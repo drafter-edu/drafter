@@ -17,6 +17,8 @@ from functools import wraps
 from dataclasses import dataclass, is_dataclass
 from bottle import Bottle, abort, request
 
+__version__ = '0.0.2'
+
 
 @dataclass
 class Page:
