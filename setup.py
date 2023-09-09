@@ -8,24 +8,24 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 REQUIREMENTS = [i.strip() for i in open("requirements.txt").readlines()]
 
-from websites import __version__
+from drafter import __version__
 
 setuptools.setup(
-    name='websites',
+    name='drafter',
     version=__version__,
     python_requires='>=3.7',
     author='acbart',
-    packages=['websites'],
-    package_data={
-        'websites': [] #'data/emojis.zip']
-    },
+    py_modules=['drafter'],
+    #package_data={
+    #    'websites': [] #'data/emojis.zip']
+    #},
     author_email='acbart@udel.edu',
     description='Student-friendly full stack web development library.',
     install_requires=REQUIREMENTS,
     license='MIT',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/websites-edu/websites',
+    url='https://github.com/drafter-edu/drafter',
     classifiers=[
         'Development Status :: 3 - Alpha',
 
