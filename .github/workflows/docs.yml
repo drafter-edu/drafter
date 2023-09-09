@@ -30,14 +30,25 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - name: Upgrade pip, install requirements
+      - name: Upgrade pip
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install -r ./requirements.txt
-          python3 -m pip install -r ./requirements_dev.txt
+      - name: Get pip cache dir
+        id: pip-cache
+        run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements_dev.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install dependencies
+        run: python3 -m pip install -r ./requirements_dev.txt
       - name: Build Docs
         run: |
-          python3 -m sphinx-build -M html docsrc ./docsrc/_build/html/
+          sphinx-build -M html docsrc ./docsrc/_build/html/
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
