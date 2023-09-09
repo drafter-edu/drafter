@@ -29,9 +29,8 @@ jobs:
       - name: Upgrade pip, install package, install requirements, build docs
         run: |
           pip install --upgrade pip
-          pip install -r ./docs/requirements.txt
-          pip install -r ./docs/requirements_dev.txt
-          pip install .
+          pip install -r ./requirements.txt
+          pip install -r ./requirements_dev.txt
           sphinx-build -M html docsrc ./docsrc/_build/html/
       # Build the documentation
       #- uses: ammaraskar/sphinx-action@master
