@@ -26,12 +26,19 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'  
+      - name: Upgrade pip, install package, install requirements, build docs
+        run: |
+          pip install --upgrade pip
+          pip install -r ./docs/requirements.txt
+          pip install -r ./docs/requirements_dev.txt
+          pip install .
+          sphinx-build -M html docsrc ./docsrc/_build/html/
       # Build the documentation
-      - uses: ammaraskar/sphinx-action@master
-        with:
-          pre-build-command: "python3 -m pip install -r requirements.txt && python3 -m pip install -r requirements_dev.txt && python3 -m pip install -e ."
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          docs-folder: "docsrc/"
+      #- uses: ammaraskar/sphinx-action@master
+      #  with:
+      #    pre-build-command: "python3 -m pip install -r requirements.txt && python3 -m pip install -r requirements_dev.txt && python3 -m pip install -e ."
+      #    repo-token: "${{ secrets.GITHUB_TOKEN }}"
+      #    docs-folder: "docsrc/"
       # Build PDF using custom depedencies
       #- uses: ammaraskar/sphinx-action@master
       #  with:
