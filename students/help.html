@@ -1,0 +1,242 @@
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>More Help &#8212; Designer 0.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="List of Anchors" href="../reference/anchors.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../reference/anchors.html" title="List of Anchors"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Designer 0.4.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">More Help</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="more-help">
+<span id="help"></span><h1>More Help<a class="headerlink" href="#more-help" title="Permalink to this heading">¶</a></h1>
+<section id="help-my-designerobjects-aren-t-showing-up-where-i-want-them-to">
+<h2>Help! My DesignerObjects aren’t showing up where I want them to.<a class="headerlink" href="#help-my-designerobjects-aren-t-showing-up-where-i-want-them-to" title="Permalink to this heading">¶</a></h2>
+<p>The Designer window works on a x,y coordinate system where (0, 0) is the left top corner.</p>
+<p>Let’s look at an example. Say we have a window that is 800 pixels wide and 600 pixels tall (this is
+the default size of the Designer window). Look at the image to understand the coordinate system.</p>
+<a class="reference internal image-reference" href="../_images/coords.png"><img alt="computer window with &quot;(0,0)&quot; in the left top corner, &quot;(400, 300)&quot; in the middle of the window, and &quot;(800, 600)&quot; in the bottom corner." src="../_images/coords.png" style="width: 700px;" /></a>
+</section>
+<section id="actions-after-start">
+<h2>Actions After Start<a class="headerlink" href="#actions-after-start" title="Permalink to this heading">¶</a></h2>
+<p>Once you call the <cite>start()</cite> function, no other code will run until your game finishes.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">designer</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># These print statements demonstrate when code runs relative to start</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This line will execute before the game starts.&quot;</span><span class="p">)</span>
+<span class="n">start</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This line will not execute until the game is over.&quot;</span>
+</pre></div>
+</div>
+<p>If you want to have activity in your game, you have to use the <cite>when</cite> function to add
+event handling.</p>
+</section>
+<section id="why-use-a-constructor">
+<h2>Why Use a Constructor<a class="headerlink" href="#why-use-a-constructor" title="Permalink to this heading">¶</a></h2>
+<p>We recommend having a nullary constructor to set up your World.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">designer</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Define the shape of the World</span>
+<span class="n">World</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;box&quot;</span><span class="p">:</span> <span class="n">DesignerObject</span> <span class="p">}</span>
+
+<span class="c1"># Create a function that creates new worlds</span>
+<span class="k">def</span> <span class="nf">create_the_world</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">World</span><span class="p">:</span>
+    <span class="c1"># Actually create an initial World instance</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="c1"># The world has a 20x30 black rectangle in it</span>
+        <span class="s2">&quot;box&quot;</span><span class="p">:</span> <span class="n">rectangle</span><span class="p">(</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+    <span class="p">}</span>
+
+<span class="c1"># This tells Designer to call our `create_the_world` function</span>
+<span class="c1"># when the game starts, in order to setup our initial World.</span>
+<span class="n">when</span><span class="p">(</span><span class="s2">&quot;starting&quot;</span><span class="p">,</span> <span class="n">create_the_world</span><span class="p">)</span>
+
+<span class="n">start</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>However, strictly speaking, this isn’t necesary. You can actually just create
+a World and pass it in to the <code class="code docutils literal notranslate"><span class="pre">start</span></code> function.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">designer</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">start</span><span class="p">({</span><span class="s2">&quot;box&quot;</span><span class="p">:</span> <span class="n">rectangle</span><span class="p">(</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">)})</span>
+</pre></div>
+</div>
+<p>The end result is the same, and the version without the constructor seems much
+shorter. So why would you want to go through all the trouble?</p>
+<p>There are three main advantages to the Constructor approach.</p>
+<p>First, we can define the type more concretely. This makes it clearer to others
+what the World looks like and how it should be used. Technically, you can also
+achieve this if you store the World in a variable.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">designer</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">World</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;box&quot;</span><span class="p">:</span> <span class="n">DesignerObject</span> <span class="p">}</span>
+<span class="n">initial_world</span><span class="p">:</span> <span class="n">World</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;box&quot;</span><span class="p">:</span> <span class="n">rectangle</span><span class="p">(</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">)}</span>
+<span class="n">start</span><span class="p">(</span><span class="n">initial_world</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Second, we can reset the game more easily. Whenever you want to reset the
+game to its initial state, you can simply have an updating function call
+the <code class="code docutils literal notranslate"><span class="pre">create_the_world</span></code> function and return the resulting new world.</p>
+<p>Third, we can test our game more easily. Any time you want to create a World,
+you just call <code class="code docutils literal notranslate"><span class="pre">create_the_world</span></code> and you have a fresh instance. From there,
+you can manipulate its fields and call update functions on the World.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="../contents.html">Page contents</a></h3>
+    <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../research/welcome.html">What is Designer and its Research?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">How to Install Designer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Designer Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docs.html">Designer Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Designer Functions Quick List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">More Help</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#help-my-designerobjects-aren-t-showing-up-where-i-want-them-to">Help! My DesignerObjects aren’t showing up where I want them to.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#actions-after-start">Actions After Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-use-a-constructor">Why Use a Constructor</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div class="sphinxprev">
+    <h4>Previous page</h4>
+    <p class="topless"><a href="../reference/anchors.html"
+                          title="Previous page">&larr; List of Anchors</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/students/help.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../reference/anchors.html" title="List of Anchors"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Designer 0.4.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">More Help</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, acbart, krishols.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>
