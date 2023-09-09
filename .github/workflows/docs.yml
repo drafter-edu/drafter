@@ -48,7 +48,7 @@ jobs:
         run: python3 -m pip install -r ./requirements_dev.txt
       - name: Build Docs
         run: |
-          sphinx-build -M html docsrc ./docsrc/_build/html/
+          sphinx-build -M html docsrc ./docsrc/_build/
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
