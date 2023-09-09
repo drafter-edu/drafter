@@ -17,7 +17,7 @@ from drafter import __version__
 
 # -- Project information -----------------------------------------------------
 
-project = 'Websites'
+project = 'Drafter'
 copyright = '2023, acbart'
 author = 'acbart'
 
