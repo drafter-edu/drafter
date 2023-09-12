@@ -11,7 +11,7 @@ Once you call the `start_server()` function, no other code will run until your w
 
 .. code-block:: python
 
-    from websites import *
+    from drafter import *
 
     # These print statements demonstrate when code runs relative to start
     print("This line will execute before the game starts.")

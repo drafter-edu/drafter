@@ -1,57 +1,57 @@
 -----------------------
-How to Install Websites
+How to Install Drafter
 -----------------------
 
 ======
 Thonny
 ======
 
-Websites can be installed through the Integrated Development Environment (IDE) Thonny_ in two ways:
+Drafter can be installed through the Integrated Development Environment (IDE) Thonny_ in two ways:
 
 1. Through the `Thonny package manager`_
     - Open the package manager through *Tools* -> *Manage packages*
-    - Type in the search bar for "websites"
+    - Type in the search bar for "drafter"
     - Press "Find packages from PyPI"
-    - Websites should be loaded from the search. Press "Install".
+    - Drafter should be loaded from the search. Press "Install".
 
 **OR:**
 
 2. Through the `Thonny system shell`_
     - Open the Thonny system shell through *Tools* -> *Open system shell*
-    - Type ``pip install websites``
+    - Type ``pip install drafter``
 
-To make sure that Websites has been successfully installed, open a new Python (.py) file.
+To make sure that Drafter has been successfully installed, open a new Python (.py) file.
 
-Type ``from websites import *``.
+Type ``from drafter import *``.
 
-If this line of code runs without error, Websites has been successfully installed!
+If this line of code runs without error, Drafter has been successfully installed!
 
 **Next:**
 
-Check out Websites quick start :ref:`quickstart`.
+Check out Drafter quick start :ref:`quickstart`.
 
 ============
 Command Line
 ============
-Websites can also be installed straight from the command line through ``pip install websites``.
+Drafter can also be installed straight from the command line through ``pip install drafter``.
 
 It can also be installed on a `Python virtual environment`_.
 
 **Next:**
 
-Check out Websites quick start :ref:`quickstart`.
+Check out Drafter quick start :ref:`quickstart`.
 
 ==================
 Single File Script
 ==================
 
-Much like `Bottle`_, Websites can be run from a single Python file.
+Much like `Bottle`_, Drafter can be run from a single Python file.
 Just go download the file and place it in your project folder.
 TODO: Get the direct link or something
 
 **Next:**
 
-Check out Websites quick start :ref:`quickstart`.
+Check out Drafter quick start :ref:`quickstart`.
 
 
 .. _Thonny: https://thonny.org/

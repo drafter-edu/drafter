@@ -1,6 +1,6 @@
 .. _fulldocs:
 
-Websites Documentation for Students
+Drafter Documentation for Students
 ===================================
 
 Document all the functions and components
