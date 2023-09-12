@@ -1,6 +1,6 @@
 from bakery import assert_equal
 from dataclasses import dataclass
-from drafter import route, start_server, Page, Textbox, SubmitButton, Dropdown, Table
+from drafter import route, start_server, Page, TextBox, SubmitButton, SelectBox, Table
 
 
 @dataclass
@@ -24,11 +24,11 @@ def index_page(state: list[Dog]) -> Page:
 def add_dog_page(state: list[Dog]) -> Page:
     return Page(state, [
         "What is the dog's name?",
-        Textbox("name", "text"),
+        TextBox("name"),
         "What is the dog's age?",
-        Textbox("age", "number"),
+        TextBox("age"),
         "What is the dog's breed?",
-        Dropdown("breed", ["corgi", "schnauzer", "mutt"]),
+        SelectBox("breed", ["corgi", "schnauzer", "mutt"]),
         SubmitButton("Add this dog", finish_adding_dog_page),
         SubmitButton("Go back", index_page)
     ])

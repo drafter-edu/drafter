@@ -1,14 +1,14 @@
 from bakery import assert_equal
 from dataclasses import dataclass
-from drafter import route, start_server, Page, Textbox, SubmitButton, Text
+from drafter import route, start_server, Page, TextBox, SubmitButton, Text
 
 @route("index")
 def index_page() -> Page:
     return Page(None, [
         "What is the first number?",
-        Textbox("first", "number"),
+        TextBox("first"),
         "What is the second number?",
-        Textbox("second", "number"),
+        TextBox("second"),
         SubmitButton("Add", "add_page")
     ])
 
@@ -23,9 +23,9 @@ def add_page(first: str, second: str) -> Page:
 
 assert_equal(index_page(), Page(None, [
     "What is the first number?",
-    Textbox("first", "number"),
+    TextBox("first", "number"),
     "What is the second number?",
-    Textbox("second", "number"),
+    TextBox("second", "number"),
     SubmitButton("Add", "add")
 ]))
 

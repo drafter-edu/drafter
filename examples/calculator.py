@@ -1,6 +1,6 @@
 from bakery import assert_equal
 from dataclasses import dataclass
-from drafter import route, start_server, Page, Textbox, SubmitButton
+from drafter import route, start_server, Page, TextBox, SubmitButton
 
 @dataclass
 class State:
@@ -13,9 +13,9 @@ class State:
 def index_page(state: State) -> Page:
     return Page(state, [
         "What is the first number?",
-        Textbox("first", "number", state.first_number),
+        TextBox("first", state.first_number, "number"),
         "What is the second number?",
-        Textbox("second", "number", state.second_number),
+        TextBox("second", state.second_number, "number"),
         SubmitButton("Add", add_page),
         "The result is",
         state.result
@@ -34,9 +34,9 @@ def add_page(state: State, first: str, second: str) -> Page:
 
 assert_equal(index_page(State(0, 0, "")), Page(State(0, 0, ""), [
     "What is the first number?",
-    Textbox("first", "number"),
+    TextBox("first", "number"),
     "What is the second number?",
-    Textbox("second", "number"),
+    TextBox("second", "number"),
     SubmitButton("Add", "add_page"),
     "The result is",
     ""
@@ -44,7 +44,7 @@ assert_equal(index_page(State(0, 0, "")), Page(State(0, 0, ""), [
 
 assert_equal(add_page(State(0, 0, ""), "5", "3"), Page(State(5, 3, "8"), [
     "What is the first number?",
-    Textbox("first", "number", 5),
+    TextBox("first", "number", 5),
     "What is the second number?",
     Textbox("second", "number", 3),
     SubmitButton("Add", "add_page"),

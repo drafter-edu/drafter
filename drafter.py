@@ -11,24 +11,25 @@ TODO: Finish these
 Components to develop:
 - [x] Image
 - [x] Table
-- [ ] Link
-- [ ] Button
+- [X] Link
+- [X] Button
 - [ ] Markdown
-- [ ] Textbox
-- [ ] Dropdown
+- [X] Textbox
+- [X] Dropdown
 - [ ] RadioButtons
-- [ ] CheckBox
+- [X] CheckBox
 - [ ] Paragraph
-- [ ] BulletList (UnorderedList)
-- [ ] NumberedList (OrderedList)
-- [ ] Unordered
-- [ ] LineBreak
-- [ ] HorizontalRule
+- [X] BulletList (UnorderedList)
+- [X] NumberedList (OrderedList)
+- [X] Unordered
+- [X] LineBreak
+- [X] HorizontalRule
 - [ ] PreformattedText
-- [ ] Header
-- [ ] Textarea
+- [X] Header
+- [X] Textarea
 """
 
+import json
 from typing import Any
 from urllib.parse import urlencode, urlparse, parse_qs
 import traceback
@@ -44,13 +45,17 @@ logger = logging.getLogger('cookbook')
 
 try:
     from bottle import Bottle, abort, request
+
     DEFAULT_BACKEND = "bottle"
 except ImportError:
     DEFAULT_BACKEND = "none"
     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
 
+__version__ = '0.1.0'
 
-__version__ = '0.0.2'
+
+RESTORABLE_STATE_KEY = "--restorable-state"
+SUBMIT_BUTTON_KEY = '--submit-button'
 
 def merge_url_query_params(url: str, additional_params: dict) -> str:
     """
@@ -61,9 +66,17 @@ def merge_url_query_params(url: str, additional_params: dict) -> str:
     :return:
     """
     url_components = urlparse(url)
-    original_params = parse_qs(url_components.query)
+    original_params = parse_qs(url_components.query, keep_blank_values=True)
     merged_params = dict(**original_params)
     merged_params.update(**additional_params)
+    updated_query = urlencode(merged_params, doseq=True)
+    return url_components._replace(query=updated_query).geturl()
+
+
+def remove_url_query_params(url: str, params_to_remove: set) -> str:
+    url_components = urlparse(url)
+    original_params = parse_qs(url_components.query, keep_blank_values=True)
+    merged_params = {k: v for k, v in original_params.items() if k not in params_to_remove}
     updated_query = urlencode(merged_params, doseq=True)
     return url_components._replace(query=updated_query).geturl()
 
@@ -86,8 +99,11 @@ class Page:
                 if not isinstance(chunk, (str, PageContent)):
                     raise ValueError("The content of a page must be a list of strings.")
 
-    def render_content(self) -> str:
-        chunked = []
+    def render_content(self, current_state) -> str:
+        # TODO: Decide if we want to dump state on the page
+        chunked = [
+            #f'<input type="hidden" name="{RESTORABLE_STATE_KEY}" value={current_state!r}/>'
+        ]
         for chunk in self.content:
             if isinstance(chunk, str):
                 chunked.append(f"<p>{chunk}</p>")
@@ -103,7 +119,7 @@ class Page:
         return True
 
 
-BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "tabindex",
+BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "tabindex", "value",
                   "onclick", "ondblclick", "onmousedown", "onmouseup", "onmouseover", "onmousemove", "onmouseout",
                   "onkeypress", "onkeydown", "onkeyup",
                   "onfocus", "onblur", "onselect", "onchange", "onsubmit", "onreset", "onabort", "onerror", "onload",
@@ -220,6 +236,7 @@ TEMPLATE_500 = """
 {routes}
 """
 
+
 @dataclass
 class Link(PageContent, LinkContent):
     text: str
@@ -231,9 +248,8 @@ class Link(PageContent, LinkContent):
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
-        url = merge_url_query_params(self.url, {'-submit-button': self.text})
+        url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: self.text})
         return f"<a href='{url}' {self.parse_extra_settings()}>{self.text}</a>"
-
 
 
 
@@ -260,12 +276,12 @@ class Image(PageContent):
 
 
 @dataclass
-class Textbox(PageContent):
+class TextBox(PageContent):
     name: str
     kind: str
     default_value: str
 
-    def __init__(self, name: str, kind: str = "text", default_value: str = None, **kwargs):
+    def __init__(self, name: str, default_value: str = None, kind: str = "text", **kwargs):
         self.name = name
         self.kind = kind
         self.default_value = default_value
@@ -280,7 +296,23 @@ class Textbox(PageContent):
 
 
 @dataclass
-class Dropdown(PageContent):
+class TextArea(PageContent):
+    name: str
+    default_value: str
+    EXTRA_ATTRS = ["rows", "cols", "autocomplete", "autofocus", "disabled", "placeholder", "readonly", "required"]
+
+    def __init__(self, name: str, default_value: str = None, **kwargs):
+        self.name = name
+        self.default_value = default_value
+        self.extra_settings = kwargs
+
+    def __str__(self) -> str:
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        return f"<textarea name='{self.name}' {parsed_settings}>{self.default_value}</textarea>"
+
+
+@dataclass
+class SelectBox(PageContent):
     name: str
     options: list[str]
     default_value: str
@@ -296,14 +328,40 @@ class Dropdown(PageContent):
         if self.default_value is not None:
             extra_settings['value'] = self.default_value
         parsed_settings = self.parse_extra_settings(**extra_settings)
-        options = "\n".join(f"<option value='{option}'>{option}</option>" for option in self.options)
+        options = "\n".join(f"<option selected value='{option}'>{option}</option>"
+                            if option == self.default_value else
+                            f"<option value='{option}'>{option}</option>"
+                            for option in self.options)
         return f"<select name='{self.name}' {parsed_settings}>{options}</select>"
+
+
+@dataclass
+class CheckBox(PageContent):
+    EXTRA_ATTRS = ["checked"]
+    name: str
+    default_value: bool
+
+    def __init__(self, name: str, default_value: bool = False, **kwargs):
+        self.name = name
+        self.default_value = default_value
+        self.extra_settings = kwargs
+
+    def __str__(self) -> str:
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        checked = 'checked' if self.default_value else ''
+        return (f"<input type='hidden' name='{self.name}' value='' {parsed_settings}>"
+                f"<input type='checkbox' name='{self.name}' {checked} value='checked' {parsed_settings}><br>")
 
 
 @dataclass
 class LineBreak(PageContent):
     def __str__(self) -> str:
         return "<br />"
+
+@dataclass
+class HorizontalRule(PageContent):
+    def __str__(self) -> str:
+        return "<hr />"
 
 
 @dataclass
@@ -312,19 +370,19 @@ class Button(PageContent, LinkContent):
     url: str
     external: bool = False
 
-    def __init__(self, text: str, url: str, external= False, **kwargs):
+    def __init__(self, text: str, url: str, external=False, **kwargs):
         self.text = text
         self.url, self.external = self._handle_url(url, external)
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
-        #extra_settings = {}
-        #if 'onclick' not in self.extra_settings:
+        # extra_settings = {}
+        # if 'onclick' not in self.extra_settings:
         #    extra_settings['onclick'] = f"window.location.href=\"{self.url}\""
-        #parsed_settings = self.parse_extra_settings(**extra_settings)
-        #return f"<button {parsed_settings}>{self.text}</button>"
+        # parsed_settings = self.parse_extra_settings(**extra_settings)
+        # return f"<button {parsed_settings}>{self.text}</button>"
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<input type='submit' name='-submit-button' value='{self.text}' formaction='{self.url}' {parsed_settings} />"
+        return f"<input type='submit' name='{SUBMIT_BUTTON_KEY}' value='{self.text}' formaction='{self.url}' {parsed_settings} />"
 
 
 @dataclass
@@ -340,7 +398,7 @@ class SubmitButton(PageContent, LinkContent):
 
     def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<input type='submit' name='-submit-button' value='{self.text}' formaction='{self.url}' {parsed_settings} />"
+        return f"<input type='submit' name='{SUBMIT_BUTTON_KEY}' value='{self.text}' formaction='{self.url}' {parsed_settings} />"
 
 
 @dataclass
@@ -357,8 +415,10 @@ class _HtmlList(PageContent):
         items = "\n".join(f"<li>{item}</li>" for item in self.items)
         return f"<{self.kind} {parsed_settings}>{items}</{self.kind}>"
 
+
 class NumberedList(_HtmlList):
     kind = "ol"
+
 
 class BulletedList(_HtmlList):
     kind = "ul"
@@ -372,11 +432,12 @@ class Header(PageContent):
     def __str__(self):
         return f"<h{self.level}>{self.body}</h{self.level}>"
 
+
 @dataclass
 class Table(PageContent):
     rows: list[list[str]]
 
-    def __init__(self, rows: list[list[str]], header = None, **kwargs):
+    def __init__(self, rows: list[list[str]], header=None, **kwargs):
         self.rows = rows
         self.header = header
         self.extra_settings = kwargs
@@ -386,13 +447,14 @@ class Table(PageContent):
         result = []
         for field in fields(self.rows):
             value = getattr(self.rows, field.name)
-            result.append([f"<code>{field.name}</code>", f"<code>{field.type.__name__}</code>", f"<code>{value!r}</code>"])
+            result.append(
+                [f"<code>{field.name}</code>", f"<code>{field.type.__name__}</code>", f"<code>{value!r}</code>"])
         self.rows = result
         if not self.header:
             self.header = ["Field", "Type", "Current Value"]
 
     def reformat_as_tabular(self):
-        print(self.rows, is_dataclass(self.rows))
+        # print(self.rows, is_dataclass(self.rows))
         if is_dataclass(self.rows):
             self.reformat_as_single()
             return
@@ -463,8 +525,49 @@ class VisitedPage:
         self.status = new_status
         self.stopped = datetime.utcnow()
 
+
+def dehydrate_json(value):
+    if isinstance(value, (list, set, tuple)):
+        return [dehydrate_json(v) for v in value]
+    elif isinstance(value, dict):
+        return {dehydrate_json(k): dehydrate_json(v) for k, v in value.items()}
+    elif isinstance(value, (int, str, float, bool)) or value == None:
+        return value
+    elif is_dataclass(value):
+        return {f.name: dehydrate_json(getattr(value, f.name))
+                for f in fields(value)}
+    raise ValueError(f"Error while serializing state: The {value!r} is not a int, str, float, bool, list, or dataclass.")
+
+
+def rehydrate_json(value, new_type):
+    if isinstance(value, list):
+        if hasattr(new_type, '__args__'):
+            element_type = new_type.__args__
+            return [rehydrate_json(v, element_type) for v in value]
+        elif hasattr(new_type, '__origin__') and getattr(new_type, '__origin__') == list:
+            return value
+    elif isinstance(value, (int, str, float, bool)) or value is None:
+        # TODO: More validation that the structure is consistent; what if the target is not these?
+        return value
+    elif isinstance(value, dict):
+        if hasattr(new_type, '__args__'):
+            # TODO: Handle various kinds of dictionary types more intelligently
+            # In particular, should be able to handle dict[int: str] (slicing) and dict[int, str]
+            key_type, value_type = new_type.__args__
+            return {rehydrate_json(k, key_type): rehydrate_json(v, value_type)
+                    for k, v in value.items()}
+        elif hasattr(new_type, '__origin__') and getattr(new_type, '__origin__') == dict:
+            return value
+        elif is_dataclass(new_type):
+            converted = {f.name: rehydrate_json(value[f.name], f.type) if f.name in value else f.default
+                         for f in fields(new_type)}
+            return new_type(**converted)
+    # Fall through if an error
+    raise ValueError(f"Error while restoring state: Could not create {new_type!r} from {value!r}")
+
+
 class Server:
-    _page_history: list[VisitedPage]
+    _page_history: list[tuple[VisitedPage, Any]]
 
     def __init__(self, **kwargs):
         self.routes = {}
@@ -472,12 +575,27 @@ class Server:
         self.default_configuration = ServerConfiguration(**kwargs)
         self._state = None
         self._state_history = []
+        self._state_frozen_history = []
         self._page_history = []
         self.original_routes = []
         self.app = None
 
     def reset(self):
         self.routes.clear()
+
+    def dump_state(self):
+        return json.dumps(dehydrate_json(self._state))
+
+    def restore_state_if_available(self, original_function):
+        if RESTORABLE_STATE_KEY in request.params:
+            # Get state
+            old_state = json.loads(request.params.pop(RESTORABLE_STATE_KEY))
+            # Get state type
+            parameters = inspect.signature(original_function).parameters
+            if 'state' in parameters:
+                state_type = parameters['state'].annotation
+                self._state = rehydrate_json(old_state, state_type)
+                self.flash_warning("Successfully restored old state: " + repr(self._state))
 
     def add_route(self, url, func):
         if url in self.routes:
@@ -521,15 +639,17 @@ class Server:
         args = list(args)
         kwargs = dict(**kwargs)
         button_pressed = ""
-        if '-submit-button' in request.params:
-            button_pressed = request.params.pop('-submit-button')
+        if SUBMIT_BUTTON_KEY in request.params:
+            button_pressed = request.params.pop(SUBMIT_BUTTON_KEY)
         # TODO: Handle non-bottle backends
         for key in list(request.params.keys()):
             kwargs[key] = request.params.pop(key)
         expected_parameters = list(inspect.signature(original_function).parameters.keys())
+        # Insert state into the beginning of args
         if (expected_parameters and expected_parameters[0] == "state") or (
                 len(expected_parameters) - 1 == len(args) + len(kwargs)):
             args.insert(0, self._state)
+        # Check if there are too many arguments
         if len(expected_parameters) < len(args) + len(kwargs):
             self.flash_warning(
                 f"The {original_function.__name__} function expected {len(expected_parameters)} parameters, but {len(args) + len(kwargs)} were provided.")
@@ -537,21 +657,42 @@ class Server:
             args = args[:len(expected_parameters)]
             while len(expected_parameters) < len(args) + len(kwargs) and kwargs:
                 kwargs.pop(list(kwargs.keys())[-1])
+        # Type conversion if required
+        expected_types = {name: p.annotation for name, p in
+                          inspect.signature(original_function).parameters.items()}
+        args = [self.convert_parameter(param, val, expected_types)
+                for param, val in zip(expected_parameters, args)]
+        kwargs = {param: self.convert_parameter(param, val, expected_types)
+                  for param, val in kwargs.items()}
+        # Final return result
         representation = [repr(arg) for arg in args] + [f"{key}={value!r}" for key, value in kwargs.items()]
         return args, kwargs, ", ".join(representation), button_pressed
+
+    def convert_parameter(self, param, val, expected_types):
+        if param in expected_types and not isinstance(val, expected_types[param]):
+            try:
+                converted_arg = expected_types[param](val)
+            except Exception as e:
+                raise ValueError(
+                    f"Could not convert {param} ({val!r}) from {type(val)} to {expected_types[param]}\n") from e
+            return converted_arg
+        else:
+            return val
 
     def make_bottle_page(self, original_function):
         @wraps(original_function)
         def bottle_page(*args, **kwargs):
             # TODO: Handle non-bottle backends
-            url = request.url
+            url = remove_url_query_params(request.url, {RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY})
+            self.restore_state_if_available(original_function)
+            original_state = self.dump_state()
             try:
                 args, kwargs, arguments, button_pressed = self.prepare_args(original_function, args, kwargs)
             except Exception as e:
                 return self.make_error_page("Error preparing arguments for page", e, original_function)
             # Actually start building up the page
             visiting_page = VisitedPage(url, original_function, arguments, "Creating Page", button_pressed)
-            self._page_history.append(visiting_page)
+            self._page_history.append((visiting_page, original_state))
             try:
                 page = original_function(*args, **kwargs)
             except Exception as e:
@@ -568,7 +709,7 @@ class Server:
             self._state = page.state
             visiting_page.update("Rendering Page Content")
             try:
-                content = page.render_content()
+                content = page.render_content(self.dump_state())
             except Exception as e:
                 return self.make_error_page("Error rendering content", e, original_function)
             visiting_page.finish("Finished Page Load")
@@ -586,17 +727,19 @@ class Server:
                        f"Instead, it returned None (which happens by default when you do not return anything else).\n"
                        f"Make sure you have a proper return statement for every branch!")
         elif isinstance(page, str):
-            message = (f"The server did not return a Page() object from {original_function}. Instead, it returned a string:\n"
-                       f"  {page!r}\n"
-                       f"Make sure you are returning a Page object with the new state and a list of strings!")
+            message = (
+                f"The server did not return a Page() object from {original_function}. Instead, it returned a string:\n"
+                f"  {page!r}\n"
+                f"Make sure you are returning a Page object with the new state and a list of strings!")
         elif isinstance(page, list):
-            message = (f"The server did not return a Page() object from {original_function}. Instead, it returned a list:\n"
-                       f" {page!r}\n"
-                       f"Make sure you return a Page object with the new state and the list of strings, not just the list of strings.")
+            message = (
+                f"The server did not return a Page() object from {original_function}. Instead, it returned a list:\n"
+                f" {page!r}\n"
+                f"Make sure you return a Page object with the new state and the list of strings, not just the list of strings.")
         elif not isinstance(page, Page):
             message = (f"The server did not return a Page() object from {original_function}. Instead, it returned:\n"
-                f" {page!r}\n"
-                f"Make sure you return a Page object with the new state and the list of strings.")
+                       f" {page!r}\n"
+                       f"Make sure you return a Page object with the new state and the list of strings.")
         else:
             verification_status = self.verify_page_state_history(page, original_function)
             if verification_status:
@@ -604,8 +747,8 @@ class Server:
             elif isinstance(page.content, str):
                 message = (f"The server did not return a valid Page() object from {original_function}.\n"
                            f"Instead of a list of strings or content objects, the content field was a string:\n"
-                    f" {page.content!r}\n"
-                    f"Make sure you return a Page object with the new state and the list of strings/content objects.")
+                           f" {page.content!r}\n"
+                           f"Make sure you return a Page object with the new state and the list of strings/content objects.")
             elif not isinstance(page.content, list):
                 message = (
                     f"The server did not return a valid Page() object from {original_function}.\n"
@@ -644,7 +787,6 @@ class Server:
         if message:
             return self.make_error_page("Error after creating page", ValueError(message), original_function)
 
-
     def wrap_page(self, content):
         style = self.default_configuration.style
         if style in INCLUDE_STYLES:
@@ -678,9 +820,11 @@ class Server:
         page.append("</details>")
         # Page History
         page.append("<details open><summary>Page Load History</summary><ol reversed>")
-        for page_history in reversed(self._page_history):
+        for page_history, old_state in reversed(self._page_history):
             button_pressed = f"Clicked <code>{page_history.button_pressed}</code> &rarr; " if page_history.button_pressed else ""
-            page.append(f"<li>{button_pressed}{page_history.status} <code>{page_history.url}/</code>: "
+            url = merge_url_query_params(page_history.url, {RESTORABLE_STATE_KEY: old_state})
+            page.append(f"<li>{button_pressed}{page_history.status} "
+                        f"<a href='{url}'><code>{page_history.url}/</code></a>: "
                         f"<code>{page_history.function.__name__}({page_history.arguments})</code>:"
                         f""
                         f"</li>")
