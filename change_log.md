@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2023-09-12
+
+## Fixed
+
+- SelectBox now has a new line afterwards
+- Fixed support for list state
+
+## Added
+
+- hide_debug_information() and show_debug_information() to control the debug information (defaults to visible)
+
 ## [0.1.1] - 2023-09-12
 
 ### Fixed

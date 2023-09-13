@@ -1,7 +1,10 @@
 from bakery import assert_equal
 from dataclasses import dataclass
-from drafter import route, start_server, Page, TextBox, SubmitButton, SelectBox, Table
+from drafter import route, start_server, Page, TextBox, SubmitButton, SelectBox, Table, hide_debug_information
 
+
+
+hide_debug_information()
 
 @dataclass
 class Dog:

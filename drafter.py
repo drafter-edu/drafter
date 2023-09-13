@@ -51,7 +51,7 @@ except ImportError:
     DEFAULT_BACKEND = "none"
     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 
 RESTORABLE_STATE_KEY = "--restorable-state"
@@ -332,7 +332,7 @@ class SelectBox(PageContent):
                             if option == self.default_value else
                             f"<option value='{option}'>{option}</option>"
                             for option in self.options)
-        return f"<select name='{self.name}' {parsed_settings}>{options}</select>"
+        return f"<select name='{self.name}' {parsed_settings}>{options}</select><br>"
 
 
 @dataclass
@@ -669,15 +669,20 @@ class Server:
         return args, kwargs, ", ".join(representation), button_pressed
 
     def convert_parameter(self, param, val, expected_types):
-        if param in expected_types and not isinstance(val, expected_types[param]):
-            try:
-                converted_arg = expected_types[param](val)
-            except Exception as e:
-                raise ValueError(
-                    f"Could not convert {param} ({val!r}) from {type(val)} to {expected_types[param]}\n") from e
-            return converted_arg
-        else:
-            return val
+        if param in expected_types:
+            expected_type = expected_types[param]
+            if hasattr(expected_type, '__origin__'):
+                # TODO: Ignoring the element type for now, but should really handle that properly
+                expected_type = expected_type.__origin__
+            if not isinstance(val, expected_type):
+                try:
+                    converted_arg = expected_types[param](val)
+                except Exception as e:
+                    raise ValueError(
+                        f"Could not convert {param} ({val!r}) from {type(val)} to {expected_types[param]}\n") from e
+                return converted_arg
+        # Fall through
+        return val
 
     def make_bottle_page(self, original_function):
         @wraps(original_function)
@@ -860,6 +865,14 @@ def route(url: str = None, server: Server = MAIN_SERVER):
 def start_server(initial_state=None, server: Server = MAIN_SERVER, **kwargs):
     server.setup(initial_state)
     server.run(**kwargs)
+
+
+def hide_debug_information():
+    MAIN_SERVER.default_configuration.debug = False
+
+
+def show_debug_information():
+    MAIN_SERVER.default_configuration.debug = True
 
 
 if __name__ == '__main__':
