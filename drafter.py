@@ -51,7 +51,7 @@ except ImportError:
     DEFAULT_BACKEND = "none"
     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 
 RESTORABLE_STATE_KEY = "--restorable-state"
@@ -803,6 +803,12 @@ class Server:
     def flash_warning(self, message):
         print(message)
 
+    def render_state(self, state):
+        if is_dataclass(state):
+            return str(Table(state))
+        else:
+            return str(Table([[f"<code>{type(state).__name__}</code>", f"<code>{state}</code>"]]))
+
     def debug_information(self):
         page = []
         # Routes
@@ -814,7 +820,7 @@ class Server:
         # Current State
         page.append("<details open><summary>State</summary>")
         if self._state is not None:
-            page.append(str(Table(self._state)))
+            page.append(self.render_state(self._state))
         else:
             page.append("<code>None</code>")
         page.append("</details>")
