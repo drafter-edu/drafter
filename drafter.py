@@ -3,10 +3,10 @@ TODO: Finish these
 - [ ] Optional bootstrap support
 - [ ] Swappable backends
 - [ ] Client-side server mode
-- [ ] Debug information: show state history
-- [ ] Debug information: show current state
-- [ ] Debug information: show the page as its original structure
 - [ ] Other HTML components
+- [ ] set_page_title(title), set_page_style(**attributes)
+
+TODO: Decide on term for [Component | Element | PageContent | ?]
 
 Components to develop:
 - [x] Image
@@ -15,7 +15,7 @@ Components to develop:
 - [X] Button
 - [ ] Markdown
 - [X] Textbox
-- [X] Dropdown
+- [X] SelectBox
 - [ ] RadioButtons
 - [X] CheckBox
 - [ ] Paragraph
@@ -26,7 +26,7 @@ Components to develop:
 - [X] HorizontalRule
 - [ ] PreformattedText
 - [X] Header
-- [X] Textarea
+- [X] TextArea
 """
 import sys
 import json
@@ -40,6 +40,7 @@ from dataclasses import dataclass, is_dataclass, replace, asdict, fields
 from dataclasses import field as dataclass_field
 import logging
 from datetime import datetime
+import pprint
 
 logger = logging.getLogger('cookbook')
 
@@ -51,7 +52,7 @@ except ImportError:
     DEFAULT_BACKEND = "none"
     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 
 RESTORABLE_STATE_KEY = "--restorable-state"
@@ -115,7 +116,7 @@ _hijack_bottle()
 @dataclass
 class Page:
     state: Any
-    content: list[str]
+    content: list
 
     def __init__(self, state, content=None):
         if content is None:
@@ -124,7 +125,7 @@ class Page:
         self.content = content
 
         if not isinstance(content, list):
-            raise ValueError("The content of a page must be a list of strings.")
+            raise ValueError("The content of a page must be a list of strings or .")
         else:
             for chunk in content:
                 if not isinstance(chunk, (str, PageContent)):
@@ -141,7 +142,10 @@ class Page:
             else:
                 chunked.append(str(chunk))
         content = "\n".join(chunked)
-        return f"<div class='container cookbook-container'><form>{content}</form></div>"
+        return (f"<div class='container cookbook-header'>Drafter Website</div>"
+                f"<div class='container cookbook-container'>"
+                f"<form>{content}</form>"
+                f"</div>")
 
     def verify_content(self, server) -> bool:
         for chunk in self.content:
@@ -218,6 +222,18 @@ BASIC_STYLE = """
     div.cookbook-container {
         padding: 1em;
         border: 1px solid lightgrey;
+    }
+    
+    div.cookbook-header {
+        border: 1px solid lightgrey;
+        border-bottom: 0px;
+        background-color: #EEE;
+        padding-left: 1em;
+        font-weight: bold;
+    }
+    
+    div.cookbook-container img {
+        display: block;
     }
 </style>
 """
@@ -521,6 +537,9 @@ class Text(PageContent):
     def __init__(self, body: str):
         self.body = body
 
+    def __str__(self):
+        return self.body
+
 
 def friendly_urls(url: str) -> str:
     if url.strip("/") == "index":
@@ -548,12 +567,18 @@ class VisitedPage:
     arguments: str
     status: str
     button_pressed: str
+    original_page_content: str = None
     old_state: Any = None
     started: datetime = dataclass_field(default_factory=datetime.utcnow)
     stopped: datetime = None
 
-    def update(self, new_status):
+    def update(self, new_status, original_page_content=None):
         self.status = new_status
+        if original_page_content is not None:
+            try:
+                self.original_page_content = pprint.pformat(original_page_content)
+            except Exception as e:
+                self.original_page_content = repr(original_page_content)
 
     def finish(self, new_status):
         self.status = new_status
@@ -738,7 +763,7 @@ class Server:
                 page = original_function(*args, **kwargs)
             except Exception as e:
                 return self.make_error_page("Error creating page", e, original_function)
-            visiting_page.update("Verifying Page Result")
+            visiting_page.update("Verifying Page Result", original_page_content=page)
             verification_status = self.verify_page_result(page, original_function)
             if verification_status:
                 return verification_status
@@ -851,31 +876,40 @@ class Server:
             return str(Table([[f"<code>{type(state).__name__}</code>", f"<code>{state}</code>"]]))
 
     def debug_information(self):
-        page = []
+        page = ["<h3>Debug Information</h3>",
+                "<em>To hide this information, call <code>hide_debug_information()</code> in your code.</em>"]
+        INDENTATION_START_HTML = "<div class='row'><div class='one column'></div><div class='eleven columns'>"
+        INDENTATION_END_HTML = "</div></div>"
         # Routes
-        page.append("<details open><summary>Routes</summary><ul>")
+        page.append(f"<details open><summary><strong>Routes</strong></summary>"
+                    f"{INDENTATION_START_HTML}"
+                    f"<ul>")
         for original_route, function in self.routes.items():
             parameters = ", ".join(inspect.signature(function).parameters.keys())
             if original_route != '/':
                 original_route += '/'
             page.append(f"<li><code>{original_route}</code>: <code>{function.__name__}({parameters})</code></li>")
-        page.append("</ul></details>")
+        page.append(f"</ul>{INDENTATION_END_HTML}</details>")
         # Current State
-        page.append("<details open><summary>State</summary>")
+        page.append("<details open><summary><strong>State</strong></summary>"
+                    f"{INDENTATION_START_HTML}")
         if self._state is not None:
             page.append(self.render_state(self._state))
         else:
             page.append("<code>None</code>")
-        page.append("</details>")
+        page.append(f"{INDENTATION_END_HTML}</details>")
         # Page History
-        page.append("<details open><summary>Page Load History</summary><ol reversed>")
+        page.append("<details open><summary><strong>Page Load History</strong></summary><ol reversed>")
         for page_history, old_state in reversed(self._page_history):
             button_pressed = f"Clicked <code>{page_history.button_pressed}</code> &rarr; " if page_history.button_pressed else ""
             url = merge_url_query_params(page_history.url, {RESTORABLE_STATE_KEY: old_state})
-            page.append(f"<li>{button_pressed}{page_history.status} "
-                        f"<a href='{url}'><code>{page_history.url}/</code></a>: "
-                        f"<code>{page_history.function.__name__}({page_history.arguments})</code>:"
-                        f""
+            page.append(f"<li>{button_pressed}{page_history.status}" #<details><summary>
+                        f"{INDENTATION_START_HTML}"
+                        f"URL: <a href='{url}'><code>{page_history.url}/</code></a><br>"
+                        f"Call: <code>{page_history.function.__name__}({page_history.arguments})</code><br>"
+                        f"<details><summary>Page Content:</summary><pre style='width: fit-content'>"
+                        f"<code>{page_history.original_page_content}</code></pre></details>"
+                        f"{INDENTATION_END_HTML}"
                         f"</li>")
         page.append("</ol></details>")
         return "\n".join(page)

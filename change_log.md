@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2023-09-15
+
+## Added
+
+- Show produced Python pprint of Page in the Debug Information
+- Finish quickstart, rough outline of student docs
+- Show Header on top of "window" of website
+
 ## [0.1.3] - 2023-09-13
 
 ## Fixed
