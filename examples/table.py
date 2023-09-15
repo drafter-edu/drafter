@@ -13,7 +13,7 @@ class Dog:
     breed: str
 
 @route
-def index_page(state: list[Dog]) -> Page:
+def index(state: list[Dog]) -> Page:
     return Page(state, [
         "There are " + str(len(state)) + " dogs",
         "What do you want to do?",
@@ -33,20 +33,20 @@ def add_dog_page(state: list[Dog]) -> Page:
         "What is the dog's breed?",
         SelectBox("breed", ["corgi", "schnauzer", "mutt"]),
         SubmitButton("Add this dog", finish_adding_dog_page),
-        SubmitButton("Go back", index_page)
+        SubmitButton("Go back", index)
     ])
     
 @route
 def finish_adding_dog_page(state: list[Dog], name: str, age: str, breed: str) -> Page:
     state.append(Dog(name, int(age), breed))
-    return index_page(state)
+    return index(state)
 
 @route
 def view_dogs_page(state: list[Dog]) -> Page:
     return Page(state, [
         "Here are the dogs:",
         Table(state),
-        SubmitButton("Go back", index_page)
+        SubmitButton("Go back", index)
     ])
 
 start_server([], reloader=True)

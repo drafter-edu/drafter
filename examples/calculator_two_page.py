@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from drafter import route, start_server, Page, TextBox, SubmitButton, Text
 
 @route("index")
-def index_page() -> Page:
+def index() -> Page:
     return Page(None, [
         "What is the first number?",
         TextBox("first"),
@@ -21,7 +21,7 @@ def add_page(first: str, second: str) -> Page:
     ])
 
 
-assert_equal(index_page(), Page(None, [
+assert_equal(index(), Page(None, [
     "What is the first number?",
     TextBox("first", "number"),
     "What is the second number?",

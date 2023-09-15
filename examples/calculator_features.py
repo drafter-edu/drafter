@@ -11,7 +11,7 @@ class State:
 
 
 @route
-def index_page(state: State) -> Page:
+def index(state: State) -> Page:
     return Page(state, [
         "What is the first number?",
         TextBox("first", state.first_number, "number"),
@@ -28,23 +28,23 @@ def index_page(state: State) -> Page:
 @route
 def add_page(state: State, first: str, second: str) -> Page:
     if not first.isdigit() or not second.isdigit():
-        return index_page(state)
+        return index(state)
     state.first_number = int(first)
     state.second_number = int(second)
     state.result = str(int(first) + int(second))
-    return index_page(state)
+    return index(state)
 
 @route
 def subtract_page(state: State, first: str, second: str) -> Page:
     if not first.isdigit() or not second.isdigit():
-        return index_page(state)
+        return index(state)
     state.first_number = int(first)
     state.second_number = int(second)
     state.result = str(int(first) - int(second))
-    return index_page(state)
+    return index(state)
 
 
-assert_equal(index_page(State(0, 0, "")), Page(State(0, 0, ""), [
+assert_equal(index(State(0, 0, "")), Page(State(0, 0, ""), [
     "What is the first number?",
     TextBox("first", "", "number"),
     "What is the second number?",

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2023-09-13
+
+## Fixed
+
+- Feels weird to call it fixed, but the message now says "Drafter server starting up"
+- Allow an empty `start_server` with no routes
+
+## Added
+
+- Improve PageContent classes to support keyword parameters like `style_*` to change style
+
 ## [0.1.2] - 2023-09-12
 
 ## Fixed

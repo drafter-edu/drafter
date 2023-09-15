@@ -2,6 +2,7 @@ from bakery import assert_equal
 from dataclasses import dataclass
 from drafter import route, start_server, Page, TextBox, SubmitButton
 
+
 @dataclass
 class State:
     first_number: int
@@ -13,7 +14,7 @@ class State:
 def index(state: State) -> Page:
     return Page(state, [
         "What is the first number?",
-        TextBox("first", state.first_number, "number"),
+        TextBox("first", state.first_number, "number", style_background_color='pink'),
         "What is the second number?",
         TextBox("second", state.second_number, "number"),
         SubmitButton("Add", add_page),

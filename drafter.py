@@ -28,7 +28,7 @@ Components to develop:
 - [X] Header
 - [X] Textarea
 """
-
+import sys
 import json
 from typing import Any
 from urllib.parse import urlencode, urlparse, parse_qs
@@ -51,7 +51,7 @@ except ImportError:
     DEFAULT_BACKEND = "none"
     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 
 RESTORABLE_STATE_KEY = "--restorable-state"
@@ -80,6 +80,37 @@ def remove_url_query_params(url: str, params_to_remove: set) -> str:
     updated_query = urlencode(merged_params, doseq=True)
     return url_components._replace(query=updated_query).geturl()
 
+
+def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
+    styles, attrs = {}, {}
+    for key, value in attributes.items():
+        target = attrs
+        if key.startswith("style_"):
+            key = key[len("style_"):]
+            target = styles
+        key = key.replace("_", "-")
+        target[key] = value
+    return styles, attrs
+
+
+def _hijack_bottle():
+    def _stderr(*args):
+        try:
+            if args:
+                first_arg = str(args[0])
+                if first_arg.startswith("Bottle v") and "server starting up" in first_arg:
+                    args = list(args)
+                    args[0] = "Drafter server starting up (using Bottle backend)."
+            print(*args, file=sys.stderr)
+        except (IOError, AttributeError):
+            pass
+    try:
+        import bottle
+        bottle._stderr = _stderr
+    except ImportError:
+        pass
+
+_hijack_bottle()
 
 @dataclass
 class Page:
@@ -135,12 +166,15 @@ class PageContent:
     def parse_extra_settings(self, **kwargs):
         extra_settings = self.extra_settings.copy()
         extra_settings.update(kwargs)
+        raw_styles, raw_attrs = remap_attr_styles(extra_settings)
         styles, attrs = [], []
-        for key, value in kwargs.items():
+        for key, value in raw_attrs.items():
             if key not in self.EXTRA_ATTRS and key not in BASELINE_ATTRS:
                 styles.append(f"{key}: {value}")
             else:
                 attrs.append(f"{key}={str(value)!r}")
+        for key, value in raw_styles.items():
+            styles.append(f"{key}: {value}")
         result = " ".join(attrs)
         if styles:
             result += f" style='{'; '.join(styles)}'"
@@ -671,6 +705,8 @@ class Server:
     def convert_parameter(self, param, val, expected_types):
         if param in expected_types:
             expected_type = expected_types[param]
+            if expected_type == inspect.Parameter.empty:
+                return val
             if hasattr(expected_type, '__origin__'):
                 # TODO: Ignoring the element type for now, but should really handle that properly
                 expected_type = expected_type.__origin__
@@ -818,9 +854,11 @@ class Server:
         page = []
         # Routes
         page.append("<details open><summary>Routes</summary><ul>")
-        for original_route, function in self.original_routes:
+        for original_route, function in self.routes.items():
             parameters = ", ".join(inspect.signature(function).parameters.keys())
-            page.append(f"<li><code>{original_route}/</code>: <code>{function.__name__}({parameters})</code></li>")
+            if original_route != '/':
+                original_route += '/'
+            page.append(f"<li><code>{original_route}</code>: <code>{function.__name__}({parameters})</code></li>")
         page.append("</ul></details>")
         # Current State
         page.append("<details open><summary>State</summary>")
@@ -873,6 +911,13 @@ def hide_debug_information():
 
 def show_debug_information():
     MAIN_SERVER.default_configuration.debug = True
+
+
+def default_index(state) -> Page:
+    return Page(state, ["Hello world!", "Welcome to Drafter."])
+
+
+route('index')(default_index)
 
 
 if __name__ == '__main__':
