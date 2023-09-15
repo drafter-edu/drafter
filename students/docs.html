@@ -7,14 +7,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Drafter Documentation for Students &#8212; Drafter 0.1.3 documentation</title>
+    <title>Drafter Documentation for Students &#8212; Drafter 0.1.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=360bc84d"></script>
+    <script src="../_static/documentation_options.js?v=fd825880"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -54,7 +54,7 @@
         <li class="right" >
           <a href="../quickstart/quickstart.html" title="Drafter Quick Start Guide"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 0.1.3 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 0.1.4 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Documentation for Students</a></li> 
       </ul>
@@ -69,17 +69,175 @@
             
   <section id="drafter-documentation-for-students">
 <span id="fulldocs"></span><h1>Drafter Documentation for Students<a class="headerlink" href="#drafter-documentation-for-students" title="Link to this heading">¶</a></h1>
-<p>Document all the functions and components</p>
-<ul class="simple">
-<li><p>route</p></li>
-<li><p>start_server</p></li>
-<li><p>setup_server</p></li>
-<li><p>Page</p></li>
-<li><p>Image</p></li>
-<li><p>Link</p></li>
-<li><p>Table</p></li>
-<li><p>Button</p></li>
+<section id="basic-routing">
+<h2>Basic Routing<a class="headerlink" href="#basic-routing" title="Link to this heading">¶</a></h2>
+<dl class="py function" id="route">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-name descname"><span class="pre">route</span></span><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-name descname"><span class="pre">route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Decorator to turn a function into route connected to a URL. If the <cite>url</cite> is not given, then
+the function’s name will be used as the route. Unless the name of the function is <cite>index</cite>, in which
+case that route will be used as the index of the website (the front, default page).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>url</strong> (<em>str</em>) – The URL to connect to the function as a route. Defaults to function’s name, if not given.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="pages">
+<h2>Pages<a class="headerlink" href="#pages" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="Page">
+<span class="sig-name descname"><span class="pre">Page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Page" title="Link to this definition">¶</a></dt>
+<dd><p>Constructor function for the <code class="docutils literal notranslate"><span class="pre">Page</span></code> object, which holds all the information for a viewable web page.
+The <cite>state</cite> is hidden from the user, but the <cite>content</cite> is rendered into HTML.
+This should be returned from any <cite>route</cite> function.</p>
+<p>The <cite>content</cite> is a list of either string values or <cite>Component</cite> instances. The strings can contain actual
+HTML, which will be injected directly into the page. The <cite>Component</cite> instances will also be turned into HTML.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> – The new value of the page, hidden from the user. This is usually an instance of a dataclass.
+If there is no change to the state, then will just be the <cite>state</cite> parameter.</p></li>
+<li><p><strong>content</strong> (<em>list</em><em>[</em><em>str</em><em> | </em><em>Component</em><em>]</em>) – The actual content of the page, eventually rendered as HTML in the browser. Can combine both
+string values and <cite>Component</cite> instances.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="server-control">
+<h2>Server Control<a class="headerlink" href="#server-control" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="start_server">
+<span class="sig-name descname"><span class="pre">start_server</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#start_server" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">start_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inital_state</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Function to start the server and launch the website. The local URL of the server will be displayed,
+usually defaulting to <a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a>. No code will be executed
+after this call.</p>
+<p>The <cite>initial_state</cite> should match the type of the first parameter for every route. If no <cite>initial_state</cite> is given,
+then the state will initially be <cite>None</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>initial_state</strong> – The initial state of the website, usually a dataclass instance. Defaults to <cite>None</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="components">
+<h2>Components<a class="headerlink" href="#components" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="Image">
+<span class="sig-name descname"><span class="pre">Image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Image" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>An image</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Link">
+<span class="sig-name descname"><span class="pre">Link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Link" title="Link to this definition">¶</a></dt>
+<dd><p>A link</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="TextBox">
+<span class="sig-name descname"><span class="pre">TextBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#TextBox" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">TextBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>A text box</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="TextArea">
+<span class="sig-name descname"><span class="pre">TextArea</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#TextArea" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">TextArea</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>A multiline text area</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="SelectBox">
+<span class="sig-name descname"><span class="pre">SelectBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#SelectBox" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">SelectBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>A dropdown box</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CheckBox">
+<span class="sig-name descname"><span class="pre">CheckBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#CheckBox" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">CheckBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>A check box</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="LineBreak">
+<span class="sig-name descname"><span class="pre">LineBreak</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#LineBreak" title="Link to this definition">¶</a></dt>
+<dd><p>A line break</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="HorizontalRule">
+<span class="sig-name descname"><span class="pre">HorizontalRule</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#HorizontalRule" title="Link to this definition">¶</a></dt>
+<dd><p>A horizontal line stretching across the page</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Button">
+<span class="sig-name descname"><span class="pre">Button</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Button" title="Link to this definition">¶</a></dt>
+<dd><p>A clickable button</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="NumberedList">
+<span class="sig-name descname"><span class="pre">NumberedList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#NumberedList" title="Link to this definition">¶</a></dt>
+<dd><p>A numeric, ordered list</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BulletedList">
+<span class="sig-name descname"><span class="pre">BulletedList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BulletedList" title="Link to this definition">¶</a></dt>
+<dd><p>An unordered, enumerated list</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Header">
+<span class="sig-name descname"><span class="pre">Header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Header" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>A text header of different sizes.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Table">
+<span class="sig-name descname"><span class="pre">Table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Table" title="Link to this definition">¶</a></dt>
+<dd><p>A tabular representation of data.</p>
+</dd></dl>
+
+</section>
+<section id="debug-information">
+<h2>Debug Information<a class="headerlink" href="#debug-information" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="show_debug_information">
+<span class="sig-name descname"><span class="pre">show_debug_information</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#show_debug_information" title="Link to this definition">¶</a></dt>
+<dd><p>Show the debug information at the bottom.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hide_debug_information">
+<span class="sig-name descname"><span class="pre">hide_debug_information</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hide_debug_information" title="Link to this definition">¶</a></dt>
+<dd><p>Hide the debug information at the bottom.</p>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -93,7 +251,42 @@
     <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">How to Install Drafter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Drafter Documentation for Students</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Drafter Documentation for Students</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-routing">Basic Routing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">route()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pages">Pages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Page"><code class="docutils literal notranslate"><span class="pre">Page()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#server-control">Server Control</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#start_server"><code class="docutils literal notranslate"><span class="pre">start_server()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#components">Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Image"><code class="docutils literal notranslate"><span class="pre">Image()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Link"><code class="docutils literal notranslate"><span class="pre">Link()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#TextBox"><code class="docutils literal notranslate"><span class="pre">TextBox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#TextArea"><code class="docutils literal notranslate"><span class="pre">TextArea()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#SelectBox"><code class="docutils literal notranslate"><span class="pre">SelectBox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#CheckBox"><code class="docutils literal notranslate"><span class="pre">CheckBox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#LineBreak"><code class="docutils literal notranslate"><span class="pre">LineBreak()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#HorizontalRule"><code class="docutils literal notranslate"><span class="pre">HorizontalRule()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Button"><code class="docutils literal notranslate"><span class="pre">Button()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#NumberedList"><code class="docutils literal notranslate"><span class="pre">NumberedList()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#BulletedList"><code class="docutils literal notranslate"><span class="pre">BulletedList()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Header"><code class="docutils literal notranslate"><span class="pre">Header()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Table"><code class="docutils literal notranslate"><span class="pre">Table()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#debug-information">Debug Information</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#show_debug_information"><code class="docutils literal notranslate"><span class="pre">show_debug_information()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hide_debug_information"><code class="docutils literal notranslate"><span class="pre">hide_debug_information()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
 <li class="toctree-l1"><a class="reference internal" href="help.html">More Help</a></li>
 </ul>
@@ -161,7 +354,7 @@
         <li class="right" >
           <a href="../quickstart/quickstart.html" title="Drafter Quick Start Guide"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 0.1.3 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 0.1.4 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Documentation for Students</a></li> 
       </ul>

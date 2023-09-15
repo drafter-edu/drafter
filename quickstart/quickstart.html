@@ -7,14 +7,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Drafter Quick Start Guide &#8212; Drafter 0.1.3 documentation</title>
+    <title>Drafter Quick Start Guide &#8212; Drafter 0.1.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=360bc84d"></script>
+    <script src="../_static/documentation_options.js?v=fd825880"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -54,7 +54,7 @@
         <li class="right" >
           <a href="../students/installation.html" title="How to Install Drafter"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 0.1.3 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 0.1.4 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Quick Start Guide</a></li> 
       </ul>
@@ -79,6 +79,12 @@
 </pre></div>
 </div>
 <p>These two lines of code should yield a result like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Drafter</span> <span class="n">server</span> <span class="n">starting</span> <span class="n">up</span> <span class="p">(</span><span class="n">using</span> <span class="n">Bottle</span> <span class="n">backend</span><span class="p">)</span><span class="o">.</span>
+<span class="n">Listening</span> <span class="n">on</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span>
+
+<span class="n">Hit</span> <span class="n">Ctrl</span><span class="o">-</span><span class="n">C</span> <span class="n">to</span> <span class="n">quit</span><span class="o">.</span>
+</pre></div>
+</div>
 <p>If you visit the url <a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a> then you will see a page like this:</p>
 <a class="reference internal image-reference" href="../_images/quickstart_empty_site.png"><img alt="Simple website with the text &quot;Hello World!&quot; and &quot;Welcome to Drafter&quot; along with some more information further below." src="../_images/quickstart_empty_site.png" style="width: 700px;" /></a>
 <p>The top rectangle is the content of your website, which defaults to the message “Hello World!” and “Welcome to Drafter”.
@@ -127,9 +133,10 @@ Let’s make a new route function that can show off the state.</p>
 <p>The new <code class="docutils literal notranslate"><span class="pre">index</span></code> function has a decorator (<code class="docutils literal notranslate"><span class="pre">&#64;route</span></code>), just like the dataclass from before.
 This decorator adds in the functionality to connect the function to a URL.
 The name <code class="docutils literal notranslate"><span class="pre">index</span></code> is special, making this function the “default” webpage that will be shown.</p>
-<p>As a route, the function must return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <a href="#id1"><span class="problematic" id="id2">``</span></a>Page` dataclass constructor is provided by Drafter
+<p>As a route, the function must return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">Page</span></code> dataclass constructor is provided by Drafter
 and has two parameters: the new state of the page and a list of strings that will be displayed on the webpage.
-In this case, the webpage will have two lines of text: “The message is:” and “The original message”.</p>
+In this case, the webpage will have two lines of text: “The message is:” and “The original message”.
+We usually will keep passing in the same state, and just update the state’s values mutably.</p>
 <p>After you add the code above, you will need to stop the original server and start the new one.
 If you visit the url <a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a> then you will see a page like this:</p>
 <a class="reference internal image-reference" href="../_images/quickstart_simple_state.png"><img alt="Simple website with the text &quot;The message is&quot; and &quot;The original message&quot; along with some more information further below." src="../_images/quickstart_simple_state.png" style="width: 700px;" /></a>
@@ -178,17 +185,17 @@ for them to navigate there. We can do this easily by just providing a button.</p
 <span class="linenos">10</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">11</span>        <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
 <span class="linenos">12</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
-<span class="linenos">13</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the Message&quot;</span><span class="p">,</span> <span class="n">change_message</span><span class="p">)</span>
-<span class="linenos">14</span>    <span class="p">])</span>
+<span class="hll"><span class="linenos">13</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the Message&quot;</span><span class="p">,</span> <span class="n">change_message</span><span class="p">)</span>
+</span><span class="linenos">14</span>    <span class="p">])</span>
 <span class="linenos">15</span>
-<span class="hll"><span class="linenos">16</span><span class="nd">@route</span>
-</span><span class="hll"><span class="linenos">17</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-</span><span class="hll"><span class="linenos">18</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
-</span><span class="hll"><span class="linenos">19</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-</span><span class="hll"><span class="linenos">20</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
-</span><span class="hll"><span class="linenos">21</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span>
-</span><span class="hll"><span class="linenos">22</span>    <span class="p">])</span>
-</span><span class="linenos">23</span>
+<span class="linenos">16</span><span class="nd">@route</span>
+<span class="linenos">17</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">18</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
+<span class="linenos">19</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+<span class="linenos">20</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
+<span class="linenos">21</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span>
+<span class="linenos">22</span>    <span class="p">])</span>
+<span class="linenos">23</span>
 <span class="linenos">24</span><span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;The original message&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -221,11 +228,11 @@ This state is not very exciting, though, so maybe we can provide the user with a
 <span class="linenos">17</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">18</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
 <span class="linenos">19</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-<span class="hll"><span class="linenos">20</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
-</span><span class="hll"><span class="linenos">21</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
-</span><span class="linenos">22</span>        <span class="s2">&quot;Would you like to change the message?&quot;</span><span class="p">,</span>
-<span class="linenos">23</span>        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;new_message&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
-<span class="linenos">24</span>    <span class="p">])</span>
+<span class="linenos">20</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
+<span class="linenos">21</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+<span class="hll"><span class="linenos">22</span>        <span class="s2">&quot;Would you like to change the message?&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">23</span>        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;new_message&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+</span><span class="linenos">24</span>    <span class="p">])</span>
 <span class="linenos">25</span>
 <span class="linenos">26</span><span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;The original message&quot;</span><span class="p">))</span>
 </pre></div>
@@ -254,16 +261,16 @@ To actually use whatever value the user ends up typing into the box, we need to 
 <span class="linenos">19</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">20</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
 <span class="linenos">21</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
-<span class="hll"><span class="linenos">22</span>        <span class="s2">&quot;Would you like to change the message?&quot;</span><span class="p">,</span>
-</span><span class="linenos">23</span>        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;new_message&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">),</span>
+<span class="linenos">22</span>        <span class="s2">&quot;Would you like to change the message?&quot;</span><span class="p">,</span>
+<span class="linenos">23</span>        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;new_message&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">),</span>
 <span class="hll"><span class="linenos">24</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Save&quot;</span><span class="p">,</span> <span class="n">set_the_message</span><span class="p">)</span>
-</span><span class="hll"><span class="linenos">25</span>    <span class="p">])</span>
-</span><span class="hll"><span class="linenos">26</span>
-</span><span class="hll"><span class="linenos">27</span><span class="nd">@route</span>
-</span><span class="linenos">28</span><span class="k">def</span> <span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-<span class="linenos">29</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">new_message</span>
-<span class="linenos">30</span>    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-<span class="linenos">31</span>
+</span><span class="linenos">25</span>    <span class="p">])</span>
+<span class="linenos">26</span>
+<span class="hll"><span class="linenos">27</span><span class="nd">@route</span>
+</span><span class="hll"><span class="linenos">28</span><span class="k">def</span> <span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll"><span class="linenos">29</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">new_message</span>
+</span><span class="hll"><span class="linenos">30</span>    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+</span><span class="linenos">31</span>
 <span class="linenos">32</span><span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;The original message&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -273,10 +280,221 @@ Drafter will translate the data from the box to the page, and we use that to upd
 <p>In the <code class="docutils literal notranslate"><span class="pre">return</span></code> statement of <code class="docutils literal notranslate"><span class="pre">set_the_message</span></code>, we call the <code class="docutils literal notranslate"><span class="pre">index</span></code> function to reuse its logic for rendering the basic page.
 We could have instead created a new page that linked back to the original <code class="docutils literal notranslate"><span class="pre">index</span></code> page - the design was really up to us.</p>
 <a class="reference internal image-reference" href="../_images/quickstart_string_state.png"><img alt="A textfield with a save button next to it" src="../_images/quickstart_string_state.png" style="width: 700px;" /></a>
-<p>Rerunning the site will allow you to change the message to whatever the user wants.</p>
+<p>Rerunning the site will allow you to change the message dynamically.
+But the site is still not very engaging.
+Let’s add some more interactivity.</p>
+</section>
+<section id="more-interactivity">
+<h2>3. More Interactivity<a class="headerlink" href="#more-interactivity" title="Link to this heading">¶</a></h2>
+<p>We’re going to create another page, which will have two possible images, controlled by a CheckBox.
+First, we create the new page.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="nd">@dataclass</span>
+<span class="linenos"> 5</span><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+<span class="linenos"> 6</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="nd">@route</span>
+<span class="linenos"> 9</span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">10</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+<span class="linenos">11</span>        <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
+<span class="linenos">12</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+<span class="linenos">13</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the Message&quot;</span><span class="p">,</span> <span class="n">change_message</span><span class="p">),</span>
+<span class="hll"><span class="linenos">14</span>        <span class="s2">&quot;You can use the button below to go see a picture&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">15</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;View the picture&quot;</span><span class="p">,</span> <span class="n">view_picture</span><span class="p">)</span>
+</span><span class="linenos">16</span>    <span class="p">])</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="nd">@route</span>
+<span class="linenos">19</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">20</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
+<span class="linenos">21</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+<span class="linenos">22</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
+<span class="linenos">23</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+<span class="linenos">24</span>        <span class="s2">&quot;Would you like to change the message?&quot;</span><span class="p">,</span>
+<span class="linenos">25</span>        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;new_message&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">),</span>
+<span class="linenos">26</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Save&quot;</span><span class="p">,</span> <span class="n">set_the_message</span><span class="p">)</span>
+<span class="linenos">27</span>    <span class="p">])</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span><span class="nd">@route</span>
+<span class="linenos">30</span><span class="k">def</span> <span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">31</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">new_message</span>
+<span class="linenos">32</span>    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="linenos">33</span>
+<span class="hll"><span class="linenos">34</span><span class="nd">@route</span>
+</span><span class="hll"><span class="linenos">35</span><span class="k">def</span> <span class="nf">view_picture</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll"><span class="linenos">36</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+</span><span class="hll"><span class="linenos">37</span>        <span class="n">Image</span><span class="p">(</span><span class="s2">&quot;https://placedog.net/500/280?random&quot;</span><span class="p">),</span>
+</span><span class="hll"><span class="linenos">38</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Return to the main page&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+</span><span class="hll"><span class="linenos">39</span>    <span class="p">])</span>
+</span><span class="linenos">40</span>
+<span class="linenos">41</span><span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;The original message&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>We’ve now created a new page where an image of a dog will appear.
+There is also a button to take the user back to the original page.</p>
+<p>What if users don’t like dogs? It’s a possiblity that we want to prepare for.
+We can provide a CheckBox to control whether they encounter a picture of a dog or not.
+We will want to remember the decision of whether they see a dog when we return to the index, so it’s
+important that we store this as part of the State.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="nd">@dataclass</span>
+<span class="linenos"> 5</span><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+<span class="linenos"> 6</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+<span class="hll"><span class="linenos"> 7</span>    <span class="n">likes_dogs</span><span class="p">:</span> <span class="nb">bool</span>
+</span><span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="nd">@route</span>
+<span class="linenos">10</span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">11</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+<span class="linenos">12</span>        <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
+<span class="linenos">13</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+<span class="linenos">14</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the Message&quot;</span><span class="p">,</span> <span class="n">change_message</span><span class="p">),</span>
+<span class="hll"><span class="linenos">15</span>        <span class="s2">&quot;Are you okay seeing pictures of dogs?&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">16</span>        <span class="n">CheckBox</span><span class="p">(</span><span class="s2">&quot;are_dogs_okay&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">likes_dogs</span><span class="p">),</span>
+</span><span class="linenos">17</span>        <span class="s2">&quot;You can use the button below to go see a picture&quot;</span><span class="p">,</span>
+<span class="linenos">18</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;View the picture&quot;</span><span class="p">,</span> <span class="n">view_picture</span><span class="p">)</span>
+<span class="linenos">19</span>    <span class="p">])</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="nd">@route</span>
+<span class="linenos">22</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">23</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
+<span class="linenos">24</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+<span class="linenos">25</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
+<span class="linenos">26</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+<span class="linenos">27</span>        <span class="s2">&quot;Would you like to change the message?&quot;</span><span class="p">,</span>
+<span class="linenos">28</span>        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;new_message&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">),</span>
+<span class="linenos">29</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Save&quot;</span><span class="p">,</span> <span class="n">set_the_message</span><span class="p">)</span>
+<span class="linenos">30</span>    <span class="p">])</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span><span class="nd">@route</span>
+<span class="linenos">33</span><span class="k">def</span> <span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">34</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">new_message</span>
+<span class="linenos">35</span>    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="linenos">36</span>
+<span class="linenos">37</span><span class="nd">@route</span>
+<span class="hll"><span class="linenos">38</span><span class="k">def</span> <span class="nf">view_picture</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">are_dogs_okay</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll"><span class="linenos">39</span>    <span class="k">if</span> <span class="n">are_dogs_okay</span><span class="p">:</span>
+</span><span class="hll"><span class="linenos">40</span>        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://placedog.net/500/280?random&quot;</span>
+</span><span class="hll"><span class="linenos">41</span>    <span class="k">else</span><span class="p">:</span>
+</span><span class="hll"><span class="linenos">42</span>        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://placekitten.com/500/280?random&quot;</span>
+</span><span class="hll"><span class="linenos">43</span>    <span class="n">state</span><span class="o">.</span><span class="n">likes_dogs</span> <span class="o">=</span> <span class="n">are_dogs_okay</span>
+</span><span class="linenos">44</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+<span class="hll"><span class="linenos">45</span>        <span class="n">Image</span><span class="p">(</span><span class="n">url</span><span class="p">),</span>
+</span><span class="linenos">46</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Return to the main page&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+<span class="linenos">47</span>    <span class="p">])</span>
+<span class="linenos">48</span>
+<span class="linenos">49</span><span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;The original message&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Now we have a new field in our state named <code class="docutils literal notranslate"><span class="pre">likes_dogs</span></code>.
+We must not only update the dataclass definition, but also the initial value in the constructor.</p>
+<p>Separately, we also have a <code class="docutils literal notranslate"><span class="pre">CheckBox</span></code> in the <code class="docutils literal notranslate"><span class="pre">index</span></code>. The first argument is the name of the
+checkbox, which will become a parameter in the <code class="docutils literal notranslate"><span class="pre">view_picture</span></code> function. The second argument is
+the current value of the checkbox, which comes from our state.</p>
+<p>In the <code class="docutils literal notranslate"><span class="pre">view_picture</span></code> function, we take the <code class="docutils literal notranslate"><span class="pre">are_dogs_okay</span></code> parameter (a boolean, since it
+came from a checkbox) and use it to decide which URL we show.
+We also update the <code class="docutils literal notranslate"><span class="pre">state.likes_dogs</span></code> field; this will make sure that when the user returns to the
+index page, their decision is retained.</p>
+<p>We’ve added a lot of features to our website, and testing the entire site takes a lot of clicking.
+It’s time to setup some tests, so we can make sure the website is working correctly even as we change parts.</p>
+</section>
+<section id="testing">
+<h2>4. Testing<a class="headerlink" href="#testing" title="Link to this heading">¶</a></h2>
+<p>Drafter works perfectly well with the Bakery library to write <code class="docutils literal notranslate"><span class="pre">assert_equal</span></code> statements.
+We can call a route function and check that the produced <code class="docutils literal notranslate"><span class="pre">Page</span></code> matches the expected result.
+This does require writing fairly lengthy statements, though:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="hll"><span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">bakery</span> <span class="kn">import</span> <span class="n">assert_equal</span>
+</span><span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="nd">@dataclass</span>
+<span class="linenos"> 6</span><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+<span class="linenos"> 7</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+<span class="linenos"> 8</span>    <span class="n">likes_dogs</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="nd">@route</span>
+<span class="linenos">11</span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">12</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+<span class="linenos">13</span>        <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
+<span class="linenos">14</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+<span class="linenos">15</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the Message&quot;</span><span class="p">,</span> <span class="n">change_message</span><span class="p">),</span>
+<span class="linenos">16</span>        <span class="s2">&quot;Are you okay seeing pictures of dogs?&quot;</span><span class="p">,</span>
+<span class="linenos">17</span>        <span class="n">CheckBox</span><span class="p">(</span><span class="s2">&quot;are_dogs_okay&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">likes_dogs</span><span class="p">),</span>
+<span class="linenos">18</span>        <span class="s2">&quot;You can use the button below to go see a picture&quot;</span><span class="p">,</span>
+<span class="linenos">19</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;View the picture&quot;</span><span class="p">,</span> <span class="n">view_picture</span><span class="p">)</span>
+<span class="linenos">20</span>    <span class="p">])</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="nd">@route</span>
+<span class="linenos">23</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">24</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
+<span class="linenos">25</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+<span class="linenos">26</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
+<span class="linenos">27</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+<span class="linenos">28</span>        <span class="s2">&quot;Would you like to change the message?&quot;</span><span class="p">,</span>
+<span class="linenos">29</span>        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;new_message&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">),</span>
+<span class="linenos">30</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Save&quot;</span><span class="p">,</span> <span class="n">set_the_message</span><span class="p">)</span>
+<span class="linenos">31</span>    <span class="p">])</span>
+<span class="linenos">32</span>
+<span class="linenos">33</span><span class="nd">@route</span>
+<span class="linenos">34</span><span class="k">def</span> <span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">35</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">new_message</span>
+<span class="linenos">36</span>    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span><span class="nd">@route</span>
+<span class="linenos">39</span><span class="k">def</span> <span class="nf">view_picture</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">are_dogs_okay</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">40</span>    <span class="k">if</span> <span class="n">are_dogs_okay</span><span class="p">:</span>
+<span class="linenos">41</span>        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://placedog.net/500/280?random&quot;</span>
+<span class="linenos">42</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos">43</span>        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://placekitten.com/500/280?random&quot;</span>
+<span class="linenos">44</span>    <span class="n">state</span><span class="o">.</span><span class="n">likes_dogs</span> <span class="o">=</span> <span class="n">are_dogs_okay</span>
+<span class="linenos">45</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+<span class="linenos">46</span>        <span class="n">Image</span><span class="p">(</span><span class="n">url</span><span class="p">),</span>
+<span class="linenos">47</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Return to the main page&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+<span class="linenos">48</span>    <span class="p">])</span>
+<span class="linenos">49</span>
+<span class="hll"><span class="linenos">50</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">index</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;My message&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)),</span>
+</span><span class="hll"><span class="linenos">51</span>             <span class="n">Page</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;My message&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span> <span class="p">[</span>
+</span><span class="hll"><span class="linenos">52</span>                <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">53</span>                <span class="s2">&quot;My message&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">54</span>                <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the Message&quot;</span><span class="p">,</span> <span class="n">change_message</span><span class="p">),</span>
+</span><span class="hll"><span class="linenos">55</span>                <span class="s2">&quot;Are you okay seeing pictures of dogs?&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">56</span>                <span class="n">CheckBox</span><span class="p">(</span><span class="s2">&quot;are_dogs_okay&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+</span><span class="hll"><span class="linenos">57</span>                <span class="s2">&quot;You can use the button below to go see a picture&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">58</span>                <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;View the picture&quot;</span><span class="p">,</span> <span class="n">view_picture</span><span class="p">)</span>
+</span><span class="hll"><span class="linenos">59</span>             <span class="p">]))</span>
+</span><span class="hll"><span class="linenos">60</span>
+</span><span class="hll"><span class="linenos">61</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">set_the_message</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;My message&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span> <span class="s2">&quot;New message&quot;</span><span class="p">),</span>
+</span><span class="hll"><span class="linenos">62</span>             <span class="n">Page</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;New message&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span> <span class="p">[</span>
+</span><span class="hll"><span class="linenos">63</span>                <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">64</span>                <span class="s2">&quot;New message&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">65</span>                <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the Message&quot;</span><span class="p">,</span> <span class="n">change_message</span><span class="p">),</span>
+</span><span class="hll"><span class="linenos">66</span>                <span class="s2">&quot;Are you okay seeing pictures of dogs?&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">67</span>                <span class="n">CheckBox</span><span class="p">(</span><span class="s2">&quot;are_dogs_okay&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+</span><span class="hll"><span class="linenos">68</span>                <span class="s2">&quot;You can use the button below to go see a picture&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">69</span>                <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;View the picture&quot;</span><span class="p">,</span> <span class="n">view_picture</span><span class="p">)</span>
+</span><span class="hll"><span class="linenos">70</span>             <span class="p">]))</span>
+</span><span class="linenos">71</span>
+<span class="linenos">72</span><span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;The original message&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>These two <code class="docutils literal notranslate"><span class="pre">assert_equal</span></code> statements check the <code class="docutils literal notranslate"><span class="pre">index</span></code> and <code class="docutils literal notranslate"><span class="pre">set_the_message</span></code> functions.
+Those functions take in the current state (which we are free to make up).
+The <code class="docutils literal notranslate"><span class="pre">set_the_message</span></code> function also takes in a Boolean argument (whether the user wants dog photos).
+Both functions return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>, which has the new resulting state and a list of the page content.</p>
+<p>Getting the exact values correct can be tricky, but fortunately there is a way to simplify the process a little.
+The Debug Information at the bottom of the page includes a section titled <strong>Page Load History</strong>.
+Clicking on the <strong>Page Content</strong> arrow will reveal the generated Page content, which can be copy/pasted back as an
+<code class="docutils literal notranslate"><span class="pre">assert_equal</span></code> along with the appropriate <strong>Call</strong>.</p>
+<a class="reference internal image-reference" href="../_images/quickstart_copy_page_content.png"><img alt="The page content expandable" src="../_images/quickstart_copy_page_content.png" style="width: 700px;" /></a>
+<p>You might think of this as “freezing” the expected state of the website, if you are happy with the design.
+Subsequent changes to the <code class="docutils literal notranslate"><span class="pre">index</span></code> function require us to update these tests, so you do not necessarily want to start
+by testing (the way you are usually encouraged to do). But as you make changes, these tests can help you confirm
+that the rest of the site still works as originally intended.</p>
 </section>
 <section id="moving-on">
-<h2>6. Moving On<a class="headerlink" href="#moving-on" title="Link to this heading">¶</a></h2>
+<h2>5. Moving On<a class="headerlink" href="#moving-on" title="Link to this heading">¶</a></h2>
 <p>Check out the <a class="reference internal" href="../students/docs.html#fulldocs"><span class="std std-ref">documentation of Components</span></a> to see all that you can
 add to your output! What will you put on your website?</p>
 </section>
@@ -296,7 +514,9 @@ add to your output! What will you put on your website?</p>
 <li class="toctree-l2"><a class="reference internal" href="#overview">0. Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#another-route">1. Another Route</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#taking-input">2. Taking Input</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#moving-on">6. Moving On</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#more-interactivity">3. More Interactivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing">4. Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#moving-on">5. Moving On</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../students/docs.html">Drafter Documentation for Students</a></li>
@@ -367,7 +587,7 @@ add to your output! What will you put on your website?</p>
         <li class="right" >
           <a href="../students/installation.html" title="How to Install Drafter"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 0.1.3 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 0.1.4 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Quick Start Guide</a></li> 
       </ul>
