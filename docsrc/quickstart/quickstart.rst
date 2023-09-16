@@ -522,5 +522,14 @@ that the rest of the site still works as originally intended.
 5. Moving On
 ============
 
+So now you have a very simple site. Here are some ideas for additions and extensions you can make:
+
+1. Add more state and routes to the site, so that there are more pages.
+2. Add another page with a numeric field (hint: you will need to check that the user entered text `isnumeric` and then convert it to an integer).
+3. Use the `SelectBox` to make a dropdown list with several options.
+4. Use the `NumberedList` or `BulletedList` to represent a list of values, and then use the `append` method to add a new item via a button.
+
 Check out the :ref:`documentation of Components <fulldocs>` to see all that you can
-add to your output! What will you put on your website?
+add to your website!
+
+And if you want a longer example, check out the :ref:`calculator example <calculator>` to see a more complicated web application.
