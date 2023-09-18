@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>More Help &#8212; Drafter 0.1.4 documentation</title>
+    <title>Longer Examples &#8212; Drafter 0.1.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
@@ -36,7 +36,8 @@
 
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="HTML Colors" href="../reference/colors.html" /> 
+    <link rel="next" title="Calculator Example" href="calculator.html" />
+    <link rel="prev" title="Drafter Quick Start Guide" href="../quickstart/quickstart.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
     <div class="relbar-top">
@@ -48,11 +49,14 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../reference/colors.html" title="HTML Colors"
+          <a href="calculator.html" title="Calculator Example"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../quickstart/quickstart.html" title="Drafter Quick Start Guide"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
     <li><a href="../contents.html">Drafter 0.1.4 documentation</a> &#187;</li>
 
-        <li class="nav-item nav-item-this"><a href="">More Help</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Longer Examples</a></li> 
       </ul>
     </div>
     </div>
@@ -63,22 +67,22 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <section id="more-help">
-<span id="help"></span><h1>More Help<a class="headerlink" href="#more-help" title="Link to this heading">¶</a></h1>
-<section id="actions-after-start">
-<h2>Actions After Start<a class="headerlink" href="#actions-after-start" title="Link to this heading">¶</a></h2>
-<p>Once you call the <cite>start_server()</cite> function, no other code will run until your website finishes.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-
-<span class="c1"># These print statements demonstrate when code runs relative to start</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This line will execute before the game starts.&quot;</span><span class="p">)</span>
-<span class="n">start_server</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This line will not execute until the game is over.&quot;</span>
-</pre></div>
+  <section id="longer-examples">
+<h1>Longer Examples<a class="headerlink" href="#longer-examples" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
 </div>
-<p>If you want to have activity in your website, you have to use the <cite>route</cite> decorator to add
-routes.</p>
-</section>
+<p><a class="reference internal" href="calculator.html#calculator"><span class="std std-ref">Calculator</span></a></p>
+<p>Build a simple calculator application, in a few different ways.</p>
+<ul class="simple">
+<li><p>Teaches: Multiple pages, basic state, handling user input</p></li>
+<li><p>Requires: <code class="docutils literal notranslate"><span class="pre">if</span></code> statements, calling functions, function definitions</p></li>
+</ul>
+<p><a class="reference internal" href="ring.html#ring"><span class="std std-ref">Ring</span></a></p>
+<p>Build a three-page ring that are connected. This site has no state!</p>
+<ul class="simple">
+<li><p>Teaches: Links, stateless websites</p></li>
+<li><p>Requires: calling functions, function definitions</p></li>
+</ul>
 </section>
 
 
@@ -90,27 +94,33 @@ routes.</p>
         <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
     <h3><a href="../contents.html">Page contents</a></h3>
     <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/installation.html">How to Install Drafter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docs.html">Drafter Documentation for Students</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">More Help</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#actions-after-start">Actions After Start</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Longer Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="calculator.html">Calculator Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ring.html">Ring Example</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../students/docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
 </ul>
 
   </div>
   <div class="sphinxprev">
     <h4>Previous page</h4>
-    <p class="topless"><a href="../reference/colors.html"
-                          title="Previous page">&larr; HTML Colors</a></p>
+    <p class="topless"><a href="../quickstart/quickstart.html"
+                          title="Previous page">&larr; Drafter Quick Start Guide</a></p>
+  </div>
+  <div class="sphinxnext">
+    <h4>Next page</h4>
+    <p class="topless"><a href="calculator.html"
+                          title="Next page">&rarr; Calculator Example</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/students/help.rst.txt"
+      <li><a href="../_sources/examples/examples.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -154,11 +164,14 @@ routes.</p>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../reference/colors.html" title="HTML Colors"
+          <a href="calculator.html" title="Calculator Example"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../quickstart/quickstart.html" title="Drafter Quick Start Guide"
              >previous</a> &nbsp; &nbsp;</li>
     <li><a href="../contents.html">Drafter 0.1.4 documentation</a> &#187;</li>
 
-        <li class="nav-item nav-item-this"><a href="">More Help</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Longer Examples</a></li> 
       </ul>
     </div>
     </div>

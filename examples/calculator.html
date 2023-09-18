@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Calculator Example &#8212; Drafter 0.1.4 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="../_static/documentation_options.js?v=fd825880"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Ring Example" href="ring.html" />
+    <link rel="prev" title="Longer Examples" href="examples.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="ring.html" title="Ring Example"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="examples.html" title="Longer Examples"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 0.1.4 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="examples.html" accesskey="U">Longer Examples</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Calculator Example</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="calculator-example">
+<span id="calculator"></span><h1>Calculator Example<a class="headerlink" href="#calculator-example" title="Link to this heading">¶</a></h1>
+<p>Here are a few different versions of the Calculator application.</p>
+<section id="basic-single-page-calculator">
+<h2>Basic Single Page Calculator<a class="headerlink" href="#basic-single-page-calculator" title="Link to this heading">¶</a></h2>
+<a class="reference internal image-reference" href="../_images/calculator_basic.png"><img alt="../_images/calculator_basic.png" src="../_images/calculator_basic.png" style="width: 500px;" /></a>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bakery</span> <span class="kn">import</span> <span class="n">assert_equal</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The application state has two numbers, which are actually stored as</span>
+<span class="sd">    strings. Users can type anything they want into the boxes, and we want</span>
+<span class="sd">    to remember the values they write, even if they are not valid numbers.</span>
+<span class="sd">    We must remember to convert them before using them.</span>
+
+<span class="sd">    The result stores the actual result to be shown to the user. Could also</span>
+<span class="sd">    be an error message if something goes wrong.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">first_number</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">second_number</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">result</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    In this version, the textboxes are on the front page, a there&#39;s</span>
+<span class="sd">    a button to go to the page that actually adds the values together.</span>
+<span class="sd">    Then, the bottom shows the latest result.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s2">&quot;What is the first number?&quot;</span><span class="p">,</span>
+        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">first_number</span><span class="p">),</span>
+        <span class="s2">&quot;What is the second number?&quot;</span><span class="p">,</span>
+        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;second&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">second_number</span><span class="p">),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Add&quot;</span><span class="p">,</span> <span class="n">add_page</span><span class="p">),</span>
+        <span class="s2">&quot;The result is&quot;</span><span class="p">,</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">result</span>
+    <span class="p">])</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">add_page</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">second</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the page with the actual logic. The first and second textboxes</span>
+<span class="sd">    values are sent here and stored in the state.</span>
+<span class="sd">    If they are both composed of digits, then their sum is calculated.</span>
+<span class="sd">    Otherwise, an error is stored in the result.</span>
+<span class="sd">    Finally, we reuse the logic for showing the index page.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">first_number</span> <span class="o">=</span> <span class="n">first</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">second_number</span> <span class="o">=</span> <span class="n">second</span>
+
+    <span class="k">if</span> <span class="n">first</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="n">second</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">first</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">second</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;Invalid numbers!&quot;</span>
+
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="c1"># Test that the front page loads normally</span>
+<span class="n">assert_equal</span><span class="p">(</span><span class="n">index</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)),</span>
+             <span class="n">Page</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+                  <span class="p">[</span><span class="s1">&#39;What is the first number?&#39;</span><span class="p">,</span>
+                   <span class="n">TextBox</span><span class="p">(</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">),</span>
+                   <span class="s1">&#39;What is the second number?&#39;</span><span class="p">,</span>
+                   <span class="n">TextBox</span><span class="p">(</span><span class="s1">&#39;second&#39;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">),</span>
+                   <span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Add&#39;</span><span class="p">,</span> <span class="n">add_page</span><span class="p">),</span>
+                   <span class="s1">&#39;The result is&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;&#39;</span><span class="p">]))</span>
+
+<span class="c1"># Test that the add page works with zeroes</span>
+<span class="n">assert_equal</span><span class="p">(</span><span class="n">add_page</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">),</span>
+             <span class="n">Page</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">),</span>
+                  <span class="p">[</span><span class="s1">&#39;What is the first number?&#39;</span><span class="p">,</span>
+                   <span class="n">TextBox</span><span class="p">(</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">),</span>
+                   <span class="s1">&#39;What is the second number?&#39;</span><span class="p">,</span>
+                   <span class="n">TextBox</span><span class="p">(</span><span class="s1">&#39;second&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">),</span>
+                   <span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Add&#39;</span><span class="p">,</span> <span class="n">add_page</span><span class="p">),</span>
+                   <span class="s1">&#39;The result is&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;0&#39;</span><span class="p">]))</span>
+
+<span class="c1"># Test that the add page can take more interesting numbers</span>
+<span class="c1"># Keyword parameters can be used to make the values more explicit.</span>
+<span class="c1"># Copying the body generated from the page may introduce them!</span>
+<span class="n">assert_equal</span><span class="p">(</span><span class="n">add_page</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">),</span>
+             <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="n">State</span><span class="p">(</span><span class="n">first_number</span><span class="o">=</span><span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="n">second_number</span><span class="o">=</span><span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="s1">&#39;8&#39;</span><span class="p">),</span>
+                  <span class="n">content</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;What is the first number?&#39;</span><span class="p">,</span>
+                           <span class="n">TextBox</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;5&quot;</span><span class="p">),</span>
+                           <span class="s1">&#39;What is the second number?&#39;</span><span class="p">,</span>
+                           <span class="n">TextBox</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;second&#39;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;3&quot;</span><span class="p">),</span>
+                           <span class="n">Button</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Add&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">add_page</span><span class="p">),</span>
+                           <span class="s1">&#39;The result is&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;8&#39;</span><span class="p">]))</span>
+
+<span class="c1"># Test that the add page can take more interesting numbers</span>
+<span class="c1"># Keyword parameters can be used to make the values more explicit.</span>
+<span class="c1"># Copying the body generated from the page may introduce them!</span>
+<span class="n">assert_equal</span><span class="p">(</span><span class="n">add_page</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;five&quot;</span><span class="p">,</span> <span class="s2">&quot;three&quot;</span><span class="p">),</span>
+             <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="n">State</span><span class="p">(</span><span class="n">first_number</span><span class="o">=</span><span class="s2">&quot;five&quot;</span><span class="p">,</span> <span class="n">second_number</span><span class="o">=</span><span class="s2">&quot;three&quot;</span><span class="p">,</span>
+                              <span class="n">result</span><span class="o">=</span><span class="s1">&#39;Invalid numbers!&#39;</span><span class="p">),</span>
+                  <span class="n">content</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;What is the first number?&#39;</span><span class="p">,</span>
+                           <span class="n">TextBox</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;five&quot;</span><span class="p">),</span>
+                           <span class="s1">&#39;What is the second number?&#39;</span><span class="p">,</span>
+                           <span class="n">TextBox</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;second&#39;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;three&quot;</span><span class="p">),</span>
+                           <span class="n">Button</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Add&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">add_page</span><span class="p">),</span>
+                           <span class="s1">&#39;The result is&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;Invalid numbers!&#39;</span><span class="p">]))</span>
+
+<span class="c1"># Default state for this application is two zeroes and no result.</span>
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="../contents.html">Page contents</a></h3>
+    <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../students/installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="examples.html">Longer Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Calculator Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-single-page-calculator">Basic Single Page Calculator</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ring.html">Ring Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../students/docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
+</ul>
+
+  </div>
+  <div class="sphinxprev">
+    <h4>Previous page</h4>
+    <p class="topless"><a href="examples.html"
+                          title="Previous page">&larr; Longer Examples</a></p>
+  </div>
+  <div class="sphinxnext">
+    <h4>Next page</h4>
+    <p class="topless"><a href="ring.html"
+                          title="Next page">&rarr; Ring Example</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/examples/calculator.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="ring.html" title="Ring Example"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="examples.html" title="Longer Examples"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 0.1.4 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="examples.html" >Longer Examples</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Calculator Example</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2023, acbart.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>
