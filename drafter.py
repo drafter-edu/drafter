@@ -703,7 +703,10 @@ class Server:
         # TODO: Handle non-bottle backends
         for key in list(request.params.keys()):
             kwargs[key] = request.params.pop(key)
-        expected_parameters = list(inspect.signature(original_function).parameters.keys())
+        signature_parameters = inspect.signature(original_function).parameters
+        expected_parameters = list(signature_parameters.keys())
+        show_names = {param.name: (param.kind in (inspect.Parameter.KEYWORD_ONLY, inspect.Parameter.VAR_KEYWORD))
+                      for param in signature_parameters.values()}
         # Insert state into the beginning of args
         if (expected_parameters and expected_parameters[0] == "state") or (
                 len(expected_parameters) - 1 == len(args) + len(kwargs)):
@@ -724,7 +727,8 @@ class Server:
         kwargs = {param: self.convert_parameter(param, val, expected_types)
                   for param, val in kwargs.items()}
         # Final return result
-        representation = [repr(arg) for arg in args] + [f"{key}={value!r}" for key, value in kwargs.items()]
+        representation = [repr(arg) for arg in args] + [f"{key}={value!r}" if show_names.get(key, False) else repr(value)
+                                                        for key, value in kwargs.items()]
         return args, kwargs, ", ".join(representation), button_pressed
 
     def convert_parameter(self, param, val, expected_types):

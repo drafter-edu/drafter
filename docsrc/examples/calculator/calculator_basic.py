@@ -6,12 +6,13 @@ from drafter import *
 @dataclass
 class State:
     """
-    The application state has two numbers, which are actually stored as strings.
-    Users can type anything they want into the boxes, and we want to remember the values
-    they write, even if they are not valid numbers. We must remember to convert them before using them.
+    The application state has two numbers, which are actually stored as
+    strings. Users can type anything they want into the boxes, and we want
+    to remember the values they write, even if they are not valid numbers.
+    We must remember to convert them before using them.
 
-    The result stores the actual result to be shown to the user. Could also be an error message if
-    something goes wrong.
+    The result stores the actual result to be shown to the user. Could also
+    be an error message if something goes wrong.
     """
     first_number: str
     second_number: str
@@ -21,9 +22,9 @@ class State:
 @route
 def index(state: State) -> Page:
     """
-    In this version, the textboxes are on the front page, a there's a button to
-    go to the page that actually adds the values together. Then, the bottom shows the latest
-    result.
+    In this version, the textboxes are on the front page, a there's
+    a button to go to the page that actually adds the values together.
+    Then, the bottom shows the latest result.
     """
     return Page(state, [
         "What is the first number?",
@@ -39,9 +40,10 @@ def index(state: State) -> Page:
 @route
 def add_page(state: State, first: str, second: str) -> Page:
     """
-    This is the page with the actual logic. The first and second textboxes values are sent here and
-    stored in the state.
-    If they are both composed of digits, then their sum is calculated. Otherwise, an error is stored in the result.
+    This is the page with the actual logic. The first and second textboxes
+    values are sent here and stored in the state.
+    If they are both composed of digits, then their sum is calculated.
+    Otherwise, an error is stored in the result.
     Finally, we reuse the logic for showing the index page.
     """
     state.first_number = first
@@ -94,7 +96,8 @@ assert_equal(add_page(State("0", "0", ""), "5", "3"),
 # Keyword parameters can be used to make the values more explicit.
 # Copying the body generated from the page may introduce them!
 assert_equal(add_page(State("0", "0", ""), "five", "three"),
-             Page(state=State(first_number="five", second_number="three", result='Invalid numbers!'),
+             Page(state=State(first_number="five", second_number="three",
+                              result='Invalid numbers!'),
                   content=['What is the first number?',
                            TextBox(name='first', default_value="five"),
                            'What is the second number?',
