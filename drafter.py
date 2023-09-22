@@ -5,6 +5,12 @@ TODO: Finish these
 - [ ] Client-side server mode
 - [ ] Other HTML components
 - [ ] set_page_title(title), set_page_style(**attributes)
+- [ ] Show all of the tests in a nice clean way
+- [ ] Make it trivial to copy the route history as tests
+- [X] Show the current route in the debug information
+- [X] classes keyword parameter
+- [ ] Create styling functions
+- [ ] Make it so you can remove the frame and deploy this more easily
 
 TODO: Decide on term for [Component | Element | PageContent | ?]
 
@@ -52,11 +58,11 @@ except ImportError:
     DEFAULT_BACKEND = "none"
     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
 
-__version__ = '0.1.4'
-
+__version__ = '0.2.0'
 
 RESTORABLE_STATE_KEY = "--restorable-state"
 SUBMIT_BUTTON_KEY = '--submit-button'
+
 
 def merge_url_query_params(url: str, additional_params: dict) -> str:
     """
@@ -84,6 +90,12 @@ def remove_url_query_params(url: str, params_to_remove: set) -> str:
 
 def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
     styles, attrs = {}, {}
+    # Handle classes keyword
+    if 'classes' in attributes:
+        attributes['class'] = attributes.pop('classes')
+        if isinstance(attributes['class'], list):
+            attributes['class'] = " ".join(attributes['class'])
+    # Handle styles_ prefixed keyword
     for key, value in attributes.items():
         target = attrs
         if key.startswith("style_"):
@@ -91,6 +103,7 @@ def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
             target = styles
         key = key.replace("_", "-")
         target[key] = value
+    # All done
     return styles, attrs
 
 
@@ -105,13 +118,16 @@ def _hijack_bottle():
             print(*args, file=sys.stderr)
         except (IOError, AttributeError):
             pass
+
     try:
         import bottle
         bottle._stderr = _stderr
     except ImportError:
         pass
 
+
 _hijack_bottle()
+
 
 @dataclass
 class Page:
@@ -134,7 +150,7 @@ class Page:
     def render_content(self, current_state) -> str:
         # TODO: Decide if we want to dump state on the page
         chunked = [
-            #f'<input type="hidden" name="{RESTORABLE_STATE_KEY}" value={current_state!r}/>'
+            # f'<input type="hidden" name="{RESTORABLE_STATE_KEY}" value={current_state!r}/>'
         ]
         for chunk in self.content:
             if isinstance(chunk, str):
@@ -163,6 +179,7 @@ BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "
 
 class PageContent:
     EXTRA_ATTRS = []
+    extra_settings: dict
 
     def verify(self, server) -> bool:
         return True
@@ -183,6 +200,14 @@ class PageContent:
         if styles:
             result += f" style='{'; '.join(styles)}'"
         return result
+
+    def update_style(self, style, value):
+        self.extra_settings[f"style_{style}"] = value
+        return self
+
+    def update_attr(self, attr, value):
+        self.extra_settings[attr] = value
+        return self
 
 
 class LinkContent:
@@ -264,6 +289,12 @@ INCLUDE_STYLES = {
 TEMPLATE_200 = """
 """
 TEMPLATE_404 = """
+<style type="text/css">
+  html {{background-color: #eee; font-family: sans-serif;}}
+  body {{background-color: #fff; border: 1px solid #ddd;
+        padding: 15px; margin: 15px;}}
+  pre {{background-color: #eee; border: 1px solid #ddd; padding: 5px;}}
+</style>
 <h3>{title}</h3>
 
 <p>{message}</p>
@@ -275,6 +306,12 @@ TEMPLATE_404 = """
 {routes}
 """
 TEMPLATE_500 = """
+<style type="text/css">
+  html {{background-color: #eee; font-family: sans-serif;}}
+  body {{background-color: #fff; border: 1px solid #ddd;
+        padding: 15px; margin: 15px;}}
+  pre {{background-color: #eee; border: 1px solid #ddd; padding: 5px;}}
+</style>
 <h3>{title}</h3>
 
 <p>{message}</p>
@@ -300,7 +337,6 @@ class Link(PageContent, LinkContent):
     def __str__(self) -> str:
         url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: self.text})
         return f"<a href='{url}' {self.parse_extra_settings()}>{self.text}</a>"
-
 
 
 @dataclass
@@ -382,7 +418,7 @@ class SelectBox(PageContent):
                             if option == self.default_value else
                             f"<option value='{option}'>{option}</option>"
                             for option in self.options)
-        return f"<select name='{self.name}' {parsed_settings}>{options}</select><br>"
+        return f"<select name='{self.name}' {parsed_settings}>{options}</select>"
 
 
 @dataclass
@@ -400,13 +436,14 @@ class CheckBox(PageContent):
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         checked = 'checked' if self.default_value else ''
         return (f"<input type='hidden' name='{self.name}' value='' {parsed_settings}>"
-                f"<input type='checkbox' name='{self.name}' {checked} value='checked' {parsed_settings}><br>")
+                f"<input type='checkbox' name='{self.name}' {checked} value='checked' {parsed_settings}>")
 
 
 @dataclass
 class LineBreak(PageContent):
     def __str__(self) -> str:
         return "<br />"
+
 
 @dataclass
 class HorizontalRule(PageContent):
@@ -549,6 +586,111 @@ def friendly_urls(url: str) -> str:
     return url
 
 
+def update_style(component, style, value):
+    if isinstance(component, str):
+        component = Text(component)
+    return component.update_style(style, value)
+
+
+def update_attr(component, attr, value):
+    if isinstance(component, str):
+        component = Text(component)
+    return component.update_attr(attr, value)
+
+
+"""
+TODO:
+- [ ] indent
+- [ ] center
+- [ ] Superscript, subscript
+- [ ] border/margin/padding (all sides)
+"""
+
+
+def float_right(component: PageContent) -> PageContent:
+    return update_style(component, 'float', 'right')
+
+
+def float_left(component: PageContent) -> PageContent:
+    return update_style(component, 'float', 'left')
+
+
+def bold(component: PageContent) -> PageContent:
+    return update_style(component, 'font-weight', 'bold')
+
+
+def italic(component: PageContent) -> PageContent:
+    return update_style(component, 'font-style', 'italic')
+
+
+def underline(component: PageContent) -> PageContent:
+    return update_style(component, 'text-decoration', 'underline')
+
+
+def strikethrough(component: PageContent) -> PageContent:
+    return update_style(component, 'text-decoration', 'line-through')
+
+
+def monospace(component: PageContent) -> PageContent:
+    return update_style(component, 'font-family', 'monospace')
+
+
+def small_font(component: PageContent) -> PageContent:
+    return update_style(component, 'font-size', 'small')
+
+
+def large_font(component: PageContent) -> PageContent:
+    return update_style(component, 'font-size', 'large')
+
+
+def change_color(component: PageContent, c: str) -> PageContent:
+    return update_style(component, 'color', c)
+
+
+def change_background_color(component: PageContent, color: str) -> PageContent:
+    return update_style(component, 'background-color', color)
+
+
+def change_text_size(component: PageContent, size: str) -> PageContent:
+    return update_style(component, 'font-size', size)
+
+
+def change_text_font(component: PageContent, font: str) -> PageContent:
+    return update_style(component, 'font-family', font)
+
+
+def change_text_align(component: PageContent, align: str) -> PageContent:
+    return update_style(component, 'text-align', align)
+
+
+def change_text_decoration(component: PageContent, decoration: str) -> PageContent:
+    return update_style(component, 'text-decoration', decoration)
+
+
+def change_text_transform(component: PageContent, transform: str) -> PageContent:
+    return update_style(component, 'text-transform', transform)
+
+
+def change_height(component: PageContent, height: str) -> PageContent:
+    return update_style(component, 'height', height)
+
+
+def change_width(component: PageContent, width: str) -> PageContent:
+    return update_style(component, 'width', width)
+
+
+def change_border(component: PageContent, border: str) -> PageContent:
+    return update_style(component, 'border', border)
+
+
+def change_margin(component: PageContent, margin: str) -> PageContent:
+    return update_style(component, 'margin', margin)
+
+
+def change_padding(component: PageContent, padding: str) -> PageContent:
+    return update_style(component, 'padding', padding)
+
+
 @dataclass
 class ServerConfiguration:
     host: str = "localhost"
@@ -558,6 +700,14 @@ class ServerConfiguration:
     backend: str = DEFAULT_BACKEND
     reloader: bool = False
     style: str = 'skeleton'
+
+
+@dataclass
+class ConversionRecord:
+    parameter: str
+    value: Any
+    expected_type: Any
+    converted_value: Any
 
 
 @dataclass
@@ -595,7 +745,8 @@ def dehydrate_json(value):
     elif is_dataclass(value):
         return {f.name: dehydrate_json(getattr(value, f.name))
                 for f in fields(value)}
-    raise ValueError(f"Error while serializing state: The {value!r} is not a int, str, float, bool, list, or dataclass.")
+    raise ValueError(
+        f"Error while serializing state: The {value!r} is not a int, str, float, bool, list, or dataclass.")
 
 
 def rehydrate_json(value, new_type):
@@ -636,6 +787,7 @@ class Server:
         self._state_history = []
         self._state_frozen_history = []
         self._page_history = []
+        self._conversion_record = []
         self.original_routes = []
         self.app = None
 
@@ -671,16 +823,24 @@ class Server:
 
         # Setup error pages
         def handle_404(error):
-            message = "The requested page was not found."
+            message = "<p>The requested page <code>{url}</code> was not found.</p>".format(url=request.url)
             # TODO: Only show if not the index
-            message += "\n<br>You might want to return to the <a href='/'>index</a> page."
+            message += "\n<p>You might want to return to the <a href='/'>index</a> page.</p>"
             return TEMPLATE_404.format(title="404 Page not found", message=message,
                                        error=error.body,
                                        routes="\n".join(
                                            f"<li><code>{r!r}</code>: <code>{func}</code></li>" for r, func in
                                            self.original_routes))
-
+        def handle_500(error):
+            message = "<p>Sorry, the requested URL <code>{url}</code> caused an error.</p>".format(url=request.url)
+            message += "\n<p>You might want to return to the <a href='/'>index</a> page.</p>"
+            return TEMPLATE_500.format(title="500 Internal Server Error", message=message,
+                                       error=error.body,
+                                       routes="\n".join(
+                                           f"<li><code>{r!r}</code>: <code>{func}</code></li>" for r, func in
+                                           self.original_routes))
         self.app.error(404)(handle_404)
+        self.app.error(500)(handle_500)
         # Setup routes
         if not self.routes:
             raise ValueError("No routes have been defined.\nDid you remember the @route decorator?")
@@ -695,6 +855,7 @@ class Server:
         self.app.run(**asdict(configuration))
 
     def prepare_args(self, original_function, args, kwargs):
+        self._conversion_record.clear()
         args = list(args)
         kwargs = dict(**kwargs)
         button_pressed = ""
@@ -727,8 +888,9 @@ class Server:
         kwargs = {param: self.convert_parameter(param, val, expected_types)
                   for param, val in kwargs.items()}
         # Final return result
-        representation = [repr(arg) for arg in args] + [f"{key}={value!r}" if show_names.get(key, False) else repr(value)
-                                                        for key, value in kwargs.items()]
+        representation = [repr(arg) for arg in args] + [
+            f"{key}={value!r}" if show_names.get(key, False) else repr(value)
+            for key, value in kwargs.items()]
         return args, kwargs, ", ".join(representation), button_pressed
 
     def convert_parameter(self, param, val, expected_types):
@@ -742,6 +904,7 @@ class Server:
             if not isinstance(val, expected_type):
                 try:
                     converted_arg = expected_types[param](val)
+                    self._conversion_record.append(ConversionRecord(param, val, expected_types[param], converted_arg))
                 except Exception as e:
                     raise ValueError(
                         f"Could not convert {param} ({val!r}) from {type(val)} to {expected_types[param]}\n") from e
@@ -881,11 +1044,36 @@ class Server:
 
     def debug_information(self):
         page = ["<h3>Debug Information</h3>",
-                "<em>To hide this information, call <code>hide_debug_information()</code> in your code.</em>"]
+                "<em>To hide this information, call <code>hide_debug_information()</code> in your code.</em><br>"]
         INDENTATION_START_HTML = "<div class='row'><div class='one column'></div><div class='eleven columns'>"
         INDENTATION_END_HTML = "</div></div>"
+        # Current route
+        page.append("<strong>Current Route:</strong> ")
+        if not self._page_history:
+            page.append("Currently no pages have been successfully visited.")
+        else:
+            page.append(f"<code>{self._page_history[-1][0].url}</code>")
+        page.append(f"<br>")
+
+        # Current State
+        page.append("<details open><summary><strong>Current State</strong></summary>"
+                    f"{INDENTATION_START_HTML}")
+        if self._state is not None:
+            page.append(self.render_state(self._state))
+            if self._conversion_record:
+                page.append(
+                    "<details open><summary><strong>The parameters were converted during page load!</strong></summary>"
+                    f"<ul>")
+                for record in self._conversion_record:
+                    page.append(f"<li><code>{record.parameter}</code>: "
+                                f"<code>{record.value!r}</code> &rarr; "
+                                f"<code>{record.converted_value!r}</code></li>")
+                page.append("</ul></details>")
+        else:
+            page.append("<code>None</code>")
+        page.append(f"{INDENTATION_END_HTML}</details>")
         # Routes
-        page.append(f"<details open><summary><strong>Routes</strong></summary>"
+        page.append(f"<details open><summary><strong>Available Routes</strong></summary>"
                     f"{INDENTATION_START_HTML}"
                     f"<ul>")
         for original_route, function in self.routes.items():
@@ -894,20 +1082,12 @@ class Server:
                 original_route += '/'
             page.append(f"<li><code>{original_route}</code>: <code>{function.__name__}({parameters})</code></li>")
         page.append(f"</ul>{INDENTATION_END_HTML}</details>")
-        # Current State
-        page.append("<details open><summary><strong>State</strong></summary>"
-                    f"{INDENTATION_START_HTML}")
-        if self._state is not None:
-            page.append(self.render_state(self._state))
-        else:
-            page.append("<code>None</code>")
-        page.append(f"{INDENTATION_END_HTML}</details>")
         # Page History
         page.append("<details open><summary><strong>Page Load History</strong></summary><ol reversed>")
         for page_history, old_state in reversed(self._page_history):
             button_pressed = f"Clicked <code>{page_history.button_pressed}</code> &rarr; " if page_history.button_pressed else ""
             url = merge_url_query_params(page_history.url, {RESTORABLE_STATE_KEY: old_state})
-            page.append(f"<li>{button_pressed}{page_history.status}" #<details><summary>
+            page.append(f"<li>{button_pressed}{page_history.status}"  # <details><summary>
                         f"{INDENTATION_START_HTML}"
                         f"URL: <a href='{url}'><code>{page_history.url}/</code></a><br>"
                         f"Call: <code>{page_history.function.__name__}({page_history.arguments})</code><br>"
@@ -955,8 +1135,8 @@ def default_index(state) -> Page:
     return Page(state, ["Hello world!", "Welcome to Drafter."])
 
 
+# Provide default route
 route('index')(default_index)
-
 
 if __name__ == '__main__':
     print("This package is meant to be imported, not run as a script. For now, at least.")

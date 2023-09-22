@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2023-09-22
+
+## Added
+
+- Current route is displayed in debug information
+- Converted parameters are now revealed in current state
+- Allow `classes` keyword parameter
+- Provide basic styling functions like `float_right` and `bold`
+
+## Fixed
+
+- Reordered the debug information to put current info at top
+- Error pages now give a little more information
+
 ## [0.1.4] - 2023-09-15
 
 ## Added
