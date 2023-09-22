@@ -7,14 +7,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Drafter Documentation for Students &#8212; Drafter 0.1.4 documentation</title>
+    <title>Drafter Documentation for Students &#8212; Drafter 0.2.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=fd825880"></script>
+    <script src="../_static/documentation_options.js?v=938c9ccc"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -36,8 +36,8 @@
 
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="&lt;no title&gt;" href="functions.html" />
-    <link rel="prev" title="Ring Example" href="../examples/ring.html" /> 
+    <link rel="next" title="HTML" href="html.html" />
+    <link rel="prev" title="Nested Data" href="../examples/nested_data.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
     <div class="relbar-top">
@@ -49,12 +49,12 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="functions.html" title="&lt;no title&gt;"
+          <a href="html.html" title="HTML"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="../examples/ring.html" title="Ring Example"
+          <a href="../examples/nested_data.html" title="Nested Data"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 0.1.4 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 0.2.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Documentation for Students</a></li> 
       </ul>
@@ -137,13 +137,37 @@ then the state will initially be <cite>None</cite>.</p>
 <span class="sig-name descname"><span class="pre">Image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Image" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">Image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>An image</p>
+<dd><p>An image to be displayed on the page. Usually needs to be a complete URL, including the <cite>http://</cite> or <cite>https://</cite>.
+Note that some websites may not allow you to use their images on your website, so be careful; you may want to
+rehost the image somewhere more reliable.</p>
+<p>If you know the exact size of the image, you can specify it with the <cite>width</cite> and <cite>height</cite> parameters. Otherwise,
+the page may resize while the image is being loaded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<em>str</em>) – The URL of the image.</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – The width of the image, in pixels. Defaults to <cite>None</cite>, which will use the image’s default width.</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – The height of the image, in pixels. Defaults to <cite>None</cite>, which will use the image’s default height.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="Link">
 <span class="sig-name descname"><span class="pre">Link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Link" title="Link to this definition">¶</a></dt>
-<dd><p>A link</p>
+<dd><p>A link to another page. The <cite>text</cite> is what will be displayed on the page, and the <cite>url</cite> is where the link will take
+you. This gets rendered as a normal HTML link (underlined blue text). If you want to use a button instead, use the
+<cite>Button</cite> component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – The text to display for the link.</p></li>
+<li><p><strong>url</strong> (<em>str</em><em> or </em><em>function</em>) – Either a string representing the full URL you are linking to (possibly external to the server) or the
+name of a function that is a route on the server (without quotes or calling parentheses).</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -151,7 +175,21 @@ then the state will initially be <cite>None</cite>.</p>
 <span class="sig-name descname"><span class="pre">TextBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#TextBox" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">TextBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>A text box</p>
+<dd><p>A text box for the user to enter text. The <cite>name</cite> is the name of the text box, which will be used to identify
+the text box when the user submits the form (and becomes a parameter to the linked page). The
+<cite>default_value</cite> is the initial value of the text box, which will be displayed to the user. If no <cite>default_value</cite>
+is provided, the textbox will initially be empty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the text box, which will be used to identify the text box when the user submits the form.
+Make sure this is a valid Python identifier (start with a letter followed only by letters, numerals,
+and underscores). This must match the same parameter name in the corresponding linked route.</p></li>
+<li><p><strong>default_value</strong> (<em>str</em>) – The initial value of the text box, which will be displayed to the user. Defaults to <cite>None</cite>,
+which will make the text box initially empty.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -159,7 +197,22 @@ then the state will initially be <cite>None</cite>.</p>
 <span class="sig-name descname"><span class="pre">TextArea</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#TextArea" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">TextArea</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>A multiline text area</p>
+<dd><p>A multiline text area for the user to enter text. Basically the same as the <cite>TextBox</cite> component, but with multiple
+lines. The <cite>name</cite> is the name of the text area, which will be used to identify
+the text area when the user submits the form (and becomes a parameter to the linked page). The
+<cite>default_value</cite> is the initial value of the text area, which will be displayed to the user. If no <cite>default_value</cite>
+is provided, the text area will initially be empty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the text area, which will be used to identify the text area when the user submits the form.
+Make sure this is a valid Python identifier (start with a letter followed only by letters, numerals,
+and underscores). This must match the same parameter name in the corresponding linked route.</p></li>
+<li><p><strong>default_value</strong> (<em>str</em>) – The initial value of the text area, which will be displayed to the user. Defaults to <cite>None</cite>,
+which will make the text area initially empty.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -167,7 +220,24 @@ then the state will initially be <cite>None</cite>.</p>
 <span class="sig-name descname"><span class="pre">SelectBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#SelectBox" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">SelectBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>A dropdown box</p>
+<dd><p>A dropdown box for the user to select a single option. The <cite>name</cite> is the name of the dropdown box, which will be used
+to identify the dropdown box when the user submits the form (and becomes a parameter to the linked page). The
+<cite>options</cite> is a list of strings representing the options in the dropdown box. The <cite>default_value</cite> is the initial
+value of the dropdown box, which will be displayed to the user. If no <cite>default_value</cite> is provided, the dropdown box
+is probably the first element of the list, or the last one, or maybe blank.</p>
+<p>These boxes are also sometimes called combo boxes, dropdowns, or select lists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the select box, which will be used to identify the select box when the user submits the form.
+Make sure this is a valid Python identifier (start with a letter followed only by letters, numerals,
+and underscores). This must match the same parameter name in the corresponding linked route.</p></li>
+<li><p><strong>options</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – The list of options to display in the select box. Each option should be a string.</p></li>
+<li><p><strong>default_value</strong> (<em>str</em>) – The initial value of the select box, which will be displayed to the user. Defaults to <cite>None</cite>,
+which will make the select box initially empty.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -175,37 +245,77 @@ then the state will initially be <cite>None</cite>.</p>
 <span class="sig-name descname"><span class="pre">CheckBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#CheckBox" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">CheckBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>A check box</p>
+<dd><p>A check box for the user to select. The <cite>name</cite> is the name of the check box, which will be used to identify the
+check box when the user submits the form (and becomes a parameter to the linked page). The <cite>default_value</cite> is the
+initial value of the check box, which will be displayed to the user. If no <cite>default_value</cite> is provided, the check
+box will initially be unchecked.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the check box, which will be used to identify the check box when the user submits the form.
+Make sure this is a valid Python identifier (start with a letter followed only by letters, numerals,
+and underscores). This must match the same parameter name in the corresponding linked route.</p></li>
+<li><p><strong>default_value</strong> (<em>bool</em>) – The initial value of the check box, which will be displayed to the user. Defaults to <cite>None</cite>,
+which will make the check box initially unchecked.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="LineBreak">
 <span class="sig-name descname"><span class="pre">LineBreak</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#LineBreak" title="Link to this definition">¶</a></dt>
-<dd><p>A line break</p>
+<dd><p>A line break in the page. This is a single line break, forcing a new line on the page. It is the same as the
+HTML <code class="docutils literal notranslate"><span class="pre">&lt;br&gt;</span></code> tag.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="HorizontalRule">
 <span class="sig-name descname"><span class="pre">HorizontalRule</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#HorizontalRule" title="Link to this definition">¶</a></dt>
-<dd><p>A horizontal line stretching across the page</p>
+<dd><p>A horizontal line stretching across the page. This is the same as the HTML <code class="docutils literal notranslate"><span class="pre">&lt;hr&gt;</span></code> tag.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="Button">
 <span class="sig-name descname"><span class="pre">Button</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Button" title="Link to this definition">¶</a></dt>
-<dd><p>A clickable button</p>
+<dd><p>A clickable button on the page. The <cite>text</cite> is what will be displayed on the button, and the <cite>url</cite> is where the
+button will take you. This gets rendered as a normal HTML button. All of the input fields on the page will be
+submitted with the button press, and passed as parameters to the linked page.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – The text to display for the button.</p></li>
+<li><p><strong>url</strong> (<em>str</em><em> or </em><em>function</em>) – Either a string representing the full URL you are linking to (possibly external to the server) or the
+name of a function that is a route on the server (without quotes or calling parentheses).</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="NumberedList">
 <span class="sig-name descname"><span class="pre">NumberedList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#NumberedList" title="Link to this definition">¶</a></dt>
-<dd><p>A numeric, ordered list</p>
+<dd><p>A numeric, ordered list of items. The <cite>items</cite> is a list of strings, each of which will be a separate item in the
+list. This gets rendered as a normal HTML ordered list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>items</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – The list of items to display in the ordered list. Each item should be a string. If they are not
+strings, then they will be converted using the builtin <code class="docutils literal notranslate"><span class="pre">str</span></code> function.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="BulletedList">
 <span class="sig-name descname"><span class="pre">BulletedList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BulletedList" title="Link to this definition">¶</a></dt>
-<dd><p>An unordered, enumerated list</p>
+<dd><p>An unordered, enumerated list. The <cite>items</cite> is a list of strings, each of which will be a separate item in the
+list. This gets rendered as a normal HTML unordered list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>items</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – The list of items to display in the unordered list. Each item should be a string. If they are not
+strings, then they will be converted using the builtin <code class="docutils literal notranslate"><span class="pre">str</span></code> function.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -213,13 +323,30 @@ then the state will initially be <cite>None</cite>.</p>
 <span class="sig-name descname"><span class="pre">Header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Header" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">Header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>A text header of different sizes.</p>
+<dd><p>A text header of different sizes. The <cite>body</cite> is the text to display in the header. The <cite>level</cite> is the size of the
+header, with 1 being the largest and 6 being the smallest. If no <cite>level</cite> is given, then it will default to 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>body</strong> (<em>str</em>) – The text to display in the header.</p></li>
+<li><p><strong>level</strong> (<em>int</em>) – The size of the header, with 1 being the largest and 6 being the smallest. Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="Table">
 <span class="sig-name descname"><span class="pre">Table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Table" title="Link to this definition">¶</a></dt>
-<dd><p>A tabular representation of data.</p>
+<dd><p>A tabular representation of data. The <cite>data</cite> is a list of lists, where each inner list is a row in the table.
+The <cite>data</cite> can also be a list of dataclass instances, which will be rendered as a pleasant table. If a single
+dataclass is passed in, that will be rendered with the fields as rows in the table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>list</em><em>[</em><em>list</em><em>[</em><em>str</em><em>]</em><em>] or </em><em>list</em><em>[</em><em>object</em><em>] or </em><em>object</em>) – The data to display in the table. Each row should be a list of strings, list of dataclass instances,
+or a single dataclass instance.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -228,7 +355,8 @@ then the state will initially be <cite>None</cite>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="show_debug_information">
 <span class="sig-name descname"><span class="pre">show_debug_information</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#show_debug_information" title="Link to this definition">¶</a></dt>
-<dd><p>Show the debug information at the bottom.</p>
+<dd><p>Show the debug information at the bottom, including the current route, current state, the list of available routes,
+and the history of visited pages.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -288,6 +416,8 @@ then the state will initially be <cite>None</cite>.</p>
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="html.html">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="styling.html">Styling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
 <li class="toctree-l1"><a class="reference internal" href="help.html">More Help</a></li>
 </ul>
@@ -295,13 +425,13 @@ then the state will initially be <cite>None</cite>.</p>
   </div>
   <div class="sphinxprev">
     <h4>Previous page</h4>
-    <p class="topless"><a href="../examples/ring.html"
-                          title="Previous page">&larr; Ring Example</a></p>
+    <p class="topless"><a href="../examples/nested_data.html"
+                          title="Previous page">&larr; Nested Data</a></p>
   </div>
   <div class="sphinxnext">
     <h4>Next page</h4>
-    <p class="topless"><a href="functions.html"
-                          title="Next page">&rarr; &lt;no title&gt;</a></p>
+    <p class="topless"><a href="html.html"
+                          title="Next page">&rarr; HTML</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -350,12 +480,12 @@ then the state will initially be <cite>None</cite>.</p>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="functions.html" title="&lt;no title&gt;"
+          <a href="html.html" title="HTML"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="../examples/ring.html" title="Ring Example"
+          <a href="../examples/nested_data.html" title="Nested Data"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 0.1.4 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 0.2.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Documentation for Students</a></li> 
       </ul>

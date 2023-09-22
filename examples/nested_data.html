@@ -1,0 +1,238 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Nested Data &#8212; Drafter 0.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="../_static/documentation_options.js?v=938c9ccc"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Drafter Documentation for Students" href="../students/docs.html" />
+    <link rel="prev" title="Login Example" href="login.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../students/docs.html" title="Drafter Documentation for Students"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="login.html" title="Login Example"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 0.2.0 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="examples.html" accesskey="U">Longer Examples</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Nested Data</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="nested-data">
+<span id="nested"></span><h1>Nested Data<a class="headerlink" href="#nested-data" title="Link to this heading">¶</a></h1>
+<p>This application has a list of dataclass instances as its model, demonstrating much more complex nested data.</p>
+<p>This is a more advanced application! It might not make sense until you’ve read later chapters in the Bakery textbook.</p>
+<a class="reference internal image-reference" href="../_images/nested_data_index.png"><img alt="../_images/nested_data_index.png" src="../_images/nested_data_index.png" style="width: 500px;" /></a>
+<a class="reference internal image-reference" href="../_images/nested_data_add.png"><img alt="../_images/nested_data_add.png" src="../_images/nested_data_add.png" style="width: 500px;" /></a>
+<a class="reference internal image-reference" href="../_images/nested_data_view.png"><img alt="../_images/nested_data_view.png" src="../_images/nested_data_view.png" style="width: 500px;" /></a>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bakery</span> <span class="kn">import</span> <span class="n">assert_equal</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Dog</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">age</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">breed</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dog</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s2">&quot;There are &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; dogs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;What do you want to do?&quot;</span><span class="p">,</span>
+        <span class="n">SubmitButton</span><span class="p">(</span><span class="s2">&quot;Add a dog&quot;</span><span class="p">,</span> <span class="n">add_dog_page</span><span class="p">),</span>
+        <span class="s2">&quot;View the dogs.&quot;</span><span class="p">,</span>
+        <span class="n">SubmitButton</span><span class="p">(</span><span class="s2">&quot;View the dogs&quot;</span><span class="p">,</span> <span class="n">view_dogs_page</span><span class="p">)</span>
+    <span class="p">])</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">add_dog_page</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dog</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s2">&quot;What is the dog&#39;s name?&quot;</span><span class="p">,</span>
+        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;What is the dog&#39;s age?&quot;</span><span class="p">,</span>
+        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;age&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;What is the dog&#39;s breed?&quot;</span><span class="p">,</span>
+        <span class="n">SelectBox</span><span class="p">(</span><span class="s2">&quot;breed&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;corgi&quot;</span><span class="p">,</span> <span class="s2">&quot;schnauzer&quot;</span><span class="p">,</span> <span class="s2">&quot;mutt&quot;</span><span class="p">]),</span>
+        <span class="n">SubmitButton</span><span class="p">(</span><span class="s2">&quot;Add this dog&quot;</span><span class="p">,</span> <span class="n">finish_adding_dog_page</span><span class="p">),</span>
+        <span class="n">SubmitButton</span><span class="p">(</span><span class="s2">&quot;Go back&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+    <span class="p">])</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">finish_adding_dog_page</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dog</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">age</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">breed</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Dog</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">age</span><span class="p">),</span> <span class="n">breed</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">view_dogs_page</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dog</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s2">&quot;Here are the dogs:&quot;</span><span class="p">,</span>
+        <span class="n">Table</span><span class="p">(</span><span class="n">state</span><span class="p">),</span>
+        <span class="n">SubmitButton</span><span class="p">(</span><span class="s2">&quot;Go back&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+    <span class="p">])</span>
+
+
+<span class="n">start_server</span><span class="p">([],</span> <span class="n">reloader</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="../contents.html">Page contents</a></h3>
+    <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../students/installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="examples.html">Longer Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="calculator.html">Calculator Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ring.html">Ring Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forms.html">Forms Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="login.html">Login Example</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Nested Data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../students/docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/html.html">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/styling.html">Styling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
+</ul>
+
+  </div>
+  <div class="sphinxprev">
+    <h4>Previous page</h4>
+    <p class="topless"><a href="login.html"
+                          title="Previous page">&larr; Login Example</a></p>
+  </div>
+  <div class="sphinxnext">
+    <h4>Next page</h4>
+    <p class="topless"><a href="../students/docs.html"
+                          title="Next page">&rarr; Drafter Documentation for Students</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/examples/nested_data.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../students/docs.html" title="Drafter Documentation for Students"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="login.html" title="Login Example"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 0.2.0 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="examples.html" >Longer Examples</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Nested Data</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2023, acbart.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

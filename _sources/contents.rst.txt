@@ -8,7 +8,8 @@ Table of Contents
    quickstart/quickstart
    examples/examples
    students/docs
-   students/functions
+   students/html
+   students/styling
    reference/reference
    students/help
 

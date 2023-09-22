@@ -7,14 +7,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>&lt;no title&gt; &#8212; Drafter 0.1.4 documentation</title>
+    <title>HTML &#8212; Drafter 0.2.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=fd825880"></script>
+    <script src="../_static/documentation_options.js?v=938c9ccc"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -36,7 +36,7 @@
 
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Reference Lists" href="../reference/reference.html" />
+    <link rel="next" title="Styling" href="styling.html" />
     <link rel="prev" title="Drafter Documentation for Students" href="docs.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
@@ -49,14 +49,14 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../reference/reference.html" title="Reference Lists"
+          <a href="styling.html" title="Styling"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
           <a href="docs.html" title="Drafter Documentation for Students"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 0.1.4 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 0.2.0 documentation</a> &#187;</li>
 
-        <li class="nav-item nav-item-this"><a href="">&lt;no title&gt;</a></li> 
+        <li class="nav-item nav-item-this"><a href="">HTML</a></li> 
       </ul>
     </div>
     </div>
@@ -67,7 +67,40 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <p id="quicklist">Document all the functions here</p>
+  <section id="html">
+<span id="id1"></span><h1>HTML<a class="headerlink" href="#html" title="Link to this heading">¶</a></h1>
+<p>Ultimately, Pages in Drafter become HTML. Although you can use functions like <code class="docutils literal notranslate"><span class="pre">Button</span></code> and <code class="docutils literal notranslate"><span class="pre">Link</span></code> to create HTML
+elements, you can also embed HTML in the string literals that you return for the page. For example, the following
+page will render a button that links to the Google homepage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">([</span>
+        <span class="s2">&quot;&lt;h1&gt;Go to Google&lt;/h1&gt;&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;&lt;a href=&quot;http://www.google.com&quot;&gt;Google&lt;/a&gt;&#39;</span>
+    <span class="p">])</span>
+
+<span class="n">start_server</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This is a very simple example, but it demonstrates how you can use HTML to create pages. You can also use HTML to
+modify text, add images, and more.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">([</span>
+        <span class="s2">&quot;&lt;strong&gt;This text&lt;/strong&gt; will be bolded. &lt;br&gt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&lt;em&gt;This text&lt;/em&gt; will be italicized. &lt;br&gt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&lt;u&gt;This text&lt;/u&gt; will be underlined. &lt;br&gt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&lt;s&gt;This text&lt;/s&gt; will be strikethrough. &lt;br&gt;&quot;</span><span class="p">,</span>
+    <span class="p">])</span>
+
+<span class="n">start_server</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 
 
             <div class="clearer"></div>
@@ -77,11 +110,13 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
     <h3><a href="../contents.html">Page contents</a></h3>
-    <ul>
+    <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">How to Install Drafter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="styling.html">Styling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
 <li class="toctree-l1"><a class="reference internal" href="help.html">More Help</a></li>
 </ul>
@@ -94,13 +129,13 @@
   </div>
   <div class="sphinxnext">
     <h4>Next page</h4>
-    <p class="topless"><a href="../reference/reference.html"
-                          title="Next page">&rarr; Reference Lists</a></p>
+    <p class="topless"><a href="styling.html"
+                          title="Next page">&rarr; Styling</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/students/functions.rst.txt"
+      <li><a href="../_sources/students/html.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -144,14 +179,14 @@
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../reference/reference.html" title="Reference Lists"
+          <a href="styling.html" title="Styling"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
           <a href="docs.html" title="Drafter Documentation for Students"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 0.1.4 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 0.2.0 documentation</a> &#187;</li>
 
-        <li class="nav-item nav-item-this"><a href="">&lt;no title&gt;</a></li> 
+        <li class="nav-item nav-item-this"><a href="">HTML</a></li> 
       </ul>
     </div>
     </div>

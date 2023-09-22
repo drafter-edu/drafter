@@ -1,0 +1,266 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Styling &#8212; Drafter 0.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="../_static/documentation_options.js?v=938c9ccc"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Reference Lists" href="../reference/reference.html" />
+    <link rel="prev" title="HTML" href="html.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../reference/reference.html" title="Reference Lists"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="html.html" title="HTML"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 0.2.0 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Styling</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="styling">
+<span id="id1"></span><h1>Styling<a class="headerlink" href="#styling" title="Link to this heading">¶</a></h1>
+<section id="styling-functions">
+<h2>Styling Functions<a class="headerlink" href="#styling-functions" title="Link to this heading">¶</a></h2>
+<p>One of the easiest ways to apply styling to components is to use the
+styling functions available. These functions take a component and return
+the same component, but with additional styling applied.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">float_right</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Quit&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">))</span>
+    <span class="p">])</span>
+</pre></div>
+</div>
+<p>The above example shows how to use the <code class="docutils literal notranslate"><span class="pre">float_right</span></code> function to make
+the button align on the right hand side of the screen.</p>
+<p>The following functions are available:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">float_left</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">float_right</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bold</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">italic</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">underline</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">strikethrough</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">monospace</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">small_font</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">large_font</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">change_color</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">change_background_color</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">change_text_size</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">change_text_font</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">change_text_align</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">change_text_decoration</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">change_text_transform</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">change_margin</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">change_border</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">change_padding</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">change_width</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">change_height</span></code></p></li>
+</ul>
+</section>
+<section id="keyword-parameters">
+<h2>Keyword Parameters<a class="headerlink" href="#keyword-parameters" title="Link to this heading">¶</a></h2>
+<p>Another way to style components is to use keyword parameters. Any component can take
+<cite>style_</cite> prefixed keyword parameters. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Quit&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">style_text_color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="nb">float</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+    <span class="p">])</span>
+</pre></div>
+</div>
+<p>The example above makes the text red and floats the button to the right.</p>
+</section>
+<section id="css-style-tags">
+<h2>CSS Style Tags<a class="headerlink" href="#css-style-tags" title="Link to this heading">¶</a></h2>
+<p>Since you can embed HTML into any <code class="docutils literal notranslate"><span class="pre">Page</span></code> component, you can also embed CSS style tags.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &lt;style&gt;</span>
+<span class="sd">            button {</span>
+<span class="sd">                color: red;</span>
+<span class="sd">                float: right;</span>
+<span class="sd">            }</span>
+<span class="sd">        &lt;/style&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="p">])</span>
+</pre></div>
+</div>
+<p>This is a more dramatic change, since it will update all buttons across the entire page.</p>
+</section>
+<section id="css-classes">
+<h2>CSS Classes<a class="headerlink" href="#css-classes" title="Link to this heading">¶</a></h2>
+<p>You can narrow down the styling by using CSS classes. You can add a class to any component
+using the <code class="docutils literal notranslate"><span class="pre">classes</span></code> keyword parameter. You can then use the class name in your CSS style.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Global Constant for cleaner, reusable code</span>
+<span class="n">STYLE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;style&gt;</span>
+<span class="s2">    .quit-button {</span>
+<span class="s2">        color: red;</span>
+<span class="s2">        float: right;</span>
+<span class="s2">    }</span>
+<span class="s2">&lt;/style&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">STYLE</span><span class="p">,</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Quit&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;quit-button&quot;</span><span class="p">)</span>
+    <span class="p">])</span>
+</pre></div>
+</div>
+<p>Don’t forget to include the <code class="docutils literal notranslate"><span class="pre">STYLE</span></code> constant in every page that uses the <code class="docutils literal notranslate"><span class="pre">quit-button</span></code> class.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="../contents.html">Page contents</a></h3>
+    <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="html.html">HTML</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Styling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#styling-functions">Styling Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#keyword-parameters">Keyword Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#css-style-tags">CSS Style Tags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#css-classes">CSS Classes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="help.html">More Help</a></li>
+</ul>
+
+  </div>
+  <div class="sphinxprev">
+    <h4>Previous page</h4>
+    <p class="topless"><a href="html.html"
+                          title="Previous page">&larr; HTML</a></p>
+  </div>
+  <div class="sphinxnext">
+    <h4>Next page</h4>
+    <p class="topless"><a href="../reference/reference.html"
+                          title="Next page">&rarr; Reference Lists</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/students/styling.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../reference/reference.html" title="Reference Lists"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="html.html" title="HTML"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 0.2.0 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Styling</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2023, acbart.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>
