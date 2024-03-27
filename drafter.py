@@ -60,7 +60,7 @@ except ImportError:
     DEFAULT_BACKEND = "none"
     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 RESTORABLE_STATE_KEY = "--restorable-state"
 SUBMIT_BUTTON_KEY = '--submit-button'
@@ -1019,9 +1019,10 @@ class Server:
         return json.dumps(dehydrate_json(self._state))
 
     def restore_state_if_available(self, original_function):
-        if RESTORABLE_STATE_KEY in request.params:
+        params = request.params.decode('utf-8')
+        if RESTORABLE_STATE_KEY in params:
             # Get state
-            old_state = json.loads(request.params.pop(RESTORABLE_STATE_KEY))
+            old_state = json.loads(params.pop(RESTORABLE_STATE_KEY))
             # Get state type
             parameters = inspect.signature(original_function).parameters
             if 'state' in parameters:
@@ -1083,13 +1084,14 @@ class Server:
         args = list(args)
         kwargs = dict(**kwargs)
         button_pressed = ""
-        if SUBMIT_BUTTON_KEY in request.params:
-            button_pressed = request.params.pop(SUBMIT_BUTTON_KEY)
-        elif PREVIOUSLY_PRESSED_BUTTON in request.params:
-            button_pressed = request.params.pop(PREVIOUSLY_PRESSED_BUTTON)
+        params = request.params.decode('utf-8')
+        if SUBMIT_BUTTON_KEY in params:
+            button_pressed = params.pop(SUBMIT_BUTTON_KEY)
+        elif PREVIOUSLY_PRESSED_BUTTON in params:
+            button_pressed = params.pop(PREVIOUSLY_PRESSED_BUTTON)
         # TODO: Handle non-bottle backends
-        for key in list(request.params.keys()):
-            kwargs[key] = request.params.pop(key)
+        for key in list(params.keys()):
+            kwargs[key] = params.pop(key)
         signature_parameters = inspect.signature(original_function).parameters
         expected_parameters = list(signature_parameters.keys())
         show_names = {param.name: (param.kind in (inspect.Parameter.KEYWORD_ONLY, inspect.Parameter.VAR_KEYWORD))
