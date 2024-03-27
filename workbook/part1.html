@@ -1,0 +1,221 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Workbook Part 1 &#8212; Drafter 1.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="../_static/documentation_options.js?v=292eb321"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+    <li><a href="../contents.html">Drafter 1.0.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Workbook Part 1</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="workbook-part-1">
+<span id="workbook"></span><h1>Workbook Part 1<a class="headerlink" href="#workbook-part-1" title="Link to this heading">¶</a></h1>
+<p>Modern application development is focused on web development.</p>
+<p>Downloading files, setting up</p>
+<section id="cookie-clicker">
+<h2>Cookie Clicker<a class="headerlink" href="#cookie-clicker" title="Link to this heading">¶</a></h2>
+<p>Cookie Clicker is a simple game where you click a cookie to get more cookies.</p>
+<p>You will need to create a <code class="docutils literal notranslate"><span class="pre">State</span></code> class that has a <code class="docutils literal notranslate"><span class="pre">cookies</span></code> field (an integer).</p>
+<p>Then, you will need to create two routes:</p>
+<ol class="arabic">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">index</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the
+returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be (in order):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">have</span> <span class="pre">X</span> <span class="pre">cookies&quot;</span></code> except instead of <code class="docutils literal notranslate"><span class="pre">X</span></code> it will be the <code class="docutils literal notranslate"><span class="pre">cookies</span></code> of the <code class="docutils literal notranslate"><span class="pre">State</span></code>
+object.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;🍪&quot;</span></code> that links to a <code class="docutils literal notranslate"><span class="pre">cookie</span></code> route.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">cookie</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">cookies</span></code> of the <code class="docutils literal notranslate"><span class="pre">state</span></code> in the returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be increased by 1.
+The function should return the result of calling the <code class="docutils literal notranslate"><span class="pre">index</span></code> function with the modified <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p></li>
+</ol>
+<p>Finally, call <code class="docutils literal notranslate"><span class="pre">start_server</span></code>, passing in a <code class="docutils literal notranslate"><span class="pre">State</span></code> object with <code class="docutils literal notranslate"><span class="pre">cookies</span></code> set to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+</section>
+<section id="bank-account">
+<h2>Bank Account<a class="headerlink" href="#bank-account" title="Link to this heading">¶</a></h2>
+<p>A bank account let’s you withdraw and deposit money.</p>
+<p>You will need to create a <code class="docutils literal notranslate"><span class="pre">State</span></code> class that has a <code class="docutils literal notranslate"><span class="pre">balance</span></code> field (an integer).</p>
+<p>Then, you will need to create five routes:</p>
+<ol class="arabic">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">index</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code> (like most routes). The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the
+returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be (in order):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;Your</span> <span class="pre">balance</span> <span class="pre">is:</span> <span class="pre">X&quot;</span></code> except instead of <code class="docutils literal notranslate"><span class="pre">X</span></code> it will be the <code class="docutils literal notranslate"><span class="pre">balance</span></code> of the <code class="docutils literal notranslate"><span class="pre">State</span></code>
+object.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Withdraw&quot;</span></code> that links to a <code class="docutils literal notranslate"><span class="pre">start_withdraw</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Deposit&quot;</span></code> that links to a <code class="docutils literal notranslate"><span class="pre">start_deposit</span></code> route.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">start_withdraw</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the returned
+<code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be (in order):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;How</span> <span class="pre">much</span> <span class="pre">would</span> <span class="pre">you</span> <span class="pre">like</span> <span class="pre">to</span> <span class="pre">withdraw?&quot;</span></code>.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">TextBox</span></code> that will be used to input the <code class="docutils literal notranslate"><span class="pre">amount</span></code> to withdraw, initially <code class="docutils literal notranslate"><span class="pre">10</span></code>.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Withdraw&quot;</span></code> that links to a <code class="docutils literal notranslate"><span class="pre">finish_withdraw</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Cancel&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">index</span></code> route.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">finish_withdraw</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and an <code class="docutils literal notranslate"><span class="pre">amount</span></code> (an <code class="docutils literal notranslate"><span class="pre">int</span></code>).
+The <code class="docutils literal notranslate"><span class="pre">balance</span></code> of the <code class="docutils literal notranslate"><span class="pre">state</span></code> in the returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be changed to reflect the withdrawal.
+The function should return the result of calling the <code class="docutils literal notranslate"><span class="pre">index</span></code> function with the modified <code class="docutils literal notranslate"><span class="pre">state</span></code>.
+<strong>Note</strong>: Use the <code class="docutils literal notranslate"><span class="pre">index</span></code> function inside of this function to avoid code duplication.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">start_deposit</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the returned
+<code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be (in order):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;How</span> <span class="pre">much</span> <span class="pre">would</span> <span class="pre">you</span> <span class="pre">like</span> <span class="pre">to</span> <span class="pre">deposit?&quot;</span></code>.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">TextBox</span></code> that will be used to input the <code class="docutils literal notranslate"><span class="pre">amount</span></code> to deposit, initially <code class="docutils literal notranslate"><span class="pre">10</span></code>.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Deposit&quot;</span></code> that links to a <code class="docutils literal notranslate"><span class="pre">finish_deposit</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Cancel&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">index</span></code> route.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">finish_deposit</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and an <code class="docutils literal notranslate"><span class="pre">amount</span></code> (an <code class="docutils literal notranslate"><span class="pre">int</span></code>).
+The <code class="docutils literal notranslate"><span class="pre">balance</span></code> of the <code class="docutils literal notranslate"><span class="pre">state</span></code> in the returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be changed to reflect the deposit.
+The function should return the result of calling the <code class="docutils literal notranslate"><span class="pre">index</span></code> function with the modified <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p></li>
+</ol>
+<p>Finally, call <code class="docutils literal notranslate"><span class="pre">start_server</span></code>, passing in a <code class="docutils literal notranslate"><span class="pre">State</span></code> object with <code class="docutils literal notranslate"><span class="pre">balance</span></code> set to <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p>
+</section>
+<section id="simple-adventure-game">
+<h2>Simple Adventure Game<a class="headerlink" href="#simple-adventure-game" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="../contents.html">Page contents</a></h3>
+    <ul>
+<li class="toctree-l1"><a class="reference internal" href="../students/installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/html.html">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/styling.html">Styling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/workbook/part1.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+    <li><a href="../contents.html">Drafter 1.0.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Workbook Part 1</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2023, acbart.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>
