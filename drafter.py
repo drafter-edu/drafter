@@ -1,18 +1,17 @@
 """
 TODO: Finish these
-- [ ] Optional bootstrap support
-- [ ] Swappable backends
-- [ ] Client-side server mode
-- [ ] Other HTML components
+- [X] Client-side server mode
+- [?] Other HTML components
 - [ ] set_page_title(title), set_page_style(**attributes)
-- [ ] Show all of the tests in a nice clean way
-- [ ] Make it trivial to copy the route history as tests
+- [X] Show all of the tests in a nice clean way
+- [X] Make it trivial to copy the route history as tests
 - [X] Show the current route in the debug information
 - [X] classes keyword parameter
 - [ ] Create styling functions
 - [ ] Make it so you can remove the frame and deploy this more easily
-
-TODO: Decide on term for [Component | Element | PageContent | ?]
+- [ ] Optional bootstrap support
+- [ ] Swappable backends
+- [ ] Text is equal to strings?
 
 Components to develop:
 - [x] Image
@@ -47,8 +46,11 @@ from dataclasses import field as dataclass_field
 import logging
 from datetime import datetime
 import pprint
+import gzip
+import base64
+import difflib
 
-logger = logging.getLogger('cookbook')
+logger = logging.getLogger('drafter')
 
 try:
     from bottle import Bottle, abort, request
@@ -58,11 +60,103 @@ except ImportError:
     DEFAULT_BACKEND = "none"
     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
 
-__version__ = '0.2.0'
+__version__ = '1.0.1'
 
 RESTORABLE_STATE_KEY = "--restorable-state"
 SUBMIT_BUTTON_KEY = '--submit-button'
+PREVIOUSLY_PRESSED_BUTTON = "--last-button"
 
+try:
+    import bakery
+except:
+    bakery = None
+
+
+@dataclass
+class BakeryTestCase:
+    args: tuple
+    kwargs: dict
+    result: Any
+    line: int
+    caller: str
+
+
+def get_line_code(depth = 5):
+    # Load in extract_stack, or provide shim for environments without it.
+    try:
+        from traceback import extract_stack
+        trace = extract_stack()
+        frame = trace[len(trace) - depth]
+        line = frame[1]
+        code = frame[3]
+        return line, code
+    except Exception:
+        return None, None
+
+
+class BakeryTests:
+    def __init__(self):
+        self.tests = []
+
+    def wrap_get_line_code(self, original_function):
+        @wraps(original_function)
+        def new_function(*args, **kwargs):
+            # line, code = original_function(*args, **kwargs)
+            # return line, code
+            return get_line_code()
+        return new_function
+
+    def track_bakery_tests(self, original_function):
+        if bakery is None:
+            return original_function
+        @wraps(original_function)
+        def new_function(*args, **kwargs):
+            line, code = get_line_code(6)
+            result = original_function(*args, **kwargs)
+            self.tests.append(BakeryTestCase(args, kwargs, result, line, code))
+            return result
+
+        return new_function
+
+
+# Modifies Bakery's copy of assert_equal, and also provides a new version for folks who already imported
+_bakery_tests = BakeryTests()
+if bakery is not None:
+    bakery.assertions.get_line_code = _bakery_tests.wrap_get_line_code(bakery.assertions.get_line_code)
+    assert_equal = bakery.assert_equal = _bakery_tests.track_bakery_tests(bakery.assert_equal)
+else:
+    def assert_equal(*args, **kwargs):
+        """ Pointless definition of assert_equal to avoid errors """
+
+
+DIFF_INDENT_WIDTH = 1
+DIFF_WRAP_WIDTH = 60
+DIFF_STYLE_TAG = """
+<style type="text/css">
+    table.diff {
+        font-family:Courier,serif;
+        border:medium;
+        margin-bottom: 4em;
+        width: 100%;
+    }
+    .diff_header {background-color:#e0e0e0}
+    td.diff_header { text-align:right; }
+    table.diff td {
+        padding: 0px;
+        border-bottom: 0px solid black;
+    }
+    .diff_next {background-color:#c0c0c0}
+    .diff_add {background-color:#aaffaa}
+    .diff_chg {background-color:#ffff77}
+    .diff_sub {background-color:#ffaaaa}
+</style>
+"""
+differ = difflib.HtmlDiff(tabsize=DIFF_INDENT_WIDTH, wrapcolumn=DIFF_WRAP_WIDTH)
+
+def diff_tests(left, right, left_name, right_name):
+    """ Compare two strings and show the differences in a table. """
+    table = differ.make_table(left.splitlines(), right.splitlines(), left_name, right_name)
+    return table
 
 def merge_url_query_params(url: str, additional_params: dict) -> str:
     """
@@ -141,11 +235,15 @@ class Page:
         self.content = content
 
         if not isinstance(content, list):
-            raise ValueError("The content of a page must be a list of strings or .")
+            incorrect_type = type(content).__name__
+            raise ValueError("The content of a page must be a list of strings or components."
+                             f" Found {incorrect_type} instead.")
         else:
-            for chunk in content:
+            for index, chunk in enumerate(content):
                 if not isinstance(chunk, (str, PageContent)):
-                    raise ValueError("The content of a page must be a list of strings.")
+                    incorrect_type = type(chunk).__name__
+                    raise ValueError("The content of a page must be a list of strings or components."
+                                     f" Found {incorrect_type} at index {index} instead.")
 
     def render_content(self, current_state) -> str:
         # TODO: Decide if we want to dump state on the page
@@ -158,8 +256,8 @@ class Page:
             else:
                 chunked.append(str(chunk))
         content = "\n".join(chunked)
-        return (f"<div class='container cookbook-header'>Drafter Website</div>"
-                f"<div class='container cookbook-container'>"
+        return (f"<div class='container btlw-header'>Drafter Website</div>"
+                f"<div class='container btlw-container'>"
                 f"<form>{content}</form>"
                 f"</div>")
 
@@ -211,8 +309,7 @@ class PageContent:
 
 
 class LinkContent:
-
-    def _handle_url(self, url, external):
+    def _handle_url(self, url, external=None):
         if callable(url):
             url = url.__name__
         if external is None:
@@ -230,6 +327,30 @@ class LinkContent:
             raise ValueError(f"Link `{self.text}` points to non-existent page `{self.url}`.")
         return True
 
+    def create_arguments(self, arguments, label_namespace):
+        parameters = self.parse_arguments(arguments, label_namespace)
+        if parameters:
+            return "\n".join(f"<input type='hidden' name='{name}' value='{value}' />"
+                             for name, value in parameters.items())
+        return ""
+
+    def parse_arguments(self, arguments, label_namespace):
+        if arguments is None:
+            return {}
+        if isinstance(arguments, dict):
+            return arguments
+        if isinstance(arguments, Argument):
+            return {f"{label_namespace}$${arguments.name}": arguments.value}
+        if isinstance(arguments, list):
+            result = {}
+            for arg in arguments:
+                if isinstance(arg, Argument):
+                    arg, value = arg.name, arg.value
+                    result[arg.name] = arg.value
+                else:
+                    arg, value = arg
+                result[f"{label_namespace}$${arg}"] = value
+        raise ValueError(f"Could not create arguments from the provided value: {arguments}")
 
 URL_REGEX = "^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$"
 
@@ -241,15 +362,40 @@ def check_invalid_external_url(url: str) -> str:
         return "is a valid external url"
     return ""
 
-
+BASIC_SCRIPTS = "<script>" + """
+    let snippets = document.getElementsByClassName('copyable');
+    const buttonText = "📋";
+    console.log(snippets);
+    for (let i = 0; i < snippets.length; i++) {
+        code = snippets[i].textContent;
+        //snippets[i].classList.add('hljs'); // append copy button to pre tag
+        snippets[i].innerHTML = '<button class="copy-button">'+buttonText+'</button>' + snippets[i].innerHTML; // append copy button
+        snippets[i].getElementsByClassName("copy-button")[0].addEventListener("click", function () {
+            this.innerText = 'Copying..';
+            navigator.clipboard.writeText(code);
+            this.innerText = 'Copied!';
+            button = this;
+            setTimeout(function () {
+                button.innerText = buttonText;
+            }, 1000)
+        });
+    }
+""" + "</script>"
 BASIC_STYLE = """
 <style>
-    div.cookbook-container {
+    div.btlw-debug .copy-button {
+         float: right;
+         cursor: pointer;
+         background-color: white;
+         padding: 4px;
+     }
+
+    div.btlw-container {
         padding: 1em;
         border: 1px solid lightgrey;
     }
     
-    div.cookbook-header {
+    div.btlw-header {
         border: 1px solid lightgrey;
         border-bottom: 0px;
         background-color: #EEE;
@@ -257,32 +403,71 @@ BASIC_STYLE = """
         font-weight: bold;
     }
     
-    div.cookbook-container img {
+    div.btlw-container img {
         display: block;
     }
 </style>
 """
+SKELETON_COMPRESSED = "<style>" + gzip.decompress(base64.b64decode(
+    "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")).decode('utf-8') + "</style>"
+
 INCLUDE_STYLES = {
     'bootstrap': {
         'styles': [
             BASIC_STYLE,
             '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">',
+            DIFF_STYLE_TAG,
         ],
         'scripts': [
             '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>',
             '<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>',
+            BASIC_SCRIPTS,
         ]
     },
     "skeleton": {
         "styles": [
+            SKELETON_COMPRESSED,
+            BASIC_STYLE,
+            DIFF_STYLE_TAG,
+        ],
+        "scripts": [BASIC_SCRIPTS,]
+    },
+    "skeleton_cdn": {
+        "styles": [
             BASIC_STYLE,
             '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" integrity="sha512-EZLkOqwILORob+p0BXZc+Vm3RgJBOe1Iq/0fiI7r/wJgzOFZMlsqTa29UEl6v6U6gsV4uIpsNZoV32YZqrCRCQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />',
+            DIFF_STYLE_TAG,
         ],
-        "scripts": []
+        "scripts": [BASIC_SCRIPTS,]
     },
     'none': {
-        'styles': [BASIC_STYLE],
-        'scripts': []
+        'styles': [BASIC_STYLE, DIFF_STYLE_TAG],
+        'scripts': [BASIC_SCRIPTS,]
     }
 }
 
@@ -290,10 +475,10 @@ TEMPLATE_200 = """
 """
 TEMPLATE_404 = """
 <style type="text/css">
-  html {{background-color: #eee; font-family: sans-serif;}}
-  body {{background-color: #fff; border: 1px solid #ddd;
+  .btlw {{background-color: #eee; font-family: sans-serif;}}
+  div.btlw {{background-color: #fff; border: 1px solid #ddd;
         padding: 15px; margin: 15px;}}
-  pre {{background-color: #eee; border: 1px solid #ddd; padding: 5px;}}
+  .btlw pre {{background-color: #eee; border: 1px solid #ddd; padding: 5px;}}
 </style>
 <h3>{title}</h3>
 
@@ -307,10 +492,10 @@ TEMPLATE_404 = """
 """
 TEMPLATE_500 = """
 <style type="text/css">
-  html {{background-color: #eee; font-family: sans-serif;}}
-  body {{background-color: #fff; border: 1px solid #ddd;
+  .btlw {{background-color: #eee; font-family: sans-serif;}}
+  div.btlw {{background-color: #fff; border: 1px solid #ddd;
         padding: 15px; margin: 15px;}}
-  pre {{background-color: #eee; border: 1px solid #ddd; padding: 5px;}}
+  .btlw pre {{background-color: #eee; border: 1px solid #ddd; padding: 5px;}}
 </style>
 <h3>{title}</h3>
 
@@ -323,20 +508,35 @@ TEMPLATE_500 = """
 {routes}
 """
 
+@dataclass
+class Argument(PageContent):
+    name: str
+    value: Any
+
+    def __init__(self, name: str, value: Any, **kwargs):
+        self.name = name
+        self.value = value
+        self.extra_settings = kwargs
+
+    def __str__(self) -> str:
+        return f"<input type='hidden' name='{self.name}' value='{self.value}' {self.parse_extra_settings()} />"
+
 
 @dataclass
 class Link(PageContent, LinkContent):
     text: str
     url: str
 
-    def __init__(self, text: str, url: str, external=None, **kwargs):
+    def __init__(self, text: str, url: str, arguments=None, **kwargs):
         self.text = text
-        self.url, self.external = self._handle_url(url, external)
+        self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
+        self.arguments = arguments
 
     def __str__(self) -> str:
+        precode = self.create_arguments(self.arguments, self.text)
         url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: self.text})
-        return f"<a href='{url}' {self.parse_extra_settings()}>{self.text}</a>"
+        return f"{precode}<a href='{url}' {self.parse_extra_settings()}>{self.text}</a>"
 
 
 @dataclass
@@ -457,35 +657,21 @@ class Button(PageContent, LinkContent):
     url: str
     external: bool = False
 
-    def __init__(self, text: str, url: str, external=False, **kwargs):
+    def __init__(self, text: str, url: str, arguments=None, **kwargs):
         self.text = text
-        self.url, self.external = self._handle_url(url, external)
+        self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
+        self.arguments = arguments
 
     def __str__(self) -> str:
-        # extra_settings = {}
-        # if 'onclick' not in self.extra_settings:
-        #    extra_settings['onclick'] = f"window.location.href=\"{self.url}\""
-        # parsed_settings = self.parse_extra_settings(**extra_settings)
-        # return f"<button {parsed_settings}>{self.text}</button>"
+        precode = self.create_arguments(self.arguments, self.text)
+        url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: self.text})
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<input type='submit' name='{SUBMIT_BUTTON_KEY}' value='{self.text}' formaction='{self.url}' {parsed_settings} />"
+        return f"{precode}<input type='submit' name='{SUBMIT_BUTTON_KEY}' value='{self.text}' formaction='{url}' {parsed_settings} />"
 
 
-@dataclass
-class SubmitButton(PageContent, LinkContent):
-    text: str
-    url: str
-    external: bool = False
-
-    def __init__(self, text: str, url: str, external=False, **kwargs):
-        self.text = text
-        self.url, self.external = self._handle_url(url, external)
-        self.extra_settings = kwargs
-
-    def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<input type='submit' name='{SUBMIT_BUTTON_KEY}' value='{self.text}' formaction='{self.url}' {parsed_settings} />"
+class SubmitButton(Button):
+    pass
 
 
 @dataclass
@@ -709,6 +895,38 @@ class ConversionRecord:
     expected_type: Any
     converted_value: Any
 
+    def as_html(self):
+        return (f"<li><code>{self.parameter}</code>: "
+                f"<code>{self.value!r}</code> &rarr; "
+                f"<code>{self.converted_value!r}</code></li>")
+
+@dataclass
+class UnchangedRecord:
+    parameter: str
+    value: Any
+    expected_type: Any = None
+
+    def as_html(self):
+        return (f"<li><code>{self.parameter}</code>: "
+                f"<code>{self.value!r}</code></li>")
+
+def format_page_content(content, width=80):
+    try:
+        return pprint.pformat(content, indent=DIFF_INDENT_WIDTH, width=width)
+    except Exception as e:
+        return repr(content)
+
+
+def remap_hidden_form_parameters(kwargs: dict, button_pressed: str):
+    renamed_kwargs = {}
+    for key, value in kwargs.items():
+        if button_pressed and key.startswith(f"{button_pressed}$$"):
+            key = key[len(f"{button_pressed}$$"):]
+            renamed_kwargs[key] = value
+        else:
+            renamed_kwargs[key] = value
+    return renamed_kwargs
+
 
 @dataclass
 class VisitedPage:
@@ -725,14 +943,16 @@ class VisitedPage:
     def update(self, new_status, original_page_content=None):
         self.status = new_status
         if original_page_content is not None:
-            try:
-                self.original_page_content = pprint.pformat(original_page_content)
-            except Exception as e:
-                self.original_page_content = repr(original_page_content)
+            self.original_page_content = format_page_content(original_page_content, 120)
 
     def finish(self, new_status):
         self.status = new_status
         self.stopped = datetime.utcnow()
+
+    def as_html(self):
+        function_name = self.function.__name__
+        return (f"<strong>Current Route:</strong><br>Route function: <code>{function_name}</code><br>"
+                f"URL: <href='{self.url}'><code>{self.url}</code></href>")
 
 
 def dehydrate_json(value):
@@ -784,6 +1004,7 @@ class Server:
         self._handle_route = {}
         self.default_configuration = ServerConfiguration(**kwargs)
         self._state = None
+        self._initial_state = None
         self._state_history = []
         self._state_frozen_history = []
         self._page_history = []
@@ -818,6 +1039,7 @@ class Server:
         self._handle_route[url] = self._handle_route[func] = func
 
     def setup(self, initial_state=None):
+        self._initial_state = initial_state
         self._state = initial_state
         self.app = Bottle()
 
@@ -831,6 +1053,7 @@ class Server:
                                        routes="\n".join(
                                            f"<li><code>{r!r}</code>: <code>{func}</code></li>" for r, func in
                                            self.original_routes))
+
         def handle_500(error):
             message = "<p>Sorry, the requested URL <code>{url}</code> caused an error.</p>".format(url=request.url)
             message += "\n<p>You might want to return to the <a href='/'>index</a> page.</p>"
@@ -839,6 +1062,7 @@ class Server:
                                        routes="\n".join(
                                            f"<li><code>{r!r}</code>: <code>{func}</code></li>" for r, func in
                                            self.original_routes))
+
         self.app.error(404)(handle_404)
         self.app.error(500)(handle_500)
         # Setup routes
@@ -861,6 +1085,8 @@ class Server:
         button_pressed = ""
         if SUBMIT_BUTTON_KEY in request.params:
             button_pressed = request.params.pop(SUBMIT_BUTTON_KEY)
+        elif PREVIOUSLY_PRESSED_BUTTON in request.params:
+            button_pressed = request.params.pop(PREVIOUSLY_PRESSED_BUTTON)
         # TODO: Handle non-bottle backends
         for key in list(request.params.keys()):
             kwargs[key] = request.params.pop(key)
@@ -868,6 +1094,7 @@ class Server:
         expected_parameters = list(signature_parameters.keys())
         show_names = {param.name: (param.kind in (inspect.Parameter.KEYWORD_ONLY, inspect.Parameter.VAR_KEYWORD))
                       for param in signature_parameters.values()}
+        kwargs = remap_hidden_form_parameters(kwargs, button_pressed)
         # Insert state into the beginning of args
         if (expected_parameters and expected_parameters[0] == "state") or (
                 len(expected_parameters) - 1 == len(args) + len(kwargs)):
@@ -875,7 +1102,9 @@ class Server:
         # Check if there are too many arguments
         if len(expected_parameters) < len(args) + len(kwargs):
             self.flash_warning(
-                f"The {original_function.__name__} function expected {len(expected_parameters)} parameters, but {len(args) + len(kwargs)} were provided.")
+                f"The {original_function.__name__} function expected {len(expected_parameters)} parameters, but {len(args) + len(kwargs)} were provided.\n"
+                f"  Expected: {', '.join(expected_parameters)}\n"
+                f"  But got: {repr(args)} and {repr(kwargs)}")
             # TODO: Select parameters to keep more intelligently by inspecting names
             args = args[:len(expected_parameters)]
             while len(expected_parameters) < len(args) + len(kwargs) and kwargs:
@@ -897,6 +1126,7 @@ class Server:
         if param in expected_types:
             expected_type = expected_types[param]
             if expected_type == inspect.Parameter.empty:
+                self._conversion_record.append(UnchangedRecord(param, val, expected_types[param]))
                 return val
             if hasattr(expected_type, '__origin__'):
                 # TODO: Ignoring the element type for now, but should really handle that properly
@@ -906,10 +1136,17 @@ class Server:
                     converted_arg = expected_types[param](val)
                     self._conversion_record.append(ConversionRecord(param, val, expected_types[param], converted_arg))
                 except Exception as e:
+                    try:
+                        from_name = type(val).__name__
+                        to_name = expected_types[param].__name__
+                    except:
+                        from_name = repr(type(val))
+                        to_name = repr(expected_types[param])
                     raise ValueError(
-                        f"Could not convert {param} ({val!r}) from {type(val)} to {expected_types[param]}\n") from e
+                        f"Could not convert {param} ({val!r}) from {from_name} to {to_name}\n") from e
                 return converted_arg
         # Fall through
+        self._conversion_record.append(UnchangedRecord(param, val))
         return val
 
     def make_bottle_page(self, original_function):
@@ -947,7 +1184,7 @@ class Server:
                 return self.make_error_page("Error rendering content", e, original_function)
             visiting_page.finish("Finished Page Load")
             if self.default_configuration.debug:
-                content = content + self.debug_information()
+                content = content + self.make_debug_page()
             content = self.wrap_page(content)
             return content
 
@@ -1026,7 +1263,7 @@ class Server:
             scripts = INCLUDE_STYLES[style]['scripts']
             styles = INCLUDE_STYLES[style]['styles']
             content = "\n".join(styles) + content + "\n".join(scripts)
-        return content
+        return "<div class='btlw'>" + content + "</div>"
 
     def make_error_page(self, title, error, original_function):
         tb = traceback.format_exc()
@@ -1036,67 +1273,134 @@ class Server:
     def flash_warning(self, message):
         print(message)
 
+    def make_debug_page(self):
+        content = DebugInformation(self._page_history, self._state, self.routes, self._conversion_record)
+        return content.generate()
+
+
+@dataclass
+class DebugInformation:
+    page_history: list[tuple[VisitedPage, Any]]
+    state: Any
+    routes: dict[str, callable]
+    conversion_record: list[ConversionRecord]
+
+    INDENTATION_START_HTML = "<div class='row'><div class='one column'></div><div class='eleven columns'>"
+    INDENTATION_END_HTML = "</div></div>"
+
+    def generate(self):
+        parts = [
+            "<div class='btlw-debug'>",
+            "<h3>Debug Information</h3>",
+            "<em>To hide this information, call <code>hide_debug_information()</code> in your code.</em><br>",
+            *self.current_route(),
+            *self.current_state(),
+            *self.available_routes(),
+            *self.page_load_history(),
+            *self.test_status(),
+            "</div>"
+        ]
+        return "\n".join(parts)
+
+    def current_route(self):
+        # Current route
+        if not self.page_history:
+            yield "Currently no pages have been successfully visited."
+        else:
+            yield self.page_history[-1][0].as_html()
+        yield f"<br>"
+        non_state_parameters = [record for record in self.conversion_record if record.parameter != 'state']
+        if non_state_parameters:
+            yield "<details open><summary><strong>Current parameter values:</strong></summary>"
+            yield f"{self.INDENTATION_START_HTML}"
+            yield f"<ul>"
+            for record in self.conversion_record:
+                if record.parameter != 'state':
+                    yield record.as_html()
+            yield f"</ul>{self.INDENTATION_END_HTML}</details>"
+        else:
+            yield "<strong>No parameters were provided.</strong>"
+
+    def current_state(self):
+        # Current State
+        yield "<details open><summary><strong>Current State</strong></summary>"
+        yield f"{self.INDENTATION_START_HTML}"
+        if self.state is not None:
+            yield self.render_state(self.state)
+        else:
+            yield "<code>None</code>"
+        yield f"{self.INDENTATION_END_HTML}</details>"
+
+    def available_routes(self):
+        # Routes
+        yield f"<details open><summary><strong>Available Routes</strong></summary>"
+        yield f"{self.INDENTATION_START_HTML}"
+        yield f"<ul>"
+        for original_route, function in self.routes.items():
+            parameter_list = inspect.signature(function).parameters.keys()
+            parameters = ", ".join(parameter_list)
+            if original_route != '/':
+                original_route += '/'
+            route = f"<code>{original_route}</code>"
+            call = f"{function.__name__}({parameters})"
+            if len(parameter_list) == 1:
+                call = f"<a href='{original_route}'>{call}</a>"
+            yield f"<li>{route}: <code>{call}</code></li>"
+        yield f"</ul>{self.INDENTATION_END_HTML}</details>"
+
+    def page_load_history(self):
+        # Page History
+        yield "<details open><summary><strong>Page Load History</strong></summary><ol>"
+        for page_history, old_state in reversed(self.page_history):
+            button_pressed = f"Clicked <code>{page_history.button_pressed}</code> &rarr; " if page_history.button_pressed else ""
+            url = merge_url_query_params(page_history.url, {
+                RESTORABLE_STATE_KEY: old_state,
+                PREVIOUSLY_PRESSED_BUTTON: page_history.button_pressed
+            })
+            yield f"<li>{button_pressed}{page_history.status}"  # <details><summary>
+            yield f"{self.INDENTATION_START_HTML}"
+            yield f"URL: <a href='{url}'><code>{page_history.url}/</code></a><br>"
+            call = f"{page_history.function.__name__}({page_history.arguments})"
+            yield f"Call: <code>{call}</code><br>"
+            yield f"<details><summary>Page Content:</summary><pre style='width: fit-content' class='copyable'>"
+            full_code = f"assert_equal(\n {call},\n {page_history.original_page_content})"
+            yield f"<code>{full_code}</code></pre></details>"
+            yield f"{self.INDENTATION_END_HTML}"
+            yield f"</li>"
+        yield "</ol></details>"
+
+    def test_status(self):
+        if bakery is None and _bakery_tests.tests:
+            yield ""
+        else:
+            if _bakery_tests.tests:
+                yield "<details open><summary><strong>Test Status</strong></summary>"
+                yield f"{self.INDENTATION_START_HTML}"
+                yield "<ul>"
+                for test_case in _bakery_tests.tests:
+                    if len(test_case.args) == 2:
+                        given, expected = test_case.args
+                        if not isinstance(expected, Page):
+                            continue
+                        # Status is either a checkmark or a red X
+                        status = "✅" if test_case.result else "❌"
+                        yield f"<li>{status} Line {test_case.line}: <code>{test_case.caller}</code>"
+                        if not test_case.result:
+                            given, expected = format_page_content(given, DIFF_WRAP_WIDTH), format_page_content(expected, DIFF_WRAP_WIDTH)
+                            yield diff_tests(given, expected,
+                                             "Your function returned",
+                                             "But the test expected")
+                yield "</ul>"
+                yield f"{self.INDENTATION_END_HTML}"
+                yield "</details>"
+            else:
+                yield "<strong>No Tests</strong>"
+
     def render_state(self, state):
         if is_dataclass(state):
             return str(Table(state))
         else:
             return str(Table([[f"<code>{type(state).__name__}</code>", f"<code>{state}</code>"]]))
-
-    def debug_information(self):
-        page = ["<h3>Debug Information</h3>",
-                "<em>To hide this information, call <code>hide_debug_information()</code> in your code.</em><br>"]
-        INDENTATION_START_HTML = "<div class='row'><div class='one column'></div><div class='eleven columns'>"
-        INDENTATION_END_HTML = "</div></div>"
-        # Current route
-        page.append("<strong>Current Route:</strong> ")
-        if not self._page_history:
-            page.append("Currently no pages have been successfully visited.")
-        else:
-            page.append(f"<code>{self._page_history[-1][0].url}</code>")
-        page.append(f"<br>")
-
-        # Current State
-        page.append("<details open><summary><strong>Current State</strong></summary>"
-                    f"{INDENTATION_START_HTML}")
-        if self._state is not None:
-            page.append(self.render_state(self._state))
-            if self._conversion_record:
-                page.append(
-                    "<details open><summary><strong>The parameters were converted during page load!</strong></summary>"
-                    f"<ul>")
-                for record in self._conversion_record:
-                    page.append(f"<li><code>{record.parameter}</code>: "
-                                f"<code>{record.value!r}</code> &rarr; "
-                                f"<code>{record.converted_value!r}</code></li>")
-                page.append("</ul></details>")
-        else:
-            page.append("<code>None</code>")
-        page.append(f"{INDENTATION_END_HTML}</details>")
-        # Routes
-        page.append(f"<details open><summary><strong>Available Routes</strong></summary>"
-                    f"{INDENTATION_START_HTML}"
-                    f"<ul>")
-        for original_route, function in self.routes.items():
-            parameters = ", ".join(inspect.signature(function).parameters.keys())
-            if original_route != '/':
-                original_route += '/'
-            page.append(f"<li><code>{original_route}</code>: <code>{function.__name__}({parameters})</code></li>")
-        page.append(f"</ul>{INDENTATION_END_HTML}</details>")
-        # Page History
-        page.append("<details open><summary><strong>Page Load History</strong></summary><ol reversed>")
-        for page_history, old_state in reversed(self._page_history):
-            button_pressed = f"Clicked <code>{page_history.button_pressed}</code> &rarr; " if page_history.button_pressed else ""
-            url = merge_url_query_params(page_history.url, {RESTORABLE_STATE_KEY: old_state})
-            page.append(f"<li>{button_pressed}{page_history.status}"  # <details><summary>
-                        f"{INDENTATION_START_HTML}"
-                        f"URL: <a href='{url}'><code>{page_history.url}/</code></a><br>"
-                        f"Call: <code>{page_history.function.__name__}({page_history.arguments})</code><br>"
-                        f"<details><summary>Page Content:</summary><pre style='width: fit-content'>"
-                        f"<code>{page_history.original_page_content}</code></pre></details>"
-                        f"{INDENTATION_END_HTML}"
-                        f"</li>")
-        page.append("</ol></details>")
-        return "\n".join(page)
 
 
 MAIN_SERVER = Server()
@@ -1133,6 +1437,18 @@ def show_debug_information():
 
 def default_index(state) -> Page:
     return Page(state, ["Hello world!", "Welcome to Drafter."])
+
+
+def set_website_title(title: str):
+    MAIN_SERVER.default_configuration.title = title
+
+def set_website_style(style: str):
+    MAIN_SERVER.default_configuration.custom_style = style
+
+
+def deploy_site():
+    hide_debug_information()
+    MAIN_SERVER.production = True
 
 
 # Provide default route

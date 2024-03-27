@@ -1,6 +1,6 @@
-from bakery import assert_equal
 from dataclasses import dataclass
 from drafter import *
+from bakery import assert_equal
 
 
 @dataclass
@@ -84,7 +84,7 @@ assert_equal(add_page(State("0", "0", ""), "5", "3"),
              Page(state=State(first_number="5", second_number="3", result='8'),
                   content=['What is the first number?',
                            TextBox(name='first', default_value="5"),
-                           'What is the second number?',
+                           'What is th second number?',
                            TextBox(name='second', default_value="3"),
                            Button(text='Add', url=add_page),
                            'The result is',
