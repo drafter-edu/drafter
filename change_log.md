@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2024-03-29
+
+## Fixed
+
+* Local images should now render correctly
+* Route tests now show the correct parameter order based on the function call they map to
+
 ## [1.0.2] - 2024-03-26
 
 ## Fixed

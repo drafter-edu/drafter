@@ -53,14 +53,14 @@ import difflib
 logger = logging.getLogger('drafter')
 
 try:
-    from bottle import Bottle, abort, request
+    from bottle import Bottle, abort, request, static_file
 
     DEFAULT_BACKEND = "bottle"
 except ImportError:
     DEFAULT_BACKEND = "none"
     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 RESTORABLE_STATE_KEY = "--restorable-state"
 SUBMIT_BUTTON_KEY = '--submit-button'
@@ -352,7 +352,7 @@ class LinkContent:
                 result[f"{label_namespace}$${arg}"] = value
         raise ValueError(f"Could not create arguments from the provided value: {arguments}")
 
-URL_REGEX = "^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$"
+URL_REGEX = r"^(?:http(s)?://)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$"
 
 
 def check_invalid_external_url(url: str) -> str:
@@ -540,7 +540,7 @@ class Link(PageContent, LinkContent):
 
 
 @dataclass
-class Image(PageContent):
+class Image(PageContent, LinkContent):
     url: str
     width: int
     height: int
@@ -557,8 +557,11 @@ class Image(PageContent):
             extra_settings['width'] = self.width
         if self.height is not None:
             extra_settings['height'] = self.height
+        url, external = self._handle_url(self.url)
+        if not external:
+            url = "/__images" + url
         parsed_settings = self.parse_extra_settings(**extra_settings)
-        return f"<img src='{self.url}' {parsed_settings}>"
+        return f"<img src='{url}' {parsed_settings}>"
 
 
 @dataclass
@@ -655,6 +658,7 @@ class HorizontalRule(PageContent):
 class Button(PageContent, LinkContent):
     text: str
     url: str
+    arguments: list[Argument]
     external: bool = False
 
     def __init__(self, text: str, url: str, arguments=None, **kwargs):
@@ -663,15 +667,16 @@ class Button(PageContent, LinkContent):
         self.extra_settings = kwargs
         self.arguments = arguments
 
+    def __repr__(self):
+        if self.arguments:
+            return f"Button(text={self.text!r}, url={self.url!r}, arguments={self.arguments!r})"
+        return f"Button(text={self.text!r}, url={self.url!r})"
+
     def __str__(self) -> str:
         precode = self.create_arguments(self.arguments, self.text)
         url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: self.text})
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         return f"{precode}<input type='submit' name='{SUBMIT_BUTTON_KEY}' value='{self.text}' formaction='{url}' {parsed_settings} />"
-
-
-class SubmitButton(Button):
-    pass
 
 
 @dataclass
@@ -996,6 +1001,13 @@ def rehydrate_json(value, new_type):
     raise ValueError(f"Error while restoring state: Could not create {new_type!r} from {value!r}")
 
 
+def get_params():
+    if hasattr(request.params, 'decode'):
+        return request.params.decode('utf-8')
+    else:
+        return request.params
+
+
 class Server:
     _page_history: list[tuple[VisitedPage, Any]]
 
@@ -1011,6 +1023,7 @@ class Server:
         self._conversion_record = []
         self.original_routes = []
         self.app = None
+        self.image_folder = '__images'
 
     def reset(self):
         self.routes.clear()
@@ -1019,7 +1032,7 @@ class Server:
         return json.dumps(dehydrate_json(self._state))
 
     def restore_state_if_available(self, original_function):
-        params = request.params.decode('utf-8')
+        params = get_params()
         if RESTORABLE_STATE_KEY in params:
             # Get state
             old_state = json.loads(params.pop(RESTORABLE_STATE_KEY))
@@ -1074,6 +1087,7 @@ class Server:
         if '/' not in self.routes:
             first_route = list(self.routes.values())[0]
             self.app.route('/', 'GET', first_route)
+        self.handle_images()
 
     def run(self, **kwargs):
         configuration = replace(self.default_configuration, **kwargs)
@@ -1084,7 +1098,7 @@ class Server:
         args = list(args)
         kwargs = dict(**kwargs)
         button_pressed = ""
-        params = request.params.decode('utf-8')
+        params = get_params()
         if SUBMIT_BUTTON_KEY in params:
             button_pressed = params.pop(SUBMIT_BUTTON_KEY)
         elif PREVIOUSLY_PRESSED_BUTTON in params:
@@ -1121,8 +1135,14 @@ class Server:
         # Final return result
         representation = [repr(arg) for arg in args] + [
             f"{key}={value!r}" if show_names.get(key, False) else repr(value)
-            for key, value in kwargs.items()]
+            for key, value in sorted(kwargs.items(), key=lambda item: expected_parameters.index(item[0]))]
         return args, kwargs, ", ".join(representation), button_pressed
+
+    def handle_images(self):
+        self.app.route(f'/{self.image_folder}/<path:path>', 'GET', self.serve_image)
+
+    def serve_image(self, path):
+        return static_file(path, root='./', mimetype='image/png')
 
     def convert_parameter(self, param, val, expected_types):
         if param in expected_types:
@@ -1448,9 +1468,10 @@ def set_website_style(style: str):
     MAIN_SERVER.default_configuration.custom_style = style
 
 
-def deploy_site():
+def deploy_site(image_folder='images'):
     hide_debug_information()
     MAIN_SERVER.production = True
+    MAIN_SERVER.image_folder = image_folder
 
 
 # Provide default route
