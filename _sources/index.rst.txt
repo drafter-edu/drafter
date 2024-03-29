@@ -16,6 +16,7 @@ full stack websites as you learn to code in Python.
    students/installation
    quickstart/quickstart
    examples/examples
+   workbook/index
    students/docs
    students/html
    students/styling

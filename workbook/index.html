@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Workbook &#8212; Drafter 1.0.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="../_static/documentation_options.js?v=baaebd52"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+    <li><a href="../contents.html">Drafter 1.0.3 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Workbook</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="workbook">
+<span id="id1"></span><h1>Workbook<a class="headerlink" href="#workbook" title="Link to this heading">¶</a></h1>
+<p>Modern application development is usually done through web development.
+We can use Drafter to make web applications that are easy to write and test.
+This workbook takes you through developing a few different web applications, piece-by-piece.
+We provide unit tests that you can use to check that you are building the software correctly.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Read over all the instructions and text as you go. Many of your questions will be answered directly in the instructions! If you just copy/paste code, you will not learn much from this activity.</p>
+</div>
+<ul class="simple">
+<li><p><a class="reference internal" href="#cookie-clicker"><span class="std std-ref">Cookie Clicker</span></a></p></li>
+<li><p><a class="reference internal" href="#bank-account"><span class="std std-ref">Bank Account</span></a></p></li>
+<li><p><a class="reference internal" href="#simple-adventure-game"><span class="std std-ref">Simple Adventure Game</span></a></p></li>
+</ul>
+<section id="cookie-clicker">
+<span id="id2"></span><h2>Cookie Clicker<a class="headerlink" href="#cookie-clicker" title="Link to this heading">¶</a></h2>
+<p>Cookie Clicker is a simple game where you click a cookie to get more cookies.
+Preview the activity at <a class="reference external" href="https://drafter-edu.github.io/examples/cookie-clicker/">https://drafter-edu.github.io/examples/cookie-clicker/</a></p>
+<a class="reference internal image-reference" href="../_images/cookie.png"><img alt="Screenshot of the Cookie Clicker game" class="align-center" src="../_images/cookie.png" style="width: 427px;" /></a>
+<p><strong>Step 1: Download</strong> <a class="reference download internal" download="" href="../_downloads/a24d1c695f83f8bd6ed9b2e79b5688fc/cookie.py"><code class="xref download docutils literal notranslate"><span class="pre">cookie.py</span></code></a> and put it into an appropriate directory, where you will place all the other files
+for this workbook.</p>
+<p>The file contains a <code class="docutils literal notranslate"><span class="pre">State</span></code> class and two route functions: <code class="docutils literal notranslate"><span class="pre">index</span></code> and <code class="docutils literal notranslate"><span class="pre">cookie</span></code>.
+The file also contains three unit tests that you will need to pass; you cannot make alterations
+to the unit tests, since they match the instructor tests we are using to grade you.
+At the bottom, there is a call to <code class="docutils literal notranslate"><span class="pre">start_server</span></code>, passing in a <code class="docutils literal notranslate"><span class="pre">State</span></code> object with <code class="docutils literal notranslate"><span class="pre">cookies</span></code> set to <code class="docutils literal notranslate"><span class="pre">0</span></code>.
+You won’t be able to run this file until you have finished implementing <code class="docutils literal notranslate"><span class="pre">State</span></code> and the functions.</p>
+<p><strong>Step 2:</strong> Inside the <code class="docutils literal notranslate"><span class="pre">State</span></code> field, you will need to create a <code class="docutils literal notranslate"><span class="pre">cookies</span></code> field (an integer).
+You can remove the “TODO” part of the docstring.</p>
+<p><strong>Step 3:</strong> You will need to define the body of the two routes:</p>
+<ol class="arabic">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">index</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the
+returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be (in order):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">have</span> <span class="pre">X</span> <span class="pre">cookies&quot;</span></code> except instead of <code class="docutils literal notranslate"><span class="pre">X</span></code> it will be the <code class="docutils literal notranslate"><span class="pre">cookies</span></code> of the <code class="docutils literal notranslate"><span class="pre">State</span></code>
+object.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;🍪&quot;</span></code> that links to a <code class="docutils literal notranslate"><span class="pre">cookie</span></code> route.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">cookie</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">cookies</span></code> of the <code class="docutils literal notranslate"><span class="pre">state</span></code> in the returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be increased by 1.
+The function should return the result of calling the <code class="docutils literal notranslate"><span class="pre">index</span></code> function with the modified <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p></li>
+</ol>
+<p><strong>Step 4:</strong> Run the file. You should see a message like the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TEST</span> <span class="n">PASSED</span> <span class="o">-</span> <span class="p">[</span><span class="n">line</span> <span class="mi">23</span><span class="p">]</span> <span class="n">assert_equal</span><span class="p">(</span>
+<span class="n">TEST</span> <span class="n">PASSED</span> <span class="o">-</span> <span class="p">[</span><span class="n">line</span> <span class="mi">31</span><span class="p">]</span> <span class="n">assert_equal</span><span class="p">(</span>
+<span class="n">TEST</span> <span class="n">PASSED</span> <span class="o">-</span> <span class="p">[</span><span class="n">line</span> <span class="mi">39</span><span class="p">]</span> <span class="n">assert_equal</span><span class="p">(</span>
+<span class="n">Drafter</span> <span class="n">server</span> <span class="n">starting</span> <span class="n">up</span> <span class="p">(</span><span class="n">using</span> <span class="n">Bottle</span> <span class="n">backend</span><span class="p">)</span><span class="o">.</span>
+<span class="n">Listening</span> <span class="n">on</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span>
+
+<span class="n">Hit</span> <span class="n">Ctrl</span><span class="o">-</span><span class="n">C</span> <span class="n">to</span> <span class="n">quit</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>It is possible that you will see an error instead. If you do, read the error message carefully and try to fix the problem.
+The application will not start if there are syntax or runtime errors in your code.
+However, if you see the message above, you can open a web browser and go to <code class="docutils literal notranslate"><span class="pre">http://localhost:8080/</span></code> to see your application.
+This will work even if you have not passed the tests yet.</p>
+<p>If you see failing tests, then it will be very important to go look at the failing tests and see what they
+are expecting. The debug information shown in the browser can actually help you understand what is going wrong.
+Scroll down to the bottom of the live webpage.</p>
+<a class="reference internal image-reference" href="../_images/cookie_test.png"><img alt="Screenshot of failing test for the Cookie Clicker game" class="align-center" src="../_images/cookie_test.png" style="width: 700px;" /></a>
+<p>The <strong>Test Status</strong> section will show a visual representation of the tests that are failing,
+with the exact differences highlighted. In the example above, the third test is failing because
+the when we called <code class="docutils literal notranslate"><span class="pre">cookie(State(cookies=100))</span></code> we expected the result to have <code class="docutils literal notranslate"><span class="pre">cookies</span></code> set to <code class="docutils literal notranslate"><span class="pre">101</span></code>,
+but instead the result had <code class="docutils literal notranslate"><span class="pre">cookies</span></code> set to <code class="docutils literal notranslate"><span class="pre">1</span></code>. This was a mistake in the implementation of the <code class="docutils literal notranslate"><span class="pre">cookie</span></code> function,
+since the function should be increasing the number of cookies by 1 instead of just assigning the value 1.
+The correct version of <code class="docutils literal notranslate"><span class="pre">cookie</span></code> should look like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">cookie</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">cookies</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This example highlights the two major kinds of routes that you will see:</p>
+<ul class="simple">
+<li><p>routes that <strong>modify</strong> (mutate) the state (like <code class="docutils literal notranslate"><span class="pre">index</span></code>), and</p></li>
+<li><p>routes that <strong>do not modify</strong> the state (like <code class="docutils literal notranslate"><span class="pre">cookie</span></code>).</p></li>
+</ul>
+<p>Usually, the routes that modify the state will return a new page that is generated by calling another route.
+This avoids code duplication and makes it easier to test the routes, since we are reusing the rendering logic of the other routes.
+The routes that do not modify the state will usually just return a page with the state as is.</p>
+<div class="mermaid">
+            flowchart LR
+    start((&quot;Start&quot;))
+    index[&quot;index&quot;]
+    cookie[/&quot;cookie&quot;/]
+    start --&gt; index
+    index -- &quot;🍪&quot; --&gt; cookie
+    cookie -.-&gt; index
+        </div><p>The diagram above helps visualize the flow of the application.
+When the application starts, the <code class="docutils literal notranslate"><span class="pre">index</span></code> route is called.
+When the 🍪 button is clicked, the <code class="docutils literal notranslate"><span class="pre">cookie</span></code> route is called, which increments the number of cookies and then returns
+the result of calling the <code class="docutils literal notranslate"><span class="pre">index</span></code> route.
+We use a dashed arrow to indicate that the <code class="docutils literal notranslate"><span class="pre">cookie</span></code> route does not directly return the <code class="docutils literal notranslate"><span class="pre">Page</span></code> object, but instead
+calls the <code class="docutils literal notranslate"><span class="pre">index</span></code> route to get the <code class="docutils literal notranslate"><span class="pre">Page</span></code> object.
+We use a parallelogram to indicate that the <code class="docutils literal notranslate"><span class="pre">cookie</span></code> route modifies the state.</p>
+</section>
+<section id="bank-account">
+<span id="id3"></span><h2>Bank Account<a class="headerlink" href="#bank-account" title="Link to this heading">¶</a></h2>
+<p>A bank account let’s you withdraw and deposit money.
+We’ll make a simple bank account application to support this.
+Preview this website at <a class="reference external" href="https://drafter-edu.github.io/examples/bank-account/">https://drafter-edu.github.io/examples/bank-account/</a></p>
+<a class="reference internal image-reference" href="../_images/drafter_preview.png"><img alt="Screenshot of the Bank Account application" class="align-center" src="../_images/drafter_preview.png" style="width: 700px;" /></a>
+<p><strong>Step 1: Download</strong> <a class="reference download internal" download="" href="../_downloads/97f4a836334a303bd7ca08d329d9fe3f/bank.py"><code class="xref download docutils literal notranslate"><span class="pre">bank.py</span></code></a> and put it into the same directory as the cookie clicker game.</p>
+<p>The file contains the incomplete <code class="docutils literal notranslate"><span class="pre">State</span></code>, five incomplete routes, six correct unit tests, and a call to <code class="docutils literal notranslate"><span class="pre">start_server</span></code>.
+You might be wondering why there are five routes when the image above only shows three pages.
+The reason is because two of the routes (<code class="docutils literal notranslate"><span class="pre">finish_withdraw</span></code> and <code class="docutils literal notranslate"><span class="pre">finish_deposit</span></code>) are routes that modify
+the state and then return the result of calling the <code class="docutils literal notranslate"><span class="pre">index</span></code> route.
+The diagram below visualizes the relationships between the routes.</p>
+<div class="mermaid">
+            flowchart
+    start((&quot;Start&quot;))
+    index[&quot;index&quot;]
+    start_withdraw[&quot;start_withdraw&quot;]
+    finish_withdraw[/&quot;finish_withdraw&quot;/]
+    start_deposit[&quot;start_deposit&quot;]
+    finish_deposit[/&quot;finish_deposit&quot;/]
+    start --&gt; index
+    index -- Withdraw --&gt; start_withdraw
+    start_withdraw -- &quot;Withdraw(amount)&quot; --&gt; finish_withdraw
+    start_withdraw -- Cancel --&gt; index
+    finish_withdraw -.-&gt; index
+    index -- Deposit --&gt; start_deposit
+    start_deposit -- &quot;Deposit(amount)&quot; --&gt; finish_deposit
+    start_deposit -- Cancel --&gt; index
+    finish_deposit -.-&gt; index
+        </div><p>To explain a little further:</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">index</span></code> route has buttons to go to the <code class="docutils literal notranslate"><span class="pre">start_withdraw</span></code> and <code class="docutils literal notranslate"><span class="pre">start_deposit</span></code> routes.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">start_withdraw</span></code> and <code class="docutils literal notranslate"><span class="pre">start_deposit</span></code> have buttons to go to the <code class="docutils literal notranslate"><span class="pre">finish_withdraw</span></code> and <code class="docutils literal notranslate"><span class="pre">finish_deposit</span></code> routes, respectively,
+and also have a button to go back to the <code class="docutils literal notranslate"><span class="pre">index</span></code> route (“Cancel”).
+The <code class="docutils literal notranslate"><span class="pre">start_withdraw</span></code> and <code class="docutils literal notranslate"><span class="pre">start_deposit</span></code> routes also have a <code class="docutils literal notranslate"><span class="pre">TextBox</span></code> to input the amount to withdraw or deposit,
+which is passed as a parameter to the <code class="docutils literal notranslate"><span class="pre">finish_withdraw</span></code> and <code class="docutils literal notranslate"><span class="pre">finish_deposit</span></code> routes.</p></li>
+<li><p>When the <code class="docutils literal notranslate"><span class="pre">finish_withdraw</span></code> and <code class="docutils literal notranslate"><span class="pre">finish_deposit</span></code> routes are called, they modify the state and
+then return the result of calling the <code class="docutils literal notranslate"><span class="pre">index</span></code> route.</p></li>
+</ul>
+<p><strong>Step 2:</strong> Inside the <code class="docutils literal notranslate"><span class="pre">State</span></code> class, add a <code class="docutils literal notranslate"><span class="pre">balance</span></code> field (an integer).</p>
+<p><strong>Step 3:</strong> You will need to create five routes:</p>
+<ol class="arabic">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">index</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code> (like most routes). The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the
+returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be (in order):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;Your</span> <span class="pre">balance</span> <span class="pre">is:</span> <span class="pre">X&quot;</span></code> except instead of <code class="docutils literal notranslate"><span class="pre">X</span></code> it will be the <code class="docutils literal notranslate"><span class="pre">balance</span></code> of the <code class="docutils literal notranslate"><span class="pre">State</span></code>
+object.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Withdraw&quot;</span></code> that links to a <code class="docutils literal notranslate"><span class="pre">start_withdraw</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Deposit&quot;</span></code> that links to a <code class="docutils literal notranslate"><span class="pre">start_deposit</span></code> route.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">start_withdraw</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the returned
+<code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be (in order):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;How</span> <span class="pre">much</span> <span class="pre">would</span> <span class="pre">you</span> <span class="pre">like</span> <span class="pre">to</span> <span class="pre">withdraw?&quot;</span></code>.</p></li>
+<li><p>A <a class="reference internal" href="../students/docs.html#TextBox" title="TextBox"><code class="xref py py-func docutils literal notranslate"><span class="pre">TextBox()</span></code></a> that will be used to input the <code class="docutils literal notranslate"><span class="pre">amount</span></code> to withdraw, initially <code class="docutils literal notranslate"><span class="pre">10</span></code>.
+Make sure you match the name for the <code class="docutils literal notranslate"><span class="pre">TextBox</span></code> to the name of the parameter in the <code class="docutils literal notranslate"><span class="pre">finish_withdraw</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Withdraw&quot;</span></code> that links to a <code class="docutils literal notranslate"><span class="pre">finish_withdraw</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Cancel&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">index</span></code> route.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">finish_withdraw</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and an <code class="docutils literal notranslate"><span class="pre">amount</span></code> (an <code class="docutils literal notranslate"><span class="pre">int</span></code>).
+The <code class="docutils literal notranslate"><span class="pre">balance</span></code> of the <code class="docutils literal notranslate"><span class="pre">state</span></code> in the returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be changed to reflect the withdrawal.
+The function should return the result of calling the <code class="docutils literal notranslate"><span class="pre">index</span></code> function with the modified <code class="docutils literal notranslate"><span class="pre">state</span></code>.
+<strong>Note</strong>: Use the <code class="docutils literal notranslate"><span class="pre">index</span></code> function inside of this function to avoid code duplication.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">start_deposit</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the returned
+<code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be (in order):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;How</span> <span class="pre">much</span> <span class="pre">would</span> <span class="pre">you</span> <span class="pre">like</span> <span class="pre">to</span> <span class="pre">deposit?&quot;</span></code>.</p></li>
+<li><p>A <a class="reference internal" href="../students/docs.html#TextBox" title="TextBox"><code class="xref py py-func docutils literal notranslate"><span class="pre">TextBox()</span></code></a> that will be used to input the <code class="docutils literal notranslate"><span class="pre">amount</span></code> to deposit, initially <code class="docutils literal notranslate"><span class="pre">10</span></code>.
+Make sure you match the name for the <code class="docutils literal notranslate"><span class="pre">TextBox</span></code> to the name of the parameter in the <code class="docutils literal notranslate"><span class="pre">finish_deposit</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Deposit&quot;</span></code> that links to a <code class="docutils literal notranslate"><span class="pre">finish_deposit</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Cancel&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">index</span></code> route.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">finish_deposit</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and an <code class="docutils literal notranslate"><span class="pre">amount</span></code> (an <code class="docutils literal notranslate"><span class="pre">int</span></code>).
+The <code class="docutils literal notranslate"><span class="pre">balance</span></code> of the <code class="docutils literal notranslate"><span class="pre">state</span></code> in the returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be changed to reflect the deposit.
+The function should return the result of calling the <code class="docutils literal notranslate"><span class="pre">index</span></code> function with the modified <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p></li>
+</ol>
+<p><strong>Step 4:</strong> Run the application and check the tests to see if you have implemented the routes correctly.</p>
+<p>This example has shown you how to have multiple pages that link together, with some routes that do not
+modify the state and some routes that do modify the state.
+You also have now seen a textbox, which is a way to get input from the user, and how that input can be passed
+to another route as a parameter in order to update the state.</p>
+</section>
+<section id="simple-adventure-game">
+<span id="id4"></span><h2>Simple Adventure Game<a class="headerlink" href="#simple-adventure-game" title="Link to this heading">¶</a></h2>
+<p>Now we’ll make a little adventure game with multiple pages that link to each other in a more complicated
+way, and also an item that you can pick up and use in of the rooms. To make things more exciting, we’ll
+have images of the screens in the game (generated using ChatGPT).
+Preview this website at <a class="reference external" href="https://drafter-edu.github.io/examples/bank-account/">https://drafter-edu.github.io/examples/bank-account/</a></p>
+<a class="reference internal image-reference" href="../_images/screen_shots.png"><img alt="Screenshot of the Simple Adventure Game" class="align-center" src="../_images/screen_shots.png" style="width: 700px;" /></a>
+<p><strong>Step 1: Download</strong> the images and the starting file for the game from the following links:</p>
+<ul class="simple">
+<li><p><a class="reference download internal" download="" href="../_downloads/6841b758afb0fb555eb818f9b20b5a99/adventure.py"><code class="xref download docutils literal notranslate"><span class="pre">adventure.py</span></code></a></p></li>
+<li><p><a class="reference download internal" download="" href="../_downloads/74ffc99828e0fdff7edf4672e4966a29/field.png"><code class="xref download docutils literal notranslate"><span class="pre">field.png</span></code></a></p></li>
+<li><p><a class="reference download internal" download="" href="../_downloads/f94f03624b618690bdc40b01c0946231/woods.png"><code class="xref download docutils literal notranslate"><span class="pre">woods.png</span></code></a></p></li>
+<li><p><a class="reference download internal" download="" href="../_downloads/dc183c983acfcc52bfed7efbcc3d9303/cave.png"><code class="xref download docutils literal notranslate"><span class="pre">cave.png</span></code></a></p></li>
+<li><p><a class="reference download internal" download="" href="../_downloads/5b02168df9b7f2f5f111519a19a88979/victory.png"><code class="xref download docutils literal notranslate"><span class="pre">victory.png</span></code></a></p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Make sure the files are in the same folder as the python file. You can change the images
+but make sure they have the same filenames, or the tests won’t run!</p>
+</div>
+<p>Once again, the number of routes and the number of pages do not match.
+The diagram below shows the flow of the game. The game starts with the <code class="docutils literal notranslate"><span class="pre">index</span></code> route, where the player
+enters their name. The player then moves to the <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route, where they can choose to go to the
+<code class="docutils literal notranslate"><span class="pre">woods</span></code> or the <code class="docutils literal notranslate"><span class="pre">cave</span></code>. In the <code class="docutils literal notranslate"><span class="pre">woods</span></code> route, the player can pick up a key, which will allow them to
+unlock the door in the <code class="docutils literal notranslate"><span class="pre">cave</span></code> route. If the player does not have the key, they will be unable to unlock
+the door and will have to leave the cave. The game ends in the <code class="docutils literal notranslate"><span class="pre">ending</span></code> route, where the player finds a
+treasure chest and wins the game.</p>
+<div class="mermaid">
+            flowchart
+    start((&quot;Start&quot;))
+    index[&quot;index&quot;]
+    begin[/&quot;begin&quot;/]
+    small_field[&quot;small_field&quot;]
+    woods[&quot;woods&quot;]
+    check_has_key{has_key}
+    check_missing_key{not has_key}
+    cave[&quot;cave&quot;]
+    take_key[/&quot;take_key&quot;/]
+    ending[&quot;ending&quot;]
+
+    start --&gt; index
+    index -- &quot;Begin(name)&quot; --&gt; begin
+    begin -.-&gt; small_field
+    small_field -- &quot;Woods&quot; --&gt; woods
+    small_field -- &quot;Cave&quot; --&gt; cave
+    woods --- check_missing_key
+    check_missing_key -- &quot;Take key&quot; --&gt; take_key
+    take_key -.-&gt; woods
+    woods -- &quot;Leave&quot; --&gt; small_field
+    check_has_key -- &quot;Unlock door&quot; --&gt; ending
+    cave -.- check_has_key
+    cave -- &quot;Leave&quot; --&gt; small_field
+        </div><p>Notice the diamond shaped nodes in the diagram. These are decision nodes. The game will have two different
+paths depending on whether the player has the key or not. The Cave only shows the “Unlock door” button if
+the player has the key. The Woods only shows the “Take key” button if the player does not have the key.
+This means that you will need an <code class="docutils literal notranslate"><span class="pre">if</span></code> statement in your route to decide which content to show.</p>
+<p><strong>Step 2:</strong> Add two fields to the <code class="docutils literal notranslate"><span class="pre">State</span></code> class.</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">has_key</span></code> field is a boolean</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">name</span></code> field is a string</p></li>
+</ul>
+<p><strong>Step 3:</strong> Finish implementing the following routes:</p>
+<ol class="arabic">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">index</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the
+returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be (in order):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;Welcome</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">adventure!</span> <span class="pre">What</span> <span class="pre">is</span> <span class="pre">your</span> <span class="pre">name?&quot;</span></code></p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">TextBox</span></code> that will take the user’s <code class="docutils literal notranslate"><span class="pre">name</span></code> (the default value is <code class="docutils literal notranslate"><span class="pre">&quot;Adventurer&quot;</span></code>).</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Begin&quot;</span></code> that links to a <code class="docutils literal notranslate"><span class="pre">begin</span></code> route.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><dl class="simple">
+<dt>The <code class="docutils literal notranslate"><span class="pre">begin</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the</dt><dd><p>returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will have the <code class="docutils literal notranslate"><span class="pre">name</span></code> field set to the value of the <code class="docutils literal notranslate"><span class="pre">TextBox</span></code> in the previous
+page. Use the <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route to return the next page, rather than defining a new <code class="docutils literal notranslate"><span class="pre">Page</span></code> object.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>The <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the</dt><dd><p>returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be (in order):</p>
+<ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">are</span> <span class="pre">NAME.&quot;</span></code> except replacing <code class="docutils literal notranslate"><span class="pre">NAME</span></code> with the value of the <code class="docutils literal notranslate"><span class="pre">name</span></code> field in the
+<code class="docutils literal notranslate"><span class="pre">State</span></code> object.</p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">are</span> <span class="pre">in</span> <span class="pre">a</span> <span class="pre">small</span> <span class="pre">field.&quot;</span></code></p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">see</span> <span class="pre">paths</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">woods</span> <span class="pre">and</span> <span class="pre">a</span> <span class="pre">cave.</span></code></p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">Cave</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">cave</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">Woods</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">woods</span></code> route.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">Image</span></code> with the filename <code class="docutils literal notranslate"><span class="pre">&quot;field.png&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>The <code class="docutils literal notranslate"><span class="pre">cave</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the</dt><dd><p>returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will depend on whether or not
+the <code class="docutils literal notranslate"><span class="pre">state</span></code> has the <code class="docutils literal notranslate"><span class="pre">has_key</span></code> field set to <code class="docutils literal notranslate"><span class="pre">True</span></code>. If it is is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then the content
+of the page should be:</p>
+<ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">enter</span> <span class="pre">the</span> <span class="pre">cave.&quot;</span></code></p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">see</span> <span class="pre">a</span> <span class="pre">locked</span> <span class="pre">door.&quot;</span></code></p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Unlock</span> <span class="pre">door&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">ending</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Leave&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">Image</span></code> with the filename <code class="docutils literal notranslate"><span class="pre">&quot;cave.png&quot;</span></code>.</p></li>
+</ul>
+<p>Otherwise, if the <code class="docutils literal notranslate"><span class="pre">has_key</span></code> field is <code class="docutils literal notranslate"><span class="pre">False</span></code>, then the content of the page should be:</p>
+<ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">enter</span> <span class="pre">the</span> <span class="pre">cave.&quot;</span></code></p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">see</span> <span class="pre">a</span> <span class="pre">locked</span> <span class="pre">door.&quot;</span></code></p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Leave&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">Image</span></code> with the filename <code class="docutils literal notranslate"><span class="pre">&quot;cave.png&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>The <code class="docutils literal notranslate"><span class="pre">woods</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the</dt><dd><p>returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will depend on whether or not
+the <code class="docutils literal notranslate"><span class="pre">state</span></code> has the <code class="docutils literal notranslate"><span class="pre">has_key</span></code> field set to <code class="docutils literal notranslate"><span class="pre">True</span></code>. If it is is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then the content
+of the page should be:</p>
+<ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">are</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">woods.&quot;</span></code></p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Leave&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">Image</span></code> with the filename <code class="docutils literal notranslate"><span class="pre">&quot;woods.png&quot;</span></code>.</p></li>
+</ul>
+<p>Otherwise, if the <code class="docutils literal notranslate"><span class="pre">has_key</span></code> field is <code class="docutils literal notranslate"><span class="pre">False</span></code>, then the content of the page should be:</p>
+<ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">are</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">woods.&quot;</span></code></p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">see</span> <span class="pre">a</span> <span class="pre">key</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">ground.&quot;</span></code></p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Take</span> <span class="pre">key&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">take_key</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Leave&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">Image</span></code> with the filename <code class="docutils literal notranslate"><span class="pre">&quot;woods.png&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">take_key</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the
+returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will have the <code class="docutils literal notranslate"><span class="pre">has_key</span></code> field set to <code class="docutils literal notranslate"><span class="pre">True</span></code>. Use the <code class="docutils literal notranslate"><span class="pre">woods</span></code> route to return
+the next page, rather than defining a new <code class="docutils literal notranslate"><span class="pre">Page</span></code> object.</p></li>
+<li><dl class="simple">
+<dt>The <code class="docutils literal notranslate"><span class="pre">ending</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the</dt><dd><p>returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be:</p>
+<ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">unlock</span> <span class="pre">the</span> <span class="pre">door.&quot;,</span></code></p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">find</span> <span class="pre">a</span> <span class="pre">treasure</span> <span class="pre">chest.&quot;</span></code></p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">win!&quot;</span></code></p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">Image</span></code> with the filename <code class="docutils literal notranslate"><span class="pre">&quot;victory.png&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+<p><strong>Step 4:</strong> Run the application and check the tests to see if you have implemented the routes correctly.</p>
+<p>This application showed you how to make multiple pages that link in more complicated ways, including
+some pages that had different content depending on the state of the <code class="docutils literal notranslate"><span class="pre">State</span></code> object. You also learned
+how to use images in your application.</p>
+<section id="interesting-extensions">
+<h3>Interesting extensions<a class="headerlink" href="#interesting-extensions" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Add a “Play Again” button to the <code class="docutils literal notranslate"><span class="pre">ending</span></code> route that links back to the <code class="docutils literal notranslate"><span class="pre">index</span></code> route, reseting
+the fields of the <code class="docutils literal notranslate"><span class="pre">State</span></code> object.</p></li>
+<li><p>Add more rooms to the game.</p></li>
+<li><p>Add more items to the game that can be picked up and used in different rooms. Use a list of strings
+or a list of booleans to manage the inventory.</p></li>
+<li><p>Add a timer to the game that limits the amount of time the player has to complete the game.
+Keep track either of the current time (using the <code class="docutils literal notranslate"><span class="pre">time</span></code> module) or the number of moves the player
+has made.</p></li>
+</ol>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="../contents.html">Page contents</a></h3>
+    <ul>
+<li class="toctree-l1"><a class="reference internal" href="../students/installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/html.html">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/styling.html">Styling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/workbook/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+    <li><a href="../contents.html">Drafter 1.0.3 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Workbook</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2023, acbart.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

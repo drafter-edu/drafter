@@ -1,0 +1,311 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Simple Adventure Game &#8212; Drafter 1.0.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=090ae2a6" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="../../_static/documentation_options.js?v=baaebd52"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+
+    
+    
+     
+        <script src="../../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+    <li><a href="../../contents.html">Drafter 1.0.3 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Simple Adventure Game</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="simple-adventure-game">
+<h1>Simple Adventure Game<a class="headerlink" href="#simple-adventure-game" title="Link to this heading">¶</a></h1>
+<p>Now we’ll make a little adventure game with multiple pages that link to each other in a more complicated
+way, and also an item that you can pick up and use in of the rooms. To make things more exciting, we’ll
+have images of the screens in the game (generated using ChatGPT).
+Preview this website at <a class="reference external" href="https://drafter-edu.github.io/examples/bank-account/">https://drafter-edu.github.io/examples/bank-account/</a></p>
+<a class="reference internal image-reference" href="../../_images/screen_shots.png"><img alt="Screenshot of the Simple Adventure Game" class="align-center" src="../../_images/screen_shots.png" style="width: 700px;" /></a>
+<p><strong>Step 1: Download</strong> the images and the starting file for the game from the following links:</p>
+<ul class="simple">
+<li><p><a class="reference download internal" download="" href="../../_downloads/6841b758afb0fb555eb818f9b20b5a99/adventure.py"><code class="xref download docutils literal notranslate"><span class="pre">adventure.py</span></code></a></p></li>
+<li><p><a class="reference download internal" download="" href="../../_downloads/74ffc99828e0fdff7edf4672e4966a29/field.png"><code class="xref download docutils literal notranslate"><span class="pre">field.png</span></code></a></p></li>
+<li><p><a class="reference download internal" download="" href="../../_downloads/f94f03624b618690bdc40b01c0946231/woods.png"><code class="xref download docutils literal notranslate"><span class="pre">woods.png</span></code></a></p></li>
+<li><p><a class="reference download internal" download="" href="../../_downloads/dc183c983acfcc52bfed7efbcc3d9303/cave.png"><code class="xref download docutils literal notranslate"><span class="pre">cave.png</span></code></a></p></li>
+<li><p><a class="reference download internal" download="" href="../../_downloads/5b02168df9b7f2f5f111519a19a88979/victory.png"><code class="xref download docutils literal notranslate"><span class="pre">victory.png</span></code></a></p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Make sure the files are in the same folder as the python file. You can change the images
+but make sure they have the same filenames, or the tests won’t run!</p>
+</div>
+<p>Once again, the number of routes and the number of pages do not match.
+The diagram below shows the flow of the game. The game starts with the <code class="docutils literal notranslate"><span class="pre">index</span></code> route, where the player
+enters their name. The player then moves to the <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route, where they can choose to go to the
+<code class="docutils literal notranslate"><span class="pre">woods</span></code> or the <code class="docutils literal notranslate"><span class="pre">cave</span></code>. In the <code class="docutils literal notranslate"><span class="pre">woods</span></code> route, the player can pick up a key, which will allow them to
+unlock the door in the <code class="docutils literal notranslate"><span class="pre">cave</span></code> route. If the player does not have the key, they will be unable to unlock
+the door and will have to leave the cave. The game ends in the <code class="docutils literal notranslate"><span class="pre">ending</span></code> route, where the player finds a
+treasure chest and wins the game.</p>
+<div class="mermaid">
+            flowchart
+    start((&quot;Start&quot;))
+    index[&quot;index&quot;]
+    begin[/&quot;begin&quot;/]
+    small_field[&quot;small_field&quot;]
+    woods[&quot;woods&quot;]
+    check_has_key{has_key}
+    check_missing_key{not has_key}
+    cave[&quot;cave&quot;]
+    take_key[/&quot;take_key&quot;/]
+    ending[&quot;ending&quot;]
+
+    start --&gt; index
+    index -- &quot;Begin(name)&quot; --&gt; begin
+    begin -.-&gt; small_field
+    small_field -- &quot;Woods&quot; --&gt; woods
+    small_field -- &quot;Cave&quot; --&gt; cave
+    woods --- check_missing_key
+    check_missing_key -- &quot;Take key&quot; --&gt; take_key
+    take_key -.-&gt; woods
+    woods -- &quot;Leave&quot; --&gt; small_field
+    check_has_key -- &quot;Unlock door&quot; --&gt; ending
+    cave -.- check_has_key
+    cave -- &quot;Leave&quot; --&gt; small_field
+        </div><p>Notice the diamond shaped nodes in the diagram. These are decision nodes. The game will have two different
+paths depending on whether the player has the key or not. The Cave only shows the “Unlock door” button if
+the player has the key. The Woods only shows the “Take key” button if the player does not have the key.
+This means that you will need an <code class="docutils literal notranslate"><span class="pre">if</span></code> statement in your route to decide which content to show.</p>
+<p><strong>Step 2:</strong> Add two fields to the <code class="docutils literal notranslate"><span class="pre">State</span></code> class.</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">has_key</span></code> field is a boolean</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">name</span></code> field is a string</p></li>
+</ul>
+<p><strong>Step 3:</strong> Finish implementing the following routes:</p>
+<ol class="arabic">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">index</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the
+returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be (in order):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;Welcome</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">adventure!</span> <span class="pre">What</span> <span class="pre">is</span> <span class="pre">your</span> <span class="pre">name?&quot;</span></code></p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">TextBox</span></code> that will take the user’s <code class="docutils literal notranslate"><span class="pre">name</span></code> (the default value is <code class="docutils literal notranslate"><span class="pre">&quot;Adventurer&quot;</span></code>).</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Begin&quot;</span></code> that links to a <code class="docutils literal notranslate"><span class="pre">begin</span></code> route.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><dl class="simple">
+<dt>The <code class="docutils literal notranslate"><span class="pre">begin</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the</dt><dd><p>returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will have the <code class="docutils literal notranslate"><span class="pre">name</span></code> field set to the value of the <code class="docutils literal notranslate"><span class="pre">TextBox</span></code> in the previous
+page. Use the <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route to return the next page, rather than defining a new <code class="docutils literal notranslate"><span class="pre">Page</span></code> object.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>The <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the</dt><dd><p>returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be (in order):</p>
+<ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">are</span> <span class="pre">NAME.&quot;</span></code> except replacing <code class="docutils literal notranslate"><span class="pre">NAME</span></code> with the value of the <code class="docutils literal notranslate"><span class="pre">name</span></code> field in the
+<code class="docutils literal notranslate"><span class="pre">State</span></code> object.</p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">are</span> <span class="pre">in</span> <span class="pre">a</span> <span class="pre">small</span> <span class="pre">field.&quot;</span></code></p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">see</span> <span class="pre">paths</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">woods</span> <span class="pre">and</span> <span class="pre">a</span> <span class="pre">cave.</span></code></p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">Cave</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">cave</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">Woods</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">woods</span></code> route.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">Image</span></code> with the filename <code class="docutils literal notranslate"><span class="pre">&quot;field.png&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>The <code class="docutils literal notranslate"><span class="pre">cave</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the</dt><dd><p>returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will depend on whether or not
+the <code class="docutils literal notranslate"><span class="pre">state</span></code> has the <code class="docutils literal notranslate"><span class="pre">has_key</span></code> field set to <code class="docutils literal notranslate"><span class="pre">True</span></code>. If it is is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then the content
+of the page should be:</p>
+<ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">enter</span> <span class="pre">the</span> <span class="pre">cave.&quot;</span></code></p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">see</span> <span class="pre">a</span> <span class="pre">locked</span> <span class="pre">door.&quot;</span></code></p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Unlock</span> <span class="pre">door&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">ending</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Leave&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">Image</span></code> with the filename <code class="docutils literal notranslate"><span class="pre">&quot;cave.png&quot;</span></code>.</p></li>
+</ul>
+<p>Otherwise, if the <code class="docutils literal notranslate"><span class="pre">has_key</span></code> field is <code class="docutils literal notranslate"><span class="pre">False</span></code>, then the content of the page should be:</p>
+<ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">enter</span> <span class="pre">the</span> <span class="pre">cave.&quot;</span></code></p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">see</span> <span class="pre">a</span> <span class="pre">locked</span> <span class="pre">door.&quot;</span></code></p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Leave&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">Image</span></code> with the filename <code class="docutils literal notranslate"><span class="pre">&quot;cave.png&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>The <code class="docutils literal notranslate"><span class="pre">woods</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the</dt><dd><p>returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will depend on whether or not
+the <code class="docutils literal notranslate"><span class="pre">state</span></code> has the <code class="docutils literal notranslate"><span class="pre">has_key</span></code> field set to <code class="docutils literal notranslate"><span class="pre">True</span></code>. If it is is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then the content
+of the page should be:</p>
+<ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">are</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">woods.&quot;</span></code></p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Leave&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">Image</span></code> with the filename <code class="docutils literal notranslate"><span class="pre">&quot;woods.png&quot;</span></code>.</p></li>
+</ul>
+<p>Otherwise, if the <code class="docutils literal notranslate"><span class="pre">has_key</span></code> field is <code class="docutils literal notranslate"><span class="pre">False</span></code>, then the content of the page should be:</p>
+<ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">are</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">woods.&quot;</span></code></p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">see</span> <span class="pre">a</span> <span class="pre">key</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">ground.&quot;</span></code></p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Take</span> <span class="pre">key&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">take_key</span></code> route.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Button</span></code> with the text <code class="docutils literal notranslate"><span class="pre">&quot;Leave&quot;</span></code> that links to the <code class="docutils literal notranslate"><span class="pre">small_field</span></code> route.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">Image</span></code> with the filename <code class="docutils literal notranslate"><span class="pre">&quot;woods.png&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">take_key</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the
+returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will have the <code class="docutils literal notranslate"><span class="pre">has_key</span></code> field set to <code class="docutils literal notranslate"><span class="pre">True</span></code>. Use the <code class="docutils literal notranslate"><span class="pre">woods</span></code> route to return
+the next page, rather than defining a new <code class="docutils literal notranslate"><span class="pre">Page</span></code> object.</p></li>
+<li><dl class="simple">
+<dt>The <code class="docutils literal notranslate"><span class="pre">ending</span></code> route will consume a <code class="docutils literal notranslate"><span class="pre">State</span></code> object and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>. The <code class="docutils literal notranslate"><span class="pre">state</span></code> in the</dt><dd><p>returned <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be unchanged. The content of the <code class="docutils literal notranslate"><span class="pre">Page</span></code> will be:</p>
+<ul class="simple">
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">unlock</span> <span class="pre">the</span> <span class="pre">door.&quot;,</span></code></p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">find</span> <span class="pre">a</span> <span class="pre">treasure</span> <span class="pre">chest.&quot;</span></code></p></li>
+<li><p>The text <code class="docutils literal notranslate"><span class="pre">&quot;You</span> <span class="pre">win!&quot;</span></code></p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">Image</span></code> with the filename <code class="docutils literal notranslate"><span class="pre">&quot;victory.png&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+<p><strong>Step 4:</strong> Run the application and check the tests to see if you have implemented the routes correctly.</p>
+<p>This application showed you how to make multiple pages that link in more complicated ways, including
+some pages that had different content depending on the state of the <code class="docutils literal notranslate"><span class="pre">State</span></code> object. You also learned
+how to use images in your application.</p>
+<section id="interesting-extensions">
+<h2>Interesting extensions<a class="headerlink" href="#interesting-extensions" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Add a “Play Again” button to the <code class="docutils literal notranslate"><span class="pre">ending</span></code> route that links back to the <code class="docutils literal notranslate"><span class="pre">index</span></code> route, reseting
+the fields of the <code class="docutils literal notranslate"><span class="pre">State</span></code> object.</p></li>
+<li><p>Add more rooms to the game.</p></li>
+<li><p>Add more items to the game that can be picked up and used in different rooms. Use a list of strings
+or a list of booleans to manage the inventory.</p></li>
+<li><p>Add a timer to the game that limits the amount of time the player has to complete the game.
+Keep track either of the current time (using the <code class="docutils literal notranslate"><span class="pre">time</span></code> module) or the number of moves the player
+has made.</p></li>
+</ol>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="../../contents.html">Page contents</a></h3>
+    <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../students/installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/examples.html">Longer Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../students/docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../students/html.html">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../students/styling.html">Styling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/reference.html">Reference Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../students/help.html">More Help</a></li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/workbook/part3/adventure.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+    <li><a href="../../contents.html">Drafter 1.0.3 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Simple Adventure Game</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2023, acbart.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>
