@@ -7,13 +7,15 @@ Workbook Part 1
 
 Modern application development is focused on web development.
 
-Downloading files, setting up
-
 ==============
 Cookie Clicker
 ==============
 
+Preview this website: https://drafter-edu.github.io/examples/cookie-clicker/
+
 Cookie Clicker is a simple game where you click a cookie to get more cookies.
+
+First, download the following file full of unit tests: :download:`workbook_part_1_tests.py`.
 
 You will need to create a ``State`` class that has a ``cookies`` field (an integer).
 
@@ -35,6 +37,8 @@ Finally, call ``start_server``, passing in a ``State`` object with ``cookies`` s
 ============
 Bank Account
 ============
+
+Preview this website: https://drafter-edu.github.io/examples/bank-account/
 
 A bank account let's you withdraw and deposit money.
 
@@ -80,3 +84,4 @@ Finally, call ``start_server``, passing in a ``State`` object with ``balance`` s
 =====================
 Simple Adventure Game
 =====================
+
