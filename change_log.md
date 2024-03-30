@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] - 2024-03-30
+
+## Fixed
+
+* Added button to copy all (unique) tests at once
+
+## Removed
+
+* Broke external URLs, will fix in future release!
+
 ## [1.0.3] - 2024-03-29
 
 ## Fixed

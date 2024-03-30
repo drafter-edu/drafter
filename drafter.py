@@ -1,8 +1,10 @@
 """
 TODO: Finish these
+- [ ] Fix external links
 - [X] Client-side server mode
 - [?] Other HTML components
 - [ ] set_page_title(title), set_page_style(**attributes)
+- [ ] Copy ALL unique tests button
 - [X] Show all of the tests in a nice clean way
 - [X] Make it trivial to copy the route history as tests
 - [X] Show the current route in the debug information
@@ -60,7 +62,7 @@ except ImportError:
     DEFAULT_BACKEND = "none"
     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 
 RESTORABLE_STATE_KEY = "--restorable-state"
 SUBMIT_BUTTON_KEY = '--submit-button'
@@ -155,8 +157,13 @@ differ = difflib.HtmlDiff(tabsize=DIFF_INDENT_WIDTH, wrapcolumn=DIFF_WRAP_WIDTH)
 
 def diff_tests(left, right, left_name, right_name):
     """ Compare two strings and show the differences in a table. """
-    table = differ.make_table(left.splitlines(), right.splitlines(), left_name, right_name)
-    return table
+    try:
+        table = differ.make_table(left.splitlines(), right.splitlines(), left_name, right_name)
+        return table
+    except:
+        if left == right:
+            return "No differences found."
+        return f"<pre>{left}</pre><pre>{right}</pre>"
 
 def merge_url_query_params(url: str, additional_params: dict) -> str:
     """
@@ -1373,6 +1380,7 @@ class DebugInformation:
     def page_load_history(self):
         # Page History
         yield "<details open><summary><strong>Page Load History</strong></summary><ol>"
+        all_visits = set()
         for page_history, old_state in reversed(self.page_history):
             button_pressed = f"Clicked <code>{page_history.button_pressed}</code> &rarr; " if page_history.button_pressed else ""
             url = merge_url_query_params(page_history.url, {
@@ -1386,10 +1394,21 @@ class DebugInformation:
             yield f"Call: <code>{call}</code><br>"
             yield f"<details><summary>Page Content:</summary><pre style='width: fit-content' class='copyable'>"
             full_code = f"assert_equal(\n {call},\n {page_history.original_page_content})"
+            all_visits.add(full_code)
             yield f"<code>{full_code}</code></pre></details>"
             yield f"{self.INDENTATION_END_HTML}"
             yield f"</li>"
-        yield "</ol></details>"
+        yield "</ol>"
+        for part in self.copy_all_page_history(all_visits):
+            yield part
+        yield "</details>"
+
+    def copy_all_page_history(self, all_visits):
+        yield "<details><summary><strong>Combined Page History</strong></summary>"
+        yield f"{self.INDENTATION_START_HTML}"
+        yield "<pre><code>" + "\n\n".join(all_visits) + "</code></pre>"
+        yield f"{self.INDENTATION_END_HTML}"
+        yield "</details>"
 
     def test_status(self):
         if bakery is None and _bakery_tests.tests:
