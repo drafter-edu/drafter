@@ -4,7 +4,8 @@ TODO: Finish these
 - [X] Client-side server mode
 - [?] Other HTML components
 - [ ] set_page_title(title), set_page_style(**attributes)
-- [ ] Copy ALL unique tests button
+- [ ] Reset all button
+- [X] Copy ALL unique tests button
 - [X] Show all of the tests in a nice clean way
 - [X] Make it trivial to copy the route history as tests
 - [X] Show the current route in the debug information
@@ -38,7 +39,7 @@ Components to develop:
 import sys
 import json
 from typing import Any
-from urllib.parse import urlencode, urlparse, parse_qs
+from urllib.parse import urlencode, urlparse, parse_qs, quote_plus
 import traceback
 import inspect
 import re
@@ -67,6 +68,7 @@ __version__ = '1.0.4'
 RESTORABLE_STATE_KEY = "--restorable-state"
 SUBMIT_BUTTON_KEY = '--submit-button'
 PREVIOUSLY_PRESSED_BUTTON = "--last-button"
+LABEL_SEPARATOR = "$@~@$"
 
 try:
     import bakery
@@ -337,7 +339,7 @@ class LinkContent:
     def create_arguments(self, arguments, label_namespace):
         parameters = self.parse_arguments(arguments, label_namespace)
         if parameters:
-            return "\n".join(f"<input type='hidden' name='{name}' value='{value}' />"
+            return "\n".join(f"<input type='hidden' name='{name}' value='{quote_plus(str(value))}' />"
                              for name, value in parameters.items())
         return ""
 
@@ -347,7 +349,7 @@ class LinkContent:
         if isinstance(arguments, dict):
             return arguments
         if isinstance(arguments, Argument):
-            return {f"{label_namespace}$${arguments.name}": arguments.value}
+            return {f"{label_namespace}{LABEL_SEPARATOR}{arguments.name}": arguments.value}
         if isinstance(arguments, list):
             result = {}
             for arg in arguments:
@@ -356,7 +358,7 @@ class LinkContent:
                     result[arg.name] = arg.value
                 else:
                     arg, value = arg
-                result[f"{label_namespace}$${arg}"] = value
+                result[f"{label_namespace}{LABEL_SEPARATOR}{arg}"] = value
         raise ValueError(f"Could not create arguments from the provided value: {arguments}")
 
 URL_REGEX = r"^(?:http(s)?://)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$"
@@ -522,11 +524,14 @@ class Argument(PageContent):
 
     def __init__(self, name: str, value: Any, **kwargs):
         self.name = name
+        if not isinstance(value, (str, int, float, bool)):
+            raise ValueError(f"Argument values must be strings, integers, floats, or booleans. Found {type(value)}")
         self.value = value
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
-        return f"<input type='hidden' name='{self.name}' value='{self.value}' {self.parse_extra_settings()} />"
+        value = quote_plus(self.value)
+        return f"<input type='hidden' name='{self.name}' value='{value}' {self.parse_extra_settings()} />"
 
 
 @dataclass
@@ -659,6 +664,15 @@ class LineBreak(PageContent):
 class HorizontalRule(PageContent):
     def __str__(self) -> str:
         return "<hr />"
+
+
+@dataclass
+class Span(PageContent):
+    def __init__(self, *args):
+        self.content = args
+
+    def __str__(self) -> str:
+        return f"<span>{''.join(str(item) for item in self.content)}</span>"
 
 
 @dataclass
@@ -932,10 +946,10 @@ def format_page_content(content, width=80):
 def remap_hidden_form_parameters(kwargs: dict, button_pressed: str):
     renamed_kwargs = {}
     for key, value in kwargs.items():
-        if button_pressed and key.startswith(f"{button_pressed}$$"):
-            key = key[len(f"{button_pressed}$$"):]
+        if button_pressed and key.startswith(f"{button_pressed}{LABEL_SEPARATOR}"):
+            key = key[len(f"{button_pressed}{LABEL_SEPARATOR}"):]
             renamed_kwargs[key] = value
-        else:
+        elif LABEL_SEPARATOR not in key:
             renamed_kwargs[key] = value
     return renamed_kwargs
 
@@ -1139,6 +1153,12 @@ class Server:
                 for param, val in zip(expected_parameters, args)]
         kwargs = {param: self.convert_parameter(param, val, expected_types)
                   for param, val in kwargs.items()}
+        # Verify all arguments are in expected_parameters
+        for key, value in kwargs.items():
+            if key not in expected_parameters:
+                raise ValueError(
+                    f"Unexpected parameter {key}={value!r} in {original_function.__name__}. "
+                    f"Expected parameters: {expected_parameters}")
         # Final return result
         representation = [repr(arg) for arg in args] + [
             f"{key}={value!r}" if show_names.get(key, False) else repr(value)

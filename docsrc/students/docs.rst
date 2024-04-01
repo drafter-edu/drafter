@@ -165,6 +165,7 @@ Components
     A horizontal line stretching across the page. This is the same as the HTML ``<hr>`` tag.
 
 .. function:: Button(text, url)
+              Button(text, url, arguments)
 
     A clickable button on the page. The `text` is what will be displayed on the button, and the `url` is where the
     button will take you. This gets rendered as a normal HTML button. All of the input fields on the page will be
@@ -175,6 +176,9 @@ Components
     :param url: Either a string representing the full URL you are linking to (possibly external to the server) or the
                 name of a function that is a route on the server (without quotes or calling parentheses).
     :type url: str or function
+    :param arguments: Any additional arguments to pass to the server when the button is pressed. These should be
+                      ``Argument`` instances. Defaults to an empty list.
+    :type arguments: list[Argument]
 
 .. function:: NumberedList(items)
 
@@ -215,6 +219,30 @@ Components
                  or a single dataclass instance.
     :type data: list[list[str]] or list[object] or object
 
+.. function:: Span(...components)
+
+    A span of text with multiple components. The `components` can be any number of strings or `Component` instances,
+    which will be rendered in the span. This is useful for combining multiple components into a single line.
+
+    :param components: The components to display in the span. Each component should be a string or a `Component`
+                       instance. You do not pass them in as a list, but as separate arguments (like the ``print``)
+                       function.
+    :type components: str | Component
+
+.. function:: Argument(name, value)
+
+    A hidden argument to be passed to the server. The `name` is the name of the argument, and the `value` is the value.
+    You can only use strings, integers, floats, or booleans as values. This is useful for passing information to the
+    server without displaying it to the user.
+
+    A major use for this feature is as an additional parameter to buttons. If you want to pass additional information
+    to the server when a button is pressed, you can use this component to do so.
+
+    .. code-block:: python
+
+        Button("Submit", some_route, Argument("additional_info", "extra_data"))
+
+    Note that buttons must have unique names, or the arguments will not be distinguishable.
 
 Debug Information
 -----------------
