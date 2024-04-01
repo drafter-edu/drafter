@@ -1,6 +1,6 @@
 """
 TODO: Finish these
-- [ ] Fix external links
+- [ ] Fix external links (ExternalLink command?)
 - [X] Client-side server mode
 - [?] Other HTML components
 - [ ] set_page_title(title), set_page_style(**attributes)
@@ -63,7 +63,7 @@ except ImportError:
     DEFAULT_BACKEND = "none"
     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
 
-__version__ = '1.0.4'
+__version__ = '1.0.5'
 
 RESTORABLE_STATE_KEY = "--restorable-state"
 SUBMIT_BUTTON_KEY = '--submit-button'

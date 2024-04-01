@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2024-04-01
+
+## Fixed
+
+* Fixed Argument instances with spaces
+* Changed button label separator to be more unusual
+* Fixed bug with additional Arguments being kept for all buttons
+
+## Added
+
+* Span component to allow for a row of things
+
 ## [1.0.4] - 2024-03-30
 
 ## Fixed
