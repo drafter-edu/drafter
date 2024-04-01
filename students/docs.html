@@ -278,6 +278,8 @@ HTML <code class="docutils literal notranslate"><span class="pre">&lt;br&gt;</sp
 <dl class="py function">
 <dt class="sig sig-object py" id="Button">
 <span class="sig-name descname"><span class="pre">Button</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Button" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Button</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>A clickable button on the page. The <cite>text</cite> is what will be displayed on the button, and the <cite>url</cite> is where the
 button will take you. This gets rendered as a normal HTML button. All of the input fields on the page will be
 submitted with the button press, and passed as parameters to the linked page.</p>
@@ -287,6 +289,8 @@ submitted with the button press, and passed as parameters to the linked page.</p
 <li><p><strong>text</strong> (<em>str</em>) – The text to display for the button.</p></li>
 <li><p><strong>url</strong> (<em>str</em><em> or </em><em>function</em>) – Either a string representing the full URL you are linking to (possibly external to the server) or the
 name of a function that is a route on the server (without quotes or calling parentheses).</p></li>
+<li><p><strong>arguments</strong> (<em>list</em><em>[</em><em>Argument</em><em>]</em>) – Any additional arguments to pass to the server when the button is pressed. These should be
+<code class="docutils literal notranslate"><span class="pre">Argument</span></code> instances. Defaults to an empty list.</p></li>
 </ul>
 </dd>
 </dl>
@@ -349,6 +353,34 @@ or a single dataclass instance.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="Span">
+<span class="sig-name descname"><span class="pre">Span</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">...components</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Span" title="Link to this definition">¶</a></dt>
+<dd><p>A span of text with multiple components. The <cite>components</cite> can be any number of strings or <cite>Component</cite> instances,
+which will be rendered in the span. This is useful for combining multiple components into a single line.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>components</strong> (<em>str</em><em> | </em><em>Component</em>) – The components to display in the span. Each component should be a string or a <cite>Component</cite>
+instance. You do not pass them in as a list, but as separate arguments (like the <code class="docutils literal notranslate"><span class="pre">print</span></code>)
+function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Argument">
+<span class="sig-name descname"><span class="pre">Argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Argument" title="Link to this definition">¶</a></dt>
+<dd><p>A hidden argument to be passed to the server. The <cite>name</cite> is the name of the argument, and the <cite>value</cite> is the value.
+You can only use strings, integers, floats, or booleans as values. This is useful for passing information to the
+server without displaying it to the user.</p>
+<p>A major use for this feature is as an additional parameter to buttons. If you want to pass additional information
+to the server when a button is pressed, you can use this component to do so.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Submit&quot;</span><span class="p">,</span> <span class="n">some_route</span><span class="p">,</span> <span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;additional_info&quot;</span><span class="p">,</span> <span class="s2">&quot;extra_data&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Note that buttons must have unique names, or the arguments will not be distinguishable.</p>
+</dd></dl>
+
 </section>
 <section id="debug-information">
 <h2>Debug Information<a class="headerlink" href="#debug-information" title="Link to this heading">¶</a></h2>
@@ -407,6 +439,8 @@ and the history of visited pages.</p>
 <li class="toctree-l3"><a class="reference internal" href="#BulletedList"><code class="docutils literal notranslate"><span class="pre">BulletedList()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Header"><code class="docutils literal notranslate"><span class="pre">Header()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Table"><code class="docutils literal notranslate"><span class="pre">Table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Span"><code class="docutils literal notranslate"><span class="pre">Span()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Argument"><code class="docutils literal notranslate"><span class="pre">Argument()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#debug-information">Debug Information</a><ul>

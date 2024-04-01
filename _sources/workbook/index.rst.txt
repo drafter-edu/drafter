@@ -14,6 +14,7 @@ We provide unit tests that you can use to check that you are building the softwa
 * :ref:`cookie-clicker`
 * :ref:`bank-account`
 * :ref:`simple-adventure-game`
+* :ref:`store`
 
 .. _cookie-clicker:
 
@@ -26,3 +27,7 @@ We provide unit tests that you can use to check that you are building the softwa
 .. _simple-adventure-game:
 
 .. include:: part3/adventure.rst
+
+.. _store:
+
+.. include:: part4/store.rst
