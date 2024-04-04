@@ -6,7 +6,12 @@ Simple Adventure Game
 Now we'll make a little adventure game with multiple pages that link to each other in a more complicated
 way, and also an item that you can pick up and use in of the rooms. To make things more exciting, we'll
 have images of the screens in the game (generated using ChatGPT).
-Preview this website at https://drafter-edu.github.io/examples/bank-account/
+Preview this website at |adventure_preview|.
+
+.. |adventure_preview| raw:: html
+
+    <a href="https://drafter-edu.github.io/examples/adventure/" target="_blank">
+        https://drafter-edu.github.io/examples/adventure/</a>
 
 .. image:: /workbook/part3/screen_shots.png
     :width: 700
@@ -79,11 +84,11 @@ This means that you will need an ``if`` statement in your route to decide which 
     - A ``Button`` with the text ``"Begin"`` that links to a ``begin`` route.
 
 2. The ``begin`` route will consume a ``State`` object and return a ``Page``. The ``state`` in the
-    returned ``Page`` will have the ``name`` field set to the value of the ``TextBox`` in the previous
-    page. Use the ``small_field`` route to return the next page, rather than defining a new ``Page`` object.
+   returned ``Page`` will have the ``name`` field set to the value of the ``TextBox`` in the previous
+   page. Use the ``small_field`` route to return the next page, rather than defining a new ``Page`` object.
 
 3. The ``small_field`` route will consume a ``State`` object and return a ``Page``. The ``state`` in the
-    returned ``Page`` will be unchanged. The content of the ``Page`` will be (in order):
+   returned ``Page`` will be unchanged. The content of the ``Page`` will be (in order):
 
     - The text ``"You are NAME."`` except replacing ``NAME`` with the value of the ``name`` field in the
       ``State`` object.
@@ -94,9 +99,9 @@ This means that you will need an ``if`` statement in your route to decide which 
     - An ``Image`` with the filename ``"field.png"``.
 
 4. The ``cave`` route will consume a ``State`` object and return a ``Page``. The ``state`` in the
-    returned ``Page`` will be unchanged. The content of the ``Page`` will depend on whether or not
-    the ``state`` has the ``has_key`` field set to ``True``. If it is is ``True``, then the content
-    of the page should be:
+   returned ``Page`` will be unchanged. The content of the ``Page`` will depend on whether or not
+   the ``state`` has the ``has_key`` field set to ``True``. If it is is ``True``, then the content
+   of the page should be:
 
     - The text ``"You enter the cave."``
     - The text ``"You see a locked door."``
@@ -104,7 +109,7 @@ This means that you will need an ``if`` statement in your route to decide which 
     - A ``Button`` with the text ``"Leave"`` that links to the ``small_field`` route.
     - An ``Image`` with the filename ``"cave.png"``.
 
-    Otherwise, if the ``has_key`` field is ``False``, then the content of the page should be:
+   Otherwise, if the ``has_key`` field is ``False``, then the content of the page should be:
 
     - The text ``"You enter the cave."``
     - The text ``"You see a locked door."``
@@ -112,15 +117,15 @@ This means that you will need an ``if`` statement in your route to decide which 
     - An ``Image`` with the filename ``"cave.png"``.
 
 5. The ``woods`` route will consume a ``State`` object and return a ``Page``. The ``state`` in the
-    returned ``Page`` will be unchanged. The content of the ``Page`` will depend on whether or not
-    the ``state`` has the ``has_key`` field set to ``True``. If it is is ``True``, then the content
-    of the page should be:
+   returned ``Page`` will be unchanged. The content of the ``Page`` will depend on whether or not
+   the ``state`` has the ``has_key`` field set to ``True``. If it is is ``True``, then the content
+   of the page should be:
 
     - The text ``"You are in the woods."``
     - A ``Button`` with the text ``"Leave"`` that links to the ``small_field`` route.
     - An ``Image`` with the filename ``"woods.png"``.
 
-    Otherwise, if the ``has_key`` field is ``False``, then the content of the page should be:
+   Otherwise, if the ``has_key`` field is ``False``, then the content of the page should be:
 
     - The text ``"You are in the woods."``
     - The text ``"You see a key on the ground."``
@@ -133,7 +138,7 @@ This means that you will need an ``if`` statement in your route to decide which 
    the next page, rather than defining a new ``Page`` object.
 
 7. The ``ending`` route will consume a ``State`` object and return a ``Page``. The ``state`` in the
-    returned ``Page`` will be unchanged. The content of the ``Page`` will be:
+   returned ``Page`` will be unchanged. The content of the ``Page`` will be:
 
     - The text ``"You unlock the door.",``
     - The text ``"You find a treasure chest."``
@@ -146,14 +151,15 @@ This application showed you how to make multiple pages that link in more complic
 some pages that had different content depending on the state of the ``State`` object. You also learned
 how to use images in your application.
 
-Interesting extensions
-######################
+..
+    **Interesting extensions:** If you are interested in extending the game, here are some ideas for things
+    you might add.
 
-1. Add a "Play Again" button to the ``ending`` route that links back to the ``index`` route, reseting
-   the fields of the ``State`` object.
-2. Add more rooms to the game.
-3. Add more items to the game that can be picked up and used in different rooms. Use a list of strings
-   or a list of booleans to manage the inventory.
-4. Add a timer to the game that limits the amount of time the player has to complete the game.
-   Keep track either of the current time (using the ``time`` module) or the number of moves the player
-   has made.
+    1. Add a "Play Again" button to the ``ending`` route that links back to the ``index`` route, reseting
+       the fields of the ``State`` object.
+    2. Add more rooms to the game.
+    3. Add more items to the game that can be picked up and used in different rooms. Use a list of strings
+       or a list of booleans to manage the inventory.
+    4. Add a timer to the game that limits the amount of time the player has to complete the game.
+       Keep track either of the current time (using the ``time`` module) or the number of moves the player
+       has made.

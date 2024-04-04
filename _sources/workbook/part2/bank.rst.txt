@@ -4,7 +4,12 @@ Bank Account
 
 A bank account let's you withdraw and deposit money.
 We'll make a simple bank account application to support this.
-Preview this website at https://drafter-edu.github.io/examples/bank-account/
+Preview this website at |bank_preview|.
+
+.. |bank_preview| raw:: html
+
+    <a href="https://drafter-edu.github.io/examples/bank/" target="_blank">
+        https://drafter-edu.github.io/examples/bank/</a>
 
 .. image:: /workbook/part2/drafter_preview.png
     :width: 700
