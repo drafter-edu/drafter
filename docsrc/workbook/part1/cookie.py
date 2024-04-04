@@ -5,6 +5,7 @@ Click the cookie to get more cookies!
 """
 from bakery import assert_equal
 from drafter import *
+from dataclasses import dataclass
 
 
 @dataclass

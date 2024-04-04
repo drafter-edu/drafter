@@ -3,7 +3,12 @@ Cookie Clicker
 ==============
 
 Cookie Clicker is a simple game where you click a cookie to get more cookies.
-Preview the activity at https://drafter-edu.github.io/examples/cookie-clicker/
+Preview the activity at |cookie_preview|.
+
+.. |cookie_preview| raw:: html
+
+    <a href="https://drafter-edu.github.io/examples/cookie/" target="_blank">
+        https://drafter-edu.github.io/examples/cookie/</a>
 
 .. image:: /workbook/part1/cookie.png
     :width: 427

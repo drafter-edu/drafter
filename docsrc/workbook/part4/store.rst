@@ -1,8 +1,14 @@
+=====
 Store
 =====
 
 This activity is a little store where you can purchase items for a game.
-Preview the activity at https://drafter-edu.github.io/examples/store/
+Preview the activity at |store_preview|.
+
+.. |store_preview| raw:: html
+
+    <a href="https://drafter-edu.github.io/examples/store/" target="_blank">
+        https://drafter-edu.github.io/examples/store/</a>
 
 In this example, we've already written the state and all the routes.
 You just need to make all the tests for us!
