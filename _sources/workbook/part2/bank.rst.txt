@@ -60,7 +60,7 @@ To explain a little further:
 1. The ``index`` route will consume a ``State`` object and return a ``Page`` (like most routes). The ``state`` in the
    returned ``Page`` will be unchanged. The content of the ``Page`` will be (in order):
 
-    - The text ``"Your balance is: X"`` except instead of ``X`` it will be the ``balance`` of the ``State``
+    - The text ``"Your current balance is:: X"`` except instead of ``X`` it will be the ``balance`` of the ``State``
       object.
     - A ``Button`` with the text ``"Withdraw"`` that links to a ``start_withdraw`` route.
     - A ``Button`` with the text ``"Deposit"`` that links to a ``start_deposit`` route.
