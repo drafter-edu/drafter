@@ -517,6 +517,7 @@ TEMPLATE_500 = """
 {routes}
 """
 
+
 @dataclass
 class Argument(PageContent):
     name: str
@@ -551,6 +552,9 @@ class Link(PageContent, LinkContent):
         return f"{precode}<a href='{url}' {self.parse_extra_settings()}>{self.text}</a>"
 
 
+BASE_IMAGE_FOLDER = "/__images"
+
+
 @dataclass
 class Image(PageContent, LinkContent):
     url: str
@@ -571,7 +575,7 @@ class Image(PageContent, LinkContent):
             extra_settings['height'] = self.height
         url, external = self._handle_url(self.url)
         if not external:
-            url = "/__images" + url
+            url = BASE_IMAGE_FOLDER + url
         parsed_settings = self.parse_extra_settings(**extra_settings)
         return f"<img src='{url}' {parsed_settings}>"
 
@@ -1426,7 +1430,7 @@ class DebugInformation:
     def copy_all_page_history(self, all_visits):
         yield "<details><summary><strong>Combined Page History</strong></summary>"
         yield f"{self.INDENTATION_START_HTML}"
-        yield "<pre><code>" + "\n\n".join(all_visits) + "</code></pre>"
+        yield "<pre style='width: fit-content' class='copyable'><code>" + "\n\n".join(all_visits) + "</code></pre>"
         yield f"{self.INDENTATION_END_HTML}"
         yield "</details>"
 

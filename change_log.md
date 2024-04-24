@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.6] - 2024-04-04
+
+## Fixed
+
+* Added copyable button to the combined tests, prevent them from spilling over
+
 ## [1.0.5] - 2024-04-01
 
 ## Fixed
