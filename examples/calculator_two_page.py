@@ -1,6 +1,6 @@
 from bakery import assert_equal
 from dataclasses import dataclass
-from drafter import route, start_server, Page, TextBox, SubmitButton, Text
+from drafter import route, start_server, Page, TextBox, Button, Text
 
 @route("index")
 def index() -> Page:
@@ -9,7 +9,7 @@ def index() -> Page:
         TextBox("first"),
         "What is the second number?",
         TextBox("second"),
-        SubmitButton("Add", "add_page")
+        Button("Add", "add_page")
     ])
 
 
@@ -26,7 +26,7 @@ assert_equal(index(), Page(None, [
     TextBox("first", "number"),
     "What is the second number?",
     TextBox("second", "number"),
-    SubmitButton("Add", "add")
+    Button("Add", "add")
 ]))
 
 assert_equal(add_page("5", "3"), Page(None, [

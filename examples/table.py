@@ -1,6 +1,6 @@
 from bakery import assert_equal
 from dataclasses import dataclass
-from drafter import route, start_server, Page, TextBox, SubmitButton, SelectBox, Table, hide_debug_information
+from drafter import route, start_server, Page, TextBox, Button, SelectBox, Table, hide_debug_information
 
 
 
@@ -17,9 +17,9 @@ def index(state: list[Dog]) -> Page:
     return Page(state, [
         "There are " + str(len(state)) + " dogs",
         "What do you want to do?",
-        SubmitButton("Add a dog", add_dog_page),
+        Button("Add a dog", add_dog_page),
         "View the dogs.",
-        SubmitButton("View the dogs", view_dogs_page)
+        Button("View the dogs", view_dogs_page)
     ])
 
 
@@ -32,8 +32,8 @@ def add_dog_page(state: list[Dog]) -> Page:
         TextBox("age"),
         "What is the dog's breed?",
         SelectBox("breed", ["corgi", "schnauzer", "mutt"]),
-        SubmitButton("Add this dog", finish_adding_dog_page),
-        SubmitButton("Go back", index)
+        Button("Add this dog", finish_adding_dog_page),
+        Button("Go back", index)
     ])
     
 @route
@@ -46,7 +46,7 @@ def view_dogs_page(state: list[Dog]) -> Page:
     return Page(state, [
         "Here are the dogs:",
         Table(state),
-        SubmitButton("Go back", index)
+        Button("Go back", index)
     ])
 
 start_server([], reloader=True)
