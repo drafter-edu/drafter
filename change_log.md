@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2024-04-26
+
+## Fixed
+
+* The library has been broken up into multiple files for easier maintenance
+* Fixed a bug with `Argument` not handling spaces correctly, or other non-String types
+
 ## [1.0.6] - 2024-04-04
 
 ## Fixed

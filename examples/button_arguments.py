@@ -14,14 +14,20 @@ def index(state: State) -> Page:
         TextBox("pears", 7),
         TextBox("plums", "3"),
         Argument("apples", 5),
-        Button("Buy", "buy_page", Argument("oranges", 7))
+        Argument('words', 'ups and downs'),
+        Argument("check", True),
+        Button("Buy", "buy_page", [
+            Argument("oranges", 7),
+            Argument("fruits", "oranges and pears and more"),
+            Argument("bonus", False)
+       ]),
     ])
 
 
 @route
-def buy_page(state: State, apples: int, oranges: int, pears: int, plums: str) -> Page:
+def buy_page(state: State, apples: int, oranges: int, pears: int, plums: str, fruits: str, words: str, check: bool, bonus: bool) -> Page:
     return Page(state, [
-        f"You bought {apples} apples, {oranges} oranges, {plums} plums, and {pears} pears",
+        f"You bought {apples} apples, {oranges} oranges, {plums} plums, and {pears} pears. ({fruits}) ({words}) ({check}) ({bonus})"
     ])
 
 
@@ -35,11 +41,11 @@ assert_equal(
                   Button(text='Buy', url='/buy_page', arguments=Argument(name='oranges', value=7))]))
 
 assert_equal(
-    buy_page(State(), 5, 7, 7, '3'),
+    buy_page(State(), 5, 7, 7, '3', 'oranges and pears and more', 'test and test', True, False),
     Page(state=State(), content=['You bought 5 apples, 7 oranges, 3 plums, and 7 pears']))
 
 assert_equal(
-    buy_page(State(), 5, 7, 100, '200'),
+    buy_page(State(), 5, 7, 100, '200', 'oranges and pears and more', 'test and test', False, True),
     Page(state=State(), content=['You bought 5 apples, 7 oranges, 200 plums, and 100 pears']))
 
 start_server(State())
