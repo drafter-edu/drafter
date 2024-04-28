@@ -16,14 +16,6 @@ from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYL
 from drafter.urls import remove_url_query_params
 
 
-@dataclass
-class LaunchConfiguration:
-    backend: str = DEFAULT_BACKEND
-    host: str = "localhost"
-    port: int = 8080
-    debug: bool = True
-    reloader: bool = False
-
 """
 Images folder
     Specific folder
@@ -44,7 +36,7 @@ Download/upload state button
 
 @dataclass
 class ServerConfiguration:
-    launch: LaunchConfiguration
+    # Launch parameters
     host: str = "localhost"
     port: int = 8080
     debug: bool = True
@@ -52,7 +44,11 @@ class ServerConfiguration:
     backend: str = DEFAULT_BACKEND
     reloader: bool = False
 
+    # Page configuration
     style: str = 'skeleton'
+    additional_styles_files: list[str] = None
+    additional_js_files: list[str] = None
+    additional_header_content: str = ""
 
 
 class Server:

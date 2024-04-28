@@ -1,9 +1,10 @@
 from dataclasses import dataclass, is_dataclass, fields
 from typing import Any
-from urllib.parse import quote_plus
+# from urllib.parse import quote_plus
 import json
+import html
 
-from drafter.constants import LABEL_SEPARATOR, SUBMIT_BUTTON_KEY
+from drafter.constants import LABEL_SEPARATOR, SUBMIT_BUTTON_KEY, JSON_DECODE_SYMBOL
 from drafter.urls import remap_attr_styles, friendly_urls, check_invalid_external_url, merge_url_query_params
 
 BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "tabindex", "value",
@@ -68,7 +69,7 @@ class LinkContent:
     def create_arguments(self, arguments, label_namespace):
         parameters = self.parse_arguments(arguments, label_namespace)
         if parameters:
-            return "\n".join(f"<input type='hidden' name='{name}' value='{quote_plus(str(value))}' />"
+            return "\n".join(f"<input type='hidden' name='{name}' value='{html.escape(json.dumps(value), True)}' />"
                              for name, value in parameters.items())
         return ""
 
@@ -84,10 +85,10 @@ class LinkContent:
             for arg in arguments:
                 if isinstance(arg, Argument):
                     arg, value = arg.name, arg.value
-                    result[arg.name] = arg.value
                 else:
                     arg, value = arg
                 result[f"{label_namespace}{LABEL_SEPARATOR}{arg}"] = value
+            return result
         raise ValueError(f"Could not create arguments from the provided value: {arguments}")
 
 
@@ -104,8 +105,8 @@ class Argument(PageContent):
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
-        value = quote_plus(json.dumps(self.value))
-        return f"<input type='hidden' name='{self.name}' value='{value}' {self.parse_extra_settings()} />"
+        value = html.escape(json.dumps(self.value), True)
+        return f"<input type='hidden' name='{JSON_DECODE_SYMBOL}{self.name}' value='{value}' {self.parse_extra_settings()} />"
 
 
 @dataclass

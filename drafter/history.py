@@ -1,10 +1,11 @@
+import json
 from dataclasses import dataclass, is_dataclass, replace, asdict, fields
 from dataclasses import field as dataclass_field
 from datetime import datetime
 from typing import Any
 import pprint
 
-from drafter.constants import LABEL_SEPARATOR
+from drafter.constants import LABEL_SEPARATOR, JSON_DECODE_SYMBOL
 from drafter.setup import request
 from drafter.testing import DIFF_INDENT_WIDTH
 
@@ -43,7 +44,10 @@ def remap_hidden_form_parameters(kwargs: dict, button_pressed: str):
     for key, value in kwargs.items():
         if button_pressed and key.startswith(f"{button_pressed}{LABEL_SEPARATOR}"):
             key = key[len(f"{button_pressed}{LABEL_SEPARATOR}"):]
-            renamed_kwargs[key] = value
+            renamed_kwargs[key] = json.loads(value)
+        elif key.startswith(JSON_DECODE_SYMBOL):
+            key = key[len(JSON_DECODE_SYMBOL):]
+            renamed_kwargs[key] = json.loads(value)
         elif LABEL_SEPARATOR not in key:
             renamed_kwargs[key] = value
     return renamed_kwargs
