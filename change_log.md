@@ -10,55 +10,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.0] - 2024-04-26
 
-## Fixed
+### Fixed
 
 * The library has been broken up into multiple files for easier maintenance
 * Fixed a bug with `Argument` not handling spaces correctly, or other non-String types
 
+### Added
+
+* Improved deployment options, including optional styles and header
+* Allowed frame and title to be configurable
+* Create DRAFTER_SKULPT os environment variable
+
 ## [1.0.6] - 2024-04-04
 
-## Fixed
+### Fixed
 
 * Added copyable button to the combined tests, prevent them from spilling over
 
 ## [1.0.5] - 2024-04-01
 
-## Fixed
+### Fixed
 
 * Fixed Argument instances with spaces
 * Changed button label separator to be more unusual
 * Fixed bug with additional Arguments being kept for all buttons
 
-## Added
+### Added
 
 * Span component to allow for a row of things
 
 ## [1.0.4] - 2024-03-30
 
-## Fixed
+### Fixed
 
 * Added button to copy all (unique) tests at once
 
-## Removed
+### Removed
 
 * Broke external URLs, will fix in future release!
 
 ## [1.0.3] - 2024-03-29
 
-## Fixed
+### Fixed
 
 * Local images should now render correctly
 * Route tests now show the correct parameter order based on the function call they map to
 
 ## [1.0.2] - 2024-03-26
 
-## Fixed
+### Fixed
 
 * Fixed emojis not rendering correctly in the history
 
 ## [1.0.0] - 2024-03-26
 
-## Added
+### Added
 
 * Tests are now displayed graphically in the debug information
 * Page history is now shown as test cases, can easily copy them to clipboard
@@ -67,21 +73,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - 2023-09-22
 
-## Added
+### Added
 
 - Current route is displayed in debug information
 - Converted parameters are now revealed in current state
 - Allow `classes` keyword parameter
 - Provide basic styling functions like `float_right` and `bold`
 
-## Fixed
+### Fixed
 
 - Reordered the debug information to put current info at top
 - Error pages now give a little more information
 
 ## [0.1.4] - 2023-09-15
 
-## Added
+### Added
 
 - Show produced Python pprint of Page in the Debug Information
 - Finish quickstart, rough outline of student docs
@@ -89,23 +95,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.3] - 2023-09-13
 
-## Fixed
+### Fixed
 
 - Feels weird to call it fixed, but the message now says "Drafter server starting up"
 - Allow an empty `start_server` with no routes
 
-## Added
+### Added
 
 - Improve PageContent classes to support keyword parameters like `style_*` to change style
 
 ## [0.1.2] - 2023-09-12
 
-## Fixed
+### Fixed
 
 - SelectBox now has a new line afterwards
 - Fixed support for list state
 
-## Added
+### Added
 
 - hide_debug_information() and show_debug_information() to control the debug information (defaults to visible)
 

@@ -1,5 +1,7 @@
+import html
+import os
 import traceback
-from dataclasses import dataclass, asdict, replace
+from dataclasses import dataclass, asdict, replace, field
 from functools import wraps
 from typing import Any
 import json
@@ -12,7 +14,7 @@ from drafter.setup import DEFAULT_BACKEND, Bottle, abort, request, static_file
 from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, get_params, \
     remap_hidden_form_parameters
 from drafter.page import Page
-from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES
+from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER
 from drafter.urls import remove_url_query_params
 
 
@@ -44,11 +46,17 @@ class ServerConfiguration:
     backend: str = DEFAULT_BACKEND
     reloader: bool = False
 
+    # Website configuration
+    title: str = "Drafter Website"
+    framed: bool = True
+    skulpt: bool = os.environ.get('DRAFTER_SKULPT', True)
+
     # Page configuration
     style: str = 'skeleton'
-    additional_styles_files: list[str] = None
-    additional_js_files: list[str] = None
-    additional_header_content: str = ""
+    additional_header_content: list[str] = field(default_factory=list)
+    additional_css_content: list[str] = field(default_factory=list)
+
+
 
 
 class Server:
@@ -57,7 +65,7 @@ class Server:
     def __init__(self, **kwargs):
         self.routes = {}
         self._handle_route = {}
-        self.default_configuration = ServerConfiguration(**kwargs)
+        self.configuration = ServerConfiguration(**kwargs)
         self._state = None
         self._initial_state = None
         self._state_history = []
@@ -133,7 +141,7 @@ class Server:
         self.handle_images()
 
     def run(self, **kwargs):
-        configuration = replace(self.default_configuration, **kwargs)
+        configuration = replace(self.configuration, **kwargs)
         self.app.run(**asdict(configuration))
 
     def prepare_args(self, original_function, args, kwargs):
@@ -250,11 +258,11 @@ class Server:
             self._state = page.state
             visiting_page.update("Rendering Page Content")
             try:
-                content = page.render_content(self.dump_state())
+                content = page.render_content(self.dump_state(), self.configuration.framed, self.configuration.title)
             except Exception as e:
                 return self.make_error_page("Error rendering content", e, original_function)
             visiting_page.finish("Finished Page Load")
-            if self.default_configuration.debug:
+            if self.configuration.debug:
                 content = content + self.make_debug_page()
             content = self.wrap_page(content)
             return content
@@ -329,12 +337,29 @@ class Server:
             return self.make_error_page("Error after creating page", ValueError(message), original_function)
 
     def wrap_page(self, content):
-        style = self.default_configuration.style
+        content = f"<div class='btlw'>{content}</div>"
+        style = self.configuration.style
         if style in INCLUDE_STYLES:
-            scripts = INCLUDE_STYLES[style]['scripts']
-            styles = INCLUDE_STYLES[style]['styles']
-            content = "\n".join(styles) + content + "\n".join(scripts)
-        return "<div class='btlw'>" + content + "</div>"
+            scripts = "\n".join(INCLUDE_STYLES[style]['scripts'])
+            styles = "\n".join(INCLUDE_STYLES[style]['styles'])
+        else:
+            raise ValueError(f"Unknown style {style}. Please choose from {', '.join(INCLUDE_STYLES.keys())}, or add a custom style tag with add_website_header.")
+        if self.configuration.additional_header_content:
+            header_content = "\n".join(self.configuration.additional_header_content)
+        else:
+            header_content = ""
+        if self.configuration.additional_css_content:
+            additional_css = "\n".join(self.configuration.additional_css_content)
+            styles = f"{styles}\n<style>{additional_css}</style>"
+        if self.configuration.skulpt:
+            return TEMPLATE_200_WITHOUT_HEADER.format(
+                header=header_content, styles=styles, scripts=scripts, content=content,
+                title=json.dumps(self.configuration.title))
+        else:
+            return TEMPLATE_200.format(
+                header=header_content, styles=styles, scripts=scripts, content=content,
+                title=html.escape(self.configuration.title))
+
 
     def make_error_page(self, title, error, original_function):
         tb = traceback.format_exc()

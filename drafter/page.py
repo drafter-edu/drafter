@@ -4,6 +4,7 @@ from typing import Any
 from drafter.constants import RESTORABLE_STATE_KEY
 from drafter.components import PageContent, Link
 
+
 @dataclass
 class Page:
     state: Any
@@ -26,7 +27,7 @@ class Page:
                     raise ValueError("The content of a page must be a list of strings or components."
                                      f" Found {incorrect_type} at index {index} instead.")
 
-    def render_content(self, current_state) -> str:
+    def render_content(self, current_state, framed: bool, title: str) -> str:
         # TODO: Decide if we want to dump state on the page
         chunked = [
             # f'<input type="hidden" name="{RESTORABLE_STATE_KEY}" value={current_state!r}/>'
@@ -37,10 +38,11 @@ class Page:
             else:
                 chunked.append(str(chunk))
         content = "\n".join(chunked)
-        return (f"<div class='container btlw-header'>Drafter Website</div>"
-                f"<div class='container btlw-container'>"
-                f"<form>{content}</form>"
-                f"</div>")
+        content = f"<form>{content}</form>"
+        if framed:
+            content = (f"<div class='container btlw-header'>{title}</div>"
+                       f"<div class='container btlw-container'>{content}</div>")
+        return content
 
     def verify_content(self, server) -> bool:
         for chunk in self.content:

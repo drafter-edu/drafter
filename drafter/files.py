@@ -20,6 +20,7 @@ BASIC_SCRIPTS = "<script>" + """
         });
     }
 """ + "</script>"
+
 BASIC_STYLE = """
 <style>
     div.btlw-debug .copy-button {
@@ -132,38 +133,49 @@ INCLUDE_STYLES = {
 }
 
 TEMPLATE_200 = """
+<html>
+    <head>
+        {header}
+        {styles}
+        <title>{title}</title>
+    </head>
+    <body>
+        {content}
+        {scripts}
+    </body>
+</html>
 """
-TEMPLATE_404 = """
-<style type="text/css">
-  .btlw {{background-color: #eee; font-family: sans-serif;}}
-  div.btlw {{background-color: #fff; border: 1px solid #ddd;
-        padding: 15px; margin: 15px;}}
-  .btlw pre {{background-color: #eee; border: 1px solid #ddd; padding: 5px;}}
-</style>
-<h3>{title}</h3>
-
-<p>{message}</p>
-
-<p>Original error message:</p>
-<pre>{error}</pre>
-
-<p>Available routes:</p>
-{routes}
+TEMPLATE_200_WITHOUT_HEADER = """
+<script>document.title = {title};</script>
+{header}
+{styles}
+{content}
+{scripts}
 """
-TEMPLATE_500 = """
-<style type="text/css">
-  .btlw {{background-color: #eee; font-family: sans-serif;}}
-  div.btlw {{background-color: #fff; border: 1px solid #ddd;
-        padding: 15px; margin: 15px;}}
-  .btlw pre {{background-color: #eee; border: 1px solid #ddd; padding: 5px;}}
-</style>
-<h3>{title}</h3>
 
-<p>{message}</p>
-
-<p>Original error message:</p>
-<pre>{error}</pre>
-
-<p>Available routes:</p>
-{routes}
+TEMPLATE_ERROR = """
+<html>
+    <head>
+        <style type="text/css">
+          .btlw {{background-color: #eee; font-family: sans-serif;}}
+          div.btlw {{background-color: #fff; border: 1px solid #ddd;
+                padding: 15px; margin: 15px;}}
+          .btlw pre {{background-color: #eee; border: 1px solid #ddd; padding: 5px;}}
+        </style>
+    </head>
+    <body>
+        <h3>{title}</h3>
+        
+        <p>{message}</p>
+        
+        <p>Original error message:</p>
+        <pre>{error}</pre>
+        
+        <p>Available routes:</p>
+        {routes}
+    </body>
+</html>
 """
+
+TEMPLATE_404 = TEMPLATE_ERROR
+TEMPLATE_500 = TEMPLATE_ERROR
