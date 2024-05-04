@@ -77,7 +77,12 @@ Even if you just leave the default message, you must click on the ``Commit chang
 
 Click on the pencil icon to edit the file. You will need to fill in the following fields.
 
-(More details will go here about what exactly to write)
+* The name of your site
+* What your web application does
+* Your name and UD email address
+* If you got significant help from a website besides the official Drafter documentation, include links along with explanations of how the site helped you. If someone helped you, this is also a nice place to mention them to thank them for their help.
+* The planning document that you created, provided as a file (see below).
+* The URL (address) of the publicly-accessible video (described below) that you uploaded.
 
 .. image:: images/deployment_github_editme.png
     :alt: Github Readme
@@ -98,3 +103,27 @@ Think of this video as something you will want to put into a portfolio when you 
 Zoom can be used to record videos; again, just make sure that we are able to see and hear everything clearly.
 
 Upload the video to a website where it can be viewed by the graders, and include the link to the video in both the docstring of the Python file and in the text entry box here.
+
+6. Upload your planning document to the website repository in the ``website`` folder. You can do this by clicking on the ``Add file`` button and selecting the file from your computer.
+
+Change the filename of the planning document to something simple and easy to type. You will need to link it in your ``readme.md` file.
+
+7. When everything is done, you can check out your deployed website. Click on the ``Actions`` link to see the deployments. You can click on the latest deployment to see the logs.
+
+.. image:: images/deployment_github_actions.png
+    :alt: Github Actions
+
+If everything is successful, you will see a green checkmark. You can click on the link to see your website.
+
+.. image:: images/deployment_github_success.png
+    :alt: Github Success
+
+If you see a red X, there was an error. You can click on the error to see what went wrong.
+
+.. image:: images/deployment_github_error.png
+    :alt: Github Error
+
+If you see an error, you can try to fix it and push the changes to the repository. The website will automatically update when you push changes to the repository.
+
+8. Once you have successfully deployed your website, you can submit the URL of your website to the assignment on Canvas.
+
