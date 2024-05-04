@@ -69,11 +69,16 @@
 GitHub Pages is a free and easy way to host your website.
 Although normally Github Pages is only useful for hosting frontend websites, Drafter can still work with it.</p>
 <p>To deploy your website to GitHub Pages, you need to follow these steps:</p>
+<section id="create-the-repository">
+<h2>Create the Repository<a class="headerlink" href="#create-the-repository" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Use the URL provided by your instructor to create a new repository on Github (<strong>Make sure you use the instructor provided URL for your classroom!</strong>)</p></li>
 </ol>
 <p>Once the repository is created, you will see that there are already a bunch of files present, and a settings bar.</p>
 <img alt="Github Repository" src="../_images/deployment_github_main.png" />
+</section>
+<section id="enable-github-pages">
+<h2>Enable Github Pages<a class="headerlink" href="#enable-github-pages" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple" start="2">
 <li><p>You will need to turn on GitHub pages in order to host your site. To do this, go to the <code class="docutils literal notranslate"><span class="pre">Settings</span></code> tab of your repository.</p></li>
 </ol>
@@ -81,6 +86,9 @@ Although normally Github Pages is only useful for hosting frontend websites, Dra
 <p>Scroll down to the <code class="docutils literal notranslate"><span class="pre">Pages</span></code> section on the left side of the page. Under the source dropdown, select <code class="docutils literal notranslate"><span class="pre">Github</span> <span class="pre">Actions</span></code>.</p>
 <img alt="Github Pages" src="../_images/deployment_github_pages.png" />
 <p>Your site will now start deploying whenever you make a change. We can check the progress of the deployment by going to the <code class="docutils literal notranslate"><span class="pre">Actions</span></code> tab. But first, we’ll need to upload our website code.</p>
+</section>
+<section id="upload-your-website-code">
+<h2>Upload Your Website Code<a class="headerlink" href="#upload-your-website-code" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple" start="3">
 <li><p>Go to the <code class="docutils literal notranslate"><span class="pre">Code</span></code> tab and click on the <code class="docutils literal notranslate"><span class="pre">website</span></code> folder.</p></li>
 </ol>
@@ -107,6 +115,9 @@ Although normally Github Pages is only useful for hosting frontend websites, Dra
 <p>A box will appear that asks you to write a commit message. This is a message that describes the changes you made to the file. You can write anything you want here, but it is recommended to write something that describes the changes you made.
 Even if you just leave the default message, you must click on the <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> button to save your changes.</p>
 <img alt="Github Commit" src="../_images/deployment_github_commit.png" />
+</section>
+<section id="edit-the-readme">
+<h2>Edit the Readme<a class="headerlink" href="#edit-the-readme" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple" start="4">
 <li><p>Now we need to edit your <code class="docutils literal notranslate"><span class="pre">readme.md</span></code> file to update the information about your website. Click on the <code class="docutils literal notranslate"><span class="pre">readme.md</span></code> file in the <code class="docutils literal notranslate"><span class="pre">website</span></code> folder.</p></li>
 </ol>
@@ -121,6 +132,9 @@ Even if you just leave the default message, you must click on the <code class="d
 <li><p>The URL (address) of the publicly-accessible video (described below) that you uploaded.</p></li>
 </ul>
 <img alt="Github Readme" src="../_images/deployment_github_editme.png" />
+</section>
+<section id="record-a-video">
+<h2>Record a Video<a class="headerlink" href="#record-a-video" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple" start="5">
 <li><p>Record a video of your web application running, and make sure you show and address all of the following with a voiceover:</p></li>
 </ol>
@@ -135,10 +149,16 @@ Even if you just leave the default message, you must click on the <code class="d
 <p>Think of this video as something you will want to put into a portfolio when you apply for internships and jobs. Try to do a good job.</p>
 <p>Zoom can be used to record videos; again, just make sure that we are able to see and hear everything clearly.</p>
 <p>Upload the video to a website where it can be viewed by the graders, and include the link to the video in both the docstring of the Python file and in the text entry box here.</p>
+</section>
+<section id="upload-the-planning-document">
+<h2>Upload the Planning Document<a class="headerlink" href="#upload-the-planning-document" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple" start="6">
 <li><p>Upload your planning document to the website repository in the <code class="docutils literal notranslate"><span class="pre">website</span></code> folder. You can do this by clicking on the <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">file</span></code> button and selecting the file from your computer.</p></li>
 </ol>
 <p>Change the filename of the planning document to something simple and easy to type. You will need to link it in your <a href="#id2"><span class="problematic" id="id3">``</span></a>readme.md` file.</p>
+</section>
+<section id="view-the-deployment">
+<h2>View the Deployment<a class="headerlink" href="#view-the-deployment" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple" start="7">
 <li><p>When everything is done, you can check out your deployed website. Click on the <code class="docutils literal notranslate"><span class="pre">Actions</span></code> link to see the deployments. You can click on the latest deployment to see the logs.</p></li>
 </ol>
@@ -148,9 +168,13 @@ Even if you just leave the default message, you must click on the <code class="d
 <p>If you see a red X, there was an error. You can click on the error to see what went wrong.</p>
 <img alt="Github Error" src="students/images/deployment_github_error.png" />
 <p>If you see an error, you can try to fix it and push the changes to the repository. The website will automatically update when you push changes to the repository.</p>
+</section>
+<section id="submit-on-canvas">
+<h2>Submit on Canvas<a class="headerlink" href="#submit-on-canvas" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple" start="8">
 <li><p>Once you have successfully deployed your website, you can submit the URL of your website to the assignment on Canvas.</p></li>
 </ol>
+</section>
 </section>
 
 
@@ -170,7 +194,17 @@ Even if you just leave the default message, you must click on the <code class="d
 <li class="toctree-l1"><a class="reference internal" href="styling.html">Styling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
 <li class="toctree-l1"><a class="reference internal" href="help.html">More Help</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Deployment</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Deployment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#create-the-repository">Create the Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#enable-github-pages">Enable Github Pages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#upload-your-website-code">Upload Your Website Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#edit-the-readme">Edit the Readme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#record-a-video">Record a Video</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#upload-the-planning-document">Upload the Planning Document</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#view-the-deployment">View the Deployment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#submit-on-canvas">Submit on Canvas</a></li>
+</ul>
+</li>
 </ul>
 
   </div>
