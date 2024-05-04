@@ -9,12 +9,18 @@ Although normally Github Pages is only useful for hosting frontend websites, Dra
 
 To deploy your website to GitHub Pages, you need to follow these steps:
 
+Create the Repository
+---------------------
+
 1. Use the URL provided by your instructor to create a new repository on Github (**Make sure you use the instructor provided URL for your classroom!**)
 
 Once the repository is created, you will see that there are already a bunch of files present, and a settings bar.
 
 .. image:: images/deployment_github_main.png
     :alt: Github Repository
+
+Enable Github Pages
+-------------------
 
 2. You will need to turn on GitHub pages in order to host your site. To do this, go to the ``Settings`` tab of your repository.
 
@@ -27,6 +33,9 @@ Scroll down to the ``Pages`` section on the left side of the page. Under the sou
     :alt: Github Pages
 
 Your site will now start deploying whenever you make a change. We can check the progress of the deployment by going to the ``Actions`` tab. But first, we'll need to upload our website code.
+
+Upload Your Website Code
+------------------------
 
 3. Go to the ``Code`` tab and click on the ``website`` folder.
 
@@ -70,6 +79,9 @@ Even if you just leave the default message, you must click on the ``Commit chang
 .. image:: images/deployment_github_commit.png
     :alt: Github Commit
 
+Edit the Readme
+---------------
+
 4. Now we need to edit your ``readme.md`` file to update the information about your website. Click on the ``readme.md`` file in the ``website`` folder.
 
 .. image:: images/deployment_github_readme.png
@@ -86,6 +98,9 @@ Click on the pencil icon to edit the file. You will need to fill in the followin
 
 .. image:: images/deployment_github_editme.png
     :alt: Github Readme
+
+Record a Video
+--------------
 
 5. Record a video of your web application running, and make sure you show and address all of the following with a voiceover:
 
@@ -104,9 +119,15 @@ Zoom can be used to record videos; again, just make sure that we are able to see
 
 Upload the video to a website where it can be viewed by the graders, and include the link to the video in both the docstring of the Python file and in the text entry box here.
 
+Upload the Planning Document
+----------------------------
+
 6. Upload your planning document to the website repository in the ``website`` folder. You can do this by clicking on the ``Add file`` button and selecting the file from your computer.
 
 Change the filename of the planning document to something simple and easy to type. You will need to link it in your ``readme.md` file.
+
+View the Deployment
+-------------------
 
 7. When everything is done, you can check out your deployed website. Click on the ``Actions`` link to see the deployments. You can click on the latest deployment to see the logs.
 
@@ -124,6 +145,9 @@ If you see a red X, there was an error. You can click on the error to see what w
     :alt: Github Error
 
 If you see an error, you can try to fix it and push the changes to the repository. The website will automatically update when you push changes to the repository.
+
+Submit on Canvas
+----------------
 
 8. Once you have successfully deployed your website, you can submit the URL of your website to the assignment on Canvas.
 
