@@ -12,6 +12,7 @@ Table of Contents
    students/styling
    reference/reference
    students/help
+   students/deployment
 
 ..
     lib/cloud_sptheme.make_helper

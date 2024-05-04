@@ -22,6 +22,7 @@ full stack websites as you learn to code in Python.
    students/styling
    reference/reference
    students/help
+   students/deployment
    
 
 
