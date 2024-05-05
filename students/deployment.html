@@ -112,30 +112,16 @@ Although normally Github Pages is only useful for hosting frontend websites, Dra
 <p>There are many other ways to style your website, but these are a starting point.</p>
 <p>When you are done, click on the <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> button in the top-right of the page.</p>
 <img alt="Github Editor" src="../_images/deployment_github_editor.png" />
-<p>A box will appear that asks you to write a commit message. This is a message that describes the changes you made to the file. You can write anything you want here, but it is recommended to write something that describes the changes you made.
-Even if you just leave the default message, you must click on the <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> button to save your changes.</p>
+<p>A box will appear that asks you to write a commit message.
+This is a message that describes the changes you made to the file.
+You can write anything you want here, but it is recommended to write something that describes the changes you made.
+For example, you could write <code class="docutils literal notranslate"><span class="pre">Added</span> <span class="pre">website</span></code>.</p>
+<p>Even if you just leave the default message, you must click on the <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> button to save your changes.</p>
 <img alt="Github Commit" src="../_images/deployment_github_commit.png" />
 </section>
-<section id="edit-the-readme">
-<h2>Edit the Readme<a class="headerlink" href="#edit-the-readme" title="Link to this heading">¶</a></h2>
-<ol class="arabic simple" start="4">
-<li><p>Now we need to edit your <code class="docutils literal notranslate"><span class="pre">readme.md</span></code> file to update the information about your website. Click on the <code class="docutils literal notranslate"><span class="pre">readme.md</span></code> file in the <code class="docutils literal notranslate"><span class="pre">website</span></code> folder.</p></li>
-</ol>
-<img alt="Github Readme" src="../_images/deployment_github_readme.png" />
-<p>Click on the pencil icon to edit the file. You will need to fill in the following fields.</p>
-<ul class="simple">
-<li><p>The name of your site</p></li>
-<li><p>What your web application does</p></li>
-<li><p>Your name and UD email address</p></li>
-<li><p>If you got significant help from a website besides the official Drafter documentation, include links along with explanations of how the site helped you. If someone helped you, this is also a nice place to mention them to thank them for their help.</p></li>
-<li><p>The planning document that you created, provided as a file (see below).</p></li>
-<li><p>The URL (address) of the publicly-accessible video (described below) that you uploaded.</p></li>
-</ul>
-<img alt="Github Readme" src="../_images/deployment_github_editme.png" />
-</section>
 <section id="record-a-video">
-<h2>Record a Video<a class="headerlink" href="#record-a-video" title="Link to this heading">¶</a></h2>
-<ol class="arabic simple" start="5">
+<span id="video"></span><h2>Record a Video<a class="headerlink" href="#record-a-video" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple" start="4">
 <li><p>Record a video of your web application running, and make sure you show and address all of the following with a voiceover:</p></li>
 </ol>
 <ul class="simple">
@@ -144,36 +130,114 @@ Even if you just leave the default message, you must click on the <code class="d
 <li><p>What the state of your website looks (i.e., explain the fields of your State dataclass)</p></li>
 <li><p>Make sure that your video is audible and visible. If we cannot see parts or hear parts, we will treat that those parts as if they do not exist.</p></li>
 </ul>
-<p>You do not need to walk through any of the code of your website, but we do want to see all of its features.</p>
-<p>Aim for a video that is 2-5 minutes in length. Do not pad with unnecessary details, but do not skip important parts.</p>
-<p>Think of this video as something you will want to put into a portfolio when you apply for internships and jobs. Try to do a good job.</p>
-<p>Zoom can be used to record videos; again, just make sure that we are able to see and hear everything clearly.</p>
-<p>Upload the video to a website where it can be viewed by the graders, and include the link to the video in both the docstring of the Python file and in the text entry box here.</p>
+<p>Here are some details to keep in mind:</p>
+<ul class="simple">
+<li><p>You do not need to walk through any of the code of your website, but we do want to see all of its features.</p></li>
+<li><p>Aim for a video that is 2-5 minutes in length. Do not pad with unnecessary details, but do not skip important parts.</p></li>
+<li><p>Think of this video as something you will want to put into a portfolio when you apply for internships and jobs. Try to do a good job.</p></li>
+<li><p>Zoom can be used to record videos; again, just make sure that we are able to see and hear everything clearly.</p></li>
+</ul>
+<p>Upload the video to a website where it can be viewed by the graders.
+If the video is not publicly accessible, you will not receive credit for this part of the assignment.
+Copy the URL of the video to paste into your <code class="docutils literal notranslate"><span class="pre">readme.md</span></code> file later.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you want to record the deployed version of your website, you can skip this step and record the video after you have deployed your website (see step <a class="reference internal" href="#view-deployment"><span class="std std-ref">View the Deployment</span></a> ) . Just make sure to record the video before the deadline.</p>
+</div>
 </section>
 <section id="upload-the-planning-document">
-<h2>Upload the Planning Document<a class="headerlink" href="#upload-the-planning-document" title="Link to this heading">¶</a></h2>
-<ol class="arabic simple" start="6">
-<li><p>Upload your planning document to the website repository in the <code class="docutils literal notranslate"><span class="pre">website</span></code> folder. You can do this by clicking on the <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">file</span></code> button and selecting the file from your computer.</p></li>
+<span id="planning-document"></span><h2>Upload the Planning Document<a class="headerlink" href="#upload-the-planning-document" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple" start="5">
+<li><p>Upload your planning document to the website repository in the <code class="docutils literal notranslate"><span class="pre">website</span></code> folder.</p></li>
 </ol>
-<p>Change the filename of the planning document to something simple and easy to type. You will need to link it in your <a href="#id2"><span class="problematic" id="id3">``</span></a>readme.md` file.</p>
+<p>First, find the file that you created in the planning phase of the project.
+It might be a <code class="docutils literal notranslate"><span class="pre">pdf</span></code>, <code class="docutils literal notranslate"><span class="pre">docx</span></code>, <code class="docutils literal notranslate"><span class="pre">png</span></code>, or some other file type.
+Change the filename of the planning document to something simple and easy to type.
+In particular, we suggest you avoid spaces and special characters in the filename.
+For example, if your planning document is called <code class="docutils literal notranslate"><span class="pre">Project</span> <span class="pre">Plan.pdf</span></code>, you could rename it to just <code class="docutils literal notranslate"><span class="pre">plan.pdf</span></code>.</p>
+<p>Next, you will need to upload the file to the repository, inside of the <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder of your website (NOT the <code class="docutils literal notranslate"><span class="pre">website</span></code> folder).
+Open the <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder.</p>
+<img alt="Github Docs" src="../_images/deployment_github_docs.png" />
+<p>You can either drag your file directly into the folder area or click on the <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">file</span></code> button and then <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">files</span></code> to select the file from your computer.
+Once they have been added (“staged”), you can click on the <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> button to save your changes.</p>
+<img alt="Github Upload" src="../_images/deployment_github_upload.png" />
+<p>Once the file is committed, you will see it in the <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder. Make a careful note of the filename, exactly as it is typed.
+In this case, the file is called <code class="docutils literal notranslate"><span class="pre">WebsiteDesign.pdf</span></code></p>
+<img alt="Github Uploaded" src="../_images/deployment_github_added.png" />
+<p>Now we need to link the file in our <code class="docutils literal notranslate"><span class="pre">readme.md</span></code> file.</p>
+</section>
+<section id="edit-the-readme">
+<h2>Edit the Readme<a class="headerlink" href="#edit-the-readme" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple" start="6">
+<li><p>Now we need to edit your <code class="docutils literal notranslate"><span class="pre">readme.md</span></code> file to update the information about your website. Click on the <code class="docutils literal notranslate"><span class="pre">readme.md</span></code> file in the <code class="docutils literal notranslate"><span class="pre">website</span></code> folder.</p></li>
+</ol>
+<img alt="Github Readme" src="../_images/deployment_github_readme.png" />
+<p>Click on the pencil icon to edit the file. You will need to fill in the following fields.</p>
+<ul class="simple">
+<li><p>The name of your site</p></li>
+<li><p>What your web application does</p></li>
+<li><p>Your name and UD email address</p></li>
+<li><p>If you got significant help from a website besides the official Drafter documentation, include links along with explanations of how the site helped you. If someone helped you, this is also a nice place to mention them to thank them for their help. Make sure you provide direct URLs where ever you can.</p></li>
+<li><p>The planning document that you created, provided as a file (see <a class="reference internal" href="#planning-document"><span class="std std-ref">Upload the Planning Document</span></a> above). At the minimum, you need to link to the file by replacing the text in parentheses with the filename of your planning document (e.g., <code class="docutils literal notranslate"><span class="pre">WebsiteDesign.pdf</span></code>). If your planning document is an image, you can also embed it directly in the readme by following one of the guides linked below.</p></li>
+<li><p>The URL (address) of the publicly-accessible video (see <a class="reference internal" href="#video"><span class="std std-ref">Record a Video</span></a> above) that you uploaded, replacing the existing text inside of the angle brackets (<code class="docutils literal notranslate"><span class="pre">&lt;https://my.video.com/&gt;</span></code>) with the URL of your video.</p></li>
+</ul>
+<img alt="Github Readme" src="../_images/deployment_github_editme.png" />
+<p>This file is written in Markdown, which is a simple way to format text. You can use the following syntax to format your text:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">**use</span> <span class="pre">two</span> <span class="pre">asterisks</span> <span class="pre">for</span> <span class="pre">bold</span> <span class="pre">text**</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">*use</span> <span class="pre">one</span> <span class="pre">asterisk</span> <span class="pre">for</span> <span class="pre">italics*</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[This</span> <span class="pre">text</span> <span class="pre">will</span> <span class="pre">be</span> <span class="pre">hyperlinked</span> <span class="pre">to](https://this.url.com/)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">You</span> <span class="pre">can</span> <span class="pre">also</span> <span class="pre">use</span> <span class="pre">backticks</span> <span class="pre">to</span> <span class="pre">`highlight`</span> <span class="pre">code</span> <span class="pre">inline</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">This</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">header</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-</span> <span class="pre">This</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">bullet</span> <span class="pre">point</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1.</span> <span class="pre">This</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">numbered</span> <span class="pre">list</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&gt;</span> <span class="pre">This</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">blockquote</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">---</span> <span class="pre">This</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">horizontal</span> <span class="pre">rule</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">![This</span> <span class="pre">is</span> <span class="pre">an</span> <span class="pre">image](https://this.url.com/image.png)</span></code></p></li>
+</ul>
+<p>You can learn more about Markdown <a class="reference external" href="https://guides.github.com/features/mastering-markdown/">from the Github Guide</a> or the <a class="reference external" href="https://www.markdownguide.org/basic-syntax/">MarkdownGuide</a> .</p>
+<p>When you are done, click on the <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> button to save your changes.</p>
 </section>
 <section id="view-the-deployment">
-<h2>View the Deployment<a class="headerlink" href="#view-the-deployment" title="Link to this heading">¶</a></h2>
+<span id="view-deployment"></span><h2>View the Deployment<a class="headerlink" href="#view-the-deployment" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple" start="7">
 <li><p>When everything is done, you can check out your deployed website. Click on the <code class="docutils literal notranslate"><span class="pre">Actions</span></code> link to see the deployments. You can click on the latest deployment to see the logs.</p></li>
 </ol>
-<img alt="Github Actions" src="students/images/deployment_github_actions.png" />
-<p>If everything is successful, you will see a green checkmark. You can click on the link to see your website.</p>
-<img alt="Github Success" src="students/images/deployment_github_success.png" />
-<p>If you see a red X, there was an error. You can click on the error to see what went wrong.</p>
-<img alt="Github Error" src="students/images/deployment_github_error.png" />
-<p>If you see an error, you can try to fix it and push the changes to the repository. The website will automatically update when you push changes to the repository.</p>
+<img alt="Github Actions" src="../_images/deployment_github_actions.png" />
+<p>If everything is successful, you will see a green checkmark. To actually access your website, you will need to click into the deployment details to get the final URL.
+Click on the green checkmark, and you will be presented with the deployed URL. This is what you will submit on Canvas, but check to make sure your game works!</p>
+<p>Once you have the deployed URL, you can skip down to the last step to submit on Canvas (see <a class="reference internal" href="#submit-on-canvas"><span class="std std-ref">Submit on Canvas</span></a>).</p>
+<img alt="Github Success" src="../_images/deployment_github_success.png" />
+<p>If you see a red X, there was an error.
+You need to click on the red X to get into the job summary, and then click the next red X to get into the deployment logs.</p>
+<img alt="Github Error" src="../_images/deployment_github_error.png" />
+<p>The error below is just an example of what can go wrong.</p>
+<img alt="Github Error" src="../_images/deployment_github_details.png" />
+<p>The screenshot above is just an example of what can go wrong; you might experience something completely different.
+In this particular case, the error is simple - the developer forgot to turn on the Github Pages feature in the settings (step 2).</p>
+<p>If you see an error, you can try to fix it and push the changes to the repository.
+The website will automatically redeploy when you push changes to the repository, and you can check the progress of the new attempt in the Actions tab again.</p>
+</section>
+<section id="view-the-readme">
+<h2>View the Readme<a class="headerlink" href="#view-the-readme" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple" start="8">
+<li><p>If you formatted your <code class="docutils literal notranslate"><span class="pre">readme.md</span></code> file correctly, you will be able to view a nicely formatted version of it.</p></li>
+</ol>
+<p>Take your original deployment URL (e.g., <code class="docutils literal notranslate"><span class="pre">https://ud-s24-cs1.github.io/cs1-website-username/</span></code>) and add <code class="docutils literal notranslate"><span class="pre">docs/</span></code> to the end of it (e.g., <code class="docutils literal notranslate"><span class="pre">https://ud-s24-cs1.github.io/cs1-website-username/docs/</span></code>).</p>
+<img alt="Github Readme View" src="../_images/deployment_github_docs_public.png" />
+<p>Make sure that all of the links work and that the video is visible and audible.
+There should be six sections in the readme: website name, description, author, help resources used, planning document, and video.</p>
 </section>
 <section id="submit-on-canvas">
-<h2>Submit on Canvas<a class="headerlink" href="#submit-on-canvas" title="Link to this heading">¶</a></h2>
-<ol class="arabic simple" start="8">
-<li><p>Once you have successfully deployed your website, you can submit the URL of your website to the assignment on Canvas.</p></li>
+<span id="id2"></span><h2>Submit on Canvas<a class="headerlink" href="#submit-on-canvas" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple" start="9">
+<li><p>Once you have successfully deployed your website, you can submit the URL of your website.</p></li>
 </ol>
+<p>Make sure that you submit the <strong>deployed URL</strong> of your website, which will look something like this: <code class="docutils literal notranslate"><span class="pre">https://ud-s24-cs1.github.io/cs1-website-username/</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Do not the submit the deployed URL with the <code class="docutils literal notranslate"><span class="pre">docs/</span></code> extension or the link to the GitHub repository (e.g., <code class="docutils literal notranslate"><span class="pre">https://github.com/ud-s24-cs1/cs1-website-username</span></code>). Submitting the wrong link will potentially earn you zero points.</p>
+</div>
 </section>
 </section>
 
@@ -198,10 +262,11 @@ Even if you just leave the default message, you must click on the <code class="d
 <li class="toctree-l2"><a class="reference internal" href="#create-the-repository">Create the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#enable-github-pages">Enable Github Pages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#upload-your-website-code">Upload Your Website Code</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#edit-the-readme">Edit the Readme</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#record-a-video">Record a Video</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#upload-the-planning-document">Upload the Planning Document</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#edit-the-readme">Edit the Readme</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#view-the-deployment">View the Deployment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#view-the-readme">View the Readme</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#submit-on-canvas">Submit on Canvas</a></li>
 </ul>
 </li>
