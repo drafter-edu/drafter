@@ -1,5 +1,5 @@
-"""
 TODO: Finish these
+
 - [ ] Fix external links (ExternalLink command?)
 - [X] Client-side server mode
 - [?] Other HTML components
@@ -17,6 +17,7 @@ TODO: Finish these
 - [ ] Text is equal to strings?
 
 Components to develop:
+
 - [x] Image
 - [x] Table
 - [X] Link
@@ -36,5 +37,3 @@ Components to develop:
 - [X] Header
 - [X] TextArea
 - [ ] FileUpload
-"""
-
