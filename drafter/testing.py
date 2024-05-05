@@ -7,6 +7,8 @@ try:
 except:
     bakery = None
 
+import logging
+logger = logging.getLogger('drafter')
 
 @dataclass
 class BakeryTestCase:
@@ -17,17 +19,24 @@ class BakeryTestCase:
     caller: str
 
 
-DEFAULT_STACK_DEPTH = 8
+DEFAULT_STACK_DEPTH = 7
 def get_line_code(depth = DEFAULT_STACK_DEPTH):
     # Load in extract_stack, or provide shim for environments without it.
     try:
         from traceback import extract_stack
         trace = extract_stack()
+        # Find the first assert_equal line
+        for data in trace:
+            line, code = data[1], data[3]
+            if code.strip().startswith('assert_equal'):
+                return line, code
+        # If none found, just try jumping up there and see what we can find
         frame = trace[len(trace) - depth]
         line = frame[1]
         code = frame[3]
         return line, code
-    except Exception:
+    except Exception as e:
+        logger.error(f"Error getting line and code: {e}")
         return None, None
 
 
@@ -60,7 +69,7 @@ class BakeryTests:
 _bakery_tests = BakeryTests()
 if bakery is not None:
     bakery.assertions.get_line_code = _bakery_tests.wrap_get_line_code(bakery.assertions.get_line_code)
-    assert_equal = bakery.assert_equal = _bakery_tests.track_bakery_tests(bakery.assert_equal)
+    bakery.assert_equal = assert_equal = _bakery_tests.track_bakery_tests(bakery.assert_equal)
 else:
     def assert_equal(*args, **kwargs):
         """ Pointless definition of assert_equal to avoid errors """
