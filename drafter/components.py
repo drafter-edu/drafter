@@ -146,7 +146,7 @@ class Image(PageContent, LinkContent):
         self.base_image_folder = BASE_IMAGE_FOLDER
 
     def render(self, current_state, configuration):
-        self.base_image_folder = configuration.image_folder
+        self.base_image_folder = configuration.deploy_image_path
         return super().render(current_state, configuration)
 
     def __str__(self) -> str:
@@ -157,7 +157,7 @@ class Image(PageContent, LinkContent):
             extra_settings['height'] = self.height
         url, external = self._handle_url(self.url)
         if not external:
-            url = self.base_image_folder + '/' + url
+            url = self.base_image_folder + url
         parsed_settings = self.parse_extra_settings(**extra_settings)
         return f"<img src='{url}' {parsed_settings}>"
 

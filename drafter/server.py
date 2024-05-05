@@ -158,11 +158,11 @@ class Server:
         return args, kwargs, ", ".join(representation), button_pressed
 
     def handle_images(self):
-        if self.configuration.image_folder:
-            self.app.route(f"/{self.configuration.image_folder}/<path:path>", 'GET', self.serve_image)
+        if self.configuration.deploy_image_path:
+            self.app.route(f"/{self.configuration.deploy_image_path}/<path:path>", 'GET', self.serve_image)
 
     def serve_image(self, path):
-        return static_file(path, root='./', mimetype='image/png')
+        return static_file(path, root='./' + self.configuration.src_image_folder, mimetype='image/png')
 
     def convert_parameter(self, param, val, expected_types):
         if param in expected_types:

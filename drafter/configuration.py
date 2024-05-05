@@ -31,4 +31,5 @@ class ServerConfiguration:
     style: str = 'skeleton'
     additional_header_content: list[str] = field(default_factory=list)
     additional_css_content: list[str] = field(default_factory=list)
-    image_folder: str = '' if skulpt else 'images'
+    src_image_folder: str = ''
+    deploy_image_path: str = 'website' if skulpt else 'images'
