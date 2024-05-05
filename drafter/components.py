@@ -46,6 +46,9 @@ class PageContent:
         self.extra_settings[attr] = value
         return self
 
+    def render(self, current_state, configuration):
+        return str(self)
+
 
 class LinkContent:
     def _handle_url(self, url, external=None):
@@ -140,6 +143,11 @@ class Image(PageContent, LinkContent):
         self.width = width
         self.height = height
         self.extra_settings = kwargs
+        self.base_image_folder = BASE_IMAGE_FOLDER
+
+    def render(self, current_state, configuration):
+        self.base_image_folder = configuration.image_folder
+        return super().render(current_state, configuration)
 
     def __str__(self) -> str:
         extra_settings = {}
@@ -149,7 +157,7 @@ class Image(PageContent, LinkContent):
             extra_settings['height'] = self.height
         url, external = self._handle_url(self.url)
         if not external:
-            url = BASE_IMAGE_FOLDER + url
+            url = self.base_image_folder + '/' + url
         parsed_settings = self.parse_extra_settings(**extra_settings)
         return f"<img src='{url}' {parsed_settings}>"
 

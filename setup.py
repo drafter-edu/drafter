@@ -15,7 +15,7 @@ setuptools.setup(
     version=__version__,
     python_requires='>=3.7',
     author='acbart',
-    py_modules=['drafter'],
+    packages=['drafter'],
     #package_data={
     #    'websites': [] #'data/emojis.zip']
     #},

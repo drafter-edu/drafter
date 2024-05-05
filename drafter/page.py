@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
+from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
 from drafter.components import PageContent, Link
 
@@ -27,7 +28,7 @@ class Page:
                     raise ValueError("The content of a page must be a list of strings or components."
                                      f" Found {incorrect_type} at index {index} instead.")
 
-    def render_content(self, current_state, framed: bool, title: str) -> str:
+    def render_content(self, current_state, configuration: ServerConfiguration) -> str:
         # TODO: Decide if we want to dump state on the page
         chunked = [
             # f'<input type="hidden" name="{RESTORABLE_STATE_KEY}" value={current_state!r}/>'
@@ -36,11 +37,11 @@ class Page:
             if isinstance(chunk, str):
                 chunked.append(f"<p>{chunk}</p>")
             else:
-                chunked.append(str(chunk))
+                chunked.append(chunk.render(current_state, configuration))
         content = "\n".join(chunked)
         content = f"<form>{content}</form>"
-        if framed:
-            content = (f"<div class='container btlw-header'>{title}</div>"
+        if configuration.framed:
+            content = (f"<div class='container btlw-header'>{configuration.title}</div>"
                        f"<div class='container btlw-container'>{content}</div>")
         return content
 

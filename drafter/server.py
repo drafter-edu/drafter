@@ -8,55 +8,18 @@ import json
 import inspect
 
 from drafter import friendly_urls, PageContent
+from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY, PREVIOUSLY_PRESSED_BUTTON
 from drafter.debug import DebugInformation
-from drafter.setup import DEFAULT_BACKEND, Bottle, abort, request, static_file
+from drafter.setup import Bottle, abort, request, static_file
 from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, get_params, \
     remap_hidden_form_parameters
 from drafter.page import Page
 from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER
 from drafter.urls import remove_url_query_params
 
-
-"""
-Images folder
-    Specific folder
-    Any adjacent file
-Current page title
-CSS style (skeleton, bootstrap, etc.)
-    Additional CSS Files
-    Additional JS Files
-    Additional header content
-Frame style (full, embed)
-
-TODO:
-Custom Error pages
-Shareable link to get a link to the current page
-Download/upload state button
-"""
-
-
-@dataclass
-class ServerConfiguration:
-    # Launch parameters
-    host: str = "localhost"
-    port: int = 8080
-    debug: bool = True
-    # "none", "flask", etc.
-    backend: str = DEFAULT_BACKEND
-    reloader: bool = False
-
-    # Website configuration
-    title: str = "Drafter Website"
-    framed: bool = True
-    skulpt: bool = os.environ.get('DRAFTER_SKULPT', True)
-
-    # Page configuration
-    style: str = 'skeleton'
-    additional_header_content: list[str] = field(default_factory=list)
-    additional_css_content: list[str] = field(default_factory=list)
-
-
+import logging
+logger = logging.getLogger('drafter')
 
 
 class Server:
@@ -74,7 +37,6 @@ class Server:
         self._conversion_record = []
         self.original_routes = []
         self.app = None
-        self.image_folder = '__images'
 
     def reset(self):
         self.routes.clear()
@@ -196,7 +158,8 @@ class Server:
         return args, kwargs, ", ".join(representation), button_pressed
 
     def handle_images(self):
-        self.app.route(f'/{self.image_folder}/<path:path>', 'GET', self.serve_image)
+        if self.configuration.image_folder:
+            self.app.route(f"/{self.configuration.image_folder}/<path:path>", 'GET', self.serve_image)
 
     def serve_image(self, path):
         return static_file(path, root='./', mimetype='image/png')
@@ -258,7 +221,7 @@ class Server:
             self._state = page.state
             visiting_page.update("Rendering Page Content")
             try:
-                content = page.render_content(self.dump_state(), self.configuration.framed, self.configuration.title)
+                content = page.render_content(self.dump_state(), self.configuration)
             except Exception as e:
                 return self.make_error_page("Error rendering content", e, original_function)
             visiting_page.finish("Finished Page Load")
@@ -377,6 +340,13 @@ class Server:
 MAIN_SERVER = Server()
 
 
-def start_server(initial_state=None, server: Server = MAIN_SERVER, **kwargs):
+def get_server_setting(key, default=None, server=MAIN_SERVER):
+    return getattr(server.configuration, key, default)
+
+
+def start_server(initial_state=None, server: Server = MAIN_SERVER, skip=False, **kwargs):
+    if server.configuration.skip or skip:
+        logger.info("Skipping server setup and execution")
+        return
     server.setup(initial_state)
     server.run(**kwargs)

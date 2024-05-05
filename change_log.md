@@ -8,6 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2024-05-05
+
+### Fixed
+
+* Images can now deploy correctly through the CDN
+
+## [1.1.4] - 2024-05-03
+
+### Fixed
+
+* Made error lines much more intelligent
+
+## [1.1.3] - 2024-05-03
+
+### Fixed
+
+* Corrected error line stack trace depth
+
+## [1.1.2] - 2024-05-03
+
+### Added
+
+* You can now run a drafter site from the command line without starting the server (e.g., for just the tests) by setting the DRAFTER_SKIP environment variable
+
 ## [1.1.0] - 2024-04-26
 
 ### Fixed
