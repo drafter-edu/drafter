@@ -3,9 +3,6 @@
 Drafter Documentation for Students
 ===================================
 
-Basic Routing
--------------
-
 This is the Student documentation for the Drafter web framework.
 This file is organized into the following sections:
 
@@ -14,6 +11,8 @@ This file is organized into the following sections:
 3. `Components`_: The different components you can use to build your pages.
 4. `Debug Information`_: How to show and hide the debug information at the bottom of the page.
 
+Basic Routing
+-------------
 
 .. _route:
 
