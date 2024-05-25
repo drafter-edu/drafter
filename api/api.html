@@ -1,0 +1,557 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Full API Documentation &#8212; Drafter 1.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="../_static/documentation_options.js?v=6efca38a"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Deployment" href="../students/deployment.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../students/deployment.html" title="Deployment"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 1.2.0 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="full-api-documentation">
+<h1>Full API Documentation<a class="headerlink" href="#full-api-documentation" title="Link to this heading">¶</a></h1>
+<p>This full API documentation is provided for those who want to understand the
+internals of Drafter and potentially contribute to the project. If you are
+looking for user documentation, please refer to the <a class="reference internal" href="../students/docs.html#fulldocs"><span class="std std-ref">Student Documentation</span></a>.</p>
+<dl class="py function" id="module-drafter.server">
+<dt class="sig sig-object py" id="drafter.server.get_server_setting">
+<span class="sig-name descname"><span class="pre">get_server_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">MAIN_SERVER</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.get_server_setting" title="Link to this definition">¶</a></dt>
+<dd><p>Gets a setting from the server’s configuration. If the setting is not found, the default value is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> – The key to look up in the configuration</p></li>
+<li><p><strong>default</strong> – The default value to return if the key is not found</p></li>
+<li><p><strong>server</strong> – The server to look up the setting in (defaults to the <code class="docutils literal notranslate"><span class="pre">MAIN_SERVER</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value of the setting, or the default value if not found</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.server.start_server">
+<span class="sig-name descname"><span class="pre">start_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Server</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">MAIN_SERVER</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.start_server" title="Link to this definition">¶</a></dt>
+<dd><p>Starts the server with the given initial state and configuration. If the server is set to skip, it will not start.
+Additional keyword arguments will be passed to the server’s run method, and therefore to Bottle. This can be
+used to control things like the <code class="docutils literal notranslate"><span class="pre">port</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_state</strong> – The initial state to start the server with</p></li>
+<li><p><strong>server</strong> – The server to run on, defaulting to <code class="docutils literal notranslate"><span class="pre">MAIN_SERVER</span></code></p></li>
+<li><p><strong>skip</strong> – If True, the server will not start; this is useful for running tests headlessly</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to pass to the server’s run method. See below.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><em>port</em> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) –
+The port to run the server on. Defaults to <code class="docutils literal notranslate"><span class="pre">8080</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class" id="module-drafter.testing">
+<dt class="sig sig-object py" id="drafter.testing.BakeryTestCase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BakeryTestCase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">caller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.testing.BakeryTestCase" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.testing.assert_equal">
+<span class="sig-name descname"><span class="pre">assert_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.testing.assert_equal" title="Link to this definition">¶</a></dt>
+<dd><p>Pointless definition of assert_equal to avoid errors</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.testing.diff_tests">
+<span class="sig-name descname"><span class="pre">diff_tests</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.testing.diff_tests" title="Link to this definition">¶</a></dt>
+<dd><p>Compare two strings and show the differences in a table.</p>
+</dd></dl>
+
+<dl class="py function" id="module-drafter.routes">
+<dt class="sig sig-object py" id="drafter.routes.route">
+<span class="sig-name descname"><span class="pre">route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Server</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">MAIN_SERVER</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.routes.route" title="Link to this definition">¶</a></dt>
+<dd><p>Main function to add a new route to the server. Recommended to use as a decorator.
+Once added, the route will be available at the given URL; the function name will be used if no URL is provided.
+When you go to the URL, the function will be called and its return value will be displayed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – The URL to add the route to. If None, the function name will be used.</p></li>
+<li><p><strong>server</strong> – The server to add the route to. Defaults to the main server.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The modified route function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class" id="module-drafter.page">
+<dt class="sig sig-object py" id="drafter.page.Page">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.page.Page" title="Link to this definition">¶</a></dt>
+<dd><p>A page is a collection of content to be displayed to the user. This content has two critical parts:</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">state</span></code>, which is the current value of the backend server for this user’s session. This is used to
+restore the state of the page when the user navigates back to it. Typically, this will be a dataclass
+or a dictionary, but could also be a list, primitive value, or even None.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">content</span></code>, which is a list of strings and components that will be rendered to the user.</p></li>
+</ul>
+<p>The content of a page can be any combination of strings and components. Strings will be rendered as paragraphs,
+while components will be rendered as their respective HTML. Components should be classes that inherit from
+<code class="docutils literal notranslate"><span class="pre">drafter.components.PageContent</span></code>. If the content is not a list, a ValueError will be raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> – The state of the page. If only one argument is provided, this will default to be <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>content</strong> – The content of the page. Must always be provided as a list of strings and components.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.page.Page.render_content">
+<span class="sig-name descname"><span class="pre">render_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.configuration.ServerConfiguration" title="drafter.configuration.ServerConfiguration"><span class="pre">ServerConfiguration</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#drafter.page.Page.render_content" title="Link to this definition">¶</a></dt>
+<dd><p>Renders the content of the page to HTML. This will include the state of the page, if it is restorable.
+Users should not call this method directly; it will be called on their behalf by the server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> – The current state of the server. This will be used to restore the page if needed.</p></li>
+<li><p><strong>configuration</strong> – The configuration of the server. This will be used to determine how the page is rendered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A string of HTML representing the content of the page.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.page.Page.verify_content">
+<span class="sig-name descname"><span class="pre">verify_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#drafter.page.Page.verify_content" title="Link to this definition">¶</a></dt>
+<dd><p>Verifies that the content of the page is valid. This will check that all links are valid and that
+all components are valid.
+This is not meant to be called by the user; it will be called by the server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>server</strong> – The server to verify the content against.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the content is valid, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-drafter.history">
+<dt class="sig sig-object py" id="drafter.history.ConversionRecord">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConversionRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">converted_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.history.ConversionRecord" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.history.UnchangedRecord">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnchangedRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.history.UnchangedRecord" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.history.VisitedPage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VisitedPage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function:</span> <span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">callable&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">button_pressed:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_page_content:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_state:</span> <span class="pre">Any</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">started:</span> <span class="pre">datetime.datetime</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stopped:</span> <span class="pre">datetime.datetime</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.history.VisitedPage" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function" id="module-drafter.deploy">
+<dt class="sig sig-object py" id="drafter.deploy.hide_debug_information">
+<span class="sig-name descname"><span class="pre">hide_debug_information</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.hide_debug_information" title="Link to this definition">¶</a></dt>
+<dd><p>Hides debug information from the website, so that it will not appear. Useful
+for deployed websites.</p>
+</dd></dl>
+
+<dl class="py class" id="module-drafter.debug">
+<dt class="sig sig-object py" id="drafter.debug.DebugInformation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DebugInformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page_history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.history.VisitedPage" title="drafter.history.VisitedPage"><span class="pre">drafter.history.VisitedPage</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">callable</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conversion_record</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.history.ConversionRecord" title="drafter.history.ConversionRecord"><span class="pre">drafter.history.ConversionRecord</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.debug.DebugInformation" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p id="module-drafter.configuration">TODO:
+Custom Error pages
+Shareable link to get a link to the current page
+Download/upload state button</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.configuration.ServerConfiguration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ServerConfiguration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'localhost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">8080</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'bottle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reloader:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'Drafter</span> <span class="pre">Website'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framed:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skulpt:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'skeleton'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_header_content:</span> <span class="pre">list[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_css_content:</span> <span class="pre">list[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_image_folder:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deploy_image_path:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'images'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.configuration.ServerConfiguration" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the server.</p>
+</dd></dl>
+
+<dl class="py class" id="module-drafter.components">
+<dt class="sig sig-object py" id="drafter.components.Argument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Argument" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.BulletedList">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BulletedList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.BulletedList" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.Button">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Button</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Button" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.CheckBox">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CheckBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.CheckBox" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.Header">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Header" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.HorizontalRule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HorizontalRule</span></span><a class="headerlink" href="#drafter.components.HorizontalRule" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.Image">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Image" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.LineBreak">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LineBreak</span></span><a class="headerlink" href="#drafter.components.LineBreak" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.Link">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Link" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.NumberedList">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NumberedList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.NumberedList" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.PageContent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PageContent</span></span><a class="headerlink" href="#drafter.components.PageContent" title="Link to this definition">¶</a></dt>
+<dd><p>Base class for all content that can be added to a page.
+This class is not meant to be used directly, but rather to be subclassed by other classes.
+Critically, each subclass must implement a <code class="docutils literal notranslate"><span class="pre">__str__</span></code> method that returns the HTML representation.</p>
+<p>Under most circumstances, a string value can be used in place of a <code class="docutils literal notranslate"><span class="pre">PageContent</span></code> object
+(in which case we say it is a <code class="docutils literal notranslate"><span class="pre">Content</span></code> type). However, the <code class="docutils literal notranslate"><span class="pre">PageContent</span></code> object
+allows for more customization and control over the content.</p>
+<p>Ultimately, the <code class="docutils literal notranslate"><span class="pre">PageContent</span></code> object is converted to a string when it is rendered.</p>
+<p>This class also has some helpful methods for verifying URLs and handling attributes/styles.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.SelectBox">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SelectBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.SelectBox" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.Span">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Span</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Span" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.Table">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Table" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.Text">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Text" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.TextArea">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TextArea</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.TextArea" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.TextBox">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TextBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'text'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.TextBox" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p id="module-drafter.styling">TODO:
+- [ ] indent
+- [ ] center
+- [ ] Superscript, subscript
+- [ ] border/margin/padding (all sides)</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.styling.float_left">
+<span class="sig-name descname"><span class="pre">float_left</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a></span></span><a class="headerlink" href="#drafter.styling.float_left" title="Link to this definition">¶</a></dt>
+<dd><p>Floats the component to the left.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>component</strong> – The component to float left</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns the original component (updated)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.styling.float_right">
+<span class="sig-name descname"><span class="pre">float_right</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a></span></span><a class="headerlink" href="#drafter.styling.float_right" title="Link to this definition">¶</a></dt>
+<dd><p>Floats the component to the right.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>component</strong> – The component to float right</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns the original component (updated)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.styling.update_attr">
+<span class="sig-name descname"><span class="pre">update_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a></span></span><a class="headerlink" href="#drafter.styling.update_attr" title="Link to this definition">¶</a></dt>
+<dd><p>Updates the attribute of a component, returning the component (allowing you to chain calls).
+The <code class="docutils literal notranslate"><span class="pre">attr</span></code> property should match the HTML attribute name.</p>
+<p>Example attributes include:
+- id
+- class
+- title</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> – The component to update</p></li>
+<li><p><strong>attr</strong> – The name of the attribute to change</p></li>
+<li><p><strong>value</strong> – The value to set the attribute to (should be a string).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns the original component (updates its values)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.styling.update_style">
+<span class="sig-name descname"><span class="pre">update_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a></span></span><a class="headerlink" href="#drafter.styling.update_style" title="Link to this definition">¶</a></dt>
+<dd><p>Updates the style of a component, returning the component (allowing you to chain calls).
+The <code class="docutils literal notranslate"><span class="pre">style</span></code> property should match the CSS property name.
+Remember to include units in the <code class="docutils literal notranslate"><span class="pre">value</span></code> if they are expected!</p>
+<p>Example style properties include:
+- color
+- background-color
+- font-size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> – The component to update</p></li>
+<li><p><strong>style</strong> – The name of the style property to change</p></li>
+<li><p><strong>value</strong> – The value to set the style property to (should be a string).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns the original component (updates its values)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="../contents.html">Page contents</a></h3>
+    <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../students/installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workbook/index.html">Workbook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/html.html">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/styling.html">Styling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/deployment.html">Deployment</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Full API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.server.get_server_setting"><code class="docutils literal notranslate"><span class="pre">get_server_setting()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.server.start_server"><code class="docutils literal notranslate"><span class="pre">start_server()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.testing.BakeryTestCase"><code class="docutils literal notranslate"><span class="pre">BakeryTestCase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.testing.assert_equal"><code class="docutils literal notranslate"><span class="pre">assert_equal()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.testing.diff_tests"><code class="docutils literal notranslate"><span class="pre">diff_tests()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.routes.route"><code class="docutils literal notranslate"><span class="pre">route()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.page.Page"><code class="docutils literal notranslate"><span class="pre">Page</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.page.Page.render_content"><code class="docutils literal notranslate"><span class="pre">Page.render_content()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.page.Page.verify_content"><code class="docutils literal notranslate"><span class="pre">Page.verify_content()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.history.ConversionRecord"><code class="docutils literal notranslate"><span class="pre">ConversionRecord</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.history.UnchangedRecord"><code class="docutils literal notranslate"><span class="pre">UnchangedRecord</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.history.VisitedPage"><code class="docutils literal notranslate"><span class="pre">VisitedPage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.hide_debug_information"><code class="docutils literal notranslate"><span class="pre">hide_debug_information()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.debug.DebugInformation"><code class="docutils literal notranslate"><span class="pre">DebugInformation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.configuration.ServerConfiguration"><code class="docutils literal notranslate"><span class="pre">ServerConfiguration</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.Argument"><code class="docutils literal notranslate"><span class="pre">Argument</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.BulletedList"><code class="docutils literal notranslate"><span class="pre">BulletedList</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.Button"><code class="docutils literal notranslate"><span class="pre">Button</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.CheckBox"><code class="docutils literal notranslate"><span class="pre">CheckBox</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.Header"><code class="docutils literal notranslate"><span class="pre">Header</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.HorizontalRule"><code class="docutils literal notranslate"><span class="pre">HorizontalRule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.Image"><code class="docutils literal notranslate"><span class="pre">Image</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.LineBreak"><code class="docutils literal notranslate"><span class="pre">LineBreak</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.Link"><code class="docutils literal notranslate"><span class="pre">Link</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.NumberedList"><code class="docutils literal notranslate"><span class="pre">NumberedList</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.PageContent"><code class="docutils literal notranslate"><span class="pre">PageContent</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.SelectBox"><code class="docutils literal notranslate"><span class="pre">SelectBox</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.Span"><code class="docutils literal notranslate"><span class="pre">Span</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.Table"><code class="docutils literal notranslate"><span class="pre">Table</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.Text"><code class="docutils literal notranslate"><span class="pre">Text</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.TextArea"><code class="docutils literal notranslate"><span class="pre">TextArea</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.TextBox"><code class="docutils literal notranslate"><span class="pre">TextBox</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.styling.float_left"><code class="docutils literal notranslate"><span class="pre">float_left()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.styling.float_right"><code class="docutils literal notranslate"><span class="pre">float_right()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.styling.update_attr"><code class="docutils literal notranslate"><span class="pre">update_attr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.styling.update_style"><code class="docutils literal notranslate"><span class="pre">update_style()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div class="sphinxprev">
+    <h4>Previous page</h4>
+    <p class="topless"><a href="../students/deployment.html"
+                          title="Previous page">&larr; Deployment</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/api.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../students/deployment.html" title="Deployment"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 1.2.0 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2023, acbart.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

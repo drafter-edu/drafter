@@ -49,6 +49,9 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
           <a href="html.html" title="HTML"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
@@ -71,6 +74,14 @@
 <span id="fulldocs"></span><h1>Drafter Documentation for Students<a class="headerlink" href="#drafter-documentation-for-students" title="Link to this heading">¶</a></h1>
 <section id="basic-routing">
 <h2>Basic Routing<a class="headerlink" href="#basic-routing" title="Link to this heading">¶</a></h2>
+<p>This is the Student documentation for the Drafter web framework.
+This file is organized into the following sections:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#basic-routing">Basic Routing</a>: How to create routes and pages for your website.</p></li>
+<li><p><a class="reference internal" href="#server-control">Server Control</a>: How to start the server and launch the website.</p></li>
+<li><p><a class="reference internal" href="#components">Components</a>: The different components you can use to build your pages.</p></li>
+<li><p><a class="reference internal" href="#debug-information">Debug Information</a>: How to show and hide the debug information at the bottom of the page.</p></li>
+</ol>
 <dl class="py function" id="route">
 <dt class="sig sig-object py" id="id0">
 <span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-name descname"><span class="pre">route</span></span><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
@@ -117,14 +128,20 @@ string values and <cite>Component</cite> instances.</p></li>
 <span class="sig-name descname"><span class="pre">start_server</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#start_server" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">start_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inital_state</span></span></em><span class="sig-paren">)</span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">start_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8080</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Function to start the server and launch the website. The local URL of the server will be displayed,
 usually defaulting to <a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a>. No code will be executed
 after this call.</p>
 <p>The <cite>initial_state</cite> should match the type of the first parameter for every route. If no <cite>initial_state</cite> is given,
 then the state will initially be <cite>None</cite>.</p>
+<p>For more details, refer to the <a class="reference internal" href="../api/api.html#drafter.server.start_server" title="drafter.server.start_server"><code class="xref py py-func docutils literal notranslate"><span class="pre">drafter.server.start_server()</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>initial_state</strong> – The initial state of the website, usually a dataclass instance. Defaults to <cite>None</cite>.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_state</strong> – The initial state of the website, usually a dataclass instance. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>port</strong> – The port to run the server on. Defaults to <cite>8080</cite>.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -289,7 +306,7 @@ submitted with the button press, and passed as parameters to the linked page.</p
 <li><p><strong>text</strong> (<em>str</em>) – The text to display for the button.</p></li>
 <li><p><strong>url</strong> (<em>str</em><em> or </em><em>function</em>) – Either a string representing the full URL you are linking to (possibly external to the server) or the
 name of a function that is a route on the server (without quotes or calling parentheses).</p></li>
-<li><p><strong>arguments</strong> (<em>list</em><em>[</em><em>Argument</em><em>]</em>) – Any additional arguments to pass to the server when the button is pressed. These should be
+<li><p><strong>arguments</strong> (<em>list</em><em>[</em><a class="reference internal" href="../api/api.html#drafter.components.Argument" title="drafter.components.Argument"><em>Argument</em></a><em>]</em>) – Any additional arguments to pass to the server when the button is pressed. These should be
 <code class="docutils literal notranslate"><span class="pre">Argument</span></code> instances. Defaults to an empty list.</p></li>
 </ul>
 </dd>
@@ -411,6 +428,7 @@ and the history of visited pages.</p>
     <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">How to Install Drafter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workbook/index.html">Workbook</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Drafter Documentation for Students</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#basic-routing">Basic Routing</a><ul>
@@ -455,6 +473,7 @@ and the history of visited pages.</p>
 <li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
 <li class="toctree-l1"><a class="reference internal" href="help.html">More Help</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/api.html">Full API Documentation</a></li>
 </ul>
 
   </div>
@@ -514,6 +533,9 @@ and the history of visited pages.</p>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
         <li class="right" >
           <a href="html.html" title="HTML"
              >next</a> &nbsp; &nbsp;</li>

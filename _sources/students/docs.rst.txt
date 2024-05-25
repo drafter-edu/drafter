@@ -6,6 +6,15 @@ Drafter Documentation for Students
 Basic Routing
 -------------
 
+This is the Student documentation for the Drafter web framework.
+This file is organized into the following sections:
+
+1. `Basic Routing`_: How to create routes and pages for your website.
+2. `Server Control`_: How to start the server and launch the website.
+3. `Components`_: The different components you can use to build your pages.
+4. `Debug Information`_: How to show and hide the debug information at the bottom of the page.
+
+
 .. _route:
 
 .. decorator:: route
@@ -41,6 +50,7 @@ Server Control
 
 .. function:: start_server()
               start_server(inital_state)
+              start_server(initial_state, port=8080)
 
     Function to start the server and launch the website. The local URL of the server will be displayed,
     usually defaulting to `http://localhost:8080/ <http://localhost:8080/>`_. No code will be executed
@@ -49,7 +59,10 @@ Server Control
     The `initial_state` should match the type of the first parameter for every route. If no `initial_state` is given,
     then the state will initially be `None`.
 
+    For more details, refer to the :py:func:`drafter.server.start_server`
+
     :param initial_state: The initial state of the website, usually a dataclass instance. Defaults to `None`.
+    :param port: The port to run the server on. Defaults to `8080`.
 
 
 Components
