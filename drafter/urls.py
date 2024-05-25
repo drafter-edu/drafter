@@ -3,11 +3,12 @@ from urllib.parse import urlencode, urlparse, parse_qs, quote_plus
 
 def merge_url_query_params(url: str, additional_params: dict) -> str:
     """
-    https://stackoverflow.com/a/52373377
+    Merges additional parameters into a URL. If a parameter already exists, it will be overwritten.
+    For more information, see: https://stackoverflow.com/a/52373377
 
-    :param url:
-    :param additional_params:
-    :return:
+    :param url: The URL to merge the parameters into
+    :param additional_params: The parameters to merge into the URL.
+    :return: The URL with the additional parameters
     """
     url_components = urlparse(url)
     original_params = parse_qs(url_components.query, keep_blank_values=True)
@@ -18,6 +19,13 @@ def merge_url_query_params(url: str, additional_params: dict) -> str:
 
 
 def remove_url_query_params(url: str, params_to_remove: set) -> str:
+    """
+    Removes parameters from a URL. If a parameter does not exist, it will be ignored.
+
+    :param url: The URL to remove the parameters from
+    :param params_to_remove: The parameters to remove from the URL
+    :return: The URL with the parameters removed
+    """
     url_components = urlparse(url)
     original_params = parse_qs(url_components.query, keep_blank_values=True)
     merged_params = {k: v for k, v in original_params.items() if k not in params_to_remove}
@@ -26,6 +34,14 @@ def remove_url_query_params(url: str, params_to_remove: set) -> str:
 
 
 def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
+    """
+    Remaps attributes into styles and attributes dictionaries. This is useful for handling style and class attributes.
+    The 'classes' key's vales will be moved to 'class' and joined with a space. Any key prefixed with 'style_' will be
+    moved to the styles dictionary. All other keys will be moved to the attributes dictionary.
+
+    :param attributes: The attributes to remap
+    :return: A tuple of the styles and attributes dictionaries
+    """
     styles, attrs = {}, {}
     # Handle classes keyword
     if 'classes' in attributes:
@@ -45,6 +61,12 @@ def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
 
 
 def friendly_urls(url: str) -> str:
+    """
+    Converts a URL to a friendly URL. This removes the leading slash and converts "index" to "/"
+
+    :param url: The URL to convert
+    :return: The friendly URL
+    """
     if url.strip("/") == "index":
         return "/"
     if not url.startswith('/'):
@@ -54,7 +76,15 @@ def friendly_urls(url: str) -> str:
 
 URL_REGEX = r"^(?:http(s)?://)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$"
 
+
 def check_invalid_external_url(url: str) -> str:
+    """
+    Checks if a URL is a valid external URL. If it is not, it will return an error message. If it is,
+    it will return an empty string.
+
+    :param url: The URL to check
+    :return: An error message if the URL is invalid, otherwise an empty string
+    """
     if url.startswith("file://"):
         return "The URL references a local file on your computer, not a file on a server."
     if re.match(URL_REGEX, url) is not None:

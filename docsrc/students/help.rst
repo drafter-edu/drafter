@@ -7,7 +7,7 @@ More Help
 Actions After Start
 -------------------
 
-Once you call the `start_server()` function, no other code will run until your website finishes.
+Once you call the ``start_server()`` function, no other code will run until your website finishes.
 
 .. code-block:: python
 
@@ -18,5 +18,5 @@ Once you call the `start_server()` function, no other code will run until your w
     start_server()
     print("This line will not execute until the game is over."
 
-If you want to have activity in your website, you have to use the `route` decorator to add
+If you want to have activity in your website, you have to use the ``route`` decorator to add
 routes.

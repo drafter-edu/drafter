@@ -12,6 +12,9 @@ from drafter.setup import DEFAULT_BACKEND
 
 @dataclass
 class ServerConfiguration:
+    """
+    Configuration for the server.
+    """
     # Launch parameters
     host: str = "localhost"
     port: int = 8080

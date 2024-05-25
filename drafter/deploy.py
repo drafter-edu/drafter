@@ -3,6 +3,10 @@ from drafter.page import Page
 
 
 def hide_debug_information():
+    """
+    Hides debug information from the website, so that it will not appear. Useful
+    for deployed websites.
+    """
     MAIN_SERVER.configuration.debug = False
 
 

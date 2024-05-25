@@ -13,6 +13,13 @@ except ImportError:
 
 
 def _hijack_bottle():
+    """
+    Hijacks the Bottle backend to allow for custom stderr messages.
+    This allows us to suppress some of the Bottle messages and replace them with our own.
+
+    Called automatically when the module is imported, as a first step to ensure that the Bottle backend is available.
+    Fails silently if Bottle is not available.
+    """
     def _stderr(*args):
         try:
             if args:

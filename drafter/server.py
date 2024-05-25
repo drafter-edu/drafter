@@ -24,8 +24,9 @@ logger = logging.getLogger('drafter')
 
 class Server:
     _page_history: list[tuple[VisitedPage, Any]]
+    _custom_name = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, _custom_name=None, **kwargs):
         self.routes = {}
         self._handle_route = {}
         self.configuration = ServerConfiguration(**kwargs)
@@ -37,6 +38,12 @@ class Server:
         self._conversion_record = []
         self.original_routes = []
         self.app = None
+        self._custom_name = _custom_name
+
+    def __repr__(self):
+        if self._custom_name:
+            return self._custom_name
+        return f"Server({self.configuration!r})"
 
     def reset(self):
         self.routes.clear()
@@ -337,14 +344,37 @@ class Server:
         return content.generate()
 
 
-MAIN_SERVER = Server()
+MAIN_SERVER = Server(_custom_name="MAIN_SERVER")
 
 
 def get_server_setting(key, default=None, server=MAIN_SERVER):
+    """
+    Gets a setting from the server's configuration. If the setting is not found, the default value is returned.
+
+    :param key: The key to look up in the configuration
+    :param default: The default value to return if the key is not found
+    :param server: The server to look up the setting in (defaults to the ``MAIN_SERVER``)
+    :return: The value of the setting, or the default value if not found
+    """
     return getattr(server.configuration, key, default)
 
 
 def start_server(initial_state=None, server: Server = MAIN_SERVER, skip=False, **kwargs):
+    """
+    Starts the server with the given initial state and configuration. If the server is set to skip, it will not start.
+    Additional keyword arguments will be passed to the server's run method, and therefore to Bottle. This can be
+    used to control things like the ``port``.
+
+    :param initial_state: The initial state to start the server with
+    :param server: The server to run on, defaulting to ``MAIN_SERVER``
+    :param skip: If True, the server will not start; this is useful for running tests headlessly
+    :param \**kwargs: Additional keyword arguments to pass to the server's run method. See below.
+    :return: None
+
+    :Keyword Arguments:
+        * *port* (``int``) --
+          The port to run the server on. Defaults to ``8080``
+    """
     if server.configuration.skip or skip:
         logger.info("Skipping server setup and execution")
         return

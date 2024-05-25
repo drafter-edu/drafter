@@ -1,5 +1,5 @@
 from dataclasses import dataclass, is_dataclass, fields
-from typing import Any
+from typing import Any, Union
 # from urllib.parse import quote_plus
 import json
 import html
@@ -15,6 +15,19 @@ BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "
 
 
 class PageContent:
+    """
+    Base class for all content that can be added to a page.
+    This class is not meant to be used directly, but rather to be subclassed by other classes.
+    Critically, each subclass must implement a ``__str__`` method that returns the HTML representation.
+
+    Under most circumstances, a string value can be used in place of a ``PageContent`` object
+    (in which case we say it is a ``Content`` type). However, the ``PageContent`` object
+    allows for more customization and control over the content.
+
+    Ultimately, the ``PageContent`` object is converted to a string when it is rendered.
+
+    This class also has some helpful methods for verifying URLs and handling attributes/styles.
+    """
     EXTRA_ATTRS = []
     extra_settings: dict
 
@@ -48,6 +61,9 @@ class PageContent:
 
     def render(self, current_state, configuration):
         return str(self)
+
+
+Content = Union[PageContent, str]
 
 
 class LinkContent:

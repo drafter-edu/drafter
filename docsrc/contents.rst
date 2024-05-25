@@ -6,6 +6,7 @@ Table of Contents
 
    students/installation
    quickstart/quickstart
+   workbook/index
    examples/examples
    students/docs
    students/html
@@ -13,6 +14,7 @@ Table of Contents
    reference/reference
    students/help
    students/deployment
+   api/api
 
 ..
     lib/cloud_sptheme.make_helper

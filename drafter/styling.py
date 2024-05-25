@@ -5,26 +5,68 @@ TODO:
 - [ ] Superscript, subscript
 - [ ] border/margin/padding (all sides)
 """
-from drafter.components import PageContent, Text
+from typing import Union
+from drafter.components import PageContent, Text, Content
 
 
-def update_style(component, style, value):
+def update_style(component: Content, style: str, value: str) -> PageContent:
+    """
+    Updates the style of a component, returning the component (allowing you to chain calls).
+    The ``style`` property should match the CSS property name.
+    Remember to include units in the ``value`` if they are expected!
+
+    Example style properties include:
+    - color
+    - background-color
+    - font-size
+
+    :param component: The component to update
+    :param style: The name of the style property to change
+    :param value: The value to set the style property to (should be a string).
+    :return: Returns the original component (updates its values)
+    """
     if isinstance(component, str):
         component = Text(component)
     return component.update_style(style, value)
 
 
-def update_attr(component, attr, value):
+def update_attr(component: Content, attr: str, value: str) -> PageContent:
+    """
+    Updates the attribute of a component, returning the component (allowing you to chain calls).
+    The ``attr`` property should match the HTML attribute name.
+
+    Example attributes include:
+    - id
+    - class
+    - title
+
+    :param component: The component to update
+    :param attr: The name of the attribute to change
+    :param value: The value to set the attribute to (should be a string).
+    :return: Returns the original component (updates its values)
+    """
     if isinstance(component, str):
         component = Text(component)
     return component.update_attr(attr, value)
 
 
-def float_right(component: PageContent) -> PageContent:
+def float_right(component: Content) -> PageContent:
+    """
+    Floats the component to the right.
+
+    :param component: The component to float right
+    :return: Returns the original component (updated)
+    """
     return update_style(component, 'float', 'right')
 
 
 def float_left(component: PageContent) -> PageContent:
+    """
+    Floats the component to the left.
+
+    :param component: The component to float left
+    :return: Returns the original component (updated)
+    """
     return update_style(component, 'float', 'left')
 
 
