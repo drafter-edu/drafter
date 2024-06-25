@@ -37,6 +37,8 @@ Your site will now start deploying whenever you make a change. We can check the 
 Upload Your Website Code
 ------------------------
 
+Warning: if your instructor has requirements about commit messages, review those before doing this step. **Commit messages are very hard to change after the fact.** 
+
 3. Go to the ``Code`` tab and click on the ``website`` folder.
 
 .. image:: images/deployment_github_code.png
@@ -52,7 +54,7 @@ When you click on the file, it will show you the contents of the file. You can e
 .. image:: images/deployment_github_edit.png
     :alt: Github Edit Main
 
-The editor area allows you to paste in your code. We recommend that you add the following lines of code to your project.
+The editor area allows you to paste in your code. We recommend that you add the following lines of code to your project. This code must go below the `import drafter` line, but above the `start_server` line. As a matter of fact, `start_server` must always be on the last line in your code, because code below it will not run while your website is up.
 
 .. code-block:: python
 
@@ -62,11 +64,13 @@ The editor area allows you to paste in your code. We recommend that you add the 
 
 These lines of code:
 
-1. Hide all of the debug information
+1. Hide all of the debug information - you may want to comment this line out while you do any debugging
 2. Set the title of the website in the tab
 3. Make the website stretch to fill the whole screen, instead of just the small box.
 
-There are many other ways to style your website, but these are a starting point.
+There are many other ways to style your website, but these are a starting point. 
+
+You can change the filename here, but your instructor may penalize you if you do so.
 
 When you are done, click on the ``Commit changes`` button in the top-right of the page.
 
@@ -76,7 +80,7 @@ When you are done, click on the ``Commit changes`` button in the top-right of th
 A box will appear that asks you to write a commit message.
 This is a message that describes the changes you made to the file.
 You can write anything you want here, but it is recommended to write something that describes the changes you made.
-For example, you could write ``Added website``.
+For example, you could write ``Added website``. If you leave the default message, your instructor may penalize you.
 
 Even if you just leave the default message, you must click on the ``Commit changes`` button to save your changes.
 
