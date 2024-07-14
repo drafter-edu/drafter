@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>HTML &#8212; Drafter 1.2.1 documentation</title>
+    <title>Components Cheatsheet &#8212; Drafter 1.2.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
@@ -35,9 +35,7 @@
     
 
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Styling" href="styling.html" />
-    <link rel="prev" title="Drafter Documentation for Students" href="docs.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
     <div class="relbar-top">
@@ -51,15 +49,9 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
-        <li class="right" >
-          <a href="styling.html" title="Styling"
-             accesskey="N">next</a> &nbsp; &nbsp;</li>
-        <li class="right" >
-          <a href="docs.html" title="Drafter Documentation for Students"
-             accesskey="P">previous</a> &nbsp; &nbsp;</li>
     <li><a href="../contents.html">Drafter 1.2.1 documentation</a> &#187;</li>
 
-        <li class="nav-item nav-item-this"><a href="">HTML</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Components Cheatsheet</a></li> 
       </ul>
     </div>
     </div>
@@ -70,39 +62,10 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <section id="html">
-<span id="id1"></span><h1>HTML<a class="headerlink" href="#html" title="Link to this heading">¶</a></h1>
-<p>Ultimately, Pages in Drafter become HTML. Although you can use functions like <code class="docutils literal notranslate"><span class="pre">Button</span></code> and <code class="docutils literal notranslate"><span class="pre">Link</span></code> to create HTML
-elements, you can also embed HTML in the string literals that you return for the page. For example, the following
-page will render a button that links to the Google homepage:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-
-<span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">index</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">([</span>
-        <span class="s2">&quot;&lt;h1&gt;Go to Google&lt;/h1&gt;&quot;</span><span class="p">,</span>
-        <span class="s1">&#39;&lt;a href=&quot;http://www.google.com&quot;&gt;Google&lt;/a&gt;&#39;</span>
-    <span class="p">])</span>
-
-<span class="n">start_server</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>This is a very simple example, but it demonstrates how you can use HTML to create pages. You can also use HTML to
-modify text, add images, and more.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-
-<span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">index</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">([</span>
-        <span class="s2">&quot;&lt;strong&gt;This text&lt;/strong&gt; will be bolded. &lt;br&gt;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;&lt;em&gt;This text&lt;/em&gt; will be italicized. &lt;br&gt;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;&lt;u&gt;This text&lt;/u&gt; will be underlined. &lt;br&gt;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;&lt;s&gt;This text&lt;/s&gt; will be strikethrough. &lt;br&gt;&quot;</span><span class="p">,</span>
-    <span class="p">])</span>
-
-<span class="n">start_server</span><span class="p">()</span>
-</pre></div>
-</div>
+  <section id="components-cheatsheet">
+<h1>Components Cheatsheet<a class="headerlink" href="#components-cheatsheet" title="Link to this heading">¶</a></h1>
+<p>This is a cheatsheet for the Components in Drafter.
+For a more detailed listing, check out: _components_detailed</p>
 </section>
 
 
@@ -113,35 +76,25 @@ modify text, add images, and more.</p>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
     <h3><a href="../contents.html">Page contents</a></h3>
-    <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">How to Install Drafter</a></li>
+    <ul>
+<li class="toctree-l1"><a class="reference internal" href="../students/installation.html">How to Install Drafter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workbook/index.html">Workbook</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docs.html">Drafter Documentation for Students</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">HTML</a></li>
-<li class="toctree-l1"><a class="reference internal" href="styling.html">Styling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
-<li class="toctree-l1"><a class="reference internal" href="help.html">More Help</a></li>
-<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/html.html">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/styling.html">Styling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/deployment.html">Deployment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/api.html">Full API Documentation</a></li>
 </ul>
 
   </div>
-  <div class="sphinxprev">
-    <h4>Previous page</h4>
-    <p class="topless"><a href="docs.html"
-                          title="Previous page">&larr; Drafter Documentation for Students</a></p>
-  </div>
-  <div class="sphinxnext">
-    <h4>Next page</h4>
-    <p class="topless"><a href="styling.html"
-                          title="Next page">&rarr; Styling</a></p>
-  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/students/html.rst.txt"
+      <li><a href="../_sources/reference/components.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -187,15 +140,9 @@ modify text, add images, and more.</p>
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
-        <li class="right" >
-          <a href="styling.html" title="Styling"
-             >next</a> &nbsp; &nbsp;</li>
-        <li class="right" >
-          <a href="docs.html" title="Drafter Documentation for Students"
-             >previous</a> &nbsp; &nbsp;</li>
     <li><a href="../contents.html">Drafter 1.2.1 documentation</a> &#187;</li>
 
-        <li class="nav-item nav-item-this"><a href="">HTML</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Components Cheatsheet</a></li> 
       </ul>
     </div>
     </div>

@@ -63,6 +63,7 @@ Server Control
     :param initial_state: The initial state of the website, usually a dataclass instance. Defaults to `None`.
     :param port: The port to run the server on. Defaults to `8080`.
 
+.. _components_detailed:
 
 Components
 ----------
