@@ -20,3 +20,5 @@ sphinx-autobuild
 sphinx-tabs
 tqdm
 twine
+
+matplotlib

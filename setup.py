@@ -22,6 +22,9 @@ setuptools.setup(
     author_email='acbart@udel.edu',
     description='Student-friendly full stack web development library.',
     install_requires=REQUIREMENTS,
+    extras_requires={
+        "plot": ["matplotlib"],
+    },
     license='MIT',
     long_description=long_description,
     long_description_content_type='text/markdown',
