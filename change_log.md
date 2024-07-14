@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2024-07-14
+
+### Added
+
+* Added a `MatPlotLibPlot` component to display MatPlotLib plots in the browser
+
 ## [1.2.0] - 2024-05-05
 
 ### Fixed
