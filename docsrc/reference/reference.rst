@@ -5,3 +5,4 @@ Reference Lists
     :maxdepth: 2
 
     colors
+    components
