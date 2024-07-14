@@ -86,29 +86,279 @@ the same component, but with additional styling applied.</p>
 <p>The above example shows how to use the <code class="docutils literal notranslate"><span class="pre">float_right</span></code> function to make
 the button align on the right hand side of the screen.</p>
 <p>The following functions are available:</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="float_left">
+<span class="sig-name descname"><span class="pre">float_left</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#float_left" title="Link to this definition">¶</a></dt>
+<dd><p>Makes the component “float” to the left, allowing other components to wrap around it.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="float_right">
+<span class="sig-name descname"><span class="pre">float_right</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#float_right" title="Link to this definition">¶</a></dt>
+<dd><p>Makes the component “float” to the right, so that it aligns to the right side of the screen.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bold">
+<span class="sig-name descname"><span class="pre">bold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bold" title="Link to this definition">¶</a></dt>
+<dd><p>Makes the text bold (increasing the font weight and making it darker). Usually used to indicate importance.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="italic">
+<span class="sig-name descname"><span class="pre">italic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#italic" title="Link to this definition">¶</a></dt>
+<dd><p>Makes the text italic (slanted to the right). Usually used to indicate emphasis.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="underline">
+<span class="sig-name descname"><span class="pre">underline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#underline" title="Link to this definition">¶</a></dt>
+<dd><p>Adds an underline to the text. Usually used to indicate that the text is a link, so use sparingly.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="strikethrough">
+<span class="sig-name descname"><span class="pre">strikethrough</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strikethrough" title="Link to this definition">¶</a></dt>
+<dd><p>Adds a line through the text. Usually used to indicate that the text is no longer relevant.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monospace">
+<span class="sig-name descname"><span class="pre">monospace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monospace" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the font to a monospace font (all the characters will be the same width). Usually used to indicate that the text is code.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="small_font">
+<span class="sig-name descname"><span class="pre">small_font</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#small_font" title="Link to this definition">¶</a></dt>
+<dd><p>Makes the font size smaller. Usually used for less important text.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="large_font">
+<span class="sig-name descname"><span class="pre">large_font</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#large_font" title="Link to this definition">¶</a></dt>
+<dd><p>Makes the font size larger. Usually used for more important text. Consider using a header instead.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="change_color">
+<span class="sig-name descname"><span class="pre">change_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_color" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the text color. The color can be a named color (e.g. “red”) or a hex code (e.g. “#FF0000”).
+See the <a href="#id2"><span class="problematic" id="id3">`colors`_</span></a> page for available HTML colors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>color</strong> (<em>str</em>) – The color to change the text to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="change_background_color">
+<span class="sig-name descname"><span class="pre">change_background_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_background_color" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the background color of the component (the <code class="docutils literal notranslate"><span class="pre">background-color</span></code> CSS attribute). The color can be a named color (e.g. “red”) or a hex code (e.g. “#FF0000”).
+See the <a href="#id4"><span class="problematic" id="id5">`colors`_</span></a> page for available HTML colors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>color</strong> (<em>str</em>) – The color to change the background to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="change_text_size">
+<span class="sig-name descname"><span class="pre">change_text_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_text_size" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the text size. The size must be a string followed by the units (e.g. “16px”) or an integer (e.g. 16).
+If an integer is given, the units are assumed to be pixels. Valid units are:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">float_left</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">float_right</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">bold</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">italic</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">underline</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">strikethrough</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">monospace</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">small_font</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">large_font</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">change_color</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">change_background_color</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">change_text_size</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">change_text_font</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">change_text_align</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">change_text_decoration</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">change_text_transform</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">change_margin</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">change_border</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">change_padding</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">change_width</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">change_height</span></code></p></li>
+<li><p>px: Pixels</p></li>
+<li><p>em: Relative to the font size of the element</p></li>
+<li><p>rem: Relative to the font size of the root element</p></li>
+<li><p>%: Percentage of the parent element’s font size</p></li>
 </ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>size</strong> (<em>int</em><em> or </em><em>str</em>) – The size to change the text to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="change_text_font">
+<span class="sig-name descname"><span class="pre">change_text_font</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_text_font" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the font of the text. The font must be a valid font name (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;Arial&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Times</span> <span class="pre">New</span> <span class="pre">Roman&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Courier</span> <span class="pre">New&quot;</span></code>).
+See the <a href="#id6"><span class="problematic" id="id7">`fonts`_</span></a> page for available fonts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>font</strong> (<em>str</em>) – The font to change the text to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="change_text_align">
+<span class="sig-name descname"><span class="pre">change_text_align</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alignment</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_text_align" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the text alignment. The alignment must be one of the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">left</span></code>: Aligns the text to the left</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">right</span></code>: Aligns the text to the right</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">center</span></code>: Centers the text</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">justify</span></code>: Justifies the text (evenly spaces the words)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>alignment</strong> (<em>str</em>) – The alignment to change the text to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="change_text_decoration">
+<span class="sig-name descname"><span class="pre">change_text_decoration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_text_decoration" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the text decoration. The decoration must be one of the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">none</span></code>: No decoration</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">underline</span></code>: Adds an underline</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">overline</span></code>: Adds a line over the text</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">line-through</span></code>: Adds a line through the text</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>decoration</strong> (<em>str</em>) – The decoration to change the text to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="change_text_transform">
+<span class="sig-name descname"><span class="pre">change_text_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_text_transform" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the text transformation. The transformation must be one of the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">none</span></code>: No transformation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uppercase</span></code>: Converts the text to uppercase</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lowercase</span></code>: Converts the text to lowercase</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">capitalize</span></code>: Capitalizes the first letter of each word</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>transform</strong> (<em>str</em>) – The transformation to change the text to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="change_margin">
+<span class="sig-name descname"><span class="pre">change_margin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_margin" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the margin of the component. The margin is the space around the component (as opposed to its padding,
+which is the space inside the component). The margin must be a string of 1-4 numbers followed by the units (e.g. “16px”) or an integer (e.g. 16),
+separated by spaces.</p>
+<p>The margin must be a string followed by the units (e.g. “16px”) or an integer (e.g. 16).
+If an integer is given, the units are assumed to be pixels. Valid units are:</p>
+<ul class="simple">
+<li><p>px: Pixels</p></li>
+<li><p>em: Relative to the font size of the element</p></li>
+<li><p>rem: Relative to the font size of the root element</p></li>
+<li><p>%: Percentage of the parent element’s font size</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">change_margin</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;16px&quot;</span><span class="p">)</span>  <span class="c1"># Adds a 16px margin to all sides</span>
+<span class="n">change_margin</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;16px 8px&quot;</span><span class="p">)</span>  <span class="c1"># Adds a 16px margin to the top and bottom, and an 8px margin to the left and right</span>
+<span class="n">change_margin</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;16px 8px 4px 2px&quot;</span><span class="p">)</span>  <span class="c1"># Adds a 16px margin to the top, 8px to the right, 4px to the bottom, and 2px to the left</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>margin</strong> (<em>int</em><em> or </em><em>str</em>) – The margin to change the component to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="change_border">
+<span class="sig-name descname"><span class="pre">change_border</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_border" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the border of the component. The border is a string that can be one of the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">none</span></code>: No border</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">solid</span></code>: A solid line border</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dotted</span></code>: A dotted line border</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dashed</span></code>: A dashed line border</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">double</span></code>: A double line border</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">groove</span></code>: A 3D grooved border</p></li>
+</ul>
+<p>Additionally, a border can have a width and color. The width must be a string followed by the units (e.g. “1px”) or an integer (e.g. 1).
+The color can be a named color (e.g. “red”) or a hex code (e.g. “#FF0000”); see the <a href="#id8"><span class="problematic" id="id9">`colors`_</span></a> page for available HTML colors.
+The format is <code class="docutils literal notranslate"><span class="pre">&quot;style</span> <span class="pre">width</span> <span class="pre">color&quot;</span></code>. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">change_border</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;solid 1px red&quot;</span><span class="p">)</span>  <span class="c1"># Adds a solid 1px red border</span>
+<span class="n">change_border</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;dotted 2px blue&quot;</span><span class="p">)</span>  <span class="c1"># Adds a dotted 2px blue border</span>
+<span class="n">change_border</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;double 3px green&quot;</span><span class="p">)</span>  <span class="c1"># Adds a double 3px green border</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>border</strong> (<em>str</em>) – The border to change the component to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="change_padding">
+<span class="sig-name descname"><span class="pre">change_padding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_padding" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the padding of the component. The padding is the space inside the component (as opposed to its margin,
+which is the space around the component). The padding must be a string of 1-4 numbers followed by the units (e.g. “16px”) or an integer (e.g. 16),</p>
+<p>The padding must be a string followed by the units (e.g. “16px”) or an integer (e.g. 16).
+If an integer is given, the units are assumed to be pixels. Valid units are:</p>
+<ul class="simple">
+<li><p>px: Pixels</p></li>
+<li><p>em: Relative to the font size of the element</p></li>
+<li><p>rem: Relative to the font size of the root element</p></li>
+<li><p>%: Percentage of the parent element’s font size</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">change_padding</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;16px&quot;</span><span class="p">)</span>  <span class="c1"># Adds a 16px padding to all sides</span>
+<span class="n">change_padding</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;16px 8px&quot;</span><span class="p">)</span>  <span class="c1"># Adds a 16px padding to the top and bottom, and an 8px padding to the left and right</span>
+<span class="n">change_padding</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;16px 8px 4px 2px&quot;</span><span class="p">)</span>  <span class="c1"># Adds a 16px padding to the top, 8px to the right, 4px to the bottom, and 2px to the left</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>padding</strong> (<em>int</em><em> or </em><em>str</em>) – The padding to change the component to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="change_width">
+<span class="sig-name descname"><span class="pre">change_width</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_width" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the width of the component. The width must be a string followed by the units (e.g. “16px”) or an integer (e.g. 16).
+If an integer is given, the units are assumed to be pixels. Valid units are:</p>
+<ul class="simple">
+<li><p>px: Pixels</p></li>
+<li><p>em: Relative to the font size of the element</p></li>
+<li><p>rem: Relative to the font size of the root element</p></li>
+<li><p>%: Percentage of the parent element’s font size</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>width</strong> (<em>int</em><em> or </em><em>str</em>) – The width to change the component to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="change_height">
+<span class="sig-name descname"><span class="pre">change_height</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_height" title="Link to this definition">¶</a></dt>
+<dd><p>Changes the height of the component. The height must be a string followed by the units (e.g. “16px”) or an integer (e.g. 16).
+If an integer is given, the units are assumed to be pixels. Valid units are:</p>
+<ul class="simple">
+<li><p>px: Pixels</p></li>
+<li><p>em: Relative to the font size of the element</p></li>
+<li><p>rem: Relative to the font size of the root element</p></li>
+<li><p>%: Percentage of the parent element’s font size</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>height</strong> (<em>int</em><em> or </em><em>str</em>) – The height to change the component to.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="keyword-parameters">
 <h2>Keyword Parameters<a class="headerlink" href="#keyword-parameters" title="Link to this heading">¶</a></h2>
@@ -116,7 +366,7 @@ the button align on the right hand side of the screen.</p>
 <cite>style_</cite> prefixed keyword parameters. For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Quit&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">style_text_color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="nb">float</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Quit&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">style_text_color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">style_float</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
     <span class="p">])</span>
 </pre></div>
 </div>
@@ -181,7 +431,30 @@ using the <code class="docutils literal notranslate"><span class="pre">classes</
 <li class="toctree-l1"><a class="reference internal" href="docs.html">Drafter Documentation for Students</a></li>
 <li class="toctree-l1"><a class="reference internal" href="html.html">HTML</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Styling</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#styling-functions">Styling Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#styling-functions">Styling Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#float_left"><code class="docutils literal notranslate"><span class="pre">float_left()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#float_right"><code class="docutils literal notranslate"><span class="pre">float_right()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bold"><code class="docutils literal notranslate"><span class="pre">bold()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#italic"><code class="docutils literal notranslate"><span class="pre">italic()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#underline"><code class="docutils literal notranslate"><span class="pre">underline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#strikethrough"><code class="docutils literal notranslate"><span class="pre">strikethrough()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monospace"><code class="docutils literal notranslate"><span class="pre">monospace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#small_font"><code class="docutils literal notranslate"><span class="pre">small_font()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#large_font"><code class="docutils literal notranslate"><span class="pre">large_font()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#change_color"><code class="docutils literal notranslate"><span class="pre">change_color()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#change_background_color"><code class="docutils literal notranslate"><span class="pre">change_background_color()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#change_text_size"><code class="docutils literal notranslate"><span class="pre">change_text_size()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#change_text_font"><code class="docutils literal notranslate"><span class="pre">change_text_font()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#change_text_align"><code class="docutils literal notranslate"><span class="pre">change_text_align()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#change_text_decoration"><code class="docutils literal notranslate"><span class="pre">change_text_decoration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#change_text_transform"><code class="docutils literal notranslate"><span class="pre">change_text_transform()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#change_margin"><code class="docutils literal notranslate"><span class="pre">change_margin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#change_border"><code class="docutils literal notranslate"><span class="pre">change_border()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#change_padding"><code class="docutils literal notranslate"><span class="pre">change_padding()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#change_width"><code class="docutils literal notranslate"><span class="pre">change_width()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#change_height"><code class="docutils literal notranslate"><span class="pre">change_height()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#keyword-parameters">Keyword Parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#css-style-tags">CSS Style Tags</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#css-classes">CSS Classes</a></li>
