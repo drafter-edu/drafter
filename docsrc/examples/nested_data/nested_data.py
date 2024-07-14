@@ -15,9 +15,9 @@ def index(state: list[Dog]) -> Page:
     return Page(state, [
         "There are " + str(len(state)) + " dogs",
         "What do you want to do?",
-        SubmitButton("Add a dog", add_dog_page),
+        Button("Add a dog", add_dog_page),
         "View the dogs.",
-        SubmitButton("View the dogs", view_dogs_page)
+        Button("View the dogs", view_dogs_page)
     ])
 
 
@@ -30,8 +30,8 @@ def add_dog_page(state: list[Dog]) -> Page:
         TextBox("age"),
         "What is the dog's breed?",
         SelectBox("breed", ["corgi", "schnauzer", "mutt"]),
-        SubmitButton("Add this dog", finish_adding_dog_page),
-        SubmitButton("Go back", index)
+        Button("Add this dog", finish_adding_dog_page),
+        Button("Go back", index)
     ])
 
 
@@ -46,7 +46,7 @@ def view_dogs_page(state: list[Dog]) -> Page:
     return Page(state, [
         "Here are the dogs:",
         Table(state),
-        SubmitButton("Go back", index)
+        Button("Go back", index)
     ])
 
 
