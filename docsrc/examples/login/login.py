@@ -30,8 +30,8 @@ def ask_login(state: State) -> Page:
         TextBox("username", state.username),
         "What is your password?",
         TextBox("password"),
-        SubmitButton("Log in", finish_login),
-        SubmitButton("Go back", index)
+        Button("Log in", finish_login),
+        Button("Go back", index)
     ])
 
 def check_password(username: str, password: str) -> bool:
@@ -55,7 +55,7 @@ def finish_login(state: State, username: str, password: str) -> Page:
 def reject_login(state: State) -> Page:
     return Page(state, [
         "Incorrect username or password.",
-        SubmitButton("Go back", index)
+        Button("Go back", index)
     ])
 
 @route
