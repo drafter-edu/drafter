@@ -2,7 +2,7 @@ Components Cheatsheet
 =====================
 
 This is a cheatsheet for the Components in Drafter.
-For a more detailed listing, check out: _components_detailed
+For a more detailed listing, check out: `_components_detailed`_
 
 ======== =======================
 Function Parameters
