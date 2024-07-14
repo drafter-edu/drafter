@@ -287,6 +287,19 @@ class Span(PageContent):
 
 
 @dataclass
+class Div(PageContent):
+    def __init__(self, *args):
+        self.content = args
+
+    def __str__(self) -> str:
+        return f"<div>{''.join(str(item) for item in self.content)}</div>"
+
+
+Division = Div
+Box = Div
+
+
+@dataclass
 class Button(PageContent, LinkContent):
     text: str
     url: str

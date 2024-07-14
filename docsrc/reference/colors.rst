@@ -1,7 +1,9 @@
+.. _colors:
+
 HTML Colors
 -----------
 
-Make a list of HTML colors here
+A list of the common HTML fonts and their names.
 
 .. raw:: html
 
