@@ -29,4 +29,5 @@ Header(body, level) `h1` to `h6`
 Table(data) `table`
 Span(...components) `span`
 Argument(name, value) `input`
+MatPlotLibPlot() `img`
 ======== =======================
