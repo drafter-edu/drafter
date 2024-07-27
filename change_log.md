@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2024-07-27
+
+### Added
+
+* Declared the package as providing types
+
 ## [1.2.1] - 2024-07-14
 
 ### Added
