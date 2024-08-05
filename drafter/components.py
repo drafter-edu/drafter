@@ -15,6 +15,12 @@ try:
 except ImportError:
     _has_matplotlib = False
 
+try:
+    from PIL import Image as PILImage
+    _has_pillow = True
+except ImportError:
+    _has_pillow = False
+
 
 BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "tabindex", "value",
                   "onclick", "ondblclick", "onmousedown", "onmouseup", "onmouseover", "onmousemove", "onmouseout",
@@ -174,12 +180,26 @@ class Image(PageContent, LinkContent):
         self.base_image_folder = configuration.deploy_image_path
         return super().render(current_state, configuration)
 
+    def _handle_pil_image(self, image):
+        if not _has_pillow or isinstance(image, str):
+            return False, image
+
+        image_data = io.BytesIO()
+        image.save(image_data, format="PNG")
+        image_data.seek(0)
+        figure = base64.b64encode(image_data.getvalue()).decode('utf-8')
+        figure = f"data:image/png;base64,{figure}"
+        return True, figure
+
     def __str__(self) -> str:
         extra_settings = {}
         if self.width is not None:
             extra_settings['width'] = self.width
         if self.height is not None:
             extra_settings['height'] = self.height
+        was_pil, url = self._handle_pil_image(self.url)
+        if was_pil:
+            return f"<img src='{url}' {self.parse_extra_settings(**extra_settings)}>"
         url, external = self._handle_url(self.url)
         if not external:
             url = self.base_image_folder + url
@@ -463,5 +483,19 @@ class Download(PageContent):
         self.content = content
         self.content_type = content_type
 
+    def _handle_pil_image(self, image):
+        if not _has_pillow or isinstance(image, str):
+            return False, image
+
+        image_data = io.BytesIO()
+        image.save(image_data, format="PNG")
+        image_data.seek(0)
+        figure = base64.b64encode(image_data.getvalue()).decode('utf-8')
+        figure = f"data:image/png;base64,{figure}"
+        return True, figure
+
     def __str__(self):
+        was_pil, url = self._handle_pil_image(self.content)
+        if was_pil:
+            return f'<a download="{self.filename}" href="{url}">{self.text}</a>'
         return f'<a download="{self.filename}" href="data:{self.content_type},{self.content}">{self.text}</a>'

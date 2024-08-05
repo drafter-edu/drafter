@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2024-08-05
+
+### Added
+
+* The `Image` component now supports PIL images
+* The `Download` component also supports PIL images being provided as the `contents`
+
 ## [1.3.0] - 2024-08-05
 
 ### Added
