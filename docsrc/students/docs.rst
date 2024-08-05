@@ -293,6 +293,51 @@ Components
                 MatPlotLibPlot()
             ])
 
+.. function:: Download(text, filename, contents)
+              Download(text, filename, contents, content_type)
+
+    A download link for the user to download a file. The ``text`` is what will be displayed for the link, the ``filename``
+    is the name of the file that will be downloaded, and the ``contents`` is the actual contents of the file. The
+    ``content_type`` is the MIME type of the file, which will be used to determine how the file is downloaded. If no
+    ``content_type`` is given, then it will default to ``text/plain``.
+
+    This is useful for allowing users to download files from your website, such as PDFs, images, or other data.
+    For example, you might generate a text file and allow the user to download it.
+
+    .. code-block:: python
+
+        Download("Download File", "file.txt", "This is the contents of the file.")
+
+    Or a JSON file:
+
+    .. code-block:: python
+
+        import json
+        data = [1, 2, 4, "hello", {"key": "value"}]
+        Download("Download JSON", "data.json", json.dumps(data), "application/json")
+
+    External hyperlinks are supported too.
+    If you want to have them download a URL of a video, for example, you could do:
+
+    .. code-block:: python
+
+        Download("Download Video", "video.mp4", "http://example.com/video.mp4", "video/mp4")
+
+    Local files are not automatically provided, though. If you want to provide a local file, you will need to read the
+    file and provide the contents as a string.
+
+    You can find a list of common MIME types `here <https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types>`_.
+
+    :param text: The text to display for the download link.
+    :type text: str
+    :param filename: The name of the file that will be downloaded.
+    :type filename: str
+    :param contents: The contents of the file that will be downloaded. This should be a string.
+    :type contents: str
+    :param content_type: The MIME type of the file. Defaults to ``text/plain``.
+    :type content_type: str
+
+
 Debug Information
 -----------------
 

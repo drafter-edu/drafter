@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2024-08-05
+
+### Added
+
+* New `Download` component to allow for downloading user generated files.
+
 ## [1.2.2] - 2024-07-27
 
 ### Added

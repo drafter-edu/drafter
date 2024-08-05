@@ -448,3 +448,20 @@ class MatPlotLibPlot(PageContent):
             return figure
         else:
             raise ValueError(f"Unsupported format {self.extra_matplotlib_settings['format']}")
+
+
+@dataclass
+class Download(PageContent):
+    text: str
+    filename: str
+    content: str
+    content_type: str = "text/plain"
+
+    def __init__(self, text: str, filename: str, content: str, content_type: str = "text/plain"):
+        self.text = text
+        self.filename = filename
+        self.content = content
+        self.content_type = content_type
+
+    def __str__(self):
+        return f'<a download="{self.filename}" href="data:{self.content_type},{self.content}">{self.text}</a>'
