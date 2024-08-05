@@ -30,4 +30,5 @@ Table(data) `table`
 Span(...components) `span`
 Argument(name, value) `input`
 MatPlotLibPlot() `img`
+Download(text, filename, contents) `a`
 ======== =======================
