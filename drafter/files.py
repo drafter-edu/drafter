@@ -46,6 +46,15 @@ BASIC_STYLE = """
     div.btlw-container img {
         display: block;
     }
+    
+    div.btlw-header .btlw-reset {
+        float: right;
+        cursor: pointer;
+        background-color: white;
+        padding: 4px;
+        text-decoration: none;
+        color: black;
+    }
 </style>
 """
 SKELETON_COMPRESSED = "<style>" + gzip.decompress(base64.b64decode(

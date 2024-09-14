@@ -556,31 +556,5 @@ class FileUpload(PageContent):
             self.extra_settings['accept'] = ", ".join(accept)
 
     def __str__(self):
-        file_input_name = f"{self.name}--FILE"
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        input_hidden = f"<input type='hidden' name={self.name!r} id={self.name!r} value='' />"
-        # Note: Do not include name field, to prevent submission with form
-        input_button = f"<input type='file' name={file_input_name!r} id={file_input_name!r} {parsed_settings} />"
-        manage_files_js_logic = f"""
-        <script>
-            document.querySelector('#{file_input_name}').addEventListener('change',
-                function () {{
-                    const fileButton = document.querySelector('#{file_input_name}');
-                    const fileInput = document.querySelector('#{self.name}');
-                    // Read all files into an object, once all promises are resolved then JSON.stringify the object
-                    const files = Array.from(fileButton.files).map(file => {{
-                        return new Promise((resolve, reject) => {{
-                            const reader = new FileReader();
-                            reader.onload = () => resolve({{name: file.name, type: file.type, data: reader.result}});
-                            reader.onerror = reject;
-                            reader.readAsDataURL(file);
-                        }});
-                    }});
-                    Promise.all(files).then(fileData => {{
-                        fileInput.value = JSON.stringify(fileData);
-                    }});
-                }} 
-            );
-        </script>
-        """
-        return f"{input_hidden}{input_button}{manage_files_js_logic}"
+        return f"<input type='file' name={self.name!r} {parsed_settings} />"

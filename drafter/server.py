@@ -7,6 +7,8 @@ from typing import Any
 import json
 import inspect
 
+import bottle
+
 from drafter import friendly_urls, PageContent
 from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY, PREVIOUSLY_PRESSED_BUTTON
@@ -17,6 +19,7 @@ from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, Convers
 from drafter.page import Page
 from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER
 from drafter.urls import remove_url_query_params
+from drafter.image_support import HAS_PILLOW, PILImage
 
 import logging
 logger = logging.getLogger('drafter')
@@ -32,6 +35,7 @@ class Server:
         self.configuration = ServerConfiguration(**kwargs)
         self._state = None
         self._initial_state = None
+        self._initial_state_type = None
         self._state_history = []
         self._state_frozen_history = []
         self._page_history = []
@@ -50,6 +54,9 @@ class Server:
 
     def dump_state(self):
         return json.dumps(dehydrate_json(self._state))
+
+    def load_from_state(self, state, state_type):
+        return rehydrate_json(json.loads(state), state_type)
 
     def restore_state_if_available(self, original_function):
         params = get_params()
@@ -72,9 +79,18 @@ class Server:
         self.routes[url] = func
         self._handle_route[url] = self._handle_route[func] = func
 
+    def reset(self):
+        self._state = self.load_from_state(self._initial_state, self._initial_state_type)
+        self._state_history.clear()
+        self._state_frozen_history.clear()
+        self._page_history.clear()
+        self._conversion_record.clear()
+        return self.routes['/']()
+
     def setup(self, initial_state=None):
-        self._initial_state = initial_state
         self._state = initial_state
+        self._initial_state = self.dump_state()
+        self._initial_state_type = type(initial_state)
         self.app = Bottle()
 
         # Setup error pages
@@ -102,6 +118,7 @@ class Server:
         # Setup routes
         if not self.routes:
             raise ValueError("No routes have been defined.\nDid you remember the @route decorator?")
+        self.app.route("/--reset", 'GET', self.reset)
         for url, func in self.routes.items():
             self.app.route(url, 'GET', func)
             self.app.route(url, "POST", func)
@@ -120,8 +137,6 @@ class Server:
         kwargs = dict(**kwargs)
         button_pressed = ""
         params = get_params()
-        print(list(params.items()))
-        print(list(request.files.items()))
         if SUBMIT_BUTTON_KEY in params:
             button_pressed = params.pop(SUBMIT_BUTTON_KEY)
         elif PREVIOUSLY_PRESSED_BUTTON in params:
@@ -174,6 +189,22 @@ class Server:
     def serve_image(self, path):
         return static_file(path, root='./' + self.configuration.src_image_folder, mimetype='image/png')
 
+    def try_special_conversions(self, value, target_type):
+        if isinstance(value, bottle.FileUpload):
+            if target_type == bytes:
+                return target_type(value.file.read())
+            elif target_type == str:
+                try:
+                    return value.file.read().decode('utf-8')
+                except UnicodeDecodeError as e:
+                    raise ValueError(f"Could not decode file {value.filename} as utf-8. Perhaps the file is not the type that you expected, or the parameter type is inappropriate?") from e
+            elif target_type == dict:
+                return {'filename': value.filename, 'content': value.file.read()}
+            elif HAS_PILLOW and issubclass(target_type, PILImage.Image):
+                image = PILImage.open(value.file)
+                return image
+        return target_type(value)
+
     def convert_parameter(self, param, val, expected_types):
         if param in expected_types:
             expected_type = expected_types[param]
@@ -185,7 +216,8 @@ class Server:
                 expected_type = expected_type.__origin__
             if not isinstance(val, expected_type):
                 try:
-                    converted_arg = expected_types[param](val)
+                    target_type = expected_types[param]
+                    converted_arg = self.try_special_conversions(val, target_type)
                     self._conversion_record.append(ConversionRecord(param, val, expected_types[param], converted_arg))
                 except Exception as e:
                     try:
@@ -335,8 +367,10 @@ class Server:
 
 
     def make_error_page(self, title, error, original_function):
-        tb = traceback.format_exc()
-        new_message = f"{title}.\nError in {original_function.__name__}:\n{error}\n\n\n{tb}"
+        tb = html.escape(traceback.format_exc())
+        new_message = (f"""{title}.\n"""
+                       f"""Error in {original_function.__name__}:\n"""
+                       f"""{html.escape(str(error))}\n\n\n{tb}""")
         abort(500, new_message)
 
     def flash_warning(self, message):

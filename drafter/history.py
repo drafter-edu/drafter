@@ -1,4 +1,5 @@
 import json
+import html
 import base64
 import io
 from dataclasses import dataclass, is_dataclass, replace, asdict, fields
@@ -20,9 +21,9 @@ class ConversionRecord:
     converted_value: Any
 
     def as_html(self):
-        return (f"<li><code>{self.parameter}</code>: "
-                f"<code>{self.value!r}</code> &rarr; "
-                f"<code>{self.converted_value!r}</code></li>")
+        return (f"<li><code>{html.escape(self.parameter)}</code>: "
+                f"<code>{html.escape(repr(self.value))}</code> &rarr; "
+                f"<code>{html.escape(repr(self.converted_value))}</code></li>")
 
 @dataclass
 class UnchangedRecord:
@@ -31,8 +32,8 @@ class UnchangedRecord:
     expected_type: Any = None
 
     def as_html(self):
-        return (f"<li><code>{self.parameter}</code>: "
-                f"<code>{self.value!r}</code></li>")
+        return (f"<li><code>{html.escape(self.parameter)}</code>: "
+                f"<code>{html.escape(repr(self.value))}</code></li>")
 
 
 def format_page_content(content, width=80):
@@ -93,7 +94,9 @@ def dehydrate_json(value):
         return {f.name: dehydrate_json(getattr(value, f.name))
                 for f in fields(value)}
     elif HAS_PILLOW and isinstance(value, PILImage.Image):
-        return value.tobytes().decode('latin1')
+        with io.BytesIO() as output:
+            value.save(output, format='PNG')
+            return output.getvalue().decode('latin1')
     raise ValueError(
         f"Error while serializing state: The {value!r} is not a int, str, float, bool, list, or dataclass.")
 
@@ -107,7 +110,7 @@ def rehydrate_json(value, new_type):
         elif hasattr(new_type, '__origin__') and getattr(new_type, '__origin__') == list:
             return value
     elif isinstance(value, str):
-        if HAS_PILLOW and issubclass(new_type, PILImage):
+        if HAS_PILLOW and issubclass(new_type, PILImage.Image):
             return PILImage.open(io.BytesIO(value.encode('latin1')))
         return value
     elif isinstance(value, (int, float, bool)) or value is None:
@@ -131,6 +134,9 @@ def rehydrate_json(value, new_type):
 
 def get_params():
     if hasattr(request.params, 'decode'):
-        return request.params.decode('utf-8')
+        params = request.params.decode('utf-8')
     else:
-        return request.params
+        params = request.params
+    for file_object in request.files:
+        params[file_object] = request.files[file_object]
+    return params

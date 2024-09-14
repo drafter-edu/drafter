@@ -64,9 +64,22 @@ class Page:
         content = "\n".join(chunked)
         content = f"<form method='POST' enctype='multipart/form-data'>{content}</form>"
         if configuration.framed:
-            content = (f"<div class='container btlw-header'>{configuration.title}</div>"
+            reset_button = self.make_reset_button()
+            content = (f"<div class='container btlw-header'>{configuration.title}{reset_button}</div>"
                        f"<div class='container btlw-container'>{content}</div>")
         return content
+
+    def make_reset_button(self) -> str:
+        """
+        Creates a reset button that has the "reset" icon and title text that says "Resets the page to its original state.".
+        Simply links to the "--reset" URL.
+
+        :return: A string of HTML representing the reset button.
+        """
+        return '''<a href="--reset" class="btlw-reset" 
+                    title="Resets the page to its original state. Any data entered will be lost."
+                    onclick="return confirm('This will reset the page to its original state. Any data entered will be lost. Are you sure you want to continue?');"
+                    >⟳</a>'''
 
     def verify_content(self, server) -> bool:
         """

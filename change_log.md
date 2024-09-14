@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2024-09-14
+
+### Added
+
+* Added a "reset" button in the topright corner to reset the state and clear out the old history
+* Can now have Pillow images in State
+* Proper file handling support; this changes buttons to now POST requests instead
+* Added `Row` component, `Pre`/`PreformattedText` components
+
+### Fixed
+
+* When outputing the current state, properly escape angle brackets
+* You can now add styles and attributes to `Div` and `Span` components
+
 ## [1.3.1] - 2024-08-05
 
 ### Added
