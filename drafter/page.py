@@ -62,7 +62,7 @@ class Page:
             else:
                 chunked.append(chunk.render(current_state, configuration))
         content = "\n".join(chunked)
-        content = f"<form>{content}</form>"
+        content = f"<form method='POST' enctype='multipart/form-data'>{content}</form>"
         if configuration.framed:
             content = (f"<div class='container btlw-header'>{configuration.title}</div>"
                        f"<div class='container btlw-container'>{content}</div>")

@@ -27,6 +27,7 @@ setuptools.setup(
     install_requires=REQUIREMENTS,
     extras_requires={
         "plot": ["matplotlib"],
+        "images": ["Pillow"],
     },
     license='MIT',
     long_description=long_description,

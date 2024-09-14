@@ -8,18 +8,13 @@ import html
 
 from drafter.constants import LABEL_SEPARATOR, SUBMIT_BUTTON_KEY, JSON_DECODE_SYMBOL
 from drafter.urls import remap_attr_styles, friendly_urls, check_invalid_external_url, merge_url_query_params
+from drafter.image_support import HAS_PILLOW
 
 try:
     import matplotlib.pyplot as plt
     _has_matplotlib = True
 except ImportError:
     _has_matplotlib = False
-
-try:
-    from PIL import Image as PILImage
-    _has_pillow = True
-except ImportError:
-    _has_pillow = False
 
 
 BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "tabindex", "value",
@@ -181,7 +176,7 @@ class Image(PageContent, LinkContent):
         return super().render(current_state, configuration)
 
     def _handle_pil_image(self, image):
-        if not _has_pillow or isinstance(image, str):
+        if not HAS_PILLOW or isinstance(image, str):
             return False, image
 
         image_data = io.BytesIO()
@@ -299,24 +294,52 @@ class HorizontalRule(PageContent):
 
 @dataclass
 class Span(PageContent):
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self.content = args
+        self.extra_settings = kwargs
 
     def __str__(self) -> str:
-        return f"<span>{''.join(str(item) for item in self.content)}</span>"
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        return f"<span {parsed_settings}>{''.join(str(item) for item in self.content)}</span>"
 
 
 @dataclass
 class Div(PageContent):
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self.content = args
+        self.extra_settings = kwargs
 
     def __str__(self) -> str:
-        return f"<div>{''.join(str(item) for item in self.content)}</div>"
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        return f"<div {parsed_settings}>{''.join(str(item) for item in self.content)}</div>"
 
 
 Division = Div
 Box = Div
+
+
+@dataclass
+class Pre(PageContent):
+    def __init__(self, *args, **kwargs):
+        self.content = args
+        self.extra_settings = kwargs
+
+    def __str__(self) -> str:
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        return f"<pre {parsed_settings}>{''.join(str(item) for item in self.content)}</pre>"
+
+
+PreformattedText = Pre
+
+
+@dataclass
+class Row(Div):
+    def __init__(self, *args, **kwargs):
+        self.content = args
+        self.extra_settings = kwargs
+        self.extra_settings['style_display'] = "flex"
+        self.extra_settings['style_flex_direction'] = "row"
+        self.extra_settings['style_align_items'] = "center"
 
 
 @dataclass
@@ -391,7 +414,9 @@ class Table(PageContent):
         for field in fields(self.rows):
             value = getattr(self.rows, field.name)
             result.append(
-                [f"<code>{field.name}</code>", f"<code>{field.type.__name__}</code>", f"<code>{value!r}</code>"])
+                [f"<code>{html.escape(field.name)}</code>",
+                 f"<code>{html.escape(field.type.__name__)}</code>",
+                 f"<code>{html.escape(repr(value))}</code>"])
         self.rows = result
         if not self.header:
             self.header = ["Field", "Type", "Current Value"]
@@ -484,7 +509,7 @@ class Download(PageContent):
         self.content_type = content_type
 
     def _handle_pil_image(self, image):
-        if not _has_pillow or isinstance(image, str):
+        if not HAS_PILLOW or isinstance(image, str):
             return False, image
 
         image_data = io.BytesIO()
@@ -499,3 +524,63 @@ class Download(PageContent):
         if was_pil:
             return f'<a download="{self.filename}" href="{url}">{self.text}</a>'
         return f'<a download="{self.filename}" href="data:{self.content_type},{self.content}">{self.text}</a>'
+
+
+class FileUpload(PageContent):
+    """
+    A file upload component that allows users to upload files to the server.
+
+    This works by creating a hidden input field that stores the file data as a JSON string.
+    That input is sent, but the file data is not sent directly.
+
+    The accept field can be used to specify the types of files that can be uploaded.
+    It accepts either a literal string (e.g. "image/*") or a list of strings (e.g. ["image/png", "image/jpeg"]).
+    You can either provide MIME types, extensions, or extensions without a period (e.g., "png", ".jpg").
+
+    To have multiple files uploaded, use the `multiple` attribute, which will cause
+    the corresponding parameter to be a list of files.
+    """
+    name: str
+    EXTRA_ATTRS = ["accept", "capture", "multiple", "required"]
+
+    def __init__(self, name: str, accept: Union[str, list[str]] = None, **kwargs):
+        self.name = name
+        self.extra_settings = kwargs
+
+        # Parse accept options
+        if accept is not None:
+            if isinstance(accept, str):
+                accept = [accept]
+            accept= [f".{ext}" if "/" not in ext and not ext.startswith(".") else ext
+                     for ext in accept]
+            self.extra_settings['accept'] = ", ".join(accept)
+
+    def __str__(self):
+        file_input_name = f"{self.name}--FILE"
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        input_hidden = f"<input type='hidden' name={self.name!r} id={self.name!r} value='' />"
+        # Note: Do not include name field, to prevent submission with form
+        input_button = f"<input type='file' name={file_input_name!r} id={file_input_name!r} {parsed_settings} />"
+        manage_files_js_logic = f"""
+        <script>
+            document.querySelector('#{file_input_name}').addEventListener('change',
+                function () {{
+                    const fileButton = document.querySelector('#{file_input_name}');
+                    const fileInput = document.querySelector('#{self.name}');
+                    // Read all files into an object, once all promises are resolved then JSON.stringify the object
+                    const files = Array.from(fileButton.files).map(file => {{
+                        return new Promise((resolve, reject) => {{
+                            const reader = new FileReader();
+                            reader.onload = () => resolve({{name: file.name, type: file.type, data: reader.result}});
+                            reader.onerror = reject;
+                            reader.readAsDataURL(file);
+                        }});
+                    }});
+                    Promise.all(files).then(fileData => {{
+                        fileInput.value = JSON.stringify(fileData);
+                    }});
+                }} 
+            );
+        </script>
+        """
+        return f"{input_hidden}{input_button}{manage_files_js_logic}"

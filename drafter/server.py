@@ -104,6 +104,7 @@ class Server:
             raise ValueError("No routes have been defined.\nDid you remember the @route decorator?")
         for url, func in self.routes.items():
             self.app.route(url, 'GET', func)
+            self.app.route(url, "POST", func)
         if '/' not in self.routes:
             first_route = list(self.routes.values())[0]
             self.app.route('/', 'GET', first_route)
@@ -119,6 +120,8 @@ class Server:
         kwargs = dict(**kwargs)
         button_pressed = ""
         params = get_params()
+        print(list(params.items()))
+        print(list(request.files.items()))
         if SUBMIT_BUTTON_KEY in params:
             button_pressed = params.pop(SUBMIT_BUTTON_KEY)
         elif PREVIOUSLY_PRESSED_BUTTON in params:

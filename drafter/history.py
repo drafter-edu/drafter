@@ -1,4 +1,6 @@
 import json
+import base64
+import io
 from dataclasses import dataclass, is_dataclass, replace, asdict, fields
 from dataclasses import field as dataclass_field
 from datetime import datetime
@@ -8,6 +10,7 @@ import pprint
 from drafter.constants import LABEL_SEPARATOR, JSON_DECODE_SYMBOL
 from drafter.setup import request
 from drafter.testing import DIFF_INDENT_WIDTH
+from drafter.image_support import HAS_PILLOW, PILImage
 
 @dataclass
 class ConversionRecord:
@@ -79,7 +82,6 @@ class VisitedPage:
         return (f"<strong>Current Route:</strong><br>Route function: <code>{function_name}</code><br>"
                 f"URL: <href='{self.url}'><code>{self.url}</code></href>")
 
-
 def dehydrate_json(value):
     if isinstance(value, (list, set, tuple)):
         return [dehydrate_json(v) for v in value]
@@ -90,19 +92,25 @@ def dehydrate_json(value):
     elif is_dataclass(value):
         return {f.name: dehydrate_json(getattr(value, f.name))
                 for f in fields(value)}
+    elif HAS_PILLOW and isinstance(value, PILImage.Image):
+        return value.tobytes().decode('latin1')
     raise ValueError(
         f"Error while serializing state: The {value!r} is not a int, str, float, bool, list, or dataclass.")
 
 
 def rehydrate_json(value, new_type):
+    # TODO: More validation that the structure is consistent; what if the target is not these?
     if isinstance(value, list):
         if hasattr(new_type, '__args__'):
             element_type = new_type.__args__
             return [rehydrate_json(v, element_type) for v in value]
         elif hasattr(new_type, '__origin__') and getattr(new_type, '__origin__') == list:
             return value
-    elif isinstance(value, (int, str, float, bool)) or value is None:
-        # TODO: More validation that the structure is consistent; what if the target is not these?
+    elif isinstance(value, str):
+        if HAS_PILLOW and issubclass(new_type, PILImage):
+            return PILImage.open(io.BytesIO(value.encode('latin1')))
+        return value
+    elif isinstance(value, (int, float, bool)) or value is None:
         return value
     elif isinstance(value, dict):
         if hasattr(new_type, '__args__'):
