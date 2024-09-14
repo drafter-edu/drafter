@@ -1,6 +1,7 @@
 from dataclasses import dataclass, is_dataclass
 from typing import Any
 import inspect
+import html
 
 from drafter.constants import RESTORABLE_STATE_KEY, PREVIOUSLY_PRESSED_BUTTON
 from drafter.history import ConversionRecord, VisitedPage, format_page_content
@@ -143,4 +144,7 @@ class DebugInformation:
         if is_dataclass(state):
             return str(Table(state))
         else:
-            return str(Table([[f"<code>{type(state).__name__}</code>", f"<code>{state}</code>"]]))
+            return str(Table([[
+                f"<code>{html.escape(type(state).__name__)}</code>",
+                f"<code>{html.escape(repr(state))}</code>"
+            ]]))
