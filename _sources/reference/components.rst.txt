@@ -18,6 +18,7 @@ SelectBox(name, options) `select`
 SelectBox(name, options, default_value) `select`
 CheckBox(name) `input`
 CheckBox(name, default_value) `input`
+FileUpload(name) `input`
 LineBreak() `br`
 HorizontalRule() `hr`
 Button(text, url) `button`
@@ -28,6 +29,9 @@ Header(body) `h1`
 Header(body, level) `h1` to `h6`
 Table(data) `table`
 Span(...components) `span`
+Div(...components) `div`
+Row(...components) `div`
+PreformattedText(text) `pre`
 Argument(name, value) `input`
 MatPlotLibPlot() `img`
 Download(text, filename, contents) `a`

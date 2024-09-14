@@ -7,14 +7,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Drafter Documentation for Students &#8212; Drafter 1.3.1 documentation</title>
+    <title>Drafter Documentation for Students &#8212; Drafter 1.4.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=bb516dca"></script>
+    <script src="../_static/documentation_options.js?v=9172181d"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -57,7 +57,7 @@
         <li class="right" >
           <a href="../examples/nested_data.html" title="Nested Data"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.3.1 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.4.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Documentation for Students</a></li> 
       </ul>
@@ -476,6 +476,63 @@ file and provide the contents as a string.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="Div">
+<span class="sig-name descname"><span class="pre">Div</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">...components</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Div" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="Row">
+<span class="sig-name descname"><span class="pre">Row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">...components</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Row" title="Link to this definition">¶</a></dt>
+<dd><p>A division or row of components. The <cite>components</cite> can be any number of strings or <cite>Component</cite> instances, which will
+be rendered in the division or row. This is useful for grouping multiple components together.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>components</strong> (<em>str</em><em> | </em><em>Component</em>) – The components to display in the division or row. Each component should be a string or a <cite>Component</cite>
+instance. You do not pass them in as a list, but as separate arguments (like the <code class="docutils literal notranslate"><span class="pre">print</span></code>)
+function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="PreformattedText">
+<span class="sig-name descname"><span class="pre">PreformattedText</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#PreformattedText" title="Link to this definition">¶</a></dt>
+<dd><p>Preformatted text to display on the page. The <cite>text</cite> is the text to display, which will be rendered in a monospaced
+font. This is useful for displaying code, logs, or other text that needs to be displayed exactly as it is written.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – The text to display in the preformatted text. This will be rendered in a monospaced font.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="FileUpload">
+<span class="sig-name descname"><span class="pre">FileUpload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#FileUpload" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FileUpload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accept</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>A file upload component for the user to upload a file. The <cite>name</cite> is the name of the file upload component, which will
+be used to identify the file when the user submits the form (and becomes a parameter to the linked page).</p>
+<p>Be mindful of the target type of the parameter. If the file is regular text, then the parameter should be a <code class="docutils literal notranslate"><span class="pre">str</span></code>;
+if the file is binary data, then the parameter should be a <code class="docutils literal notranslate"><span class="pre">bytes</span></code>.
+If you are accepting an image (e.g., <code class="docutils literal notranslate"><span class="pre">FileUpload(&quot;new_image&quot;,</span> <span class="pre">&quot;image/*&quot;)</span></code>), then you can use the <cite>PIL</cite> library to
+convert the image to a format that can be displayed on the page. If you can trust the user to upload only images,
+then you can make the parameter a <code class="docutils literal notranslate"><span class="pre">PIL.Image</span></code> object; otherwise you should leave the parameter as a <code class="docutils literal notranslate"><span class="pre">bytes</span></code>
+and convert the image to a displayable format in the route.</p>
+<p>The <cite>accept</cite> parameter is a string representing the file types that the user can upload. This should be a comma-separated
+list of MIME types, such as <code class="docutils literal notranslate"><span class="pre">&quot;image/*,.pdf&quot;</span></code>. If no <cite>accept</cite> is given, then the user can upload any file type.
+You can also pass a list of strings, which will be joined with commas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the file upload component, which will be used to identify the file when the user submits the form.
+Make sure this is a valid Python identifier (start with a letter followed only by letters, numerals,
+and underscores). This must match the same parameter name in the corresponding linked route.</p></li>
+<li><p><strong>accept</strong> (<em>str</em><em> | </em><em>list</em><em>[</em><em>str</em><em>]</em>) – The file types that the user can upload. This should be a comma-separated list of MIME types.
+Defaults to <cite>None</cite>, which will allow the user to upload any file type.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="debug-information">
 <h2>Debug Information<a class="headerlink" href="#debug-information" title="Link to this heading">¶</a></h2>
@@ -539,6 +596,10 @@ and the history of visited pages.</p>
 <li class="toctree-l3"><a class="reference internal" href="#Argument"><code class="docutils literal notranslate"><span class="pre">Argument()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#MatPlotLibPlot"><code class="docutils literal notranslate"><span class="pre">MatPlotLibPlot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Download"><code class="docutils literal notranslate"><span class="pre">Download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Div"><code class="docutils literal notranslate"><span class="pre">Div()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Row"><code class="docutils literal notranslate"><span class="pre">Row()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PreformattedText"><code class="docutils literal notranslate"><span class="pre">PreformattedText()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#FileUpload"><code class="docutils literal notranslate"><span class="pre">FileUpload()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#debug-information">Debug Information</a><ul>
@@ -622,7 +683,7 @@ and the history of visited pages.</p>
         <li class="right" >
           <a href="../examples/nested_data.html" title="Nested Data"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.3.1 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.4.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Documentation for Students</a></li> 
       </ul>

@@ -337,6 +337,50 @@ Components
     :param content_type: The MIME type of the file. Defaults to ``text/plain``.
     :type content_type: str
 
+.. function:: Div(...components)
+              Row(...components)
+
+    A division or row of components. The `components` can be any number of strings or `Component` instances, which will
+    be rendered in the division or row. This is useful for grouping multiple components together.
+
+    :param components: The components to display in the division or row. Each component should be a string or a `Component`
+                       instance. You do not pass them in as a list, but as separate arguments (like the ``print``)
+                       function.
+    :type components: str | Component
+
+.. function:: PreformattedText(text)
+
+        Preformatted text to display on the page. The `text` is the text to display, which will be rendered in a monospaced
+        font. This is useful for displaying code, logs, or other text that needs to be displayed exactly as it is written.
+
+        :param text: The text to display in the preformatted text. This will be rendered in a monospaced font.
+        :type text: str
+
+.. function:: FileUpload(name)
+              FileUpload(name, accept)
+
+    A file upload component for the user to upload a file. The `name` is the name of the file upload component, which will
+    be used to identify the file when the user submits the form (and becomes a parameter to the linked page).
+
+    Be mindful of the target type of the parameter. If the file is regular text, then the parameter should be a ``str``;
+    if the file is binary data, then the parameter should be a ``bytes``.
+    If you are accepting an image (e.g., ``FileUpload("new_image", "image/*")``), then you can use the `PIL` library to
+    convert the image to a format that can be displayed on the page. If you can trust the user to upload only images,
+    then you can make the parameter a ``PIL.Image`` object; otherwise you should leave the parameter as a ``bytes``
+    and convert the image to a displayable format in the route.
+
+    The `accept` parameter is a string representing the file types that the user can upload. This should be a comma-separated
+    list of MIME types, such as ``"image/*,.pdf"``. If no `accept` is given, then the user can upload any file type.
+    You can also pass a list of strings, which will be joined with commas.
+
+    :param name: The name of the file upload component, which will be used to identify the file when the user submits the form.
+                 Make sure this is a valid Python identifier (start with a letter followed only by letters, numerals,
+                 and underscores). This must match the same parameter name in the corresponding linked route.
+    :type name: str
+    :param accept: The file types that the user can upload. This should be a comma-separated list of MIME types.
+                   Defaults to `None`, which will allow the user to upload any file type.
+    :type accept: str | list[str]
+
 
 Debug Information
 -----------------
