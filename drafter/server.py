@@ -201,8 +201,12 @@ class Server:
             elif target_type == dict:
                 return {'filename': value.filename, 'content': value.file.read()}
             elif HAS_PILLOW and issubclass(target_type, PILImage.Image):
-                image = PILImage.open(value.file)
-                return image
+                try:
+                    image = PILImage.open(value.file)
+                    return image
+                except Exception as e:
+                    # TODO: Allow configuration for just setting this to None instead, if there is an error
+                    raise ValueError(f"Could not open image file {value.filename} as a PIL.Image. Perhaps the file is not an image, or the parameter type is inappropriate?") from e
         return target_type(value)
 
     def convert_parameter(self, param, val, expected_types):

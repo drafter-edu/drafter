@@ -44,9 +44,9 @@ def index(state: State) -> Page:
 
 
 @route
-def update_data(state: State, new_text: str, new_bits: str, new_image: PILImage.Image) -> Page:
+def update_data(state: State, new_text: str, new_bits: bytes, new_image: PILImage.Image) -> Page:
     state.current_text = new_text
-    state.current_bits = new_bits
+    state.current_bits = str(new_bits)
     state.current_image = new_image
     return index(state)
 
