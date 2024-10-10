@@ -23,12 +23,12 @@ class ServerConfiguration:
     backend: str = DEFAULT_BACKEND
     reloader: bool = False
     # This makes the server not run (e.g., to only run tests)
-    skip: bool = os.environ.get('DRAFTER_SKIP', False)
+    skip: bool = bool(os.environ.get('DRAFTER_SKIP', False))
 
     # Website configuration
     title: str = "Drafter Website"
     framed: bool = True
-    skulpt: bool = os.environ.get('DRAFTER_SKULPT', False)
+    skulpt: bool = bool(os.environ.get('DRAFTER_SKULPT', False))
 
     # Page configuration
     style: str = 'skeleton'

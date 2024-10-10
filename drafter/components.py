@@ -1,5 +1,5 @@
 from dataclasses import dataclass, is_dataclass, fields
-from typing import Any, Union
+from typing import Any, Union, Optional
 import io
 import base64
 # from urllib.parse import quote_plus
@@ -38,7 +38,7 @@ class PageContent:
 
     This class also has some helpful methods for verifying URLs and handling attributes/styles.
     """
-    EXTRA_ATTRS = []
+    EXTRA_ATTRS: list[str] = []
     extra_settings: dict
 
     def verify(self, server) -> bool:
@@ -76,7 +76,11 @@ class PageContent:
 Content = Union[PageContent, str]
 
 
+
 class LinkContent:
+    url: str
+    text: str
+
     def _handle_url(self, url, external=None):
         if callable(url):
             url = url.__name__
@@ -206,9 +210,9 @@ class Image(PageContent, LinkContent):
 class TextBox(PageContent):
     name: str
     kind: str
-    default_value: str
+    default_value: Optional[str]
 
-    def __init__(self, name: str, default_value: str = None, kind: str = "text", **kwargs):
+    def __init__(self, name: str, default_value: Optional[str] = None, kind: str = "text", **kwargs):
         self.name = name
         self.kind = kind
         self.default_value = default_value
@@ -225,10 +229,10 @@ class TextBox(PageContent):
 @dataclass
 class TextArea(PageContent):
     name: str
-    default_value: str
+    default_value: Optional[str]
     EXTRA_ATTRS = ["rows", "cols", "autocomplete", "autofocus", "disabled", "placeholder", "readonly", "required"]
 
-    def __init__(self, name: str, default_value: str = None, **kwargs):
+    def __init__(self, name: str, default_value: Optional[str] = None, **kwargs):
         self.name = name
         self.default_value = default_value
         self.extra_settings = kwargs
@@ -242,9 +246,9 @@ class TextArea(PageContent):
 class SelectBox(PageContent):
     name: str
     options: list[str]
-    default_value: str
+    default_value: Optional[str]
 
-    def __init__(self, name: str, options: list[str], default_value: str = None, **kwargs):
+    def __init__(self, name: str, options: list[str], default_value: Optional[str] = None, **kwargs):
         self.name = name
         self.options = options
         self.default_value = default_value
@@ -543,7 +547,7 @@ class FileUpload(PageContent):
     name: str
     EXTRA_ATTRS = ["accept", "capture", "multiple", "required"]
 
-    def __init__(self, name: str, accept: Union[str, list[str]] = None, **kwargs):
+    def __init__(self, name: str, accept: Union[str, list[str], None] = None, **kwargs):
         self.name = name
         self.extra_settings = kwargs
 

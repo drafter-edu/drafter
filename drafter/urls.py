@@ -1,3 +1,4 @@
+from typing import Any
 import re
 from urllib.parse import urlencode, urlparse, parse_qs, quote_plus
 
@@ -42,7 +43,8 @@ def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
     :param attributes: The attributes to remap
     :return: A tuple of the styles and attributes dictionaries
     """
-    styles, attrs = {}, {}
+    styles: dict[str, Any] = {}
+    attrs: dict[str, Any] = {}
     # Handle classes keyword
     if 'classes' in attributes:
         attributes['class'] = attributes.pop('classes')

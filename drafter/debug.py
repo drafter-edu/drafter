@@ -1,5 +1,5 @@
 from dataclasses import dataclass, is_dataclass
-from typing import Any
+from typing import Any, Callable
 import inspect
 import html
 
@@ -14,7 +14,7 @@ from drafter.components import Table
 class DebugInformation:
     page_history: list[tuple[VisitedPage, Any]]
     state: Any
-    routes: dict[str, callable]
+    routes: dict[str, Callable]
     conversion_record: list[ConversionRecord]
 
     INDENTATION_START_HTML = "<div class='row'><div class='one column'></div><div class='eleven columns'>"

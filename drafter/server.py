@@ -49,7 +49,7 @@ class Server:
             return self._custom_name
         return f"Server({self.configuration!r})"
 
-    def reset(self):
+    def clear_routes(self):
         self.routes.clear()
 
     def dump_state(self):

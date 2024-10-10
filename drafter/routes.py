@@ -1,7 +1,8 @@
+from typing import Union, Callable
 from drafter.server import Server, MAIN_SERVER
 
 
-def route(url: str = None, server: Server = MAIN_SERVER):
+def route(url: Union[Callable, str, None] = None, server: Server = MAIN_SERVER):
     """
     Main function to add a new route to the server. Recommended to use as a decorator.
     Once added, the route will be available at the given URL; the function name will be used if no URL is provided.

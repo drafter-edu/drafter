@@ -5,7 +5,7 @@ import io
 from dataclasses import dataclass, is_dataclass, replace, asdict, fields
 from dataclasses import field as dataclass_field
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional, Callable
 import pprint
 
 from drafter.constants import LABEL_SEPARATOR, JSON_DECODE_SYMBOL
@@ -71,14 +71,14 @@ def remap_hidden_form_parameters(kwargs: dict, button_pressed: str):
 @dataclass
 class VisitedPage:
     url: str
-    function: callable
+    function: Callable
     arguments: str
     status: str
     button_pressed: str
-    original_page_content: str = None
+    original_page_content: Optional[str] = None
     old_state: Any = None
     started: datetime = dataclass_field(default_factory=datetime.utcnow)
-    stopped: datetime = None
+    stopped: Optional[datetime] = None
 
     def update(self, new_status, original_page_content=None):
         self.status = new_status
