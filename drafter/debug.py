@@ -4,7 +4,7 @@ import inspect
 import html
 
 from drafter.constants import RESTORABLE_STATE_KEY, PREVIOUSLY_PRESSED_BUTTON
-from drafter.history import ConversionRecord, VisitedPage, format_page_content
+from drafter.history import ConversionRecord, VisitedPage, format_page_content, make_value_expandable
 from drafter.page import Page
 from drafter.urls import merge_url_query_params
 from drafter.testing import bakery, _bakery_tests, DIFF_WRAP_WIDTH, diff_tests
@@ -93,7 +93,7 @@ class DebugInformation:
             yield f"<li>{button_pressed}{page_history.status}"  # <details><summary>
             yield f"{self.INDENTATION_START_HTML}"
             yield f"URL: <a href='{url}'><code>{page_history.url}/</code></a><br>"
-            call = f"{page_history.function.__name__}({page_history.arguments})"
+            call = f"{page_history.function.__name__}({make_value_expandable(html.escape(page_history.arguments))})"
             yield f"Call: <code>{call}</code><br>"
             yield f"<details><summary>Page Content:</summary><pre style='width: fit-content' class='copyable'>"
             full_code = f"assert_equal(\n {call},\n {page_history.original_page_content})"

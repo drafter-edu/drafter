@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2024-10-10
+
+### Added
+
+* Improved output for very long strings of text, allowing them to be collapsed
+
 ## [1.4.0] - 2024-09-14
 
 ### Added

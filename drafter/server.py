@@ -409,7 +409,7 @@ def start_server(initial_state=None, server: Server = MAIN_SERVER, skip=False, *
     :param initial_state: The initial state to start the server with
     :param server: The server to run on, defaulting to ``MAIN_SERVER``
     :param skip: If True, the server will not start; this is useful for running tests headlessly
-    :param \**kwargs: Additional keyword arguments to pass to the server's run method. See below.
+    :param **kwargs: Additional keyword arguments to pass to the server's run method. See below.
     :return: None
 
     :Keyword Arguments:

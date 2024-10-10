@@ -13,6 +13,17 @@ from drafter.setup import request
 from drafter.testing import DIFF_INDENT_WIDTH
 from drafter.image_support import HAS_PILLOW, PILImage
 
+
+TOO_LONG_VALUE_THRESHOLD = 256
+
+def make_value_expandable(value):
+    if isinstance(value, str) and len(value) > TOO_LONG_VALUE_THRESHOLD:
+        return f"<span class='expandable'>{value}</span>"
+    return value
+
+def value_to_html(value):
+    return make_value_expandable(html.escape(repr(value)))
+
 @dataclass
 class ConversionRecord:
     parameter: str
@@ -22,8 +33,8 @@ class ConversionRecord:
 
     def as_html(self):
         return (f"<li><code>{html.escape(self.parameter)}</code>: "
-                f"<code>{html.escape(repr(self.value))}</code> &rarr; "
-                f"<code>{html.escape(repr(self.converted_value))}</code></li>")
+                f"<code>{value_to_html(self.value)}</code> &rarr; "
+                f"<code>{value_to_html(self.converted_value)}</code></li>")
 
 @dataclass
 class UnchangedRecord:
@@ -33,7 +44,7 @@ class UnchangedRecord:
 
     def as_html(self):
         return (f"<li><code>{html.escape(self.parameter)}</code>: "
-                f"<code>{html.escape(repr(self.value))}</code></li>")
+                f"<code>{value_to_html(self.value)}</code></li>")
 
 
 def format_page_content(content, width=80):

@@ -19,6 +19,25 @@ BASIC_SCRIPTS = "<script>" + """
             }, 1000)
         });
     }
+    
+    let expandables = document.getElementsByClassName('expandable');
+    // Any span with the expandable class will be turned into "...", and can be clicked
+    // to expand the rest of the content.
+    for (let i = 0; i < expandables.length; i++) {
+        let expandable = expandables[i];
+        let content = expandable.textContent;
+        if (content.length > 100) {
+            expandable.textContent = content.slice(0, 100) + '...';
+            expandable.style.cursor = 'pointer';
+            expandable.addEventListener('click', function () {
+                if (expandable.textContent.endsWith('...')) {
+                    expandable.textContent = content;
+                } else {
+                    expandable.textContent = content.slice(0, 100) + '...';
+                }
+            });
+        }        
+    }
 """ + "</script>"
 
 BASIC_STYLE = """
