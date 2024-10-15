@@ -7,18 +7,23 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Cookie Clicker &#8212; Drafter 1.4.0 documentation</title>
+    <title>Cookie Clicker &#8212; Drafter 1.4.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/cloud.css?v=f9ae72be" />
-    <link rel="stylesheet" type="text/css" href="../../_static/tabs.css?v=a5c4661c" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../../_static/documentation_options.js?v=9172181d"></script>
-    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/documentation_options.js?v=02f2166e"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
-    <script>mermaid.initialize({startOnLoad:true});</script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
 
     
     
@@ -51,7 +56,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
-    <li><a href="../../contents.html">Drafter 1.4.0 documentation</a> &#187;</li>
+    <li><a href="../../contents.html">Drafter 1.4.2 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Cookie Clicker</a></li> 
       </ul>
@@ -69,7 +74,8 @@
 <p>Cookie Clicker is a simple game where you click a cookie to get more cookies.
 Preview the activity at <a href="https://drafter-edu.github.io/examples/cookie/" target="_blank">
     https://drafter-edu.github.io/examples/cookie/</a>.</p>
-<a class="reference internal image-reference" href="../../_images/cookie.png"><img alt="Screenshot of the Cookie Clicker game" class="align-center" src="../../_images/cookie.png" style="width: 427px;" /></a>
+<a class="reference internal image-reference" href="../../_images/cookie.png"><img alt="Screenshot of the Cookie Clicker game" class="align-center" src="../../_images/cookie.png" style="width: 427px;" />
+</a>
 <p><strong>Step 1: Download</strong> <a class="reference download internal" download="" href="../../_downloads/a24d1c695f83f8bd6ed9b2e79b5688fc/cookie.py"><code class="xref download docutils literal notranslate"><span class="pre">cookie.py</span></code></a> and put it into an appropriate directory, where you will place all the other files
 for this workbook.</p>
 <p>The file contains a <code class="docutils literal notranslate"><span class="pre">State</span></code> class and two route functions: <code class="docutils literal notranslate"><span class="pre">index</span></code> and <code class="docutils literal notranslate"><span class="pre">cookie</span></code>.
@@ -112,7 +118,8 @@ This will work even if you have not passed the tests yet.</p>
 <p>If you see failing tests, then it will be very important to go look at the failing tests and see what they
 are expecting. The debug information shown in the browser can actually help you understand what is going wrong.
 Scroll down to the bottom of the live webpage.</p>
-<a class="reference internal image-reference" href="../../_images/cookie_test.png"><img alt="Screenshot of failing test for the Cookie Clicker game" class="align-center" src="../../_images/cookie_test.png" style="width: 700px;" /></a>
+<a class="reference internal image-reference" href="../../_images/cookie_test.png"><img alt="Screenshot of failing test for the Cookie Clicker game" class="align-center" src="../../_images/cookie_test.png" style="width: 700px;" />
+</a>
 <p>The <strong>Test Status</strong> section will show a visual representation of the tests that are failing,
 with the exact differences highlighted. In the example above, the third test is failing because
 the when we called <code class="docutils literal notranslate"><span class="pre">cookie(State(cookies=100))</span></code> we expected the result to have <code class="docutils literal notranslate"><span class="pre">cookies</span></code> set to <code class="docutils literal notranslate"><span class="pre">101</span></code>,
@@ -133,15 +140,15 @@ The correct version of <code class="docutils literal notranslate"><span class="p
 <p>Usually, the routes that modify the state will return a new page that is generated by calling another route.
 This avoids code duplication and makes it easier to test the routes, since we are reusing the rendering logic of the other routes.
 The routes that do not modify the state will usually just return a page with the state as is.</p>
-<div class="mermaid">
-            flowchart LR
+<pre  class="mermaid">
+        flowchart LR
     start((&quot;Start&quot;))
     index[&quot;index&quot;]
     cookie[/&quot;cookie&quot;/]
     start --&gt; index
     index -- &quot;🍪&quot; --&gt; cookie
     cookie -.-&gt; index
-        </div><p>The diagram above helps visualize the flow of the application.
+    </pre><p>The diagram above helps visualize the flow of the application.
 When the application starts, the <code class="docutils literal notranslate"><span class="pre">index</span></code> route is called.
 When the 🍪 button is clicked, the <code class="docutils literal notranslate"><span class="pre">cookie</span></code> route is called, which increments the number of cookies and then returns
 the result of calling the <code class="docutils literal notranslate"><span class="pre">index</span></code> route.
@@ -222,7 +229,7 @@ We use a parallelogram to indicate that the <code class="docutils literal notran
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
-    <li><a href="../../contents.html">Drafter 1.4.0 documentation</a> &#187;</li>
+    <li><a href="../../contents.html">Drafter 1.4.2 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Cookie Clicker</a></li> 
       </ul>
@@ -231,7 +238,7 @@ We use a parallelogram to indicate that the <code class="docutils literal notran
 
     <div class="footer" role="contentinfo">
     &#169; Copyright 2023, acbart.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     </div>
     <!-- cloud_sptheme 1.4 -->
   </body>

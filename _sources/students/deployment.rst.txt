@@ -76,14 +76,18 @@ When you are done, click on the ``Commit changes`` button in the top-right of th
 A box will appear that asks you to write a commit message.
 This is a message that describes the changes you made to the file.
 You can write anything you want here, but it is recommended to write something that describes the changes you made.
-For example, you could write ``Added website``.
+For example, you could write ``Added website code``. **Always write concise, descriptive messages!**
 
-Even if you just leave the default message, you must click on the ``Commit changes`` button to save your changes.
+Once you have changed the default message to be more descriptive, you must click on the ``Commit changes`` button to save your changes.
 
 .. image:: images/deployment_github_commit.png
     :alt: Github Commit
 
+If you have other files besides ``main.py``, then check the appendix at the bottom of this document for how to upload them: :ref:`appendix_upload_files`.
+
 .. _video:
+
+
 
 Record a Video
 --------------
@@ -242,3 +246,21 @@ Make sure that you submit the **deployed URL** of your website, which will look 
     Do not the submit the deployed URL with the ``docs/`` extension or the link to the GitHub repository (e.g., ``https://github.com/ud-s24-cs1/cs1-website-username``). Submitting the wrong link will potentially earn you zero points.
 
 
+.. _appendix_upload_files:
+
+Appendix: Uploading Files
+-------------------------
+
+If you have files other than ``main.py`` that you need to upload to your website, you can follow these steps.
+
+1. Go to the ``Code`` tab and click on the ``website`` folder.
+2. Click on the ``Add file`` button and then ``Upload files`` to select the file from your computer.
+3. Once they have been added ("staged"), you can click on the ``Commit changes`` button to save your changes. Make sure you write a descriptive commit message!
+
+If you have multiple files, you can upload them all at once by dragging them into the folder area.
+
+Note that you need to upload files to the ``website`` folder, not the ``docs`` folder. The ``docs`` folder is only for the planning document.
+
+If you are using additional Python libraries, you can include a ``requirements.txt`` file in the ``website`` folder to list the libraries you are using.
+This file should be uploaded in the same way as other files.
+However, not all third-party libraries are supported on the deployed version of Drafter, so you should check with your instructor before using them.

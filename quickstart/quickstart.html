@@ -7,15 +7,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Drafter Quick Start Guide &#8212; Drafter 1.4.0 documentation</title>
+    <title>Drafter Quick Start Guide &#8212; Drafter 1.4.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
-    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=9172181d"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/documentation_options.js?v=02f2166e"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
     
@@ -57,7 +56,7 @@
         <li class="right" >
           <a href="../students/installation.html" title="How to Install Drafter"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.4.0 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.4.2 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Quick Start Guide</a></li> 
       </ul>
@@ -89,7 +88,8 @@
 </pre></div>
 </div>
 <p>If you visit the url <a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a> then you will see a page like this:</p>
-<a class="reference internal image-reference" href="../_images/quickstart_empty_site.png"><img alt="Simple website with the text &quot;Hello World!&quot; and &quot;Welcome to Drafter&quot; along with some more information further below." src="../_images/quickstart_empty_site.png" style="width: 700px;" /></a>
+<a class="reference internal image-reference" href="../_images/quickstart_empty_site.png"><img alt="Simple website with the text &quot;Hello World!&quot; and &quot;Welcome to Drafter&quot; along with some more information further below." src="../_images/quickstart_empty_site.png" style="width: 700px;" />
+</a>
 <p>The top rectangle is the content of your website, which defaults to the message “Hello World!” and “Welcome to Drafter”.
 Down below, you see some debug information that will be helpful once we start adding more to our site.
 For now, you can see that we have a single, default <strong>Route</strong>.</p>
@@ -142,7 +142,8 @@ In this case, the webpage will have two lines of text: “The message is:” and
 We usually will keep passing in the same state, and just update the state’s values mutably.</p>
 <p>After you add the code above, you will need to stop the original server and start the new one.
 If you visit the url <a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a> then you will see a page like this:</p>
-<a class="reference internal image-reference" href="../_images/quickstart_simple_state.png"><img alt="Simple website with the text &quot;The message is&quot; and &quot;The original message&quot; along with some more information further below." src="../_images/quickstart_simple_state.png" style="width: 700px;" /></a>
+<a class="reference internal image-reference" href="../_images/quickstart_simple_state.png"><img alt="Simple website with the text &quot;The message is&quot; and &quot;The original message&quot; along with some more information further below." src="../_images/quickstart_simple_state.png" style="width: 700px;" />
+</a>
 </section>
 <section id="another-route">
 <h2>1. Another Route<a class="headerlink" href="#another-route" title="Link to this heading">¶</a></h2>
@@ -203,9 +204,11 @@ for them to navigate there. We can do this easily by just providing a button.</p
 </pre></div>
 </div>
 <p>Stopping the old server and running this new one will show that there is a button on the new page.</p>
-<a class="reference internal image-reference" href="../_images/quickstart_button_state_1.png"><img alt="Clickable button is now visible on the original page" src="../_images/quickstart_button_state_1.png" style="width: 700px;" /></a>
+<a class="reference internal image-reference" href="../_images/quickstart_button_state_1.png"><img alt="Clickable button is now visible on the original page" src="../_images/quickstart_button_state_1.png" style="width: 700px;" />
+</a>
 <p>Once we click the button, we are taken to the new page.</p>
-<a class="reference internal image-reference" href="../_images/quickstart_button_state_2.png"><img alt="Clickable button was added on the first page that leads to this new page." src="../_images/quickstart_button_state_2.png" style="width: 700px;" /></a>
+<a class="reference internal image-reference" href="../_images/quickstart_button_state_2.png"><img alt="Clickable button was added on the first page that leads to this new page." src="../_images/quickstart_button_state_2.png" style="width: 700px;" />
+</a>
 <p>Note that the State has changed and there is now a new item in the Page Load History.
 This state is not very exciting, though, so maybe we can provide the user with an opportunity to change the message too?</p>
 </section>
@@ -282,7 +285,8 @@ That route function takes a parameter named <code class="docutils literal notran
 Drafter will translate the data from the box to the page, and we use that to update the <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p>
 <p>In the <code class="docutils literal notranslate"><span class="pre">return</span></code> statement of <code class="docutils literal notranslate"><span class="pre">set_the_message</span></code>, we call the <code class="docutils literal notranslate"><span class="pre">index</span></code> function to reuse its logic for rendering the basic page.
 We could have instead created a new page that linked back to the original <code class="docutils literal notranslate"><span class="pre">index</span></code> page - the design was really up to us.</p>
-<a class="reference internal image-reference" href="../_images/quickstart_string_state.png"><img alt="A textfield with a save button next to it" src="../_images/quickstart_string_state.png" style="width: 700px;" /></a>
+<a class="reference internal image-reference" href="../_images/quickstart_string_state.png"><img alt="A textfield with a save button next to it" src="../_images/quickstart_string_state.png" style="width: 700px;" />
+</a>
 <p>Rerunning the site will allow you to change the message dynamically.
 But the site is still not very engaging.
 Let’s add some more interactivity.</p>
@@ -490,7 +494,8 @@ Both functions return a <code class="docutils literal notranslate"><span class="
 The Debug Information at the bottom of the page includes a section titled <strong>Page Load History</strong>.
 Clicking on the <strong>Page Content</strong> arrow will reveal the generated Page content, which can be copy/pasted back as an
 <code class="docutils literal notranslate"><span class="pre">assert_equal</span></code> along with the appropriate <strong>Call</strong>.</p>
-<a class="reference internal image-reference" href="../_images/quickstart_copy_page_content.png"><img alt="The page content expandable" src="../_images/quickstart_copy_page_content.png" style="width: 700px;" /></a>
+<a class="reference internal image-reference" href="../_images/quickstart_copy_page_content.png"><img alt="The page content expandable" src="../_images/quickstart_copy_page_content.png" style="width: 700px;" />
+</a>
 <p>You might think of this as “freezing” the expected state of the website, if you are happy with the design.
 Subsequent changes to the <code class="docutils literal notranslate"><span class="pre">index</span></code> function require us to update these tests, so you do not necessarily want to start
 by testing (the way you are usually encouraged to do). But as you make changes, these tests can help you confirm
@@ -607,7 +612,7 @@ add to your website!</p>
         <li class="right" >
           <a href="../students/installation.html" title="How to Install Drafter"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.4.0 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.4.2 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Quick Start Guide</a></li> 
       </ul>
@@ -616,7 +621,7 @@ add to your website!</p>
 
     <div class="footer" role="contentinfo">
     &#169; Copyright 2023, acbart.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     </div>
     <!-- cloud_sptheme 1.4 -->
   </body>

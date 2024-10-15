@@ -7,18 +7,23 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Bank Account &#8212; Drafter 1.4.0 documentation</title>
+    <title>Bank Account &#8212; Drafter 1.4.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/cloud.css?v=f9ae72be" />
-    <link rel="stylesheet" type="text/css" href="../../_static/tabs.css?v=a5c4661c" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../../_static/documentation_options.js?v=9172181d"></script>
-    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/documentation_options.js?v=02f2166e"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
-    <script>mermaid.initialize({startOnLoad:true});</script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
 
     
     
@@ -51,7 +56,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
-    <li><a href="../../contents.html">Drafter 1.4.0 documentation</a> &#187;</li>
+    <li><a href="../../contents.html">Drafter 1.4.2 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Bank Account</a></li> 
       </ul>
@@ -70,15 +75,16 @@
 We’ll make a simple bank account application to support this.
 Preview this website at <a href="https://drafter-edu.github.io/examples/bank/" target="_blank">
     https://drafter-edu.github.io/examples/bank/</a>.</p>
-<a class="reference internal image-reference" href="../../_images/drafter_preview.png"><img alt="Screenshot of the Bank Account application" class="align-center" src="../../_images/drafter_preview.png" style="width: 700px;" /></a>
+<a class="reference internal image-reference" href="../../_images/drafter_preview.png"><img alt="Screenshot of the Bank Account application" class="align-center" src="../../_images/drafter_preview.png" style="width: 700px;" />
+</a>
 <p><strong>Step 1: Download</strong> <a class="reference download internal" download="" href="../../_downloads/97f4a836334a303bd7ca08d329d9fe3f/bank.py"><code class="xref download docutils literal notranslate"><span class="pre">bank.py</span></code></a> and put it into the same directory as the cookie clicker game.</p>
 <p>The file contains the incomplete <code class="docutils literal notranslate"><span class="pre">State</span></code>, five incomplete routes, six correct unit tests, and a call to <code class="docutils literal notranslate"><span class="pre">start_server</span></code>.
 You might be wondering why there are five routes when the image above only shows three pages.
 The reason is because two of the routes (<code class="docutils literal notranslate"><span class="pre">finish_withdraw</span></code> and <code class="docutils literal notranslate"><span class="pre">finish_deposit</span></code>) are routes that modify
 the state and then return the result of calling the <code class="docutils literal notranslate"><span class="pre">index</span></code> route.
 The diagram below visualizes the relationships between the routes.</p>
-<div class="mermaid">
-            flowchart
+<pre  class="mermaid">
+        flowchart
     start((&quot;Start&quot;))
     index[&quot;index&quot;]
     start_withdraw[&quot;start_withdraw&quot;]
@@ -94,7 +100,7 @@ The diagram below visualizes the relationships between the routes.</p>
     start_deposit -- &quot;Deposit(amount)&quot; --&gt; finish_deposit
     start_deposit -- Cancel --&gt; index
     finish_deposit -.-&gt; index
-        </div><p>To explain a little further:</p>
+    </pre><p>To explain a little further:</p>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">index</span></code> route has buttons to go to the <code class="docutils literal notranslate"><span class="pre">start_withdraw</span></code> and <code class="docutils literal notranslate"><span class="pre">start_deposit</span></code> routes.</p></li>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">start_withdraw</span></code> and <code class="docutils literal notranslate"><span class="pre">start_deposit</span></code> have buttons to go to the <code class="docutils literal notranslate"><span class="pre">finish_withdraw</span></code> and <code class="docutils literal notranslate"><span class="pre">finish_deposit</span></code> routes, respectively,
@@ -229,7 +235,7 @@ to another route as a parameter in order to update the state.</p>
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
-    <li><a href="../../contents.html">Drafter 1.4.0 documentation</a> &#187;</li>
+    <li><a href="../../contents.html">Drafter 1.4.2 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Bank Account</a></li> 
       </ul>
@@ -238,7 +244,7 @@ to another route as a parameter in order to update the state.</p>
 
     <div class="footer" role="contentinfo">
     &#169; Copyright 2023, acbart.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     </div>
     <!-- cloud_sptheme 1.4 -->
   </body>

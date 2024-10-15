@@ -7,15 +7,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Deployment &#8212; Drafter 1.4.0 documentation</title>
+    <title>Deployment &#8212; Drafter 1.4.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
-    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=9172181d"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/documentation_options.js?v=02f2166e"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
     
@@ -57,7 +56,7 @@
         <li class="right" >
           <a href="help.html" title="More Help"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.4.0 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.4.2 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Deployment</a></li> 
       </ul>
@@ -122,9 +121,10 @@ Although normally Github Pages is only useful for hosting frontend websites, Dra
 <p>A box will appear that asks you to write a commit message.
 This is a message that describes the changes you made to the file.
 You can write anything you want here, but it is recommended to write something that describes the changes you made.
-For example, you could write <code class="docutils literal notranslate"><span class="pre">Added</span> <span class="pre">website</span></code>.</p>
-<p>Even if you just leave the default message, you must click on the <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> button to save your changes.</p>
+For example, you could write <code class="docutils literal notranslate"><span class="pre">Added</span> <span class="pre">website</span> <span class="pre">code</span></code>. <strong>Always write concise, descriptive messages!</strong></p>
+<p>Once you have changed the default message to be more descriptive, you must click on the <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> button to save your changes.</p>
 <img alt="Github Commit" src="../_images/deployment_github_commit.png" />
+<p>If you have other files besides <code class="docutils literal notranslate"><span class="pre">main.py</span></code>, then check the appendix at the bottom of this document for how to upload them: <a class="reference internal" href="#appendix-upload-files"><span class="std std-ref">Appendix: Uploading Files</span></a>.</p>
 </section>
 <section id="record-a-video">
 <span id="video"></span><h2>Record a Video<a class="headerlink" href="#record-a-video" title="Link to this heading">¶</a></h2>
@@ -246,6 +246,20 @@ There should be six sections in the readme: website name, description, author, h
 <p>Do not the submit the deployed URL with the <code class="docutils literal notranslate"><span class="pre">docs/</span></code> extension or the link to the GitHub repository (e.g., <code class="docutils literal notranslate"><span class="pre">https://github.com/ud-s24-cs1/cs1-website-username</span></code>). Submitting the wrong link will potentially earn you zero points.</p>
 </div>
 </section>
+<section id="appendix-uploading-files">
+<span id="appendix-upload-files"></span><h2>Appendix: Uploading Files<a class="headerlink" href="#appendix-uploading-files" title="Link to this heading">¶</a></h2>
+<p>If you have files other than <code class="docutils literal notranslate"><span class="pre">main.py</span></code> that you need to upload to your website, you can follow these steps.</p>
+<ol class="arabic simple">
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">Code</span></code> tab and click on the <code class="docutils literal notranslate"><span class="pre">website</span></code> folder.</p></li>
+<li><p>Click on the <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">file</span></code> button and then <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">files</span></code> to select the file from your computer.</p></li>
+<li><p>Once they have been added (“staged”), you can click on the <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> button to save your changes. Make sure you write a descriptive commit message!</p></li>
+</ol>
+<p>If you have multiple files, you can upload them all at once by dragging them into the folder area.</p>
+<p>Note that you need to upload files to the <code class="docutils literal notranslate"><span class="pre">website</span></code> folder, not the <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder. The <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder is only for the planning document.</p>
+<p>If you are using additional Python libraries, you can include a <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file in the <code class="docutils literal notranslate"><span class="pre">website</span></code> folder to list the libraries you are using.
+This file should be uploaded in the same way as other files.
+However, not all third-party libraries are supported on the deployed version of Drafter, so you should check with your instructor before using them.</p>
+</section>
 </section>
 
 
@@ -276,6 +290,7 @@ There should be six sections in the readme: website name, description, author, h
 <li class="toctree-l2"><a class="reference internal" href="#view-the-deployment">View the Deployment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#view-the-readme">View the Readme</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#submit-on-canvas">Submit on Canvas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#appendix-uploading-files">Appendix: Uploading Files</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api/api.html">Full API Documentation</a></li>
@@ -347,7 +362,7 @@ There should be six sections in the readme: website name, description, author, h
         <li class="right" >
           <a href="help.html" title="More Help"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.4.0 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.4.2 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Deployment</a></li> 
       </ul>
@@ -356,7 +371,7 @@ There should be six sections in the readme: website name, description, author, h
 
     <div class="footer" role="contentinfo">
     &#169; Copyright 2023, acbart.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     </div>
     <!-- cloud_sptheme 1.4 -->
   </body>
