@@ -1,6 +1,3 @@
-from typing import Optional
-import typing
-
 try:
     from PIL import Image as PILImage
     HAS_PILLOW = True

@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.2] - 2024-10-15
+
+### Fixed
+
+* Added a `hacks.py` module to make the `MatPlotLibPlot` component work in Skulpt
+
 ## [1.4.1] - 2024-10-10
 
 ### Added
@@ -34,6 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * The `Image` component now supports PIL images
 * The `Download` component also supports PIL images being provided as the `contents`
+
+### Fixed
+
+* Now passing Mypy checks (although we had to silence Bakery and Bottle)
 
 ## [1.3.0] - 2024-08-05
 
