@@ -1,8 +1,8 @@
 """
 A simple application for managing a bank account.
 """
-from bakery import assert_equal
 from drafter import *
+from bakery import assert_equal
 from dataclasses import dataclass
 
 
