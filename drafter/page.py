@@ -62,7 +62,7 @@ class Page:
             else:
                 chunked.append(chunk.render(current_state, configuration))
         content = "\n".join(chunked)
-        content = f"<form method='POST' enctype='multipart/form-data'>{content}</form>"
+        content = f"<form method='POST' enctype='multipart/form-data' accept-charset='utf-8'>{content}</form>"
         if configuration.framed:
             reset_button = self.make_reset_button()
             content = (f"<div class='container btlw-header'>{configuration.title}{reset_button}</div>"

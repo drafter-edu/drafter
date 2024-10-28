@@ -15,7 +15,7 @@ from drafter.constants import RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY, PREVIOUSL
 from drafter.debug import DebugInformation
 from drafter.setup import Bottle, abort, request, static_file
 from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, get_params, \
-    remap_hidden_form_parameters
+    remap_hidden_form_parameters, safe_repr
 from drafter.page import Page
 from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER
 from drafter.urls import remove_url_query_params
@@ -98,8 +98,11 @@ class Server:
             message = "<p>The requested page <code>{url}</code> was not found.</p>".format(url=request.url)
             # TODO: Only show if not the index
             message += "\n<p>You might want to return to the <a href='/'>index</a> page.</p>"
+            original_error = f"{error.body}\n"
+            if hasattr(error, 'traceback'):
+                original_error += f"{error.traceback}\n"
             return TEMPLATE_404.format(title="404 Page not found", message=message,
-                                       error=error.body,
+                                       error=original_error,
                                        routes="\n".join(
                                            f"<li><code>{r!r}</code>: <code>{func}</code></li>" for r, func in
                                            self.original_routes))
@@ -107,8 +110,12 @@ class Server:
         def handle_500(error):
             message = "<p>Sorry, the requested URL <code>{url}</code> caused an error.</p>".format(url=request.url)
             message += "\n<p>You might want to return to the <a href='/'>index</a> page.</p>"
-            return TEMPLATE_500.format(title="500 Internal Server Error", message=message,
-                                       error=error.body,
+            original_error = f"{error.body}\n"
+            if hasattr(error, 'traceback'):
+                original_error += f"{error.traceback}\n"
+            return TEMPLATE_500.format(title="500 Internal Server Error",
+                                       message=message,
+                                       error=original_error,
                                        routes="\n".join(
                                            f"<li><code>{r!r}</code>: <code>{func}</code></li>" for r, func in
                                            self.original_routes))
@@ -129,6 +136,7 @@ class Server:
 
     def run(self, **kwargs):
         configuration = replace(self.configuration, **kwargs)
+        self.configuration = configuration
         self.app.run(**asdict(configuration))
 
     def prepare_args(self, original_function, args, kwargs):
@@ -177,8 +185,8 @@ class Server:
                     f"Unexpected parameter {key}={value!r} in {original_function.__name__}. "
                     f"Expected parameters: {expected_parameters}")
         # Final return result
-        representation = [repr(arg) for arg in args] + [
-            f"{key}={value!r}" if show_names.get(key, False) else repr(value)
+        representation = [safe_repr(arg) for arg in args] + [
+            f"{key}={safe_repr(value)}" if show_names.get(key, False) else safe_repr(value)
             for key, value in sorted(kwargs.items(), key=lambda item: expected_parameters.index(item[0]))]
         return args, kwargs, ", ".join(representation), button_pressed
 
@@ -203,6 +211,7 @@ class Server:
             elif HAS_PILLOW and issubclass(target_type, PILImage.Image):
                 try:
                     image = PILImage.open(value.file)
+                    image.filename = value.filename
                     return image
                 except Exception as e:
                     # TODO: Allow configuration for just setting this to None instead, if there is an error

@@ -8,7 +8,8 @@ import html
 
 from drafter.constants import LABEL_SEPARATOR, SUBMIT_BUTTON_KEY, JSON_DECODE_SYMBOL
 from drafter.urls import remap_attr_styles, friendly_urls, check_invalid_external_url, merge_url_query_params
-from drafter.image_support import HAS_PILLOW
+from drafter.image_support import HAS_PILLOW, PILImage
+from drafter.history import safe_repr
 
 try:
     import matplotlib.pyplot as plt
@@ -76,6 +77,9 @@ class PageContent:
 Content = Union[PageContent, str]
 
 
+def make_safe_argument(value):
+    return html.escape(json.dumps(value), True)
+
 
 class LinkContent:
     url: str
@@ -99,10 +103,12 @@ class LinkContent:
             raise ValueError(f"Link `{self.text}` points to non-existent page `{self.url}`.")
         return True
 
+
+
     def create_arguments(self, arguments, label_namespace):
         parameters = self.parse_arguments(arguments, label_namespace)
         if parameters:
-            return "\n".join(f"<input type='hidden' name='{name}' value='{html.escape(json.dumps(value), True)}' />"
+            return "\n".join(f"<input type='hidden' name='{name}' value='{make_safe_argument(value)}' />"
                              for name, value in parameters.items())
         return ""
 
@@ -138,7 +144,7 @@ class Argument(PageContent):
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
-        value = html.escape(json.dumps(self.value), True)
+        value = make_safe_argument(self.value)
         return f"<input type='hidden' name='{JSON_DECODE_SYMBOL}{self.name}' value='{value}' {self.parse_extra_settings()} />"
 
 
@@ -175,6 +181,16 @@ class Image(PageContent, LinkContent):
         self.extra_settings = kwargs
         self.base_image_folder = BASE_IMAGE_FOLDER
 
+    def open(self, *args, **kwargs):
+        if not HAS_PILLOW:
+            raise ImportError("Pillow is not installed. Please install it to use this feature.")
+        return PILImage.open(*args, **kwargs)
+
+    def new(self, *args, **kwargs):
+        if not HAS_PILLOW:
+            raise ImportError("Pillow is not installed. Please install it to use this feature.")
+        return PILImage.new(*args, **kwargs)
+
     def render(self, current_state, configuration):
         self.base_image_folder = configuration.deploy_image_path
         return super().render(current_state, configuration)
@@ -206,6 +222,9 @@ class Image(PageContent, LinkContent):
         return f"<img src='{url}' {parsed_settings}>"
 
 
+Picture = Image
+
+
 @dataclass
 class TextBox(PageContent):
     name: str
@@ -223,6 +242,7 @@ class TextBox(PageContent):
         if self.default_value is not None:
             extra_settings['value'] = self.default_value
         parsed_settings = self.parse_extra_settings(**extra_settings)
+        # TODO: investigate whether we need to make the name safer
         return f"<input type='{self.kind}' name='{self.name}' {parsed_settings}>"
 
 
@@ -368,7 +388,11 @@ class Button(PageContent, LinkContent):
         precode = self.create_arguments(self.arguments, self.text)
         url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: self.text})
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"{precode}<input type='submit' name='{SUBMIT_BUTTON_KEY}' value='{self.text}' formaction='{url}' {parsed_settings} />"
+        value = make_safe_argument(self.text)
+        return f"{precode}<button type='submit' name='{SUBMIT_BUTTON_KEY}' value={value} formaction='{url}' {parsed_settings}>{self.text}</button>"
+
+
+SubmitButton = Button
 
 
 @dataclass
@@ -420,7 +444,7 @@ class Table(PageContent):
             result.append(
                 [f"<code>{html.escape(field.name)}</code>",
                  f"<code>{html.escape(field.type.__name__)}</code>",
-                 f"<code>{html.escape(repr(value))}</code>"])
+                 f"<code>{safe_repr(value)}</code>"])
         self.rows = result
         if not self.header:
             self.header = ["Field", "Type", "Current Value"]

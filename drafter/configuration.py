@@ -35,4 +35,5 @@ class ServerConfiguration:
     additional_header_content: list[str] = field(default_factory=list)
     additional_css_content: list[str] = field(default_factory=list)
     src_image_folder: str = ''
+    save_uploaded_files: bool = not skulpt
     deploy_image_path: str = 'website' if skulpt else 'images'

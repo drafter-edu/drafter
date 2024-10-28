@@ -5,8 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [Unreleased]
+
+## [1.5.0] - 2024-10-24
+
+### Added
+
+* Provide `Picture` class to prevent name collisions with `Image` class and `Pillow` module
+* Provide `new` and `open` methods in `Image` that shadow the `Pillow` module's versions.
+* Provide `UploadedFile` class to represent uploaded files in unit tests and the State.
+
+### Fixed
+
+* Fixed a bug with `Button`s not properly escaping data (including unicode emojis).
 
 ## [1.4.2] - 2024-10-15
 

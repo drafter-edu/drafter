@@ -3,12 +3,18 @@ from drafter import *
 
 @dataclass
 class State:
-    pass
+    message: str
 
 @route
 def index(state: State) -> Page:
     return Page(state, [
-        Button("🍪", "index")
+        state.message,
+        Button("\"🍪", "add_cookie")
     ])
 
-start_server(State())
+@route
+def add_cookie(state: State) -> Page:
+    state.message += "🍪"
+    return index(state)
+
+start_server(State("🍪"))

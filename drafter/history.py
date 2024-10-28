@@ -1,10 +1,12 @@
 import json
 import html
 import base64
+import os
 import io
 from dataclasses import dataclass, is_dataclass, replace, asdict, fields
 from dataclasses import field as dataclass_field
 from datetime import datetime
+from glob import escape
 from typing import Any, Optional, Callable
 import pprint
 
@@ -24,6 +26,80 @@ def make_value_expandable(value):
 def value_to_html(value):
     return make_value_expandable(html.escape(repr(value)))
 
+def is_generator(iterable):
+    return hasattr(iterable, '__iter__') and not hasattr(iterable, '__len__')
+
+
+# TODO: If no filename data, then could dump base64 representation or something? tobytes perhaps?
+
+def safe_repr(value: Any, handled=None):
+    obj_id = id(value)
+    if handled is None:
+        handled = set()
+    if obj_id in handled:
+        return f"<strong>Circular Reference</strong>"
+    if isinstance(value, (int, float, bool, type(None), str, bytes, complex, bytearray, memoryview)):
+        return make_value_expandable(html.escape(repr(value)))
+    if isinstance(value, list):
+        handled.add(obj_id)
+        return f"[{', '.join(safe_repr(v, handled) for v in value)}]"
+    if isinstance(value, dict):
+        handled.add(obj_id)
+        return f"{{{', '.join(f'{safe_repr(k, handled)}: {safe_repr(v, handled)}' for k, v in value.items())}}}"
+    if is_dataclass(value):
+        handled.add(obj_id)
+        fields_repr = ', '.join(f'{f.name}={safe_repr(getattr(value, f.name), handled)}' for f in fields(value))
+        return f"{value.__class__.__name__}({fields_repr})"
+    if isinstance(value, set):
+        handled.add(obj_id)
+        return f"{{{', '.join(safe_repr(v, handled) for v in value)}}}"
+    if isinstance(value, tuple):
+        handled.add(obj_id)
+        return f"({', '.join(safe_repr(v, handled) for v in value)})"
+    if isinstance(value, (frozenset, range, )):
+        handled.add(obj_id)
+        args_repr = ', '.join(safe_repr(v, handled) for v in value)
+        return f"{value.__class__.__name__}({{{args_repr}}})"
+
+    if HAS_PILLOW and isinstance(value, PILImage.Image):
+        return repr_pil_image(value)
+
+    # TODO: How should we handle custom things like dict_keys, numpy arrays, etc?
+
+    # TODO: Handle the recursive case of a list/dictionary/dataclass with images inside
+    return make_value_expandable(html.escape(repr(value)))
+
+
+
+def repr_pil_image(value):
+    from drafter.server import get_server_setting
+    filename = value.filename if hasattr(value, 'filename') else None
+    if not filename:
+        # TODO: Make sure that the imports are provided to the student
+        image_data = base64.b64encode(image_to_bytes(value)).decode('latin1')
+        image_src = f"data:image/png;base64,{image_data}"
+        escaped_data = json.dumps(image_data)
+        full_call = f"Image.open(io.BytesIO(base64.b64decode({escaped_data}.encode(\"latin1\"))))"
+        return f"<img src={image_src} alt='{full_call}' />"
+    try:
+        # If the file does not already exist, persist it to the image folder
+        print("Folder:", get_server_setting("src_image_folder"))
+        print("Filename:", filename)
+        full_path = os.path.join(get_server_setting("src_image_folder"), filename)
+        if get_server_setting("save_uploaded_files"):
+            if not os.path.exists(full_path):
+                value.save(full_path)
+    except Exception as e:
+        print(f"Could not save {value!r} because", e)
+        return f"Image.open('?')"
+    try:
+        escaped_name = json.dumps(full_path)
+        return f"<img src={escaped_name} alt='Image.open({escaped_name})' />"
+    except AttributeError as e:
+        print(f"Could not get filename for {value!r} because", e)
+        return f"Image.open('?')"
+
+
 @dataclass
 class ConversionRecord:
     parameter: str
@@ -33,8 +109,8 @@ class ConversionRecord:
 
     def as_html(self):
         return (f"<li><code>{html.escape(self.parameter)}</code>: "
-                f"<code>{value_to_html(self.value)}</code> &rarr; "
-                f"<code>{value_to_html(self.converted_value)}</code></li>")
+                f"<code>{safe_repr(self.value)}</code> &rarr; "
+                f"<code>{safe_repr(self.converted_value)}</code></li>")
 
 @dataclass
 class UnchangedRecord:
@@ -44,14 +120,21 @@ class UnchangedRecord:
 
     def as_html(self):
         return (f"<li><code>{html.escape(self.parameter)}</code>: "
-                f"<code>{value_to_html(self.value)}</code></li>")
+                f"<code>{safe_repr(self.value)}</code></li>")
 
+
+class CustomPrettyPrinter(pprint.PrettyPrinter):
+    def format(self, object, context, maxlevels, level):
+        if HAS_PILLOW and isinstance(object, PILImage.Image):
+            return repr_pil_image(object), True, False
+        return pprint.PrettyPrinter.format(self, object, context, maxlevels, level)
 
 def format_page_content(content, width=80):
     try:
-        return pprint.pformat(content, indent=DIFF_INDENT_WIDTH, width=width)
+        custom_pretty_printer = CustomPrettyPrinter(indent=DIFF_INDENT_WIDTH, width=width)
+        return custom_pretty_printer.pformat(content)
     except Exception as e:
-        return repr(content)
+        return safe_repr(content)
 
 
 def remap_hidden_form_parameters(kwargs: dict, button_pressed: str):
@@ -105,11 +188,20 @@ def dehydrate_json(value):
         return {f.name: dehydrate_json(getattr(value, f.name))
                 for f in fields(value)}
     elif HAS_PILLOW and isinstance(value, PILImage.Image):
-        with io.BytesIO() as output:
-            value.save(output, format='PNG')
-            return output.getvalue().decode('latin1')
+        return image_to_bytes(value).decode('latin1')
     raise ValueError(
         f"Error while serializing state: The {value!r} is not a int, str, float, bool, list, or dataclass.")
+
+
+def image_to_bytes(value):
+    with io.BytesIO() as output:
+        value.save(output, format='PNG')
+        return output.getvalue()
+
+def bytes_to_image(value):
+    return PILImage.open(io.BytesIO(value))
+
+
 
 
 def rehydrate_json(value, new_type):
@@ -122,7 +214,7 @@ def rehydrate_json(value, new_type):
             return value
     elif isinstance(value, str):
         if HAS_PILLOW and issubclass(new_type, PILImage.Image):
-            return PILImage.open(io.BytesIO(value.encode('latin1')))
+            return bytes_to_image(value.encode('latin1'))
         return value
     elif isinstance(value, (int, float, bool)) or value is None:
         return value
@@ -144,10 +236,9 @@ def rehydrate_json(value, new_type):
 
 
 def get_params():
-    if hasattr(request.params, 'decode'):
-        params = request.params.decode('utf-8')
-    else:
-        params = request.params
+    params = request.params
+    if hasattr(params, 'decode'):
+        params = params.decode('utf-8')
     for file_object in request.files:
         params[file_object] = request.files[file_object]
     return params
