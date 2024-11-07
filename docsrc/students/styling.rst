@@ -291,3 +291,31 @@ using the ``classes`` keyword parameter. You can then use the class name in your
         ])
 
 Don't forget to include the ``STYLE`` constant in every page that uses the ``quit-button`` class.
+
+If you don't want to have to include the ``STYLE`` constant in every page, you can use the
+``add_website_css`` function to add the CSS to every page on the website:
+
+.. function:: add_website_css(css: str)
+              add_website_css(selector: str, css: str)
+
+    Adds additional CSS content to the website. This is useful for adding custom
+    CSS to the website, either for specific selectors or for general styles.
+    If you only provide one parameter, it will be wrapped in <style> tags.
+    If you provide both parameters, they will be used to create a CSS rule; the first parameter
+    is the CSS selector, and the second parameter is the CSS content that will be wrapped in {}.
+
+    .. code-block:: python
+
+        add_website_css("button", "color: red; float: right;")
+        add_website_css(".quit-button", "color: red; float: right;")
+        add_website_css("""
+        button {
+            color: red;
+            float: right;
+        }
+        """)
+
+    :param selector: The CSS selector to apply the CSS to, or the CSS content if the second parameter is None.
+    :type selector: str
+    :param css: The CSS content to apply to the selector.
+    :type css: str
