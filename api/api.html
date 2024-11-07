@@ -237,10 +237,101 @@ This is not meant to be called by the user; it will be called by the server.</p>
 <dd></dd></dl>
 
 <dl class="py function" id="module-drafter.deploy">
+<dt class="sig sig-object py" id="drafter.deploy.add_website_css">
+<span class="sig-name descname"><span class="pre">add_website_css</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">css</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.add_website_css" title="Link to this definition">¶</a></dt>
+<dd><p>Adds additional CSS content to the website. This is useful for adding custom
+CSS to the website, either for specific selectors or for general styles.
+If you only provide one parameter, it will be wrapped in &lt;style&gt; tags.
+If you provide both parameters, they will be used to create a CSS rule; the first parameter
+is the CSS selector, and the second parameter is the CSS content that will be wrapped in {}.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>selector</strong> – The CSS selector to apply the CSS to, or the CSS content if the second parameter is None.</p></li>
+<li><p><strong>css</strong> – The CSS content to apply to the selector.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.deploy.add_website_header">
+<span class="sig-name descname"><span class="pre">add_website_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.add_website_header" title="Link to this definition">¶</a></dt>
+<dd><p>Adds additional header content to the website. This is useful for adding custom
+CSS or JavaScript to the website, or other arbitrary header tags like meta tags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>header</strong> – The raw header content to add. This will not be wrapped in additional tags.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.deploy.default_index">
+<span class="sig-name descname"><span class="pre">default_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#drafter.page.Page" title="drafter.page.Page"><span class="pre">Page</span></a></span></span><a class="headerlink" href="#drafter.deploy.default_index" title="Link to this definition">¶</a></dt>
+<dd><p>The default index page for the website. This will show a simple “Hello world!” message.
+You should not modify or use this function; instead, create your own index page.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.deploy.deploy_site">
+<span class="sig-name descname"><span class="pre">deploy_site</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'images'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.deploy_site" title="Link to this definition">¶</a></dt>
+<dd><p>Deploys the website with the given image folder. This will set the production
+flag to True and turn off debug information, too.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image_folder</strong> – The folder where images are stored.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="drafter.deploy.hide_debug_information">
 <span class="sig-name descname"><span class="pre">hide_debug_information</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.hide_debug_information" title="Link to this definition">¶</a></dt>
 <dd><p>Hides debug information from the website, so that it will not appear. Useful
 for deployed websites.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.deploy.set_website_framed">
+<span class="sig-name descname"><span class="pre">set_website_framed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">framed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.set_website_framed" title="Link to this definition">¶</a></dt>
+<dd><p>Sets whether the website should be framed or not. If you are deploying the website, then
+this would be a common thing to set to False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>framed</strong> – Whether the website should be framed or not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.deploy.set_website_style">
+<span class="sig-name descname"><span class="pre">set_website_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.set_website_style" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the style of the website. This is a string that will be used to determine the
+CSS style of the website from the available styles (e.g., <cite>skeleton</cite>, <cite>bootstrap</cite>).
+This list will be expanded in the future.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>style</strong> – The style of the website.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.deploy.set_website_title">
+<span class="sig-name descname"><span class="pre">set_website_title</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.set_website_title" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the title of the website, as it appears in the browser tab.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>title</strong> – The title of the website.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.deploy.show_debug_information">
+<span class="sig-name descname"><span class="pre">show_debug_information</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.show_debug_information" title="Link to this definition">¶</a></dt>
+<dd><p>Shows debug information on the website. Useful for development.</p>
 </dd></dl>
 
 <dl class="py class" id="module-drafter.debug">
@@ -536,7 +627,15 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 <li class="toctree-l2"><a class="reference internal" href="#drafter.history.ConversionRecord"><code class="docutils literal notranslate"><span class="pre">ConversionRecord</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.history.UnchangedRecord"><code class="docutils literal notranslate"><span class="pre">UnchangedRecord</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.history.VisitedPage"><code class="docutils literal notranslate"><span class="pre">VisitedPage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.add_website_css"><code class="docutils literal notranslate"><span class="pre">add_website_css()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.add_website_header"><code class="docutils literal notranslate"><span class="pre">add_website_header()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.default_index"><code class="docutils literal notranslate"><span class="pre">default_index()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.deploy_site"><code class="docutils literal notranslate"><span class="pre">deploy_site()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.hide_debug_information"><code class="docutils literal notranslate"><span class="pre">hide_debug_information()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.set_website_framed"><code class="docutils literal notranslate"><span class="pre">set_website_framed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.set_website_style"><code class="docutils literal notranslate"><span class="pre">set_website_style()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.set_website_title"><code class="docutils literal notranslate"><span class="pre">set_website_title()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.show_debug_information"><code class="docutils literal notranslate"><span class="pre">show_debug_information()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.debug.DebugInformation"><code class="docutils literal notranslate"><span class="pre">DebugInformation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.configuration.ServerConfiguration"><code class="docutils literal notranslate"><span class="pre">ServerConfiguration</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.Argument"><code class="docutils literal notranslate"><span class="pre">Argument</span></code></a></li>
