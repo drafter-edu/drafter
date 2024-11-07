@@ -76,9 +76,14 @@ class PageContent:
 
 Content = Union[PageContent, str]
 
+def make_safe_json_argument(value):
+    return html.escape(json.dumps(value), True)
 
 def make_safe_argument(value):
     return html.escape(json.dumps(value), True)
+
+def make_safe_name(value):
+    return html.escape(str(value))
 
 
 class LinkContent:
@@ -108,7 +113,7 @@ class LinkContent:
     def create_arguments(self, arguments, label_namespace):
         parameters = self.parse_arguments(arguments, label_namespace)
         if parameters:
-            return "\n".join(f"<input type='hidden' name='{name}' value='{make_safe_argument(value)}' />"
+            return "\n".join(f"<input type='hidden' name='{name}' value={make_safe_json_argument(value)} />"
                              for name, value in parameters.items())
         return ""
 
@@ -144,8 +149,8 @@ class Argument(PageContent):
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
-        value = make_safe_argument(self.value)
-        return f"<input type='hidden' name='{JSON_DECODE_SYMBOL}{self.name}' value='{value}' {self.parse_extra_settings()} />"
+        value = make_safe_json_argument(self.value)
+        return f"<input type='hidden' name='{JSON_DECODE_SYMBOL}{self.name}' value={value} {self.parse_extra_settings()} />"
 
 
 @dataclass
@@ -163,6 +168,35 @@ class Link(PageContent, LinkContent):
         precode = self.create_arguments(self.arguments, self.text)
         url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: self.text})
         return f"{precode}<a href='{url}' {self.parse_extra_settings()}>{self.text}</a>"
+
+
+@dataclass
+class Button(PageContent, LinkContent):
+    text: str
+    url: str
+    arguments: list[Argument]
+    external: bool = False
+
+    def __init__(self, text: str, url: str, arguments=None, **kwargs):
+        self.text = text
+        self.url, self.external = self._handle_url(url)
+        self.extra_settings = kwargs
+        self.arguments = arguments
+
+    def __repr__(self):
+        if self.arguments:
+            return f"Button(text={self.text!r}, url={self.url!r}, arguments={self.arguments!r})"
+        return f"Button(text={self.text!r}, url={self.url!r})"
+
+    def __str__(self) -> str:
+        precode = self.create_arguments(self.arguments, self.text)
+        url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: self.text})
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        value = make_safe_argument(self.text)
+        return f"{precode}<button type='submit' name='{SUBMIT_BUTTON_KEY}' value='{value}' formaction='{url}' {parsed_settings}>{self.text}</button>"
+
+
+SubmitButton = Button
 
 
 BASE_IMAGE_FOLDER = "/__images"
@@ -234,13 +268,13 @@ class TextBox(PageContent):
     def __init__(self, name: str, default_value: Optional[str] = None, kind: str = "text", **kwargs):
         self.name = name
         self.kind = kind
-        self.default_value = default_value
+        self.default_value = str(default_value) if default_value is not None else ""
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
         extra_settings = {}
         if self.default_value is not None:
-            extra_settings['value'] = self.default_value
+            extra_settings['value'] = html.escape(self.default_value)
         parsed_settings = self.parse_extra_settings(**extra_settings)
         # TODO: investigate whether we need to make the name safer
         return f"<input type='{self.kind}' name='{self.name}' {parsed_settings}>"
@@ -254,12 +288,12 @@ class TextArea(PageContent):
 
     def __init__(self, name: str, default_value: Optional[str] = None, **kwargs):
         self.name = name
-        self.default_value = default_value
+        self.default_value = str(default_value) if default_value is not None else ""
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<textarea name='{self.name}' {parsed_settings}>{self.default_value}</textarea>"
+        return f"<textarea name='{self.name}' {parsed_settings}>{html.escape(self.default_value)}</textarea>"
 
 
 @dataclass
@@ -271,13 +305,13 @@ class SelectBox(PageContent):
     def __init__(self, name: str, options: list[str], default_value: Optional[str] = None, **kwargs):
         self.name = name
         self.options = options
-        self.default_value = default_value
+        self.default_value = str(default_value) if default_value is not None else ""
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
         extra_settings = {}
         if self.default_value is not None:
-            extra_settings['value'] = self.default_value
+            extra_settings['value'] = html.escape(self.default_value)
         parsed_settings = self.parse_extra_settings(**extra_settings)
         options = "\n".join(f"<option selected value='{option}'>{option}</option>"
                             if option == self.default_value else
@@ -294,7 +328,7 @@ class CheckBox(PageContent):
 
     def __init__(self, name: str, default_value: bool = False, **kwargs):
         self.name = name
-        self.default_value = default_value
+        self.default_value = bool(default_value)
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
@@ -318,9 +352,17 @@ class HorizontalRule(PageContent):
 
 @dataclass
 class Span(PageContent):
+    content: list[Any]
+    extra_settings: dict
+
     def __init__(self, *args, **kwargs):
         self.content = args
         self.extra_settings = kwargs
+
+    def __repr__(self):
+        if self.extra_settings:
+            return f"Span({', '.join(repr(item) for item in self.content)}, {self.extra_settings})"
+        return f"Span({', '.join(repr(item) for item in self.content)})"
 
     def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
@@ -329,9 +371,19 @@ class Span(PageContent):
 
 @dataclass
 class Div(PageContent):
+
+    # TODO: This should subclass a common ancestor with Span
+    content: list[Any]
+    extra_settings: dict
+
     def __init__(self, *args, **kwargs):
         self.content = args
         self.extra_settings = kwargs
+
+    def __repr__(self):
+        if self.extra_settings:
+            return f"Div({', '.join(repr(item) for item in self.content)}, {self.extra_settings})"
+        return f"Div({', '.join(repr(item) for item in self.content)})"
 
     def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
@@ -364,35 +416,6 @@ class Row(Div):
         self.extra_settings['style_display'] = "flex"
         self.extra_settings['style_flex_direction'] = "row"
         self.extra_settings['style_align_items'] = "center"
-
-
-@dataclass
-class Button(PageContent, LinkContent):
-    text: str
-    url: str
-    arguments: list[Argument]
-    external: bool = False
-
-    def __init__(self, text: str, url: str, arguments=None, **kwargs):
-        self.text = text
-        self.url, self.external = self._handle_url(url)
-        self.extra_settings = kwargs
-        self.arguments = arguments
-
-    def __repr__(self):
-        if self.arguments:
-            return f"Button(text={self.text!r}, url={self.url!r}, arguments={self.arguments!r})"
-        return f"Button(text={self.text!r}, url={self.url!r})"
-
-    def __str__(self) -> str:
-        precode = self.create_arguments(self.arguments, self.text)
-        url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: self.text})
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        value = make_safe_argument(self.text)
-        return f"{precode}<button type='submit' name='{SUBMIT_BUTTON_KEY}' value={value} formaction='{url}' {parsed_settings}>{self.text}</button>"
-
-
-SubmitButton = Button
 
 
 @dataclass

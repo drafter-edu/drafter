@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.3] - 2024-11-7
+
+### Added
+
+* The `add_website_css` function now allows a single string (just the CSS) instead of the selector/CSS pair
+
+## [1.5.2] - 2024-10-29
+
+### Fixed
+
+* Force text boxes, text areas, and other input components to `str` their default value (when provided) and escape it for html
+
+## [1.5.1] - 2024-10-29
+
+### Fixed
+
+* Fixed other input components' values not being properly escaped
+* Fixed a bug with `Span` and `Div` components not properly being `repr`ed
+
 ## [1.5.0] - 2024-10-24
 
 ### Added

@@ -146,9 +146,9 @@ class Server:
         button_pressed = ""
         params = get_params()
         if SUBMIT_BUTTON_KEY in params:
-            button_pressed = params.pop(SUBMIT_BUTTON_KEY)
+            button_pressed = json.loads(params.pop(SUBMIT_BUTTON_KEY))
         elif PREVIOUSLY_PRESSED_BUTTON in params:
-            button_pressed = params.pop(PREVIOUSLY_PRESSED_BUTTON)
+            button_pressed = json.loads(params.pop(PREVIOUSLY_PRESSED_BUTTON))
         # TODO: Handle non-bottle backends
         for key in list(params.keys()):
             kwargs[key] = params.pop(key)

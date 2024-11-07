@@ -142,10 +142,16 @@ def remap_hidden_form_parameters(kwargs: dict, button_pressed: str):
     for key, value in kwargs.items():
         if button_pressed and key.startswith(f"{button_pressed}{LABEL_SEPARATOR}"):
             key = key[len(f"{button_pressed}{LABEL_SEPARATOR}"):]
-            renamed_kwargs[key] = json.loads(value)
+            try:
+                renamed_kwargs[key] = json.loads(value)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Could not decode JSON for {key}={value!r}") from e
         elif key.startswith(JSON_DECODE_SYMBOL):
             key = key[len(JSON_DECODE_SYMBOL):]
-            renamed_kwargs[key] = json.loads(value)
+            try:
+                renamed_kwargs[key] = json.loads(value)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Could not decode JSON for {key}={value!r}") from e
         elif LABEL_SEPARATOR not in key:
             renamed_kwargs[key] = value
     return renamed_kwargs
@@ -209,6 +215,10 @@ def rehydrate_json(value, new_type):
     if isinstance(value, list):
         if hasattr(new_type, '__args__'):
             element_type = new_type.__args__
+            if len(element_type) == 1:
+                element_type = element_type[0]
+            else:
+                raise ValueError(f"Error while restoring state: Could not create {new_type!r} from {value!r}. The element type of the list ({new_type!r}) is not a single type.")
             return [rehydrate_json(v, element_type) for v in value]
         elif hasattr(new_type, '__origin__') and getattr(new_type, '__origin__') == list:
             return value

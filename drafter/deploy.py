@@ -1,3 +1,4 @@
+from typing import Optional
 from drafter.server import MAIN_SERVER
 from drafter.page import Page
 
@@ -30,8 +31,11 @@ def add_website_header(header: str):
     MAIN_SERVER.configuration.additional_header_content.append(header)
 
 
-def add_website_css(selector: str, css: str):
-    MAIN_SERVER.configuration.additional_css_content.append(f"{selector} {{{css}}}")
+def add_website_css(selector: str, css: Optional[str] = None):
+    if css is None:
+        MAIN_SERVER.configuration.additional_css_content.append(selector+"\n")
+    else:
+        MAIN_SERVER.configuration.additional_css_content.append(f"{selector} {{{css}}}\n")
 
 
 def deploy_site(image_folder='images'):
