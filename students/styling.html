@@ -411,6 +411,38 @@ using the <code class="docutils literal notranslate"><span class="pre">classes</
 </pre></div>
 </div>
 <p>Don’t forget to include the <code class="docutils literal notranslate"><span class="pre">STYLE</span></code> constant in every page that uses the <code class="docutils literal notranslate"><span class="pre">quit-button</span></code> class.</p>
+<p>If you don’t want to have to include the <code class="docutils literal notranslate"><span class="pre">STYLE</span></code> constant in every page, you can use the
+<code class="docutils literal notranslate"><span class="pre">add_website_css</span></code> function to add the CSS to every page on the website:</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="add_website_css">
+<span class="sig-name descname"><span class="pre">add_website_css</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">css</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#add_website_css" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">add_website_css</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">css</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Adds additional CSS content to the website. This is useful for adding custom
+CSS to the website, either for specific selectors or for general styles.
+If you only provide one parameter, it will be wrapped in &lt;style&gt; tags.
+If you provide both parameters, they will be used to create a CSS rule; the first parameter
+is the CSS selector, and the second parameter is the CSS content that will be wrapped in {}.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;button&quot;</span><span class="p">,</span> <span class="s2">&quot;color: red; float: right;&quot;</span><span class="p">)</span>
+<span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;.quit-button&quot;</span><span class="p">,</span> <span class="s2">&quot;color: red; float: right;&quot;</span><span class="p">)</span>
+<span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">button {</span>
+<span class="s2">    color: red;</span>
+<span class="s2">    float: right;</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>selector</strong> (<em>str</em>) – The CSS selector to apply the CSS to, or the CSS content if the second parameter is None.</p></li>
+<li><p><strong>css</strong> (<em>str</em>) – The CSS content to apply to the selector.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -456,7 +488,10 @@ using the <code class="docutils literal notranslate"><span class="pre">classes</
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#keyword-parameters">Keyword Parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#css-style-tags">CSS Style Tags</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#css-classes">CSS Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#css-classes">CSS Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#add_website_css"><code class="docutils literal notranslate"><span class="pre">add_website_css()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
