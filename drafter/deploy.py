@@ -37,7 +37,7 @@ def set_website_framed(framed: bool):
     MAIN_SERVER.configuration.framed = framed
 
 
-def set_website_style(style: str):
+def set_website_style(style: Optional[str]):
     """
     Sets the style of the website. This is a string that will be used to determine the
     CSS style of the website from the available styles (e.g., `skeleton`, `bootstrap`).
@@ -45,6 +45,8 @@ def set_website_style(style: str):
 
     :param style: The style of the website.
     """
+    if style is None:
+        style = "none"
     MAIN_SERVER.configuration.style = style
 
 
