@@ -3,6 +3,72 @@
 Styling
 =======
 
+If you want to make your page pretty, then there's a number of ways to control the **style** of your components.
+In HTML, you can style components using `CSS (Cascading Style Sheets) <https://developer.mozilla.org/en-US/docs/Web/CSS>`_. CSS allows you to control the appearance of
+your components, such as the font, color, size, and position. Drafter provides several ways to style components.
+You can use the built-in styling functions, keyword parameters, CSS classes, CSS style tags, and website-wide CSS.
+
+Drafter generates plain HTML and CSS, so you can use any CSS styling you want. However, Drafter also provides
+some built-in functions to make styling easier.
+
+The following section gives examples of how to style your components using these methods,
+with links to the more detailed sub-sections.
+
+A Full Styling Example
+----------------------
+
+Here is an example of how you might use the styling functions and keyword parameters to style a page:
+
+.. code-block:: python
+
+    from drafter import *
+
+    set_website_style("none")
+    add_website_css("""
+    body {
+        background-color: lightblue;
+        font-size: 20px;
+    }
+
+    .name-box {
+        background-color: pink;
+        float: right;
+    }
+    """)
+
+    PAGE_SPECIFIC_STYLE = """<style>
+    .name-box {
+        margin: 10px;
+    }
+    </style>
+    """,
+
+    @route
+    def index(state: str) -> Page:
+        return Page(state, [
+            PAGE_SPECIFIC_STYLE,
+            bold("Welcome to the website!"),
+            TextBox("Name", "Your name goes here", classes="name-box"),
+            Button("Quit", index, style_color="red", style_float='right')
+        ])
+
+    start_server("")
+
+This demonstrates the following concepts:
+
+* Disabling the default theme (``set_website_style("none")``: `changing themes`_
+* Adding custom CSS to the website (``add_website_css``): `Adding Website CSS`_
+* Using CSS classes to style components (``classes`` keyword parameter): `CSS Classes`_
+* Using styling functions to style components (e.g., ``bold``): `Styling Functions`_
+* Using keyword parameters to style components (e.g., ``style_color`` and ``style_float``): `Keyword Parameters`_
+* Embedding a CSS style tag in a page (``PAGE_SPECIFIC_STYLE``): `CSS Style Tags`_
+
+Here's what that basic example might look like when rendered in a browser:
+
+.. image:: images/styling_example_full.png
+    :alt: Github Repository
+
+
 Styling Functions
 -----------------
 
@@ -238,12 +304,32 @@ Another way to style components is to use keyword parameters. Any component can 
 
 .. code-block:: python
 
+    @route
     def index(state: State) -> Page:
         return Page(state, [
             Button("Quit", index, style_text_color="red", style_float='right')
         ])
 
 The example above makes the text red and floats the button to the right.
+
+Drafter will automatically convert the keyword parameters to CSS styles, by applying the following rules:
+
+1. If the keyword parameter does not begin with ``style_``, then the result will be an `HTML attribute <https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes>`_.
+2. If it does begin with ``style_``, then the result will be an `inline CSS style attribute <https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/style>`_ of the tag, with the ``style_`` prefix removed.
+3. Any underscores in the keyword parameter will be converted to hyphens in the CSS style attribute.
+4. The value of the keyword parameter will be used as the value of the CSS style attribute, converted to a string using the ``str`` function.
+
+So for example, the following Drafter code:
+
+.. code-block:: python
+
+    Span("Hello World", style_font_size=50)
+
+Will generate the following HTML:
+
+.. code-block:: html
+
+    <span style="font-size: 50;">Hello World</span>
 
 CSS Style Tags
 --------------
@@ -252,6 +338,7 @@ Since you can embed HTML into any ``Page`` component, you can also embed CSS sty
 
 .. code-block:: python
 
+    @route
     def index(state: State) -> Page:
         return Page(state, [
             """
@@ -284,6 +371,7 @@ using the ``classes`` keyword parameter. You can then use the class name in your
     </style>
     """
 
+    @route
     def index(state: State) -> Page:
         return Page(state, [
             STYLE,
@@ -291,6 +379,22 @@ using the ``classes`` keyword parameter. You can then use the class name in your
         ])
 
 Don't forget to include the ``STYLE`` constant in every page that uses the ``quit-button`` class.
+
+If you are using the default theme (``skeleton``), then you may need to be more specific with your CSS selectors.
+For example, if you want to style a button, you may need to use the following CSS:
+
+.. code-block:: css
+
+    button.quit-button {
+        color: red;
+        float: right;
+    }
+
+Otherwise, the default theme may override your styles. You can disable the default theme by
+using ``set_website_style("none")`` (see `changing themes`_).
+
+Adding Website CSS
+------------------
 
 If you don't want to have to include the ``STYLE`` constant in every page, you can use the
 ``add_website_css`` function to add the CSS to every page on the website:
@@ -306,12 +410,12 @@ If you don't want to have to include the ``STYLE`` constant in every page, you c
 
     .. code-block:: python
 
-        add_website_css("button", "color: red; float: right;")
-        add_website_css(".quit-button", "color: red; float: right;")
+        add_website_css("body", "background-color: lightblue;")
+        add_website_css("button.quit-button", "color: red; float: right;")
         add_website_css("""
-        button {
-            color: red;
-            float: right;
+        body {
+            background-color: lightblue;
+            font-size: 20px;
         }
         """)
 
@@ -319,3 +423,34 @@ If you don't want to have to include the ``STYLE`` constant in every page, you c
     :type selector: str
     :param css: The CSS content to apply to the selector.
     :type css: str
+
+This can be placed anywhere before the ``start_server`` function is called, but we recommend putting it
+directly after your imports for clarity.
+
+.. _changing themes:
+
+Changing Themes
+---------------
+
+Drafter ships with a default theme called ``skeleton``. You can change the theme by using the
+``set_website_style`` function. There are currently only three theme options.
+
+.. function:: set_website_style(style: str)
+
+    Sets the website style to the specified theme. The theme must be one of the following:
+
+    * ``skeleton``: The default theme, which is a simple, clean theme that does not require additional CSS classes.
+    * ``bootstrap``: A more complex theme that requires additional CSS classes to style components.
+    * ``none``: Disables the default theme, allowing you to style everything yourself.
+
+    .. code-block:: python
+
+        set_website_style("bootstrap")
+        set_website_style("skeleton")
+        set_website_style("none")
+
+    :param style: The theme to set the website style to.
+    :type style: str
+
+This can be placed anywhere before the ``start_server`` function is called, but we recommend putting it
+directly after your imports for clarity.

@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Full API Documentation &#8212; Drafter 1.5.3 documentation</title>
+    <title>Full API Documentation &#8212; Drafter 1.5.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=d75fd82e"></script>
+    <script src="../_static/documentation_options.js?v=1cd648e3"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="../students/deployment.html" title="Deployment"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.5.3 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.5.4 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>
@@ -71,6 +71,17 @@
 internals of Drafter and potentially contribute to the project. If you are
 looking for user documentation, please refer to the <a class="reference internal" href="../students/docs.html#fulldocs"><span class="std std-ref">Student Documentation</span></a>.</p>
 <dl class="py function" id="module-drafter.server">
+<dt class="sig sig-object py" id="drafter.server.get_main_server">
+<span class="sig-name descname"><span class="pre">get_main_server</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Server</span></span></span><a class="headerlink" href="#drafter.server.get_main_server" title="Link to this definition">¶</a></dt>
+<dd><p>Gets the main server. This is useful for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The main server</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="drafter.server.get_server_setting">
 <span class="sig-name descname"><span class="pre">get_server_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">MAIN_SERVER</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.get_server_setting" title="Link to this definition">¶</a></dt>
 <dd><p>Gets a setting from the server’s configuration. If the setting is not found, the default value is returned.</p>
@@ -84,6 +95,20 @@ looking for user documentation, please refer to the <a class="reference internal
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The value of the setting, or the default value if not found</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.server.set_main_server">
+<span class="sig-name descname"><span class="pre">set_main_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Server</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.set_main_server" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the main server to the given server. This is useful for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>server</strong> – The server to set as the main server</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -306,7 +331,7 @@ this would be a common thing to set to False.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="drafter.deploy.set_website_style">
-<span class="sig-name descname"><span class="pre">set_website_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.set_website_style" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_website_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.set_website_style" title="Link to this definition">¶</a></dt>
 <dd><p>Sets the style of the website. This is a string that will be used to determine the
 CSS style of the website from the available styles (e.g., <cite>skeleton</cite>, <cite>bootstrap</cite>).
 This list will be expanded in the future.</p>
@@ -497,7 +522,7 @@ allows for more customization and control over the content.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="drafter.components.Text">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Text" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Text" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
@@ -612,7 +637,9 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 <li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../students/deployment.html">Deployment</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Full API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.server.get_main_server"><code class="docutils literal notranslate"><span class="pre">get_main_server()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.get_server_setting"><code class="docutils literal notranslate"><span class="pre">get_server_setting()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.server.set_main_server"><code class="docutils literal notranslate"><span class="pre">set_main_server()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.start_server"><code class="docutils literal notranslate"><span class="pre">start_server()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.testing.BakeryTestCase"><code class="docutils literal notranslate"><span class="pre">BakeryTestCase</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.testing.assert_equal"><code class="docutils literal notranslate"><span class="pre">assert_equal()</span></code></a></li>
@@ -732,7 +759,7 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
         <li class="right" >
           <a href="../students/deployment.html" title="Deployment"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.5.3 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.5.4 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>

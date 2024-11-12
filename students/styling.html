@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Styling &#8212; Drafter 1.5.3 documentation</title>
+    <title>Styling &#8212; Drafter 1.5.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=d75fd82e"></script>
+    <script src="../_static/documentation_options.js?v=1cd648e3"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -56,7 +56,7 @@
         <li class="right" >
           <a href="html.html" title="HTML"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.5.3 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.5.4 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Styling</a></li> 
       </ul>
@@ -71,6 +71,63 @@
             
   <section id="styling">
 <span id="id1"></span><h1>Styling<a class="headerlink" href="#styling" title="Link to this heading">¶</a></h1>
+<p>If you want to make your page pretty, then there’s a number of ways to control the <strong>style</strong> of your components.
+In HTML, you can style components using <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS">CSS (Cascading Style Sheets)</a>. CSS allows you to control the appearance of
+your components, such as the font, color, size, and position. Drafter provides several ways to style components.
+You can use the built-in styling functions, keyword parameters, CSS classes, CSS style tags, and website-wide CSS.</p>
+<p>Drafter generates plain HTML and CSS, so you can use any CSS styling you want. However, Drafter also provides
+some built-in functions to make styling easier.</p>
+<p>The following section gives examples of how to style your components using these methods,
+with links to the more detailed sub-sections.</p>
+<section id="a-full-styling-example">
+<h2>A Full Styling Example<a class="headerlink" href="#a-full-styling-example" title="Link to this heading">¶</a></h2>
+<p>Here is an example of how you might use the styling functions and keyword parameters to style a page:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
+<span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">body {</span>
+<span class="s2">    background-color: lightblue;</span>
+<span class="s2">    font-size: 20px;</span>
+<span class="s2">}</span>
+
+<span class="s2">.name-box {</span>
+<span class="s2">    background-color: pink;</span>
+<span class="s2">    float: right;</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="n">PAGE_SPECIFIC_STYLE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;&lt;style&gt;</span>
+<span class="s2">.name-box {</span>
+<span class="s2">    margin: 10px;</span>
+<span class="s2">}</span>
+<span class="s2">&lt;/style&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">PAGE_SPECIFIC_STYLE</span><span class="p">,</span>
+        <span class="n">bold</span><span class="p">(</span><span class="s2">&quot;Welcome to the website!&quot;</span><span class="p">),</span>
+        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Your name goes here&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;name-box&quot;</span><span class="p">),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Quit&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">style_color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">style_float</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+    <span class="p">])</span>
+
+<span class="n">start_server</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This demonstrates the following concepts:</p>
+<ul class="simple">
+<li><p>Disabling the default theme (<code class="docutils literal notranslate"><span class="pre">set_website_style(&quot;none&quot;)</span></code>: <a class="reference internal" href="#changing-themes">changing themes</a></p></li>
+<li><p>Adding custom CSS to the website (<code class="docutils literal notranslate"><span class="pre">add_website_css</span></code>): <a class="reference internal" href="#adding-website-css">Adding Website CSS</a></p></li>
+<li><p>Using CSS classes to style components (<code class="docutils literal notranslate"><span class="pre">classes</span></code> keyword parameter): <a class="reference internal" href="#css-classes">CSS Classes</a></p></li>
+<li><p>Using styling functions to style components (e.g., <code class="docutils literal notranslate"><span class="pre">bold</span></code>): <a class="reference internal" href="#styling-functions">Styling Functions</a></p></li>
+<li><p>Using keyword parameters to style components (e.g., <code class="docutils literal notranslate"><span class="pre">style_color</span></code> and <code class="docutils literal notranslate"><span class="pre">style_float</span></code>): <a class="reference internal" href="#keyword-parameters">Keyword Parameters</a></p></li>
+<li><p>Embedding a CSS style tag in a page (<code class="docutils literal notranslate"><span class="pre">PAGE_SPECIFIC_STYLE</span></code>): <a class="reference internal" href="#css-style-tags">CSS Style Tags</a></p></li>
+</ul>
+<p>Here’s what that basic example might look like when rendered in a browser:</p>
+<img alt="Github Repository" src="../_images/styling_example_full.png" />
+</section>
 <section id="styling-functions">
 <h2>Styling Functions<a class="headerlink" href="#styling-functions" title="Link to this heading">¶</a></h2>
 <p>One of the easiest ways to apply styling to components is to use the
@@ -143,7 +200,7 @@ the button align on the right hand side of the screen.</p>
 <dt class="sig sig-object py" id="change_color">
 <span class="sig-name descname"><span class="pre">change_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_color" title="Link to this definition">¶</a></dt>
 <dd><p>Changes the text color. The color can be a named color (e.g. “red”) or a hex code (e.g. “#FF0000”).
-See the <a href="#id2"><span class="problematic" id="id3">`colors`_</span></a> page for available HTML colors.</p>
+See the <a href="#id3"><span class="problematic" id="id4">`colors`_</span></a> page for available HTML colors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>color</strong> (<em>str</em>) – The color to change the text to.</p>
@@ -155,7 +212,7 @@ See the <a href="#id2"><span class="problematic" id="id3">`colors`_</span></a> p
 <dt class="sig sig-object py" id="change_background_color">
 <span class="sig-name descname"><span class="pre">change_background_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_background_color" title="Link to this definition">¶</a></dt>
 <dd><p>Changes the background color of the component (the <code class="docutils literal notranslate"><span class="pre">background-color</span></code> CSS attribute). The color can be a named color (e.g. “red”) or a hex code (e.g. “#FF0000”).
-See the <a href="#id4"><span class="problematic" id="id5">`colors`_</span></a> page for available HTML colors.</p>
+See the <a href="#id5"><span class="problematic" id="id6">`colors`_</span></a> page for available HTML colors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>color</strong> (<em>str</em>) – The color to change the background to.</p>
@@ -185,7 +242,7 @@ If an integer is given, the units are assumed to be pixels. Valid units are:</p>
 <dt class="sig sig-object py" id="change_text_font">
 <span class="sig-name descname"><span class="pre">change_text_font</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_text_font" title="Link to this definition">¶</a></dt>
 <dd><p>Changes the font of the text. The font must be a valid font name (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;Arial&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Times</span> <span class="pre">New</span> <span class="pre">Roman&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Courier</span> <span class="pre">New&quot;</span></code>).
-See the <a href="#id6"><span class="problematic" id="id7">`fonts`_</span></a> page for available fonts.</p>
+See the <a href="#id7"><span class="problematic" id="id8">`fonts`_</span></a> page for available fonts.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>font</strong> (<em>str</em>) – The font to change the text to.</p>
@@ -283,7 +340,7 @@ If an integer is given, the units are assumed to be pixels. Valid units are:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">groove</span></code>: A 3D grooved border</p></li>
 </ul>
 <p>Additionally, a border can have a width and color. The width must be a string followed by the units (e.g. “1px”) or an integer (e.g. 1).
-The color can be a named color (e.g. “red”) or a hex code (e.g. “#FF0000”); see the <a href="#id8"><span class="problematic" id="id9">`colors`_</span></a> page for available HTML colors.
+The color can be a named color (e.g. “red”) or a hex code (e.g. “#FF0000”); see the <a href="#id9"><span class="problematic" id="id10">`colors`_</span></a> page for available HTML colors.
 The format is <code class="docutils literal notranslate"><span class="pre">&quot;style</span> <span class="pre">width</span> <span class="pre">color&quot;</span></code>. For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">change_border</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;solid 1px red&quot;</span><span class="p">)</span>  <span class="c1"># Adds a solid 1px red border</span>
 <span class="n">change_border</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;dotted 2px blue&quot;</span><span class="p">)</span>  <span class="c1"># Adds a dotted 2px blue border</span>
@@ -363,18 +420,35 @@ If an integer is given, the units are assumed to be pixels. Valid units are:</p>
 <h2>Keyword Parameters<a class="headerlink" href="#keyword-parameters" title="Link to this heading">¶</a></h2>
 <p>Another way to style components is to use keyword parameters. Any component can take
 <cite>style_</cite> prefixed keyword parameters. For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Quit&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">style_text_color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">style_float</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
     <span class="p">])</span>
 </pre></div>
 </div>
 <p>The example above makes the text red and floats the button to the right.</p>
+<p>Drafter will automatically convert the keyword parameters to CSS styles, by applying the following rules:</p>
+<ol class="arabic simple">
+<li><p>If the keyword parameter does not begin with <code class="docutils literal notranslate"><span class="pre">style_</span></code>, then the result will be an <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes">HTML attribute</a>.</p></li>
+<li><p>If it does begin with <code class="docutils literal notranslate"><span class="pre">style_</span></code>, then the result will be an <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/style">inline CSS style attribute</a> of the tag, with the <code class="docutils literal notranslate"><span class="pre">style_</span></code> prefix removed.</p></li>
+<li><p>Any underscores in the keyword parameter will be converted to hyphens in the CSS style attribute.</p></li>
+<li><p>The value of the keyword parameter will be used as the value of the CSS style attribute, converted to a string using the <code class="docutils literal notranslate"><span class="pre">str</span></code> function.</p></li>
+</ol>
+<p>So for example, the following Drafter code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Span</span><span class="p">(</span><span class="s2">&quot;Hello World&quot;</span><span class="p">,</span> <span class="n">style_font_size</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Will generate the following HTML:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">span</span> <span class="na">style</span><span class="o">=</span><span class="s">&quot;font-size: 50;&quot;</span><span class="p">&gt;</span>Hello World<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+</pre></div>
+</div>
 </section>
 <section id="css-style-tags">
 <h2>CSS Style Tags<a class="headerlink" href="#css-style-tags" title="Link to this heading">¶</a></h2>
 <p>Since you can embed HTML into any <code class="docutils literal notranslate"><span class="pre">Page</span></code> component, you can also embed CSS style tags.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &lt;style&gt;</span>
@@ -403,6 +477,7 @@ using the <code class="docutils literal notranslate"><span class="pre">classes</
 <span class="s2">&lt;/style&gt;</span>
 <span class="s2">&quot;&quot;&quot;</span>
 
+<span class="nd">@route</span>
 <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="n">STYLE</span><span class="p">,</span>
@@ -411,6 +486,19 @@ using the <code class="docutils literal notranslate"><span class="pre">classes</
 </pre></div>
 </div>
 <p>Don’t forget to include the <code class="docutils literal notranslate"><span class="pre">STYLE</span></code> constant in every page that uses the <code class="docutils literal notranslate"><span class="pre">quit-button</span></code> class.</p>
+<p>If you are using the default theme (<code class="docutils literal notranslate"><span class="pre">skeleton</span></code>), then you may need to be more specific with your CSS selectors.
+For example, if you want to style a button, you may need to use the following CSS:</p>
+<div class="highlight-css notranslate"><div class="highlight"><pre><span></span><span class="nt">button</span><span class="p">.</span><span class="nc">quit-button</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">red</span><span class="p">;</span>
+<span class="w">    </span><span class="k">float</span><span class="p">:</span><span class="w"> </span><span class="kc">right</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Otherwise, the default theme may override your styles. You can disable the default theme by
+using <code class="docutils literal notranslate"><span class="pre">set_website_style(&quot;none&quot;)</span></code> (see <a class="reference internal" href="#changing-themes">changing themes</a>).</p>
+</section>
+<section id="adding-website-css">
+<h2>Adding Website CSS<a class="headerlink" href="#adding-website-css" title="Link to this heading">¶</a></h2>
 <p>If you don’t want to have to include the <code class="docutils literal notranslate"><span class="pre">STYLE</span></code> constant in every page, you can use the
 <code class="docutils literal notranslate"><span class="pre">add_website_css</span></code> function to add the CSS to every page on the website:</p>
 <dl class="py function">
@@ -423,12 +511,12 @@ CSS to the website, either for specific selectors or for general styles.
 If you only provide one parameter, it will be wrapped in &lt;style&gt; tags.
 If you provide both parameters, they will be used to create a CSS rule; the first parameter
 is the CSS selector, and the second parameter is the CSS content that will be wrapped in {}.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;button&quot;</span><span class="p">,</span> <span class="s2">&quot;color: red; float: right;&quot;</span><span class="p">)</span>
-<span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;.quit-button&quot;</span><span class="p">,</span> <span class="s2">&quot;color: red; float: right;&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="s2">&quot;background-color: lightblue;&quot;</span><span class="p">)</span>
+<span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;button.quit-button&quot;</span><span class="p">,</span> <span class="s2">&quot;color: red; float: right;&quot;</span><span class="p">)</span>
 <span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">button {</span>
-<span class="s2">    color: red;</span>
-<span class="s2">    float: right;</span>
+<span class="s2">body {</span>
+<span class="s2">    background-color: lightblue;</span>
+<span class="s2">    font-size: 20px;</span>
 <span class="s2">}</span>
 <span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
 </pre></div>
@@ -443,6 +531,36 @@ is the CSS selector, and the second parameter is the CSS content that will be wr
 </dl>
 </dd></dl>
 
+<p>This can be placed anywhere before the <code class="docutils literal notranslate"><span class="pre">start_server</span></code> function is called, but we recommend putting it
+directly after your imports for clarity.</p>
+</section>
+<section id="changing-themes">
+<span id="id2"></span><h2>Changing Themes<a class="headerlink" href="#changing-themes" title="Link to this heading">¶</a></h2>
+<p>Drafter ships with a default theme called <code class="docutils literal notranslate"><span class="pre">skeleton</span></code>. You can change the theme by using the
+<code class="docutils literal notranslate"><span class="pre">set_website_style</span></code> function. There are currently only three theme options.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="set_website_style">
+<span class="sig-name descname"><span class="pre">set_website_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#set_website_style" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the website style to the specified theme. The theme must be one of the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">skeleton</span></code>: The default theme, which is a simple, clean theme that does not require additional CSS classes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bootstrap</span></code>: A more complex theme that requires additional CSS classes to style components.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">none</span></code>: Disables the default theme, allowing you to style everything yourself.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;bootstrap&quot;</span><span class="p">)</span>
+<span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;skeleton&quot;</span><span class="p">)</span>
+<span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>style</strong> (<em>str</em>) – The theme to set the website style to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>This can be placed anywhere before the <code class="docutils literal notranslate"><span class="pre">start_server</span></code> function is called, but we recommend putting it
+directly after your imports for clarity.</p>
 </section>
 </section>
 
@@ -462,6 +580,7 @@ is the CSS selector, and the second parameter is the CSS content that will be wr
 <li class="toctree-l1"><a class="reference internal" href="docs.html">Drafter Documentation for Students</a></li>
 <li class="toctree-l1"><a class="reference internal" href="html.html">HTML</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Styling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#a-full-styling-example">A Full Styling Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#styling-functions">Styling Functions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#float_left"><code class="docutils literal notranslate"><span class="pre">float_left()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#float_right"><code class="docutils literal notranslate"><span class="pre">float_right()</span></code></a></li>
@@ -488,8 +607,13 @@ is the CSS selector, and the second parameter is the CSS content that will be wr
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#keyword-parameters">Keyword Parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#css-style-tags">CSS Style Tags</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#css-classes">CSS Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#css-classes">CSS Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-website-css">Adding Website CSS</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#add_website_css"><code class="docutils literal notranslate"><span class="pre">add_website_css()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#changing-themes">Changing Themes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#set_website_style"><code class="docutils literal notranslate"><span class="pre">set_website_style()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -566,7 +690,7 @@ is the CSS selector, and the second parameter is the CSS content that will be wr
         <li class="right" >
           <a href="html.html" title="HTML"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.5.3 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.5.4 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Styling</a></li> 
       </ul>
