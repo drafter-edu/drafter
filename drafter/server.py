@@ -1,9 +1,9 @@
 import html
 import os
 import traceback
-from dataclasses import dataclass, asdict, replace, field
+from dataclasses import dataclass, asdict, replace, field, fields
 from functools import wraps
-from typing import Any
+from typing import Any, Optional
 import json
 import inspect
 
@@ -135,9 +135,15 @@ class Server:
         self.handle_images()
 
     def run(self, **kwargs):
-        configuration = replace(self.configuration, **kwargs)
-        self.configuration = configuration
-        self.app.run(**asdict(configuration))
+        final_args = asdict(self.configuration)
+        # Update the configuration with the safe kwargs
+        safe_keys = fields(ServerConfiguration)
+        safe_kwargs = {key: value for key, value in kwargs.items() if key in safe_keys}
+        updated_configuration = replace(self.configuration, **safe_kwargs)
+        self.configuration = updated_configuration
+        # Update the final args with the new configuration
+        final_args.update(kwargs)
+        self.app.run(**final_args)
 
     def prepare_args(self, original_function, args, kwargs):
         self._conversion_record.clear()
@@ -413,6 +419,11 @@ def get_main_server() -> Server:
     :return: The main server
     """
     return MAIN_SERVER
+
+def get_all_routes(server: Optional[Server] = None):
+    if server is None:
+        server = get_main_server()
+    return server.routes
 
 
 def get_server_setting(key, default=None, server=MAIN_SERVER):
