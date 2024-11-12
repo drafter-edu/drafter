@@ -103,7 +103,9 @@ Although normally Github Pages is only useful for hosting frontend websites, Dra
 <img alt="Github Files" src="../_images/deployment_github_files.png" />
 <p>When you click on the file, it will show you the contents of the file. You can edit the file by clicking on the pencil icon.</p>
 <img alt="Github Edit Main" src="../_images/deployment_github_edit.png" />
-<p>The editor area allows you to paste in your code. We recommend that you add the following lines of code to your project.</p>
+<p>The editor area allows you to paste in your code. We recommend that you add the following lines of code to your project.
+They need to be after the import statements, but before the <code class="docutils literal notranslate"><span class="pre">start_server(...)</span></code> line.
+We suggest placing them right before your dataclasses and routes.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hide_debug_information</span><span class="p">()</span>
 <span class="n">set_website_title</span><span class="p">(</span><span class="s2">&quot;Your Website Title&quot;</span><span class="p">)</span>
 <span class="n">set_website_framed</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>

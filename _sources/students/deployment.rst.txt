@@ -53,6 +53,8 @@ When you click on the file, it will show you the contents of the file. You can e
     :alt: Github Edit Main
 
 The editor area allows you to paste in your code. We recommend that you add the following lines of code to your project.
+They need to be after the import statements, but before the ``start_server(...)`` line.
+We suggest placing them right before your dataclasses and routes.
 
 .. code-block:: python
 
