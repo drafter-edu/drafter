@@ -18,8 +18,8 @@ from drafter import __version__
 # -- Project information -----------------------------------------------------
 
 project = 'Drafter'
-copyright = '2023, acbart'
-author = 'acbart'
+copyright = '2024, acbart & nazim'
+author = 'acbart, nazim'
 
 # The full version, including alpha/beta/rc tags
 release = __version__
@@ -74,3 +74,5 @@ html_css_files = [
 ]
 
 add_module_names = False
+
+html_logo = '_static/drafter_logo.png'
