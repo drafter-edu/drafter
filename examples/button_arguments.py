@@ -1,5 +1,5 @@
-from bakery import assert_equal
 from drafter import *
+from bakery import assert_equal
 
 
 @dataclass
@@ -14,7 +14,7 @@ def index(state: State) -> Page:
         TextBox("pears", 7),
         TextBox("plums", "3"),
         Argument("apples", 5),
-        Argument('words', 'ups and downs'),
+        Argument('words', 'ups\' and \" and downs'),
         Argument("check", True),
         Button("Buy", "buy_page", [
             Argument("oranges", 7),
@@ -33,7 +33,8 @@ def buy_page(state: State, apples: int, oranges: int, pears: int, plums: str, fr
 
 assert_equal(
     index(State()),
-    Page(state=State(), content=['Welcome to my site!', TextBox(name='pears', kind='text', default_value=7), TextBox(name='plums', kind='text', default_value='3'), Argument(name='apples', value=5), Argument(name='words', value='ups and downs'), Argument(name='check', value=True), Button(text='Buy', url='/buy_page', arguments=[Argument(name='oranges', value=7), Argument(name='fruits', value='oranges and pears and more'), Argument(name='bonus', value=False)])]))
+    Page(state=State(), content=['Welcome to my site!',
+                                 TextBox(name='pears', kind='text', default_value=7), TextBox(name='plums', kind='text', default_value='3'), Argument(name='apples', value=5), Argument(name='words', value='ups\' and \" and downs'), Argument(name='check', value=True), Button(text='Buy', url='/buy_page', arguments=[Argument(name='oranges', value=7), Argument(name='fruits', value='oranges and pears and more'), Argument(name='bonus', value=False)])]))
 
 assert_equal(
     buy_page(State(), 5, 7, 7, '3', 'oranges and pears and more', 'test and test', True, False),

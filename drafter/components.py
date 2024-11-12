@@ -114,7 +114,7 @@ class LinkContent:
     def create_arguments(self, arguments, label_namespace):
         parameters = self.parse_arguments(arguments, label_namespace)
         if parameters:
-            return "\n".join(f"<input type='hidden' name='{name}' value={make_safe_json_argument(value)} />"
+            return "\n".join(f"<input type='hidden' name='{name}' value='{make_safe_json_argument(value)}' />"
                              for name, value in parameters.items())
         return ""
 
@@ -151,7 +151,7 @@ class Argument(PageContent):
 
     def __str__(self) -> str:
         value = make_safe_json_argument(self.value)
-        return f"<input type='hidden' name='{JSON_DECODE_SYMBOL}{self.name}' value={value} {self.parse_extra_settings()} />"
+        return f"<input type='hidden' name='{JSON_DECODE_SYMBOL}{self.name}' value='{value}' {self.parse_extra_settings()} />"
 
 
 @dataclass
