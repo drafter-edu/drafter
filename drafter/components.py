@@ -54,6 +54,7 @@ class PageContent:
             if key not in self.EXTRA_ATTRS and key not in BASELINE_ATTRS:
                 styles.append(f"{key}: {value}")
             else:
+                # TODO: Is this safe enough?
                 attrs.append(f"{key}={str(value)!r}")
         for key, value in raw_styles.items():
             styles.append(f"{key}: {value}")
@@ -502,12 +503,17 @@ class Table(PageContent):
 
 class Text(PageContent):
     body: str
+    extra_settings: dict
 
-    def __init__(self, body: str):
+    def __init__(self, body: str, **kwargs):
         self.body = body
+        self.extra_settings = kwargs
 
     def __str__(self):
-        return self.body
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        if not parsed_settings:
+            return self.body
+        return f"<span {parsed_settings}>{self.body}</span>"
 
 
 class MatPlotLibPlot(PageContent):
