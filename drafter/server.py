@@ -396,6 +396,24 @@ class Server:
 
 MAIN_SERVER = Server(_custom_name="MAIN_SERVER")
 
+def set_main_server(server: Server):
+    """
+    Sets the main server to the given server. This is useful for testing purposes.
+
+    :param server: The server to set as the main server
+    :return: None
+    """
+    global MAIN_SERVER
+    MAIN_SERVER = server
+
+def get_main_server() -> Server:
+    """
+    Gets the main server. This is useful for testing purposes.
+
+    :return: The main server
+    """
+    return MAIN_SERVER
+
 
 def get_server_setting(key, default=None, server=MAIN_SERVER):
     """
