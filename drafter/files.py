@@ -1,3 +1,8 @@
+"""
+We do not put the <script> and <style> tags directly in the code,
+so that we can rely on language injection to provide syntax highlighting.
+"""
+
 import gzip
 import base64
 
@@ -40,8 +45,7 @@ BASIC_SCRIPTS = "<script>" + """
     }
 """ + "</script>"
 
-BASIC_STYLE = """
-<style>
+BASIC_STYLE = "<style>" + """"
     div.btlw-debug .copy-button {
          float: right;
          cursor: pointer;
