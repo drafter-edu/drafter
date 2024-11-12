@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.4] - 2024-11-12
+
+### Added
+
+* The `set_website_style` now accepts `None` in addition to `"none"` to remove the style
+* Provide `get_main_server` and `set_main_server` functions to manipulate the global server (mostly for testing purposes).
+
+### Fixed
+
+* Improved documentation for styling features
+
 ## [1.5.3] - 2024-11-7
 
 ### Added
