@@ -24,3 +24,9 @@ twine
 matplotlib
 mypy
 pillow
+
+pytest
+splinter[selenium]
+pytest-splinter
+pytest-cov
+WebTest
