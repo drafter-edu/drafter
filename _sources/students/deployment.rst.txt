@@ -220,6 +220,9 @@ In this particular case, the error is simple - the developer forgot to turn on t
 If you see an error, you can try to fix it and push the changes to the repository.
 The website will automatically redeploy when you push changes to the repository, and you can check the progress of the new attempt in the Actions tab again.
 
+You can also get more details about the deployment from the deployment dashboard (see :ref:`deployment_dashboard`).
+Unless there is a catastrophic error (e.g., you didn't enable GitHub Pages), you should be able to see the dashboard.
+
 View the Readme
 ---------------
 
@@ -232,6 +235,22 @@ Take your original deployment URL (e.g., ``https://ud-s24-cs1.github.io/cs1-webs
 
 Make sure that all of the links work and that the video is visible and audible.
 There should be six sections in the readme: website name, description, author, help resources used, planning document, and video.
+
+.. _deployment_dashboard:
+
+Deployment Dashboard
+--------------------
+
+Whether your deployment succeeds or fails, there will be a lot of useful information available in the deployment dashboard.
+
+Take your original deployment URL (e.g., ``https://ud-s24-cs1.github.io/cs1-website-username/``) and add ``dashboard/`` to the end of it (e.g., ``https://ud-s24-cs1.github.io/cs1-website-username/dashboard/``).
+
+.. image:: images/deployment_dashboard.png
+    :alt: Deployment Dashboard
+
+If there was an error or warning during deployment, that will be shown at the top.
+Then there are quick links to things like the deployed site, the github deployment logs, the GitHub repository, commit messages, and your tests.
+At the bottom you will see your Build Log, which includes all the steps that Drafter took to deploy your site.
 
 .. _submit_on_canvas:
 

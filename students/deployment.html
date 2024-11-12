@@ -224,6 +224,8 @@ You need to click on the red X to get into the job summary, and then click the n
 In this particular case, the error is simple - the developer forgot to turn on the Github Pages feature in the settings (step 2).</p>
 <p>If you see an error, you can try to fix it and push the changes to the repository.
 The website will automatically redeploy when you push changes to the repository, and you can check the progress of the new attempt in the Actions tab again.</p>
+<p>You can also get more details about the deployment from the deployment dashboard (see <a class="reference internal" href="#deployment-dashboard"><span class="std std-ref">Deployment Dashboard</span></a>).
+Unless there is a catastrophic error (e.g., you didn’t enable GitHub Pages), you should be able to see the dashboard.</p>
 </section>
 <section id="view-the-readme">
 <h2>View the Readme<a class="headerlink" href="#view-the-readme" title="Link to this heading">¶</a></h2>
@@ -235,8 +237,17 @@ The website will automatically redeploy when you push changes to the repository,
 <p>Make sure that all of the links work and that the video is visible and audible.
 There should be six sections in the readme: website name, description, author, help resources used, planning document, and video.</p>
 </section>
+<section id="deployment-dashboard">
+<span id="id2"></span><h2>Deployment Dashboard<a class="headerlink" href="#deployment-dashboard" title="Link to this heading">¶</a></h2>
+<p>Whether your deployment succeeds or fails, there will be a lot of useful information available in the deployment dashboard.</p>
+<p>Take your original deployment URL (e.g., <code class="docutils literal notranslate"><span class="pre">https://ud-s24-cs1.github.io/cs1-website-username/</span></code>) and add <code class="docutils literal notranslate"><span class="pre">dashboard/</span></code> to the end of it (e.g., <code class="docutils literal notranslate"><span class="pre">https://ud-s24-cs1.github.io/cs1-website-username/dashboard/</span></code>).</p>
+<img alt="Deployment Dashboard" src="../_images/deployment_dashboard.png" />
+<p>If there was an error or warning during deployment, that will be shown at the top.
+Then there are quick links to things like the deployed site, the github deployment logs, the GitHub repository, commit messages, and your tests.
+At the bottom you will see your Build Log, which includes all the steps that Drafter took to deploy your site.</p>
+</section>
 <section id="submit-on-canvas">
-<span id="id2"></span><h2>Submit on Canvas<a class="headerlink" href="#submit-on-canvas" title="Link to this heading">¶</a></h2>
+<span id="id3"></span><h2>Submit on Canvas<a class="headerlink" href="#submit-on-canvas" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple" start="9">
 <li><p>Once you have successfully deployed your website, you can submit the URL of your website.</p></li>
 </ol>
@@ -289,6 +300,7 @@ However, not all third-party libraries are supported on the deployed version of 
 <li class="toctree-l2"><a class="reference internal" href="#edit-the-readme">Edit the Readme</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#view-the-deployment">View the Deployment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#view-the-readme">View the Readme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deployment-dashboard">Deployment Dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#submit-on-canvas">Submit on Canvas</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#appendix-uploading-files">Appendix: Uploading Files</a></li>
 </ul>
@@ -370,7 +382,7 @@ However, not all third-party libraries are supported on the deployed version of 
     </div>
 
     <div class="footer" role="contentinfo">
-    &#169; Copyright 2023, acbart.
+    &#169; Copyright 2024, acbart &amp; nazim.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     </div>
     <!-- cloud_sptheme 1.4 -->
