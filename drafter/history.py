@@ -6,7 +6,6 @@ import io
 from dataclasses import dataclass, is_dataclass, replace, asdict, fields
 from dataclasses import field as dataclass_field
 from datetime import datetime
-from glob import escape
 from typing import Any, Optional, Callable
 import pprint
 
@@ -38,7 +37,7 @@ def safe_repr(value: Any, handled=None):
         handled = set()
     if obj_id in handled:
         return f"<strong>Circular Reference</strong>"
-    if isinstance(value, (int, float, bool, type(None), str, bytes, complex, bytearray, memoryview)):
+    if isinstance(value, (int, float, bool, type(None), str, bytes, complex, bytearray)):
         return make_value_expandable(html.escape(repr(value)))
     if isinstance(value, list):
         handled.add(obj_id)
@@ -121,6 +120,18 @@ class UnchangedRecord:
     def as_html(self):
         return (f"<li><code>{html.escape(self.parameter)}</code>: "
                 f"<code>{safe_repr(self.value)}</code></li>")
+
+try:
+    pprint.PrettyPrinter
+except:
+    class PrettyPrinter:
+        def __init__(self, indent, width, *args, **kwargs):
+            self.indent = indent
+            self.width = width
+        def pformat(self, obj):
+            return pprint.pformat(obj, indent=self.indent, width=self.width)
+
+    pprint.PrettyPrinter = PrettyPrinter  # type: ignore
 
 
 class CustomPrettyPrinter(pprint.PrettyPrinter):

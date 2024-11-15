@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.6] - 2024-11-15
+
+### Fixed
+
+* Fixed a few components (`MatPlotLibPlot`, `FileUpload`, and `Text`) not rendering correctly in test cases due to not being dataclasses.
+* Fixed an issue with an incorrect import (glob) appearing somehow
+* Fixed an issue where `memoryview` was being serialized in the `safe_repr` function
+
 ## [1.5.5] - 2024-11-12
 
 ### Fixed

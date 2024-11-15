@@ -501,6 +501,7 @@ class Table(PageContent):
         return f"<table {parsed_settings}>{header}{rows}</table>"
 
 
+@dataclass
 class Text(PageContent):
     body: str
     extra_settings: dict
@@ -516,6 +517,7 @@ class Text(PageContent):
         return f"<span {parsed_settings}>{self.body}</span>"
 
 
+@dataclass
 class MatPlotLibPlot(PageContent):
     args: tuple
     kwargs: dict
@@ -583,6 +585,7 @@ class Download(PageContent):
         return f'<a download="{self.filename}" href="data:{self.content_type},{self.content}">{self.text}</a>'
 
 
+@dataclass
 class FileUpload(PageContent):
     """
     A file upload component that allows users to upload files to the server.
