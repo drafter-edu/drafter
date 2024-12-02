@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2024-12-02
+
+### Added
+
+* Can now test deployments with the `deploy` button, which will open a new tab with the deployed site using Skulpt
+* Configuration information is now shown on the debug page at the bottom, along with the deploy button.
+
+### Fixed
+
+* MatPlotLibPlot now has correct fields
+
+## [1.5.7] - 2024-11-24
+
+### Fixed
+
+* Circular references in the State now throw an error, instead of just causing an infinite loop.
+* Fixed a bug with the `safe_repr` function incorrectly marking objects that show up multiple times as circular, even if they are in sibling structures.
+
 ## [1.5.6] - 2024-11-15
 
 ### Fixed
