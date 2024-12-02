@@ -519,8 +519,8 @@ class Text(PageContent):
 
 @dataclass
 class MatPlotLibPlot(PageContent):
-    args: tuple
-    kwargs: dict
+    extra_matplotlib_settings: dict
+    close_automatically: bool
 
     def __init__(self, extra_matplotlib_settings=None, close_automatically=True, **kwargs):
         if not _has_matplotlib:
