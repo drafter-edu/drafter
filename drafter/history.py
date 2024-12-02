@@ -35,6 +35,8 @@ def safe_repr(value: Any, handled=None):
     obj_id = id(value)
     if handled is None:
         handled = set()
+    else:
+        handled = set(handled)
     if obj_id in handled:
         return f"<strong>Circular Reference</strong>"
     if isinstance(value, (int, float, bool, type(None), str, bytes, complex, bytearray)):
@@ -194,15 +196,25 @@ class VisitedPage:
         return (f"<strong>Current Route:</strong><br>Route function: <code>{function_name}</code><br>"
                 f"URL: <href='{self.url}'><code>{self.url}</code></href>")
 
-def dehydrate_json(value):
+def dehydrate_json(value, seen=None):
+    if seen is None:
+        seen = set()
+    else:
+        seen = set(seen)
+    if id(value) in seen:
+        raise ValueError(f"Error while serializing state: Circular reference detected in {value!r}")
     if isinstance(value, (list, set, tuple)):
-        return [dehydrate_json(v) for v in value]
+        seen.add(id(value))
+        return [dehydrate_json(v, seen) for v in value]
     elif isinstance(value, dict):
-        return {dehydrate_json(k): dehydrate_json(v) for k, v in value.items()}
+        seen.add(id(value))
+        return {dehydrate_json(k, seen): dehydrate_json(v, seen)
+                for k, v in value.items()}
     elif isinstance(value, (int, str, float, bool)) or value == None:
         return value
     elif is_dataclass(value):
-        return {f.name: dehydrate_json(getattr(value, f.name))
+        seen.add(id(value))
+        return {f.name: dehydrate_json(getattr(value, f.name), seen)
                 for f in fields(value)}
     elif HAS_PILLOW and isinstance(value, PILImage.Image):
         return image_to_bytes(value).decode('latin1')
@@ -252,6 +264,8 @@ def rehydrate_json(value, new_type):
             converted = {f.name: rehydrate_json(value[f.name], f.type) if f.name in value else f.default
                          for f in fields(new_type)}
             return new_type(**converted)
+        else:
+            return value
     # Fall through if an error
     raise ValueError(f"Error while restoring state: Could not create {new_type!r} from {value!r}")
 

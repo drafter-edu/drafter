@@ -211,3 +211,41 @@ TEMPLATE_ERROR = """
 
 TEMPLATE_404 = TEMPLATE_ERROR
 TEMPLATE_500 = TEMPLATE_ERROR
+
+def seek_file_by_line(line, missing_value=None):
+    try:
+        from traceback import extract_stack
+        trace = extract_stack()
+        for data in trace:
+            print(list(data))
+            if data[3].strip().startswith(line):
+                return data[0]
+        return missing_value
+    except Exception as e:
+        print(f"Error seeking file by line: {e}")
+        return missing_value
+
+TEMPLATE_SKULPT_DEPLOY = """
+<html>
+    <head>
+        <script src="https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt.js" type="text/javascript"></script>
+        <script src="https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-stdlib.js" type="text/javascript"></script>
+        <script src="https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-drafter.js" type="text/javascript"></script>
+        <script
+            src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous"
+        ></script>
+        <script type="text/javascript">
+{website_code}
+        </script>
+    </head>
+
+    <body>
+<div id="website">
+Loading...
+</div>
+        <script src="https://drafter-edu.github.io/drafter-cdn/skulpt/drafter-setup.js" type="text/javascript"></script>
+    </body>
+</html>
+"""

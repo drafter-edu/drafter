@@ -3,7 +3,7 @@ This module contains hacks to work around limitations of various platforms.
 """
 import sys
 
-__all__ = []
+__all__: list[str] = []
 
 
 if sys.platform == 'skulpt':

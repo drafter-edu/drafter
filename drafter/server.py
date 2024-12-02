@@ -6,6 +6,7 @@ from functools import wraps
 from typing import Any, Optional
 import json
 import inspect
+import pathlib
 
 import bottle
 
@@ -17,12 +18,38 @@ from drafter.setup import Bottle, abort, request, static_file
 from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, get_params, \
     remap_hidden_form_parameters, safe_repr
 from drafter.page import Page
-from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER
+from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, \
+    TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
 from drafter.urls import remove_url_query_params
 from drafter.image_support import HAS_PILLOW, PILImage
 
 import logging
 logger = logging.getLogger('drafter')
+
+
+DEFAULT_ALLOWED_EXTENSIONS = ('py', 'js', 'css', 'txt', 'json', 'csv', 'html', 'md')
+
+def bundle_files_into_js(main_file, root_path, allowed_extensions=DEFAULT_ALLOWED_EXTENSIONS):
+    skipped_files, added_files = [], []
+    all_files = {}
+    for root, dirs, files in os.walk(root_path):
+        for file in files:
+            is_main = os.path.join(root_path, file) == main_file
+            path = pathlib.Path(os.path.join(root, file)).relative_to(root_path)
+            if pathlib.Path(file).suffix[1:].lower() not in allowed_extensions:
+                skipped_files.append(os.path.join(root, file))
+                continue
+            with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
+                content = f.read()
+                filename = str(path.as_posix()) if not is_main else "main.py"
+                all_files[filename] = content
+                added_files.append(os.path.join(root, file))
+
+    js_lines = []
+    for filename, contents in all_files.items():
+        js_lines.append(f"Sk.builtinFiles.files[{filename!r}] = {contents!r};\n")
+
+    return "\n".join(js_lines), skipped_files, added_files
 
 
 class Server:
@@ -126,6 +153,9 @@ class Server:
         if not self.routes:
             raise ValueError("No routes have been defined.\nDid you remember the @route decorator?")
         self.app.route("/--reset", 'GET', self.reset)
+        # If not skulpt, then allow them to test the deployment
+        if not self.configuration.skulpt:
+            self.app.route("/--test-deployment", 'GET', self.test_deployment)
         for url, func in self.routes.items():
             self.app.route(url, 'GET', func)
             self.app.route(url, "POST", func)
@@ -396,8 +426,20 @@ class Server:
         print(message)
 
     def make_debug_page(self):
-        content = DebugInformation(self._page_history, self._state, self.routes, self._conversion_record)
+        content = DebugInformation(self._page_history, self._state, self.routes, self._conversion_record,
+                                   self.configuration)
         return content.generate()
+
+    def test_deployment(self):
+        # Bundle up the necessary files, including the source code
+        student_main_file = seek_file_by_line("start_server")
+        if student_main_file is None:
+            return TEMPLATE_500.format(title="500 Internal Server Error",
+                                       message="Could not find the student's main file.",
+                                       error="Could not find the student's main file.",
+                                       routes="")
+        bundled_js, skipped, added = bundle_files_into_js(student_main_file, os.path.dirname(student_main_file))
+        return TEMPLATE_SKULPT_DEPLOY.format(website_code=bundled_js)
 
 
 MAIN_SERVER = Server(_custom_name="MAIN_SERVER")
