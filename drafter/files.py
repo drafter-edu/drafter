@@ -217,7 +217,6 @@ def seek_file_by_line(line, missing_value=None):
         from traceback import extract_stack
         trace = extract_stack()
         for data in trace:
-            print(list(data))
             if data[3].strip().startswith(line):
                 return data[0]
         return missing_value
