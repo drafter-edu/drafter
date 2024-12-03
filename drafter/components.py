@@ -25,6 +25,26 @@ BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "
                   "onunload", "onresize", "onscroll"]
 
 
+BASE_PARAMETER_ERROR = ("""The {component_type} name must be a valid Python identifier name. A string is considered """
+                        """a valid identifier if it only contains alphanumeric letters (a-z) and (0-9), or """
+                        """underscores (_). A valid identifier cannot start with a number, or contain any spaces.""")
+
+def validate_parameter_name(name: str, component_type: str):
+    base_error = BASE_PARAMETER_ERROR.format(component_type=component_type)
+    if not isinstance(name, str):
+        raise ValueError(base_error + f"\n\nReason: The given name `{name!r}` is not a string.")
+    if not name.isidentifier():
+        if " " in name:
+            raise ValueError(base_error + f"\n\nReason: The name `{name}` has a space, which is not allowed.")
+        if not name:
+            raise ValueError(base_error + f"\n\nReason: The name is an empty string.")
+        if name[0].isdigit():
+            raise ValueError(base_error + f"\n\nReason: The name `{name}` starts with a digit, which is not allowed.")
+        if not name[0].isalpha() and name[0] != "_":
+            raise ValueError(base_error + f"\n\nReason: The name `{name}` does not start with a letter or an underscore.")
+        raise ValueError(base_error + f" The name `{name}` is not a valid Python identifier name.")
+
+
 class PageContent:
     """
     Base class for all content that can be added to a page.
@@ -143,6 +163,7 @@ class Argument(PageContent):
     value: Any
 
     def __init__(self, name: str, value: Any, **kwargs):
+        validate_parameter_name(name, "Argument")
         self.name = name
         if not isinstance(value, (str, int, float, bool)):
             raise ValueError(f"Argument values must be strings, integers, floats, or booleans. Found {type(value)}")
@@ -267,6 +288,7 @@ class TextBox(PageContent):
     default_value: Optional[str]
 
     def __init__(self, name: str, default_value: Optional[str] = None, kind: str = "text", **kwargs):
+        validate_parameter_name(name, "TextBox")
         self.name = name
         self.kind = kind
         self.default_value = str(default_value) if default_value is not None else ""
@@ -288,6 +310,7 @@ class TextArea(PageContent):
     EXTRA_ATTRS = ["rows", "cols", "autocomplete", "autofocus", "disabled", "placeholder", "readonly", "required"]
 
     def __init__(self, name: str, default_value: Optional[str] = None, **kwargs):
+        validate_parameter_name(name, "TextArea")
         self.name = name
         self.default_value = str(default_value) if default_value is not None else ""
         self.extra_settings = kwargs
@@ -304,6 +327,7 @@ class SelectBox(PageContent):
     default_value: Optional[str]
 
     def __init__(self, name: str, options: list[str], default_value: Optional[str] = None, **kwargs):
+        validate_parameter_name(name, "SelectBox")
         self.name = name
         self.options = options
         self.default_value = str(default_value) if default_value is not None else ""
@@ -328,6 +352,7 @@ class CheckBox(PageContent):
     default_value: bool
 
     def __init__(self, name: str, default_value: bool = False, **kwargs):
+        validate_parameter_name(name, "CheckBox")
         self.name = name
         self.default_value = bool(default_value)
         self.extra_settings = kwargs
@@ -604,6 +629,7 @@ class FileUpload(PageContent):
     EXTRA_ATTRS = ["accept", "capture", "multiple", "required"]
 
     def __init__(self, name: str, accept: Union[str, list[str], None] = None, **kwargs):
+        validate_parameter_name(name, "FileUpload")
         self.name = name
         self.extra_settings = kwargs
 
