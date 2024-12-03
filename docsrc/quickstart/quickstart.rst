@@ -3,7 +3,7 @@
 --------------------------
 Drafter Quick Start Guide
 --------------------------
-Drafter is an educational interactive graphics Python library. What does that mean?
+Drafter is an educational web development library for Python. What does that mean?
 
 As a student, you can use Drafter to learn and practice Python by creating a full-stack website.
 
