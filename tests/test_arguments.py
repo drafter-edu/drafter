@@ -8,13 +8,13 @@ def test_button_arguments(browser, splinter_headless):
     @route(server=drafter_server.server)
     def index(state) -> Page:
         return Page(state, [
-            "Welcome to my site!",
-            TextBox("pears", 7),
+            "Welcome to Ada's Fruit site!",
+            TextBox("pears", "7"),
             TextBox("plums", "3"),
             Argument("apples", 5),
             Argument('words', 'ups and downs'),
             Argument("check", True),
-            Button("Buy", "buy_page", [
+            Button("Buy Ada's Fruits", "buy_page", [
                 Argument("oranges", 7),
                 Argument("fruits", "oranges and pears and more"),
                 Argument("bonus", False)
@@ -30,7 +30,7 @@ def test_button_arguments(browser, splinter_headless):
 
     with drafter_server:
         browser.visit('http://localhost:8080')
-        assert browser.is_text_present('Welcome to my site!')
+        assert browser.is_text_present("Welcome to Ada's Fruit site!")
 
         browser.fill("pears", "100")
         browser.fill("plums", "200")
