@@ -13,10 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Can now test deployments with the `deploy` button, which will open a new tab with the deployed site using Skulpt
 * Configuration information is now shown on the debug page at the bottom, along with the deploy button.
+* Components that have names will now validate the name to ensure it is a valid Python variable name, and show an error.
+* Slightly more information is shown on the error page when parameter conversion fails.
 
 ### Fixed
 
 * MatPlotLibPlot now has correct fields
+* Arguments for Buttons can now have non-html-safe characters
 
 ## [1.5.7] - 2024-11-24
 
