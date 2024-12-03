@@ -3,6 +3,7 @@ import html
 import base64
 import os
 import io
+from urllib.parse import unquote
 from dataclasses import dataclass, is_dataclass, replace, asdict, fields
 from dataclasses import field as dataclass_field
 from datetime import datetime
@@ -150,15 +151,23 @@ def format_page_content(content, width=80):
         return safe_repr(content)
 
 
+def extract_button_label(full_key: str):
+    if LABEL_SEPARATOR not in full_key:
+        return full_key, None
+    button_pressed, key = full_key.split(LABEL_SEPARATOR, 1)
+    button_pressed = json.loads(unquote(button_pressed))
+    return button_pressed, key
+
+
 def remap_hidden_form_parameters(kwargs: dict, button_pressed: str):
     renamed_kwargs = {}
     for key, value in kwargs.items():
-        if button_pressed and key.startswith(f"{button_pressed}{LABEL_SEPARATOR}"):
-            key = key[len(f"{button_pressed}{LABEL_SEPARATOR}"):]
+        possible_button_pressed, possible_key = extract_button_label(key)
+        if button_pressed and possible_button_pressed == button_pressed:
             try:
-                renamed_kwargs[key] = json.loads(value)
+                renamed_kwargs[possible_key] = json.loads(value)
             except json.JSONDecodeError as e:
-                raise ValueError(f"Could not decode JSON for {key}={value!r}") from e
+                raise ValueError(f"Could not decode JSON for {possible_key}={value!r}") from e
         elif key.startswith(JSON_DECODE_SYMBOL):
             key = key[len(JSON_DECODE_SYMBOL):]
             try:

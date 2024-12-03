@@ -144,15 +144,17 @@ class LinkContent:
         if isinstance(arguments, dict):
             return arguments
         if isinstance(arguments, Argument):
-            return {f"{label_namespace}{LABEL_SEPARATOR}{arguments.name}": arguments.value}
+            escaped_label_namespace = make_safe_argument(label_namespace)
+            return {f"{escaped_label_namespace}{LABEL_SEPARATOR}{arguments.name}": arguments.value}
         if isinstance(arguments, list):
             result = {}
+            escaped_label_namespace = make_safe_argument(label_namespace)
             for arg in arguments:
                 if isinstance(arg, Argument):
                     arg, value = arg.name, arg.value
                 else:
                     arg, value = arg
-                result[f"{label_namespace}{LABEL_SEPARATOR}{arg}"] = value
+                result[f"{escaped_label_namespace}{LABEL_SEPARATOR}{arg}"] = value
             return result
         raise ValueError(f"Could not create arguments from the provided value: {arguments}")
 
