@@ -299,7 +299,11 @@ class Server:
             try:
                 page = original_function(*args, **kwargs)
             except Exception as e:
-                return self.make_error_page("Error creating page", e, original_function)
+                additional_details = (f"  Arguments: {args!r}\n"
+                                      f"  Keyword Arguments: {kwargs!r}\n"
+                                      f"  Button Pressed: {button_pressed!r}\n"
+                                      f"  Function Signature: {inspect.signature(original_function)}")
+                return self.make_error_page("Error creating page", e, original_function, additional_details)
             visiting_page.update("Verifying Page Result", original_page_content=page)
             verification_status = self.verify_page_result(page, original_function)
             if verification_status:
@@ -415,11 +419,13 @@ class Server:
                 title=html.escape(self.configuration.title))
 
 
-    def make_error_page(self, title, error, original_function):
+    def make_error_page(self, title, error, original_function, additional_details=""):
         tb = html.escape(traceback.format_exc())
         new_message = (f"""{title}.\n"""
                        f"""Error in {original_function.__name__}:\n"""
                        f"""{html.escape(str(error))}\n\n\n{tb}""")
+        if additional_details:
+            new_message += f"\n\n\nAdditional Details:\n{additional_details}"
         abort(500, new_message)
 
     def flash_warning(self, message):
