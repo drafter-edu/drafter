@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>More Help &#8212; Drafter 1.5.6 documentation</title>
+    <title>More Help &#8212; Drafter 1.6.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=8f564690"></script>
+    <script src="../_static/documentation_options.js?v=72d88caf"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -56,7 +56,7 @@
         <li class="right" >
           <a href="../reference/fonts.html" title="HTML Fonts"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.5.6 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">More Help</a></li> 
       </ul>
@@ -85,6 +85,103 @@
 <p>If you want to have activity in your website, you have to use the <code class="docutils literal notranslate"><span class="pre">route</span></code> decorator to add
 routes.</p>
 </section>
+<section id="circular-reference-errors">
+<h2>Circular Reference Errors<a class="headerlink" href="#circular-reference-errors" title="Link to this heading">¶</a></h2>
+<p>Drafter does its best to automatically generate unit tests for your code. However, it is not
+perfect. One particular issue is if you have a <em>circular reference</em> in your data.
+The unit test will seem to randomly have the text “Circular Reference” in it.</p>
+<p>Let’s look at an example of how to trigger this issue:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Item</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">previously_seen</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="s1">&#39;Item&#39;</span><span class="p">]</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Item</span><span class="p">]</span>
+
+<span class="c1"># ...</span>
+
+<span class="n">first_item</span> <span class="o">=</span> <span class="n">Item</span><span class="p">(</span><span class="s2">&quot;First Item&quot;</span><span class="p">,</span> <span class="p">[])</span>
+<span class="n">second_item</span> <span class="o">=</span> <span class="n">Item</span><span class="p">(</span><span class="s2">&quot;Second Item&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">first_item</span><span class="p">])</span>
+<span class="n">first_item</span><span class="o">.</span><span class="n">previously_seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">second_item</span><span class="p">)</span>
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">([</span><span class="n">first_item</span><span class="p">,</span> <span class="n">second_item</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>In this example, the <code class="docutils literal notranslate"><span class="pre">first_item</span></code> has a reference to the <code class="docutils literal notranslate"><span class="pre">second_item</span></code> and vice versa.
+This creates a circular reference between those elements. When Drafter tries
+to generate code to construct the instances, it would get stuck in an infinite loop
+trying to flatten everything. Instead, it chooses to generate the text <code class="docutils literal notranslate"><span class="pre">&quot;Circular</span> <span class="pre">Reference&quot;</span></code>.</p>
+<p>To fix this issue, you should first confirm that you need circular references.
+Circular references are extremely useful for a wide variety of purposes, such
+as representing a graph. If you do need them, you can manually write the
+unit tests for those cases, using the generated ones as a base.
+Capture the result of calling your route, and you can then test
+individual pieces by inspecting the <code class="docutils literal notranslate"><span class="pre">state</span></code> and <code class="docutils literal notranslate"><span class="pre">content</span></code> of the
+resulting <code class="docutils literal notranslate"><span class="pre">Page</span></code> object. See <a class="reference internal" href="#testing-parts-of-routes"><span class="std std-ref">Testing Parts of Routes</span></a> for more information.</p>
+<p>However, it’s also very likely that you do not need circular references,
+and you added them by mistake. Review your code carefully to see if you are
+accidentally creating circular references. A few ways that this can happen:</p>
+<ul class="simple">
+<li><p>You are appending a list to itself.</p></li>
+<li><p>You set the field of an object to itself.</p></li>
+<li><p>You have an inner field or list element that refers to the outer object.</p></li>
+</ul>
+<p>For example, if you were</p>
+</section>
+<section id="testing-parts-of-routes">
+<span id="id1"></span><h2>Testing Parts of Routes<a class="headerlink" href="#testing-parts-of-routes" title="Link to this heading">¶</a></h2>
+<p>Drafter’s automatically generated tests are designed to test the entire result
+of a route, including its <code class="docutils literal notranslate"><span class="pre">state</span></code> and <code class="docutils literal notranslate"><span class="pre">content</span></code>. However, sometimes you
+want to test just a part of the result, using more relaxed assertions.</p>
+<p>To do this, you can manually inspect the result of calling your route, and
+then test individual pieces by inspecting the <code class="docutils literal notranslate"><span class="pre">state</span></code> and <code class="docutils literal notranslate"><span class="pre">content</span></code> of the
+resulting <code class="docutils literal notranslate"><span class="pre">Page</span></code> object. Remember, the <code class="docutils literal notranslate"><span class="pre">Page</span></code> is just a dataclass!</p>
+<p>For example, the following allows us to test that the content has at least
+some of the expected text:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
+    <span class="p">])</span>
+
+<span class="c1"># ...</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">index</span><span class="p">(</span><span class="s2">&quot;World&quot;</span><span class="p">)</span>
+<span class="n">assert_equal</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or you could make an assertion about a specific part of the state, without
+reference to any other part of the <code class="docutils literal notranslate"><span class="pre">Page</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
+    <span class="p">])</span>
+
+<span class="c1"># ...</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">index</span><span class="p">(</span><span class="s2">&quot;World&quot;</span><span class="p">)</span>
+<span class="n">assert_equal</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;World&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -106,6 +203,8 @@ routes.</p>
 <li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">More Help</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#actions-after-start">Actions After Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#circular-reference-errors">Circular Reference Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-parts-of-routes">Testing Parts of Routes</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a></li>
@@ -178,7 +277,7 @@ routes.</p>
         <li class="right" >
           <a href="../reference/fonts.html" title="HTML Fonts"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.5.6 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">More Help</a></li> 
       </ul>

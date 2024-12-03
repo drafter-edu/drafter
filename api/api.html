@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Full API Documentation &#8212; Drafter 1.5.6 documentation</title>
+    <title>Full API Documentation &#8212; Drafter 1.6.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=8f564690"></script>
+    <script src="../_static/documentation_options.js?v=72d88caf"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="../students/deployment.html" title="Deployment"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.5.6 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>
@@ -361,7 +361,7 @@ This list will be expanded in the future.</p>
 
 <dl class="py class" id="module-drafter.debug">
 <dt class="sig sig-object py" id="drafter.debug.DebugInformation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DebugInformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page_history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.history.VisitedPage" title="drafter.history.VisitedPage"><span class="pre">drafter.history.VisitedPage</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conversion_record</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.history.ConversionRecord" title="drafter.history.ConversionRecord"><span class="pre">drafter.history.ConversionRecord</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.debug.DebugInformation" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DebugInformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page_history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.history.VisitedPage" title="drafter.history.VisitedPage"><span class="pre">drafter.history.VisitedPage</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conversion_record</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.history.ConversionRecord" title="drafter.history.ConversionRecord"><span class="pre">drafter.history.ConversionRecord</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.configuration.ServerConfiguration" title="drafter.configuration.ServerConfiguration"><span class="pre">drafter.configuration.ServerConfiguration</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.debug.DebugInformation" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p id="module-drafter.configuration">TODO:
@@ -759,7 +759,7 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
         <li class="right" >
           <a href="../students/deployment.html" title="Deployment"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.5.6 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>
