@@ -11,9 +11,10 @@ Table of Contents
    students/docs
    students/html
    students/styling
+   students/testing
+   students/deployment
    reference/reference
    students/help
-   students/deployment
    api/api
 
 ..
