@@ -200,7 +200,7 @@ the button align on the right hand side of the screen.</p>
 <dt class="sig sig-object py" id="change_color">
 <span class="sig-name descname"><span class="pre">change_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_color" title="Link to this definition">¶</a></dt>
 <dd><p>Changes the text color. The color can be a named color (e.g. “red”) or a hex code (e.g. “#FF0000”).
-See the <a href="#id3"><span class="problematic" id="id4">`colors`_</span></a> page for available HTML colors.</p>
+See the <a class="reference internal" href="../reference/colors.html#colors"><span class="std std-ref">HTML Colors</span></a> page for available HTML colors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>color</strong> (<em>str</em>) – The color to change the text to.</p>
@@ -212,7 +212,7 @@ See the <a href="#id3"><span class="problematic" id="id4">`colors`_</span></a> p
 <dt class="sig sig-object py" id="change_background_color">
 <span class="sig-name descname"><span class="pre">change_background_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_background_color" title="Link to this definition">¶</a></dt>
 <dd><p>Changes the background color of the component (the <code class="docutils literal notranslate"><span class="pre">background-color</span></code> CSS attribute). The color can be a named color (e.g. “red”) or a hex code (e.g. “#FF0000”).
-See the <a href="#id5"><span class="problematic" id="id6">`colors`_</span></a> page for available HTML colors.</p>
+See the <a class="reference internal" href="../reference/colors.html#colors"><span class="std std-ref">HTML Colors</span></a> page for available HTML colors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>color</strong> (<em>str</em>) – The color to change the background to.</p>
@@ -242,7 +242,7 @@ If an integer is given, the units are assumed to be pixels. Valid units are:</p>
 <dt class="sig sig-object py" id="change_text_font">
 <span class="sig-name descname"><span class="pre">change_text_font</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#change_text_font" title="Link to this definition">¶</a></dt>
 <dd><p>Changes the font of the text. The font must be a valid font name (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;Arial&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Times</span> <span class="pre">New</span> <span class="pre">Roman&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Courier</span> <span class="pre">New&quot;</span></code>).
-See the <a href="#id7"><span class="problematic" id="id8">`fonts`_</span></a> page for available fonts.</p>
+See the <a class="reference internal" href="../reference/fonts.html#fonts"><span class="std std-ref">HTML Fonts</span></a> page for available fonts.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>font</strong> (<em>str</em>) – The font to change the text to.</p>
@@ -340,7 +340,7 @@ If an integer is given, the units are assumed to be pixels. Valid units are:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">groove</span></code>: A 3D grooved border</p></li>
 </ul>
 <p>Additionally, a border can have a width and color. The width must be a string followed by the units (e.g. “1px”) or an integer (e.g. 1).
-The color can be a named color (e.g. “red”) or a hex code (e.g. “#FF0000”); see the <a href="#id9"><span class="problematic" id="id10">`colors`_</span></a> page for available HTML colors.
+The color can be a named color (e.g. “red”) or a hex code (e.g. “#FF0000”); see the <a class="reference internal" href="../reference/colors.html#colors"><span class="std std-ref">HTML Colors</span></a> page for available HTML colors.
 The format is <code class="docutils literal notranslate"><span class="pre">&quot;style</span> <span class="pre">width</span> <span class="pre">color&quot;</span></code>. For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">change_border</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;solid 1px red&quot;</span><span class="p">)</span>  <span class="c1"># Adds a solid 1px red border</span>
 <span class="n">change_border</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">),</span> <span class="s2">&quot;dotted 2px blue&quot;</span><span class="p">)</span>  <span class="c1"># Adds a dotted 2px blue border</span>

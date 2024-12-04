@@ -125,8 +125,7 @@ used to control things like the <code class="docutils literal notranslate"><span
 <li><p><strong>initial_state</strong> – The initial state to start the server with</p></li>
 <li><p><strong>server</strong> – The server to run on, defaulting to <code class="docutils literal notranslate"><span class="pre">MAIN_SERVER</span></code></p></li>
 <li><p><strong>skip</strong> – If True, the server will not start; this is useful for running tests headlessly</p></li>
-<li><p><strong>**kwargs</strong> – <p>Additional keyword arguments to pass to the server’s run method. See below.</p>
-</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to pass to the server’s run method. See below.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -423,7 +422,7 @@ Download/upload state button</p>
 <p>This works by creating a hidden input field that stores the file data as a JSON string.
 That input is sent, but the file data is not sent directly.</p>
 <p>The accept field can be used to specify the types of files that can be uploaded.
-It accepts either a literal string (e.g. “image/<a href="#id3"><span class="problematic" id="id4">*</span></a>”) or a list of strings (e.g. [“image/png”, “image/jpeg”]).
+It accepts either a literal string (e.g. “image/*”) or a list of strings (e.g. [“image/png”, “image/jpeg”]).
 You can either provide MIME types, extensions, or extensions without a period (e.g., “png”, “.jpg”).</p>
 <p>To have multiple files uploaded, use the <cite>multiple</cite> attribute, which will cause
 the corresponding parameter to be a list of files.</p>
