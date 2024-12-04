@@ -187,7 +187,7 @@ In this case, the file is called <code class="docutils literal notranslate"><spa
 <li><p>What your web application does</p></li>
 <li><p>Your name and UD email address</p></li>
 <li><p>If you got significant help from a website besides the official Drafter documentation, include links along with explanations of how the site helped you. If someone helped you, this is also a nice place to mention them to thank them for their help. Make sure you provide direct URLs where ever you can.</p></li>
-<li><p>The planning document that you created, provided as a file (see <a class="reference internal" href="#planning-document"><span class="std std-ref">Upload the Planning Document</span></a> above). At the minimum, you need to link to the file by replacing the text in parentheses with the filename of your planning document (e.g., <code class="docutils literal notranslate"><span class="pre">WebsiteDesign.pdf</span></code>). If your planning document is an image, you can also embed it directly in the readme by following one of the guides linked below.</p></li>
+<li><p>The planning document that you created, provided as a file (see <a class="reference internal" href="#planning-document"><span class="std std-ref">Upload the Planning Document</span></a> above). At the minimum, you need to link to the file by replacing the text in parentheses with the filename of your planning document (e.g., <code class="docutils literal notranslate"><span class="pre">WebsiteDesign.pdf</span></code>). If your planning document is an image, you can also embed it directly in the readme by following one of the guides linked below. Note that you should not put <cite>docs/</cite> in front of the file URL, even though the file is in the <cite>docs</cite> folder; when we deploy your site, we’ll fix the URL for you.</p></li>
 <li><p>The URL (address) of the publicly-accessible video (see <a class="reference internal" href="#video"><span class="std std-ref">Record a Video</span></a> above) that you uploaded, replacing the existing text inside of the angle brackets (<code class="docutils literal notranslate"><span class="pre">&lt;https://my.video.com/&gt;</span></code>) with the URL of your video.</p></li>
 </ul>
 <img alt="Github Readme" src="../_images/deployment_github_editme.png" />
@@ -273,6 +273,25 @@ At the bottom you will see your Build Log, which includes all the steps that Dra
 This file should be uploaded in the same way as other files.
 However, not all third-party libraries are supported on the deployed version of Drafter, so you should check with your instructor before using them.</p>
 </section>
+<section id="common-errors">
+<h2>Common Errors<a class="headerlink" href="#common-errors" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>Files not linked correctly in Readme</strong>:</dt><dd><ul>
+<li><p>Make sure that all of the links in your readme are correct. If you are linking to a file in the <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder, you should not include <code class="docutils literal notranslate"><span class="pre">docs/</span></code> in the URL. If you are linking to a video, make sure that the video is publicly accessible.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Deployment fails</strong>:</dt><dd><ul>
+<li><p>If your deployment fails, you can check the logs in the Actions tab to see what went wrong. Common errors include not enabling GitHub Pages, not uploading the correct files, or having a syntax error in your code.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
 </section>
 
 
@@ -305,6 +324,7 @@ However, not all third-party libraries are supported on the deployed version of 
 <li class="toctree-l2"><a class="reference internal" href="#deployment-dashboard">Deployment Dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#submit-on-canvas">Submit on Canvas</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#appendix-uploading-files">Appendix: Uploading Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-errors">Common Errors</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api/api.html">Full API Documentation</a></li>
