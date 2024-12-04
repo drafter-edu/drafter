@@ -163,7 +163,7 @@ Click on the pencil icon to edit the file. You will need to fill in the followin
 * What your web application does
 * Your name and UD email address
 * If you got significant help from a website besides the official Drafter documentation, include links along with explanations of how the site helped you. If someone helped you, this is also a nice place to mention them to thank them for their help. Make sure you provide direct URLs where ever you can.
-* The planning document that you created, provided as a file (see :ref:`planning_document` above). At the minimum, you need to link to the file by replacing the text in parentheses with the filename of your planning document (e.g., ``WebsiteDesign.pdf``). If your planning document is an image, you can also embed it directly in the readme by following one of the guides linked below.
+* The planning document that you created, provided as a file (see :ref:`planning_document` above). At the minimum, you need to link to the file by replacing the text in parentheses with the filename of your planning document (e.g., ``WebsiteDesign.pdf``). If your planning document is an image, you can also embed it directly in the readme by following one of the guides linked below. Note that you should not put `docs/` in front of the file URL, even though the file is in the `docs` folder; when we deploy your site, we'll fix the URL for you.
 * The URL (address) of the publicly-accessible video (see :ref:`video` above) that you uploaded, replacing the existing text inside of the angle brackets (``<https://my.video.com/>``) with the URL of your video.
 
 .. image:: images/deployment_github_editme.png
@@ -285,3 +285,11 @@ Note that you need to upload files to the ``website`` folder, not the ``docs`` f
 If you are using additional Python libraries, you can include a ``requirements.txt`` file in the ``website`` folder to list the libraries you are using.
 This file should be uploaded in the same way as other files.
 However, not all third-party libraries are supported on the deployed version of Drafter, so you should check with your instructor before using them.
+
+Common Errors
+-------------
+
+* **Files not linked correctly in Readme**:
+    * Make sure that all of the links in your readme are correct. If you are linking to a file in the ``docs`` folder, you should not include ``docs/`` in the URL. If you are linking to a video, make sure that the video is publicly accessible.
+* **Deployment fails**:
+    * If your deployment fails, you can check the logs in the Actions tab to see what went wrong. Common errors include not enabling GitHub Pages, not uploading the correct files, or having a syntax error in your code.
