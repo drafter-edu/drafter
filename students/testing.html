@@ -1,0 +1,267 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Testing Drafter Applications &#8212; Drafter 1.6.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="../_static/documentation_options.js?v=72d88caf"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Deployment" href="deployment.html" />
+    <link rel="prev" title="Styling" href="styling.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="deployment.html" title="Deployment"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="styling.html" title="Styling"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 1.6.0 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Testing Drafter Applications</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="testing-drafter-applications">
+<h1>Testing Drafter Applications<a class="headerlink" href="#testing-drafter-applications" title="Link to this heading">¶</a></h1>
+<p>A powerful feature of Drafter is the ability to test your applications.
+Drafter functions are simple functions that take in a <code class="docutils literal notranslate"><span class="pre">State</span></code> and return a <code class="docutils literal notranslate"><span class="pre">Page</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">Page</span></code> object is just a dataclass with a <code class="docutils literal notranslate"><span class="pre">state</span></code> and a <code class="docutils literal notranslate"><span class="pre">content</span></code>, so you can easily inspect the results of
+calling your functions, or just write equality assertions.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">bakery</span> <span class="kn">import</span> <span class="n">assert_equal</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
+    <span class="p">])</span>
+
+<span class="c1"># ...</span>
+
+<span class="n">assert_equal</span><span class="p">(</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;World&quot;</span><span class="p">),</span>
+             <span class="n">Page</span><span class="p">(</span><span class="s2">&quot;World&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;Hello, World!&quot;</span><span class="p">]))</span>
+</pre></div>
+</div>
+<section id="automatically-generated-tests">
+<h2>Automatically Generated Tests<a class="headerlink" href="#automatically-generated-tests" title="Link to this heading">¶</a></h2>
+<p>When you run your Drafter application, Drafter automatically creates tests for you as you interact with the site.</p>
+<p>The Debug Information at the bottom of the page includes a section titled <strong>Page Load History</strong>.
+Clicking on the <strong>Page Content</strong> arrow will reveal the generated Page content, which can be copy/pasted back as an
+<code class="docutils literal notranslate"><span class="pre">assert_equal</span></code> along with the appropriate <strong>Call</strong>.</p>
+<p>You might think of this as “freezing” the expected state of the website, if you are happy with the design.
+Subsequent changes to the <code class="docutils literal notranslate"><span class="pre">index</span></code> function require us to update these tests, so you do not necessarily want to start
+by testing (the way you are usually encouraged to do). But as you make changes, these tests can help you confirm
+that the rest of the site still works as originally intended. These are known as <strong>regression tests</strong>.</p>
+</section>
+<section id="testing-parts-of-routes">
+<span id="id1"></span><h2>Testing Parts of Routes<a class="headerlink" href="#testing-parts-of-routes" title="Link to this heading">¶</a></h2>
+<p>Drafter’s automatically generated tests are designed to test the entire result
+of a route, including its <code class="docutils literal notranslate"><span class="pre">state</span></code> and <code class="docutils literal notranslate"><span class="pre">content</span></code>. However, sometimes you
+want to test just a part of the result, using more relaxed assertions.</p>
+<p>To do this, you can manually inspect the result of calling your route, and
+then test individual pieces by inspecting the <code class="docutils literal notranslate"><span class="pre">state</span></code> and <code class="docutils literal notranslate"><span class="pre">content</span></code> of the
+resulting <code class="docutils literal notranslate"><span class="pre">Page</span></code> object. Remember, the <code class="docutils literal notranslate"><span class="pre">Page</span></code> is just a dataclass!</p>
+<p>For example, the following allows us to test that the content has at least
+some of the expected text:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
+    <span class="p">])</span>
+
+<span class="c1"># ...</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">index</span><span class="p">(</span><span class="s2">&quot;World&quot;</span><span class="p">)</span>
+<span class="n">assert_equal</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or you could make an assertion about a specific part of the state, without
+reference to any other part of the <code class="docutils literal notranslate"><span class="pre">Page</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
+    <span class="p">])</span>
+
+<span class="c1"># ...</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">index</span><span class="p">(</span><span class="s2">&quot;World&quot;</span><span class="p">)</span>
+<span class="n">assert_equal</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;World&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="../contents.html">Page contents</a></h3>
+    <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workbook/index.html">Workbook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="html.html">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="styling.html">Styling</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Testing Drafter Applications</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#automatically-generated-tests">Automatically Generated Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-parts-of-routes">Testing Parts of Routes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="help.html">More Help</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/api.html">Full API Documentation</a></li>
+</ul>
+
+  </div>
+  <div class="sphinxprev">
+    <h4>Previous page</h4>
+    <p class="topless"><a href="styling.html"
+                          title="Previous page">&larr; Styling</a></p>
+  </div>
+  <div class="sphinxnext">
+    <h4>Next page</h4>
+    <p class="topless"><a href="deployment.html"
+                          title="Next page">&rarr; Deployment</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/students/testing.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="deployment.html" title="Deployment"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="styling.html" title="Styling"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 1.6.0 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Testing Drafter Applications</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, acbart &amp; nazim.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

@@ -35,7 +35,7 @@
 
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Deployment" href="deployment.html" />
+    <link rel="next" title="Full API Documentation" href="../api/api.html" />
     <link rel="prev" title="HTML Fonts" href="../reference/fonts.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
@@ -51,7 +51,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="deployment.html" title="Deployment"
+          <a href="../api/api.html" title="Full API Documentation"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
           <a href="../reference/fonts.html" title="HTML Fonts"
@@ -120,7 +120,7 @@ as representing a graph. If you do need them, you can manually write the
 unit tests for those cases, using the generated ones as a base.
 Capture the result of calling your route, and you can then test
 individual pieces by inspecting the <code class="docutils literal notranslate"><span class="pre">state</span></code> and <code class="docutils literal notranslate"><span class="pre">content</span></code> of the
-resulting <code class="docutils literal notranslate"><span class="pre">Page</span></code> object. See <a class="reference internal" href="#testing-parts-of-routes"><span class="std std-ref">Testing Parts of Routes</span></a> for more information.</p>
+resulting <code class="docutils literal notranslate"><span class="pre">Page</span></code> object. See <a class="reference internal" href="testing.html#testing-parts-of-routes"><span class="std std-ref">Testing Parts of Routes</span></a> for more information.</p>
 <p>However, it’s also very likely that you do not need circular references,
 and you added them by mistake. Review your code carefully to see if you are
 accidentally creating circular references. A few ways that this can happen:</p>
@@ -129,58 +129,6 @@ accidentally creating circular references. A few ways that this can happen:</p>
 <li><p>You set the field of an object to itself.</p></li>
 <li><p>You have an inner field or list element that refers to the outer object.</p></li>
 </ul>
-<p>For example, if you were</p>
-</section>
-<section id="testing-parts-of-routes">
-<span id="id1"></span><h2>Testing Parts of Routes<a class="headerlink" href="#testing-parts-of-routes" title="Link to this heading">¶</a></h2>
-<p>Drafter’s automatically generated tests are designed to test the entire result
-of a route, including its <code class="docutils literal notranslate"><span class="pre">state</span></code> and <code class="docutils literal notranslate"><span class="pre">content</span></code>. However, sometimes you
-want to test just a part of the result, using more relaxed assertions.</p>
-<p>To do this, you can manually inspect the result of calling your route, and
-then test individual pieces by inspecting the <code class="docutils literal notranslate"><span class="pre">state</span></code> and <code class="docutils literal notranslate"><span class="pre">content</span></code> of the
-resulting <code class="docutils literal notranslate"><span class="pre">Page</span></code> object. Remember, the <code class="docutils literal notranslate"><span class="pre">Page</span></code> is just a dataclass!</p>
-<p>For example, the following allows us to test that the content has at least
-some of the expected text:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">import</span> <span class="nn">random</span>
-
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-
-<span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
-    <span class="p">])</span>
-
-<span class="c1"># ...</span>
-
-<span class="n">result</span> <span class="o">=</span> <span class="n">index</span><span class="p">(</span><span class="s2">&quot;World&quot;</span><span class="p">)</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Or you could make an assertion about a specific part of the state, without
-reference to any other part of the <code class="docutils literal notranslate"><span class="pre">Page</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">import</span> <span class="nn">random</span>
-
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-
-<span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
-    <span class="p">])</span>
-
-<span class="c1"># ...</span>
-
-<span class="n">result</span> <span class="o">=</span> <span class="n">index</span><span class="p">(</span><span class="s2">&quot;World&quot;</span><span class="p">)</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;World&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
 </section>
 </section>
 
@@ -200,14 +148,14 @@ reference to any other part of the <code class="docutils literal notranslate"><s
 <li class="toctree-l1"><a class="reference internal" href="docs.html">Drafter Documentation for Students</a></li>
 <li class="toctree-l1"><a class="reference internal" href="html.html">HTML</a></li>
 <li class="toctree-l1"><a class="reference internal" href="styling.html">Styling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing Drafter Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">More Help</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#actions-after-start">Actions After Start</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#circular-reference-errors">Circular Reference Errors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#testing-parts-of-routes">Testing Parts of Routes</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/api.html">Full API Documentation</a></li>
 </ul>
 
@@ -219,8 +167,8 @@ reference to any other part of the <code class="docutils literal notranslate"><s
   </div>
   <div class="sphinxnext">
     <h4>Next page</h4>
-    <p class="topless"><a href="deployment.html"
-                          title="Next page">&rarr; Deployment</a></p>
+    <p class="topless"><a href="../api/api.html"
+                          title="Next page">&rarr; Full API Documentation</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -272,7 +220,7 @@ reference to any other part of the <code class="docutils literal notranslate"><s
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="deployment.html" title="Deployment"
+          <a href="../api/api.html" title="Full API Documentation"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
           <a href="../reference/fonts.html" title="HTML Fonts"
