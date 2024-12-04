@@ -128,7 +128,7 @@ The following functions are available:
 .. function:: change_color(component, color)
 
     Changes the text color. The color can be a named color (e.g. "red") or a hex code (e.g. "#FF0000").
-    See the `colors`_ page for available HTML colors.
+    See the :ref:`colors` page for available HTML colors.
 
     :param color: The color to change the text to.
     :type color: str
@@ -136,7 +136,7 @@ The following functions are available:
 .. function:: change_background_color(component, color)
 
     Changes the background color of the component (the ``background-color`` CSS attribute). The color can be a named color (e.g. "red") or a hex code (e.g. "#FF0000").
-    See the `colors`_ page for available HTML colors.
+    See the :ref:`colors` page for available HTML colors.
 
     :param color: The color to change the background to.
     :type color: str
@@ -158,7 +158,7 @@ The following functions are available:
 .. function:: change_text_font(component, font)
 
     Changes the font of the text. The font must be a valid font name (e.g. ``"Arial"``, ``"Times New Roman"``, ``"Courier New"``).
-    See the `fonts`_ page for available fonts.
+    See the :ref:`fonts` page for available fonts.
 
     :param font: The font to change the text to.
     :type font: str
@@ -234,7 +234,7 @@ The following functions are available:
     * ``groove``: A 3D grooved border
 
     Additionally, a border can have a width and color. The width must be a string followed by the units (e.g. "1px") or an integer (e.g. 1).
-    The color can be a named color (e.g. "red") or a hex code (e.g. "#FF0000"); see the `colors`_ page for available HTML colors.
+    The color can be a named color (e.g. "red") or a hex code (e.g. "#FF0000"); see the :ref:`colors` page for available HTML colors.
     The format is ``"style width color"``. For example:
 
     .. code-block:: python
