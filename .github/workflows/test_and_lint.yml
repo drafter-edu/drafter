@@ -12,7 +12,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
@@ -36,3 +36,15 @@ jobs:
     - name: Test with pytest
       run: |
         python -m pytest ./tests/
+    - name: Suggest Tests with Qodo
+      uses: qodo-ai/qodo-ci/.github/actions/qodo-cover@v0.1.1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        project_language: python
+        project_root: ./drafter/
+        code_coverage_report_path: ./coverage.xml
+        test_command: "python -m pytest ./tests/ --cov=./drafter/ --cov-report=xml --cov-report=term"
+        model: gpt-4o
+
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
