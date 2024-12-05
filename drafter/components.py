@@ -308,7 +308,7 @@ class TextBox(PageContent):
 @dataclass
 class TextArea(PageContent):
     name: str
-    default_value: Optional[str]
+    default_value: str
     EXTRA_ATTRS = ["rows", "cols", "autocomplete", "autofocus", "disabled", "placeholder", "readonly", "required"]
 
     def __init__(self, name: str, default_value: Optional[str] = None, **kwargs):
