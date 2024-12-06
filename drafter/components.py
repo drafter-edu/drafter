@@ -379,9 +379,10 @@ class HorizontalRule(PageContent):
 
 
 @dataclass
-class Span(PageContent):
+class _HtmlGroup(PageContent):
     content: list[Any]
     extra_settings: dict
+    # kind: str = ''
 
     def __init__(self, *args, **kwargs):
         self.content = args
@@ -389,33 +390,30 @@ class Span(PageContent):
 
     def __repr__(self):
         if self.extra_settings:
-            return f"Span({', '.join(repr(item) for item in self.content)}, {self.extra_settings})"
-        return f"Span({', '.join(repr(item) for item in self.content)})"
+            return f"{self.kind.capitalize()}({', '.join(repr(item) for item in self.content)}, {self.extra_settings})"
+        return f"{self.kind.capitalize()}({', '.join(repr(item) for item in self.content)})"
 
     def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<span {parsed_settings}>{''.join(str(item) for item in self.content)}</span>"
+        return f"<{self.kind} {parsed_settings}>{''.join(str(item) for item in self.content)}</{self.kind}>"
 
 
 @dataclass
-class Div(PageContent):
-
-    # TODO: This should subclass a common ancestor with Span
-    content: list[Any]
-    extra_settings: dict
+class Span(_HtmlGroup):
+    kind = 'span'
 
     def __init__(self, *args, **kwargs):
         self.content = args
         self.extra_settings = kwargs
 
-    def __repr__(self):
-        if self.extra_settings:
-            return f"Div({', '.join(repr(item) for item in self.content)}, {self.extra_settings})"
-        return f"Div({', '.join(repr(item) for item in self.content)})"
 
-    def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<div {parsed_settings}>{''.join(str(item) for item in self.content)}</div>"
+@dataclass
+class Div(_HtmlGroup):
+    kind = 'div'
+
+    def __init__(self, *args, **kwargs):
+        self.content = args
+        self.extra_settings = kwargs
 
 
 Division = Div
