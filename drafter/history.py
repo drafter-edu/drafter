@@ -194,7 +194,7 @@ class VisitedPage:
     def update(self, new_status, original_page_content=None):
         self.status = new_status
         if original_page_content is not None:
-            self.original_page_content = format_page_content(original_page_content, 120).replace('<', '&lt;').replace('>', '&gt;')
+            self.original_page_content = html.escape(format_page_content(original_page_content, 120))
 
     def finish(self, new_status):
         self.status = new_status
