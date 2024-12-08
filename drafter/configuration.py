@@ -6,6 +6,7 @@ Download/upload state button
 """
 
 from dataclasses import dataclass, field
+from typing import List, Dict
 import os
 
 from drafter.setup import DEFAULT_BACKEND
@@ -32,8 +33,8 @@ class ServerConfiguration:
 
     # Page configuration
     style: str = 'skeleton'
-    additional_header_content: list[str] = field(default_factory=list)
-    additional_css_content: list[str] = field(default_factory=list)
+    additional_header_content: List[str] = field(default_factory=list)
+    additional_css_content: List[str] = field(default_factory=list)
     src_image_folder: str = ''
     save_uploaded_files: bool = not skulpt
     deploy_image_path: str = 'website' if skulpt else 'images'
