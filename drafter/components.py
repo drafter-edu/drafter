@@ -1,5 +1,5 @@
 from dataclasses import dataclass, is_dataclass, fields
-from typing import Any, Union, Optional
+from typing import Any, Union, Optional, List, Dict, Tuple
 import io
 import base64
 # from urllib.parse import quote_plus
@@ -59,7 +59,7 @@ class PageContent:
 
     This class also has some helpful methods for verifying URLs and handling attributes/styles.
     """
-    EXTRA_ATTRS: list[str] = []
+    EXTRA_ATTRS: List[str] = []
     extra_settings: dict
 
     def verify(self, server) -> bool:
@@ -198,7 +198,7 @@ class Link(PageContent, LinkContent):
 class Button(PageContent, LinkContent):
     text: str
     url: str
-    arguments: list[Argument]
+    arguments: List[Argument]
     external: bool = False
 
     def __init__(self, text: str, url: str, arguments=None, **kwargs):
@@ -325,10 +325,10 @@ class TextArea(PageContent):
 @dataclass
 class SelectBox(PageContent):
     name: str
-    options: list[str]
+    options: List[str]
     default_value: Optional[str]
 
-    def __init__(self, name: str, options: list[str], default_value: Optional[str] = None, **kwargs):
+    def __init__(self, name: str, options: List[str], default_value: Optional[str] = None, **kwargs):
         validate_parameter_name(name, "SelectBox")
         self.name = name
         self.options = options
@@ -340,9 +340,8 @@ class SelectBox(PageContent):
         if self.default_value is not None:
             extra_settings['value'] = html.escape(self.default_value)
         parsed_settings = self.parse_extra_settings(**extra_settings)
-        options = "\n".join(f"<option selected value='{option}'>{option}</option>"
-                            if option == self.default_value else
-                            f"<option value='{option}'>{option}</option>"
+        options = "\n".join(f"<option {'selected' if option == self.default_value else ''} "
+                            f"value='{make_safe_argument(option)}'>{option}</option>"
                             for option in self.options)
         return f"<select name='{self.name}' {parsed_settings}>{options}</select>"
 
@@ -380,7 +379,7 @@ class HorizontalRule(PageContent):
 
 @dataclass
 class Span(PageContent):
-    content: list[Any]
+    content: List[Any]
     extra_settings: dict
 
     def __init__(self, *args, **kwargs):
@@ -401,7 +400,7 @@ class Span(PageContent):
 class Div(PageContent):
 
     # TODO: This should subclass a common ancestor with Span
-    content: list[Any]
+    content: List[Any]
     extra_settings: dict
 
     def __init__(self, *args, **kwargs):
@@ -448,10 +447,10 @@ class Row(Div):
 
 @dataclass
 class _HtmlList(PageContent):
-    items: list[Any]
+    items: List[Any]
     kind: str = ""
 
-    def __init__(self, items: list[Any], **kwargs):
+    def __init__(self, items: List[Any], **kwargs):
         self.items = items
         self.extra_settings = kwargs
 
@@ -480,9 +479,9 @@ class Header(PageContent):
 
 @dataclass
 class Table(PageContent):
-    rows: list[list[str]]
+    rows: List[List[str]]
 
-    def __init__(self, rows: list[list[str]], header=None, **kwargs):
+    def __init__(self, rows: List[List[str]], header=None, **kwargs):
         self.rows = rows
         self.header = header
         self.extra_settings = kwargs
@@ -630,7 +629,7 @@ class FileUpload(PageContent):
     name: str
     EXTRA_ATTRS = ["accept", "capture", "multiple", "required"]
 
-    def __init__(self, name: str, accept: Union[str, list[str], None] = None, **kwargs):
+    def __init__(self, name: str, accept: Union[str, List[str], None] = None, **kwargs):
         validate_parameter_name(name, "FileUpload")
         self.name = name
         self.extra_settings = kwargs
