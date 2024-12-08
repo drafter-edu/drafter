@@ -52,7 +52,9 @@ def test_complex_form(browser, splinter_headless):
 
         browser.fill("new_name", "Ada Lovelace")
         browser.find_by_name('new_availability')[1].check()
-        browser.select("new_animal", "capybaras")
+        #print(browser.find_by_name("new_animal"))
+        #browser.find_by_name("new_animal").select("capybaras")
+        browser.find_by_name("new_animal").first.find_by_tag("option")[2].click()
         browser.fill("new_poem", "Roses are red, violets are blue.")
         browser.find_by_name(SUBMIT_BUTTON_KEY).click()
 
