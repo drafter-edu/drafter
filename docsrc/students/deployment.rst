@@ -264,7 +264,7 @@ Submit on Canvas
 Make sure that you submit the **deployed URL** of your website, which will look something like this: ``https://ud-s24-cs1.github.io/cs1-website-username/``.
 
 .. warning::
-    Do not the submit the deployed URL with the ``docs/`` extension or the link to the GitHub repository (e.g., ``https://github.com/ud-s24-cs1/cs1-website-username``). Submitting the wrong link will potentially earn you zero points.
+    Do not the submit the deployed URL with the ``docs/`` extension or the link to the GitHub repository (e.g., ``https://github.com/ud-s24-cs1/cs1-website-username``). Also do not submit the original `https://localhost:8080` link; that URL only works on your computer while the program is running locally, so it will not work on other peoples' machine. Test the link after you submit, from another device. Submitting the wrong link will potentially earn you zero points!
 
 
 .. _appendix_upload_files:
