@@ -341,7 +341,7 @@ class SelectBox(PageContent):
             extra_settings['value'] = html.escape(self.default_value)
         parsed_settings = self.parse_extra_settings(**extra_settings)
         options = "\n".join(f"<option {'selected' if option == self.default_value else ''} "
-                            f"value='{make_safe_argument(option)}'>{option}</option>"
+                            f"value='{html.escape(option)}'>{option}</option>"
                             for option in self.options)
         return f"<select name='{self.name}' {parsed_settings}>{options}</select>"
 
