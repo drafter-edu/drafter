@@ -1,5 +1,5 @@
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable
+from typing import Any, Callable, List, Tuple, Dict
 import inspect
 import html
 
@@ -13,10 +13,10 @@ from drafter.configuration import ServerConfiguration
 
 @dataclass
 class DebugInformation:
-    page_history: list[tuple[VisitedPage, Any]]
+    page_history: List[Tuple[VisitedPage, Any]]
     state: Any
-    routes: dict[str, Callable]
-    conversion_record: list[ConversionRecord]
+    routes: Dict[str, Callable]
+    conversion_record: List[ConversionRecord]
     configuration: ServerConfiguration
 
     INDENTATION_START_HTML = "<div class='row'><div class='one column'></div><div class='eleven columns'>"

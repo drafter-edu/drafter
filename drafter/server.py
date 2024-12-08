@@ -3,7 +3,7 @@ import os
 import traceback
 from dataclasses import dataclass, asdict, replace, field, fields
 from functools import wraps
-from typing import Any, Optional
+from typing import Any, Optional, List, Tuple
 import json
 import inspect
 import pathlib
@@ -53,7 +53,7 @@ def bundle_files_into_js(main_file, root_path, allowed_extensions=DEFAULT_ALLOWE
 
 
 class Server:
-    _page_history: list[tuple[VisitedPage, Any]]
+    _page_history: List[Tuple[VisitedPage, Any]]
     _custom_name = None
 
     def __init__(self, _custom_name=None, **kwargs):
@@ -186,7 +186,8 @@ class Server:
         elif PREVIOUSLY_PRESSED_BUTTON in params:
             button_pressed = json.loads(params.pop(PREVIOUSLY_PRESSED_BUTTON))
         # TODO: Handle non-bottle backends
-        for key in list(params.keys()):
+        param_keys = list(params.keys())
+        for key in param_keys:
             kwargs[key] = params.pop(key)
         signature_parameters = inspect.signature(original_function).parameters
         expected_parameters = list(signature_parameters.keys())

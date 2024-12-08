@@ -2,8 +2,9 @@
 This module contains hacks to work around limitations of various platforms.
 """
 import sys
+from typing import List
 
-__all__: list[str] = []
+__all__: List[str] = []
 
 
 if sys.platform == 'skulpt':
