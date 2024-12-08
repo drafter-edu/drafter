@@ -6,7 +6,7 @@ import io
 from urllib.parse import unquote
 from dataclasses import dataclass, is_dataclass, replace, asdict, fields
 from dataclasses import field as dataclass_field
-from datetime import datetime
+from datetime import timezone, timedelta, datetime
 from typing import Any, Optional, Callable, Dict
 import pprint
 
@@ -14,6 +14,9 @@ from drafter.constants import LABEL_SEPARATOR, JSON_DECODE_SYMBOL
 from drafter.setup import request
 from drafter.testing import DIFF_INDENT_WIDTH
 from drafter.image_support import HAS_PILLOW, PILImage
+
+
+timezone_UTC = timezone(timedelta(0))
 
 
 TOO_LONG_VALUE_THRESHOLD = 256
@@ -201,17 +204,17 @@ class VisitedPage:
     button_pressed: str
     original_page_content: Optional[str] = None
     old_state: Any = None
-    started: datetime = dataclass_field(default_factory=datetime.utcnow)
+    started: datetime = dataclass_field(default_factory=lambda:datetime.now(timezone_UTC))
     stopped: Optional[datetime] = None
 
     def update(self, new_status, original_page_content=None):
         self.status = new_status
         if original_page_content is not None:
-            self.original_page_content = format_page_content(original_page_content, 120)
+            self.original_page_content = html.escape(format_page_content(original_page_content, 120))
 
     def finish(self, new_status):
         self.status = new_status
-        self.stopped = datetime.utcnow()
+        self.stopped = datetime.now(timezone_UTC)
 
     def as_html(self):
         function_name = self.function.__name__
