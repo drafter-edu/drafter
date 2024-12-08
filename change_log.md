@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.1] - 2024-12-08
+
+### Fixed
+
+* Using utcnow() instead of now() (credit to @crsommers)
+* Refactored `Div` and `Span` slightly (credit to @crsommers)
+* Fixed issue with escaping of tags in `VisitedPage`
+* Fixed issue with dropdowns not properly escaping the option
+* Fixed issue with non-button related values being passed incorrectly
+
 ## [1.6.0] - 2024-12-02
 
 ### Added
