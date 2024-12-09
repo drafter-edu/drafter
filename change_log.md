@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.2] - 2024-12-09
+
+### Fixed
+
+* The options for a `SelectBox` are forced into strings, before they are escaped.
+
 ## [1.6.1] - 2024-12-08
 
 ### Fixed

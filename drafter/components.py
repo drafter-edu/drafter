@@ -331,7 +331,7 @@ class SelectBox(PageContent):
     def __init__(self, name: str, options: List[str], default_value: Optional[str] = None, **kwargs):
         validate_parameter_name(name, "SelectBox")
         self.name = name
-        self.options = options
+        self.options = [str(option) for option in options]
         self.default_value = str(default_value) if default_value is not None else ""
         self.extra_settings = kwargs
 
