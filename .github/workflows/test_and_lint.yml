@@ -39,8 +39,8 @@ jobs:
         python -m pytest ./tests/
     - name: Store failures information
       if: failure()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: reports
+        name: test-results-${{ matrix.runs-on }}
         path: |
           **/tests.test**
