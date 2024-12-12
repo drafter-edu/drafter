@@ -618,7 +618,7 @@ class FileUpload(PageContent):
     That input is sent, but the file data is not sent directly.
 
     The accept field can be used to specify the types of files that can be uploaded.
-    It accepts either a literal string (e.g. "image/\*") or a list of strings (e.g. ["image/png", "image/jpeg"]).
+    It accepts either a literal string (e.g. "image/*") or a list of strings (e.g. ["image/png", "image/jpeg"]).
     You can either provide MIME types, extensions, or extensions without a period (e.g., "png", ".jpg").
 
     To have multiple files uploaded, use the `multiple` attribute, which will cause
