@@ -1,6 +1,7 @@
 from tests.helpers import *
 from drafter import *
 from dataclasses import dataclass
+import time
 
 def test_button_arguments(browser, splinter_headless):
     drafter_server = TestServer(None)
@@ -29,6 +30,7 @@ def test_button_arguments(browser, splinter_headless):
         ])
 
     with drafter_server:
+        time.sleep(1)
         browser.visit('http://localhost:8080')
         assert browser.is_text_present("Welcome to Ada's Fruit site!")
 
