@@ -185,6 +185,8 @@ This file is written in Markdown, which is a simple way to format text. You can 
 
 You can learn more about Markdown `from the Github Guide <https://guides.github.com/features/mastering-markdown/>`_ or the `MarkdownGuide <https://www.markdownguide.org/basic-syntax/>`_ .
 
+You should also add a section with a bulletted list in the ``readme.md`` document describing the project requirements and how you met them.
+
 When you are done, click on the ``Commit changes`` button to save your changes.
 
 .. _view_deployment:
@@ -221,6 +223,8 @@ In this particular case, the error is simple - the developer forgot to turn on t
 
 If you see an error, you can try to fix it and push the changes to the repository.
 The website will automatically redeploy when you push changes to the repository, and you can check the progress of the new attempt in the Actions tab again.
+
+The Actions section of the repository will list prior deploy attempts in chronological order. So, if you see past attempts with the red X, don't worry about it as long as the top (most recent) deploy attempt was successful. That's the one that matters. 
 
 You can also get more details about the deployment from the deployment dashboard (see :ref:`deployment_dashboard`).
 Unless there is a catastrophic error (e.g., you didn't enable GitHub Pages), you should be able to see the dashboard.
