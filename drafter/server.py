@@ -168,7 +168,8 @@ class Server:
         final_args = asdict(self.configuration)
         # Update the configuration with the safe kwargs
         safe_keys = fields(ServerConfiguration)
-        safe_kwargs = {key: value for key, value in kwargs.items() if key in safe_keys}
+        safe_key_names = {field.name for field in safe_keys}
+        safe_kwargs = {key: value for key, value in kwargs.items() if key in safe_key_names}
         updated_configuration = replace(self.configuration, **safe_kwargs)
         self.configuration = updated_configuration
         # Update the final args with the new configuration
@@ -446,7 +447,11 @@ class Server:
                                        error="Could not find the student's main file.",
                                        routes="")
         bundled_js, skipped, added = bundle_files_into_js(student_main_file, os.path.dirname(student_main_file))
-        return TEMPLATE_SKULPT_DEPLOY.format(website_code=bundled_js)
+        return TEMPLATE_SKULPT_DEPLOY.format(website_code=bundled_js,
+                                             cdn_skulpt=self.configuration.cdn_skulpt,
+                                             cdn_skulpt_std=self.configuration.cdn_skulpt_std,
+                                             cdn_skulpt_drafter=self.configuration.cdn_skulpt_drafter,
+                                             cdn_drafter_setup=self.configuration.cdn_drafter_setup)
 
 
 MAIN_SERVER = Server(_custom_name="MAIN_SERVER")

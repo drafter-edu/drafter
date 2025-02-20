@@ -38,3 +38,9 @@ class ServerConfiguration:
     src_image_folder: str = ''
     save_uploaded_files: bool = not skulpt
     deploy_image_path: str = 'website' if skulpt else 'images'
+
+    # Test Deployment CDN configurations
+    cdn_skulpt: str = os.environ.get("DRAFTER_CDN_SKULPT", "https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt.js")
+    cdn_skulpt_std: str = os.environ.get("DRAFTER_CDN_SKULPT_STD", "https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-stdlib.js")
+    cdn_skulpt_drafter: str = os.environ.get("DRAFTER_CDN_SKULPT_DRAFTER", "https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-drafter.js")
+    cdn_drafter_setup: str = os.environ.get("DRAFTER_CDN_SETUP", "https://drafter-edu.github.io/drafter-cdn/skulpt/drafter-setup.js")
