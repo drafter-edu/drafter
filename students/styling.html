@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Styling &#8212; Drafter 1.6.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <title>Styling &#8212; Drafter 1.6.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=e15882dc"></script>
+    <script src="../_static/documentation_options.js?v=452006c5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -56,7 +56,7 @@
         <li class="right" >
           <a href="html.html" title="HTML"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.6.2 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.3 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Styling</a></li> 
       </ul>
@@ -82,7 +82,7 @@ with links to the more detailed sub-sections.</p>
 <section id="a-full-styling-example">
 <h2>A Full Styling Example<a class="headerlink" href="#a-full-styling-example" title="Link to this heading">¶</a></h2>
 <p>Here is an example of how you might use the styling functions and keyword parameters to style a page:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
 <span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
@@ -105,7 +105,7 @@ with links to the more detailed sub-sections.</p>
 <span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
 
 <span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="n">PAGE_SPECIFIC_STYLE</span><span class="p">,</span>
         <span class="n">bold</span><span class="p">(</span><span class="s2">&quot;Welcome to the website!&quot;</span><span class="p">),</span>
@@ -133,7 +133,7 @@ with links to the more detailed sub-sections.</p>
 <p>One of the easiest ways to apply styling to components is to use the
 styling functions available. These functions take a component and return
 the same component, but with additional styling applied.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="n">float_right</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Quit&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">))</span>
     <span class="p">])</span>
@@ -421,7 +421,7 @@ If an integer is given, the units are assumed to be pixels. Valid units are:</p>
 <p>Another way to style components is to use keyword parameters. Any component can take
 <cite>style_</cite> prefixed keyword parameters. For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Quit&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">style_text_color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">style_float</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
     <span class="p">])</span>
@@ -448,7 +448,7 @@ If an integer is given, the units are assumed to be pixels. Valid units are:</p>
 <h2>CSS Style Tags<a class="headerlink" href="#css-style-tags" title="Link to this heading">¶</a></h2>
 <p>Since you can embed HTML into any <code class="docutils literal notranslate"><span class="pre">Page</span></code> component, you can also embed CSS style tags.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &lt;style&gt;</span>
@@ -478,7 +478,7 @@ using the <code class="docutils literal notranslate"><span class="pre">classes</
 <span class="s2">&quot;&quot;&quot;</span>
 
 <span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="n">STYLE</span><span class="p">,</span>
         <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Quit&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;quit-button&quot;</span><span class="p">)</span>
@@ -691,7 +691,7 @@ directly after your imports for clarity.</p>
         <li class="right" >
           <a href="html.html" title="HTML"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.6.2 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.3 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Styling</a></li> 
       </ul>

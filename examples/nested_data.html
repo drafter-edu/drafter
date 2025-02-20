@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Nested Data &#8212; Drafter 1.6.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <title>Nested Data &#8212; Drafter 1.6.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=e15882dc"></script>
+    <script src="../_static/documentation_options.js?v=452006c5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -56,7 +56,7 @@
         <li class="right" >
           <a href="login.html" title="Login Example"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.6.2 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.3 documentation</a> &#187;</li>
 
           <li class="nav-item nav-item-1"><a href="examples.html" accesskey="U">Longer Examples</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Nested Data</a></li> 
@@ -80,20 +80,20 @@
 </a>
 <a class="reference internal image-reference" href="../_images/nested_data_view.png"><img alt="../_images/nested_data_view.png" src="../_images/nested_data_view.png" style="width: 500px;" />
 </a>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">bakery</span> <span class="kn">import</span> <span class="n">assert_equal</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bakery</span><span class="w"> </span><span class="kn">import</span> <span class="n">assert_equal</span>
 
 
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Dog</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Dog</span><span class="p">:</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">age</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">breed</span><span class="p">:</span> <span class="nb">str</span>
 
 
 <span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dog</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dog</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="s2">&quot;There are &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; dogs&quot;</span><span class="p">,</span>
         <span class="s2">&quot;What do you want to do?&quot;</span><span class="p">,</span>
@@ -104,7 +104,7 @@
 
 
 <span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">add_dog_page</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dog</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_dog_page</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dog</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="s2">&quot;What is the dog&#39;s name?&quot;</span><span class="p">,</span>
         <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
@@ -118,13 +118,13 @@
 
 
 <span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">finish_adding_dog_page</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dog</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">age</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">breed</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">finish_adding_dog_page</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dog</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">age</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">breed</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="n">state</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Dog</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">age</span><span class="p">),</span> <span class="n">breed</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
 
 <span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">view_dogs_page</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dog</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">view_dogs_page</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Dog</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="s2">&quot;Here are the dogs:&quot;</span><span class="p">,</span>
         <span class="n">Table</span><span class="p">(</span><span class="n">state</span><span class="p">),</span>
@@ -233,7 +233,7 @@
         <li class="right" >
           <a href="login.html" title="Login Example"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.6.2 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.3 documentation</a> &#187;</li>
 
           <li class="nav-item nav-item-1"><a href="examples.html" >Longer Examples</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Nested Data</a></li> 

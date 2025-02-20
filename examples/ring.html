@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Ring Example &#8212; Drafter 1.6.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <title>Ring Example &#8212; Drafter 1.6.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=e15882dc"></script>
+    <script src="../_static/documentation_options.js?v=452006c5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -56,7 +56,7 @@
         <li class="right" >
           <a href="calculator.html" title="Calculator Example"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.6.2 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.3 documentation</a> &#187;</li>
 
           <li class="nav-item nav-item-1"><a href="examples.html" accesskey="U">Longer Examples</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Ring Example</a></li> 
@@ -79,12 +79,12 @@
 </a>
 <a class="reference internal image-reference" href="../_images/ring3.png"><img alt="../_images/ring3.png" src="../_images/ring3.png" style="width: 500px;" />
 </a>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="n">route</span><span class="p">,</span> <span class="n">start_server</span><span class="p">,</span> <span class="n">Page</span><span class="p">,</span> <span class="n">Link</span>
-<span class="kn">from</span> <span class="nn">bakery</span> <span class="kn">import</span> <span class="n">assert_equal</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="n">route</span><span class="p">,</span> <span class="n">start_server</span><span class="p">,</span> <span class="n">Page</span><span class="p">,</span> <span class="n">Link</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bakery</span><span class="w"> </span><span class="kn">import</span> <span class="n">assert_equal</span>
 
 
 <span class="nd">@route</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span>
         <span class="s2">&quot;Hello, World!&quot;</span><span class="p">,</span>
         <span class="n">Link</span><span class="p">(</span><span class="s2">&quot;Second page&quot;</span><span class="p">,</span> <span class="s2">&quot;second&quot;</span><span class="p">)</span>
@@ -92,7 +92,7 @@
 
 
 <span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">second</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">second</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span>
         <span class="s2">&quot;Welcome to the second page.&quot;</span><span class="p">,</span>
         <span class="n">Link</span><span class="p">(</span><span class="s2">&quot;Third page&quot;</span><span class="p">,</span> <span class="n">third</span><span class="p">)</span>
@@ -100,7 +100,7 @@
 
 
 <span class="nd">@route</span>
-<span class="k">def</span> <span class="nf">third</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">third</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span>
         <span class="s2">&quot;Welcome to the third page.&quot;</span><span class="p">,</span>
         <span class="n">Link</span><span class="p">(</span><span class="s2">&quot;Return to start&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
@@ -212,7 +212,7 @@
         <li class="right" >
           <a href="calculator.html" title="Calculator Example"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.6.2 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.3 documentation</a> &#187;</li>
 
           <li class="nav-item nav-item-1"><a href="examples.html" >Longer Examples</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Ring Example</a></li> 

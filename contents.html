@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Table of Contents &#8212; Drafter 1.6.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <title>Table of Contents &#8212; Drafter 1.6.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="_static/documentation_options.js?v=e15882dc"></script>
+    <script src="_static/documentation_options.js?v=452006c5"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="students/installation.html" title="How to Install Drafter"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
-    <li><a href="#">Drafter 1.6.2 documentation</a> &#187;</li>
+    <li><a href="#">Drafter 1.6.3 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Table of Contents</a></li> 
       </ul>
@@ -199,6 +199,17 @@
 <li class="toctree-l2"><a class="reference internal" href="reference/colors.html">HTML Colors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/components.html">Components Cheatsheet</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/fonts.html">HTML Fonts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/flask.html">Transitioning from Drafter to Flask</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="reference/flask.html#what-is-flask">What is Flask?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/flask.html#installing-flask">Installing Flask</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/flask.html#basic-routing">Basic Routing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/flask.html#returning-html-content">Returning HTML Content</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/flask.html#using-templates">Using Templates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/flask.html#handling-forms-and-input">Handling Forms and Input</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/flask.html#managing-state">Managing State</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/flask.html#conclusion">Conclusion</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="students/help.html">More Help</a><ul>
@@ -207,6 +218,32 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/api.html">Full API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.server.Server"><code class="docutils literal notranslate"><span class="pre">Server</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.add_route"><code class="docutils literal notranslate"><span class="pre">Server.add_route()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.clear_routes"><code class="docutils literal notranslate"><span class="pre">Server.clear_routes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.convert_parameter"><code class="docutils literal notranslate"><span class="pre">Server.convert_parameter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.dump_state"><code class="docutils literal notranslate"><span class="pre">Server.dump_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.flash_warning"><code class="docutils literal notranslate"><span class="pre">Server.flash_warning()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.handle_images"><code class="docutils literal notranslate"><span class="pre">Server.handle_images()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.load_from_state"><code class="docutils literal notranslate"><span class="pre">Server.load_from_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.make_bottle_page"><code class="docutils literal notranslate"><span class="pre">Server.make_bottle_page()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.make_debug_page"><code class="docutils literal notranslate"><span class="pre">Server.make_debug_page()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.make_error_page"><code class="docutils literal notranslate"><span class="pre">Server.make_error_page()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.prepare_args"><code class="docutils literal notranslate"><span class="pre">Server.prepare_args()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.reset"><code class="docutils literal notranslate"><span class="pre">Server.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.restore_state_if_available"><code class="docutils literal notranslate"><span class="pre">Server.restore_state_if_available()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.run"><code class="docutils literal notranslate"><span class="pre">Server.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.serve_image"><code class="docutils literal notranslate"><span class="pre">Server.serve_image()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.setup"><code class="docutils literal notranslate"><span class="pre">Server.setup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.test_deployment"><code class="docutils literal notranslate"><span class="pre">Server.test_deployment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.try_special_conversions"><code class="docutils literal notranslate"><span class="pre">Server.try_special_conversions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.verify_page_result"><code class="docutils literal notranslate"><span class="pre">Server.verify_page_result()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.verify_page_state_history"><code class="docutils literal notranslate"><span class="pre">Server.verify_page_state_history()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.server.Server.wrap_page"><code class="docutils literal notranslate"><span class="pre">Server.wrap_page()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.server.bundle_files_into_js"><code class="docutils literal notranslate"><span class="pre">bundle_files_into_js()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.server.get_all_routes"><code class="docutils literal notranslate"><span class="pre">get_all_routes()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.server.get_main_server"><code class="docutils literal notranslate"><span class="pre">get_main_server()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.server.get_server_setting"><code class="docutils literal notranslate"><span class="pre">get_server_setting()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.server.set_main_server"><code class="docutils literal notranslate"><span class="pre">set_main_server()</span></code></a></li>
@@ -246,12 +283,23 @@
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.FileUpload"><code class="docutils literal notranslate"><span class="pre">FileUpload</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.Header"><code class="docutils literal notranslate"><span class="pre">Header</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.HorizontalRule"><code class="docutils literal notranslate"><span class="pre">HorizontalRule</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.Image"><code class="docutils literal notranslate"><span class="pre">Image</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.Image"><code class="docutils literal notranslate"><span class="pre">Image</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.components.Image.render"><code class="docutils literal notranslate"><span class="pre">Image.render()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.LineBreak"><code class="docutils literal notranslate"><span class="pre">LineBreak</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.Link"><code class="docutils literal notranslate"><span class="pre">Link</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.LinkContent"><code class="docutils literal notranslate"><span class="pre">LinkContent</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.MatPlotLibPlot"><code class="docutils literal notranslate"><span class="pre">MatPlotLibPlot</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.NumberedList"><code class="docutils literal notranslate"><span class="pre">NumberedList</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.PageContent"><code class="docutils literal notranslate"><span class="pre">PageContent</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.PageContent"><code class="docutils literal notranslate"><span class="pre">PageContent</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.components.PageContent.parse_extra_settings"><code class="docutils literal notranslate"><span class="pre">PageContent.parse_extra_settings()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.components.PageContent.render"><code class="docutils literal notranslate"><span class="pre">PageContent.render()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.components.PageContent.update_attr"><code class="docutils literal notranslate"><span class="pre">PageContent.update_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.components.PageContent.update_style"><code class="docutils literal notranslate"><span class="pre">PageContent.update_style()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/api.html#drafter.components.PageContent.verify"><code class="docutils literal notranslate"><span class="pre">PageContent.verify()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.Picture"><code class="docutils literal notranslate"><span class="pre">Picture</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.Pre"><code class="docutils literal notranslate"><span class="pre">Pre</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.PreformattedText"><code class="docutils literal notranslate"><span class="pre">PreformattedText</span></code></a></li>
@@ -263,6 +311,10 @@
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.Text"><code class="docutils literal notranslate"><span class="pre">Text</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.TextArea"><code class="docutils literal notranslate"><span class="pre">TextArea</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.TextBox"><code class="docutils literal notranslate"><span class="pre">TextBox</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.make_safe_argument"><code class="docutils literal notranslate"><span class="pre">make_safe_argument()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.make_safe_json_argument"><code class="docutils literal notranslate"><span class="pre">make_safe_json_argument()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.make_safe_name"><code class="docutils literal notranslate"><span class="pre">make_safe_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.validate_parameter_name"><code class="docutils literal notranslate"><span class="pre">validate_parameter_name()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.styling.float_left"><code class="docutils literal notranslate"><span class="pre">float_left()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.styling.float_right"><code class="docutils literal notranslate"><span class="pre">float_right()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.styling.update_attr"><code class="docutils literal notranslate"><span class="pre">update_attr()</span></code></a></li>
@@ -354,7 +406,7 @@
         <li class="right" >
           <a href="students/installation.html" title="How to Install Drafter"
              >next</a> &nbsp; &nbsp;</li>
-    <li><a href="#">Drafter 1.6.2 documentation</a> &#187;</li>
+    <li><a href="#">Drafter 1.6.3 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Table of Contents</a></li> 
       </ul>

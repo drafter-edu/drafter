@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Drafter Quick Start Guide &#8212; Drafter 1.6.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <title>Drafter Quick Start Guide &#8212; Drafter 1.6.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=e15882dc"></script>
+    <script src="../_static/documentation_options.js?v=452006c5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -56,7 +56,7 @@
         <li class="right" >
           <a href="../students/installation.html" title="How to Install Drafter"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.6.2 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.3 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Quick Start Guide</a></li> 
       </ul>
@@ -75,7 +75,7 @@
 <p>As a student, you can use Drafter to learn and practice Python by creating a full-stack website.</p>
 <p>Let’s look at some code to get us started.</p>
 <p>Once you’ve installed Drafter, you only need two lines of code to get started:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="linenos">2</span>
 <span class="linenos">3</span><span class="n">start_server</span><span class="p">()</span>
 </pre></div>
@@ -103,11 +103,11 @@ These pages will have links to other URLs in the same web server.</p>
 <p>Another useful feature of a server is that <strong>State</strong> can be saved between pages.
 The value from a textbox on the first page can be saved and shown on the second page.
 A good way to create State in Drafter is to make a dataclass.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="hll"><span class="linenos">2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="hll"><span class="linenos">2</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 </span><span class="hll"><span class="linenos">3</span>
 </span><span class="hll"><span class="linenos">4</span><span class="nd">@dataclass</span>
-</span><span class="hll"><span class="linenos">5</span><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+</span><span class="hll"><span class="linenos">5</span><span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
 </span><span class="hll"><span class="linenos">6</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 </span><span class="linenos">7</span>
 <span class="linenos">8</span><span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;The original message&quot;</span><span class="p">))</span>
@@ -116,15 +116,15 @@ A good way to create State in Drafter is to make a dataclass.</p>
 <p>The code above does not result in a visible change, because we have not created any new routes that take advantage of
 the state.
 Let’s make a new route function that can show off the state.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="nd">@dataclass</span>
-<span class="linenos"> 5</span><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+<span class="linenos"> 5</span><span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
 <span class="linenos"> 6</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos"> 7</span>
 <span class="hll"><span class="linenos"> 8</span><span class="nd">@route</span>
-</span><span class="hll"><span class="linenos"> 9</span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll"><span class="linenos"> 9</span><span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 </span><span class="hll"><span class="linenos">10</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 </span><span class="hll"><span class="linenos">11</span>        <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
 </span><span class="hll"><span class="linenos">12</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span>
@@ -149,22 +149,22 @@ If you visit the url <a class="reference external" href="http://localhost:8080/"
 <h2>1. Another Route<a class="headerlink" href="#another-route" title="Link to this heading">¶</a></h2>
 <p>We can see the state now, but the state is <em>static</em> - nothing ever changes. Let’s add in another page that changes
 the state.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="nd">@dataclass</span>
-<span class="linenos"> 5</span><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+<span class="linenos"> 5</span><span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
 <span class="linenos"> 6</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="nd">@route</span>
-<span class="linenos"> 9</span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos"> 9</span><span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">10</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">11</span>        <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
 <span class="linenos">12</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span>
 <span class="linenos">13</span>    <span class="p">])</span>
 <span class="linenos">14</span>
 <span class="hll"><span class="linenos">15</span><span class="nd">@route</span>
-</span><span class="hll"><span class="linenos">16</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll"><span class="linenos">16</span><span class="k">def</span><span class="w"> </span><span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 </span><span class="hll"><span class="linenos">17</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
 </span><span class="hll"><span class="linenos">18</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 </span><span class="hll"><span class="linenos">19</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
@@ -177,15 +177,15 @@ the state.</p>
 <p>We’ve created a new route named <code class="docutils literal notranslate"><span class="pre">change_message</span></code>, we could actually visit if we changed the URL in the web
 browser. However, that’s inconvenient for users. Instead, we can add a link to the <code class="docutils literal notranslate"><span class="pre">index</span></code> page to make it easier
 for them to navigate there. We can do this easily by just providing a button.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="nd">@dataclass</span>
-<span class="linenos"> 5</span><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+<span class="linenos"> 5</span><span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
 <span class="linenos"> 6</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="nd">@route</span>
-<span class="linenos"> 9</span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos"> 9</span><span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">10</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">11</span>        <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
 <span class="linenos">12</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
@@ -193,7 +193,7 @@ for them to navigate there. We can do this easily by just providing a button.</p
 </span><span class="linenos">14</span>    <span class="p">])</span>
 <span class="linenos">15</span>
 <span class="linenos">16</span><span class="nd">@route</span>
-<span class="linenos">17</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">17</span><span class="k">def</span><span class="w"> </span><span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">18</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
 <span class="linenos">19</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">20</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
@@ -215,15 +215,15 @@ This state is not very exciting, though, so maybe we can provide the user with a
 <section id="taking-input">
 <h2>2. Taking Input<a class="headerlink" href="#taking-input" title="Link to this heading">¶</a></h2>
 <p>Let’s add a TextBox to the <code class="docutils literal notranslate"><span class="pre">change_message</span></code> page. This is a <strong>Component</strong>, just like the Button we added before.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="nd">@dataclass</span>
-<span class="linenos"> 5</span><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+<span class="linenos"> 5</span><span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
 <span class="linenos"> 6</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="nd">@route</span>
-<span class="linenos"> 9</span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos"> 9</span><span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">10</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">11</span>        <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
 <span class="linenos">12</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
@@ -231,7 +231,7 @@ This state is not very exciting, though, so maybe we can provide the user with a
 <span class="linenos">14</span>    <span class="p">])</span>
 <span class="linenos">15</span>
 <span class="linenos">16</span><span class="nd">@route</span>
-<span class="linenos">17</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">17</span><span class="k">def</span><span class="w"> </span><span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">18</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
 <span class="linenos">19</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">20</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
@@ -246,15 +246,15 @@ This state is not very exciting, though, so maybe we can provide the user with a
 <p>The first argument to the <code class="docutils literal notranslate"><span class="pre">TextBox</span></code> constructor call is the name of the field, which will be necessary to use the value from the field later on.
 The second argument is the default value of the <code class="docutils literal notranslate"><span class="pre">TextBox</span></code> when the page displays, which should be the current message’s value.
 To actually use whatever value the user ends up typing into the box, we need to create a new Button and a new route function.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="nd">@dataclass</span>
-<span class="linenos"> 5</span><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+<span class="linenos"> 5</span><span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
 <span class="linenos"> 6</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="nd">@route</span>
-<span class="linenos"> 9</span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos"> 9</span><span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">10</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">11</span>        <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
 <span class="linenos">12</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
@@ -262,7 +262,7 @@ To actually use whatever value the user ends up typing into the box, we need to 
 <span class="linenos">14</span>    <span class="p">])</span>
 <span class="linenos">15</span>
 <span class="linenos">16</span><span class="nd">@route</span>
-<span class="linenos">17</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">17</span><span class="k">def</span><span class="w"> </span><span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">18</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
 <span class="linenos">19</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">20</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
@@ -273,7 +273,7 @@ To actually use whatever value the user ends up typing into the box, we need to 
 </span><span class="linenos">25</span>    <span class="p">])</span>
 <span class="linenos">26</span>
 <span class="hll"><span class="linenos">27</span><span class="nd">@route</span>
-</span><span class="hll"><span class="linenos">28</span><span class="k">def</span> <span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll"><span class="linenos">28</span><span class="k">def</span><span class="w"> </span><span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 </span><span class="hll"><span class="linenos">29</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">new_message</span>
 </span><span class="hll"><span class="linenos">30</span>    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 </span><span class="linenos">31</span>
@@ -295,15 +295,15 @@ Let’s add some more interactivity.</p>
 <h2>3. More Interactivity<a class="headerlink" href="#more-interactivity" title="Link to this heading">¶</a></h2>
 <p>We’re going to create another page, which will have two possible images, controlled by a CheckBox.
 First, we create the new page.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="nd">@dataclass</span>
-<span class="linenos"> 5</span><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+<span class="linenos"> 5</span><span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
 <span class="linenos"> 6</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="nd">@route</span>
-<span class="linenos"> 9</span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos"> 9</span><span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">10</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">11</span>        <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
 <span class="linenos">12</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
@@ -313,7 +313,7 @@ First, we create the new page.</p>
 </span><span class="linenos">16</span>    <span class="p">])</span>
 <span class="linenos">17</span>
 <span class="linenos">18</span><span class="nd">@route</span>
-<span class="linenos">19</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">19</span><span class="k">def</span><span class="w"> </span><span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">20</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
 <span class="linenos">21</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">22</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
@@ -324,12 +324,12 @@ First, we create the new page.</p>
 <span class="linenos">27</span>    <span class="p">])</span>
 <span class="linenos">28</span>
 <span class="linenos">29</span><span class="nd">@route</span>
-<span class="linenos">30</span><span class="k">def</span> <span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">30</span><span class="k">def</span><span class="w"> </span><span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">31</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">new_message</span>
 <span class="linenos">32</span>    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 <span class="linenos">33</span>
 <span class="hll"><span class="linenos">34</span><span class="nd">@route</span>
-</span><span class="hll"><span class="linenos">35</span><span class="k">def</span> <span class="nf">view_picture</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll"><span class="linenos">35</span><span class="k">def</span><span class="w"> </span><span class="nf">view_picture</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 </span><span class="hll"><span class="linenos">36</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 </span><span class="hll"><span class="linenos">37</span>        <span class="n">Image</span><span class="p">(</span><span class="s2">&quot;https://placedog.net/500/280?random&quot;</span><span class="p">),</span>
 </span><span class="hll"><span class="linenos">38</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Return to the main page&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
@@ -344,16 +344,16 @@ There is also a button to take the user back to the original page.</p>
 We can provide a CheckBox to control whether they encounter a picture of a dog or not.
 We will want to remember the decision of whether they see a dog when we return to the index, so it’s
 important that we store this as part of the State.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="nd">@dataclass</span>
-<span class="linenos"> 5</span><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+<span class="linenos"> 5</span><span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
 <span class="linenos"> 6</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="hll"><span class="linenos"> 7</span>    <span class="n">likes_dogs</span><span class="p">:</span> <span class="nb">bool</span>
 </span><span class="linenos"> 8</span>
 <span class="linenos"> 9</span><span class="nd">@route</span>
-<span class="linenos">10</span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">10</span><span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">11</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">12</span>        <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
 <span class="linenos">13</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
@@ -365,7 +365,7 @@ important that we store this as part of the State.</p>
 <span class="linenos">19</span>    <span class="p">])</span>
 <span class="linenos">20</span>
 <span class="linenos">21</span><span class="nd">@route</span>
-<span class="linenos">22</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">22</span><span class="k">def</span><span class="w"> </span><span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">23</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
 <span class="linenos">24</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">25</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
@@ -376,12 +376,12 @@ important that we store this as part of the State.</p>
 <span class="linenos">30</span>    <span class="p">])</span>
 <span class="linenos">31</span>
 <span class="linenos">32</span><span class="nd">@route</span>
-<span class="linenos">33</span><span class="k">def</span> <span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">33</span><span class="k">def</span><span class="w"> </span><span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">34</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">new_message</span>
 <span class="linenos">35</span>    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 <span class="linenos">36</span>
 <span class="linenos">37</span><span class="nd">@route</span>
-<span class="hll"><span class="linenos">38</span><span class="k">def</span> <span class="nf">view_picture</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">are_dogs_okay</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="hll"><span class="linenos">38</span><span class="k">def</span><span class="w"> </span><span class="nf">view_picture</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">are_dogs_okay</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 </span><span class="hll"><span class="linenos">39</span>    <span class="k">if</span> <span class="n">are_dogs_okay</span><span class="p">:</span>
 </span><span class="hll"><span class="linenos">40</span>        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://placedog.net/500/280?random&quot;</span>
 </span><span class="hll"><span class="linenos">41</span>    <span class="k">else</span><span class="p">:</span>
@@ -412,17 +412,17 @@ It’s time to setup some tests, so we can make sure the website is working corr
 <p>Drafter works perfectly well with the Bakery library to write <code class="docutils literal notranslate"><span class="pre">assert_equal</span></code> statements.
 We can call a route function and check that the produced <code class="docutils literal notranslate"><span class="pre">Page</span></code> matches the expected result.
 This does require writing fairly lengthy statements, though:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">drafter</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="hll"><span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">bakery</span> <span class="kn">import</span> <span class="n">assert_equal</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="hll"><span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">bakery</span><span class="w"> </span><span class="kn">import</span> <span class="n">assert_equal</span>
 </span><span class="linenos"> 4</span>
 <span class="linenos"> 5</span><span class="nd">@dataclass</span>
-<span class="linenos"> 6</span><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+<span class="linenos"> 6</span><span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
 <span class="linenos"> 7</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos"> 8</span>    <span class="n">likes_dogs</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="linenos"> 9</span>
 <span class="linenos">10</span><span class="nd">@route</span>
-<span class="linenos">11</span><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">11</span><span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">12</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">13</span>        <span class="s2">&quot;The message is:&quot;</span><span class="p">,</span>
 <span class="linenos">14</span>        <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
@@ -434,7 +434,7 @@ This does require writing fairly lengthy statements, though:</p>
 <span class="linenos">20</span>    <span class="p">])</span>
 <span class="linenos">21</span>
 <span class="linenos">22</span><span class="nd">@route</span>
-<span class="linenos">23</span><span class="k">def</span> <span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">23</span><span class="k">def</span><span class="w"> </span><span class="nf">change_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">24</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The new message!&quot;</span>
 <span class="linenos">25</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
 <span class="linenos">26</span>        <span class="s2">&quot;Now the message is&quot;</span><span class="p">,</span>
@@ -445,12 +445,12 @@ This does require writing fairly lengthy statements, though:</p>
 <span class="linenos">31</span>    <span class="p">])</span>
 <span class="linenos">32</span>
 <span class="linenos">33</span><span class="nd">@route</span>
-<span class="linenos">34</span><span class="k">def</span> <span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">34</span><span class="k">def</span><span class="w"> </span><span class="nf">set_the_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">35</span>    <span class="n">state</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">new_message</span>
 <span class="linenos">36</span>    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 <span class="linenos">37</span>
 <span class="linenos">38</span><span class="nd">@route</span>
-<span class="linenos">39</span><span class="k">def</span> <span class="nf">view_picture</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">are_dogs_okay</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="linenos">39</span><span class="k">def</span><span class="w"> </span><span class="nf">view_picture</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">are_dogs_okay</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
 <span class="linenos">40</span>    <span class="k">if</span> <span class="n">are_dogs_okay</span><span class="p">:</span>
 <span class="linenos">41</span>        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://placedog.net/500/280?random&quot;</span>
 <span class="linenos">42</span>    <span class="k">else</span><span class="p">:</span>
@@ -613,7 +613,7 @@ add to your website!</p>
         <li class="right" >
           <a href="../students/installation.html" title="How to Install Drafter"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.6.2 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.3 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Quick Start Guide</a></li> 
       </ul>

@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Full API Documentation &#8212; Drafter 1.6.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <title>Full API Documentation &#8212; Drafter 1.6.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=e15882dc"></script>
+    <script src="../_static/documentation_options.js?v=452006c5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="../students/help.html" title="More Help"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.6.2 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.3 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>
@@ -70,9 +70,543 @@
 <p>This full API documentation is provided for those who want to understand the
 internals of Drafter and potentially contribute to the project. If you are
 looking for user documentation, please refer to the <a class="reference internal" href="../students/docs.html#fulldocs"><span class="std std-ref">Student Documentation</span></a>.</p>
-<dl class="py function" id="module-drafter.server">
+<dl class="py class" id="module-drafter.server">
+<dt class="sig sig-object py" id="drafter.server.Server">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_custom_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server" title="Link to this definition">¶</a></dt>
+<dd><p>Represents a server capable of managing routes, states, configurations, and error handling
+while supporting application setup and runtime logic.</p>
+<p>This class allows the definition of web routes, manages application states, handles errors
+gracefully, and provides a framework for deploying a web application with a structured
+configuration and support for image serving. It integrates with the Bottle framework
+to handle HTTP requests and responses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>routes</strong> – A dictionary mapping URLs to their respective handler functions.</p></li>
+<li><p><strong>_handle_route</strong> – Internal mapping for handler functions and their respective URLs.</p></li>
+<li><p><strong>configuration</strong> – The configuration object representing server settings.</p></li>
+<li><p><strong>_state</strong> – Current state of the application.</p></li>
+<li><p><strong>_initial_state</strong> – Serialized representation of the initial application state.</p></li>
+<li><p><strong>_initial_state_type</strong> – Type of the initial state.</p></li>
+<li><p><strong>_state_history</strong> – List tracking historical states of the application.</p></li>
+<li><p><strong>_state_frozen_history</strong> – List storing serialized snapshots of historical states.</p></li>
+<li><p><strong>_page_history</strong> – History of visited pages.</p></li>
+<li><p><strong>_conversion_record</strong> – Internal record tracking parameter conversion processes.</p></li>
+<li><p><strong>original_routes</strong> – List containing tuples of original route URLs and their handlers.</p></li>
+<li><p><strong>app</strong> – The Bottle application instance for handling HTTP requests.</p></li>
+<li><p><strong>_custom_name</strong> – Custom name for the server instance, used in string representations.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.add_route">
+<span class="sig-name descname"><span class="pre">add_route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.add_route" title="Link to this definition">¶</a></dt>
+<dd><p>Adds a route to the routing table for URL handling, ensuring the URL is unique
+and maps a function to the given route. Prepares the URL, processes the
+function into a valid callable, and stores the mapping for later resolution
+when the URL is accessed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<em>str</em>) – The URL string to be added as a route. It must be unique.</p></li>
+<li><p><strong>func</strong> (<em>Callable</em>) – The function to be associated with the provided URL. This
+function will be called when the route is accessed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the URL is already registered for another function.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.clear_routes">
+<span class="sig-name descname"><span class="pre">clear_routes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.clear_routes" title="Link to this definition">¶</a></dt>
+<dd><p>Clears all stored routes from the <cite>routes</cite> attribute.</p>
+<p>This method removes all data within the <cite>routes</cite> attribute,
+resetting it back to its empty state. Use this when you want
+to remove all previous route configurations or stored paths
+within the object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.convert_parameter">
+<span class="sig-name descname"><span class="pre">convert_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_types</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.convert_parameter" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a given parameter value to a specified target type if possible, based
+on the expected types provided. Records successful conversions, unchanged
+parameters, and failed conversion attempts with detailed information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>param</strong> (<em>str</em>) – The name of the parameter to be converted.</p></li>
+<li><p><strong>val</strong> (<em>Any</em>) – The value of the parameter to be converted.</p></li>
+<li><p><strong>expected_types</strong> (<em>dict</em>) – A dictionary containing the expected types for all
+parameters. The key is the parameter name, and the value is its expected
+type. If a parameter does not require conversion, its value is set to
+<cite>inspect.Parameter.empty</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The converted value of the parameter if a conversion is successful;
+otherwise, the original value of the parameter.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the value cannot be converted to its specified expected
+type, providing detailed information about the attempted conversion.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.dump_state">
+<span class="sig-name descname"><span class="pre">dump_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.dump_state" title="Link to this definition">¶</a></dt>
+<dd><p>Converts the current internal state of the State object into a JSON-encoded
+string. The internal state must be dehydratable using the provided
+utility function <cite>dehydrate_json</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – If any part of the internal state cannot be
+serialized into JSON due to invalid types.</p></li>
+<li><p><strong>ValueError</strong> – If serialization encounters unexpected value
+constraints or data inconsistencies.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON string capturing the serialized format of the
+object’s state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.flash_warning">
+<span class="sig-name descname"><span class="pre">flash_warning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.flash_warning" title="Link to this definition">¶</a></dt>
+<dd><p>This method displays a warning message. It is intended for immediate
+output to notify the user of a specific warning or issue.</p>
+<p>TODO: This should actually append to a list that gets shown in the debug area.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em>) – The warning message to be displayed to the user.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.handle_images">
+<span class="sig-name descname"><span class="pre">handle_images</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.handle_images" title="Link to this definition">¶</a></dt>
+<dd><p>Handles the serving of images when the <cite>deploy_image_path</cite> is configured. This
+method maps a dynamic route to serve image files by their paths, allowing them
+to be accessed through the defined route.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>AttributeError</strong> – If <cite>self.configuration.deploy_image_path</cite> or its
+attributes are not properly configured.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.load_from_state">
+<span class="sig-name descname"><span class="pre">load_from_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.load_from_state" title="Link to this definition">¶</a></dt>
+<dd><p>Loads a specific State object from a serialized state based on the given state type.
+This method takes a serialized JSON string representation of a state and
+rehydrates it into the corresponding Python object according to the given state type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>str</em>) – The serialized JSON string representation of the object state.</p></li>
+<li><p><strong>state_type</strong> (<em>Type</em>) – The class or data type to rehydrate the JSON state into.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The rehydrated Python object based on the state and state_type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.make_bottle_page">
+<span class="sig-name descname"><span class="pre">make_bottle_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.make_bottle_page" title="Link to this definition">¶</a></dt>
+<dd><p>A decorator that wraps a given function to create and manage a Bottle web
+page environment. This includes processing request parameters, building
+the page, verifying its content, and rendering it to the client. It also
+maintains state and history for the page creation and execution process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>original_function</strong> – The original callable function to be wrapped
+and executed to construct the page.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A wrapped function that, when called, executes the original
+function within the Bottle page handling logic.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.make_debug_page">
+<span class="sig-name descname"><span class="pre">make_debug_page</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.make_debug_page" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a debug page by gathering and processing various internal states and
+informational data.</p>
+<p>This method collects the page history, current state, routes, configuration,
+and conversion record to create a representation of a debug page. It utilizes
+these components to generate a structured output that represents the debug
+information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Debug information page content generated based on the current internal
+state and history of the application.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.make_error_page">
+<span class="sig-name descname"><span class="pre">make_error_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.make_error_page" title="Link to this definition">¶</a></dt>
+<dd><p>Generates and displays a detailed error page upon encountering an issue in the application.</p>
+<p>This function formats a detailed error message by including the title of the error,
+the original function’s name where the error occurred, the original error’s message, and
+any additional details if provided. It also escapes potentially unsafe HTML characters
+from the error details and traceback to improve security. The formatted message is then
+displayed with an HTTP 500 Internal Server Error status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> (<em>str</em>) – A brief, descriptive title for the error (e.g., “Server Error”).</p></li>
+<li><p><strong>error</strong> (<em>Exception</em>) – The original error/exception that was encountered.</p></li>
+<li><p><strong>original_function</strong> (<em>Callable</em>) – The function object where the error originated.</p></li>
+<li><p><strong>additional_details</strong> (<em>str</em>) – Optional additional information or context about the error. Defaults to an empty string.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Does not return any value as it raises an HTTP 500 error with the formatted message.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.prepare_args">
+<span class="sig-name descname"><span class="pre">prepare_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.prepare_args" title="Link to this definition">¶</a></dt>
+<dd><p>Processes and prepares arguments for the route function call, ensuring compatibility
+with expected parameters, handling state insertion, remapping parameters,
+and performing type conversion when necessary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>original_function</strong> – The function whose parameters are being prepared.</p></li>
+<li><p><strong>args</strong> – The positional arguments to be passed to the function.</p></li>
+<li><p><strong>kwargs</strong> – The keyword arguments to be passed to the function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple containing:
+- Processed positional arguments matching the expected parameters of the</p>
+<blockquote>
+<div><p>function.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>Processed keyword arguments matching the expected parameters of the
+function.</p></li>
+<li><p>A string representation of the final arguments for logging or debugging.</p></li>
+<li><p>The button pressed if detected and processed.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.reset" title="Link to this definition">¶</a></dt>
+<dd><p>Resets the current State object to its initial configuration and clears all
+recorded histories. After resetting, the function returns the result of the
+route mapped to ‘/’ (the root index URL).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The result of the ‘/’ route execution.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#drafter.page.Page" title="drafter.page.Page">Page</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.restore_state_if_available">
+<span class="sig-name descname"><span class="pre">restore_state_if_available</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.restore_state_if_available" title="Link to this definition">¶</a></dt>
+<dd><p>Restores the state if the necessary data is available in the parameters. This
+function checks for the presence of a specific key in the parameters and, when
+available, rehydrates the serialized state back to the appropriate type and
+assigns it to the current instance’s state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>original_function</strong> – The function whose state is being restored. This function
+must have a parameter named <cite>state</cite> with an associated
+type annotation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.run" title="Link to this definition">¶</a></dt>
+<dd><p>Executes the server application using the provided configuration. The method will
+update the configuration with any additional keyword arguments provided and start
+the server application with the updated configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – Arbitrary keyword arguments containing configuration updates. Only
+keys that match the ServerConfiguration fields will be applied.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None. The server application is started with the updated configuration.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.serve_image">
+<span class="sig-name descname"><span class="pre">serve_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.serve_image" title="Link to this definition">¶</a></dt>
+<dd><p>Serves an image file located in the specified directory with the MIME type
+<cite>image/png</cite>. The method retrieves the image from the path provided, using
+the configured source image folder as the root directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – The relative path to the image file within the source image folder.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The static file object representing the requested image.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>static_file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.setup" title="Link to this definition">¶</a></dt>
+<dd><p>Initializes and configures the application. Sets up initial state, error
+pages, and application routes for handling requests.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>initial_state</strong> (<em>Any</em>) – The initial state to set up the application.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.test_deployment">
+<span class="sig-name descname"><span class="pre">test_deployment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.test_deployment" title="Link to this definition">¶</a></dt>
+<dd><p>Bundles files necessary for deployment, including the source code identified by
+the “start_server” line in the student’s main file. This allows the server to
+“deploy” a local version of the application, as it would appear on a live server
+using Skulpt.</p>
+<p>This function searches for the entry point of the student’s application and
+attempts to bundle it with all its associated files into a deployable format.
+If the main file cannot be located, it returns an error indicating the failure
+to find the required file. Otherwise, it creates a bundled JavaScript version
+of the required files and integrates them with the appropriate configurations
+for deployment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the student’s main file cannot be located.</p></li>
+<li><p><strong>IOError</strong> – If there are issues during the file bundling process.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>HTML template string formatted with bundled JavaScript and CDN
+configurations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.try_special_conversions">
+<span class="sig-name descname"><span class="pre">try_special_conversions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.try_special_conversions" title="Link to this definition">¶</a></dt>
+<dd><p>Attempts to convert the input value to the specified target type using various
+specialized conversion methods. This method is designed to handle specific types
+of input, such as <cite>bottle.FileUpload</cite>, supporting conversion to bytes, string,
+dictionary, and, if available, <cite>PIL.Image</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>Any</em>) – The input value to be converted. Typically, this is expected
+to be an instance of <cite>bottle.FileUpload</cite>.</p></li>
+<li><p><strong>target_type</strong> (<em>type</em>) – The desired type to convert the input value to. This can
+include types such as <cite>bytes</cite>, <cite>str</cite>, <cite>dict</cite>, or others, depending on the
+availability of appropriate conversion logic.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The converted value as an instance of the specified target type.
+If no special conversion logic applies, the original value is passed
+to the target type directly for conversion.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the method encounters an error during conversion,
+such as failure to decode file content as UTF-8, or if a file cannot be
+opened as an image using PIL.Image when <cite>HAS_PILLOW</cite> is <cite>True</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.verify_page_result">
+<span class="sig-name descname"><span class="pre">verify_page_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.verify_page_result" title="Link to this definition">¶</a></dt>
+<dd><p>Verifies the result of a function execution to ensure it returns a valid <cite>Page</cite>
+object. The verification checks whether the returned result is of type <cite>Page</cite>
+and whether its structure adheres to the expected format. If the validation
+fails, an error message is generated and returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>page</strong> (<em>Union</em><em>[</em><em>None</em><em>, </em><em>str</em><em>, </em><em>list</em><em>, </em><em>Any</em><em>]</em>) – The object returned by the endpoint method to be verified.</p></li>
+<li><p><strong>original_function</strong> (<em>Callable</em>) – A reference to the function or method where the
+<cite>Page</cite> object is expected to be returned from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns either a valid <cite>Page</cite> object or an error page with diagnostic
+information when the verification process fails.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[<a class="reference internal" href="#drafter.page.Page" title="drafter.page.Page">Page</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.verify_page_state_history">
+<span class="sig-name descname"><span class="pre">verify_page_state_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.verify_page_state_history" title="Link to this definition">¶</a></dt>
+<dd><p>Validates the consistency of the state object’s type in the provided <cite>page</cite>
+against the most recent state stored in the <cite>self._state_history</cite>. If any
+discrepancy is found in the type of the state object, it constructs an error
+message highlighting the inconsistency and generates an error page.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>page</strong> – The page object containing the state to be verified.</p></li>
+<li><p><strong>original_function</strong> – The name of the function that created the page.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns an error page if a validation issue arises, otherwise none.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.wrap_page">
+<span class="sig-name descname"><span class="pre">wrap_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.wrap_page" title="Link to this definition">¶</a></dt>
+<dd><p>Wraps provided content in a styled HTML template, applying additional headers,
+scripts, styles, and any configuration-specific content.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>content</strong> (<em>str</em>) – The content to be wrapped in the HTML template.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the specified style in the configuration is not found
+in the list of included styles.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A fully formatted HTML string, including necessary headers, styles,
+scripts, and the provided content wrapped according to the configuration
+and selected style.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.server.bundle_files_into_js">
+<span class="sig-name descname"><span class="pre">bundle_files_into_js</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_extensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('py',</span> <span class="pre">'js',</span> <span class="pre">'css',</span> <span class="pre">'txt',</span> <span class="pre">'json',</span> <span class="pre">'csv',</span> <span class="pre">'html',</span> <span class="pre">'md')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.bundle_files_into_js" title="Link to this definition">¶</a></dt>
+<dd><p>Bundles all files from a specified directory into a JavaScript-compatible format
+for Skulpt, a Python-to-JavaScript transpiler. The function traverses through the
+given directory, reads files with extensions present in the allowed extensions list,
+and aggregates them into a JavaScript code snippet. It also identifies files to be
+skipped and keeps a record of successfully added files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>main_file</strong> (<em>str</em>) – The path to the main Python file. This file will be labeled
+as “main.py” in the JavaScript output.</p></li>
+<li><p><strong>root_path</strong> (<em>str</em>) – The root directory to search for files.</p></li>
+<li><p><strong>allowed_extensions</strong> (<em>set</em><em>[</em><em>str</em><em>]</em>) – A collection of file extensions allowed for inclusion
+in the final JavaScript output. Defaults to a predefined set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing:
+- The combined JavaScript output string with file contents.
+- A list of skipped files that do not match the allowed extensions.
+- A list of added files that were successfully bundled.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[str, list[str], list[str]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.server.get_all_routes">
+<span class="sig-name descname"><span class="pre">get_all_routes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.server.Server" title="drafter.server.Server"><span class="pre">Server</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.get_all_routes" title="Link to this definition">¶</a></dt>
+<dd><p>Get all routes available in the given server or the main server if none is provided.</p>
+<p>If the <cite>server</cite> parameter is not specified, the function retrieves the main server
+using the <cite>get_main_server()</cite> function and returns its list of routes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>server</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#drafter.server.Server" title="drafter.server.Server"><em>Server</em></a><em>]</em>) – An optional <cite>Server</cite> instance. If provided, the method will retrieve
+routes specific to this server. If omitted, it defaults to the main server.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a list of routes from the provided or default main server.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="drafter.server.get_main_server">
-<span class="sig-name descname"><span class="pre">get_main_server</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Server</span></span></span><a class="headerlink" href="#drafter.server.get_main_server" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_main_server</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#drafter.server.Server" title="drafter.server.Server"><span class="pre">Server</span></a></span></span><a class="headerlink" href="#drafter.server.get_main_server" title="Link to this definition">¶</a></dt>
 <dd><p>Gets the main server. This is useful for testing purposes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -101,7 +635,7 @@ looking for user documentation, please refer to the <a class="reference internal
 
 <dl class="py function">
 <dt class="sig sig-object py" id="drafter.server.set_main_server">
-<span class="sig-name descname"><span class="pre">set_main_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Server</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.set_main_server" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_main_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.server.Server" title="drafter.server.Server"><span class="pre">Server</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.set_main_server" title="Link to this definition">¶</a></dt>
 <dd><p>Sets the main server to the given server. This is useful for testing purposes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -115,7 +649,7 @@ looking for user documentation, please refer to the <a class="reference internal
 
 <dl class="py function">
 <dt class="sig sig-object py" id="drafter.server.start_server">
-<span class="sig-name descname"><span class="pre">start_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Server</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">MAIN_SERVER</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.start_server" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">start_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.server.Server" title="drafter.server.Server"><span class="pre">Server</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">MAIN_SERVER</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.start_server" title="Link to this definition">¶</a></dt>
 <dd><p>Starts the server with the given initial state and configuration. If the server is set to skip, it will not start.
 Additional keyword arguments will be passed to the server’s run method, and therefore to Bottle. This can be
 used to control things like the <code class="docutils literal notranslate"><span class="pre">port</span></code>.</p>
@@ -159,7 +693,7 @@ The port to run the server on. Defaults to <code class="docutils literal notrans
 
 <dl class="py function" id="module-drafter.routes">
 <dt class="sig sig-object py" id="drafter.routes.route">
-<span class="sig-name descname"><span class="pre">route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Server</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.routes.route" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.server.Server" title="drafter.server.Server"><span class="pre">Server</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.routes.route" title="Link to this definition">¶</a></dt>
 <dd><p>Main function to add a new route to the server. Recommended to use as a decorator.
 Once added, the route will be available at the given URL; the function name will be used if no URL is provided.
 When you go to the URL, the function will be called and its return value will be displayed.</p>
@@ -369,7 +903,7 @@ Shareable link to get a link to the current page
 Download/upload state button</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="drafter.configuration.ServerConfiguration">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ServerConfiguration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'localhost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">8080</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'bottle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reloader:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'Drafter</span> <span class="pre">Website'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framed:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skulpt:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'skeleton'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_header_content:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_css_content:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_image_folder:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_uploaded_files:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deploy_image_path:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'images'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.configuration.ServerConfiguration" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ServerConfiguration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'localhost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">8080</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'bottle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reloader:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'Drafter</span> <span class="pre">Website'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framed:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skulpt:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'skeleton'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_header_content:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_css_content:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_image_folder:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_uploaded_files:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deploy_image_path:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'images'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_skulpt:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt.js'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_skulpt_std:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-stdlib.js'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_skulpt_drafter:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-drafter.js'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_drafter_setup:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/drafter-setup.js'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.configuration.ServerConfiguration" title="Link to this definition">¶</a></dt>
 <dd><p>Configuration for the server.</p>
 </dd></dl>
 
@@ -441,7 +975,26 @@ the corresponding parameter to be a list of files.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="drafter.components.Image">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Image" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="drafter.components.Image.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Image.render" title="Link to this definition">¶</a></dt>
+<dd><p>This method is called when the component is being rendered to a string. It should return
+the HTML representation of the component, using the current State and configuration to
+determine the final output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>Any</em>) – The current state of the component</p></li>
+<li><p><strong>configuration</strong> (<em>Configuration</em>) – The configuration settings for the component</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The HTML representation of the component</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="drafter.components.LineBreak">
@@ -452,6 +1005,23 @@ the corresponding parameter to be a list of files.</p>
 <dt class="sig sig-object py" id="drafter.components.Link">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Link" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.components.LinkContent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LinkContent</span></span><a class="headerlink" href="#drafter.components.LinkContent" title="Link to this definition">¶</a></dt>
+<dd><p>Represents content for a hyperlink.</p>
+<p>This class encapsulates the URL and display text of a link.
+It provides utility methods for verifying the URL, handling its structure,
+and processing associated arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – The URL of the link.</p></li>
+<li><p><strong>text</strong> – The display text of the link.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="drafter.components.MatPlotLibPlot">
@@ -474,6 +1044,112 @@ Critically, each subclass must implement a <code class="docutils literal notrans
 allows for more customization and control over the content.</p>
 <p>Ultimately, the <code class="docutils literal notranslate"><span class="pre">PageContent</span></code> object is converted to a string when it is rendered.</p>
 <p>This class also has some helpful methods for verifying URLs and handling attributes/styles.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.components.PageContent.parse_extra_settings">
+<span class="sig-name descname"><span class="pre">parse_extra_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.PageContent.parse_extra_settings" title="Link to this definition">¶</a></dt>
+<dd><p>Parses and combines extra settings into valid attribute and style formats.</p>
+<p>This method processes additional configuration settings provided via arguments or stored
+in the <cite>extra_settings</cite> property, converts them into valid HTML attributes and styles,
+and then consolidates the processed values into the appropriate output format. Attributes
+not explicitly defined in the baseline or extra attribute lists are converted into inline
+style declarations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – Arbitrary keyword arguments containing extra configuration settings to be
+applied or overridden. The keys represent attribute or style names, and the values
+represent their corresponding values.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A string containing formatted HTML attributes along with an inline style block
+if any styles are provided.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.components.PageContent.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.PageContent.render" title="Link to this definition">¶</a></dt>
+<dd><p>This method is called when the component is being rendered to a string. It should return
+the HTML representation of the component, using the current State and configuration to
+determine the final output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>Any</em>) – The current state of the component</p></li>
+<li><p><strong>configuration</strong> (<em>Configuration</em>) – The configuration settings for the component</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The HTML representation of the component</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.components.PageContent.update_attr">
+<span class="sig-name descname"><span class="pre">update_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.PageContent.update_attr" title="Link to this definition">¶</a></dt>
+<dd><p>Updates a specific attribute with the given value in the extra_settings dictionary.</p>
+<p>This method modifies the <cite>extra_settings</cite> dictionary by setting the specified
+attribute to the given value. It returns the instance of the object, allowing
+for method chaining. No validation is performed on the input values, so they
+should conform to the expected structure or constraints of the <cite>extra_settings</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attr</strong> (<em>str</em>) – The key of the attribute to be updated in the dictionary.</p></li>
+<li><p><strong>value</strong> (<em>Any</em>) – The value to set for the specified key in the dictionary.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The instance of the object after the update.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Self</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.components.PageContent.update_style">
+<span class="sig-name descname"><span class="pre">update_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.PageContent.update_style" title="Link to this definition">¶</a></dt>
+<dd><p>Updates the style of a specific setting and stores it in the
+extra_settings dictionary with a key formatted as “style_{style}”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>style</strong> (<em>str</em>) – The key representing the style to be updated</p></li>
+<li><p><strong>value</strong> (<em>Any</em>) – The value to associate with the given style key</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns the instance of the object after updating the style</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>self</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.components.PageContent.verify">
+<span class="sig-name descname"><span class="pre">verify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#drafter.components.PageContent.verify" title="Link to this definition">¶</a></dt>
+<dd><p>Verify the status of this component. This method is called before rendering the component
+to ensure that the component is in a valid state. If the component is not valid, this method
+should return False.</p>
+<p>Default implementation returns True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>server</strong> – The server object that is rendering the component</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the component is valid, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py attribute">
@@ -533,6 +1209,87 @@ allows for more customization and control over the content.</p>
 <dt class="sig sig-object py" id="drafter.components.TextBox">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TextBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'text'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.TextBox" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.components.make_safe_argument">
+<span class="sig-name descname"><span class="pre">make_safe_argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.make_safe_argument" title="Link to this definition">¶</a></dt>
+<dd><p>Encodes the given value into JSON format and escapes any special HTML
+characters to ensure the argument is safe for use in HTML contexts.</p>
+<p>This function is particularly useful in scenarios where you need
+to serialize a Python object into JSON, while making sure that the
+output is safe to insert into an HTML document, protecting against
+potential HTML injection attacks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>Any</em>) – Any Python object that needs to be converted to a
+JSON string and HTML escaped.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A string containing the HTML-escaped and JSON-encoded
+representation of the input value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.components.make_safe_json_argument">
+<span class="sig-name descname"><span class="pre">make_safe_json_argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.make_safe_json_argument" title="Link to this definition">¶</a></dt>
+<dd><p>Converts the given value to a JSON-compatible string and escapes special
+HTML characters, making it safe for inclusion in HTML contexts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> – The input value to be converted and escaped. The value can
+be of any type that is serializable to JSON.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An HTML-safe JSON string representation of the input value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.components.make_safe_name">
+<span class="sig-name descname"><span class="pre">make_safe_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.make_safe_name" title="Link to this definition">¶</a></dt>
+<dd><p>This function takes a value as input and generates a safe string version of it by escaping
+special characters to prevent injection attacks or unintended HTML rendering. It ensures that
+the provided input is safely transformed into an escaped HTML string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>Any</em>) – The input value to be escaped. It is converted to a string if it is not already.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The escaped HTML version of the input value as a string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.components.validate_parameter_name">
+<span class="sig-name descname"><span class="pre">validate_parameter_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.validate_parameter_name" title="Link to this definition">¶</a></dt>
+<dd><p>Validates a parameter name to ensure it adheres to Python’s identifier naming rules.
+The function verifies if the given name is a string, non-empty, does not contain spaces,
+does not start with a digit, and is a valid Python identifier. Additionally, it ensures
+the name starts with a letter or an underscore. Raises a <cite>ValueError</cite> with a detailed
+error message if validation fails.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name to validate.</p></li>
+<li><p><strong>component_type</strong> (<em>str</em>) – Describes the type of component associated with the parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <cite>name</cite> is not a string, is empty, contains spaces, starts with a
+digit, does not start with a letter or underscore, or is not a valid identifier.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <p id="module-drafter.styling">TODO:
 - [ ] indent
@@ -637,6 +1394,32 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 <li class="toctree-l1"><a class="reference internal" href="../reference/reference.html">Reference Lists</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Full API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.server.Server"><code class="docutils literal notranslate"><span class="pre">Server</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.add_route"><code class="docutils literal notranslate"><span class="pre">Server.add_route()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.clear_routes"><code class="docutils literal notranslate"><span class="pre">Server.clear_routes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.convert_parameter"><code class="docutils literal notranslate"><span class="pre">Server.convert_parameter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.dump_state"><code class="docutils literal notranslate"><span class="pre">Server.dump_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.flash_warning"><code class="docutils literal notranslate"><span class="pre">Server.flash_warning()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.handle_images"><code class="docutils literal notranslate"><span class="pre">Server.handle_images()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.load_from_state"><code class="docutils literal notranslate"><span class="pre">Server.load_from_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.make_bottle_page"><code class="docutils literal notranslate"><span class="pre">Server.make_bottle_page()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.make_debug_page"><code class="docutils literal notranslate"><span class="pre">Server.make_debug_page()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.make_error_page"><code class="docutils literal notranslate"><span class="pre">Server.make_error_page()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.prepare_args"><code class="docutils literal notranslate"><span class="pre">Server.prepare_args()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.reset"><code class="docutils literal notranslate"><span class="pre">Server.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.restore_state_if_available"><code class="docutils literal notranslate"><span class="pre">Server.restore_state_if_available()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.run"><code class="docutils literal notranslate"><span class="pre">Server.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.serve_image"><code class="docutils literal notranslate"><span class="pre">Server.serve_image()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.setup"><code class="docutils literal notranslate"><span class="pre">Server.setup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.test_deployment"><code class="docutils literal notranslate"><span class="pre">Server.test_deployment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.try_special_conversions"><code class="docutils literal notranslate"><span class="pre">Server.try_special_conversions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.verify_page_result"><code class="docutils literal notranslate"><span class="pre">Server.verify_page_result()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.verify_page_state_history"><code class="docutils literal notranslate"><span class="pre">Server.verify_page_state_history()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.wrap_page"><code class="docutils literal notranslate"><span class="pre">Server.wrap_page()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.server.bundle_files_into_js"><code class="docutils literal notranslate"><span class="pre">bundle_files_into_js()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.server.get_all_routes"><code class="docutils literal notranslate"><span class="pre">get_all_routes()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.get_main_server"><code class="docutils literal notranslate"><span class="pre">get_main_server()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.get_server_setting"><code class="docutils literal notranslate"><span class="pre">get_server_setting()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.set_main_server"><code class="docutils literal notranslate"><span class="pre">set_main_server()</span></code></a></li>
@@ -676,12 +1459,23 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.FileUpload"><code class="docutils literal notranslate"><span class="pre">FileUpload</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.Header"><code class="docutils literal notranslate"><span class="pre">Header</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.HorizontalRule"><code class="docutils literal notranslate"><span class="pre">HorizontalRule</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#drafter.components.Image"><code class="docutils literal notranslate"><span class="pre">Image</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.Image"><code class="docutils literal notranslate"><span class="pre">Image</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.components.Image.render"><code class="docutils literal notranslate"><span class="pre">Image.render()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.LineBreak"><code class="docutils literal notranslate"><span class="pre">LineBreak</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.Link"><code class="docutils literal notranslate"><span class="pre">Link</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.LinkContent"><code class="docutils literal notranslate"><span class="pre">LinkContent</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.MatPlotLibPlot"><code class="docutils literal notranslate"><span class="pre">MatPlotLibPlot</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.NumberedList"><code class="docutils literal notranslate"><span class="pre">NumberedList</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#drafter.components.PageContent"><code class="docutils literal notranslate"><span class="pre">PageContent</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.PageContent"><code class="docutils literal notranslate"><span class="pre">PageContent</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.components.PageContent.parse_extra_settings"><code class="docutils literal notranslate"><span class="pre">PageContent.parse_extra_settings()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.components.PageContent.render"><code class="docutils literal notranslate"><span class="pre">PageContent.render()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.components.PageContent.update_attr"><code class="docutils literal notranslate"><span class="pre">PageContent.update_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.components.PageContent.update_style"><code class="docutils literal notranslate"><span class="pre">PageContent.update_style()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.components.PageContent.verify"><code class="docutils literal notranslate"><span class="pre">PageContent.verify()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.Picture"><code class="docutils literal notranslate"><span class="pre">Picture</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.Pre"><code class="docutils literal notranslate"><span class="pre">Pre</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.PreformattedText"><code class="docutils literal notranslate"><span class="pre">PreformattedText</span></code></a></li>
@@ -693,6 +1487,10 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.Text"><code class="docutils literal notranslate"><span class="pre">Text</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.TextArea"><code class="docutils literal notranslate"><span class="pre">TextArea</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.TextBox"><code class="docutils literal notranslate"><span class="pre">TextBox</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.make_safe_argument"><code class="docutils literal notranslate"><span class="pre">make_safe_argument()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.make_safe_json_argument"><code class="docutils literal notranslate"><span class="pre">make_safe_json_argument()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.make_safe_name"><code class="docutils literal notranslate"><span class="pre">make_safe_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.validate_parameter_name"><code class="docutils literal notranslate"><span class="pre">validate_parameter_name()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.styling.float_left"><code class="docutils literal notranslate"><span class="pre">float_left()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.styling.float_right"><code class="docutils literal notranslate"><span class="pre">float_right()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.styling.update_attr"><code class="docutils literal notranslate"><span class="pre">update_attr()</span></code></a></li>
@@ -759,7 +1557,7 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
         <li class="right" >
           <a href="../students/help.html" title="More Help"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.6.2 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.6.3 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>
