@@ -133,7 +133,8 @@ class DebugInformation:
                         status = "✅" if test_case.result else "❌"
                         yield f"<li>{status} Line {test_case.line}: <code>{test_case.caller}</code>"
                         if not test_case.result:
-                            given, expected = format_page_content(given, DIFF_WRAP_WIDTH), format_page_content(expected, DIFF_WRAP_WIDTH)
+                            given, given_normal_mode = format_page_content(given, DIFF_WRAP_WIDTH)
+                            expected, expected_normal_mode = format_page_content(expected, DIFF_WRAP_WIDTH)
                             yield diff_tests(given, expected,
                                              "Your function returned",
                                              "But the test expected")

@@ -149,9 +149,9 @@ class CustomPrettyPrinter(pprint.PrettyPrinter):
 def format_page_content(content, width=80):
     try:
         custom_pretty_printer = CustomPrettyPrinter(indent=DIFF_INDENT_WIDTH, width=width)
-        return custom_pretty_printer.pformat(content)
+        return custom_pretty_printer.pformat(content), True
     except Exception as e:
-        return safe_repr(content)
+        return safe_repr(content), False
 
 
 def extract_button_label(full_key: str):
@@ -210,7 +210,10 @@ class VisitedPage:
     def update(self, new_status, original_page_content=None):
         self.status = new_status
         if original_page_content is not None:
-            self.original_page_content = html.escape(format_page_content(original_page_content, 120))
+            content, normal_mode = format_page_content(original_page_content, 120)
+            if normal_mode:
+                content = html.escape(content)
+            self.original_page_content = content
 
     def finish(self, new_status):
         self.status = new_status
