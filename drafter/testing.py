@@ -73,6 +73,8 @@ if bakery is not None:
 else:
     def assert_equal(*args, **kwargs):
         """ Pointless definition of assert_equal to avoid errors """
+        print("The Bakery testing library is not installed; skipping assert_equal tests. "
+              "To fix this, you can install Bakery with 'pip install bakery' or use a different testing framework.")
 
 
 DIFF_INDENT_WIDTH = 1
