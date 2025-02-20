@@ -64,8 +64,8 @@ class RawFiles:
 
             for category, files in categories.items():
                 for filename, raw in files.items():
-                    converted = base64.b64encode(gzip.compress(raw.encode())).decode("utf-8")
-                    f.write(f"RAW_FILES['{theme}'].{category}['{filename}'] = '{converted}'\n")
+                    #converted = base64.b64encode(gzip.compress(raw.encode())).decode("utf-8")
+                    f.write(f"RAW_FILES['{theme}'].{category}['{filename}'] = {json.dumps(raw)}\n")
                     raw_file_count += 1
 
         f.write("\n")
@@ -82,8 +82,8 @@ def get_raw_files(theme):
         return None
     return RawFiles(
         RAW_FILES[theme].metadata,
-        {k: f"<script>{extract(v)}</script>" for k, v in RAW_FILES[theme].scripts.items()},
-        {k: f"<style>{extract(v)}</style>" for k, v in RAW_FILES[theme].styles.items()},
+        {k: f"<script>{v}</script>" for k, v in RAW_FILES[theme].scripts.items()},
+        {k: f"<style>{v}</style>" for k, v in RAW_FILES[theme].styles.items()},
     )
 
 def get_themes():
