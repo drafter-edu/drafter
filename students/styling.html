@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Styling &#8212; Drafter 1.6.3 documentation</title>
+    <title>Styling &#8212; Drafter 1.7.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=452006c5"></script>
+    <script src="../_static/documentation_options.js?v=030dc6f6"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -56,7 +56,7 @@
         <li class="right" >
           <a href="html.html" title="HTML"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.6.3 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.7.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Styling</a></li> 
       </ul>
@@ -537,17 +537,24 @@ directly after your imports for clarity.</p>
 <section id="changing-themes">
 <span id="id2"></span><h2>Changing Themes<a class="headerlink" href="#changing-themes" title="Link to this heading">¶</a></h2>
 <p>Drafter ships with a default theme called <code class="docutils literal notranslate"><span class="pre">skeleton</span></code>. You can change the theme by using the
-<code class="docutils literal notranslate"><span class="pre">set_website_style</span></code> function. There are currently only three theme options.</p>
+<code class="docutils literal notranslate"><span class="pre">set_website_style</span></code> function. There are currently a few different options.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="set_website_style">
 <span class="sig-name descname"><span class="pre">set_website_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#set_website_style" title="Link to this definition">¶</a></dt>
 <dd><p>Sets the website style to the specified theme. The theme must be one of the following:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">skeleton</span></code>: The default theme, which is a simple, clean theme that does not require additional CSS classes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">skeleton</span></code>: The default theme, which is a simple, clean theme that does not require additional CSS classes. Check &lt;<a class="reference external" href="http://getskeleton.com/">http://getskeleton.com/</a>&gt; for more information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mvp</span></code>: Check out &lt;<a class="reference external" href="http://andybrewer.github.io/mvp/">http://andybrewer.github.io/mvp/</a>&gt; for more information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sakura</span></code>: Check out &lt;<a class="reference external" href="https://oxal.org/projects/sakura/">https://oxal.org/projects/sakura/</a>&gt; for more information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">simple</span></code>: Check out &lt;<a class="reference external" href="https://simplecss.org/">https://simplecss.org/</a>&gt; for more information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tacit</span></code>: Check out &lt;<a class="reference external" href="https://yegor256.github.io/tacit/">https://yegor256.github.io/tacit/</a>&gt; for more information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">98</span></code>: A theme based on Windows 98. Check out &lt;<a class="reference external" href="https://www.98.css">https://www.98.css</a>&gt; for more information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">XP</span></code>: A theme based on Windows XP. Check out &lt;<a class="reference external" href="http://botoxparty.github.io/XP.css/">http://botoxparty.github.io/XP.css/</a>&gt; for more information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">7</span></code>: A theme based on Windows 7. Check out &lt;<a class="reference external" href="http://khang-nd.github.io/7.css/">http://khang-nd.github.io/7.css/</a>&gt; for more information.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">bootstrap</span></code>: A more complex theme that requires additional CSS classes to style components.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">none</span></code>: Disables the default theme, allowing you to style everything yourself.</p></li>
 </ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;bootstrap&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;mvp&quot;</span><span class="p">)</span>
 <span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;skeleton&quot;</span><span class="p">)</span>
 <span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
 </pre></div>
@@ -691,7 +698,7 @@ directly after your imports for clarity.</p>
         <li class="right" >
           <a href="html.html" title="HTML"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.6.3 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.7.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Styling</a></li> 
       </ul>
