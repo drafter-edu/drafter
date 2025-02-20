@@ -7,17 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.6.3] - 2025-02-20
+## [1.7.0] - 2025-02-20
 
+### Added
+
+* There are now a bunch more themes available (`sakura`, `tacit`, `XP`, and more).
+* The deployment URLs for Skulpt and its associated files can now be overridden
+* 
 ### Fixed
 
 * Deployed sites were not correctly escaping HTML entities for generated tests
 * Fixed an issue where the configuration parameters were not being accepted via start_server
 * Slightly better error message when the Bakery library is not found, and assert_equal is used
+* Theme architecture is more flexible and dynamically based off `libs/manifest.json`
 
-### Added
-
-* The deployment URLs for Skulpt and its associated files can now be overridden
 
 ## [1.6.2] - 2024-12-09
 

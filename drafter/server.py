@@ -20,6 +20,7 @@ from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, Convers
 from drafter.page import Page
 from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, \
     TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
+from drafter.raw_files import get_raw_files, get_themes
 from drafter.urls import remove_url_query_params
 from drafter.image_support import HAS_PILLOW, PILImage
 
@@ -686,11 +687,18 @@ class Server:
         """
         content = f"<div class='btlw'>{content}</div>"
         style = self.configuration.style
-        if style in INCLUDE_STYLES:
-            scripts = "\n".join(INCLUDE_STYLES[style]['scripts'])
-            styles = "\n".join(INCLUDE_STYLES[style]['styles'])
-        else:
-            raise ValueError(f"Unknown style {style}. Please choose from {', '.join(INCLUDE_STYLES.keys())}, or add a custom style tag with add_website_header.")
+        global_files = get_raw_files("global")
+        style_files = get_raw_files(style)
+        if style_files is None:
+            possible_themes = ", ".join(get_themes())
+            raise ValueError(f"Unknown style {style}. Please choose from {possible_themes}, or add a custom style tag with add_website_header.")
+
+        scripts = "\n".join([*global_files.scripts.values(), *style_files.scripts.values()])
+        styles = "\n".join([*global_files.styles.values(), *style_files.styles.values()])
+        credit = "\n".join(c for c in [
+            style_files.metadata.get('credit', ''),
+            global_files.metadata.get('credit', ''),
+        ] if c)
         if self.configuration.additional_header_content:
             header_content = "\n".join(self.configuration.additional_header_content)
         else:
@@ -705,7 +713,8 @@ class Server:
         else:
             return TEMPLATE_200.format(
                 header=header_content, styles=styles, scripts=scripts, content=content,
-                title=html.escape(self.configuration.title))
+                title=html.escape(self.configuration.title),
+                credit=credit)
 
 
     def make_error_page(self, title, error, original_function, additional_details=""):
