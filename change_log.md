@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.3] - 2025-02-20
+
+### Fixed
+
+* Deployed sites were not correctly escaping HTML entities for generated tests
+* Fixed an issue where the configuration parameters were not being accepted via start_server
+* Slightly better error message when the Bakery library is not found, and assert_equal is used
+
+### Added
+
+* The deployment URLs for Skulpt and its associated files can now be overridden
+
 ## [1.6.2] - 2024-12-09
 
 ### Fixed
