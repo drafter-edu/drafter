@@ -1,6 +1,6 @@
 from os import path
 
-import setuptools
+import setuptools  # type: ignore
 
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
@@ -16,12 +16,19 @@ setuptools.setup(
     python_requires='>=3.7',
     author='acbart',
     packages=['drafter'],
+    package_data={
+        "drafter": ["py.typed"]
+    },
     #package_data={
     #    'websites': [] #'data/emojis.zip']
     #},
     author_email='acbart@udel.edu',
     description='Student-friendly full stack web development library.',
     install_requires=REQUIREMENTS,
+    extras_requires={
+        "plot": ["matplotlib"],
+        "images": ["Pillow"],
+    },
     license='MIT',
     long_description=long_description,
     long_description_content_type='text/markdown',

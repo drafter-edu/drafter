@@ -1,20 +1,23 @@
 from dataclasses import dataclass, is_dataclass
-from typing import Any
+from typing import Any, Callable, List, Tuple, Dict
 import inspect
+import html
 
 from drafter.constants import RESTORABLE_STATE_KEY, PREVIOUSLY_PRESSED_BUTTON
-from drafter.history import ConversionRecord, VisitedPage, format_page_content
+from drafter.history import ConversionRecord, VisitedPage, format_page_content, make_value_expandable, safe_repr
 from drafter.page import Page
 from drafter.urls import merge_url_query_params
 from drafter.testing import bakery, _bakery_tests, DIFF_WRAP_WIDTH, diff_tests
 from drafter.components import Table
+from drafter.configuration import ServerConfiguration
 
 @dataclass
 class DebugInformation:
-    page_history: list[tuple[VisitedPage, Any]]
+    page_history: List[Tuple[VisitedPage, Any]]
     state: Any
-    routes: dict[str, callable]
-    conversion_record: list[ConversionRecord]
+    routes: Dict[str, Callable]
+    conversion_record: List[ConversionRecord]
+    configuration: ServerConfiguration
 
     INDENTATION_START_HTML = "<div class='row'><div class='one column'></div><div class='eleven columns'>"
     INDENTATION_END_HTML = "</div></div>"
@@ -29,6 +32,7 @@ class DebugInformation:
             *self.available_routes(),
             *self.page_load_history(),
             *self.test_status(),
+            *self.test_deployment(),
             "</div>"
         ]
         return "\n".join(parts)
@@ -129,7 +133,8 @@ class DebugInformation:
                         status = "✅" if test_case.result else "❌"
                         yield f"<li>{status} Line {test_case.line}: <code>{test_case.caller}</code>"
                         if not test_case.result:
-                            given, expected = format_page_content(given, DIFF_WRAP_WIDTH), format_page_content(expected, DIFF_WRAP_WIDTH)
+                            given, given_normal_mode = format_page_content(given, DIFF_WRAP_WIDTH)
+                            expected, expected_normal_mode = format_page_content(expected, DIFF_WRAP_WIDTH)
                             yield diff_tests(given, expected,
                                              "Your function returned",
                                              "But the test expected")
@@ -137,10 +142,38 @@ class DebugInformation:
                 yield f"{self.INDENTATION_END_HTML}"
                 yield "</details>"
             else:
-                yield "<strong>No Tests</strong>"
+                yield "<div><strong>No Tests</strong></div>"
 
     def render_state(self, state):
         if is_dataclass(state):
             return str(Table(state))
         else:
-            return str(Table([[f"<code>{type(state).__name__}</code>", f"<code>{state}</code>"]]))
+            return str(Table([[
+                f"<code>{html.escape(type(state).__name__)}</code>",
+                f"<code>{safe_repr(state)}</code>"
+            ]]))
+
+    def test_deployment(self):
+        if self.configuration.skulpt:
+            yield "<strong>Configuration</strong>"
+            yield f"<p>Running on Skulpt.</p>"
+        else:
+            yield "<strong>Configuration</strong>"
+            yield f"<div>Running on {self.configuration.backend}.</div>"
+            yield f"""<details><summary>Configuration Details</summary><pre>
+Host: {self.configuration.host}
+Port: {self.configuration.port}
+Reloader: {self.configuration.reloader}
+Title: {self.configuration.title}
+Framed: {self.configuration.framed}
+Style: {self.configuration.style}
+src_image_folder: {self.configuration.src_image_folder}
+save_uploaded_files: {self.configuration.save_uploaded_files}
+deploy_image_path: {self.configuration.deploy_image_path}
+</pre></details>"""
+            yield "<a class='button' target=_blank href='--test-deployment'>Try Deployment</a><br><small>Loads the website in a new tab using the deployment settings. Note that this does not make the site externally available; it is useful for testing your website before publishing it on a service like GitHub Pages.</small>"
+
+    # TODO: Dump the current server configuration
+
+    def render_configuration(self):
+        pass

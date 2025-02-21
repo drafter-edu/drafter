@@ -74,7 +74,7 @@ def purchase(state: State, name: str) -> Page:
 
 
 start_server(State([
-    Item("Sword", 100, 3),
-    Item("Shield", 50, 5),
+    Item("Sword of Hope", 100, 3),
+    Item("John's Shield", 50, 5),
     Item("Potion", 25, 10)
 ], [], 200))

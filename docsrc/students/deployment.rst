@@ -54,7 +54,9 @@ When you click on the file, it will show you the contents of the file. You can e
 .. image:: images/deployment_github_edit.png
     :alt: Github Edit Main
 
-The editor area allows you to paste in your code. We recommend that you add the following lines of code to your project. This code must go below the `import drafter` line, but above the `start_server` line. As a matter of fact, `start_server` must always be on the last line in your code, because code below it will not run while your website is up.
+The editor area allows you to paste in your code. We recommend that you add the following lines of code to your project.
+They need to be after the import statements, but before the ``start_server(...)`` line.
+We suggest placing them right before your dataclasses and routes.
 
 .. code-block:: python
 
@@ -81,13 +83,18 @@ A box will appear that asks you to write a commit message.
 This is a message that describes the changes you made to the file.
 You can write anything you want here, but it is recommended to write something that describes the changes you made.
 For example, you could write ``Added website``. If you leave the default message, your instructor may penalize you.
+**Always write concise, descriptive messages!**
 
-Even if you just leave the default message, you must click on the ``Commit changes`` button to save your changes.
+Once you have changed the default message to be more descriptive, you must click on the ``Commit changes`` button to save your changes.
 
 .. image:: images/deployment_github_commit.png
     :alt: Github Commit
 
+If you have other files besides ``main.py``, then check the appendix at the bottom of this document for how to upload them: :ref:`appendix_upload_files`.
+
 .. _video:
+
+
 
 Record a Video
 --------------
@@ -161,7 +168,7 @@ Click on the pencil icon to edit the file. You will need to fill in the followin
 * What your web application does
 * Your name and UD email address
 * If you got significant help from a website besides the official Drafter documentation, include links along with explanations of how the site helped you. If someone helped you, this is also a nice place to mention them to thank them for their help. Make sure you provide direct URLs where ever you can.
-* The planning document that you created, provided as a file (see :ref:`planning_document` above). At the minimum, you need to link to the file by replacing the text in parentheses with the filename of your planning document (e.g., ``WebsiteDesign.pdf``). If your planning document is an image, you can also embed it directly in the readme by following one of the guides linked below.
+* The planning document that you created, provided as a file (see :ref:`planning_document` above). At the minimum, you need to link to the file by replacing the text in parentheses with the filename of your planning document (e.g., ``WebsiteDesign.pdf``). If your planning document is an image, you can also embed it directly in the readme by following one of the guides linked below. Note that you should not put `docs/` in front of the file URL, even though the file is in the `docs` folder; when we deploy your site, we'll fix the URL for you.
 * The URL (address) of the publicly-accessible video (see :ref:`video` above) that you uploaded, replacing the existing text inside of the angle brackets (``<https://my.video.com/>``) with the URL of your video.
 
 .. image:: images/deployment_github_editme.png
@@ -220,6 +227,9 @@ In this particular case, the error is simple - the developer forgot to turn on t
 If you see an error, you can try to fix it and push the changes to the repository.
 The website will automatically redeploy when you push changes to the repository, and you can check the progress of the new attempt in the Actions tab again.
 
+You can also get more details about the deployment from the deployment dashboard (see :ref:`deployment_dashboard`).
+Unless there is a catastrophic error (e.g., you didn't enable GitHub Pages), you should be able to see the dashboard.
+
 View the Readme
 ---------------
 
@@ -233,6 +243,22 @@ Take your original deployment URL (e.g., ``https://ud-s24-cs1.github.io/cs1-webs
 Make sure that all of the links work and that the video is visible and audible.
 There should be six sections in the readme: website name, description, author, help resources used, planning document, and video.
 
+.. _deployment_dashboard:
+
+Deployment Dashboard
+--------------------
+
+Whether your deployment succeeds or fails, there will be a lot of useful information available in the deployment dashboard.
+
+Take your original deployment URL (e.g., ``https://ud-s24-cs1.github.io/cs1-website-username/``) and add ``dashboard/`` to the end of it (e.g., ``https://ud-s24-cs1.github.io/cs1-website-username/dashboard/``).
+
+.. image:: images/deployment_dashboard.png
+    :alt: Deployment Dashboard
+
+If there was an error or warning during deployment, that will be shown at the top.
+Then there are quick links to things like the deployed site, the github deployment logs, the GitHub repository, commit messages, and your tests.
+At the bottom you will see your Build Log, which includes all the steps that Drafter took to deploy your site.
+
 .. _submit_on_canvas:
 
 Submit on Canvas
@@ -243,6 +269,32 @@ Submit on Canvas
 Make sure that you submit the **deployed URL** of your website, which will look something like this: ``https://ud-s24-cs1.github.io/cs1-website-username/``.
 
 .. warning::
-    Do not the submit the deployed URL with the ``docs/`` extension or the link to the GitHub repository (e.g., ``https://github.com/ud-s24-cs1/cs1-website-username``). Submitting the wrong link will potentially earn you zero points.
+    Do not the submit the deployed URL with the ``docs/`` extension or the link to the GitHub repository (e.g., ``https://github.com/ud-s24-cs1/cs1-website-username``). Also do not submit the original `https://localhost:8080` link; that URL only works on your computer while the program is running locally, so it will not work on other peoples' machine. Test the link after you submit, from another device. Submitting the wrong link will potentially earn you zero points!
 
 
+.. _appendix_upload_files:
+
+Appendix: Uploading Files
+-------------------------
+
+If you have files other than ``main.py`` that you need to upload to your website, you can follow these steps.
+
+1. Go to the ``Code`` tab and click on the ``website`` folder.
+2. Click on the ``Add file`` button and then ``Upload files`` to select the file from your computer.
+3. Once they have been added ("staged"), you can click on the ``Commit changes`` button to save your changes. Make sure you write a descriptive commit message!
+
+If you have multiple files, you can upload them all at once by dragging them into the folder area.
+
+Note that you need to upload files to the ``website`` folder, not the ``docs`` folder. The ``docs`` folder is only for the planning document.
+
+If you are using additional Python libraries, you can include a ``requirements.txt`` file in the ``website`` folder to list the libraries you are using.
+This file should be uploaded in the same way as other files.
+However, not all third-party libraries are supported on the deployed version of Drafter, so you should check with your instructor before using them.
+
+Common Errors
+-------------
+
+* **Files not linked correctly in Readme**:
+    * Make sure that all of the links in your readme are correct. If you are linking to a file in the ``docs`` folder, you should not include ``docs/`` in the URL. If you are linking to a video, make sure that the video is publicly accessible.
+* **Deployment fails**:
+    * If your deployment fails, you can check the logs in the Actions tab to see what went wrong. Common errors include not enabling GitHub Pages, not uploading the correct files, or having a syntax error in your code.

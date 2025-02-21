@@ -1,3 +1,4 @@
+from typing import Any, Tuple, Dict
 import re
 from urllib.parse import urlencode, urlparse, parse_qs, quote_plus
 
@@ -33,7 +34,7 @@ def remove_url_query_params(url: str, params_to_remove: set) -> str:
     return url_components._replace(query=updated_query).geturl()
 
 
-def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
+def remap_attr_styles(attributes: dict) -> Tuple[dict, dict]:
     """
     Remaps attributes into styles and attributes dictionaries. This is useful for handling style and class attributes.
     The 'classes' key's vales will be moved to 'class' and joined with a space. Any key prefixed with 'style_' will be
@@ -42,7 +43,8 @@ def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
     :param attributes: The attributes to remap
     :return: A tuple of the styles and attributes dictionaries
     """
-    styles, attrs = {}, {}
+    styles: Dict[str, Any] = {}
+    attrs: Dict[str, Any] = {}
     # Handle classes keyword
     if 'classes' in attributes:
         attributes['class'] = attributes.pop('classes')

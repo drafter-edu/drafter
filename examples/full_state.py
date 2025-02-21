@@ -1,6 +1,7 @@
 from drafter import *
 from dataclasses import dataclass
-from bakery import assert_equal
+
+set_website_style('none')
 
 @dataclass
 class State:
@@ -13,8 +14,8 @@ def index(state: State) -> Page:
         "The message is:",
         state.message,
         Button("Change the Message", change_message),
-        "Are you okay seeing pictures of dogs?",
-        CheckBox("are_dogs_okay", state.likes_dogs),
+        Row("Are you okay seeing pictures of dogs?",
+        CheckBox("are_dogs_okay", state.likes_dogs)),
         "You can use the button below to go see a picture",
         Button("View the picture", view_picture)
     ])

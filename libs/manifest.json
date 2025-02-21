@@ -1,0 +1,79 @@
+{
+  "global": {
+    "metadata": {
+    },
+    "scripts": [
+        "global.js"
+    ],
+    "styles": [
+      "diff.css",
+      "global.css"
+    ]
+  },
+  "skeleton": {
+    "metadata": {
+      "credit": "<a href='http://getskeleton.com/' target='_blank'>Skeleton</a> by Dave Gamache"
+    },
+    "styles": [
+        "skeleton.css"
+    ]
+  },
+  "98": {
+    "metadata": {
+      "credit": "<a href='http://www.98.css' target='_blank'>98.css</a> by <code>jdan</code>"
+    },
+    "styles": [
+        "98.css"
+    ]
+  },
+  "XP": {
+    "metadata": {
+      "credit": "<a href='http://botoxparty.github.io/XP.css/' target='_blank'>XP.css</a> by <code>botoxparty</code>"
+    },
+    "styles": [
+        "XP.css"
+    ]
+  },
+  "7": {
+    "metadata": {
+      "credit": "<a href='http://khang-nd.github.io/7.css/' target='_blank'>7.css</a> by <code>khang-nd</code>"
+    },
+    "styles": [
+        "7.css"
+    ]
+  },
+  "mvp": {
+    "metadata": {
+      "credit": "<a href='http://andybrewer.github.io/mvp/' target='_blank'>MVP.css</a> by <code>andybrewer</code>"
+    },
+    "styles": [
+        "mvp.css"
+    ]
+  },
+  "sakura": {
+    "metadata": {
+      "credit": "<a href='https://oxal.org/projects/sakura/' target='_blank'>Sakura</a> by <code>oxal</code>"
+    },
+    "styles": [
+        "sakura.css"
+    ]
+  },
+  "simple": {
+    "metadata": {
+      "credit": "<a href='https://simplecss.org/' target='_blank'>Simple.css</a> by <code>kevquirk</code>"
+    },
+    "styles": [
+        "simple.min.css"
+    ]
+  },
+  "tacit": {
+    "metadata": {
+      "credit": "<a href='https://yegor256.github.io/tacit/' target='_blank'>Tacit</a> by <code>yegor256</code>"
+    },
+    "styles": [
+        "tacit.css"
+    ]
+  },
+  "none": {
+  }
+}

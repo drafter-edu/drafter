@@ -5,8 +5,170 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [Unreleased]
+
+## [1.7.0] - 2025-02-20
+
+### Added
+
+* There are now a bunch more themes available (`sakura`, `tacit`, `XP`, and more).
+* The deployment URLs for Skulpt and its associated files can now be overridden
+* 
+### Fixed
+
+* Deployed sites were not correctly escaping HTML entities for generated tests
+* Fixed an issue where the configuration parameters were not being accepted via start_server
+* Slightly better error message when the Bakery library is not found, and assert_equal is used
+* Theme architecture is more flexible and dynamically based off `libs/manifest.json`
+
+
+## [1.6.2] - 2024-12-09
+
+### Fixed
+
+* The options for a `SelectBox` are forced into strings, before they are escaped.
+
+## [1.6.1] - 2024-12-08
+
+### Fixed
+
+* Using utcnow() instead of now() (credit to @crsommers)
+* Refactored `Div` and `Span` slightly (credit to @crsommers)
+* Fixed issue with escaping of tags in `VisitedPage`
+* Fixed issue with dropdowns not properly escaping the option
+* Fixed issue with non-button related values being passed incorrectly
+
+## [1.6.0] - 2024-12-02
+
+### Added
+
+* Can now test deployments with the `deploy` button, which will open a new tab with the deployed site using Skulpt
+* Configuration information is now shown on the debug page at the bottom, along with the deploy button.
+* Components that have names will now validate the name to ensure it is a valid Python variable name, and show an error.
+* Slightly more information is shown on the error page when parameter conversion fails.
+
+### Fixed
+
+* MatPlotLibPlot now has correct fields
+* Arguments for Buttons can now have non-html-safe characters
+
+## [1.5.7] - 2024-11-24
+
+### Fixed
+
+* Circular references in the State now throw an error, instead of just causing an infinite loop.
+* Fixed a bug with the `safe_repr` function incorrectly marking objects that show up multiple times as circular, even if they are in sibling structures.
+
+## [1.5.6] - 2024-11-15
+
+### Fixed
+
+* Fixed a few components (`MatPlotLibPlot`, `FileUpload`, and `Text`) not rendering correctly in test cases due to not being dataclasses.
+* Fixed an issue with an incorrect import (glob) appearing somehow
+* Fixed an issue where `memoryview` was being serialized in the `safe_repr` function
+
+## [1.5.5] - 2024-11-12
+
+### Fixed
+
+* Fixed an error with `Argument` values that had quotes, not being escaped properly. Thanks new unit tests!
+
+## [1.5.4] - 2024-11-12
+
+### Added
+
+* The `set_website_style` now accepts `None` in addition to `"none"` to remove the style
+* Provide `get_main_server` and `set_main_server` functions to manipulate the global server (mostly for testing purposes).
+
+### Fixed
+
+* Improved documentation for styling features
+
+## [1.5.3] - 2024-11-7
+
+### Added
+
+* The `add_website_css` function now allows a single string (just the CSS) instead of the selector/CSS pair
+
+## [1.5.2] - 2024-10-29
+
+### Fixed
+
+* Force text boxes, text areas, and other input components to `str` their default value (when provided) and escape it for html
+
+## [1.5.1] - 2024-10-29
+
+### Fixed
+
+* Fixed other input components' values not being properly escaped
+* Fixed a bug with `Span` and `Div` components not properly being `repr`ed
+
+## [1.5.0] - 2024-10-24
+
+### Added
+
+* Provide `Picture` class to prevent name collisions with `Image` class and `Pillow` module
+* Provide `new` and `open` methods in `Image` that shadow the `Pillow` module's versions.
+* Provide `UploadedFile` class to represent uploaded files in unit tests and the State.
+
+### Fixed
+
+* Fixed a bug with `Button`s not properly escaping data (including unicode emojis).
+
+## [1.4.2] - 2024-10-15
+
+### Fixed
+
+* Added a `hacks.py` module to make the `MatPlotLibPlot` component work in Skulpt
+
+## [1.4.1] - 2024-10-10
+
+### Added
+
+* Improved output for very long strings of text, allowing them to be collapsed
+
+## [1.4.0] - 2024-09-14
+
+### Added
+
+* Added a "reset" button in the topright corner to reset the state and clear out the old history
+* Can now have Pillow images in State
+* Proper file handling support; this changes buttons to now POST requests instead
+* Added `Row` component, `Pre`/`PreformattedText` components
+
+### Fixed
+
+* When outputing the current state, properly escape angle brackets
+* You can now add styles and attributes to `Div` and `Span` components
+
+## [1.3.1] - 2024-08-05
+
+### Added
+
+* The `Image` component now supports PIL images
+* The `Download` component also supports PIL images being provided as the `contents`
+
+### Fixed
+
+* Now passing Mypy checks (although we had to silence Bakery and Bottle)
+
+## [1.3.0] - 2024-08-05
+
+### Added
+
+* New `Download` component to allow for downloading user generated files.
+
+## [1.2.2] - 2024-07-27
+
+### Added
+
+* Declared the package as providing types
+
+## [1.2.1] - 2024-07-14
+
+### Added
+
+* Added a `MatPlotLibPlot` component to display MatPlotLib plots in the browser
 
 ## [1.2.0] - 2024-05-05
 

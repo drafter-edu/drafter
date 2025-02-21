@@ -106,7 +106,9 @@ def change_background_color(component: PageContent, color: str) -> PageContent:
     return update_style(component, 'background-color', color)
 
 
-def change_text_size(component: PageContent, size: str) -> PageContent:
+def change_text_size(component: PageContent, size: Union[str, int]) -> PageContent:
+    if isinstance(size, int):
+        size = f'{size}px'
     return update_style(component, 'font-size', size)
 
 

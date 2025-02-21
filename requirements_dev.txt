@@ -20,3 +20,13 @@ sphinx-autobuild
 sphinx-tabs
 tqdm
 twine
+
+matplotlib
+mypy
+pillow
+
+pytest
+splinter[selenium]
+pytest-splinter
+pytest-cov
+WebTest
