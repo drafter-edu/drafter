@@ -78,7 +78,7 @@ Components
     If you know the exact size of the image, you can specify it with the `width` and `height` parameters. Otherwise,
     the page may resize while the image is being loaded.
 
-    :param url: The URL of the image.
+    :param url: The URL of the image, or filename of the image as a string (in quotes) if it is in the same folder as the code.
     :type url: str
     :param width: The width of the image, in pixels. Defaults to `None`, which will use the image's default width.
     :type width: int
