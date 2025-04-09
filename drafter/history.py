@@ -6,14 +6,17 @@ import io
 from urllib.parse import unquote
 from dataclasses import dataclass, is_dataclass, replace, asdict, fields
 from dataclasses import field as dataclass_field
-from datetime import datetime, UTC as timezone_UTC
-from typing import Any, Optional, Callable
+from datetime import timezone, timedelta, datetime
+from typing import Any, Optional, Callable, Dict
 import pprint
 
 from drafter.constants import LABEL_SEPARATOR, JSON_DECODE_SYMBOL
 from drafter.setup import request
 from drafter.testing import DIFF_INDENT_WIDTH
 from drafter.image_support import HAS_PILLOW, PILImage
+
+
+timezone_UTC = timezone(timedelta(0))
 
 
 TOO_LONG_VALUE_THRESHOLD = 256
@@ -146,36 +149,49 @@ class CustomPrettyPrinter(pprint.PrettyPrinter):
 def format_page_content(content, width=80):
     try:
         custom_pretty_printer = CustomPrettyPrinter(indent=DIFF_INDENT_WIDTH, width=width)
-        return custom_pretty_printer.pformat(content)
+        return custom_pretty_printer.pformat(content), True
     except Exception as e:
-        return safe_repr(content)
+        return safe_repr(content), False
 
 
 def extract_button_label(full_key: str):
     if LABEL_SEPARATOR not in full_key:
-        return full_key, None
+        return None, full_key
     button_pressed, key = full_key.split(LABEL_SEPARATOR, 1)
     button_pressed = json.loads(unquote(button_pressed))
     return button_pressed, key
 
 
+def add_unless_present(a_dictionary, key, value, from_button=False):
+    if key in a_dictionary:
+        base_message = f"Parameter {key!r} with new value {value!r} already exists in {a_dictionary!r}"
+        if from_button:
+            raise ValueError(f"{base_message}. Did you have a button with the same name as another component?")
+        else:
+            raise ValueError(f"{base_message}. Did you have a component with the same name as another component?")
+    a_dictionary[key] = value
+    return a_dictionary
+
+
 def remap_hidden_form_parameters(kwargs: dict, button_pressed: str):
-    renamed_kwargs = {}
+    renamed_kwargs: Dict[Any, Any] = {}
     for key, value in kwargs.items():
         possible_button_pressed, possible_key = extract_button_label(key)
         if button_pressed and possible_button_pressed == button_pressed:
             try:
-                renamed_kwargs[possible_key] = json.loads(value)
+                new_value = json.loads(value)
             except json.JSONDecodeError as e:
                 raise ValueError(f"Could not decode JSON for {possible_key}={value!r}") from e
+            add_unless_present(renamed_kwargs, possible_key, new_value, from_button=True)
         elif key.startswith(JSON_DECODE_SYMBOL):
             key = key[len(JSON_DECODE_SYMBOL):]
             try:
-                renamed_kwargs[key] = json.loads(value)
+                new_value = json.loads(value)
             except json.JSONDecodeError as e:
                 raise ValueError(f"Could not decode JSON for {key}={value!r}") from e
+            add_unless_present(renamed_kwargs, key, new_value)
         elif LABEL_SEPARATOR not in key:
-            renamed_kwargs[key] = value
+            add_unless_present(renamed_kwargs, key, value)
     return renamed_kwargs
 
 
@@ -194,7 +210,10 @@ class VisitedPage:
     def update(self, new_status, original_page_content=None):
         self.status = new_status
         if original_page_content is not None:
-            self.original_page_content = html.escape(format_page_content(original_page_content, 120))
+            content, normal_mode = format_page_content(original_page_content, 120)
+            if normal_mode:
+                content = html.escape(content)
+            self.original_page_content = content
 
     def finish(self, new_status):
         self.status = new_status

@@ -17,8 +17,11 @@ class MyWSGIRefServer(ServerAdapter):
 
     def stop(self):
         self.server.server_close()
+        self.server.shutdown()
 
 class TestServer:
+    __test__ = False
+
     def __init__(self, initial_state=None, setup_kwargs=None,
                  run_kwargs=None, custom_name="TEST_SERVER"):
         if setup_kwargs is None:

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable
+from typing import Any, Callable, List, Tuple, Dict
 import inspect
 import html
 
@@ -13,10 +13,10 @@ from drafter.configuration import ServerConfiguration
 
 @dataclass
 class DebugInformation:
-    page_history: list[tuple[VisitedPage, Any]]
+    page_history: List[Tuple[VisitedPage, Any]]
     state: Any
-    routes: dict[str, Callable]
-    conversion_record: list[ConversionRecord]
+    routes: Dict[str, Callable]
+    conversion_record: List[ConversionRecord]
     configuration: ServerConfiguration
 
     INDENTATION_START_HTML = "<div class='row'><div class='one column'></div><div class='eleven columns'>"
@@ -133,7 +133,8 @@ class DebugInformation:
                         status = "✅" if test_case.result else "❌"
                         yield f"<li>{status} Line {test_case.line}: <code>{test_case.caller}</code>"
                         if not test_case.result:
-                            given, expected = format_page_content(given, DIFF_WRAP_WIDTH), format_page_content(expected, DIFF_WRAP_WIDTH)
+                            given, given_normal_mode = format_page_content(given, DIFF_WRAP_WIDTH)
+                            expected, expected_normal_mode = format_page_content(expected, DIFF_WRAP_WIDTH)
                             yield diff_tests(given, expected,
                                              "Your function returned",
                                              "But the test expected")

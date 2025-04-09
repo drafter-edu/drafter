@@ -1,7 +1,6 @@
+import unittest
 from drafter import *
 from dataclasses import dataclass
-
-set_website_style('none')
 
 @dataclass
 class State:
@@ -14,8 +13,8 @@ def index(state: State) -> Page:
         "The message is:",
         state.message,
         Button("Change the Message", change_message),
-        Row("Are you okay seeing pictures of dogs?",
-        CheckBox("are_dogs_okay", state.likes_dogs)),
+        "Are you okay seeing pictures of dogs?",
+        CheckBox("are_dogs_okay", state.likes_dogs),
         "You can use the button below to go see a picture",
         Button("View the picture", view_picture)
     ])
@@ -49,8 +48,11 @@ def view_picture(state: State, are_dogs_okay: bool) -> Page:
     ])
 
 
-assert_equal(index(State("My message", True)),
-             Page(State("My message", True), [
+class TestFullState(unittest.TestCase):
+    def test_full_state(self):
+        self.assertEqual(
+            index(State("My message", True)),
+            Page(State("My message", True), [
                 "The message is:",
                 "My message",
                 Button("Change the Message", change_message),
@@ -58,10 +60,13 @@ assert_equal(index(State("My message", True)),
                 CheckBox("are_dogs_okay", True),
                 "You can use the button below to go see a picture",
                 Button("View the picture", view_picture)
-             ]))
+            ])
+        )
 
-assert_equal(set_the_message(State("My message", True), "New message"),
-             Page(State("New message", True), [
+    def test_set_the_message(self):
+        self.assertEqual(
+            set_the_message(State("My message", True), "New message"),
+            Page(State("New message", True), [
                 "The message is:",
                 "New message",
                 Button("Change the Message", change_message),
@@ -69,6 +74,10 @@ assert_equal(set_the_message(State("My message", True), "New message"),
                 CheckBox("are_dogs_okay", True),
                 "You can use the button below to go see a picture",
                 Button("View the picture", view_picture)
-             ]))
+            ])
+        )
+
+if __name__ == "__main__":
+    unittest.main()
 
 start_server(State("The original message", True))

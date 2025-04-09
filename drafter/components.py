@@ -1,5 +1,5 @@
 from dataclasses import dataclass, is_dataclass, fields
-from typing import Any, Union, Optional
+from typing import Any, Union, Optional, List, Dict, Tuple
 import io
 import base64
 # from urllib.parse import quote_plus
@@ -30,6 +30,20 @@ BASE_PARAMETER_ERROR = ("""The {component_type} name must be a valid Python iden
                         """underscores (_). A valid identifier cannot start with a number, or contain any spaces.""")
 
 def validate_parameter_name(name: str, component_type: str):
+    """
+    Validates a parameter name to ensure it adheres to Python's identifier naming rules.
+    The function verifies if the given name is a string, non-empty, does not contain spaces,
+    does not start with a digit, and is a valid Python identifier. Additionally, it ensures
+    the name starts with a letter or an underscore. Raises a `ValueError` with a detailed
+    error message if validation fails.
+
+    :param name: The name to validate.
+    :type name: str
+    :param component_type: Describes the type of component associated with the parameter.
+    :type component_type: str
+    :raises ValueError: If `name` is not a string, is empty, contains spaces, starts with a
+        digit, does not start with a letter or underscore, or is not a valid identifier.
+    """
     base_error = BASE_PARAMETER_ERROR.format(component_type=component_type)
     if not isinstance(name, str):
         raise ValueError(base_error + f"\n\nReason: The given name `{name!r}` is not a string.")
@@ -59,13 +73,39 @@ class PageContent:
 
     This class also has some helpful methods for verifying URLs and handling attributes/styles.
     """
-    EXTRA_ATTRS: list[str] = []
+    EXTRA_ATTRS: List[str] = []
     extra_settings: dict
 
     def verify(self, server) -> bool:
+        """
+        Verify the status of this component. This method is called before rendering the component
+        to ensure that the component is in a valid state. If the component is not valid, this method
+        should return False.
+
+        Default implementation returns True.
+
+        :param server: The server object that is rendering the component
+        :return: True if the component is valid, False otherwise
+        """
         return True
 
     def parse_extra_settings(self, **kwargs):
+        """
+        Parses and combines extra settings into valid attribute and style formats.
+
+        This method processes additional configuration settings provided via arguments or stored
+        in the `extra_settings` property, converts them into valid HTML attributes and styles,
+        and then consolidates the processed values into the appropriate output format. Attributes
+        not explicitly defined in the baseline or extra attribute lists are converted into inline
+        style declarations.
+
+        :param kwargs: Arbitrary keyword arguments containing extra configuration settings to be
+            applied or overridden. The keys represent attribute or style names, and the values
+            represent their corresponding values.
+        :return: A string containing formatted HTML attributes along with an inline style block
+            if any styles are provided.
+        :rtype: str
+        """
         extra_settings = self.extra_settings.copy()
         extra_settings.update(kwargs)
         raw_styles, raw_attrs = remap_attr_styles(extra_settings)
@@ -84,30 +124,113 @@ class PageContent:
         return result
 
     def update_style(self, style, value):
+        """
+        Updates the style of a specific setting and stores it in the
+        extra_settings dictionary with a key formatted as "style_{style}".
+
+        :param style: The key representing the style to be updated
+        :type style: str
+        :param value: The value to associate with the given style key
+        :type value: Any
+        :return: Returns the instance of the object after updating the style
+        :rtype: self
+        """
         self.extra_settings[f"style_{style}"] = value
         return self
 
     def update_attr(self, attr, value):
+        """
+        Updates a specific attribute with the given value in the extra_settings dictionary.
+
+        This method modifies the `extra_settings` dictionary by setting the specified
+        attribute to the given value. It returns the instance of the object, allowing
+        for method chaining. No validation is performed on the input values, so they
+        should conform to the expected structure or constraints of the `extra_settings`.
+
+        :param attr: The key of the attribute to be updated in the dictionary.
+        :type attr: str
+        :param value: The value to set for the specified key in the dictionary.
+        :type value: Any
+        :return: The instance of the object after the update.
+        :rtype: Self
+        """
         self.extra_settings[attr] = value
         return self
 
     def render(self, current_state, configuration):
+        """
+        This method is called when the component is being rendered to a string. It should return
+        the HTML representation of the component, using the current State and configuration to
+        determine the final output.
+
+        :param current_state: The current state of the component
+        :type current_state: Any
+        :param configuration: The configuration settings for the component
+        :type configuration: Configuration
+        :return: The HTML representation of the component
+        """
         return str(self)
 
 
 Content = Union[PageContent, str]
 
 def make_safe_json_argument(value):
+    """
+    Converts the given value to a JSON-compatible string and escapes special
+    HTML characters, making it safe for inclusion in HTML contexts.
+
+    :param value: The input value to be converted and escaped. The value can
+        be of any type that is serializable to JSON.
+    :return: An HTML-safe JSON string representation of the input value.
+    """
     return html.escape(json.dumps(value), True)
 
 def make_safe_argument(value):
+    """
+    Encodes the given value into JSON format and escapes any special HTML
+    characters to ensure the argument is safe for use in HTML contexts.
+
+    This function is particularly useful in scenarios where you need
+    to serialize a Python object into JSON, while making sure that the
+    output is safe to insert into an HTML document, protecting against
+    potential HTML injection attacks.
+
+    :param value: Any Python object that needs to be converted to a
+        JSON string and HTML escaped.
+    :type value: Any
+    :return: A string containing the HTML-escaped and JSON-encoded
+        representation of the input value.
+    :rtype: str
+    """
     return html.escape(json.dumps(value), True)
 
 def make_safe_name(value):
+    """
+    This function takes a value as input and generates a safe string version of it by escaping
+    special characters to prevent injection attacks or unintended HTML rendering. It ensures that
+    the provided input is safely transformed into an escaped HTML string.
+
+    :param value: The input value to be escaped. It is converted to a string if it is not already.
+    :type value: Any
+    :return: The escaped HTML version of the input value as a string.
+    :rtype: str
+    """
     return html.escape(str(value))
 
 
 class LinkContent:
+    """
+    Represents content for a hyperlink.
+
+    This class encapsulates the URL and display text of a link.
+    It provides utility methods for verifying the URL, handling its structure,
+    and processing associated arguments.
+
+    :ivar url: The URL of the link.
+    :type url: str
+    :ivar text: The display text of the link.
+    :type text: str
+    """
     url: str
     text: str
 
@@ -198,7 +321,7 @@ class Link(PageContent, LinkContent):
 class Button(PageContent, LinkContent):
     text: str
     url: str
-    arguments: list[Argument]
+    arguments: List[Argument]
     external: bool = False
 
     def __init__(self, text: str, url: str, arguments=None, **kwargs):
@@ -325,13 +448,13 @@ class TextArea(PageContent):
 @dataclass
 class SelectBox(PageContent):
     name: str
-    options: list[str]
+    options: List[str]
     default_value: Optional[str]
 
-    def __init__(self, name: str, options: list[str], default_value: Optional[str] = None, **kwargs):
+    def __init__(self, name: str, options: List[str], default_value: Optional[str] = None, **kwargs):
         validate_parameter_name(name, "SelectBox")
         self.name = name
-        self.options = options
+        self.options = [str(option) for option in options]
         self.default_value = str(default_value) if default_value is not None else ""
         self.extra_settings = kwargs
 
@@ -340,9 +463,8 @@ class SelectBox(PageContent):
         if self.default_value is not None:
             extra_settings['value'] = html.escape(self.default_value)
         parsed_settings = self.parse_extra_settings(**extra_settings)
-        options = "\n".join(f"<option selected value='{option}'>{option}</option>"
-                            if option == self.default_value else
-                            f"<option value='{option}'>{option}</option>"
+        options = "\n".join(f"<option {'selected' if option == self.default_value else ''} "
+                            f"value='{html.escape(option)}'>{option}</option>"
                             for option in self.options)
         return f"<select name='{self.name}' {parsed_settings}>{options}</select>"
 
@@ -380,12 +502,12 @@ class HorizontalRule(PageContent):
 
 @dataclass
 class _HtmlGroup(PageContent):
-    content: list[Any]
-    extra_settings: dict
-    # kind: str = ''
+    content: List[Any]
+    extra_settings: Dict
+    kind: str
 
     def __init__(self, *args, **kwargs):
-        self.content = args
+        self.content = list(args)
         self.extra_settings = kwargs
 
     def __repr__(self):
@@ -446,10 +568,10 @@ class Row(Div):
 
 @dataclass
 class _HtmlList(PageContent):
-    items: list[Any]
+    items: List[Any]
     kind: str = ""
 
-    def __init__(self, items: list[Any], **kwargs):
+    def __init__(self, items: List[Any], **kwargs):
         self.items = items
         self.extra_settings = kwargs
 
@@ -478,9 +600,9 @@ class Header(PageContent):
 
 @dataclass
 class Table(PageContent):
-    rows: list[list[str]]
+    rows: List[List[str]]
 
-    def __init__(self, rows: list[list[str]], header=None, **kwargs):
+    def __init__(self, rows: List[List[str]], header=None, **kwargs):
         self.rows = rows
         self.header = header
         self.extra_settings = kwargs
@@ -619,7 +741,7 @@ class FileUpload(PageContent):
     That input is sent, but the file data is not sent directly.
 
     The accept field can be used to specify the types of files that can be uploaded.
-    It accepts either a literal string (e.g. "image/\*") or a list of strings (e.g. ["image/png", "image/jpeg"]).
+    It accepts either a literal string (e.g. "image/*") or a list of strings (e.g. ["image/png", "image/jpeg"]).
     You can either provide MIME types, extensions, or extensions without a period (e.g., "png", ".jpg").
 
     To have multiple files uploaded, use the `multiple` attribute, which will cause
@@ -628,7 +750,7 @@ class FileUpload(PageContent):
     name: str
     EXTRA_ATTRS = ["accept", "capture", "multiple", "required"]
 
-    def __init__(self, name: str, accept: Union[str, list[str], None] = None, **kwargs):
+    def __init__(self, name: str, accept: Union[str, List[str], None] = None, **kwargs):
         validate_parameter_name(name, "FileUpload")
         self.name = name
         self.extra_settings = kwargs

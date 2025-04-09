@@ -174,6 +174,9 @@ TEMPLATE_200 = """
     <body>
         {content}
         {scripts}
+        <footer style="text-align: center; margin-top: 1em;">
+        The theme for this page is: {credit}
+        </footer>
     </body>
 </html>
 """
@@ -213,6 +216,22 @@ TEMPLATE_404 = TEMPLATE_ERROR
 TEMPLATE_500 = TEMPLATE_ERROR
 
 def seek_file_by_line(line, missing_value=None):
+    """
+    Seeks and returns the filename of a source file by examining the stack trace for a line
+    matching the given string. This function allows looking into the recent call stack to
+    find where a specific line of code was executed. If no match is found, an optional
+    missing value can be returned.
+
+    :param line: The string to search for in the stack trace. It is compared with the
+        stripped contents of each entry in the stack trace.
+    :type line: str
+    :param missing_value: An optional value to return if no match is found in the stack
+        trace. Defaults to None.
+    :type missing_value: Any
+    :return: The filename associated with the supplied line in the stack trace if found,
+        or the missing_value if no match is located.
+    :rtype: str | None
+    """
     try:
         from traceback import extract_stack
         trace = extract_stack()
@@ -227,15 +246,16 @@ def seek_file_by_line(line, missing_value=None):
 TEMPLATE_SKULPT_DEPLOY = """
 <html>
     <head>
-        <script src="https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt.js" type="text/javascript"></script>
-        <script src="https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-stdlib.js" type="text/javascript"></script>
-        <script src="https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-drafter.js" type="text/javascript"></script>
+        <script src="{cdn_skulpt}" type="text/javascript"></script>
+        <script src="{cdn_skulpt_std}" type="text/javascript"></script>
+        <script src="{cdn_skulpt_drafter}" type="text/javascript"></script>
         <script
             src="https://code.jquery.com/jquery-3.7.1.min.js"
             integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
             crossorigin="anonymous"
         ></script>
         <script type="text/javascript">
+Sk.output = console.log;
 {website_code}
         </script>
     </head>
@@ -244,7 +264,7 @@ TEMPLATE_SKULPT_DEPLOY = """
 <div id="website">
 Loading...
 </div>
-        <script src="https://drafter-edu.github.io/drafter-cdn/skulpt/drafter-setup.js" type="text/javascript"></script>
+        <script src="{cdn_drafter_setup}" type="text/javascript"></script>
     </body>
 </html>
 """

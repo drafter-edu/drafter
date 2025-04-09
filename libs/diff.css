@@ -1,0 +1,16 @@
+table.diff {
+    font-family:Courier,serif;
+    border:medium;
+    margin-bottom: 4em;
+    width: 100%;
+}
+.diff_header {background-color:#e0e0e0}
+td.diff_header { text-align:right; }
+table.diff td {
+    padding: 0px;
+    border-bottom: 0px solid black;
+}
+.diff_next {background-color:#c0c0c0}
+.diff_add {background-color:#aaffaa}
+.diff_chg {background-color:#ffff77}
+.diff_sub {background-color:#ffaaaa}

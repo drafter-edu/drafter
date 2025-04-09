@@ -1,0 +1,32 @@
+div.btlw-debug .copy-button {
+     float: right;
+     cursor: pointer;
+     background-color: white;
+     padding: 4px;
+ }
+
+div.btlw-container {
+    padding: 1em;
+    border: 1px solid lightgrey;
+}
+
+div.btlw-header {
+    border: 1px solid lightgrey;
+    border-bottom: 0px;
+    background-color: #EEE;
+    padding-left: 1em;
+    font-weight: bold;
+}
+
+div.btlw-container img {
+    display: block;
+}
+
+div.btlw-header .btlw-reset {
+    float: right;
+    cursor: pointer;
+    background-color: white;
+    padding: 4px;
+    text-decoration: none;
+    color: black;
+}

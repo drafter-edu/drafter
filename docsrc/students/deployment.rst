@@ -37,6 +37,8 @@ Your site will now start deploying whenever you make a change. We can check the 
 Upload Your Website Code
 ------------------------
 
+Warning: if your instructor has requirements about commit messages, review those before doing this step. **Commit messages are very hard to change after the fact.** 
+
 3. Go to the ``Code`` tab and click on the ``website`` folder.
 
 .. image:: images/deployment_github_code.png
@@ -64,11 +66,13 @@ We suggest placing them right before your dataclasses and routes.
 
 These lines of code:
 
-1. Hide all of the debug information
+1. Hide all of the debug information - you may want to comment this line out while you do any debugging
 2. Set the title of the website in the tab
 3. Make the website stretch to fill the whole screen, instead of just the small box.
 
-There are many other ways to style your website, but these are a starting point.
+There are many other ways to style your website, but these are a starting point. 
+
+You can change the filename here, but your instructor may penalize you if you do so.
 
 When you are done, click on the ``Commit changes`` button in the top-right of the page.
 
@@ -78,7 +82,8 @@ When you are done, click on the ``Commit changes`` button in the top-right of th
 A box will appear that asks you to write a commit message.
 This is a message that describes the changes you made to the file.
 You can write anything you want here, but it is recommended to write something that describes the changes you made.
-For example, you could write ``Added website code``. **Always write concise, descriptive messages!**
+For example, you could write ``Added website``. If you leave the default message, your instructor may penalize you.
+**Always write concise, descriptive messages!**
 
 Once you have changed the default message to be more descriptive, you must click on the ``Commit changes`` button to save your changes.
 
@@ -185,6 +190,8 @@ This file is written in Markdown, which is a simple way to format text. You can 
 
 You can learn more about Markdown `from the Github Guide <https://guides.github.com/features/mastering-markdown/>`_ or the `MarkdownGuide <https://www.markdownguide.org/basic-syntax/>`_ .
 
+You should also add a section with a bulletted list in the ``readme.md`` document describing the project requirements and how you met them.
+
 When you are done, click on the ``Commit changes`` button to save your changes.
 
 .. _view_deployment:
@@ -221,6 +228,8 @@ In this particular case, the error is simple - the developer forgot to turn on t
 
 If you see an error, you can try to fix it and push the changes to the repository.
 The website will automatically redeploy when you push changes to the repository, and you can check the progress of the new attempt in the Actions tab again.
+
+The Actions section of the repository will list prior deploy attempts in chronological order. So, if you see past attempts with the red X, don't worry about it as long as the top (most recent) deploy attempt was successful. That's the one that matters. 
 
 You can also get more details about the deployment from the deployment dashboard (see :ref:`deployment_dashboard`).
 Unless there is a catastrophic error (e.g., you didn't enable GitHub Pages), you should be able to see the dashboard.
@@ -264,7 +273,7 @@ Submit on Canvas
 Make sure that you submit the **deployed URL** of your website, which will look something like this: ``https://ud-s24-cs1.github.io/cs1-website-username/``.
 
 .. warning::
-    Do not the submit the deployed URL with the ``docs/`` extension or the link to the GitHub repository (e.g., ``https://github.com/ud-s24-cs1/cs1-website-username``). Submitting the wrong link will potentially earn you zero points.
+    Do not the submit the deployed URL with the ``docs/`` extension or the link to the GitHub repository (e.g., ``https://github.com/ud-s24-cs1/cs1-website-username``). Also do not submit the original `https://localhost:8080` link; that URL only works on your computer while the program is running locally, so it will not work on other peoples' machine. Test the link after you submit, from another device. Submitting the wrong link will potentially earn you zero points!
 
 
 .. _appendix_upload_files:
