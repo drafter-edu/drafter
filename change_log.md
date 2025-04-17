@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.2] - 2025-04-17
+
+### Fixed
+
+* Div, Span, Pre, and Row components now properly handle both explicit keyword arguments and *args
+
 ## [1.7.1] - 2025-02-20
 
 ### Fixed
