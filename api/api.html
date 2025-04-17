@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Full API Documentation &#8212; Drafter 1.7.0 documentation</title>
+    <title>Full API Documentation &#8212; Drafter 1.7.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=030dc6f6"></script>
+    <script src="../_static/documentation_options.js?v=908dc885"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="../students/help.html" title="More Help"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.7.0 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.7.2 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>
@@ -894,8 +894,143 @@ This list will be expanded in the future.</p>
 
 <dl class="py class" id="module-drafter.debug">
 <dt class="sig sig-object py" id="drafter.debug.DebugInformation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DebugInformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page_history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.history.VisitedPage" title="drafter.history.VisitedPage"><span class="pre">drafter.history.VisitedPage</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conversion_record</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.history.ConversionRecord" title="drafter.history.ConversionRecord"><span class="pre">drafter.history.ConversionRecord</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.configuration.ServerConfiguration" title="drafter.configuration.ServerConfiguration"><span class="pre">drafter.configuration.ServerConfiguration</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.debug.DebugInformation" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DebugInformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page_history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.history.VisitedPage" title="drafter.history.VisitedPage"><span class="pre">VisitedPage</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conversion_record</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.history.ConversionRecord" title="drafter.history.ConversionRecord"><span class="pre">ConversionRecord</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.configuration.ServerConfiguration" title="drafter.configuration.ServerConfiguration"><span class="pre">ServerConfiguration</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.debug.DebugInformation" title="Link to this definition">¶</a></dt>
+<dd><p>Holds debugging information related to the server, including page history, routing,
+state, conversion records, and configuration.</p>
+<p>This class is designed to generate detailed HTML debug information for students
+when debugging server applications. It provides utilities to render the current
+state of the server, the history of page loads, available routes, and test statuses.
+Additionally, it outlines server configuration details and deployment settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>page_history</strong> – List of tuples where each tuple contains a <cite>VisitedPage</cite> instance
+representing a visited page and its associated state.</p></li>
+<li><p><strong>state</strong> – The current state of the application.</p></li>
+<li><p><strong>routes</strong> – Dictionary of available routes mapped to their handler functions.</p></li>
+<li><p><strong>conversion_record</strong> – List of <cite>ConversionRecord</cite> instances that track state
+transitions and parameter changes.</p></li>
+<li><p><strong>configuration</strong> – Server configuration holding deployment and runtime configuration details.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.debug.DebugInformation.available_routes">
+<span class="sig-name descname"><span class="pre">available_routes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.debug.DebugInformation.available_routes" title="Link to this definition">¶</a></dt>
+<dd><p>Generate an HTML formatted list of all available routes and their corresponding functions.</p>
+<p>This method dynamically generates documentation for routes by examining the registered
+functions and their parameters in the <cite>routes</cite> dictionary. It formats each route as a list
+item with its corresponding callable function and parameters. Routes that have no parameters
+are formatted as clickable links pointing to the route path. The output is returned as
+HTML-rendered lines suitable for detailed documentation display.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HTML-formatted strings representing available routes and their metadata.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Iterator[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.debug.DebugInformation.copy_all_page_history">
+<span class="sig-name descname"><span class="pre">copy_all_page_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_visits</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.debug.DebugInformation.copy_all_page_history" title="Link to this definition">¶</a></dt>
+<dd><p>Copies and formats the entire history of all page visits into a structured HTML
+representation, combining them within a collapsible details element for display.</p>
+<p>This function yields formatted HTML elements suitable for embedding in web pages
+or other HTML-based interfaces. The page history provided as input is processed
+and rendered into a human-readable format enclosed in a collapsible container.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>all_visits</strong> (<em>list</em><em> of </em><em>str</em>) – The list of strings where each string represents individual
+page visit details to be combined and formatted for rendering.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Yields strings of HTML elements representing the formatted and combined
+page history.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Iterator[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.debug.DebugInformation.current_route">
+<span class="sig-name descname"><span class="pre">current_route</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.debug.DebugInformation.current_route" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a sequence of HTML content describing the current routing state
+and associated parameter values.</p>
+<p>The function produces the last successfully visited page and its HTML
+representation, along with presenting a list of non-state parameters in
+HTML format. If no pages have been visited successfully or no non-state
+parameters exist, default messages in HTML format are generated instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A generator that yields HTML content representing the current
+routing state and its parameters.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Iterator[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.debug.DebugInformation.current_state">
+<span class="sig-name descname"><span class="pre">current_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.debug.DebugInformation.current_state" title="Link to this definition">¶</a></dt>
+<dd><p>Generates HTML representation of the current state.</p>
+<p>This function yields an HTML block describing the current state
+of the object. It checks if the <code class="docutils literal notranslate"><span class="pre">state</span></code> attribute is not <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+and if so, it utilizes the method <code class="docutils literal notranslate"><span class="pre">render_state</span></code> to construct the
+appropriate HTML for the state data. If the attribute <code class="docutils literal notranslate"><span class="pre">state</span></code> is
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, it yields a placeholder HTML.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Yields string fragments of an HTML representation of the
+object’s current state.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Iterator[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.debug.DebugInformation.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.debug.DebugInformation.generate" title="Link to this definition">¶</a></dt>
+<dd><p>Generates an HTML string containing debug information for the current system state. The generated
+debug information includes details about the current route, system state, available routes, page
+load history, test status, and test deployment. The HTML content is wrapped within a <cite>&lt;div&gt;</cite> element
+with the class <cite>btlw-debug</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An HTML string composed of debug information for the current system state.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.debug.DebugInformation.page_load_history">
+<span class="sig-name descname"><span class="pre">page_load_history</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.debug.DebugInformation.page_load_history" title="Link to this definition">¶</a></dt>
+<dd><p>Generates HTML content listing the history of web page loads including related details, such as
+the button actions, function calls, URLs, and page content. Each step is presented in an
+expandable/collapsible structure for better visualization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A generator that yields strings representing segments of an HTML document formatted
+with the history details.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Iterator[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
 
 <p id="module-drafter.configuration">TODO:
 Custom Error pages
@@ -904,7 +1039,46 @@ Download/upload state button</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="drafter.configuration.ServerConfiguration">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ServerConfiguration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'localhost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">8080</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'bottle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reloader:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'Drafter</span> <span class="pre">Website'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framed:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skulpt:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'skeleton'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_header_content:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_css_content:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_image_folder:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_uploaded_files:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deploy_image_path:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'images'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_skulpt:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt.js'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_skulpt_std:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-stdlib.js'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_skulpt_drafter:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-drafter.js'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_drafter_setup:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/drafter-setup.js'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.configuration.ServerConfiguration" title="Link to this definition">¶</a></dt>
-<dd><p>Configuration for the server.</p>
+<dd><p>Represents a configuration for a server, including launch settings, website
+settings, page configurations, and test deployment CDN parameters.</p>
+<p>This class encapsulates all the necessary settings to configure and launch a
+server. It provides fields for specifying server connection parameters, behavior
+modifiers, website customizations, and CDN configurations for test deployments.</p>
+<ul class="simple">
+<li><p>Launch parameters allow setting options like host address and port for initiating
+the server.</p></li>
+<li><p>Website settings provide options to define the appearance and behavior
+of the site served by the server.</p></li>
+<li><p>Additional fields configure page styling and
+resource path management.</p></li>
+<li><p>Test deployment parameters facilitate url-based
+customization for specific development or testing environments.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>host</strong> – The server’s host address.</p></li>
+<li><p><strong>port</strong> – The port on which the server runs.</p></li>
+<li><p><strong>debug</strong> – Whether to enable debug mode for the server.</p></li>
+<li><p><strong>backend</strong> – The backend system used (e.g., “none”, “flask”).</p></li>
+<li><p><strong>reloader</strong> – Whether to use the reloader (typically for development purposes).</p></li>
+<li><p><strong>skip</strong> – Whether to skip running the server, often used for testing purposes.</p></li>
+<li><p><strong>title</strong> – Title for the website server.</p></li>
+<li><p><strong>framed</strong> – Whether the website should operate in a framed mode.</p></li>
+<li><p><strong>skulpt</strong> – Whether the Skulpt environment is enabled for the server.</p></li>
+<li><p><strong>style</strong> – The page styling framework or theme.</p></li>
+<li><p><strong>additional_header_content</strong> – A list of additional header content for the page.</p></li>
+<li><p><strong>additional_css_content</strong> – A list of additional CSS content for the page.</p></li>
+<li><p><strong>src_image_folder</strong> – Source folder for server-stored images.</p></li>
+<li><p><strong>save_uploaded_files</strong> – Whether uploaded files should be saved to storage.</p></li>
+<li><p><strong>deploy_image_path</strong> – Path for deploying images (defaults vary based on Skulpt usage).</p></li>
+<li><p><strong>cdn_skulpt</strong> – CDN URL for accessing Skulpt library files.</p></li>
+<li><p><strong>cdn_skulpt_std</strong> – CDN URL for accessing the Skulpt standard library.</p></li>
+<li><p><strong>cdn_skulpt_drafter</strong> – CDN URL for accessing Skulpt-related Drafter files.</p></li>
+<li><p><strong>cdn_drafter_setup</strong> – CDN URL for accessing Skulpt Drafter setup files.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class" id="module-drafter.components">
@@ -1446,7 +1620,15 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 <li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.set_website_style"><code class="docutils literal notranslate"><span class="pre">set_website_style()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.set_website_title"><code class="docutils literal notranslate"><span class="pre">set_website_title()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.show_debug_information"><code class="docutils literal notranslate"><span class="pre">show_debug_information()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#drafter.debug.DebugInformation"><code class="docutils literal notranslate"><span class="pre">DebugInformation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.debug.DebugInformation"><code class="docutils literal notranslate"><span class="pre">DebugInformation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.debug.DebugInformation.available_routes"><code class="docutils literal notranslate"><span class="pre">DebugInformation.available_routes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.debug.DebugInformation.copy_all_page_history"><code class="docutils literal notranslate"><span class="pre">DebugInformation.copy_all_page_history()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.debug.DebugInformation.current_route"><code class="docutils literal notranslate"><span class="pre">DebugInformation.current_route()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.debug.DebugInformation.current_state"><code class="docutils literal notranslate"><span class="pre">DebugInformation.current_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.debug.DebugInformation.generate"><code class="docutils literal notranslate"><span class="pre">DebugInformation.generate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.debug.DebugInformation.page_load_history"><code class="docutils literal notranslate"><span class="pre">DebugInformation.page_load_history()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.configuration.ServerConfiguration"><code class="docutils literal notranslate"><span class="pre">ServerConfiguration</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.Argument"><code class="docutils literal notranslate"><span class="pre">Argument</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.Box"><code class="docutils literal notranslate"><span class="pre">Box</span></code></a></li>
@@ -1557,7 +1739,7 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
         <li class="right" >
           <a href="../students/help.html" title="More Help"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.7.0 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.7.2 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>
