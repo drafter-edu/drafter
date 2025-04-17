@@ -500,7 +500,7 @@ class HorizontalRule(PageContent):
         return "<hr />"
 
 
-@dataclass
+@dataclass(repr=False)
 class _HtmlGroup(PageContent):
     content: List[Any]
     extra_settings: Dict
@@ -508,7 +508,15 @@ class _HtmlGroup(PageContent):
 
     def __init__(self, *args, **kwargs):
         self.content = list(args)
-        self.extra_settings = kwargs
+        if 'content' in kwargs:
+            self.content.extend(kwargs.pop('content'))
+        if 'kind' in kwargs:
+            self.kind = kwargs.pop('kind')
+        if 'extra_settings' in kwargs:
+            self.extra_settings = kwargs.pop('extra_settings')
+            self.extra_settings.update(kwargs)
+        else:
+            self.extra_settings = kwargs
 
     def __repr__(self):
         if self.extra_settings:
@@ -520,47 +528,42 @@ class _HtmlGroup(PageContent):
         return f"<{self.kind} {parsed_settings}>{''.join(str(item) for item in self.content)}</{self.kind}>"
 
 
-@dataclass
+@dataclass(repr=False)
 class Span(_HtmlGroup):
     kind = 'span'
 
     def __init__(self, *args, **kwargs):
-        self.content = args
-        self.extra_settings = kwargs
+        super().__init__(*args, **kwargs)
 
 
-@dataclass
+@dataclass(repr=False)
 class Div(_HtmlGroup):
     kind = 'div'
 
     def __init__(self, *args, **kwargs):
-        self.content = args
-        self.extra_settings = kwargs
+        super().__init__(*args, **kwargs)
 
 
 Division = Div
 Box = Div
 
 
-@dataclass
-class Pre(PageContent):
-    def __init__(self, *args, **kwargs):
-        self.content = args
-        self.extra_settings = kwargs
+@dataclass(repr=False)
+class Pre(_HtmlGroup):
+    content: List[Any]
+    kind = 'pre'
 
-    def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<pre {parsed_settings}>{''.join(str(item) for item in self.content)}</pre>"
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 PreformattedText = Pre
 
 
-@dataclass
+@dataclass(repr=False)
 class Row(Div):
     def __init__(self, *args, **kwargs):
-        self.content = args
-        self.extra_settings = kwargs
+        super().__init__(*args, **kwargs)
         self.extra_settings['style_display'] = "flex"
         self.extra_settings['style_flex_direction'] = "row"
         self.extra_settings['style_align_items'] = "center"
