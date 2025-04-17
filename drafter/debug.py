@@ -13,6 +13,28 @@ from drafter.configuration import ServerConfiguration
 
 @dataclass
 class DebugInformation:
+    """
+    Holds debugging information related to the server, including page history, routing,
+    state, conversion records, and configuration.
+
+    This class is designed to generate detailed HTML debug information for students
+    when debugging server applications. It provides utilities to render the current
+    state of the server, the history of page loads, available routes, and test statuses.
+    Additionally, it outlines server configuration details and deployment settings.
+
+    :ivar page_history: List of tuples where each tuple contains a `VisitedPage` instance
+        representing a visited page and its associated state.
+    :type page_history: List[Tuple[VisitedPage, Any]]
+    :ivar state: The current state of the application.
+    :type state: Any
+    :ivar routes: Dictionary of available routes mapped to their handler functions.
+    :type routes: Dict[str, Callable]
+    :ivar conversion_record: List of `ConversionRecord` instances that track state
+        transitions and parameter changes.
+    :type conversion_record: List[ConversionRecord]
+    :ivar configuration: Server configuration holding deployment and runtime configuration details.
+    :type configuration: ServerConfiguration
+    """
     page_history: List[Tuple[VisitedPage, Any]]
     state: Any
     routes: Dict[str, Callable]
@@ -23,6 +45,15 @@ class DebugInformation:
     INDENTATION_END_HTML = "</div></div>"
 
     def generate(self):
+        """
+        Generates an HTML string containing debug information for the current system state. The generated
+        debug information includes details about the current route, system state, available routes, page
+        load history, test status, and test deployment. The HTML content is wrapped within a `<div>` element
+        with the class `btlw-debug`.
+
+        :return: An HTML string composed of debug information for the current system state.
+        :rtype: str
+        """
         parts = [
             "<div class='btlw-debug'>",
             "<h3>Debug Information</h3>",
@@ -38,6 +69,19 @@ class DebugInformation:
         return "\n".join(parts)
 
     def current_route(self):
+        """
+        Generates a sequence of HTML content describing the current routing state
+        and associated parameter values.
+
+        The function produces the last successfully visited page and its HTML
+        representation, along with presenting a list of non-state parameters in
+        HTML format. If no pages have been visited successfully or no non-state
+        parameters exist, default messages in HTML format are generated instead.
+
+        :return: A generator that yields HTML content representing the current
+            routing state and its parameters.
+        :rtype: Iterator[str]
+        """
         # Current route
         if not self.page_history:
             yield "Currently no pages have been successfully visited."
@@ -57,6 +101,20 @@ class DebugInformation:
             yield "<strong>No parameters were provided.</strong>"
 
     def current_state(self):
+        """
+        Generates HTML representation of the current state.
+
+        This function yields an HTML block describing the current state
+        of the object. It checks if the ``state`` attribute is not ``None``,
+        and if so, it utilizes the method ``render_state`` to construct the
+        appropriate HTML for the state data. If the attribute ``state`` is
+        ``None``, it yields a placeholder HTML.
+
+        :return: Yields string fragments of an HTML representation of the
+            object's current state.
+        :rtype: Iterator[str]
+
+        """
         # Current State
         yield "<details open><summary><strong>Current State</strong></summary>"
         yield f"{self.INDENTATION_START_HTML}"
@@ -67,6 +125,18 @@ class DebugInformation:
         yield f"{self.INDENTATION_END_HTML}</details>"
 
     def available_routes(self):
+        """
+        Generate an HTML formatted list of all available routes and their corresponding functions.
+
+        This method dynamically generates documentation for routes by examining the registered
+        functions and their parameters in the `routes` dictionary. It formats each route as a list
+        item with its corresponding callable function and parameters. Routes that have no parameters
+        are formatted as clickable links pointing to the route path. The output is returned as
+        HTML-rendered lines suitable for detailed documentation display.
+
+        :returns: HTML-formatted strings representing available routes and their metadata.
+        :rtype: Iterator[str]
+        """
         # Routes
         yield f"<details open><summary><strong>Available Routes</strong></summary>"
         yield f"{self.INDENTATION_START_HTML}"
@@ -84,6 +154,15 @@ class DebugInformation:
         yield f"</ul>{self.INDENTATION_END_HTML}</details>"
 
     def page_load_history(self):
+        """
+        Generates HTML content listing the history of web page loads including related details, such as
+        the button actions, function calls, URLs, and page content. Each step is presented in an
+        expandable/collapsible structure for better visualization.
+
+        :returns: A generator that yields strings representing segments of an HTML document formatted
+            with the history details.
+        :rtype: Iterator[str]
+        """
         # Page History
         yield "<details open><summary><strong>Page Load History</strong></summary><ol>"
         all_visits = set()
@@ -110,6 +189,22 @@ class DebugInformation:
         yield "</details>"
 
     def copy_all_page_history(self, all_visits):
+        """
+        Copies and formats the entire history of all page visits into a structured HTML
+        representation, combining them within a collapsible details element for display.
+
+        This function yields formatted HTML elements suitable for embedding in web pages
+        or other HTML-based interfaces. The page history provided as input is processed
+        and rendered into a human-readable format enclosed in a collapsible container.
+
+        :param all_visits: The list of strings where each string represents individual
+            page visit details to be combined and formatted for rendering.
+        :type all_visits: list of str
+
+        :return: Yields strings of HTML elements representing the formatted and combined
+            page history.
+        :rtype: Iterator[str]
+        """
         yield "<details><summary><strong>Combined Page History</strong></summary>"
         yield f"{self.INDENTATION_START_HTML}"
         yield "<pre style='width: fit-content' class='copyable'><code>" + "\n\n".join(all_visits) + "</code></pre>"
