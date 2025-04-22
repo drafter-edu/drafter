@@ -658,7 +658,35 @@ class Text(PageContent):
 
     def __init__(self, body: str, **kwargs):
         self.body = body
-        self.extra_settings = kwargs
+        if 'body' in kwargs:
+            self.body = kwargs.pop('content')
+        if 'extra_settings' in kwargs:
+            self.extra_settings = kwargs.pop('extra_settings')
+            self.extra_settings.update(kwargs)
+        else:
+            self.extra_settings = kwargs
+
+    def __eq__(self, other):
+        if isinstance(other, Text):
+            return (self.body == other.body and
+                    self.extra_settings == other.extra_settings)
+        elif isinstance(other, str):
+            return self.extra_settings == {} and self.body == other
+        return NotImplemented
+
+    def __hash__(self):
+        if self.extra_settings:
+            items = tuple(sorted(self.extra_settings.items()))
+            return hash((self.body, items))
+        else:
+            return hash(self.body)
+
+    def __repr__(self):
+        if self.extra_settings:
+            return f"Text({self.body!r}, {self.extra_settings})"
+        return f"Text({self.body!r})"
+
+
 
     def __str__(self):
         parsed_settings = self.parse_extra_settings(**self.extra_settings)

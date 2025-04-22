@@ -28,7 +28,7 @@ def index(state: State) -> Page:
                            "for " + str(item.price) + " coins (" + str(item.stock) + " left in stock)")
             for_sale.append(content)
     return Page(state, [
-        "Welcome to the store!",
+        Text("Welcome to the store!", extra_settings={}),
         Pre("Alpha", "Beta"),
         "You have: " + str(state.money) + " coins",
         "You own: " + ", ".join(state.bought),
@@ -49,7 +49,7 @@ assert_equal(
                         Item(name='Potion', price=25, stock=10)],
                  bought=[],
                  money=200),
-     content=['Welcome to the store!',
+     content=[Text('Welcome to the store!'),
                 Pre('Alpha', 'Beta'),
               'You have: 200 coins',
               'You own: ',

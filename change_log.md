@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.3] - 2025-04-22
+
+### Fixed
+
+* `Text` components now correctly handle keyword arguments. They also are able to be compared to string literals (one direction only), should be rendered better in tests.
+
 ## [1.7.2] - 2025-04-17
 
 ### Fixed
