@@ -769,3 +769,27 @@ class FileUpload(PageContent):
     def __str__(self):
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         return f"<input type='file' name={self.name!r} {parsed_settings} />"
+
+
+@dataclass
+class Script(PageContent):
+    text: str
+
+    def __str__(self):
+        return f"<script>{self.body}</script>"
+
+
+@dataclass
+class ScriptButton(PageContent):
+    label: str
+    jsfunction: str
+    extra_settings: dict
+
+    def __init__(self, label: str, jsfunction: str, **kwargs):
+        self.label = label
+        self.jsfunction = jsfunction
+        self.extra_settings = kwargs
+
+    def __str__(self):
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        return f"<input type='button' value='{self.label}' onClick='{self.jsfunction}' {parsed_settings}/>"
