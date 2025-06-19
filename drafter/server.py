@@ -866,9 +866,11 @@ def get_server_setting(key, default=None, server=MAIN_SERVER):
 
 def start_server(initial_state=None, server: Server = MAIN_SERVER, skip=False, **kwargs):
     """
-    Starts the server with the given initial state and configuration. If the server is set to skip, it will not start.
-    Additional keyword arguments will be passed to the server's run method, and therefore to Bottle. This can be
-    used to control things like the ``port``.
+    Starts the server with the given initial state and configuration.
+    If not running in Skulpt, starts a local HTTP server from which it runs everything.
+    If the server is set to skip, it will not start.
+    Additional keyword arguments will be passed to the server's run method, and therefore to Bottle.
+    This can be used to control things like the ``port``.
 
     :param initial_state: The initial state to start the server with
     :param server: The server to run on, defaulting to ``MAIN_SERVER``
@@ -880,8 +882,14 @@ def start_server(initial_state=None, server: Server = MAIN_SERVER, skip=False, *
         * *port* (``int``) --
           The port to run the server on. Defaults to ``8080``
     """
+    kwargs["port"] = kwargs.get("port", 8080)
     if server.configuration.skip or skip:
         logger.info("Skipping server setup and execution")
         return
-    server.setup(initial_state)
-    server.run(**kwargs)
+
+    if server.configuration.skulpt:
+        server.setup(initial_state)
+        server.run(**kwargs)
+    else:
+        from http.server import test, SimpleHTTPRequestHandler, ThreadingHTTPServer
+        test(SimpleHTTPRequestHandler, ThreadingHTTPServer, **kwargs)
