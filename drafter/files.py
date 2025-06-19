@@ -14,7 +14,7 @@ BASIC_SCRIPTS = """<!--html-->
     for (let i = 0; i < snippets.length; i++) {
         code = snippets[i].textContent;
         //snippets[i].classList.add('hljs'); // append copy button to pre tag
-        snippets[i].innerHTML = '<button class="copy-button">'+buttonText+'</button>' + snippets[i].innerHTML; // append copy button
+        snippets[i].innerHTML = '<button class="copy-button">' + buttonText + '</button>' + snippets[i].innerHTML; // append copy button
         snippets[i].getElementsByClassName("copy-button")[0].addEventListener("click", function () {
             this.innerText = 'Copying..';
             navigator.clipboard.writeText(code);
@@ -177,7 +177,7 @@ TEMPLATE_200 = """<!--html-->
         {content}
         {scripts}
         <footer style="text-align: center; margin-top: 1em;">
-        The theme for this page is: {credit}
+            The theme for this page is: {credit}
         </footer>
     </body>
 </html>
@@ -194,10 +194,21 @@ TEMPLATE_ERROR = """<!--html-->
 <html>
     <head>
         <style type="text/css">
-          .btlw {{background-color: #eee; font-family: sans-serif;}}
-          div.btlw {{background-color: #fff; border: 1px solid #ddd;
-                padding: 15px; margin: 15px;}}
-          .btlw pre {{background-color: #eee; border: 1px solid #ddd; padding: 5px;}}
+            .btlw {{
+                background-color: #eee;
+                font-family: sans-serif;
+            }}
+            div.btlw {{
+                background-color: #fff;
+                border: 1px solid #ddd;
+                padding: 15px;
+                margin: 15px;
+            }}
+            .btlw pre {{
+                background-color: #eee;
+                border: 1px solid #ddd;
+                padding: 5px;
+            }}
         </style>
     </head>
     <body>
@@ -257,15 +268,15 @@ TEMPLATE_SKULPT_DEPLOY = """<!--html-->
             crossorigin="anonymous"
         ></script>
         <script type="text/javascript">
-Sk.output = console.log;
-{website_code}
+            Sk.output = console.log;
+            {website_code}
         </script>
     </head>
 
     <body>
-<div id="website">
-Loading...
-</div>
+        <div id="website">
+        Loading...
+        </div>
         <script src="{cdn_drafter_setup}" type="text/javascript"></script>
     </body>
 </html>
