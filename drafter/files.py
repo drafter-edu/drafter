@@ -6,7 +6,8 @@ so that we can rely on language injection to provide syntax highlighting.
 import gzip
 import base64
 
-BASIC_SCRIPTS = "<script>" + """
+BASIC_SCRIPTS = """<!--html-->
+<script>
     let snippets = document.getElementsByClassName('copyable');
     const buttonText = "📋";
     console.log(snippets);
@@ -43,9 +44,10 @@ BASIC_SCRIPTS = "<script>" + """
             });
         }        
     }
-""" + "</script>"
+</script>"""
 
-BASIC_STYLE = "<style>" + """"
+BASIC_STYLE = """<!--html-->
+<style>"
     div.btlw-debug .copy-button {
          float: right;
          cursor: pointer;
@@ -108,7 +110,7 @@ SKELETON_COMPRESSED = "<style>" + gzip.decompress(base64.b64decode(
     "98b/ZmiCyz83viLcjoJTKAfxr4rp26KPGRqW/2SoeynVb5/Rgn/lXSRQZ9Y1NRxlttCzvEOnoGJzu+ZTfu4bE71X"
     "VMPIzK9d6dNTprbAFPSMVyZAudes/vwP2UWyq1EaAAA=")).decode('utf-8') + "</style>"
 
-DIFF_STYLE_TAG = """
+DIFF_STYLE_TAG = """<!--html-->
 <style type="text/css">
     table.diff {
         font-family:Courier,serif;
@@ -164,7 +166,7 @@ INCLUDE_STYLES = {
     }
 }
 
-TEMPLATE_200 = """
+TEMPLATE_200 = """<!--html-->
 <html>
     <head>
         {header}
@@ -180,7 +182,7 @@ TEMPLATE_200 = """
     </body>
 </html>
 """
-TEMPLATE_200_WITHOUT_HEADER = """
+TEMPLATE_200_WITHOUT_HEADER = """<!--html-->
 <script>document.title = {title};</script>
 {header}
 {styles}
@@ -188,7 +190,7 @@ TEMPLATE_200_WITHOUT_HEADER = """
 {scripts}
 """
 
-TEMPLATE_ERROR = """
+TEMPLATE_ERROR = """<!--html-->
 <html>
     <head>
         <style type="text/css">
@@ -243,7 +245,7 @@ def seek_file_by_line(line, missing_value=None):
         print(f"Error seeking file by line: {e}")
         return missing_value
 
-TEMPLATE_SKULPT_DEPLOY = """
+TEMPLATE_SKULPT_DEPLOY = """<!--html-->
 <html>
     <head>
         <script src="{cdn_skulpt}" type="text/javascript"></script>
