@@ -8,9 +8,9 @@ from drafter.constants import RESTORABLE_STATE_KEY
 from drafter.components import PageContent, Link
 
 
-# from typing import TYPE_CHECKING
-# if TYPE_CHECKING:
-#     from drafter.server import Server
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from drafter.server import Server
 
 @dataclass
 class Page:

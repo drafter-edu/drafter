@@ -13,3 +13,7 @@ if sys.platform == 'skulpt':
     from drafter.components import MatPlotLibPlot
 
     MatPlotLibPlot.__str__ = plt.savefig
+
+    # Set the TYPE_CHECKING constant of typing
+    import typing
+    setattr(typing, 'TYPE_CHECKING', False)
