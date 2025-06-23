@@ -1,3 +1,5 @@
+# from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any
 
@@ -5,6 +7,10 @@ from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
 from drafter.components import PageContent, Link
 
+
+# from typing import TYPE_CHECKING
+# if TYPE_CHECKING:
+#     from drafter.server import Server
 
 @dataclass
 class Page:
@@ -81,7 +87,7 @@ class Page:
                     onclick="return confirm('This will reset the page to its original state. Any data entered will be lost. Are you sure you want to continue?');"
                     >⟳</a>'''
 
-    def verify_content(self, server) -> bool:
+    def verify_content(self, server: 'Server') -> bool:
         """
         Verifies that the content of the page is valid. This will check that all links are valid and that
         all components are valid.
