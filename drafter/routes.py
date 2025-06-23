@@ -21,7 +21,7 @@ def route(url: Union[Callable[..., Page], str, None] = None, server: Optional[Se
 
     def make_route(func: Callable):
         local_url = url
-        if url is None:
+        if local_url is None:
             local_url = func.__name__
         server.add_route(local_url, func)
         return func
