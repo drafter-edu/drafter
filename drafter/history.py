@@ -200,7 +200,7 @@ def remap_hidden_form_parameters(kwargs: dict[Any, Any], button_pressed: str) ->
 @dataclass
 class VisitedPage:
     url: str
-    function: Callable[..., Page]
+    function: Callable[..., 'Page']
     arguments: str
     status: str
     button_pressed: str
