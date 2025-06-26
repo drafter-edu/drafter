@@ -3,14 +3,15 @@ import os
 import traceback
 from dataclasses import dataclass, asdict, replace, field, fields
 from functools import wraps
-from typing import Any, Optional, List, Tuple
+from typing import Any, Callable, Never, Optional, List, Tuple, Union
 import json
 import inspect
 import pathlib
 
 import bottle
 
-from drafter import friendly_urls, PageContent
+from drafter.urls import friendly_urls
+from drafter.components import PageContent
 from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY, PREVIOUSLY_PRESSED_BUTTON
 from drafter.debug import DebugInformation
@@ -20,7 +21,7 @@ from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, Convers
 from drafter.page import Page
 from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, \
     TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
-from drafter.raw_files import get_raw_files, get_themes
+from drafter.raw_files import get_raw_files, get_themes # type: ignore[attr-defined]
 from drafter.urls import remove_url_query_params
 from drafter.image_support import HAS_PILLOW, PILImage
 
@@ -30,7 +31,7 @@ logger = logging.getLogger('drafter')
 
 DEFAULT_ALLOWED_EXTENSIONS = ('py', 'js', 'css', 'txt', 'json', 'csv', 'html', 'md')
 
-def bundle_files_into_js(main_file, root_path, allowed_extensions=DEFAULT_ALLOWED_EXTENSIONS):
+def bundle_files_into_js(main_file: str, root_path: str, allowed_extensions: Optional[set[str]] = None) -> tuple[str, list[str], list[str]]:
     """
     Bundles all files from a specified directory into a JavaScript-compatible format
     for Skulpt, a Python-to-JavaScript transpiler. The function traverses through the
@@ -44,7 +45,7 @@ def bundle_files_into_js(main_file, root_path, allowed_extensions=DEFAULT_ALLOWE
     :param root_path: The root directory to search for files.
     :type root_path: str
     :param allowed_extensions: A collection of file extensions allowed for inclusion
-        in the final JavaScript output. Defaults to a predefined set.
+        in the final JavaScript output. Defaults to a predefined tuple.
     :type allowed_extensions: set[str]
     :return: A tuple containing:
         - The combined JavaScript output string with file contents.
@@ -52,7 +53,10 @@ def bundle_files_into_js(main_file, root_path, allowed_extensions=DEFAULT_ALLOWE
         - A list of added files that were successfully bundled.
     :rtype: tuple[str, list[str], list[str]]
     """
-    skipped_files, added_files = [], []
+    allowed_extensions = allowed_extensions or set(DEFAULT_ALLOWED_EXTENSIONS)
+
+    skipped_files: list[str] = []
+    added_files: list[str] = []
     all_files = {}
     for root, dirs, files in os.walk(root_path):
         for file in files:
@@ -98,8 +102,8 @@ class Server:
     :type _initial_state_type: type
     :ivar _state_history: List tracking historical states of the application.
     :type _state_history: list
-    :ivar _state_frozen_history: List storing serialized snapshots of historical states.
-    :type _state_frozen_history: list
+    # :ivar _state_frozen_history: List storing serialized snapshots of historical states.
+    # :type _state_frozen_history: list
     :ivar _page_history: History of visited pages.
     :type _page_history: list
     :ivar _conversion_record: Internal record tracking parameter conversion processes.
@@ -114,22 +118,22 @@ class Server:
     _page_history: List[Tuple[VisitedPage, Any]]
     _custom_name = None
 
-    def __init__(self, _custom_name=None, **kwargs):
-        self.routes = {}
-        self._handle_route = {}
+    def __init__(self, _custom_name: Union[str, None] = None, **kwargs: Any) -> None:
+        self.routes: dict[str, Callable[..., Page]] = {}
+        self._handle_route: dict[Union[str, Callable[..., Page]], Callable[..., Page]] = {}
         self.configuration = ServerConfiguration(**kwargs)
-        self._state = None
-        self._initial_state = None
-        self._initial_state_type = None
-        self._state_history = []
-        self._state_frozen_history = []
-        self._page_history = []
-        self._conversion_record = []
-        self.original_routes = []
-        self.app = None
+        self._state: Any = None
+        self._initial_state: Union[str, None] = None
+        self._initial_state_type: Union[type, None] = None
+        self._state_history: list[Any] = []
+        # self._state_frozen_history = []
+        self._page_history: List[Tuple[VisitedPage, Any]] = []
+        self._conversion_record: list[Union[ConversionRecord, UnchangedRecord]] = []
+        self.original_routes: list[Tuple[str, Callable[..., Page]]] = []
+        self.app: Union[Bottle, None] = None # type: ignore
         self._custom_name = _custom_name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Provides a string representation of the current server object. If a custom
         name has been defined for the server instance, it returns that custom name.
@@ -144,7 +148,7 @@ class Server:
             return self._custom_name
         return f"Server({self.configuration!r})"
 
-    def clear_routes(self):
+    def clear_routes(self) -> None:
         """
         Clears all stored routes from the `routes` attribute.
 
@@ -155,7 +159,7 @@ class Server:
         """
         self.routes.clear()
 
-    def dump_state(self):
+    def dump_state(self) -> str:
         """
         Converts the current internal state of the State object into a JSON-encoded
         string. The internal state must be dehydratable using the provided
@@ -172,7 +176,7 @@ class Server:
         """
         return json.dumps(dehydrate_json(self._state))
 
-    def load_from_state(self, state, state_type):
+    def load_from_state(self, state: str, state_type: type) -> Any:
         """
         Loads a specific State object from a serialized state based on the given state type.
         This method takes a serialized JSON string representation of a state and
@@ -187,7 +191,7 @@ class Server:
         """
         return rehydrate_json(json.loads(state), state_type)
 
-    def restore_state_if_available(self, original_function):
+    def restore_state_if_available(self, original_function: Callable[..., Page]) -> None:
         """
         Restores the state if the necessary data is available in the parameters. This
         function checks for the presence of a specific key in the parameters and, when
@@ -210,7 +214,7 @@ class Server:
                 self._state = rehydrate_json(old_state, state_type)
                 self.flash_warning("Successfully restored old state: " + repr(self._state))
 
-    def add_route(self, url, func):
+    def add_route(self, url: str, func: Callable[..., Page]) -> None:
         """
         Adds a route to the routing table for URL handling, ensuring the URL is unique
         and maps a function to the given route. Prepares the URL, processes the
@@ -233,7 +237,7 @@ class Server:
         self.routes[url] = func
         self._handle_route[url] = self._handle_route[func] = func
 
-    def reset(self):
+    def reset(self) -> Page:
         """
         Resets the current State object to its initial configuration and clears all
         recorded histories. After resetting, the function returns the result of the
@@ -242,14 +246,16 @@ class Server:
         :return: The result of the '/' route execution.
         :rtype: Page
         """
+        if self._initial_state is None or self._initial_state_type is None:
+            raise ValueError("You can't reset if you haven't setup!")
         self._state = self.load_from_state(self._initial_state, self._initial_state_type)
         self._state_history.clear()
-        self._state_frozen_history.clear()
+        # self._state_frozen_history.clear()
         self._page_history.clear()
         self._conversion_record.clear()
         return self.routes['/']()
 
-    def setup(self, initial_state=None):
+    def setup(self, initial_state: Any = None) -> None:
         """
         Initializes and configures the application. Sets up initial state, error
         pages, and application routes for handling requests.
@@ -263,7 +269,7 @@ class Server:
         self.app = Bottle()
 
         # Setup error pages
-        def handle_404(error):
+        def handle_404(error: bottle.HTTPError) -> str:
             """
             This is the default handler for HTTP 404 errors. It renders a custom error page
             that displays a message indicating the requested page was not found, and provides
@@ -281,7 +287,7 @@ class Server:
                                            f"<li><code>{r!r}</code>: <code>{func}</code></li>" for r, func in
                                            self.original_routes))
 
-        def handle_500(error):
+        def handle_500(error: bottle.HTTPError) -> str:
             """
             This is the default handler for HTTP 500 errors. It renders a custom error page
             that displays a message indicating an internal server error occurred, and provides
@@ -316,7 +322,7 @@ class Server:
             self.app.route('/', 'GET', first_route)
         self.handle_images()
 
-    def run(self, **kwargs):
+    def run(self, **kwargs: Any) -> None:
         """
         Executes the server application using the provided configuration. The method will
         update the configuration with any additional keyword arguments provided and start
@@ -330,14 +336,14 @@ class Server:
         # Update the configuration with the safe kwargs
         safe_keys = fields(ServerConfiguration)
         safe_key_names = {field.name for field in safe_keys}
-        safe_kwargs = {key: value for key, value in kwargs.items() if key in safe_key_names}
+        safe_kwargs: Any = {key: value for key, value in kwargs.items() if key in safe_key_names}
         updated_configuration = replace(self.configuration, **safe_kwargs)
         self.configuration = updated_configuration
         # Update the final args with the new configuration
         final_args.update(kwargs)
         self.app.run(**final_args)
 
-    def prepare_args(self, original_function, args, kwargs):
+    def prepare_args(self, original_function: Callable[..., Any], args: Any, kwargs: Any) -> Any:
         """
         Processes and prepares arguments for the route function call, ensuring compatibility
         with expected parameters, handling state insertion, remapping parameters,
@@ -355,7 +361,7 @@ class Server:
             - The button pressed if detected and processed.
         """
         self._conversion_record.clear()
-        args = list(args)
+        args = tuple(args)
         kwargs = dict(**kwargs)
         button_pressed = ""
         params = get_params()
@@ -405,7 +411,7 @@ class Server:
             for key, value in sorted(kwargs.items(), key=lambda item: expected_parameters.index(item[0]))]
         return args, kwargs, ", ".join(representation), button_pressed
 
-    def handle_images(self):
+    def handle_images(self) -> None:
         """
         Handles the serving of images when the `deploy_image_path` is configured. This
         method maps a dynamic route to serve image files by their paths, allowing them
@@ -418,7 +424,7 @@ class Server:
         if self.configuration.deploy_image_path:
             self.app.route(f"/{self.configuration.deploy_image_path}/<path:path>", 'GET', self.serve_image)
 
-    def serve_image(self, path):
+    def serve_image(self, path: str) -> bottle.HTTPResponse:
         """
         Serves an image file located in the specified directory with the MIME type
         `image/png`. The method retrieves the image from the path provided, using
@@ -431,7 +437,7 @@ class Server:
         """
         return static_file(path, root='./' + self.configuration.src_image_folder, mimetype='image/png')
 
-    def try_special_conversions(self, value, target_type):
+    def try_special_conversions(self, value: Any, target_type: type) -> Any:
         """
         Attempts to convert the input value to the specified target type using various
         specialized conversion methods. This method is designed to handle specific types
@@ -473,7 +479,7 @@ class Server:
                     raise ValueError(f"Could not open image file {value.filename} as a PIL.Image. Perhaps the file is not an image, or the parameter type is inappropriate?") from e
         return target_type(value)
 
-    def convert_parameter(self, param, val, expected_types):
+    def convert_parameter(self, param: str, val: Any, expected_types: dict[str, type]) -> Any:
         """
         Converts a given parameter value to a specified target type if possible, based
         on the expected types provided. Records successful conversions, unchanged
@@ -521,7 +527,7 @@ class Server:
         self._conversion_record.append(UnchangedRecord(param, val))
         return val
 
-    def make_bottle_page(self, original_function):
+    def make_bottle_page(self, original_function: Callable[..., Page]) -> Callable[..., Optional[Union[str, Page]]]:
         """
         A decorator that wraps a given function to create and manage a Bottle web
         page environment. This includes processing request parameters, building
@@ -534,7 +540,7 @@ class Server:
             function within the Bottle page handling logic.
         """
         @wraps(original_function)
-        def bottle_page(*args, **kwargs):
+        def bottle_page(*args: Any, **kwargs: Any) -> Optional[Union[str, Page]]:
             # TODO: Handle non-bottle backends
             url = remove_url_query_params(request.url, {RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY})
             self.restore_state_if_available(original_function)
@@ -542,7 +548,8 @@ class Server:
             try:
                 args, kwargs, arguments, button_pressed = self.prepare_args(original_function, args, kwargs)
             except Exception as e:
-                return self.make_error_page("Error preparing arguments for page", e, original_function)
+                self.make_error_page("Error preparing arguments for page", e, original_function)
+                return None
             # Actually start building up the page
             visiting_page = VisitedPage(url, original_function, arguments, "Creating Page", button_pressed)
             self._page_history.append((visiting_page, original_state))
@@ -553,7 +560,8 @@ class Server:
                                       f"  Keyword Arguments: {kwargs!r}\n"
                                       f"  Button Pressed: {button_pressed!r}\n"
                                       f"  Function Signature: {inspect.signature(original_function)}")
-                return self.make_error_page("Error creating page", e, original_function, additional_details)
+                self.make_error_page("Error creating page", e, original_function, additional_details)
+                return None
             visiting_page.update("Verifying Page Result", original_page_content=page)
             verification_status = self.verify_page_result(page, original_function)
             if verification_status:
@@ -561,14 +569,16 @@ class Server:
             try:
                 page.verify_content(self)
             except Exception as e:
-                return self.make_error_page("Error verifying content", e, original_function)
+                self.make_error_page("Error verifying content", e, original_function)
+                return None
             self._state_history.append(page.state)
             self._state = page.state
             visiting_page.update("Rendering Page Content")
             try:
                 content = page.render_content(self.dump_state(), self.configuration)
             except Exception as e:
-                return self.make_error_page("Error rendering content", e, original_function)
+                self.make_error_page("Error rendering content", e, original_function)
+                return None
             visiting_page.finish("Finished Page Load")
             if self.configuration.debug:
                 content = content + self.make_debug_page()
@@ -577,7 +587,7 @@ class Server:
 
         return bottle_page
 
-    def verify_page_result(self, page, original_function):
+    def verify_page_result(self, page: Page, original_function: Callable[..., Page]) -> Union[Optional[Page], Never]:
         """
         Verifies the result of a function execution to ensure it returns a valid `Page`
         object. The verification checks whether the returned result is of type `Page`
@@ -613,8 +623,8 @@ class Server:
                        f" {page!r}\n"
                        f"Make sure you return a Page object with the new state and the list of strings.")
         else:
-            verification_status = self.verify_page_state_history(page, original_function)
-            if verification_status:
+            self.verify_page_state_history(page, original_function)
+            if False:
                 return verification_status
             elif isinstance(page.content, str):
                 message = (f"The server did not return a valid Page() object from {original_function}.\n"
@@ -639,9 +649,10 @@ class Server:
                             f"Make sure you return a Page object with the new state and the list of strings/content objects.")
 
         if message:
-            return self.make_error_page("Error after creating page", ValueError(message), original_function)
+            self.make_error_page("Error after creating page", ValueError(message), original_function)
+        # return None
 
-    def verify_page_state_history(self, page, original_function):
+    def verify_page_state_history(self, page: Page, original_function: Callable[..., Page]) -> None:
         """
         Validates the consistency of the state object's type in the provided `page`
         against the most recent state stored in the `self._state_history`. If any
@@ -667,9 +678,9 @@ class Server:
                 f"Make sure you return the same type each time.")
         # TODO: Typecheck each field
         if message:
-            return self.make_error_page("Error after creating page", ValueError(message), original_function)
+            self.make_error_page("Error after creating page", ValueError(message), original_function)
 
-    def wrap_page(self, content):
+    def wrap_page(self, content: str) -> str:
         """
         Wraps provided content in a styled HTML template, applying additional headers,
         scripts, styles, and any configuration-specific content.
@@ -717,7 +728,7 @@ class Server:
                 credit=credit)
 
 
-    def make_error_page(self, title, error, original_function, additional_details=""):
+    def make_error_page(self, title: str, error: Exception, original_function: Callable[..., Page], additional_details: str = "") -> None:
         """
         Generates and displays a detailed error page upon encountering an issue in the application.
 
@@ -746,7 +757,7 @@ class Server:
             new_message += f"\n\n\nAdditional Details:\n{additional_details}"
         abort(500, new_message)
 
-    def flash_warning(self, message):
+    def flash_warning(self, message: str) -> None:
         """
         This method displays a warning message. It is intended for immediate
         output to notify the user of a specific warning or issue.
@@ -759,7 +770,7 @@ class Server:
         """
         print(message)
 
-    def make_debug_page(self):
+    def make_debug_page(self) -> str:
         """
         Generates a debug page by gathering and processing various internal states and
         informational data.
@@ -773,11 +784,12 @@ class Server:
                  state and history of the application.
         :rtype: str
         """
-        content = DebugInformation(self._page_history, self._state, self.routes, self._conversion_record,
+        conv_rec = [rec for rec in self._conversion_record if isinstance(rec, ConversionRecord)]
+        content = DebugInformation(self._page_history, self._state, self.routes, conv_rec,
                                    self.configuration)
         return content.generate()
 
-    def test_deployment(self):
+    def test_deployment(self) -> str:
         """
         Bundles files necessary for deployment, including the source code identified by
         the "start_server" line in the student's main file. This allows the server to
@@ -891,5 +903,5 @@ def start_server(initial_state=None, server: Server = MAIN_SERVER, skip=False, *
         server.setup(initial_state)
         server.run(**kwargs)
     else:
-        from http.server import test, SimpleHTTPRequestHandler, ThreadingHTTPServer
+        from http.server import test, SimpleHTTPRequestHandler, ThreadingHTTPServer # type: ignore[attr-defined]
         test(SimpleHTTPRequestHandler, ThreadingHTTPServer, **kwargs)
