@@ -18,7 +18,7 @@ from drafter.debug import DebugInformation
 from drafter.setup import Bottle, abort, request, static_file
 from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, get_params, \
     remap_hidden_form_parameters, safe_repr
-from drafter.page import Page
+from drafter.page import Page, _Page
 from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, \
     TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
 from drafter.raw_files import get_raw_files, get_themes
@@ -123,8 +123,8 @@ class Server:
     _custom_name = None
 
     def __init__(self, _custom_name: Union[str, None] = None, **kwargs: Any) -> None:
-        self.routes: dict[str, Callable[..., Page]] = {}
-        self._handle_route: dict[Union[str, Callable[..., Page]], Callable[..., Page]] = {}
+        self.routes: dict[str, Callable[..., '_Page']] = {}
+        self._handle_route: dict[Union[str, Callable[..., '_Page']], Callable[..., '_Page']] = {}
         self.configuration = ServerConfiguration(**kwargs)
         self._state: Any = None
         self._initial_state: Union[str, None] = None
@@ -239,11 +239,11 @@ class Server:
             raise ValueError(f"URL `{url}` already exists for an existing routed function: `{func.__name__}`")
         self.original_routes.append((url, func))
         url = friendly_urls(url)
-        func = self.make_bottle_page(func)
-        self.routes[url] = func
-        self._handle_route[url] = self._handle_route[func] = func
+        made_func = self.make_bottle_page(func)
+        self.routes[url] = made_func
+        self._handle_route[url] = self._handle_route[made_func] = made_func
 
-    def reset(self) -> Page:
+    def reset(self) -> '_Page':
         """
         Resets the current State object to its initial configuration and clears all
         recorded histories. After resetting, the function returns the result of the
@@ -347,6 +347,8 @@ class Server:
         self.configuration = updated_configuration
         # Update the final args with the new configuration
         final_args.update(kwargs)
+        if not self.app:
+            raise ValueError("You can't run the server if it hasn't been set up!")
         self.app.run(**final_args)
 
     def prepare_args(self, original_function: Callable[..., Any], args: Any, kwargs: Any) -> Any:
@@ -427,6 +429,8 @@ class Server:
                                  attributes are not properly configured.
         :return: None
         """
+        if not self.app:
+            raise ValueError("You can't set up routes on the server if it hasn't been set up!")
         if self.configuration.deploy_image_path:
             self.app.route(f"/{self.configuration.deploy_image_path}/<path:path>", 'GET', self.serve_image)
 
@@ -533,7 +537,7 @@ class Server:
         self._conversion_record.append(UnchangedRecord(param, val))
         return val
 
-    def make_bottle_page(self, original_function: Callable[..., Page]) -> Callable[..., Optional[Union[str, Page]]]:
+    def make_bottle_page(self, original_function: Callable[..., Page]) -> Callable[..., '_Page']:
         """
         A decorator that wraps a given function to create and manage a Bottle web
         page environment. This includes processing request parameters, building
@@ -546,7 +550,7 @@ class Server:
             function within the Bottle page handling logic.
         """
         @wraps(original_function)
-        def bottle_page(*args: Any, **kwargs: Any) -> Optional[Union[str, Page]]:
+        def bottle_page(*args: Any, **kwargs: Any) -> '_Page':
             # TODO: Handle non-bottle backends
             url = remove_url_query_params(request.url, {RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY})
             self.restore_state_if_available(original_function)
@@ -555,7 +559,7 @@ class Server:
                 args, kwargs, arguments, button_pressed = self.prepare_args(original_function, args, kwargs)
             except Exception as e:
                 self.make_error_page("Error preparing arguments for page", e, original_function)
-                return None
+                # return None
             # Actually start building up the page
             visiting_page = VisitedPage(url, original_function, arguments, "Creating Page", button_pressed)
             self._page_history.append((visiting_page, original_state))
@@ -567,16 +571,16 @@ class Server:
                                       f"  Button Pressed: {button_pressed!r}\n"
                                       f"  Function Signature: {inspect.signature(original_function)}")
                 self.make_error_page("Error creating page", e, original_function, additional_details)
-                return None
+                # return None
             visiting_page.update("Verifying Page Result", original_page_content=page)
-            verification_status = self.verify_page_result(page, original_function)
-            if verification_status:
-                return verification_status
+            self.verify_page_result(page, original_function)
+            if False:
+                pass # return verification_status
             try:
                 page.verify_content(self)
             except Exception as e:
                 self.make_error_page("Error verifying content", e, original_function)
-                return None
+                # return None
             self._state_history.append(page.state)
             self._state = page.state
             visiting_page.update("Rendering Page Content")
@@ -584,7 +588,7 @@ class Server:
                 content = page.render_content(self.dump_state(), self.configuration)
             except Exception as e:
                 self.make_error_page("Error rendering content", e, original_function)
-                return None
+                # return None
             visiting_page.finish("Finished Page Load")
             if self.configuration.debug:
                 content = content + self.make_debug_page()
@@ -593,7 +597,7 @@ class Server:
 
         return bottle_page
 
-    def verify_page_result(self, page: Page, original_function: Callable[..., Page]) -> Union[Optional[Page], Never]:
+    def verify_page_result(self, page: Page, original_function: Callable[..., Page]) -> None:
         """
         Verifies the result of a function execution to ensure it returns a valid `Page`
         object. The verification checks whether the returned result is of type `Page`
@@ -605,9 +609,8 @@ class Server:
         :param original_function: A reference to the function or method where the
             `Page` object is expected to be returned from.
         :type original_function: Callable
-        :return: Returns either a valid `Page` object or an error page with diagnostic
-            information when the verification process fails.
-        :rtype: Optional[Page]
+        :return: Does not return any value as it raises an HTTP 500 error with the formatted message.
+        :rtype: None
         """
         message = ""
         if page is None:
@@ -631,7 +634,7 @@ class Server:
         else:
             self.verify_page_state_history(page, original_function)
             if False:
-                return verification_status
+                pass # return verification_status
             elif isinstance(page.content, str):
                 message = (f"The server did not return a valid Page() object from {original_function}.\n"
                            f"Instead of a list of strings or content objects, the content field was a string:\n"
@@ -704,10 +707,10 @@ class Server:
         """
         content = f"<div class='btlw'>{content}</div>"
         style = self.configuration.style
-        global_files = get_raw_files("global")
-        style_files = get_raw_files(style)
+        global_files = get_raw_files("global") # type: ignore
+        style_files = get_raw_files(style) # type: ignore
         if style_files is None:
-            possible_themes = ", ".join(get_themes())
+            possible_themes = ", ".join(get_themes()) # type: ignore
             raise ValueError(f"Unknown style {style}. Please choose from {possible_themes}, or add a custom style tag with add_website_header.")
 
         scripts = "\n".join([*global_files.scripts.values(), *style_files.scripts.values()])
@@ -834,7 +837,7 @@ class Server:
 
 MAIN_SERVER = Server(_custom_name="MAIN_SERVER")
 
-def set_main_server(server: Server):
+def set_main_server(server: Server) -> None:
     """
     Sets the main server to the given server. This is useful for testing purposes.
 
@@ -852,7 +855,7 @@ def get_main_server() -> Server:
     """
     return MAIN_SERVER
 
-def get_all_routes(server: Optional[Server] = None):
+def get_all_routes(server: Optional[Server] = None) -> dict[str, Callable[..., '_Page']]:
     """
     Get all routes available in the given server or the main server if none is provided.
 
@@ -869,8 +872,7 @@ def get_all_routes(server: Optional[Server] = None):
         server = get_main_server()
     return server.routes
 
-
-def get_server_setting(key: str, default: Optional[Any] = None, server: Optional[Server] = MAIN_SERVER) -> Any:
+def get_server_setting(key: str, default: Optional[Any] = None, server: Server = MAIN_SERVER) -> Any:
     """
     Gets a setting from the server's configuration. If the setting is not found, the default value is returned.
 
@@ -882,7 +884,7 @@ def get_server_setting(key: str, default: Optional[Any] = None, server: Optional
     return getattr(server.configuration, key, default)
 
 
-def start_server(initial_state=None, server: Server = MAIN_SERVER, skip=False, **kwargs):
+def start_server(initial_state: Any = None, server: Server = MAIN_SERVER, skip: bool = False, **kwargs: Any) -> None:
     """
     Starts the server with the given initial state and configuration.
     If not running in Skulpt, starts a local HTTP server from which it runs everything.

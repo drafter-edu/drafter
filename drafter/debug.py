@@ -1,11 +1,11 @@
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Iterator, List, Tuple, Dict
+from typing import TYPE_CHECKING, Any, Callable, Iterator, List, Tuple, Dict
 import inspect
 import html
 
 from drafter.constants import RESTORABLE_STATE_KEY, PREVIOUSLY_PRESSED_BUTTON
 from drafter.history import ConversionRecord, VisitedPage, format_page_content, make_value_expandable, safe_repr
-from drafter.page import Page
+from drafter.page import Page, _Page
 from drafter.urls import merge_url_query_params
 from drafter.testing import bakery, _bakery_tests, DIFF_WRAP_WIDTH, diff_tests
 from drafter.components import Table
@@ -37,7 +37,7 @@ class DebugInformation:
     """
     page_history: List[Tuple[VisitedPage, Any]]
     state: Any
-    routes: Dict[str, Callable[..., Page]]
+    routes: Dict[str, Callable[..., '_Page']]
     conversion_record: List[ConversionRecord]
     configuration: ServerConfiguration
 

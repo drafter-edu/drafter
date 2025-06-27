@@ -1,7 +1,7 @@
 # from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, TYPE_CHECKING, Optional, Union
+from typing import Any, TYPE_CHECKING, Optional, TypeAlias, Union
 
 from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
@@ -99,3 +99,5 @@ class Page:
             if isinstance(chunk, Link):
                 chunk.verify(server)
         return True
+
+_Page: TypeAlias = Union[str, Page]
