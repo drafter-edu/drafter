@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Callable, Optional, TypeVarTuple, Union
+from typing import Any, Callable, Optional, Union
 import difflib
 try:
     import bakery
