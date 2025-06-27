@@ -240,7 +240,7 @@ class DebugInformation:
                 yield "<div><strong>No Tests</strong></div>"
 
     def render_state(self, state: Any) -> str:
-        if is_dataclass(state):
+        if is_dataclass(state) and not isinstance(state, type):
             return str(Table(state))
         else:
             return str(Table([[

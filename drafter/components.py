@@ -1,5 +1,5 @@
 from dataclasses import dataclass, is_dataclass, fields
-from typing import Any, Union, Optional, List, Dict, Tuple
+from typing import TYPE_CHECKING, Any, Union, Optional, List, Dict, Tuple
 import io
 import base64
 # from urllib.parse import quote_plus
@@ -17,6 +17,9 @@ try:
     _has_matplotlib = True
 except ImportError:
     _has_matplotlib = False
+
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
 
 
 BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "tabindex", "value",
@@ -604,9 +607,9 @@ class Header(PageContent):
 
 @dataclass
 class Table(PageContent):
-    rows: List[List[str]]
+    # rows: List[List[str]]
 
-    def __init__(self, rows: List[List[str]], header=None, **kwargs):
+    def __init__(self, rows: Union[List[List[str]], 'DataclassInstance'], header: Optional[list[str]] = None, **kwargs) -> str:
         self.rows = rows
         self.header = header
         self.extra_settings = kwargs

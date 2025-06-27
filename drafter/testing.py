@@ -81,7 +81,7 @@ DIFF_INDENT_WIDTH = 1
 DIFF_WRAP_WIDTH = 60
 differ = difflib.HtmlDiff(tabsize=DIFF_INDENT_WIDTH, wrapcolumn=DIFF_WRAP_WIDTH)
 
-def diff_tests(left, right, left_name, right_name):
+def diff_tests(left: str, right: str, left_name: str, right_name: str) -> str:
     """ Compare two strings and show the differences in a table. """
     try:
         table = differ.make_table(left.splitlines(), right.splitlines(), left_name, right_name)
