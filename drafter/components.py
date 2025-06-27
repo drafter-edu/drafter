@@ -581,7 +581,7 @@ class _HtmlList(PageContent):
     items: List[Any]
     kind: str = ""
 
-    def __init__(self, items: List[Any], **kwargs):
+    def __init__(self, items: List[Any], **kwargs: Any) -> None:
         self.items = items
         self.extra_settings = kwargs
 
