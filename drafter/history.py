@@ -17,6 +17,7 @@ from drafter.image_support import HAS_PILLOW, PILImage
 
 if TYPE_CHECKING:
     from drafter.page import Page
+    import bottle
 
 timezone_UTC = timezone(timedelta(0))
 
@@ -300,7 +301,7 @@ def rehydrate_json(value: Any, new_type: Any) -> Any:
     raise ValueError(f"Error while restoring state: Could not create {new_type!r} from {value!r}")
 
 
-def get_params(): # type: ignore
+def get_params() -> 'bottle.FormsDict':
     params = request.params
     if hasattr(params, 'decode'):
         params = params.decode('utf-8')
