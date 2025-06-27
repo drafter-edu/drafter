@@ -5,6 +5,7 @@ so that we can rely on language injection to provide syntax highlighting.
 
 import gzip
 import base64
+from typing import Optional
 
 BASIC_SCRIPTS = """<!--html-->
 <script>
@@ -228,7 +229,7 @@ TEMPLATE_ERROR = """<!--html-->
 TEMPLATE_404 = TEMPLATE_ERROR
 TEMPLATE_500 = TEMPLATE_ERROR
 
-def seek_file_by_line(line, missing_value=None):
+def seek_file_by_line(line: str, missing_value: Optional[str] = None) -> Optional[str]:
     """
     Seeks and returns the filename of a source file by examining the stack trace for a line
     matching the given string. This function allows looking into the recent call stack to
@@ -240,7 +241,7 @@ def seek_file_by_line(line, missing_value=None):
     :type line: str
     :param missing_value: An optional value to return if no match is found in the stack
         trace. Defaults to None.
-    :type missing_value: Any
+    :type missing_value: str
     :return: The filename associated with the supplied line in the stack trace if found,
         or the missing_value if no match is located.
     :rtype: str | None
@@ -249,6 +250,7 @@ def seek_file_by_line(line, missing_value=None):
         from traceback import extract_stack
         trace = extract_stack()
         for data in trace:
+            if not data[3]: continue
             if data[3].strip().startswith(line):
                 return data[0]
         return missing_value

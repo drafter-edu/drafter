@@ -1,9 +1,14 @@
+# from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TYPE_CHECKING, Optional, TypeAlias, Union
 
 from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
-from drafter.components import PageContent, Link
+from drafter.components import Content, PageContent, Link
+
+if TYPE_CHECKING:
+    from drafter.server import Server
 
 
 @dataclass
@@ -24,9 +29,9 @@ class Page:
     :param content: The content of the page. Must always be provided as a list of strings and components.
     """
     state: Any
-    content: list
+    content: list[Content]
 
-    def __init__(self, state, content=None):
+    def __init__(self, state: Any, content: Optional[list[Content]] = None) -> None:
         if content is None:
             state, content = None, state
         self.state = state
@@ -43,7 +48,7 @@ class Page:
                     raise ValueError("The content of a page must be a list of strings or components."
                                      f" Found {incorrect_type} at index {index} instead.")
 
-    def render_content(self, current_state, configuration: ServerConfiguration) -> str:
+    def render_content(self, current_state: Any, configuration: ServerConfiguration) -> str:
         """
         Renders the content of the page to HTML. This will include the state of the page, if it is restorable.
         Users should not call this method directly; it will be called on their behalf by the server.
@@ -81,7 +86,7 @@ class Page:
                     onclick="return confirm('This will reset the page to its original state. Any data entered will be lost. Are you sure you want to continue?');"
                     >⟳</a>'''
 
-    def verify_content(self, server) -> bool:
+    def verify_content(self, server: 'Server') -> bool:
         """
         Verifies that the content of the page is valid. This will check that all links are valid and that
         all components are valid.
@@ -94,3 +99,5 @@ class Page:
             if isinstance(chunk, Link):
                 chunk.verify(server)
         return True
+
+_Page: TypeAlias = Union[str, Page]

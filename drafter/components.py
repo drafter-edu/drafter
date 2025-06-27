@@ -1,11 +1,12 @@
 from dataclasses import dataclass, is_dataclass, fields
-from typing import Any, Union, Optional, List, Dict, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Self, TypeAlias, Union, Optional, List, Dict, Tuple
 import io
 import base64
 # from urllib.parse import quote_plus
 import json
 import html
 
+from drafter.configuration import ServerConfiguration
 from drafter.constants import LABEL_SEPARATOR, SUBMIT_BUTTON_KEY, JSON_DECODE_SYMBOL
 from drafter.urls import remap_attr_styles, friendly_urls, check_invalid_external_url, merge_url_query_params
 from drafter.image_support import HAS_PILLOW, PILImage
@@ -16,6 +17,11 @@ try:
     _has_matplotlib = True
 except ImportError:
     _has_matplotlib = False
+
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
+    from drafter.server import Server
+    from drafter.page import _Page
 
 
 BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "tabindex", "value",
@@ -29,7 +35,7 @@ BASE_PARAMETER_ERROR = ("""The {component_type} name must be a valid Python iden
                         """a valid identifier if it only contains alphanumeric letters (a-z) and (0-9), or """
                         """underscores (_). A valid identifier cannot start with a number, or contain any spaces.""")
 
-def validate_parameter_name(name: str, component_type: str):
+def validate_parameter_name(name: str, component_type: str) -> None:
     """
     Validates a parameter name to ensure it adheres to Python's identifier naming rules.
     The function verifies if the given name is a string, non-empty, does not contain spaces,
@@ -74,9 +80,9 @@ class PageContent:
     This class also has some helpful methods for verifying URLs and handling attributes/styles.
     """
     EXTRA_ATTRS: List[str] = []
-    extra_settings: dict
+    extra_settings: dict[str, Any]
 
-    def verify(self, server) -> bool:
+    def verify(self, server: 'Server') -> bool:
         """
         Verify the status of this component. This method is called before rendering the component
         to ensure that the component is in a valid state. If the component is not valid, this method
@@ -89,7 +95,7 @@ class PageContent:
         """
         return True
 
-    def parse_extra_settings(self, **kwargs):
+    def parse_extra_settings(self, **kwargs: Any) -> str:
         """
         Parses and combines extra settings into valid attribute and style formats.
 
@@ -123,7 +129,7 @@ class PageContent:
             result += f" style='{'; '.join(styles)}'"
         return result
 
-    def update_style(self, style, value):
+    def update_style(self, style: str, value: Any) -> Self:
         """
         Updates the style of a specific setting and stores it in the
         extra_settings dictionary with a key formatted as "style_{style}".
@@ -138,7 +144,7 @@ class PageContent:
         self.extra_settings[f"style_{style}"] = value
         return self
 
-    def update_attr(self, attr, value):
+    def update_attr(self, attr: str, value: Any) -> Self:
         """
         Updates a specific attribute with the given value in the extra_settings dictionary.
 
@@ -157,7 +163,7 @@ class PageContent:
         self.extra_settings[attr] = value
         return self
 
-    def render(self, current_state, configuration):
+    def render(self, current_state: Any, configuration: ServerConfiguration) -> str:
         """
         This method is called when the component is being rendered to a string. It should return
         the HTML representation of the component, using the current State and configuration to
@@ -172,9 +178,9 @@ class PageContent:
         return str(self)
 
 
-Content = Union[PageContent, str]
+Content: TypeAlias = Union[PageContent, str]
 
-def make_safe_json_argument(value):
+def make_safe_json_argument(value: Any) -> str:
     """
     Converts the given value to a JSON-compatible string and escapes special
     HTML characters, making it safe for inclusion in HTML contexts.
@@ -185,7 +191,7 @@ def make_safe_json_argument(value):
     """
     return html.escape(json.dumps(value), True)
 
-def make_safe_argument(value):
+def make_safe_argument(value: Any) -> str:
     """
     Encodes the given value into JSON format and escapes any special HTML
     characters to ensure the argument is safe for use in HTML contexts.
@@ -204,7 +210,7 @@ def make_safe_argument(value):
     """
     return html.escape(json.dumps(value), True)
 
-def make_safe_name(value):
+def make_safe_name(value: Any) -> str:
     """
     This function takes a value as input and generates a safe string version of it by escaping
     special characters to prevent injection attacks or unintended HTML rendering. It ensures that
@@ -234,7 +240,7 @@ class LinkContent:
     url: str
     text: str
 
-    def _handle_url(self, url, external=None):
+    def _handle_url(self, url: Union[str, Callable[..., '_Page']], external: Optional[bool] = None) -> tuple[str, bool]:
         if callable(url):
             url = url.__name__
         if external is None:
@@ -242,7 +248,7 @@ class LinkContent:
         url = url if external else friendly_urls(url)
         return url, external
 
-    def verify(self, server) -> bool:
+    def verify(self, server: 'Server') -> bool:
         if self.url not in server._handle_route:
             invalid_external_url_reason = check_invalid_external_url(self.url)
             if invalid_external_url_reason == "is a valid external url":
@@ -254,14 +260,14 @@ class LinkContent:
 
 
 
-    def create_arguments(self, arguments, label_namespace):
+    def create_arguments(self, arguments: Any, label_namespace: str) -> str:
         parameters = self.parse_arguments(arguments, label_namespace)
         if parameters:
             return "\n".join(f"<input type='hidden' name='{name}' value='{make_safe_json_argument(value)}' />"
                              for name, value in parameters.items())
         return ""
 
-    def parse_arguments(self, arguments, label_namespace):
+    def parse_arguments(self, arguments: Any, label_namespace: str) -> dict[str, Any]:
         if arguments is None:
             return {}
         if isinstance(arguments, dict):
@@ -274,7 +280,8 @@ class LinkContent:
             escaped_label_namespace = make_safe_argument(label_namespace)
             for arg in arguments:
                 if isinstance(arg, Argument):
-                    arg, value = arg.name, arg.value
+                    value = arg.value
+                    arg = arg.name
                 else:
                     arg, value = arg
                 result[f"{escaped_label_namespace}{LABEL_SEPARATOR}{arg}"] = value
@@ -287,7 +294,7 @@ class Argument(PageContent):
     name: str
     value: Any
 
-    def __init__(self, name: str, value: Any, **kwargs):
+    def __init__(self, name: str, value: Any, **kwargs: Any) -> None:
         validate_parameter_name(name, "Argument")
         self.name = name
         if not isinstance(value, (str, int, float, bool)):
@@ -305,7 +312,7 @@ class Link(PageContent, LinkContent):
     text: str
     url: str
 
-    def __init__(self, text: str, url: str, arguments=None, **kwargs):
+    def __init__(self, text: str, url: str, arguments: Any = None, **kwargs: Any) -> None:
         self.text = text
         self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
@@ -324,13 +331,13 @@ class Button(PageContent, LinkContent):
     arguments: List[Argument]
     external: bool = False
 
-    def __init__(self, text: str, url: str, arguments=None, **kwargs):
+    def __init__(self, text: str, url: str, arguments: Any = None, **kwargs: Any) -> None:
         self.text = text
         self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
         self.arguments = arguments
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.arguments:
             return f"Button(text={self.text!r}, url={self.url!r}, arguments={self.arguments!r})"
         return f"Button(text={self.text!r}, url={self.url!r})"
@@ -352,31 +359,31 @@ BASE_IMAGE_FOLDER = "/__images"
 @dataclass
 class Image(PageContent, LinkContent):
     url: str
-    width: int
-    height: int
+    width: Optional[int]
+    height: Optional[int]
 
-    def __init__(self, url: str, width=None, height=None, **kwargs):
+    def __init__(self, url: str, width: Optional[int] = None, height: Optional[int] = None, **kwargs: Any) -> None:
         self.url = url
         self.width = width
         self.height = height
         self.extra_settings = kwargs
         self.base_image_folder = BASE_IMAGE_FOLDER
 
-    def open(self, *args, **kwargs):
+    def open(self, *args: Any, **kwargs: Any) -> PILImage.Image:
         if not HAS_PILLOW:
             raise ImportError("Pillow is not installed. Please install it to use this feature.")
         return PILImage.open(*args, **kwargs)
 
-    def new(self, *args, **kwargs):
+    def new(self, *args: Any, **kwargs: Any) -> PILImage.Image:
         if not HAS_PILLOW:
             raise ImportError("Pillow is not installed. Please install it to use this feature.")
         return PILImage.new(*args, **kwargs)
 
-    def render(self, current_state, configuration):
+    def render(self, current_state: Any, configuration: ServerConfiguration) -> str:
         self.base_image_folder = configuration.deploy_image_path
         return super().render(current_state, configuration)
 
-    def _handle_pil_image(self, image):
+    def _handle_pil_image(self, image: str) -> tuple[bool, str]:
         if not HAS_PILLOW or isinstance(image, str):
             return False, image
 
@@ -412,7 +419,7 @@ class TextBox(PageContent):
     kind: str
     default_value: Optional[str]
 
-    def __init__(self, name: str, default_value: Optional[str] = None, kind: str = "text", **kwargs):
+    def __init__(self, name: str, default_value: Optional[str] = None, kind: str = "text", **kwargs: Any) -> None:
         validate_parameter_name(name, "TextBox")
         self.name = name
         self.kind = kind
@@ -434,7 +441,7 @@ class TextArea(PageContent):
     default_value: str
     EXTRA_ATTRS = ["rows", "cols", "autocomplete", "autofocus", "disabled", "placeholder", "readonly", "required"]
 
-    def __init__(self, name: str, default_value: Optional[str] = None, **kwargs):
+    def __init__(self, name: str, default_value: Optional[str] = None, **kwargs: Any) -> None:
         validate_parameter_name(name, "TextArea")
         self.name = name
         self.default_value = str(default_value) if default_value is not None else ""
@@ -451,7 +458,7 @@ class SelectBox(PageContent):
     options: List[str]
     default_value: Optional[str]
 
-    def __init__(self, name: str, options: List[str], default_value: Optional[str] = None, **kwargs):
+    def __init__(self, name: str, options: List[str], default_value: Optional[str] = None, **kwargs: Any) -> None:
         validate_parameter_name(name, "SelectBox")
         self.name = name
         self.options = [str(option) for option in options]
@@ -475,7 +482,7 @@ class CheckBox(PageContent):
     name: str
     default_value: bool
 
-    def __init__(self, name: str, default_value: bool = False, **kwargs):
+    def __init__(self, name: str, default_value: bool = False, **kwargs: Any) -> None:
         validate_parameter_name(name, "CheckBox")
         self.name = name
         self.default_value = bool(default_value)
@@ -503,10 +510,10 @@ class HorizontalRule(PageContent):
 @dataclass(repr=False)
 class _HtmlGroup(PageContent):
     content: List[Any]
-    extra_settings: Dict
+    extra_settings: Dict[str, Any]
     kind: str
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.content = list(args)
         if 'content' in kwargs:
             self.content.extend(kwargs.pop('content'))
@@ -518,7 +525,7 @@ class _HtmlGroup(PageContent):
         else:
             self.extra_settings = kwargs
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.extra_settings:
             return f"{self.kind.capitalize()}({', '.join(repr(item) for item in self.content)}, {self.extra_settings})"
         return f"{self.kind.capitalize()}({', '.join(repr(item) for item in self.content)})"
@@ -532,7 +539,7 @@ class _HtmlGroup(PageContent):
 class Span(_HtmlGroup):
     kind = 'span'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
 
@@ -540,7 +547,7 @@ class Span(_HtmlGroup):
 class Div(_HtmlGroup):
     kind = 'div'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
 
@@ -553,7 +560,7 @@ class Pre(_HtmlGroup):
     content: List[Any]
     kind = 'pre'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
 
@@ -562,7 +569,7 @@ PreformattedText = Pre
 
 @dataclass(repr=False)
 class Row(Div):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.extra_settings['style_display'] = "flex"
         self.extra_settings['style_flex_direction'] = "row"
@@ -574,7 +581,7 @@ class _HtmlList(PageContent):
     items: List[Any]
     kind: str = ""
 
-    def __init__(self, items: List[Any], **kwargs):
+    def __init__(self, items: List[Any], **kwargs: Any) -> None:
         self.items = items
         self.extra_settings = kwargs
 
@@ -597,33 +604,36 @@ class Header(PageContent):
     body: str
     level: int = 1
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"<h{self.level}>{self.body}</h{self.level}>"
 
 
 @dataclass
 class Table(PageContent):
-    rows: List[List[str]]
+    # rows: List[List[str]]
 
-    def __init__(self, rows: List[List[str]], header=None, **kwargs):
+    def __init__(self, rows: Union[List[List[str]], 'DataclassInstance'], header: Optional[list[str]] = None, **kwargs: Any) -> None:
         self.rows = rows
         self.header = header
         self.extra_settings = kwargs
         self.reformat_as_tabular()
 
-    def reformat_as_single(self):
+    def reformat_as_single(self) -> None:
         result = []
+        if not is_dataclass(self.rows):
+            raise TypeError("reformat_as_single called without ensuring type of rows")
         for field in fields(self.rows):
             value = getattr(self.rows, field.name)
+            field_type = field.type if isinstance(field.type, type) else type(value)
             result.append(
                 [f"<code>{html.escape(field.name)}</code>",
-                 f"<code>{html.escape(field.type.__name__)}</code>",
+                 f"<code>{html.escape(field_type.__name__)}</code>",
                  f"<code>{safe_repr(value)}</code>"])
         self.rows = result
         if not self.header:
             self.header = ["Field", "Type", "Current Value"]
 
-    def reformat_as_tabular(self):
+    def reformat_as_tabular(self) -> None:
         # print(self.rows, is_dataclass(self.rows))
         if is_dataclass(self.rows):
             self.reformat_as_single()
@@ -640,11 +650,13 @@ class Table(PageContent):
                 result.append([str(cell) for cell in row])
 
         if had_dataclasses and self.header is None:
-            self.header = list(row.__dataclass_fields__.keys())
+            self.header = list(row.__dataclass_fields__.keys()) # type: ignore # Hä??
         self.rows = result
 
     def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        if is_dataclass(self.rows):
+            raise TypeError("Improperly initialised Table")
         rows = "\n".join(f"<tr>{''.join(f'<td>{cell}</td>' for cell in row)}</tr>"
                          for row in self.rows)
         header = "" if not self.header else f"<thead><tr>{''.join(f'<th>{cell}</th>' for cell in self.header)}</tr></thead>"
@@ -654,13 +666,13 @@ class Table(PageContent):
 @dataclass
 class Text(PageContent):
     body: str
-    extra_settings: dict
+    extra_settings: dict[str, Any]
 
-    def __init__(self, body: str, **kwargs):
+    def __init__(self, body: str, **kwargs: Any) -> None:
         self.body = body
         self.extra_settings = kwargs
 
-    def __str__(self):
+    def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         if not parsed_settings:
             return self.body
@@ -669,10 +681,10 @@ class Text(PageContent):
 
 @dataclass
 class MatPlotLibPlot(PageContent):
-    extra_matplotlib_settings: dict
+    extra_matplotlib_settings: dict[str, Any]
     close_automatically: bool
 
-    def __init__(self, extra_matplotlib_settings=None, close_automatically=True, **kwargs):
+    def __init__(self, extra_matplotlib_settings: Optional[dict[str, Any]] = None, close_automatically: bool = True, **kwargs: Any) -> None:
         if not _has_matplotlib:
             raise ImportError("Matplotlib is not installed. Please install it to use this feature.")
         if extra_matplotlib_settings is None:
@@ -685,7 +697,7 @@ class MatPlotLibPlot(PageContent):
             extra_matplotlib_settings["bbox_inches"] = "tight"
         self.close_automatically = close_automatically
 
-    def __str__(self):
+    def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         # Handle image processing
         image_data = io.BytesIO()
@@ -708,17 +720,19 @@ class MatPlotLibPlot(PageContent):
 class Download(PageContent):
     text: str
     filename: str
-    content: str
+    content: Union[str, PILImage.Image]
     content_type: str = "text/plain"
 
-    def __init__(self, text: str, filename: str, content: str, content_type: str = "text/plain"):
+    def __init__(self, text: str, filename: str, content: Union[str, PILImage.Image], content_type: str = "text/plain") -> None:
         self.text = text
         self.filename = filename
         self.content = content
         self.content_type = content_type
 
-    def _handle_pil_image(self, image):
-        if not HAS_PILLOW or isinstance(image, str):
+    def _handle_pil_image(self, image: Union[str, PILImage.Image]) -> tuple[bool, str]:
+        if not HAS_PILLOW:
+            return False, repr(image)
+        if isinstance(image, str):
             return False, image
 
         image_data = io.BytesIO()
@@ -728,7 +742,7 @@ class Download(PageContent):
         figure = f"data:image/png;base64,{figure}"
         return True, figure
 
-    def __str__(self):
+    def __str__(self) -> str:
         was_pil, url = self._handle_pil_image(self.content)
         if was_pil:
             return f'<a download="{self.filename}" href="{url}">{self.text}</a>'
@@ -753,7 +767,7 @@ class FileUpload(PageContent):
     name: str
     EXTRA_ATTRS = ["accept", "capture", "multiple", "required"]
 
-    def __init__(self, name: str, accept: Union[str, List[str], None] = None, **kwargs):
+    def __init__(self, name: str, accept: Union[str, List[str], None] = None, **kwargs: Any) -> None:
         validate_parameter_name(name, "FileUpload")
         self.name = name
         self.extra_settings = kwargs
@@ -766,6 +780,6 @@ class FileUpload(PageContent):
                      for ext in accept]
             self.extra_settings['accept'] = ", ".join(accept)
 
-    def __str__(self):
+    def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         return f"<input type='file' name={self.name!r} {parsed_settings} />"

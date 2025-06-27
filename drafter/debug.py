@@ -1,11 +1,11 @@
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, List, Tuple, Dict
+from typing import TYPE_CHECKING, Any, Callable, Iterator, List, Tuple, Dict
 import inspect
 import html
 
 from drafter.constants import RESTORABLE_STATE_KEY, PREVIOUSLY_PRESSED_BUTTON
 from drafter.history import ConversionRecord, VisitedPage, format_page_content, make_value_expandable, safe_repr
-from drafter.page import Page
+from drafter.page import Page, _Page
 from drafter.urls import merge_url_query_params
 from drafter.testing import bakery, _bakery_tests, DIFF_WRAP_WIDTH, diff_tests
 from drafter.components import Table
@@ -37,14 +37,14 @@ class DebugInformation:
     """
     page_history: List[Tuple[VisitedPage, Any]]
     state: Any
-    routes: Dict[str, Callable]
+    routes: Dict[str, Callable[..., '_Page']]
     conversion_record: List[ConversionRecord]
     configuration: ServerConfiguration
 
     INDENTATION_START_HTML = "<div class='row'><div class='one column'></div><div class='eleven columns'>"
     INDENTATION_END_HTML = "</div></div>"
 
-    def generate(self):
+    def generate(self) -> str:
         """
         Generates an HTML string containing debug information for the current system state. The generated
         debug information includes details about the current route, system state, available routes, page
@@ -68,7 +68,7 @@ class DebugInformation:
         ]
         return "\n".join(parts)
 
-    def current_route(self):
+    def current_route(self) -> Iterator[str]:
         """
         Generates a sequence of HTML content describing the current routing state
         and associated parameter values.
@@ -100,7 +100,7 @@ class DebugInformation:
         else:
             yield "<strong>No parameters were provided.</strong>"
 
-    def current_state(self):
+    def current_state(self) -> Iterator[str]:
         """
         Generates HTML representation of the current state.
 
@@ -124,7 +124,7 @@ class DebugInformation:
             yield "<code>None</code>"
         yield f"{self.INDENTATION_END_HTML}</details>"
 
-    def available_routes(self):
+    def available_routes(self) -> Iterator[str]:
         """
         Generate an HTML formatted list of all available routes and their corresponding functions.
 
@@ -153,7 +153,7 @@ class DebugInformation:
             yield f"<li>{route}: <code>{call}</code></li>"
         yield f"</ul>{self.INDENTATION_END_HTML}</details>"
 
-    def page_load_history(self):
+    def page_load_history(self) -> Iterator[str]:
         """
         Generates HTML content listing the history of web page loads including related details, such as
         the button actions, function calls, URLs, and page content. Each step is presented in an
@@ -188,7 +188,7 @@ class DebugInformation:
             yield part
         yield "</details>"
 
-    def copy_all_page_history(self, all_visits):
+    def copy_all_page_history(self, all_visits: set[str]) -> Iterator[str]:
         """
         Copies and formats the entire history of all page visits into a structured HTML
         representation, combining them within a collapsible details element for display.
@@ -199,7 +199,7 @@ class DebugInformation:
 
         :param all_visits: The list of strings where each string represents individual
             page visit details to be combined and formatted for rendering.
-        :type all_visits: list of str
+        :type all_visits: set[str]
 
         :return: Yields strings of HTML elements representing the formatted and combined
             page history.
@@ -211,7 +211,7 @@ class DebugInformation:
         yield f"{self.INDENTATION_END_HTML}"
         yield "</details>"
 
-    def test_status(self):
+    def test_status(self) -> Iterator[str]:
         if bakery is None and _bakery_tests.tests:
             yield ""
         else:
@@ -239,8 +239,8 @@ class DebugInformation:
             else:
                 yield "<div><strong>No Tests</strong></div>"
 
-    def render_state(self, state):
-        if is_dataclass(state):
+    def render_state(self, state: Any) -> str:
+        if is_dataclass(state) and not isinstance(state, type):
             return str(Table(state))
         else:
             return str(Table([[
@@ -248,7 +248,7 @@ class DebugInformation:
                 f"<code>{safe_repr(state)}</code>"
             ]]))
 
-    def test_deployment(self):
+    def test_deployment(self) -> Iterator[str]:
         if self.configuration.skulpt:
             yield "<strong>Configuration</strong>"
             yield f"<p>Running on Skulpt.</p>"
@@ -270,5 +270,5 @@ deploy_image_path: {self.configuration.deploy_image_path}
 
     # TODO: Dump the current server configuration
 
-    def render_configuration(self):
-        pass
+    def render_configuration(self) -> None:
+        raise NotImplementedError()

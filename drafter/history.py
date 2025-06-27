@@ -7,7 +7,7 @@ from urllib.parse import unquote
 from dataclasses import dataclass, is_dataclass, replace, asdict, fields
 from dataclasses import field as dataclass_field
 from datetime import timezone, timedelta, datetime
-from typing import Any, Optional, Callable, Dict
+from typing import Any, Optional, Callable, Dict, TYPE_CHECKING, Union
 import pprint
 
 from drafter.constants import LABEL_SEPARATOR, JSON_DECODE_SYMBOL
@@ -15,27 +15,30 @@ from drafter.setup import request
 from drafter.testing import DIFF_INDENT_WIDTH
 from drafter.image_support import HAS_PILLOW, PILImage
 
+if TYPE_CHECKING:
+    from drafter.page import Page
+    import bottle
 
 timezone_UTC = timezone(timedelta(0))
 
 
 TOO_LONG_VALUE_THRESHOLD = 256
 
-def make_value_expandable(value):
+def make_value_expandable(value: Any) -> str:
     if isinstance(value, str) and len(value) > TOO_LONG_VALUE_THRESHOLD:
         return f"<span class='expandable'>{value}</span>"
-    return value
+    return str(value)
 
-def value_to_html(value):
+def value_to_html(value: Any) -> str:
     return make_value_expandable(html.escape(repr(value)))
 
-def is_generator(iterable):
+def is_generator(iterable: Any) -> bool:
     return hasattr(iterable, '__iter__') and not hasattr(iterable, '__len__')
 
 
 # TODO: If no filename data, then could dump base64 representation or something? tobytes perhaps?
 
-def safe_repr(value: Any, handled=None):
+def safe_repr(value: Any, handled: Optional[set[int]] = None) -> str:
     obj_id = id(value)
     if handled is None:
         handled = set()
@@ -76,7 +79,7 @@ def safe_repr(value: Any, handled=None):
 
 
 
-def repr_pil_image(value):
+def repr_pil_image(value: PILImage.Image) -> str:
     from drafter.server import get_server_setting
     filename = value.filename if hasattr(value, 'filename') else None
     if not filename:
@@ -112,7 +115,7 @@ class ConversionRecord:
     expected_type: Any
     converted_value: Any
 
-    def as_html(self):
+    def as_html(self) -> str:
         return (f"<li><code>{html.escape(self.parameter)}</code>: "
                 f"<code>{safe_repr(self.value)}</code> &rarr; "
                 f"<code>{safe_repr(self.converted_value)}</code></li>")
@@ -123,7 +126,7 @@ class UnchangedRecord:
     value: Any
     expected_type: Any = None
 
-    def as_html(self):
+    def as_html(self) -> str:
         return (f"<li><code>{html.escape(self.parameter)}</code>: "
                 f"<code>{safe_repr(self.value)}</code></li>")
 
@@ -131,22 +134,22 @@ try:
     pprint.PrettyPrinter
 except:
     class PrettyPrinter:
-        def __init__(self, indent, width, *args, **kwargs):
+        def __init__(self, indent: int, width: int, *args: Any, **kwargs: Any) -> None:
             self.indent = indent
             self.width = width
-        def pformat(self, obj):
+        def pformat(self, obj: object) -> str:
             return pprint.pformat(obj, indent=self.indent, width=self.width)
 
     pprint.PrettyPrinter = PrettyPrinter  # type: ignore
 
 
 class CustomPrettyPrinter(pprint.PrettyPrinter):
-    def format(self, object, context, maxlevels, level):
+    def format(self, object: object, context: dict[int, int], maxlevels: int, level: int) -> tuple[str, bool, bool]:
         if HAS_PILLOW and isinstance(object, PILImage.Image):
             return repr_pil_image(object), True, False
         return pprint.PrettyPrinter.format(self, object, context, maxlevels, level)
 
-def format_page_content(content, width=80):
+def format_page_content(content: object, width: int = 80) -> tuple[str, bool]:
     try:
         custom_pretty_printer = CustomPrettyPrinter(indent=DIFF_INDENT_WIDTH, width=width)
         return custom_pretty_printer.pformat(content), True
@@ -154,7 +157,7 @@ def format_page_content(content, width=80):
         return safe_repr(content), False
 
 
-def extract_button_label(full_key: str):
+def extract_button_label(full_key: str) -> tuple[Optional[Any], str]:
     if LABEL_SEPARATOR not in full_key:
         return None, full_key
     button_pressed, key = full_key.split(LABEL_SEPARATOR, 1)
@@ -162,7 +165,7 @@ def extract_button_label(full_key: str):
     return button_pressed, key
 
 
-def add_unless_present(a_dictionary, key, value, from_button=False):
+def add_unless_present(a_dictionary: dict[Any, Any], key: Any, value: Any, from_button: bool = False) -> dict[Any, Any]:
     if key in a_dictionary:
         base_message = f"Parameter {key!r} with new value {value!r} already exists in {a_dictionary!r}"
         if from_button:
@@ -173,7 +176,7 @@ def add_unless_present(a_dictionary, key, value, from_button=False):
     return a_dictionary
 
 
-def remap_hidden_form_parameters(kwargs: dict, button_pressed: str):
+def remap_hidden_form_parameters(kwargs: dict[Any, Any], button_pressed: str) -> dict[Any, Any]:
     renamed_kwargs: Dict[Any, Any] = {}
     for key, value in kwargs.items():
         possible_button_pressed, possible_key = extract_button_label(key)
@@ -198,7 +201,7 @@ def remap_hidden_form_parameters(kwargs: dict, button_pressed: str):
 @dataclass
 class VisitedPage:
     url: str
-    function: Callable
+    function: Callable[..., 'Page']
     arguments: str
     status: str
     button_pressed: str
@@ -207,7 +210,7 @@ class VisitedPage:
     started: datetime = dataclass_field(default_factory=lambda:datetime.now(timezone_UTC))
     stopped: Optional[datetime] = None
 
-    def update(self, new_status, original_page_content=None):
+    def update(self, new_status: str, original_page_content: Optional['Page'] = None) -> None:
         self.status = new_status
         if original_page_content is not None:
             content, normal_mode = format_page_content(original_page_content, 120)
@@ -215,16 +218,16 @@ class VisitedPage:
                 content = html.escape(content)
             self.original_page_content = content
 
-    def finish(self, new_status):
+    def finish(self, new_status: str) -> None:
         self.status = new_status
         self.stopped = datetime.now(timezone_UTC)
 
-    def as_html(self):
+    def as_html(self) -> str:
         function_name = self.function.__name__
         return (f"<strong>Current Route:</strong><br>Route function: <code>{function_name}</code><br>"
                 f"URL: <href='{self.url}'><code>{self.url}</code></href>")
 
-def dehydrate_json(value, seen=None):
+def dehydrate_json(value: Any, seen: Optional[set[Any]] = None) -> Any:
     if seen is None:
         seen = set()
     else:
@@ -250,18 +253,18 @@ def dehydrate_json(value, seen=None):
         f"Error while serializing state: The {value!r} is not a int, str, float, bool, list, or dataclass.")
 
 
-def image_to_bytes(value):
+def image_to_bytes(value: PILImage.Image) -> bytes:
     with io.BytesIO() as output:
         value.save(output, format='PNG')
         return output.getvalue()
 
-def bytes_to_image(value):
+def bytes_to_image(value: bytes) -> PILImage.Image:
     return PILImage.open(io.BytesIO(value))
 
 
 
 
-def rehydrate_json(value, new_type):
+def rehydrate_json(value: Any, new_type: Any) -> Any:
     # TODO: More validation that the structure is consistent; what if the target is not these?
     if isinstance(value, list):
         if hasattr(new_type, '__args__'):
@@ -288,7 +291,7 @@ def rehydrate_json(value, new_type):
                     for k, v in value.items()}
         elif hasattr(new_type, '__origin__') and getattr(new_type, '__origin__') == dict:
             return value
-        elif is_dataclass(new_type):
+        elif is_dataclass(new_type) and isinstance(new_type, type):
             converted = {f.name: rehydrate_json(value[f.name], f.type) if f.name in value else f.default
                          for f in fields(new_type)}
             return new_type(**converted)
@@ -298,7 +301,7 @@ def rehydrate_json(value, new_type):
     raise ValueError(f"Error while restoring state: Could not create {new_type!r} from {value!r}")
 
 
-def get_params():
+def get_params() -> 'bottle.FormsDict':
     params = request.params
     if hasattr(params, 'decode'):
         params = params.decode('utf-8')
