@@ -681,10 +681,10 @@ class Text(PageContent):
 
 @dataclass
 class MatPlotLibPlot(PageContent):
-    extra_matplotlib_settings: dict
+    extra_matplotlib_settings: dict[str, Any]
     close_automatically: bool
 
-    def __init__(self, extra_matplotlib_settings=None, close_automatically=True, **kwargs):
+    def __init__(self, extra_matplotlib_settings: Optional[dict[str, Any]] = None, close_automatically: bool = True, **kwargs: Any) -> None:
         if not _has_matplotlib:
             raise ImportError("Matplotlib is not installed. Please install it to use this feature.")
         if extra_matplotlib_settings is None:
@@ -697,7 +697,7 @@ class MatPlotLibPlot(PageContent):
             extra_matplotlib_settings["bbox_inches"] = "tight"
         self.close_automatically = close_automatically
 
-    def __str__(self):
+    def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         # Handle image processing
         image_data = io.BytesIO()
