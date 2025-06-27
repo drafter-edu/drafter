@@ -510,10 +510,10 @@ class HorizontalRule(PageContent):
 @dataclass(repr=False)
 class _HtmlGroup(PageContent):
     content: List[Any]
-    extra_settings: Dict
+    extra_settings: Dict[str, Any]
     kind: str
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.content = list(args)
         if 'content' in kwargs:
             self.content.extend(kwargs.pop('content'))
@@ -525,7 +525,7 @@ class _HtmlGroup(PageContent):
         else:
             self.extra_settings = kwargs
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.extra_settings:
             return f"{self.kind.capitalize()}({', '.join(repr(item) for item in self.content)}, {self.extra_settings})"
         return f"{self.kind.capitalize()}({', '.join(repr(item) for item in self.content)})"
@@ -539,7 +539,7 @@ class _HtmlGroup(PageContent):
 class Span(_HtmlGroup):
     kind = 'span'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
 
@@ -547,7 +547,7 @@ class Span(_HtmlGroup):
 class Div(_HtmlGroup):
     kind = 'div'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
 
@@ -560,7 +560,7 @@ class Pre(_HtmlGroup):
     content: List[Any]
     kind = 'pre'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
 
@@ -569,7 +569,7 @@ PreformattedText = Pre
 
 @dataclass(repr=False)
 class Row(Div):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.extra_settings['style_display'] = "flex"
         self.extra_settings['style_flex_direction'] = "row"
