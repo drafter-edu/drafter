@@ -280,7 +280,8 @@ class LinkContent:
             escaped_label_namespace = make_safe_argument(label_namespace)
             for arg in arguments:
                 if isinstance(arg, Argument):
-                    arg, value = arg.name, arg.value
+                    value = arg.value
+                    arg = arg.name
                 else:
                     arg, value = arg
                 result[f"{escaped_label_namespace}{LABEL_SEPARATOR}{arg}"] = value
