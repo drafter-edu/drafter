@@ -2,7 +2,7 @@ from typing import Any, Tuple, Dict
 import re
 from urllib.parse import urlencode, urlparse, parse_qs, quote_plus
 
-def merge_url_query_params(url: str, additional_params: dict) -> str:
+def merge_url_query_params(url: str, additional_params: dict[str, Any]) -> str:
     """
     Merges additional parameters into a URL. If a parameter already exists, it will be overwritten.
     For more information, see: https://stackoverflow.com/a/52373377
@@ -19,7 +19,7 @@ def merge_url_query_params(url: str, additional_params: dict) -> str:
     return url_components._replace(query=updated_query).geturl()
 
 
-def remove_url_query_params(url: str, params_to_remove: set) -> str:
+def remove_url_query_params(url: str, params_to_remove: set[str]) -> str:
     """
     Removes parameters from a URL. If a parameter does not exist, it will be ignored.
 
@@ -34,7 +34,7 @@ def remove_url_query_params(url: str, params_to_remove: set) -> str:
     return url_components._replace(query=updated_query).geturl()
 
 
-def remap_attr_styles(attributes: dict) -> Tuple[dict, dict]:
+def remap_attr_styles(attributes: dict[str, Any]) -> Tuple[dict[str, Any], dict[str, Any]]:
     """
     Remaps attributes into styles and attributes dictionaries. This is useful for handling style and class attributes.
     The 'classes' key's vales will be moved to 'class' and joined with a space. Any key prefixed with 'style_' will be
