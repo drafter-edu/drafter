@@ -604,7 +604,7 @@ class Header(PageContent):
     body: str
     level: int = 1
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"<h{self.level}>{self.body}</h{self.level}>"
 
 
@@ -612,25 +612,28 @@ class Header(PageContent):
 class Table(PageContent):
     # rows: List[List[str]]
 
-    def __init__(self, rows: Union[List[List[str]], 'DataclassInstance'], header: Optional[list[str]] = None, **kwargs) -> str:
+    def __init__(self, rows: Union[List[List[str]], 'DataclassInstance'], header: Optional[list[str]] = None, **kwargs: Any) -> None:
         self.rows = rows
         self.header = header
         self.extra_settings = kwargs
         self.reformat_as_tabular()
 
-    def reformat_as_single(self):
+    def reformat_as_single(self) -> None:
         result = []
+        if not is_dataclass(self.rows):
+            raise TypeError("reformat_as_single called without ensuring type of rows")
         for field in fields(self.rows):
             value = getattr(self.rows, field.name)
+            field_type = field.type if isinstance(field.type, type) else type(value)
             result.append(
                 [f"<code>{html.escape(field.name)}</code>",
-                 f"<code>{html.escape(field.type.__name__)}</code>",
+                 f"<code>{html.escape(field_type.__name__)}</code>",
                  f"<code>{safe_repr(value)}</code>"])
         self.rows = result
         if not self.header:
             self.header = ["Field", "Type", "Current Value"]
 
-    def reformat_as_tabular(self):
+    def reformat_as_tabular(self) -> None:
         # print(self.rows, is_dataclass(self.rows))
         if is_dataclass(self.rows):
             self.reformat_as_single()
@@ -647,11 +650,13 @@ class Table(PageContent):
                 result.append([str(cell) for cell in row])
 
         if had_dataclasses and self.header is None:
-            self.header = list(row.__dataclass_fields__.keys())
+            self.header = list(row.__dataclass_fields__.keys()) # type: ignore # Hä??
         self.rows = result
 
     def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        if is_dataclass(self.rows):
+            raise TypeError("Improperly initialised Table")
         rows = "\n".join(f"<tr>{''.join(f'<td>{cell}</td>' for cell in row)}</tr>"
                          for row in self.rows)
         header = "" if not self.header else f"<thead><tr>{''.join(f'<th>{cell}</th>' for cell in self.header)}</tr></thead>"
@@ -661,13 +666,13 @@ class Table(PageContent):
 @dataclass
 class Text(PageContent):
     body: str
-    extra_settings: dict
+    extra_settings: dict[str, Any]
 
-    def __init__(self, body: str, **kwargs):
+    def __init__(self, body: str, **kwargs: Any) -> None:
         self.body = body
         self.extra_settings = kwargs
 
-    def __str__(self):
+    def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         if not parsed_settings:
             return self.body
@@ -715,17 +720,19 @@ class MatPlotLibPlot(PageContent):
 class Download(PageContent):
     text: str
     filename: str
-    content: str
+    content: Union[str, PILImage.Image]
     content_type: str = "text/plain"
 
-    def __init__(self, text: str, filename: str, content: str, content_type: str = "text/plain"):
+    def __init__(self, text: str, filename: str, content: Union[str, PILImage.Image], content_type: str = "text/plain") -> None:
         self.text = text
         self.filename = filename
         self.content = content
         self.content_type = content_type
 
-    def _handle_pil_image(self, image):
-        if not HAS_PILLOW or isinstance(image, str):
+    def _handle_pil_image(self, image: Union[str, PILImage.Image]) -> tuple[bool, str]:
+        if not HAS_PILLOW:
+            return False, repr(image)
+        if isinstance(image, str):
             return False, image
 
         image_data = io.BytesIO()
@@ -735,7 +742,7 @@ class Download(PageContent):
         figure = f"data:image/png;base64,{figure}"
         return True, figure
 
-    def __str__(self):
+    def __str__(self) -> str:
         was_pil, url = self._handle_pil_image(self.content)
         if was_pil:
             return f'<a download="{self.filename}" href="{url}">{self.text}</a>'
@@ -760,7 +767,7 @@ class FileUpload(PageContent):
     name: str
     EXTRA_ATTRS = ["accept", "capture", "multiple", "required"]
 
-    def __init__(self, name: str, accept: Union[str, List[str], None] = None, **kwargs):
+    def __init__(self, name: str, accept: Union[str, List[str], None] = None, **kwargs: Any) -> None:
         validate_parameter_name(name, "FileUpload")
         self.name = name
         self.extra_settings = kwargs
@@ -773,6 +780,6 @@ class FileUpload(PageContent):
                      for ext in accept]
             self.extra_settings['accept'] = ", ".join(accept)
 
-    def __str__(self):
+    def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         return f"<input type='file' name={self.name!r} {parsed_settings} />"
