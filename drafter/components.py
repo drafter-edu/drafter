@@ -1,5 +1,5 @@
 from dataclasses import dataclass, is_dataclass, fields
-from typing import TYPE_CHECKING, Any, Self, Union, Optional, List, Dict, Tuple
+from typing import TYPE_CHECKING, Any, Self, TypeAlias, Union, Optional, List, Dict, Tuple
 import io
 import base64
 # from urllib.parse import quote_plus
@@ -20,6 +20,7 @@ except ImportError:
 
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
+    from drafter.server import Server
 
 
 BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "tabindex", "value",
@@ -33,7 +34,7 @@ BASE_PARAMETER_ERROR = ("""The {component_type} name must be a valid Python iden
                         """a valid identifier if it only contains alphanumeric letters (a-z) and (0-9), or """
                         """underscores (_). A valid identifier cannot start with a number, or contain any spaces.""")
 
-def validate_parameter_name(name: str, component_type: str):
+def validate_parameter_name(name: str, component_type: str) -> None:
     """
     Validates a parameter name to ensure it adheres to Python's identifier naming rules.
     The function verifies if the given name is a string, non-empty, does not contain spaces,
@@ -78,9 +79,9 @@ class PageContent:
     This class also has some helpful methods for verifying URLs and handling attributes/styles.
     """
     EXTRA_ATTRS: List[str] = []
-    extra_settings: dict
+    extra_settings: dict[str, Any]
 
-    def verify(self, server) -> bool:
+    def verify(self, server: 'Server') -> bool:
         """
         Verify the status of this component. This method is called before rendering the component
         to ensure that the component is in a valid state. If the component is not valid, this method
@@ -93,7 +94,7 @@ class PageContent:
         """
         return True
 
-    def parse_extra_settings(self, **kwargs):
+    def parse_extra_settings(self, **kwargs: Any) -> str:
         """
         Parses and combines extra settings into valid attribute and style formats.
 
@@ -176,9 +177,9 @@ class PageContent:
         return str(self)
 
 
-Content = Union[PageContent, str]
+Content: TypeAlias = Union[PageContent, str]
 
-def make_safe_json_argument(value):
+def make_safe_json_argument(value: Any) -> str:
     """
     Converts the given value to a JSON-compatible string and escapes special
     HTML characters, making it safe for inclusion in HTML contexts.
@@ -189,7 +190,7 @@ def make_safe_json_argument(value):
     """
     return html.escape(json.dumps(value), True)
 
-def make_safe_argument(value):
+def make_safe_argument(value: Any) -> str:
     """
     Encodes the given value into JSON format and escapes any special HTML
     characters to ensure the argument is safe for use in HTML contexts.
@@ -208,7 +209,7 @@ def make_safe_argument(value):
     """
     return html.escape(json.dumps(value), True)
 
-def make_safe_name(value):
+def make_safe_name(value: Any) -> str:
     """
     This function takes a value as input and generates a safe string version of it by escaping
     special characters to prevent injection attacks or unintended HTML rendering. It ensures that
