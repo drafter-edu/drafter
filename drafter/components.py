@@ -1,5 +1,5 @@
 from dataclasses import dataclass, is_dataclass, fields
-from typing import TYPE_CHECKING, Any, Union, Optional, List, Dict, Tuple
+from typing import TYPE_CHECKING, Any, Self, Union, Optional, List, Dict, Tuple
 import io
 import base64
 # from urllib.parse import quote_plus
@@ -127,7 +127,7 @@ class PageContent:
             result += f" style='{'; '.join(styles)}'"
         return result
 
-    def update_style(self, style, value):
+    def update_style(self, style: str, value: Any) -> Self:
         """
         Updates the style of a specific setting and stores it in the
         extra_settings dictionary with a key formatted as "style_{style}".
@@ -142,7 +142,7 @@ class PageContent:
         self.extra_settings[f"style_{style}"] = value
         return self
 
-    def update_attr(self, attr, value):
+    def update_attr(self, attr: str, value: Any) -> Self:
         """
         Updates a specific attribute with the given value in the extra_settings dictionary.
 
