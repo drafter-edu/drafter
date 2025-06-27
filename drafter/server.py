@@ -269,7 +269,7 @@ class Server:
         self.app = Bottle()
 
         # Setup error pages
-        def handle_404(error: bottle.HTTPError) -> str:
+        def handle_404(error): # type: (bottle.HTTPError) -> str
             """
             This is the default handler for HTTP 404 errors. It renders a custom error page
             that displays a message indicating the requested page was not found, and provides
@@ -287,7 +287,7 @@ class Server:
                                            f"<li><code>{r!r}</code>: <code>{func}</code></li>" for r, func in
                                            self.original_routes))
 
-        def handle_500(error: bottle.HTTPError) -> str:
+        def handle_500(error): # type: (bottle.HTTPError) -> str
             """
             This is the default handler for HTTP 500 errors. It renders a custom error page
             that displays a message indicating an internal server error occurred, and provides
@@ -361,7 +361,7 @@ class Server:
             - The button pressed if detected and processed.
         """
         self._conversion_record.clear()
-        args = tuple(args)
+        args = list(args)
         kwargs = dict(**kwargs)
         button_pressed = ""
         params = get_params()
@@ -424,7 +424,7 @@ class Server:
         if self.configuration.deploy_image_path:
             self.app.route(f"/{self.configuration.deploy_image_path}/<path:path>", 'GET', self.serve_image)
 
-    def serve_image(self, path: str) -> bottle.HTTPResponse:
+    def serve_image(self, path): # type: (str) -> bottle.HTTPResponse
         """
         Serves an image file located in the specified directory with the MIME type
         `image/png`. The method retrieves the image from the path provided, using
