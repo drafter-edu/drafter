@@ -418,7 +418,7 @@ class TextBox(PageContent):
     kind: str
     default_value: Optional[str]
 
-    def __init__(self, name: str, default_value: Optional[str] = None, kind: str = "text", **kwargs):
+    def __init__(self, name: str, default_value: Optional[str] = None, kind: str = "text", **kwargs: Any) -> None:
         validate_parameter_name(name, "TextBox")
         self.name = name
         self.kind = kind
@@ -440,7 +440,7 @@ class TextArea(PageContent):
     default_value: str
     EXTRA_ATTRS = ["rows", "cols", "autocomplete", "autofocus", "disabled", "placeholder", "readonly", "required"]
 
-    def __init__(self, name: str, default_value: Optional[str] = None, **kwargs):
+    def __init__(self, name: str, default_value: Optional[str] = None, **kwargs: Any) -> None:
         validate_parameter_name(name, "TextArea")
         self.name = name
         self.default_value = str(default_value) if default_value is not None else ""
@@ -457,7 +457,7 @@ class SelectBox(PageContent):
     options: List[str]
     default_value: Optional[str]
 
-    def __init__(self, name: str, options: List[str], default_value: Optional[str] = None, **kwargs):
+    def __init__(self, name: str, options: List[str], default_value: Optional[str] = None, **kwargs: Any) -> None:
         validate_parameter_name(name, "SelectBox")
         self.name = name
         self.options = [str(option) for option in options]
@@ -481,7 +481,7 @@ class CheckBox(PageContent):
     name: str
     default_value: bool
 
-    def __init__(self, name: str, default_value: bool = False, **kwargs):
+    def __init__(self, name: str, default_value: bool = False, **kwargs: Any) -> None:
         validate_parameter_name(name, "CheckBox")
         self.name = name
         self.default_value = bool(default_value)
