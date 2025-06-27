@@ -293,7 +293,7 @@ class Argument(PageContent):
     name: str
     value: Any
 
-    def __init__(self, name: str, value: Any, **kwargs):
+    def __init__(self, name: str, value: Any, **kwargs: Any) -> None:
         validate_parameter_name(name, "Argument")
         self.name = name
         if not isinstance(value, (str, int, float, bool)):
@@ -311,7 +311,7 @@ class Link(PageContent, LinkContent):
     text: str
     url: str
 
-    def __init__(self, text: str, url: str, arguments=None, **kwargs):
+    def __init__(self, text: str, url: str, arguments: Any = None, **kwargs: Any) -> None:
         self.text = text
         self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
@@ -330,13 +330,13 @@ class Button(PageContent, LinkContent):
     arguments: List[Argument]
     external: bool = False
 
-    def __init__(self, text: str, url: str, arguments=None, **kwargs):
+    def __init__(self, text: str, url: str, arguments: Any = None, **kwargs: Any) -> None:
         self.text = text
         self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
         self.arguments = arguments
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.arguments:
             return f"Button(text={self.text!r}, url={self.url!r}, arguments={self.arguments!r})"
         return f"Button(text={self.text!r}, url={self.url!r})"
@@ -358,31 +358,31 @@ BASE_IMAGE_FOLDER = "/__images"
 @dataclass
 class Image(PageContent, LinkContent):
     url: str
-    width: int
-    height: int
+    width: Optional[int]
+    height: Optional[int]
 
-    def __init__(self, url: str, width=None, height=None, **kwargs):
+    def __init__(self, url: str, width: Optional[int] = None, height: Optional[int] = None, **kwargs: Any) -> None:
         self.url = url
         self.width = width
         self.height = height
         self.extra_settings = kwargs
         self.base_image_folder = BASE_IMAGE_FOLDER
 
-    def open(self, *args, **kwargs):
+    def open(self, *args: Any, **kwargs: Any) -> PILImage.Image:
         if not HAS_PILLOW:
             raise ImportError("Pillow is not installed. Please install it to use this feature.")
         return PILImage.open(*args, **kwargs)
 
-    def new(self, *args, **kwargs):
+    def new(self, *args: Any, **kwargs: Any) -> PILImage.Image:
         if not HAS_PILLOW:
             raise ImportError("Pillow is not installed. Please install it to use this feature.")
         return PILImage.new(*args, **kwargs)
 
-    def render(self, current_state, configuration):
+    def render(self, current_state: Any, configuration: ServerConfiguration) -> str:
         self.base_image_folder = configuration.deploy_image_path
         return super().render(current_state, configuration)
 
-    def _handle_pil_image(self, image):
+    def _handle_pil_image(self, image: str) -> tuple[bool, str]:
         if not HAS_PILLOW or isinstance(image, str):
             return False, image
 
