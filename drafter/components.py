@@ -1,5 +1,5 @@
 from dataclasses import dataclass, is_dataclass, fields
-from typing import TYPE_CHECKING, Any, Self, TypeAlias, Union, Optional, List, Dict, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Self, TypeAlias, Union, Optional, List, Dict, Tuple
 import io
 import base64
 # from urllib.parse import quote_plus
@@ -21,6 +21,7 @@ except ImportError:
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
     from drafter.server import Server
+    from drafter.page import _Page
 
 
 BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "tabindex", "value",
@@ -239,7 +240,7 @@ class LinkContent:
     url: str
     text: str
 
-    def _handle_url(self, url, external=None):
+    def _handle_url(self, url: Union[str, Callable[..., '_Page']], external: Optional[bool] = None) -> tuple[str, bool]:
         if callable(url):
             url = url.__name__
         if external is None:
@@ -247,7 +248,7 @@ class LinkContent:
         url = url if external else friendly_urls(url)
         return url, external
 
-    def verify(self, server) -> bool:
+    def verify(self, server: 'Server') -> bool:
         if self.url not in server._handle_route:
             invalid_external_url_reason = check_invalid_external_url(self.url)
             if invalid_external_url_reason == "is a valid external url":
@@ -259,14 +260,14 @@ class LinkContent:
 
 
 
-    def create_arguments(self, arguments, label_namespace):
+    def create_arguments(self, arguments: Any, label_namespace: str) -> str:
         parameters = self.parse_arguments(arguments, label_namespace)
         if parameters:
             return "\n".join(f"<input type='hidden' name='{name}' value='{make_safe_json_argument(value)}' />"
                              for name, value in parameters.items())
         return ""
 
-    def parse_arguments(self, arguments, label_namespace):
+    def parse_arguments(self, arguments: Any, label_namespace: str) -> dict[str, Any]:
         if arguments is None:
             return {}
         if isinstance(arguments, dict):
