@@ -114,6 +114,10 @@ class Server:
     :type app: Bottle or None
     :ivar _custom_name: Custom name for the server instance, used in string representations.
     :type _custom_name: str or None
+    :ivar production: Whether the server is in production mode.
+    :type production: bool
+    :ivar image_folder: The folder to look for images in.
+    :type image_folder: str
     """
     _page_history: List[Tuple[VisitedPage, Any]]
     _custom_name = None
@@ -132,6 +136,8 @@ class Server:
         self.original_routes: list[Tuple[str, Callable[..., Page]]] = []
         self.app: Union[Bottle, None] = None
         self._custom_name = _custom_name
+        self.production = False
+        self.image_folder = "images"
 
     def __repr__(self) -> str:
         """
