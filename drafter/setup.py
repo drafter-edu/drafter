@@ -1,5 +1,6 @@
 import sys
 import logging
+from typing import Any
 logger = logging.getLogger('drafter')
 
 
@@ -12,7 +13,7 @@ except ImportError:
     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
 
 
-def _hijack_bottle():
+def _hijack_bottle() -> None:
     """
     Hijacks the Bottle backend to allow for custom stderr messages.
     This allows us to suppress some of the Bottle messages and replace them with our own.
@@ -20,14 +21,14 @@ def _hijack_bottle():
     Called automatically when the module is imported, as a first step to ensure that the Bottle backend is available.
     Fails silently if Bottle is not available.
     """
-    def _stderr(*args):
+    def _stderr(*args: Any) -> None:
         try:
             if args:
                 first_arg = str(args[0])
                 if first_arg.startswith("Bottle v") and "server starting up" in first_arg:
-                    args = list(args)
-                    args[0] = "Drafter server starting up (using Bottle backend)."
-            print(*args, file=sys.stderr)
+                    mutable_args = list(args)
+                    mutable_args[0] = "Drafter server starting up (using Bottle backend)."
+            print(*mutable_args, file=sys.stderr)
         except (IOError, AttributeError):
             pass
 
