@@ -21,7 +21,7 @@ from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, Convers
 from drafter.page import Page
 from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, \
     TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
-from drafter.raw_files import get_raw_files, get_themes # type: ignore[attr-defined]
+from drafter.raw_files import get_raw_files, get_themes
 from drafter.urls import remove_url_query_params
 from drafter.image_support import HAS_PILLOW, PILImage
 
@@ -130,7 +130,7 @@ class Server:
         self._page_history: List[Tuple[VisitedPage, Any]] = []
         self._conversion_record: list[Union[ConversionRecord, UnchangedRecord]] = []
         self.original_routes: list[Tuple[str, Callable[..., Page]]] = []
-        self.app: Union[Bottle, None] = None # type: ignore
+        self.app: Union[Bottle, None] = None
         self._custom_name = _custom_name
 
     def __repr__(self) -> str:
@@ -864,7 +864,7 @@ def get_all_routes(server: Optional[Server] = None):
     return server.routes
 
 
-def get_server_setting(key, default=None, server=MAIN_SERVER):
+def get_server_setting(key: str, default: Optional[Any] = None, server: Optional[Server] = MAIN_SERVER) -> Any:
     """
     Gets a setting from the server's configuration. If the setting is not found, the default value is returned.
 

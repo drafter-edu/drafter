@@ -290,7 +290,7 @@ def rehydrate_json(value: Any, new_type: Any) -> Any:
                     for k, v in value.items()}
         elif hasattr(new_type, '__origin__') and getattr(new_type, '__origin__') == dict:
             return value
-        elif is_dataclass(new_type):
+        elif is_dataclass(new_type) and isinstance(new_type, type):
             converted = {f.name: rehydrate_json(value[f.name], f.type) if f.name in value else f.default
                          for f in fields(new_type)}
             return new_type(**converted)
