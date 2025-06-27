@@ -6,6 +6,7 @@ import base64
 import json
 import html
 
+from drafter.configuration import ServerConfiguration
 from drafter.constants import LABEL_SEPARATOR, SUBMIT_BUTTON_KEY, JSON_DECODE_SYMBOL
 from drafter.urls import remap_attr_styles, friendly_urls, check_invalid_external_url, merge_url_query_params
 from drafter.image_support import HAS_PILLOW, PILImage
@@ -157,7 +158,7 @@ class PageContent:
         self.extra_settings[attr] = value
         return self
 
-    def render(self, current_state, configuration):
+    def render(self, current_state: Any, configuration: ServerConfiguration) -> str:
         """
         This method is called when the component is being rendered to a string. It should return
         the HTML representation of the component, using the current State and configuration to

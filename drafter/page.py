@@ -31,7 +31,7 @@ class Page:
     state: Any
     content: list[Content]
 
-    def __init__(self, state: Any, content: Optional[list[Content]] = None):
+    def __init__(self, state: Any, content: Optional[list[Content]] = None) -> None:
         if content is None:
             state, content = None, state
         self.state = state
