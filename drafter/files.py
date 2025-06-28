@@ -283,3 +283,39 @@ TEMPLATE_SKULPT_DEPLOY = """<!--html-->
     </body>
 </html>
 """
+
+TEMPLATE_INDEX_HTML = """<!DOCTYPE html>
+<html>
+    <head>
+        <script src="{cdn_skulpt}" type="text/javascript"></script>
+        <script src="{cdn_skulpt_std}" type="text/javascript"></script>
+        <script src="{cdn_skulpt_drafter}" type="text/javascript"></script>
+        <script
+            src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous"
+        ></script>
+        <script type="text/javascript">
+            let {python_source_obj_name} = {{}};
+            {python_source}
+            function compilePython() {{
+                for (let fileName in {python_source_obj_name}) {{
+                    let internalName = fileName.replace(/\\.py$/, ".js");
+                    let contents = {python_source_obj_name}[fileName];
+                    let co = Sk.compile(contents, `src/lib/${{fileName}}`, 'exec', true, true);
+                    Sk.builtinFiles.files[`src/lib/${{internalName}}`] = `${{co.code}}\\nvar $builtinmodule = ${{co.funcname}};`;
+                }}
+            }}
+
+            Sk.output = console.log;
+        </script>
+    </head>
+
+    <body>
+        <div id="website">
+            Loading...
+        </div>
+        <script src="{cdn_drafter_setup}" type="text/javascript"></script>
+    </body>
+</html>
+"""

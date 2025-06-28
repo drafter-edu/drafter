@@ -19,7 +19,7 @@ from drafter.setup import Bottle, abort, request, static_file
 from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, get_params, \
     remap_hidden_form_parameters, safe_repr
 from drafter.page import Page, _Page
-from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, \
+from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, TEMPLATE_INDEX_HTML, \
     TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
 from drafter.raw_files import get_raw_files, get_themes
 from drafter.urls import remove_url_query_params
@@ -108,7 +108,7 @@ def bundle_py_into_raw_js(root_path: str, js_obj_name: str = "python_source") ->
     for filename, contents in all_files.items():
         js_lines.append(f"{js_obj_name}[{filename!r}] = {contents!r};\n")
     
-    return "\n".join(js_lines)
+    return "            ".join(js_lines)
 
 
 class Server:
@@ -944,5 +944,16 @@ def start_server(initial_state: Any = None, server: Server = MAIN_SERVER, skip: 
         server.setup(initial_state)
         server.run(**kwargs)
     else:
+        bundled_js = bundle_py_into_raw_js(".")
+        with open("index.html", "w") as f:
+            f.write(TEMPLATE_INDEX_HTML.format(python_source_obj_name="python_source",
+                                               python_source=bundled_js,
+                                               cdn_skulpt=server.configuration.cdn_skulpt,
+                                               cdn_skulpt_std=server.configuration.cdn_skulpt_std,
+                                               cdn_skulpt_drafter=server.configuration.cdn_skulpt_drafter,
+                                               cdn_drafter_setup=server.configuration.cdn_drafter_setup))
+        # with open("out.js", "w") as f:
+        #     f.write(bundle_py_into_raw_js("."))
+
         from http.server import test, SimpleHTTPRequestHandler, ThreadingHTTPServer # type: ignore[attr-defined]
         test(SimpleHTTPRequestHandler, ThreadingHTTPServer, **kwargs)
