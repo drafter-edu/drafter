@@ -967,7 +967,10 @@ def start_server(initial_state: Any = None, server: Server = MAIN_SERVER, skip: 
 
     if server.configuration.skulpt:
         server.setup(initial_state)
-        server.run(**kwargs)
+        # server.run(**kwargs)
+        # global SITE
+        # SITE = str(server.routes["/"](server._state))
+        # SITE = str(server.routes["/"]())
     else:
         with open("index.html", "w") as f:
             f.write(server.index_html_deployment())

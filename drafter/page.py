@@ -100,4 +100,7 @@ class Page:
                 chunk.verify(server)
         return True
 
+    def __str__(self) -> str:
+        return self.render_content()
+
 _Page: TypeAlias = Union[str, Page]
