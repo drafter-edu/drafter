@@ -19,7 +19,7 @@ from drafter.setup import Bottle, abort, request, static_file
 from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, get_params, \
     remap_hidden_form_parameters, safe_repr
 from drafter.page import Page, _Page
-from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, \
+from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, TEMPLATE_INDEX_HTML, \
     TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
 from drafter.raw_files import get_raw_files, get_themes
 from drafter.urls import remove_url_query_params
@@ -31,7 +31,12 @@ logger = logging.getLogger('drafter')
 
 DEFAULT_ALLOWED_EXTENSIONS = ('py', 'js', 'css', 'txt', 'json', 'csv', 'html', 'md')
 
-def bundle_files_into_js(main_file: str, root_path: str, allowed_extensions: Optional[set[str]] = None) -> tuple[str, list[str], list[str]]:
+def bundle_files_into_js(
+        main_file: str, root_path: str,
+        allowed_extensions: Optional[set[str]] = None,
+        js_obj_name: str = "Sk.builtinFiles.files",
+        sep: str = "\n"
+    ) -> tuple[str, list[str], list[str]]:
     """
     Bundles all files from a specified directory into a JavaScript-compatible format
     for Skulpt, a Python-to-JavaScript transpiler. The function traverses through the
@@ -47,6 +52,11 @@ def bundle_files_into_js(main_file: str, root_path: str, allowed_extensions: Opt
     :param allowed_extensions: A collection of file extensions allowed for inclusion
         in the final JavaScript output. Defaults to a predefined tuple.
     :type allowed_extensions: set[str]
+    :param js_obj_name: An optional alternative name for the JS object in which to store
+        the python source.
+    :type js_obj_name: str
+    :param sep: The separator between each JSified file line.
+    :type sep: str
     :return: A tuple containing:
         - The combined JavaScript output string with file contents.
         - A list of skipped files that do not match the allowed extensions.
@@ -73,9 +83,9 @@ def bundle_files_into_js(main_file: str, root_path: str, allowed_extensions: Opt
 
     js_lines = []
     for filename, contents in all_files.items():
-        js_lines.append(f"Sk.builtinFiles.files[{filename!r}] = {contents!r};\n")
+        js_lines.append(f"{js_obj_name}[{filename!r}] = {contents!r};\n")
 
-    return "\n".join(js_lines), skipped_files, added_files
+    return sep.join(js_lines), skipped_files, added_files
 
 
 class Server:
@@ -798,27 +808,35 @@ class Server:
                                    self.configuration)
         return content.generate()
 
-    def test_deployment(self) -> str:
+    def bundled_js_or_error(
+            self,
+            allowed_extensions: Optional[set[str]],
+            js_obj_name: Optional[str],
+            sep: Optional[str]
+        ) -> tuple[str, bool]:
         """
         Bundles files necessary for deployment, including the source code identified by
-        the "start_server" line in the student's main file. This allows the server to
-        "deploy" a local version of the application, as it would appear on a live server
-        using Skulpt.
+        the "start_server" line in the student's main file. 
 
         This function searches for the entry point of the student's application and
         attempts to bundle it with all its associated files into a deployable format.
         If the main file cannot be located, it returns an error indicating the failure
         to find the required file. Otherwise, it creates a bundled JavaScript version
-        of the required files and integrates them with the appropriate configurations
-        for deployment.
+        of the required files.
 
-        :raises ValueError: If the student's main file cannot be located.
-
-        :raises IOError: If there are issues during the file bundling process.
-
-        :return: HTML template string formatted with bundled JavaScript and CDN
-                 configurations.
-        :rtype: str
+        :param allowed_extensions: A collection of file extensions allowed for inclusion
+            in the final JavaScript output. Passed directly on to `bundle_files_into_js`,
+            where it defaults to a predefined tuple.
+        :type allowed_extensions: set[str]
+        :param js_obj_name: An alternative name for the JS object in which to store
+            the python source. Passed directly on, where it defaults to `Sk.builtinFiles.files`.
+        :type js_obj_name: str
+        :param sep: The separator between each JSified file line, passed directly on,
+            defaulting to newline.
+        :type sep: str
+        :return: A tuple containing the bundled JS or error and an indication that an
+            error occured (so you know what the first item is).
+        :rtype: tuple[str, bool]
         """
         # Bundle up the necessary files, including the source code
         student_main_file = seek_file_by_line("start_server")
@@ -826,13 +844,53 @@ class Server:
             return TEMPLATE_500.format(title="500 Internal Server Error",
                                        message="Could not find the student's main file.",
                                        error="Could not find the student's main file.",
-                                       routes="")
-        bundled_js, skipped, added = bundle_files_into_js(student_main_file, os.path.dirname(student_main_file))
+                                       routes=""), False
+        bundled_js, skipped, added = bundle_files_into_js(
+            student_main_file, os.path.dirname(student_main_file),
+            allowed_extensions, js_obj_name, sep
+        )
+        return bundled_js, True
+    
+    def test_deployment(self) -> str:
+        """
+        Bundles files and integrates them with the appropriate configurations
+        for deployment, allowing the server to "deploy" a local version of the 
+        application, as it would appear on a live server using Skulpt.
+
+        :raises IOError: If there are issues during the file bundling process.
+
+        :return: HTML template string formatted with bundled JavaScript and CDN
+                 configurations.
+        :rtype: str
+        """
+        js_or_err, success = self.bundled_js_or_error()
+        if not success: return js_or_err
+        bundled_js = js_or_err
         return TEMPLATE_SKULPT_DEPLOY.format(website_code=bundled_js,
                                              cdn_skulpt=self.configuration.cdn_skulpt,
                                              cdn_skulpt_std=self.configuration.cdn_skulpt_std,
                                              cdn_skulpt_drafter=self.configuration.cdn_skulpt_drafter,
                                              cdn_drafter_setup=self.configuration.cdn_drafter_setup)
+
+    def index_html_deployment(self) -> str:
+        """
+        Bundles files and integrates them with the appropriate configurations
+        for local or remote deployment using skulpt.
+
+        :return: HTML template string formatted with bundled source code and
+            CDN configurations.
+        :rtype: str
+        """
+        PYTHON_SOURCE_OBJECT_NAME = "pythonSource"
+        js_or_err, success = self.bundled_js_or_error({"py"}, PYTHON_SOURCE_OBJECT_NAME, "            ")
+        if not success: return js_or_err
+        else: bundled_js = js_or_err
+        return TEMPLATE_INDEX_HTML.format(python_source_obj_name=PYTHON_SOURCE_OBJECT_NAME,
+                                          python_source=bundled_js,
+                                          cdn_skulpt=self.configuration.cdn_skulpt,
+                                          cdn_skulpt_std=self.configuration.cdn_skulpt_std,
+                                          cdn_skulpt_drafter=self.configuration.cdn_skulpt_drafter,
+                                          cdn_drafter_setup=self.configuration.cdn_drafter_setup)
 
 
 MAIN_SERVER = Server(_custom_name="MAIN_SERVER")
@@ -911,5 +969,8 @@ def start_server(initial_state: Any = None, server: Server = MAIN_SERVER, skip: 
         server.setup(initial_state)
         server.run(**kwargs)
     else:
+        with open("index.html", "w") as f:
+            f.write(server.index_html_deployment())
+
         from http.server import test, SimpleHTTPRequestHandler, ThreadingHTTPServer # type: ignore[attr-defined]
         test(SimpleHTTPRequestHandler, ThreadingHTTPServer, **kwargs)
