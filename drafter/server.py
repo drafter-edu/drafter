@@ -77,6 +77,39 @@ def bundle_files_into_js(main_file: str, root_path: str, allowed_extensions: Opt
 
     return "\n".join(js_lines), skipped_files, added_files
 
+def bundle_py_into_raw_js(root_path: str, js_obj_name: str = "python_source") -> str:
+    """
+    Bundles all *.py files into simple javascript, not for direct use by Skulpt. 
+    The function traverses through the given directory, reads all *.py files,
+    and aggregates them into a JavaScript code snippet. 
+
+    :param root_path: The root directory to search for files.
+    :type root_path: str
+    :param js_obj_name: An optional alternative name for the JS object in which to store
+        the python source.
+    :type js_obj_name: str
+
+    :return: A JS string containing the files.
+    :rtype: str
+    """
+    all_files = {}
+    for root, dirs, files in os.walk(root_path):
+        for file in files:
+            path = pathlib.Path(os.path.join(root, file)).relative_to(root_path)
+            if pathlib.Path(file).suffix[1:].lower() != "py": continue
+            with open(os.path.join(root, file), encoding='utf-8') as f:
+                is_main = False
+                content = f.read()
+                for line in content.split("\n"): is_main = line.strip().startswith("start_server") or is_main
+                filename = str(path.as_posix()) if not is_main else "main.py"
+                all_files[filename] = content
+
+    js_lines = []
+    for filename, contents in all_files.items():
+        js_lines.append(f"{js_obj_name}[{filename!r}] = {contents!r};\n")
+    
+    return "\n".join(js_lines)
+
 
 class Server:
     """
