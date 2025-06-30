@@ -941,6 +941,25 @@ def get_server_setting(key: str, default: Optional[Any] = None, server: Server =
     """
     return getattr(server.configuration, key, default)
 
+def render_route(route: str, state_str: str) -> tuple[str, str]:
+    """
+    Renders the route specified with the state specified. Returns the site content and
+    new state.
+
+    :param route: The name of the route to render.
+    :type route: str
+    :param state_str: The current state of the website, probably from localStorage.
+    :type state_str: str
+    :return: the text content of the site and state.
+    :rtype: tuple[str, str]
+    """
+    server = get_main_server()
+    state = server.load_from_state(state_str, server._initial_state_type)
+    server._state = state
+    page = server.routes[route]()
+
+    return page, server.dump_state()
+
 
 def start_server(initial_state: Any = None, server: Server = MAIN_SERVER, skip: bool = False, **kwargs: Any) -> None:
     """
