@@ -34,8 +34,8 @@ DEFAULT_ALLOWED_EXTENSIONS = ('py', 'js', 'css', 'txt', 'json', 'csv', 'html', '
 def bundle_files_into_js(
         main_file: str, root_path: str,
         allowed_extensions: Optional[set[str]] = None,
-        js_obj_name: str = "Sk.builtinFiles.files",
-        sep: str = "\n"
+        js_obj_name: Optional[str] = None,
+        sep: Optional[str] = None
     ) -> tuple[str, list[str], list[str]]:
     """
     Bundles all files from a specified directory into a JavaScript-compatible format
@@ -64,6 +64,8 @@ def bundle_files_into_js(
     :rtype: tuple[str, list[str], list[str]]
     """
     allowed_extensions = allowed_extensions or set(DEFAULT_ALLOWED_EXTENSIONS)
+    js_obj_name = js_obj_name or "Sk.builtinFiles.files"
+    sep = sep or "\n"
 
     skipped_files: list[str] = []
     added_files: list[str] = []
@@ -133,8 +135,8 @@ class Server:
     _custom_name = None
 
     def __init__(self, _custom_name: Union[str, None] = None, **kwargs: Any) -> None:
-        self.routes: dict[str, Callable[..., '_Page']] = {}
-        self._handle_route: dict[Union[str, Callable[..., '_Page']], Callable[..., '_Page']] = {}
+        self.routes: dict[str, Callable[..., str]] = {}
+        self._handle_route: dict[Union[str, Callable[..., str]], Callable[..., str]] = {}
         self.configuration = ServerConfiguration(**kwargs)
         self._state: Any = None
         self._initial_state: Union[str, None] = None
@@ -547,7 +549,7 @@ class Server:
         self._conversion_record.append(UnchangedRecord(param, val))
         return val
 
-    def make_bottle_page(self, original_function: Callable[..., Page]) -> Callable[..., '_Page']:
+    def make_bottle_page(self, original_function: Callable[..., Page]) -> Callable[..., str]:
         """
         A decorator that wraps a given function to create and manage a Bottle web
         page environment. This includes processing request parameters, building
@@ -560,7 +562,7 @@ class Server:
             function within the Bottle page handling logic.
         """
         @wraps(original_function)
-        def bottle_page(*args: Any, **kwargs: Any) -> '_Page':
+        def bottle_page(*args: Any, **kwargs: Any) -> str:
             # TODO: Handle non-bottle backends
             url = remove_url_query_params(request.url, {RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY})
             self.restore_state_if_available(original_function)
@@ -810,9 +812,9 @@ class Server:
 
     def bundled_js_or_error(
             self,
-            allowed_extensions: Optional[set[str]],
-            js_obj_name: Optional[str],
-            sep: Optional[str]
+            allowed_extensions: Optional[set[str]] = None,
+            js_obj_name: Optional[str] = None,
+            sep: Optional[str] = None
         ) -> tuple[str, bool]:
         """
         Bundles files necessary for deployment, including the source code identified by
@@ -913,7 +915,7 @@ def get_main_server() -> Server:
     """
     return MAIN_SERVER
 
-def get_all_routes(server: Optional[Server] = None) -> dict[str, Callable[..., '_Page']]:
+def get_all_routes(server: Optional[Server] = None) -> dict[str, Callable[..., str]]:
     """
     Get all routes available in the given server or the main server if none is provided.
 
@@ -954,6 +956,8 @@ def render_route(route: str, state_str: str) -> tuple[str, str]:
     :rtype: tuple[str, str]
     """
     server = get_main_server()
+    if server._initial_state_type is None:
+        raise ValueError("You can't render a route if you haven't setup!")
     state = server.load_from_state(state_str, server._initial_state_type)
     server._state = state
     page = server.routes[route]()

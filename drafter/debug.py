@@ -37,7 +37,8 @@ class DebugInformation:
     """
     page_history: List[Tuple[VisitedPage, Any]]
     state: Any
-    routes: Dict[str, Callable[..., '_Page']]
+    routes: Dict[str, Callable[..., str]]
+    # routes: Dict[str, Callable[..., '_Page']]
     conversion_record: List[ConversionRecord]
     configuration: ServerConfiguration
 
