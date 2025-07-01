@@ -1,3 +1,4 @@
+import base64
 import html
 import os
 import traceback
@@ -399,9 +400,9 @@ class Server:
                       for param in signature_parameters.values()}
         kwargs = remap_hidden_form_parameters(kwargs, button_pressed)
         # Insert state into the beginning of args
-        if (expected_parameters and expected_parameters[0] == "state") or (
-                len(expected_parameters) - 1 == len(args) + len(kwargs)):
-            args.insert(0, self._state)
+        # if (expected_parameters and expected_parameters[0] == "state") or (
+        #         len(expected_parameters) - 1 == len(args) + len(kwargs)):
+        #     args.insert(0, self._state)
         # Check if there are too many arguments
         if len(expected_parameters) < len(args) + len(kwargs):
             self.flash_warning(
@@ -562,11 +563,11 @@ class Server:
             function within the Bottle page handling logic.
         """
         @wraps(original_function)
-        def bottle_page(*args: Any, **kwargs: Any) -> str:
+        def bottle_page(state: Any, *args: Any, **kwargs: Any) -> str:
             # TODO: Handle non-bottle backends
             url = remove_url_query_params(request.url, {RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY})
-            self.restore_state_if_available(original_function)
-            original_state = self.dump_state()
+            # self.restore_state_if_available(original_function)
+            # original_state = self.dump_state()
             try:
                 args, kwargs, arguments, button_pressed = self.prepare_args(original_function, args, kwargs)
             except Exception as e:
@@ -574,18 +575,23 @@ class Server:
                 # return None
             # Actually start building up the page
             visiting_page = VisitedPage(url, original_function, arguments, "Creating Page", button_pressed)
-            self._page_history.append((visiting_page, original_state))
+            # self._page_history.append((visiting_page, original_state))
+            self._page_history.append((visiting_page, json.dumps(dehydrate_json(state))))
             try:
-                page = original_function(*args, **kwargs)
+                page = original_function(state, *args, **kwargs)
             except Exception as e:
-                additional_details = (f"  Arguments: {args!r}\n"
+                print(583)
+                additional_details = (f"  State: {state!r}\n"
+                                      f"  Arguments: {args!r}\n"
                                       f"  Keyword Arguments: {kwargs!r}\n"
                                       f"  Button Pressed: {button_pressed!r}\n"
                                       f"  Function Signature: {inspect.signature(original_function)}")
                 self.make_error_page("Error creating page", e, original_function, additional_details)
-                # return None
+                return None
+            print(590)
             visiting_page.update("Verifying Page Result", original_page_content=page)
             self.verify_page_result(page, original_function)
+            print(593)
             if False:
                 pass # return verification_status
             try:
@@ -943,15 +949,19 @@ def get_server_setting(key: str, default: Optional[Any] = None, server: Server =
     """
     return getattr(server.configuration, key, default)
 
-def render_route(route: str, state_str: str) -> tuple[str, str]:
+def render_route(route: str, state_str: str, args: str, kwargs: str) -> tuple[str, str]:
     """
-    Renders the route specified with the state specified. Returns the site content and
-    new state.
+    Renders the route specified with the state and arguments specified. 
+    Returns the site content and new state.
 
     :param route: The name of the route to render.
     :type route: str
     :param state_str: The current state of the website, probably from localStorage.
     :type state_str: str
+    :param args: The JSONified positional arguments.
+    :type args: str
+    :param kwargs: The JSONified keyword arguments.
+    :type kwargs: str
     :return: the text content of the site and state.
     :rtype: tuple[str, str]
     """
@@ -960,7 +970,9 @@ def render_route(route: str, state_str: str) -> tuple[str, str]:
         raise ValueError("You can't render a route if you haven't setup!")
     state = server.load_from_state(state_str, server._initial_state_type)
     server._state = state
-    page = server.routes[route]()
+    py_args = json.loads(base64.b64decode(bytes(args, 'utf-8')).decode('utf-8'))
+    py_kwargs = json.loads(base64.b64decode(bytes(kwargs, 'utf-8')).decode('utf-8'))
+    page = server.routes[route](state, *py_args, **py_kwargs)
 
     return page, server.dump_state()
 
