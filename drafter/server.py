@@ -403,7 +403,7 @@ class Server:
         # for key in param_keys:
         #     kwargs[key] = params.pop(key)
         signature_parameters = inspect.signature(original_function).parameters
-        expected_parameters = list(signature_parameters.keys())
+        expected_parameters = list(signature_parameters.keys())[1:]
         show_names = {param.name: (param.kind in (inspect.Parameter.KEYWORD_ONLY, inspect.Parameter.VAR_KEYWORD))
                       for param in signature_parameters.values()}
         # kwargs = remap_hidden_form_parameters(kwargs, button_pressed)
