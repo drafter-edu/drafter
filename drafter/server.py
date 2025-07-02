@@ -9,16 +9,16 @@ import json
 import inspect
 import pathlib
 
-import bottle
+# import bottle
 
 from drafter.urls import friendly_urls
 from drafter.components import PageContent
 from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY, PREVIOUSLY_PRESSED_BUTTON
 from drafter.debug import DebugInformation
-from drafter.setup import Bottle, abort, request, static_file
-from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, get_params, \
-    remap_hidden_form_parameters, safe_repr
+# from drafter.setup import Bottle, abort, request, static_file
+from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, \
+    remap_hidden_form_parameters, safe_repr#, get_params
 from drafter.page import Page, _Page
 from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, TEMPLATE_INDEX_HTML, \
     TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
@@ -132,7 +132,7 @@ class Server:
     :ivar image_folder: The folder to look for images in.
     :type image_folder: str
     """
-    _page_history: List[Tuple[VisitedPage, Any]]
+    _page_history: List[Tuple[VisitedPage, str]]
     _custom_name = None
 
     def __init__(self, _custom_name: Union[str, None] = None, **kwargs: Any) -> None:
@@ -144,7 +144,7 @@ class Server:
         self._initial_state_type: Union[type, None] = None
         self._state_history: list[Any] = []
         # self._state_frozen_history = []
-        self._page_history: List[Tuple[VisitedPage, Any]] = []
+        self._page_history: List[Tuple[VisitedPage, str]] = []
         self._conversion_record: list[Union[ConversionRecord, UnchangedRecord]] = []
         self.original_routes: list[Tuple[str, Callable[..., Page]]] = []
         # self.app: Union[Bottle, None] = None
@@ -210,28 +210,28 @@ class Server:
         """
         return rehydrate_json(json.loads(state), state_type)
 
-    def restore_state_if_available(self, original_function: Callable[..., Page]) -> None:
-        """
-        Restores the state if the necessary data is available in the parameters. This
-        function checks for the presence of a specific key in the parameters and, when
-        available, rehydrates the serialized state back to the appropriate type and
-        assigns it to the current instance's state.
+    # def restore_state_if_available(self, original_function: Callable[..., Page]) -> None:
+    #     """
+    #     Restores the state if the necessary data is available in the parameters. This
+    #     function checks for the presence of a specific key in the parameters and, when
+    #     available, rehydrates the serialized state back to the appropriate type and
+    #     assigns it to the current instance's state.
 
-        :param original_function: The function whose state is being restored. This function
-                                  must have a parameter named `state` with an associated
-                                  type annotation.
-        :return: None
-        """
-        params = get_params()
-        if RESTORABLE_STATE_KEY in params:
-            # Get state
-            old_state = json.loads(params.pop(RESTORABLE_STATE_KEY))
-            # Get state type
-            parameters = inspect.signature(original_function).parameters
-            if 'state' in parameters:
-                state_type = parameters['state'].annotation
-                self._state = rehydrate_json(old_state, state_type)
-                self.flash_warning("Successfully restored old state: " + repr(self._state))
+    #     :param original_function: The function whose state is being restored. This function
+    #                               must have a parameter named `state` with an associated
+    #                               type annotation.
+    #     :return: None
+    #     """
+    #     params = get_params()
+    #     if RESTORABLE_STATE_KEY in params:
+    #         # Get state
+    #         old_state = json.loads(params.pop(RESTORABLE_STATE_KEY))
+    #         # Get state type
+    #         parameters = inspect.signature(original_function).parameters
+    #         if 'state' in parameters:
+    #             state_type = parameters['state'].annotation
+    #             self._state = rehydrate_json(old_state, state_type)
+    #             self.flash_warning("Successfully restored old state: " + repr(self._state))
 
     def add_route(self, url: str, func: Callable[..., Page]) -> None:
         """
@@ -288,13 +288,14 @@ class Server:
         # self.app = Bottle()
 
         # Setup error pages
-        def handle_404(error): # type: (bottle.HTTPError) -> str
+        # def handle_404(error): # type: (bottle.HTTPError) -> str
+        def handle_404(error): # type: (Any) -> str
             """
             This is the default handler for HTTP 404 errors. It renders a custom error page
             that displays a message indicating the requested page was not found, and provides
             a link to return to the index page.
             """
-            message = "<p>The requested page <code>{url}</code> was not found.</p>".format(url=request.url)
+            message = "<p>The requested page <code>{url}</code> was not found.</p>"#.format(url=request.url)
             # TODO: Only show if not the index
             message += "\n<p>You might want to return to the <a href='/'>index</a> page.</p>"
             original_error = f"{error.body}\n"
@@ -306,13 +307,14 @@ class Server:
                                            f"<li><code>{r!r}</code>: <code>{func}</code></li>" for r, func in
                                            self.original_routes))
 
-        def handle_500(error): # type: (bottle.HTTPError) -> str
+        # def handle_500(error): # type: (bottle.HTTPError) -> str
+        def handle_500(error): # type: (Any) -> str
             """
             This is the default handler for HTTP 500 errors. It renders a custom error page
             that displays a message indicating an internal server error occurred, and provides
             a link to return to the index page. along with some additional error details.
             """
-            message = "<p>Sorry, the requested URL <code>{url}</code> caused an error.</p>".format(url=request.url)
+            message = "<p>Sorry, the requested URL <code>{url}</code> caused an error.</p>"#.format(url=request.url)
             message += "\n<p>You might want to return to the <a href='/'>index</a> page.</p>"
             original_error = f"{error.body}\n"
             if hasattr(error, 'traceback'):
@@ -366,7 +368,10 @@ class Server:
         #     raise ValueError("You can't run the server if it hasn't been set up!")
         # self.app.run(**final_args)
 
-    def prepare_args(self, original_function: Callable[..., Any], args: Any, kwargs: Any) -> Any:
+    def prepare_args(self, 
+                     original_function: Callable[..., Any], 
+                     args: tuple[Any, ...], kwargs: dict[str, Any]
+                    ) -> tuple[tuple[Any, ...], dict[str, Any], str, str]:
         """
         Processes and prepares arguments for the route function call, ensuring compatibility
         with expected parameters, handling state insertion, remapping parameters,
@@ -384,23 +389,24 @@ class Server:
             - The button pressed if detected and processed.
         """
         self._conversion_record.clear()
-        args = list(args)
+        # args: list[Any] = list(args)
         kwargs = dict(**kwargs)
         button_pressed = ""
-        params = get_params()
-        if SUBMIT_BUTTON_KEY in params:
-            button_pressed = json.loads(params.pop(SUBMIT_BUTTON_KEY))
-        elif PREVIOUSLY_PRESSED_BUTTON in params:
-            button_pressed = json.loads(params.pop(PREVIOUSLY_PRESSED_BUTTON))
+        # params = get_params()
+        # if SUBMIT_BUTTON_KEY in params:
+        #     button_pressed = json.loads(params.pop(SUBMIT_BUTTON_KEY))
+        # elif PREVIOUSLY_PRESSED_BUTTON in params:
+        #     button_pressed = json.loads(params.pop(PREVIOUSLY_PRESSED_BUTTON))
         # TODO: Handle non-bottle backends
-        param_keys = list(params.keys())
-        for key in param_keys:
-            kwargs[key] = params.pop(key)
+            # specifically regarding button_pressed
+        # param_keys = list(params.keys())
+        # for key in param_keys:
+        #     kwargs[key] = params.pop(key)
         signature_parameters = inspect.signature(original_function).parameters
         expected_parameters = list(signature_parameters.keys())
         show_names = {param.name: (param.kind in (inspect.Parameter.KEYWORD_ONLY, inspect.Parameter.VAR_KEYWORD))
                       for param in signature_parameters.values()}
-        kwargs = remap_hidden_form_parameters(kwargs, button_pressed)
+        # kwargs = remap_hidden_form_parameters(kwargs, button_pressed)
         # Insert state into the beginning of args
         # if (expected_parameters and expected_parameters[0] == "state") or (
         #         len(expected_parameters) - 1 == len(args) + len(kwargs)):
@@ -418,8 +424,8 @@ class Server:
         # Type conversion if required
         expected_types = {name: p.annotation for name, p in
                           inspect.signature(original_function).parameters.items()}
-        args = [self.convert_parameter(param, val, expected_types)
-                for param, val in zip(expected_parameters, args)]
+        args = tuple(self.convert_parameter(param, val, expected_types)
+                for param, val in zip(expected_parameters, args))
         kwargs = {param: self.convert_parameter(param, val, expected_types)
                   for param, val in kwargs.items()}
         # Verify all arguments are in expected_parameters
@@ -447,11 +453,13 @@ class Server:
         # if not self.app:
         #     raise ValueError("You can't set up routes on the server if it hasn't been set up!")
         if self.configuration.deploy_image_path:
+            # TODO: make this do anything
             # self.app.route(f"/{self.configuration.deploy_image_path}/<path:path>", 'GET', self.serve_image)
             # self.routes[f"/{self.configuration.deploy_image_path}/<path:path>"] = lambda state, path: self.serve_image(path)
             pass
 
-    def serve_image(self, path): # type: (str) -> bottle.HTTPResponse
+    # def serve_image(self, path): # type: (str) -> bottle.HTTPResponse
+    def serve_image(self, path): # type: (str) -> Any
         """
         Serves an image file located in the specified directory with the MIME type
         `image/png`. The method retrieves the image from the path provided, using
@@ -462,8 +470,9 @@ class Server:
         :return: The static file object representing the requested image.
         :rtype: static_file
         """
+        # TODO: make this do anything
         raise NotImplementedError("serve_image is not yet implemented")
-        return static_file(path, root='./' + self.configuration.src_image_folder, mimetype='image/png')
+        # return static_file(path, root='./' + self.configuration.src_image_folder, mimetype='image/png')
 
     def try_special_conversions(self, value: Any, target_type: type) -> Any:
         """
@@ -487,24 +496,24 @@ class Server:
             such as failure to decode file content as UTF-8, or if a file cannot be
             opened as an image using PIL.Image when `HAS_PILLOW` is `True`.
         """
-        if isinstance(value, bottle.FileUpload):
-            if target_type == bytes:
-                return target_type(value.file.read())
-            elif target_type == str:
-                try:
-                    return value.file.read().decode('utf-8')
-                except UnicodeDecodeError as e:
-                    raise ValueError(f"Could not decode file {value.filename} as utf-8. Perhaps the file is not the type that you expected, or the parameter type is inappropriate?") from e
-            elif target_type == dict:
-                return {'filename': value.filename, 'content': value.file.read()}
-            elif HAS_PILLOW and issubclass(target_type, PILImage.Image):
-                try:
-                    image = PILImage.open(value.file)
-                    image.filename = value.filename
-                    return image
-                except Exception as e:
-                    # TODO: Allow configuration for just setting this to None instead, if there is an error
-                    raise ValueError(f"Could not open image file {value.filename} as a PIL.Image. Perhaps the file is not an image, or the parameter type is inappropriate?") from e
+        # if isinstance(value, bottle.FileUpload):
+        #     if target_type == bytes:
+        #         return target_type(value.file.read())
+        #     elif target_type == str:
+        #         try:
+        #             return value.file.read().decode('utf-8')
+        #         except UnicodeDecodeError as e:
+        #             raise ValueError(f"Could not decode file {value.filename} as utf-8. Perhaps the file is not the type that you expected, or the parameter type is inappropriate?") from e
+        #     elif target_type == dict:
+        #         return {'filename': value.filename, 'content': value.file.read()}
+        #     elif HAS_PILLOW and issubclass(target_type, PILImage.Image):
+        #         try:
+        #             image = PILImage.open(value.file)
+        #             image.filename = value.filename
+        #             return image
+        #         except Exception as e:
+        #             # TODO: Allow configuration for just setting this to None instead, if there is an error
+        #             raise ValueError(f"Could not open image file {value.filename} as a PIL.Image. Perhaps the file is not an image, or the parameter type is inappropriate?") from e
         return target_type(value)
 
     def convert_parameter(self, param: str, val: Any, expected_types: dict[str, type]) -> Any:
@@ -568,9 +577,9 @@ class Server:
             function within the Bottle page handling logic.
         """
         @wraps(original_function)
-        def bottle_page(state: Any, *args: Any, **kwargs: Any) -> str:
+        def bottle_page(state: Any, page_history: list[tuple[VisitedPage, str]], *args: Any, **kwargs: Any) -> str:
             # TODO: Handle non-bottle backends
-            url = remove_url_query_params(request.url, {RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY})
+            # url = remove_url_query_params(request.url, {RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY})
             # self.restore_state_if_available(original_function)
             # original_state = self.dump_state()
             try:
@@ -579,9 +588,9 @@ class Server:
                 self.make_error_page("Error preparing arguments for page", e, original_function)
                 # return None
             # Actually start building up the page
-            visiting_page = VisitedPage(url, original_function, arguments, "Creating Page", button_pressed)
+            visiting_page = VisitedPage(original_function.__name__, original_function, arguments, "Creating Page", button_pressed)
             # self._page_history.append((visiting_page, original_state))
-            self._page_history.append((visiting_page, json.dumps(dehydrate_json(state))))
+            self._page_history = [*page_history, (visiting_page, repr((json.dumps(dehydrate_json(state))))[1:-1].replace("\"", "\\\""))]
             try:
                 page = original_function(state, *args, **kwargs)
             except Exception as e:
@@ -621,7 +630,6 @@ class Server:
         return "\n|\n".join([f"{vp}\t|\t{s}" for vp, s in history])
     
     def destringify_history(self, hist_str: str) -> list[tuple[VisitedPage, str]]:
-        print(len(hist_str.split('\n|\n')))
         if not hist_str: return []
 
         def make_entry(line: str) -> tuple[VisitedPage, str]:
@@ -704,6 +712,8 @@ class Server:
         :param original_function: The name of the function that created the page.
         :return: Returns an error page if a validation issue arises, otherwise none.
         """
+        # TODO: rewrite as `verify_page_state_type` and verify against self._initial_state_type
+            # Then, self._state_history is unneeded
         if not self._state_history:
             return
         message = ""
@@ -973,7 +983,7 @@ def get_server_setting(key: str, default: Optional[Any] = None, server: Server =
     """
     return getattr(server.configuration, key, default)
 
-def render_route(route: str, state_str: str, args: str, kwargs: str) -> tuple[str, str]:
+def render_route(route: str, state_str: str, page_history_str: str, args: str, kwargs: str) -> tuple[str, str, str]:
     """
     Renders the route specified with the state and arguments specified. 
     Returns the site content and new state.
@@ -982,29 +992,38 @@ def render_route(route: str, state_str: str, args: str, kwargs: str) -> tuple[st
     :type route: str
     :param state_str: The current state of the website, probably from localStorage.
     :type state_str: str
+    :param page_history_str: The history of the website, probably from localStorage.
+    :type page_history_str: str
     :param args: The JSONified positional arguments.
     :type args: str
     :param kwargs: The JSONified keyword arguments.
     :type kwargs: str
-    :return: the text content of the site and state.
-    :rtype: tuple[str, str]
+    :return: the text content of the site, state, and history.
+    :rtype: tuple[str, str, str]
     """
     server = get_main_server()
     if server._initial_state_type is None:
         raise ValueError("You can't render a route if you haven't setup!")
     state = server.load_from_state(state_str, server._initial_state_type)
     server._state = state
+    page_history = server.destringify_history(page_history_str)
+    server._page_history = page_history
     py_args = json.loads(base64.b64decode(bytes(args, 'utf-8')).decode('utf-8'))
     py_kwargs = json.loads(base64.b64decode(bytes(kwargs, 'utf-8')).decode('utf-8'))
 
     try:
-        page = server.routes[route](state, *py_args, **py_kwargs)
+        page = server.routes[route](state, page_history, *py_args, **py_kwargs)
     except DrafterError as e:
-        return str(e), state_str
+        return str(e), state_str, server.stringify_history(server._page_history)
     except Exception as e:
-        return "<h1>Unknown Error:</h1>" + str(e), state_str
+        # tb = html.escape("<br>".join(traceback.format_exc().split("\n")))
+        tb = html.escape(traceback.format_exc())
+        return f"<h1>Unknown Error:</h1>\n<div>{e}</div>\n<pre>{tb}</pre>", state_str, server.stringify_history(server._page_history)
 
-    return page, server.dump_state()
+    # print(1009, server._page_history[0][0])
+    # print(1010, json.dumps(server._page_history[0][0]))
+
+    return page, server.dump_state(), server.stringify_history(server._page_history)
 
 
 def start_server(initial_state: Any = None, server: Server = MAIN_SERVER, skip: bool = False, **kwargs: Any) -> None:

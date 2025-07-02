@@ -35,7 +35,7 @@ class DebugInformation:
     :ivar configuration: Server configuration holding deployment and runtime configuration details.
     :type configuration: ServerConfiguration
     """
-    page_history: List[Tuple[VisitedPage, Any]]
+    page_history: List[Tuple[VisitedPage, str]]
     state: Any
     routes: Dict[str, Callable[..., str]]
     # routes: Dict[str, Callable[..., '_Page']]
