@@ -123,8 +123,8 @@ class Server:
     :type _conversion_record: list
     :ivar original_routes: List containing tuples of original route URLs and their handlers.
     :type original_routes: list
-    :ivar app: The Bottle application instance for handling HTTP requests.
-    :type app: Bottle or None
+    # :ivar app: The Bottle application instance for handling HTTP requests.
+    # :type app: Bottle or None
     :ivar _custom_name: Custom name for the server instance, used in string representations.
     :type _custom_name: str or None
     :ivar production: Whether the server is in production mode.
@@ -147,7 +147,7 @@ class Server:
         self._page_history: List[Tuple[VisitedPage, Any]] = []
         self._conversion_record: list[Union[ConversionRecord, UnchangedRecord]] = []
         self.original_routes: list[Tuple[str, Callable[..., Page]]] = []
-        self.app: Union[Bottle, None] = None
+        # self.app: Union[Bottle, None] = None
         self._custom_name = _custom_name
         self.production = False
         self.image_folder = "images"
@@ -256,7 +256,7 @@ class Server:
         self.routes[url] = made_func
         self._handle_route[url] = self._handle_route[made_func] = made_func
 
-    def reset(self) -> '_Page':
+    def reset(self) -> str:
         """
         Resets the current State object to its initial configuration and clears all
         recorded histories. After resetting, the function returns the result of the
@@ -272,7 +272,7 @@ class Server:
         # self._state_frozen_history.clear()
         self._page_history.clear()
         self._conversion_record.clear()
-        return self.routes['/']()
+        return self.routes['/'](self._state)
 
     def setup(self, initial_state: Any = None) -> None:
         """
@@ -285,7 +285,7 @@ class Server:
         self._state = initial_state
         self._initial_state = self.dump_state()
         self._initial_state_type = type(initial_state)
-        self.app = Bottle()
+        # self.app = Bottle()
 
         # Setup error pages
         def handle_404(error): # type: (bottle.HTTPError) -> str
@@ -324,21 +324,23 @@ class Server:
                                            f"<li><code>{r!r}</code>: <code>{func}</code></li>" for r, func in
                                            self.original_routes))
 
-        self.app.error(404)(handle_404)
-        self.app.error(500)(handle_500)
+        # self.app.error(404)(handle_404)
+        # self.app.error(500)(handle_500)
         # Setup routes
         if not self.routes:
             raise ValueError("No routes have been defined.\nDid you remember the @route decorator?")
-        self.app.route("/--reset", 'GET', self.reset)
+        # self.app.route("/--reset", 'GET', self.reset)
+        self.routes["/--reset"] = lambda state: self.reset()
         # If not skulpt, then allow them to test the deployment
-        if not self.configuration.skulpt:
-            self.app.route("/--test-deployment", 'GET', self.test_deployment)
-        for url, func in self.routes.items():
-            self.app.route(url, 'GET', func)
-            self.app.route(url, "POST", func)
+        # if not self.configuration.skulpt:
+        #     self.app.route("/--test-deployment", 'GET', self.test_deployment)
+        # for url, func in self.routes.items():
+        #     self.app.route(url, 'GET', func)
+        #     self.app.route(url, "POST", func)
         if '/' not in self.routes:
             first_route = list(self.routes.values())[0]
-            self.app.route('/', 'GET', first_route)
+            # self.app.route('/', 'GET', first_route)
+            self.routes['/'] = first_route
         self.handle_images()
 
     def run(self, **kwargs: Any) -> None:
@@ -360,9 +362,9 @@ class Server:
         self.configuration = updated_configuration
         # Update the final args with the new configuration
         final_args.update(kwargs)
-        if not self.app:
-            raise ValueError("You can't run the server if it hasn't been set up!")
-        self.app.run(**final_args)
+        # if not self.app:
+        #     raise ValueError("You can't run the server if it hasn't been set up!")
+        # self.app.run(**final_args)
 
     def prepare_args(self, original_function: Callable[..., Any], args: Any, kwargs: Any) -> Any:
         """
@@ -442,10 +444,12 @@ class Server:
                                  attributes are not properly configured.
         :return: None
         """
-        if not self.app:
-            raise ValueError("You can't set up routes on the server if it hasn't been set up!")
+        # if not self.app:
+        #     raise ValueError("You can't set up routes on the server if it hasn't been set up!")
         if self.configuration.deploy_image_path:
-            self.app.route(f"/{self.configuration.deploy_image_path}/<path:path>", 'GET', self.serve_image)
+            # self.app.route(f"/{self.configuration.deploy_image_path}/<path:path>", 'GET', self.serve_image)
+            # self.routes[f"/{self.configuration.deploy_image_path}/<path:path>"] = lambda state, path: self.serve_image(path)
+            pass
 
     def serve_image(self, path): # type: (str) -> bottle.HTTPResponse
         """
@@ -458,6 +462,7 @@ class Server:
         :return: The static file object representing the requested image.
         :rtype: static_file
         """
+        raise NotImplementedError("serve_image is not yet implemented")
         return static_file(path, root='./' + self.configuration.src_image_folder, mimetype='image/png')
 
     def try_special_conversions(self, value: Any, target_type: type) -> Any:
@@ -580,18 +585,14 @@ class Server:
             try:
                 page = original_function(state, *args, **kwargs)
             except Exception as e:
-                print(583)
                 additional_details = (f"  State: {state!r}\n"
                                       f"  Arguments: {args!r}\n"
                                       f"  Keyword Arguments: {kwargs!r}\n"
                                       f"  Button Pressed: {button_pressed!r}\n"
                                       f"  Function Signature: {inspect.signature(original_function)}")
                 self.make_error_page("Error creating page", e, original_function, additional_details)
-                return None
-            print(590)
             visiting_page.update("Verifying Page Result", original_page_content=page)
             self.verify_page_result(page, original_function)
-            print(593)
             if False:
                 pass # return verification_status
             try:
@@ -782,7 +783,8 @@ class Server:
                        f"""{html.escape(str(error))}\n\n\n{tb}""")
         if additional_details:
             new_message += f"\n\n\nAdditional Details:\n{additional_details}"
-        abort(500, new_message)
+        # abort(500, new_message)
+        raise DrafterError(500, new_message)
 
     def flash_warning(self, message: str) -> None:
         """
@@ -901,6 +903,15 @@ class Server:
                                           cdn_drafter_setup=self.configuration.cdn_drafter_setup)
 
 
+@dataclass
+class DrafterError(BaseException):
+    code: int = 500
+    text: str = "Unknown Error."
+
+    def __str__(self) -> str:
+        return f"<h1>Error Code: {self.code}</h1>\n<div>{self.text}</div>"
+
+
 MAIN_SERVER = Server(_custom_name="MAIN_SERVER")
 
 def set_main_server(server: Server) -> None:
@@ -972,7 +983,13 @@ def render_route(route: str, state_str: str, args: str, kwargs: str) -> tuple[st
     server._state = state
     py_args = json.loads(base64.b64decode(bytes(args, 'utf-8')).decode('utf-8'))
     py_kwargs = json.loads(base64.b64decode(bytes(kwargs, 'utf-8')).decode('utf-8'))
-    page = server.routes[route](state, *py_args, **py_kwargs)
+
+    try:
+        page = server.routes[route](state, *py_args, **py_kwargs)
+    except DrafterError as e:
+        return str(e), state_str
+    except Exception as e:
+        return "<h1>Unknown Error:</h1>" + str(e), state_str
 
     return page, server.dump_state()
 
@@ -1002,7 +1019,7 @@ def start_server(initial_state: Any = None, server: Server = MAIN_SERVER, skip: 
 
     if server.configuration.skulpt:
         server.setup(initial_state)
-        # server.run(**kwargs)
+        server.run(**kwargs) # really just an extension of setup to handle config
         # global SITE
         # SITE = str(server.routes["/"](server._state))
         # SITE = str(server.routes["/"]())

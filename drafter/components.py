@@ -362,7 +362,7 @@ class Button(PageContent):
                  **extra_settings: Any) -> None:
         self.text = text
         self.onclick = onclick
-        self.args = args or []
+        self.args = list(args or [])
         self.kwargs = kwargs or {}
         self.extra_settings = extra_settings
     
