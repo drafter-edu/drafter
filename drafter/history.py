@@ -227,6 +227,21 @@ class VisitedPage:
         return (f"<strong>Current Route:</strong><br>Route function: <code>{function_name}</code><br>"
                 f"URL: <href='{self.url}'><code>{self.url}</code></href>")
 
+    def __str__(self) -> str:
+        started = self.started.timestamp()
+        stopped = self.stopped.timestamp() if self.stopped else ''
+        return f"{self.url}|{self.arguments}|{self.status}|{self.button_pressed}|{self.original_page_content or ''}|{self.old_state or ''}|{started}|{stopped}"
+
+    @staticmethod
+    def fromstr(vp: str) -> Any: # really -> VisitedPage
+        from drafter.server import get_main_server
+        url, arguments, status, button_pressed, original_page_content_str, old_state, started_str, stopped_str = vp.split("|")
+        function = get_main_server().routes['/--reset'] # this is false, but I need sth.
+        original_page_content = original_page_content_str or None
+        started = datetime.fromtimestamp(float(started_str))
+        stopped = datetime.fromtimestamp(float(stopped_str)) if stopped_str else None
+        return VisitedPage(url, function, arguments, status, button_pressed, original_page_content, old_state, started, stopped)
+
 def dehydrate_json(value: Any, seen: Optional[set[Any]] = None) -> Any:
     if seen is None:
         seen = set()

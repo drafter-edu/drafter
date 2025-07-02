@@ -616,6 +616,19 @@ class Server:
 
         return bottle_page
 
+    def stringify_history(self, history: Optional[list[tuple[VisitedPage, str]]]) -> str:
+        history = history if history is not None else self._page_history
+        return "\n|\n".join([f"{vp}\t|\t{s}" for vp, s in history])
+    
+    def destringify_history(self, hist_str: str) -> list[tuple[VisitedPage, str]]:
+        print(len(hist_str.split('\n|\n')))
+        if not hist_str: return []
+
+        def make_entry(line: str) -> tuple[VisitedPage, str]:
+            vp, s = line.split("\t|\t")
+            return VisitedPage.fromstr(vp), s
+        return [make_entry(line) for line in hist_str.split("\n|\n")]
+
     def verify_page_result(self, page: Page, original_function: Callable[..., Page]) -> None:
         """
         Verifies the result of a function execution to ensure it returns a valid `Page`
