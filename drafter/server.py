@@ -272,7 +272,7 @@ class Server:
         # self._state_frozen_history.clear()
         self._page_history.clear()
         self._conversion_record.clear()
-        return self.routes['/'](self._state)
+        return self.routes['/'](self._state, [])
 
     def setup(self, initial_state: Any = None) -> None:
         """
@@ -332,7 +332,7 @@ class Server:
         if not self.routes:
             raise ValueError("No routes have been defined.\nDid you remember the @route decorator?")
         # self.app.route("/--reset", 'GET', self.reset)
-        self.routes["/--reset"] = lambda state: self.reset()
+        self.routes["/--reset"] = lambda state, page_history: self.reset()
         # If not skulpt, then allow them to test the deployment
         # if not self.configuration.skulpt:
         #     self.app.route("/--test-deployment", 'GET', self.test_deployment)
