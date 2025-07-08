@@ -36,7 +36,8 @@ def bundle_files_into_js(
         main_file: str, root_path: str,
         allowed_extensions: Optional[set[str]] = None,
         js_obj_name: Optional[str] = None,
-        sep: Optional[str] = None
+        sep: Optional[str] = None,
+        pref: Optional[str] = None
     ) -> tuple[str, list[str], list[str]]:
     """
     Bundles all files from a specified directory into a JavaScript-compatible format
@@ -58,6 +59,8 @@ def bundle_files_into_js(
     :type js_obj_name: str
     :param sep: The separator between each JSified file line.
     :type sep: str
+    :param pref: An optional prefix for the filenames.  Defaults to empty string.
+    :type pref: str
     :return: A tuple containing:
         - The combined JavaScript output string with file contents.
         - A list of skipped files that do not match the allowed extensions.
@@ -67,6 +70,7 @@ def bundle_files_into_js(
     allowed_extensions = allowed_extensions or set(DEFAULT_ALLOWED_EXTENSIONS)
     js_obj_name = js_obj_name or "Sk.builtinFiles.files"
     sep = sep or "\n"
+    pref = pref or ""
 
     skipped_files: list[str] = []
     added_files: list[str] = []
@@ -86,6 +90,7 @@ def bundle_files_into_js(
 
     js_lines = []
     for filename, contents in all_files.items():
+        filename = pref + filename
         js_lines.append(f"{js_obj_name}[{filename!r}] = {contents!r};\n")
 
     return sep.join(js_lines), skipped_files, added_files
@@ -845,7 +850,8 @@ class Server:
             self,
             allowed_extensions: Optional[set[str]] = None,
             js_obj_name: Optional[str] = None,
-            sep: Optional[str] = None
+            sep: Optional[str] = None,
+            pref: Optional[str] = None
         ) -> tuple[str, bool]:
         """
         Bundles files necessary for deployment, including the source code identified by
@@ -867,6 +873,8 @@ class Server:
         :param sep: The separator between each JSified file line, passed directly on,
             defaulting to newline.
         :type sep: str
+        :param pref: An optional prefix for the filenames, passed directly on, defaults to ""
+        :type pref: str
         :return: A tuple containing the bundled JS or error and an indication that an
             error occured (so you know what the first item is).
         :rtype: tuple[str, bool]
@@ -880,7 +888,7 @@ class Server:
                                        routes=""), False
         bundled_js, skipped, added = bundle_files_into_js(
             student_main_file, os.path.dirname(student_main_file),
-            allowed_extensions, js_obj_name, sep
+            allowed_extensions, js_obj_name, sep, pref
         )
         return bundled_js, True
     
@@ -914,8 +922,9 @@ class Server:
             CDN configurations.
         :rtype: str
         """
-        PYTHON_SOURCE_OBJECT_NAME = "pythonSource"
-        js_or_err, success = self.bundled_js_or_error({"py"}, PYTHON_SOURCE_OBJECT_NAME, "            ")
+        PYTHON_SOURCE_OBJECT_NAME = "pythonSource" if not self.configuration.debug else None
+        pref = "src/lib/" if self.configuration.debug else None
+        js_or_err, success = self.bundled_js_or_error({"py"}, PYTHON_SOURCE_OBJECT_NAME, "            ", pref)
         if not success: return js_or_err
         else: bundled_js = js_or_err
         return TEMPLATE_INDEX_HTML.format(python_source_obj_name=PYTHON_SOURCE_OBJECT_NAME,
@@ -1014,11 +1023,12 @@ def render_route(route: str, state_str: str, page_history_str: str, args: str, k
     try:
         page = server.routes[route](state, page_history, *py_args, **py_kwargs)
     except DrafterError as e:
-        return str(e), state_str, server.stringify_history(server._page_history)
+        tb = html.escape(traceback.format_exc())
+        return f"<h1>Unknown Error:</h1>\n<pre>{e}</pre>\n<pre>{tb}</pre>", state_str, server.stringify_history(server._page_history)
     except Exception as e:
         # tb = html.escape("<br>".join(traceback.format_exc().split("\n")))
         tb = html.escape(traceback.format_exc())
-        return f"<h1>Unknown Error:</h1>\n<div>{e}</div>\n<pre>{tb}</pre>", state_str, server.stringify_history(server._page_history)
+        return f"<h1>Unknown Error:</h1>\n<pre>{e}</pre>\n<pre>{tb}</pre>", state_str, server.stringify_history(server._page_history)
 
     # print(1009, server._page_history[0][0])
     # print(1010, json.dumps(server._page_history[0][0]))
@@ -1056,6 +1066,9 @@ def start_server(initial_state: Any = None, server: Server = MAIN_SERVER, skip: 
         # SITE = str(server.routes["/"](server._state))
         # SITE = str(server.routes["/"]())
     else:
+        if server.configuration.debug:
+            server.configuration.cdn_skulpt_drafter = server.configuration.cdn_skulpt_drafter.replace(".js", "-py.js")
+
         with open("index.html", "w") as f:
             f.write(server.index_html_deployment())
 
