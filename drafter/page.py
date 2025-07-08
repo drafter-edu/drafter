@@ -67,7 +67,7 @@ class Page:
             else:
                 chunked.append(chunk.render(current_state, configuration))
         content = "\n".join(chunked)
-        content = f"<form method='POST' enctype='multipart/form-data' accept-charset='utf-8'>{content}</form>"
+        # content = f"<form method='POST' enctype='multipart/form-data' accept-charset='utf-8'>{content}</form>"
         if configuration.framed:
             reset_button = self.make_reset_button()
             content = (f"<div class='container btlw-header'>{configuration.title}{reset_button}</div>"
@@ -81,10 +81,14 @@ class Page:
 
         :return: A string of HTML representing the reset button.
         """
-        return '''<a href="--reset" class="btlw-reset" 
+        # return '''<a href="--reset" class="btlw-reset" 
+        #             title="Resets the page to its original state. Any data entered will be lost."
+        #             onclick="return confirm('This will reset the page to its original state. Any data entered will be lost. Are you sure you want to continue?');"
+        #             >⟳</a>'''
+        return '''<button class="btlw-reset" 
                     title="Resets the page to its original state. Any data entered will be lost."
-                    onclick="return confirm('This will reset the page to its original state. Any data entered will be lost. Are you sure you want to continue?');"
-                    >⟳</a>'''
+                    onclick="confirm('This will reset the page to its original state. Any data entered will be lost. Are you sure you want to continue?') && goToRoute('/--reset');"
+                    >⟳</button>'''
 
     def verify_content(self, server: 'Server') -> bool:
         """
@@ -99,5 +103,6 @@ class Page:
             if isinstance(chunk, Link):
                 chunk.verify(server)
         return True
+
 
 _Page: TypeAlias = Union[str, Page]

@@ -325,7 +325,7 @@ class Link(PageContent, LinkContent):
 
 
 @dataclass
-class Button(PageContent, LinkContent):
+class SubmitButton(PageContent, LinkContent):
     text: str
     url: str
     arguments: List[Argument]
@@ -350,7 +350,31 @@ class Button(PageContent, LinkContent):
         return f"{precode}<button type='submit' name='{SUBMIT_BUTTON_KEY}' value='{value}' formaction='{url}' {parsed_settings}>{self.text}</button>"
 
 
-SubmitButton = Button
+@dataclass
+class Button(PageContent):
+    text: str
+    onclick: Callable[..., Any]
+    args: list[Any]
+    kwargs: dict[str, Any]
+
+    def __init__(self, text: str, onclick: Callable[..., Any],
+                 args: Optional[tuple[Any]] = None, kwargs: Optional[dict[str, Any]] = None,
+                 **extra_settings: Any) -> None:
+        self.text = text
+        self.onclick = onclick
+        self.args = list(args or [])
+        self.kwargs = kwargs or {}
+        self.extra_settings = extra_settings
+    
+    def __repr__(self) -> str:
+        return f"Button(text={self.text!r}, onclick={self.onclick!r}, args={self.args!r}, kwargs={self.kwargs!r})"
+    
+    def __str__(self) -> str:
+        route = friendly_urls(self.onclick.__name__)
+        b64_args = base64.b64encode(bytes(json.dumps(self.args), 'utf-8')).decode('utf-8')
+        b64_kwargs = base64.b64encode(bytes(json.dumps(self.kwargs), 'utf-8')).decode('utf-8')
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        return f"""<button onclick="goToRoute('{route}', '{b64_args}', '{b64_kwargs}')" {parsed_settings}>{self.text}</button>"""
 
 
 BASE_IMAGE_FOLDER = "/__images"

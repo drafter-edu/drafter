@@ -1,3 +1,4 @@
+import base64
 import html
 import os
 import traceback
@@ -8,16 +9,16 @@ import json
 import inspect
 import pathlib
 
-import bottle
+# import bottle
 
 from drafter.urls import friendly_urls
 from drafter.components import PageContent
 from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY, PREVIOUSLY_PRESSED_BUTTON
 from drafter.debug import DebugInformation
-from drafter.setup import Bottle, abort, request, static_file
-from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, get_params, \
-    remap_hidden_form_parameters, safe_repr
+# from drafter.setup import Bottle, abort, request, static_file
+from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, \
+    remap_hidden_form_parameters, safe_repr#, get_params
 from drafter.page import Page, _Page
 from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, TEMPLATE_INDEX_HTML, \
     TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
@@ -34,8 +35,9 @@ DEFAULT_ALLOWED_EXTENSIONS = ('py', 'js', 'css', 'txt', 'json', 'csv', 'html', '
 def bundle_files_into_js(
         main_file: str, root_path: str,
         allowed_extensions: Optional[set[str]] = None,
-        js_obj_name: str = "Sk.builtinFiles.files",
-        sep: str = "\n"
+        js_obj_name: Optional[str] = None,
+        sep: Optional[str] = None,
+        pref: Optional[str] = None
     ) -> tuple[str, list[str], list[str]]:
     """
     Bundles all files from a specified directory into a JavaScript-compatible format
@@ -57,6 +59,8 @@ def bundle_files_into_js(
     :type js_obj_name: str
     :param sep: The separator between each JSified file line.
     :type sep: str
+    :param pref: An optional prefix for the filenames.  Defaults to empty string.
+    :type pref: str
     :return: A tuple containing:
         - The combined JavaScript output string with file contents.
         - A list of skipped files that do not match the allowed extensions.
@@ -64,6 +68,9 @@ def bundle_files_into_js(
     :rtype: tuple[str, list[str], list[str]]
     """
     allowed_extensions = allowed_extensions or set(DEFAULT_ALLOWED_EXTENSIONS)
+    js_obj_name = js_obj_name or "Sk.builtinFiles.files"
+    sep = sep or "\n"
+    pref = pref or ""
 
     skipped_files: list[str] = []
     added_files: list[str] = []
@@ -83,6 +90,7 @@ def bundle_files_into_js(
 
     js_lines = []
     for filename, contents in all_files.items():
+        filename = pref + filename
         js_lines.append(f"{js_obj_name}[{filename!r}] = {contents!r};\n")
 
     return sep.join(js_lines), skipped_files, added_files
@@ -120,8 +128,8 @@ class Server:
     :type _conversion_record: list
     :ivar original_routes: List containing tuples of original route URLs and their handlers.
     :type original_routes: list
-    :ivar app: The Bottle application instance for handling HTTP requests.
-    :type app: Bottle or None
+    # :ivar app: The Bottle application instance for handling HTTP requests.
+    # :type app: Bottle or None
     :ivar _custom_name: Custom name for the server instance, used in string representations.
     :type _custom_name: str or None
     :ivar production: Whether the server is in production mode.
@@ -129,22 +137,22 @@ class Server:
     :ivar image_folder: The folder to look for images in.
     :type image_folder: str
     """
-    _page_history: List[Tuple[VisitedPage, Any]]
+    _page_history: List[Tuple[VisitedPage, str]]
     _custom_name = None
 
     def __init__(self, _custom_name: Union[str, None] = None, **kwargs: Any) -> None:
-        self.routes: dict[str, Callable[..., '_Page']] = {}
-        self._handle_route: dict[Union[str, Callable[..., '_Page']], Callable[..., '_Page']] = {}
+        self.routes: dict[str, Callable[..., str]] = {}
+        self._handle_route: dict[Union[str, Callable[..., str]], Callable[..., str]] = {}
         self.configuration = ServerConfiguration(**kwargs)
         self._state: Any = None
         self._initial_state: Union[str, None] = None
         self._initial_state_type: Union[type, None] = None
         self._state_history: list[Any] = []
         # self._state_frozen_history = []
-        self._page_history: List[Tuple[VisitedPage, Any]] = []
+        self._page_history: List[Tuple[VisitedPage, str]] = []
         self._conversion_record: list[Union[ConversionRecord, UnchangedRecord]] = []
         self.original_routes: list[Tuple[str, Callable[..., Page]]] = []
-        self.app: Union[Bottle, None] = None
+        # self.app: Union[Bottle, None] = None
         self._custom_name = _custom_name
         self.production = False
         self.image_folder = "images"
@@ -207,28 +215,28 @@ class Server:
         """
         return rehydrate_json(json.loads(state), state_type)
 
-    def restore_state_if_available(self, original_function: Callable[..., Page]) -> None:
-        """
-        Restores the state if the necessary data is available in the parameters. This
-        function checks for the presence of a specific key in the parameters and, when
-        available, rehydrates the serialized state back to the appropriate type and
-        assigns it to the current instance's state.
+    # def restore_state_if_available(self, original_function: Callable[..., Page]) -> None:
+    #     """
+    #     Restores the state if the necessary data is available in the parameters. This
+    #     function checks for the presence of a specific key in the parameters and, when
+    #     available, rehydrates the serialized state back to the appropriate type and
+    #     assigns it to the current instance's state.
 
-        :param original_function: The function whose state is being restored. This function
-                                  must have a parameter named `state` with an associated
-                                  type annotation.
-        :return: None
-        """
-        params = get_params()
-        if RESTORABLE_STATE_KEY in params:
-            # Get state
-            old_state = json.loads(params.pop(RESTORABLE_STATE_KEY))
-            # Get state type
-            parameters = inspect.signature(original_function).parameters
-            if 'state' in parameters:
-                state_type = parameters['state'].annotation
-                self._state = rehydrate_json(old_state, state_type)
-                self.flash_warning("Successfully restored old state: " + repr(self._state))
+    #     :param original_function: The function whose state is being restored. This function
+    #                               must have a parameter named `state` with an associated
+    #                               type annotation.
+    #     :return: None
+    #     """
+    #     params = get_params()
+    #     if RESTORABLE_STATE_KEY in params:
+    #         # Get state
+    #         old_state = json.loads(params.pop(RESTORABLE_STATE_KEY))
+    #         # Get state type
+    #         parameters = inspect.signature(original_function).parameters
+    #         if 'state' in parameters:
+    #             state_type = parameters['state'].annotation
+    #             self._state = rehydrate_json(old_state, state_type)
+    #             self.flash_warning("Successfully restored old state: " + repr(self._state))
 
     def add_route(self, url: str, func: Callable[..., Page]) -> None:
         """
@@ -253,7 +261,7 @@ class Server:
         self.routes[url] = made_func
         self._handle_route[url] = self._handle_route[made_func] = made_func
 
-    def reset(self) -> '_Page':
+    def reset(self) -> str:
         """
         Resets the current State object to its initial configuration and clears all
         recorded histories. After resetting, the function returns the result of the
@@ -269,7 +277,7 @@ class Server:
         # self._state_frozen_history.clear()
         self._page_history.clear()
         self._conversion_record.clear()
-        return self.routes['/']()
+        return self.routes['/'](self._state, [])
 
     def setup(self, initial_state: Any = None) -> None:
         """
@@ -282,16 +290,17 @@ class Server:
         self._state = initial_state
         self._initial_state = self.dump_state()
         self._initial_state_type = type(initial_state)
-        self.app = Bottle()
+        # self.app = Bottle()
 
         # Setup error pages
-        def handle_404(error): # type: (bottle.HTTPError) -> str
+        # def handle_404(error): # type: (bottle.HTTPError) -> str
+        def handle_404(error): # type: (Any) -> str
             """
             This is the default handler for HTTP 404 errors. It renders a custom error page
             that displays a message indicating the requested page was not found, and provides
             a link to return to the index page.
             """
-            message = "<p>The requested page <code>{url}</code> was not found.</p>".format(url=request.url)
+            message = "<p>The requested page <code>{url}</code> was not found.</p>"#.format(url=request.url)
             # TODO: Only show if not the index
             message += "\n<p>You might want to return to the <a href='/'>index</a> page.</p>"
             original_error = f"{error.body}\n"
@@ -303,13 +312,14 @@ class Server:
                                            f"<li><code>{r!r}</code>: <code>{func}</code></li>" for r, func in
                                            self.original_routes))
 
-        def handle_500(error): # type: (bottle.HTTPError) -> str
+        # def handle_500(error): # type: (bottle.HTTPError) -> str
+        def handle_500(error): # type: (Any) -> str
             """
             This is the default handler for HTTP 500 errors. It renders a custom error page
             that displays a message indicating an internal server error occurred, and provides
             a link to return to the index page. along with some additional error details.
             """
-            message = "<p>Sorry, the requested URL <code>{url}</code> caused an error.</p>".format(url=request.url)
+            message = "<p>Sorry, the requested URL <code>{url}</code> caused an error.</p>"#.format(url=request.url)
             message += "\n<p>You might want to return to the <a href='/'>index</a> page.</p>"
             original_error = f"{error.body}\n"
             if hasattr(error, 'traceback'):
@@ -321,21 +331,23 @@ class Server:
                                            f"<li><code>{r!r}</code>: <code>{func}</code></li>" for r, func in
                                            self.original_routes))
 
-        self.app.error(404)(handle_404)
-        self.app.error(500)(handle_500)
+        # self.app.error(404)(handle_404)
+        # self.app.error(500)(handle_500)
         # Setup routes
         if not self.routes:
             raise ValueError("No routes have been defined.\nDid you remember the @route decorator?")
-        self.app.route("/--reset", 'GET', self.reset)
+        # self.app.route("/--reset", 'GET', self.reset)
+        self.routes["/--reset"] = lambda state, page_history: self.reset()
         # If not skulpt, then allow them to test the deployment
-        if not self.configuration.skulpt:
-            self.app.route("/--test-deployment", 'GET', self.test_deployment)
-        for url, func in self.routes.items():
-            self.app.route(url, 'GET', func)
-            self.app.route(url, "POST", func)
+        # if not self.configuration.skulpt:
+        #     self.app.route("/--test-deployment", 'GET', self.test_deployment)
+        # for url, func in self.routes.items():
+        #     self.app.route(url, 'GET', func)
+        #     self.app.route(url, "POST", func)
         if '/' not in self.routes:
             first_route = list(self.routes.values())[0]
-            self.app.route('/', 'GET', first_route)
+            # self.app.route('/', 'GET', first_route)
+            self.routes['/'] = first_route
         self.handle_images()
 
     def run(self, **kwargs: Any) -> None:
@@ -357,11 +369,14 @@ class Server:
         self.configuration = updated_configuration
         # Update the final args with the new configuration
         final_args.update(kwargs)
-        if not self.app:
-            raise ValueError("You can't run the server if it hasn't been set up!")
-        self.app.run(**final_args)
+        # if not self.app:
+        #     raise ValueError("You can't run the server if it hasn't been set up!")
+        # self.app.run(**final_args)
 
-    def prepare_args(self, original_function: Callable[..., Any], args: Any, kwargs: Any) -> Any:
+    def prepare_args(self, 
+                     original_function: Callable[..., Any], 
+                     args: tuple[Any, ...], kwargs: dict[str, Any]
+                    ) -> tuple[tuple[Any, ...], dict[str, Any], str, str]:
         """
         Processes and prepares arguments for the route function call, ensuring compatibility
         with expected parameters, handling state insertion, remapping parameters,
@@ -379,27 +394,28 @@ class Server:
             - The button pressed if detected and processed.
         """
         self._conversion_record.clear()
-        args = list(args)
+        # args: list[Any] = list(args)
         kwargs = dict(**kwargs)
         button_pressed = ""
-        params = get_params()
-        if SUBMIT_BUTTON_KEY in params:
-            button_pressed = json.loads(params.pop(SUBMIT_BUTTON_KEY))
-        elif PREVIOUSLY_PRESSED_BUTTON in params:
-            button_pressed = json.loads(params.pop(PREVIOUSLY_PRESSED_BUTTON))
+        # params = get_params()
+        # if SUBMIT_BUTTON_KEY in params:
+        #     button_pressed = json.loads(params.pop(SUBMIT_BUTTON_KEY))
+        # elif PREVIOUSLY_PRESSED_BUTTON in params:
+        #     button_pressed = json.loads(params.pop(PREVIOUSLY_PRESSED_BUTTON))
         # TODO: Handle non-bottle backends
-        param_keys = list(params.keys())
-        for key in param_keys:
-            kwargs[key] = params.pop(key)
+            # specifically regarding button_pressed
+        # param_keys = list(params.keys())
+        # for key in param_keys:
+        #     kwargs[key] = params.pop(key)
         signature_parameters = inspect.signature(original_function).parameters
-        expected_parameters = list(signature_parameters.keys())
+        expected_parameters = list(signature_parameters.keys())[1:]
         show_names = {param.name: (param.kind in (inspect.Parameter.KEYWORD_ONLY, inspect.Parameter.VAR_KEYWORD))
                       for param in signature_parameters.values()}
-        kwargs = remap_hidden_form_parameters(kwargs, button_pressed)
+        # kwargs = remap_hidden_form_parameters(kwargs, button_pressed)
         # Insert state into the beginning of args
-        if (expected_parameters and expected_parameters[0] == "state") or (
-                len(expected_parameters) - 1 == len(args) + len(kwargs)):
-            args.insert(0, self._state)
+        # if (expected_parameters and expected_parameters[0] == "state") or (
+        #         len(expected_parameters) - 1 == len(args) + len(kwargs)):
+        #     args.insert(0, self._state)
         # Check if there are too many arguments
         if len(expected_parameters) < len(args) + len(kwargs):
             self.flash_warning(
@@ -413,8 +429,8 @@ class Server:
         # Type conversion if required
         expected_types = {name: p.annotation for name, p in
                           inspect.signature(original_function).parameters.items()}
-        args = [self.convert_parameter(param, val, expected_types)
-                for param, val in zip(expected_parameters, args)]
+        args = tuple(self.convert_parameter(param, val, expected_types)
+                for param, val in zip(expected_parameters, args))
         kwargs = {param: self.convert_parameter(param, val, expected_types)
                   for param, val in kwargs.items()}
         # Verify all arguments are in expected_parameters
@@ -439,12 +455,16 @@ class Server:
                                  attributes are not properly configured.
         :return: None
         """
-        if not self.app:
-            raise ValueError("You can't set up routes on the server if it hasn't been set up!")
+        # if not self.app:
+        #     raise ValueError("You can't set up routes on the server if it hasn't been set up!")
         if self.configuration.deploy_image_path:
-            self.app.route(f"/{self.configuration.deploy_image_path}/<path:path>", 'GET', self.serve_image)
+            # TODO: make this do anything
+            # self.app.route(f"/{self.configuration.deploy_image_path}/<path:path>", 'GET', self.serve_image)
+            # self.routes[f"/{self.configuration.deploy_image_path}/<path:path>"] = lambda state, path: self.serve_image(path)
+            pass
 
-    def serve_image(self, path): # type: (str) -> bottle.HTTPResponse
+    # def serve_image(self, path): # type: (str) -> bottle.HTTPResponse
+    def serve_image(self, path): # type: (str) -> Any
         """
         Serves an image file located in the specified directory with the MIME type
         `image/png`. The method retrieves the image from the path provided, using
@@ -455,7 +475,9 @@ class Server:
         :return: The static file object representing the requested image.
         :rtype: static_file
         """
-        return static_file(path, root='./' + self.configuration.src_image_folder, mimetype='image/png')
+        # TODO: make this do anything
+        raise NotImplementedError("serve_image is not yet implemented")
+        # return static_file(path, root='./' + self.configuration.src_image_folder, mimetype='image/png')
 
     def try_special_conversions(self, value: Any, target_type: type) -> Any:
         """
@@ -479,24 +501,24 @@ class Server:
             such as failure to decode file content as UTF-8, or if a file cannot be
             opened as an image using PIL.Image when `HAS_PILLOW` is `True`.
         """
-        if isinstance(value, bottle.FileUpload):
-            if target_type == bytes:
-                return target_type(value.file.read())
-            elif target_type == str:
-                try:
-                    return value.file.read().decode('utf-8')
-                except UnicodeDecodeError as e:
-                    raise ValueError(f"Could not decode file {value.filename} as utf-8. Perhaps the file is not the type that you expected, or the parameter type is inappropriate?") from e
-            elif target_type == dict:
-                return {'filename': value.filename, 'content': value.file.read()}
-            elif HAS_PILLOW and issubclass(target_type, PILImage.Image):
-                try:
-                    image = PILImage.open(value.file)
-                    image.filename = value.filename
-                    return image
-                except Exception as e:
-                    # TODO: Allow configuration for just setting this to None instead, if there is an error
-                    raise ValueError(f"Could not open image file {value.filename} as a PIL.Image. Perhaps the file is not an image, or the parameter type is inappropriate?") from e
+        # if isinstance(value, bottle.FileUpload):
+        #     if target_type == bytes:
+        #         return target_type(value.file.read())
+        #     elif target_type == str:
+        #         try:
+        #             return value.file.read().decode('utf-8')
+        #         except UnicodeDecodeError as e:
+        #             raise ValueError(f"Could not decode file {value.filename} as utf-8. Perhaps the file is not the type that you expected, or the parameter type is inappropriate?") from e
+        #     elif target_type == dict:
+        #         return {'filename': value.filename, 'content': value.file.read()}
+        #     elif HAS_PILLOW and issubclass(target_type, PILImage.Image):
+        #         try:
+        #             image = PILImage.open(value.file)
+        #             image.filename = value.filename
+        #             return image
+        #         except Exception as e:
+        #             # TODO: Allow configuration for just setting this to None instead, if there is an error
+        #             raise ValueError(f"Could not open image file {value.filename} as a PIL.Image. Perhaps the file is not an image, or the parameter type is inappropriate?") from e
         return target_type(value)
 
     def convert_parameter(self, param: str, val: Any, expected_types: dict[str, type]) -> Any:
@@ -547,7 +569,7 @@ class Server:
         self._conversion_record.append(UnchangedRecord(param, val))
         return val
 
-    def make_bottle_page(self, original_function: Callable[..., Page]) -> Callable[..., '_Page']:
+    def make_bottle_page(self, original_function: Callable[..., Page]) -> Callable[..., str]:
         """
         A decorator that wraps a given function to create and manage a Bottle web
         page environment. This includes processing request parameters, building
@@ -560,28 +582,29 @@ class Server:
             function within the Bottle page handling logic.
         """
         @wraps(original_function)
-        def bottle_page(*args: Any, **kwargs: Any) -> '_Page':
+        def bottle_page(state: Any, page_history: list[tuple[VisitedPage, str]], *args: Any, **kwargs: Any) -> str:
             # TODO: Handle non-bottle backends
-            url = remove_url_query_params(request.url, {RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY})
-            self.restore_state_if_available(original_function)
-            original_state = self.dump_state()
+            # url = remove_url_query_params(request.url, {RESTORABLE_STATE_KEY, SUBMIT_BUTTON_KEY})
+            # self.restore_state_if_available(original_function)
+            # original_state = self.dump_state()
             try:
                 args, kwargs, arguments, button_pressed = self.prepare_args(original_function, args, kwargs)
             except Exception as e:
                 self.make_error_page("Error preparing arguments for page", e, original_function)
                 # return None
             # Actually start building up the page
-            visiting_page = VisitedPage(url, original_function, arguments, "Creating Page", button_pressed)
-            self._page_history.append((visiting_page, original_state))
+            visiting_page = VisitedPage(original_function.__name__, original_function, arguments, "Creating Page", button_pressed)
+            # self._page_history.append((visiting_page, original_state))
+            self._page_history = [*page_history, (visiting_page, repr((json.dumps(dehydrate_json(state))))[1:-1].replace("\"", "\\\""))]
             try:
-                page = original_function(*args, **kwargs)
+                page = original_function(state, *args, **kwargs)
             except Exception as e:
-                additional_details = (f"  Arguments: {args!r}\n"
+                additional_details = (f"  State: {state!r}\n"
+                                      f"  Arguments: {args!r}\n"
                                       f"  Keyword Arguments: {kwargs!r}\n"
                                       f"  Button Pressed: {button_pressed!r}\n"
                                       f"  Function Signature: {inspect.signature(original_function)}")
                 self.make_error_page("Error creating page", e, original_function, additional_details)
-                # return None
             visiting_page.update("Verifying Page Result", original_page_content=page)
             self.verify_page_result(page, original_function)
             if False:
@@ -606,6 +629,18 @@ class Server:
             return content
 
         return bottle_page
+
+    def stringify_history(self, history: Optional[list[tuple[VisitedPage, str]]]) -> str:
+        history = history if history is not None else self._page_history
+        return "\n|\n".join([f"{vp}\t|\t{s}" for vp, s in history])
+    
+    def destringify_history(self, hist_str: str) -> list[tuple[VisitedPage, str]]:
+        if not hist_str: return []
+
+        def make_entry(line: str) -> tuple[VisitedPage, str]:
+            vp, s = line.split("\t|\t")
+            return VisitedPage.fromstr(vp), s
+        return [make_entry(line) for line in hist_str.split("\n|\n")]
 
     def verify_page_result(self, page: Page, original_function: Callable[..., Page]) -> None:
         """
@@ -682,6 +717,8 @@ class Server:
         :param original_function: The name of the function that created the page.
         :return: Returns an error page if a validation issue arises, otherwise none.
         """
+        # TODO: rewrite as `verify_page_state_type` and verify against self._initial_state_type
+            # Then, self._state_history is unneeded
         if not self._state_history:
             return
         message = ""
@@ -774,7 +811,8 @@ class Server:
                        f"""{html.escape(str(error))}\n\n\n{tb}""")
         if additional_details:
             new_message += f"\n\n\nAdditional Details:\n{additional_details}"
-        abort(500, new_message)
+        # abort(500, new_message)
+        raise DrafterError(500, new_message)
 
     def flash_warning(self, message: str) -> None:
         """
@@ -810,9 +848,10 @@ class Server:
 
     def bundled_js_or_error(
             self,
-            allowed_extensions: Optional[set[str]],
-            js_obj_name: Optional[str],
-            sep: Optional[str]
+            allowed_extensions: Optional[set[str]] = None,
+            js_obj_name: Optional[str] = None,
+            sep: Optional[str] = None,
+            pref: Optional[str] = None
         ) -> tuple[str, bool]:
         """
         Bundles files necessary for deployment, including the source code identified by
@@ -834,6 +873,8 @@ class Server:
         :param sep: The separator between each JSified file line, passed directly on,
             defaulting to newline.
         :type sep: str
+        :param pref: An optional prefix for the filenames, passed directly on, defaults to ""
+        :type pref: str
         :return: A tuple containing the bundled JS or error and an indication that an
             error occured (so you know what the first item is).
         :rtype: tuple[str, bool]
@@ -847,7 +888,7 @@ class Server:
                                        routes=""), False
         bundled_js, skipped, added = bundle_files_into_js(
             student_main_file, os.path.dirname(student_main_file),
-            allowed_extensions, js_obj_name, sep
+            allowed_extensions, js_obj_name, sep, pref
         )
         return bundled_js, True
     
@@ -881,8 +922,9 @@ class Server:
             CDN configurations.
         :rtype: str
         """
-        PYTHON_SOURCE_OBJECT_NAME = "pythonSource"
-        js_or_err, success = self.bundled_js_or_error({"py"}, PYTHON_SOURCE_OBJECT_NAME, "            ")
+        PYTHON_SOURCE_OBJECT_NAME = "pythonSource" if not self.configuration.debug else None
+        pref = "src/lib/" if self.configuration.debug else None
+        js_or_err, success = self.bundled_js_or_error({"py"}, PYTHON_SOURCE_OBJECT_NAME, "            ", pref)
         if not success: return js_or_err
         else: bundled_js = js_or_err
         return TEMPLATE_INDEX_HTML.format(python_source_obj_name=PYTHON_SOURCE_OBJECT_NAME,
@@ -891,6 +933,15 @@ class Server:
                                           cdn_skulpt_std=self.configuration.cdn_skulpt_std,
                                           cdn_skulpt_drafter=self.configuration.cdn_skulpt_drafter,
                                           cdn_drafter_setup=self.configuration.cdn_drafter_setup)
+
+
+@dataclass
+class DrafterError(BaseException):
+    code: int = 500
+    text: str = "Unknown Error."
+
+    def __str__(self) -> str:
+        return f"<h1>Error Code: {self.code}</h1>\n<div>{self.text}</div>"
 
 
 MAIN_SERVER = Server(_custom_name="MAIN_SERVER")
@@ -913,7 +964,7 @@ def get_main_server() -> Server:
     """
     return MAIN_SERVER
 
-def get_all_routes(server: Optional[Server] = None) -> dict[str, Callable[..., '_Page']]:
+def get_all_routes(server: Optional[Server] = None) -> dict[str, Callable[..., str]]:
     """
     Get all routes available in the given server or the main server if none is provided.
 
@@ -941,6 +992,49 @@ def get_server_setting(key: str, default: Optional[Any] = None, server: Server =
     """
     return getattr(server.configuration, key, default)
 
+def render_route(route: str, state_str: str, page_history_str: str, args: str, kwargs: str) -> tuple[str, str, str]:
+    """
+    Renders the route specified with the state and arguments specified. 
+    Returns the site content and new state.
+
+    :param route: The name of the route to render.
+    :type route: str
+    :param state_str: The current state of the website, probably from localStorage.
+    :type state_str: str
+    :param page_history_str: The history of the website, probably from localStorage.
+    :type page_history_str: str
+    :param args: The JSONified positional arguments.
+    :type args: str
+    :param kwargs: The JSONified keyword arguments.
+    :type kwargs: str
+    :return: the text content of the site, state, and history.
+    :rtype: tuple[str, str, str]
+    """
+    server = get_main_server()
+    if server._initial_state_type is None:
+        raise ValueError("You can't render a route if you haven't setup!")
+    state = server.load_from_state(state_str, server._initial_state_type)
+    server._state = state
+    page_history = server.destringify_history(page_history_str)
+    server._page_history = page_history
+    py_args = json.loads(base64.b64decode(bytes(args, 'utf-8')).decode('utf-8'))
+    py_kwargs = json.loads(base64.b64decode(bytes(kwargs, 'utf-8')).decode('utf-8'))
+
+    try:
+        page = server.routes[route](state, page_history, *py_args, **py_kwargs)
+    except DrafterError as e:
+        tb = html.escape(traceback.format_exc())
+        return f"<h1>Unknown Error:</h1>\n<pre>{e}</pre>\n<pre>{tb}</pre>", state_str, server.stringify_history(server._page_history)
+    except Exception as e:
+        # tb = html.escape("<br>".join(traceback.format_exc().split("\n")))
+        tb = html.escape(traceback.format_exc())
+        return f"<h1>Unknown Error:</h1>\n<pre>{e}</pre>\n<pre>{tb}</pre>", state_str, server.stringify_history(server._page_history)
+
+    # print(1009, server._page_history[0][0])
+    # print(1010, json.dumps(server._page_history[0][0]))
+
+    return page, server.dump_state(), server.stringify_history(server._page_history)
+
 
 def start_server(initial_state: Any = None, server: Server = MAIN_SERVER, skip: bool = False, **kwargs: Any) -> None:
     """
@@ -967,8 +1061,14 @@ def start_server(initial_state: Any = None, server: Server = MAIN_SERVER, skip: 
 
     if server.configuration.skulpt:
         server.setup(initial_state)
-        server.run(**kwargs)
+        server.run(**kwargs) # really just an extension of setup to handle config
+        # global SITE
+        # SITE = str(server.routes["/"](server._state))
+        # SITE = str(server.routes["/"]())
     else:
+        if server.configuration.debug:
+            server.configuration.cdn_skulpt_drafter = server.configuration.cdn_skulpt_drafter.replace(".js", "-py.js")
+
         with open("index.html", "w") as f:
             f.write(server.index_html_deployment())
 

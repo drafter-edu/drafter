@@ -11,13 +11,13 @@ from typing import Any, Optional, Callable, Dict, TYPE_CHECKING, Union
 import pprint
 
 from drafter.constants import LABEL_SEPARATOR, JSON_DECODE_SYMBOL
-from drafter.setup import request
+# from drafter.setup import request
 from drafter.testing import DIFF_INDENT_WIDTH
 from drafter.image_support import HAS_PILLOW, PILImage
 
 if TYPE_CHECKING:
     from drafter.page import Page
-    import bottle
+    # import bottle
 
 timezone_UTC = timezone(timedelta(0))
 
@@ -227,6 +227,21 @@ class VisitedPage:
         return (f"<strong>Current Route:</strong><br>Route function: <code>{function_name}</code><br>"
                 f"URL: <href='{self.url}'><code>{self.url}</code></href>")
 
+    def __str__(self) -> str:
+        started = self.started.timestamp()
+        stopped = self.stopped.timestamp() if self.stopped else ''
+        return f"{self.url}|{self.arguments}|{self.status}|{self.button_pressed}|{self.original_page_content or ''}|{self.old_state or ''}|{started}|{stopped}"
+
+    @staticmethod
+    def fromstr(vp: str) -> Any: # really -> VisitedPage
+        from drafter.server import get_main_server
+        url, arguments, status, button_pressed, original_page_content_str, old_state, started_str, stopped_str = vp.split("|")
+        function = get_main_server().original_routes[0][1] # this is false, but I need sth.
+        original_page_content = original_page_content_str or None
+        started = datetime.fromtimestamp(float(started_str))
+        stopped = datetime.fromtimestamp(float(stopped_str)) if stopped_str else None
+        return VisitedPage(url, function, arguments, status, button_pressed, original_page_content, old_state, started, stopped)
+
 def dehydrate_json(value: Any, seen: Optional[set[Any]] = None) -> Any:
     if seen is None:
         seen = set()
@@ -301,10 +316,10 @@ def rehydrate_json(value: Any, new_type: Any) -> Any:
     raise ValueError(f"Error while restoring state: Could not create {new_type!r} from {value!r}")
 
 
-def get_params() -> 'bottle.FormsDict':
-    params = request.params
-    if hasattr(params, 'decode'):
-        params = params.decode('utf-8')
-    for file_object in request.files:
-        params[file_object] = request.files[file_object]
-    return params
+# def get_params() -> 'bottle.FormsDict':
+#     params = request.params
+#     if hasattr(params, 'decode'):
+#         params = params.decode('utf-8')
+#     for file_object in request.files:
+#         params[file_object] = request.files[file_object]
+#     return params

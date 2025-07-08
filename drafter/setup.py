@@ -4,14 +4,14 @@ from typing import Any
 logger = logging.getLogger('drafter')
 
 
-try:
-    from bottle import Bottle, abort, request, static_file
+# try:
+#     from bottle import Bottle, abort, request, static_file
 
-    DEFAULT_BACKEND = "bottle"
-except ImportError:
-    DEFAULT_BACKEND = "none"
-    logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
-
+#     DEFAULT_BACKEND = "bottle"
+# except ImportError:
+#     DEFAULT_BACKEND = "none"
+#     logger.warn("Bottle unavailable; backend will be disabled and run in test-only mode.")
+DEFAULT_BACKEND = 'http.server'
 
 def _hijack_bottle() -> None:
     """
@@ -32,11 +32,11 @@ def _hijack_bottle() -> None:
         except (IOError, AttributeError):
             pass
 
-    try:
-        import bottle
-        bottle._stderr = _stderr
-    except ImportError:
-        pass
+    # try:
+    #     import bottle
+    #     bottle._stderr = _stderr
+    # except ImportError:
+    #     pass
 
 
 _hijack_bottle()
