@@ -373,8 +373,8 @@ class Server:
         #     raise ValueError("You can't run the server if it hasn't been set up!")
         # self.app.run(**final_args)
 
-    def prepare_args(self, 
-                     original_function: Callable[..., Any], 
+    def prepare_args(self,
+                     original_function: Callable[..., Any],
                      args: tuple[Any, ...], kwargs: dict[str, Any]
                     ) -> tuple[tuple[Any, ...], dict[str, Any], str, str]:
         """
@@ -633,7 +633,7 @@ class Server:
     def stringify_history(self, history: Optional[list[tuple[VisitedPage, str]]]) -> str:
         history = history if history is not None else self._page_history
         return "\n|\n".join([f"{vp}\t|\t{s}" for vp, s in history])
-    
+
     def destringify_history(self, hist_str: str) -> list[tuple[VisitedPage, str]]:
         if not hist_str: return []
 
@@ -805,6 +805,7 @@ class Server:
         :return: Does not return any value as it raises an HTTP 500 error with the formatted message.
         :rtype: None
         """
+        # TODO: Make errors much prettier.
         tb = html.escape(traceback.format_exc())
         new_message = (f"""{title}.\n"""
                        f"""Error in {original_function.__name__}:\n"""
@@ -855,7 +856,7 @@ class Server:
         ) -> tuple[str, bool]:
         """
         Bundles files necessary for deployment, including the source code identified by
-        the "start_server" line in the student's main file. 
+        the "start_server" line in the student's main file.
 
         This function searches for the entry point of the student's application and
         attempts to bundle it with all its associated files into a deployable format.
@@ -891,11 +892,11 @@ class Server:
             allowed_extensions, js_obj_name, sep, pref
         )
         return bundled_js, True
-    
+
     def test_deployment(self) -> str:
         """
         Bundles files and integrates them with the appropriate configurations
-        for deployment, allowing the server to "deploy" a local version of the 
+        for deployment, allowing the server to "deploy" a local version of the
         application, as it would appear on a live server using Skulpt.
 
         :raises IOError: If there are issues during the file bundling process.
@@ -923,7 +924,7 @@ class Server:
         :rtype: str
         """
         PYTHON_SOURCE_OBJECT_NAME = "pythonSource" if not self.configuration.debug else None
-        pref = "src/lib/" if self.configuration.debug else None
+        pref = "src/student/" if self.configuration.debug else None
         js_or_err, success = self.bundled_js_or_error({"py"}, PYTHON_SOURCE_OBJECT_NAME, "            ", pref)
         if not success: return js_or_err
         else: bundled_js = js_or_err
@@ -994,7 +995,7 @@ def get_server_setting(key: str, default: Optional[Any] = None, server: Server =
 
 def render_route(route: str, state_str: str, page_history_str: str, args: str, kwargs: str) -> tuple[str, str, str]:
     """
-    Renders the route specified with the state and arguments specified. 
+    Renders the route specified with the state and arguments specified.
     Returns the site content and new state.
 
     :param route: The name of the route to render.
