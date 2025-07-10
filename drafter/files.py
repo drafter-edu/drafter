@@ -26,7 +26,7 @@ BASIC_SCRIPTS = """<!--html-->
             }, 1000)
         });
     }
-    
+
     let expandables = document.getElementsByClassName('expandable');
     // Any span with the expandable class will be turned into "...", and can be clicked
     // to expand the rest of the content.
@@ -43,7 +43,7 @@ BASIC_SCRIPTS = """<!--html-->
                     expandable.textContent = content.slice(0, 100) + '...';
                 }
             });
-        }        
+        }
     }
 </script>"""
 
@@ -72,7 +72,7 @@ BASIC_STYLE = """<!--html-->
     div.btlw-container img {
         display: block;
     }
-    
+
     div.btlw-header .btlw-reset {
         float: right;
         cursor: pointer;
@@ -214,12 +214,12 @@ TEMPLATE_ERROR = """<!--html-->
     </head>
     <body>
         <h3>{title}</h3>
-        
+
         <p>{message}</p>
-        
+
         <p>Original error message:</p>
         <pre>{error}</pre>
-        
+
         <p>Available routes:</p>
         {routes}
     </body>
@@ -302,8 +302,8 @@ TEMPLATE_INDEX_HTML = """<!DOCTYPE html>
                 for (let fileName in {python_source_obj_name}) {{
                     let internalName = fileName.replace(/\\.py$/, ".js");
                     let contents = {python_source_obj_name}[fileName];
-                    let co = Sk.compile(contents, `src/lib/${{fileName}}`, 'exec', true, true);
-                    Sk.builtinFiles.files[`src/lib/${{internalName}}`] = `${{co.code}}\\nvar $builtinmodule = ${{co.funcname}};`;
+                    let co = Sk.compile(contents, `src/student/${{fileName}}`, 'exec', true, true);
+                    Sk.builtinFiles.files[`src/student/${{internalName}}`] = `${{co.code}}\\nvar $builtinmodule = ${{co.funcname}};`;
                 }}
             }}
 
