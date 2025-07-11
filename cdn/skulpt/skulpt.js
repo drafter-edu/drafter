@@ -14199,7 +14199,7 @@ Compiler.prototype.getSourceLine = function (lineno) {
     return this.source[lineno - 1];
 };
 
-Compiler.prototype.annotateSource = function (ast, shouldStep) {
+Compiler.prototype.annotateSource = function (ast, shouldStep, chompLineAt=90) {
     var i;
     var col_offset;
     var lineno;
@@ -14213,18 +14213,18 @@ Compiler.prototype.annotateSource = function (ast, shouldStep) {
         let isDocstring = !!(ast.constructor === Sk.astnodes.Expr &&
                              ast.value.constructor === Sk.astnodes.Str);
         // Do not trace the standard library
-        // DO trace the standard library!
         if (shouldStep && (
             !this.filename
             || !this.filename.startsWith("src/lib/")
+            // But *do* trace drafter
             ||  this.filename.startsWith("src/lib/drafter/")
         )) {
             out("\n$currLineNo=", lineno, ";$currColNo=", col_offset, ";");
             // TODO: Make filename a module-global, and update it via that quickly.
             // JSON.stringify(sourceLine)
             let chompedLine = sourceLine;
-            // And DON'T chomp the line!
-            // if (chompedLine.length > 24) {chompedLine = chompedLine.substr(0, 24)+"...";}
+            // And chomp the line as specified (defaults to 90 now, not fixed at 24)
+            if (chompedLine.length > chompLineAt) {chompedLine = chompedLine.substr(0, chompLineAt)+"...";}
             out("Sk.currFilename=$fname;$currSource=", JSON.stringify(chompedLine), ";");
             out(`Sk.afterSingleExecution && Sk.afterSingleExecution($gbl,$getLocals(),${lineno}, ${col_offset}, $fname, ${isDocstring}, '${astName}');\n`);
         }
@@ -37769,8 +37769,8 @@ function check_special_type_attr(type, value, pyName) {
 var Sk = {}; // jshint ignore:line
 
 Sk.build = {
-    githash: "067b94fde76d1efc171f6ea871297f708f369005",
-    date: "2025-07-10T21:17:03.531Z"
+    githash: "e0e7ca8704d4058f080afda67b2e074f6ff52846",
+    date: "2025-07-11T02:19:07.011Z"
 };
 
 /**
