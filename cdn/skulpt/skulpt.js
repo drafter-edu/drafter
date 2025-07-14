@@ -20822,7 +20822,8 @@ Sk.builtin.frame.prototype.tp$getattr = function (name) {
     }
 
     // if we have not returned yet, try the genericgetattr
-    return Sk.builtin.object.prototype.GenericGetAttr(name);
+    // return Sk.builtin.object.prototype.GenericGetAttr(name);
+    return Sk.generic.getAttr(name);
 };
 Sk.builtin.frame.prototype["$r"] = function () {
     return new Sk.builtin.str("<frame object>");
@@ -20884,7 +20885,8 @@ Sk.builtin.traceback.prototype.tp$getattr = function (name) {
     }
 
     // if we have not returned yet, try the genericgetattr
-    return Sk.builtin.object.prototype.GenericGetAttr(name);
+    // return Sk.builtin.object.prototype.GenericGetAttr(name);
+    return Sk.generic.getAttr(name);
 };
 Sk.builtin.traceback.prototype["$r"] = function () {
     return new Sk.builtin.str("<traceback object>");
@@ -37769,8 +37771,8 @@ function check_special_type_attr(type, value, pyName) {
 var Sk = {}; // jshint ignore:line
 
 Sk.build = {
-    githash: "e0e7ca8704d4058f080afda67b2e074f6ff52846",
-    date: "2025-07-11T02:19:07.011Z"
+    githash: "0d9c0e7cdff43c02ced20f531fc07a23e26d7e3e",
+    date: "2025-07-14T22:37:10.835Z"
 };
 
 /**
