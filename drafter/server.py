@@ -397,6 +397,7 @@ class Server:
         # args: list[Any] = list(args)
         kwargs = dict(**kwargs)
         button_pressed = ""
+
         # params = get_params()
         # if SUBMIT_BUTTON_KEY in params:
         #     button_pressed = json.loads(params.pop(SUBMIT_BUTTON_KEY))
@@ -407,15 +408,20 @@ class Server:
         # param_keys = list(params.keys())
         # for key in param_keys:
         #     kwargs[key] = params.pop(key)
+
         signature_parameters = inspect.signature(original_function).parameters
+        # print(signature_parameters.get('kwargs', signature_parameters['state']).annotation)
         expected_parameters = list(signature_parameters.keys())[1:]
         show_names = {param.name: (param.kind in (inspect.Parameter.KEYWORD_ONLY, inspect.Parameter.VAR_KEYWORD))
                       for param in signature_parameters.values()}
+        has_kwargs_params = bool(sum(param.kind == inspect.Parameter.VAR_KEYWORD for param in signature_parameters.values()))
+
         # kwargs = remap_hidden_form_parameters(kwargs, button_pressed)
         # Insert state into the beginning of args
         # if (expected_parameters and expected_parameters[0] == "state") or (
         #         len(expected_parameters) - 1 == len(args) + len(kwargs)):
         #     args.insert(0, self._state)
+
         # Check if there are too many arguments
         if len(expected_parameters) < len(args) + len(kwargs):
             self.flash_warning(
@@ -435,14 +441,20 @@ class Server:
                   for param, val in kwargs.items()}
         # Verify all arguments are in expected_parameters
         for key, value in kwargs.items():
-            if key not in expected_parameters:
+            if key not in expected_parameters and not has_kwargs_params:
                 raise ValueError(
                     f"Unexpected parameter {key}={value!r} in {original_function.__name__}. "
-                    f"Expected parameters: {expected_parameters}")
+                    f"Expected parameters: {expected_parameters}. "
+                )
+        def index_or_len(item: tuple[str, Any]) -> int:
+            try:
+                return expected_parameters.index(item[0])
+            except ValueError:
+                return len(expected_parameters)
         # Final return result
         representation = [safe_repr(arg) for arg in args] + [
             f"{key}={safe_repr(value)}" if show_names.get(key, False) else safe_repr(value)
-            for key, value in sorted(kwargs.items(), key=lambda item: expected_parameters.index(item[0]))]
+            for key, value in sorted(kwargs.items(), key=index_or_len)]
         return args, kwargs, ", ".join(representation), button_pressed
 
     def handle_images(self) -> None:
@@ -993,7 +1005,7 @@ def get_server_setting(key: str, default: Optional[Any] = None, server: Server =
     """
     return getattr(server.configuration, key, default)
 
-def render_route(route: str, state_str: str, page_history_str: str, args: str, kwargs: str) -> tuple[str, str, str]:
+def render_route(route: str, state_str: str, page_history_str: str, args: str, kwargs: str, inputs: str) -> tuple[str, str, str]:
     """
     Renders the route specified with the state and arguments specified.
     Returns the site content and new state.
@@ -1008,6 +1020,8 @@ def render_route(route: str, state_str: str, page_history_str: str, args: str, k
     :type args: str
     :param kwargs: The JSONified keyword arguments.
     :type kwargs: str
+    :param inputs: All of the <input> tags, JSONified. 
+    :type inputs: str
     :return: the text content of the site, state, and history.
     :rtype: tuple[str, str, str]
     """
@@ -1020,6 +1034,7 @@ def render_route(route: str, state_str: str, page_history_str: str, args: str, k
     server._page_history = page_history
     py_args = json.loads(base64.b64decode(bytes(args, 'utf-8')).decode('utf-8'))
     py_kwargs = json.loads(base64.b64decode(bytes(kwargs, 'utf-8')).decode('utf-8'))
+    py_kwargs.update(json.loads(base64.b64decode(bytes(inputs, 'utf-8')).decode('utf-8')))
 
     try:
         page = server.routes[route](state, page_history, *py_args, **py_kwargs)
