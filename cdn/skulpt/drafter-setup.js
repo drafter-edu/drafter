@@ -88,7 +88,8 @@ from drafter import render_route
 SITE, STATE, PAGE_HISTORY = render_route('${route}',
                            '''${localStorage.getItem("state")}''',
                            '''${localStorage.getItem("page-history")}''',
-                           '${args}', '${kwargs}')
+                           '${args}', '${kwargs}',
+                           '${getAllInputs()}')
 `
     execPython(python).then(() => {
         document.getElementById("website").innerHTML = module.SITE.v;
@@ -96,6 +97,15 @@ SITE, STATE, PAGE_HISTORY = render_route('${route}',
         localStorage.setItem("page-history", module.PAGE_HISTORY.v);
         localStorage.setItem("route", route);
     });
+}
+
+function getAllInputs() {
+    const inputs = document.getElementsByTagName("input");
+    let parsedInputs = {};
+    for (let input of inputs) {
+        parsedInputs[input.name] = input.value;
+    }
+    return btoa(JSON.stringify(parsedInputs));
 }
 
 function showError(err, filenameExecuted, code) {
