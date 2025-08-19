@@ -32,7 +32,10 @@ class Page:
         self.state = state
         self.content = content
 
-        if not isinstance(content, list):
+        if isinstance(content, (str, PageContent)):
+            # If the content is a single string, convert it to a list with that string as the only element.
+            self.content = [content]
+        elif not isinstance(content, list):
             incorrect_type = type(content).__name__
             raise ValueError("The content of a page must be a list of strings or components."
                              f" Found {incorrect_type} instead.")

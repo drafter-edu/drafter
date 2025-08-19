@@ -34,4 +34,4 @@ assert_equal(add_page("5", "3"), Page(None, [
     "8",
 ]))
 
-start_server(reloader=True)
+start_server()
