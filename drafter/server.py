@@ -74,6 +74,21 @@ def bundle_files_into_js(main_file, root_path, allowed_extensions=DEFAULT_ALLOWE
     return "\n".join(js_lines), skipped_files, added_files
 
 
+def protect_script_tags(content: str) -> str:
+    """
+    Protects `<script>` tags in the given HTML content by escaping them. This is
+    particularly useful when embedding HTML content within JavaScript strings, as
+    unescaped `<script>` tags can lead to unintended script execution or parsing
+    issues.
+
+    :param content: The HTML content containing potential `<script>` tags.
+    :type content: str
+    :return: The modified HTML content with `<script>` tags escaped.
+    :rtype: str
+    """
+    return content.replace("<script", "&lt;script").replace("</script>", "&lt;/script&gt;")
+
+
 class Server:
     """
     Represents a server capable of managing routes, states, configurations, and error handling
@@ -807,12 +822,12 @@ class Server:
                                        error="Could not find the student's main file.",
                                        routes="")
         bundled_js, skipped, added = bundle_files_into_js(student_main_file, os.path.dirname(student_main_file))
+        bundled_js = protect_script_tags(bundled_js)
         return TEMPLATE_SKULPT_DEPLOY.format(website_code=bundled_js,
                                              cdn_skulpt=self.configuration.cdn_skulpt,
                                              cdn_skulpt_std=self.configuration.cdn_skulpt_std,
                                              cdn_skulpt_drafter=self.configuration.cdn_skulpt_drafter,
                                              cdn_drafter_setup=self.configuration.cdn_drafter_setup)
-
 
 MAIN_SERVER = Server(_custom_name="MAIN_SERVER")
 
