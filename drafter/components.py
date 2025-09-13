@@ -135,7 +135,7 @@ class PageContent:
         :return: Returns the instance of the object after updating the style
         :rtype: self
         """
-        self.extra_settings[f"style_{style}"] = value
+        self.extra_settings[f"style_{style.replace('-', '_')}"] = value
         return self
 
     def update_attr(self, attr, value):
