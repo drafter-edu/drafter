@@ -1,4 +1,5 @@
 from tests.helpers import *
+from tests.test_retry_wrapper import retry_on_network_error
 from drafter import *
 from dataclasses import dataclass
 
@@ -9,6 +10,7 @@ class State:
     favorite: str
     poem: str
 
+@retry_on_network_error(max_retries=3, delay=2.0)
 def test_complex_form(browser, splinter_headless):
     drafter_server = TestServer(State("Dr. Bart", False, "dogs", ""))
 
