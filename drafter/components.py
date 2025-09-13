@@ -18,11 +18,12 @@ except ImportError:
     _has_matplotlib = False
 
 
-BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "tabindex", "value",
+BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "tabindex", "value", "alt",
                   "onclick", "ondblclick", "onmousedown", "onmouseup", "onmouseover", "onmousemove", "onmouseout",
                   "onkeypress", "onkeydown", "onkeyup",
                   "onfocus", "onblur", "onselect", "onchange", "onsubmit", "onreset", "onabort", "onerror", "onload",
-                  "onunload", "onresize", "onscroll"]
+                  "onunload", "onresize", "onscroll",
+                  "aria-label", "aria-labelledby", "aria-describedby", "aria-required", "aria-invalid"]
 
 
 BASE_PARAMETER_ERROR = ("""The {component_type} name must be a valid Python identifier name. A string is considered """
@@ -354,9 +355,11 @@ class Image(PageContent, LinkContent):
     url: str
     width: int
     height: int
+    alt: str
 
-    def __init__(self, url: str, width=None, height=None, **kwargs):
+    def __init__(self, url: str, alt="", width=None, height=None, **kwargs):
         self.url = url
+        self.alt = alt
         self.width = width
         self.height = height
         self.extra_settings = kwargs
@@ -393,6 +396,11 @@ class Image(PageContent, LinkContent):
             extra_settings['width'] = self.width
         if self.height is not None:
             extra_settings['height'] = self.height
+        
+        # Always include alt attribute for accessibility
+        alt_text = html.escape(self.alt) if self.alt else ""
+        extra_settings['alt'] = alt_text
+        
         was_pil, url = self._handle_pil_image(self.url)
         if was_pil:
             return f"<img src='{url}' {self.parse_extra_settings(**extra_settings)}>"
@@ -411,38 +419,63 @@ class TextBox(PageContent):
     name: str
     kind: str
     default_value: Optional[str]
+    label: Optional[str]
 
-    def __init__(self, name: str, default_value: Optional[str] = None, kind: str = "text", **kwargs):
+    def __init__(self, name: str, default_value: Optional[str] = None, kind: str = "text", label: Optional[str] = None, **kwargs):
         validate_parameter_name(name, "TextBox")
         self.name = name
         self.kind = kind
         self.default_value = str(default_value) if default_value is not None else ""
+        self.label = label
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
         extra_settings = {}
         if self.default_value is not None:
             extra_settings['value'] = html.escape(self.default_value)
+        
+        # Generate input element
+        input_id = f"textbox-{self.name}"
+        extra_settings['id'] = input_id
         parsed_settings = self.parse_extra_settings(**extra_settings)
-        # TODO: investigate whether we need to make the name safer
-        return f"<input type='{self.kind}' name='{self.name}' {parsed_settings}>"
+        input_html = f"<input type='{self.kind}' name='{self.name}' {parsed_settings}>"
+        
+        # If label is provided, wrap with label element
+        if self.label:
+            label_html = f"<label for='{input_id}'>{html.escape(self.label)}</label>"
+            return f"{label_html}{input_html}"
+        
+        return input_html
 
 
 @dataclass
 class TextArea(PageContent):
     name: str
     default_value: str
+    label: Optional[str]
     EXTRA_ATTRS = ["rows", "cols", "autocomplete", "autofocus", "disabled", "placeholder", "readonly", "required"]
 
-    def __init__(self, name: str, default_value: Optional[str] = None, **kwargs):
+    def __init__(self, name: str, default_value: Optional[str] = None, label: Optional[str] = None, **kwargs):
         validate_parameter_name(name, "TextArea")
         self.name = name
         self.default_value = str(default_value) if default_value is not None else ""
+        self.label = label
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<textarea name='{self.name}' {parsed_settings}>{html.escape(self.default_value)}</textarea>"
+        # Generate textarea element
+        textarea_id = f"textarea-{self.name}"
+        extra_settings = {'id': textarea_id}
+        extra_settings.update(self.extra_settings)
+        parsed_settings = self.parse_extra_settings(**extra_settings)
+        textarea_html = f"<textarea name='{self.name}' {parsed_settings}>{html.escape(self.default_value)}</textarea>"
+        
+        # If label is provided, wrap with label element
+        if self.label:
+            label_html = f"<label for='{textarea_id}'>{html.escape(self.label)}</label>"
+            return f"{label_html}{textarea_html}"
+        
+        return textarea_html
 
 
 @dataclass
@@ -450,23 +483,35 @@ class SelectBox(PageContent):
     name: str
     options: List[str]
     default_value: Optional[str]
+    label: Optional[str]
 
-    def __init__(self, name: str, options: List[str], default_value: Optional[str] = None, **kwargs):
+    def __init__(self, name: str, options: List[str], default_value: Optional[str] = None, label: Optional[str] = None, **kwargs):
         validate_parameter_name(name, "SelectBox")
         self.name = name
         self.options = [str(option) for option in options]
         self.default_value = str(default_value) if default_value is not None else ""
+        self.label = label
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
-        extra_settings = {}
+        # Generate select element
+        select_id = f"select-{self.name}"
+        extra_settings = {'id': select_id}
         if self.default_value is not None:
             extra_settings['value'] = html.escape(self.default_value)
+        extra_settings.update(self.extra_settings)
         parsed_settings = self.parse_extra_settings(**extra_settings)
         options = "\n".join(f"<option {'selected' if option == self.default_value else ''} "
                             f"value='{html.escape(option)}'>{option}</option>"
                             for option in self.options)
-        return f"<select name='{self.name}' {parsed_settings}>{options}</select>"
+        select_html = f"<select name='{self.name}' {parsed_settings}>{options}</select>"
+        
+        # If label is provided, wrap with label element
+        if self.label:
+            label_html = f"<label for='{select_id}'>{html.escape(self.label)}</label>"
+            return f"{label_html}{select_html}"
+        
+        return select_html
 
 
 @dataclass
@@ -474,18 +519,33 @@ class CheckBox(PageContent):
     EXTRA_ATTRS = ["checked"]
     name: str
     default_value: bool
+    label: Optional[str]
 
-    def __init__(self, name: str, default_value: bool = False, **kwargs):
+    def __init__(self, name: str, default_value: bool = False, label: Optional[str] = None, **kwargs):
         validate_parameter_name(name, "CheckBox")
         self.name = name
         self.default_value = bool(default_value)
+        self.label = label
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        # Generate checkbox element
+        checkbox_id = f"checkbox-{self.name}"
+        extra_settings = {'id': checkbox_id}
+        extra_settings.update(self.extra_settings)
+        parsed_settings = self.parse_extra_settings(**extra_settings)
         checked = 'checked' if self.default_value else ''
-        return (f"<input type='hidden' name='{self.name}' value='' {parsed_settings}>"
-                f"<input type='checkbox' name='{self.name}' {checked} value='checked' {parsed_settings}>")
+        
+        # The hidden input maintains the current behavior for unchecked boxes
+        hidden_input = f"<input type='hidden' name='{self.name}' value=''>"
+        checkbox_input = f"<input type='checkbox' name='{self.name}' {checked} value='checked' {parsed_settings}>"
+        
+        # If label is provided, wrap checkbox with label element
+        if self.label:
+            label_html = f"<label for='{checkbox_id}'>{checkbox_input} {html.escape(self.label)}</label>"
+            return f"{hidden_input}{label_html}"
+        
+        return f"{hidden_input}{checkbox_input}"
 
 
 @dataclass
