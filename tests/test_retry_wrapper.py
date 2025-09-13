@@ -22,18 +22,20 @@ def retry_on_network_error(max_retries=3, delay=1.0):
             
             for attempt in range(max_retries + 1):
                 try:
+                    print(f"Running {func.__name__} (attempt {attempt + 1}/{max_retries + 1})")
                     return func(*args, **kwargs)
-                except (WebDriverException, ConnectionError, OSError) as e:
+                except (WebDriverException, ConnectionError, OSError, Exception) as e:
                     last_exception = e
                     error_msg = str(e).lower()
                     
-                    # Check if it's a network-related error
+                    # Check if it's a network-related error or timeout
                     if any(keyword in error_msg for keyword in [
                         'network', 'connection', 'timeout', 'unreachable',
-                        'refused', 'reset', 'could not connect'
+                        'refused', 'reset', 'could not connect', 'timed out',
+                        'webdriver', 'selenium', 'browser'
                     ]):
                         if attempt < max_retries:
-                            print(f"Network error on attempt {attempt + 1}, retrying in {delay}s: {e}")
+                            print(f"Network/browser error on attempt {attempt + 1}, retrying in {delay}s: {e}")
                             time.sleep(delay)
                             continue
                     

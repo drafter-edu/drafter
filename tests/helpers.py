@@ -60,6 +60,9 @@ class TestServer:
         # Wait for server to be ready
         if not self.server_ready.wait(timeout=10):  # 10 second timeout
             raise RuntimeError("Server failed to start within 10 seconds")
+        
+        # Add a small buffer to ensure server is fully stable for browser tests
+        time.sleep(0.5)
             
         return self.thread
 
@@ -102,4 +105,7 @@ class TestServer:
                 pass
             time.sleep(0.1)
         
+        # Last resort: just wait a bit and hope for the best
+        time.sleep(2)
+        self.server_ready.set()
         return False

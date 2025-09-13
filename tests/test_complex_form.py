@@ -10,7 +10,7 @@ class State:
     favorite: str
     poem: str
 
-@retry_on_network_error(max_retries=3, delay=2.0)
+@retry_on_network_error(max_retries=3, delay=3.0)
 def test_complex_form(browser, splinter_headless):
     drafter_server = TestServer(State("Dr. Bart", False, "dogs", ""))
 

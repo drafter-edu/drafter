@@ -2,7 +2,7 @@ from tests.helpers import *
 from tests.test_retry_wrapper import retry_on_network_error
 
 
-@retry_on_network_error(max_retries=3, delay=2.0)
+@retry_on_network_error(max_retries=3, delay=3.0)
 def test_simple_default_page(browser, splinter_headless):
     drafter_server = TestServer()
     with drafter_server:
@@ -11,7 +11,7 @@ def test_simple_default_page(browser, splinter_headless):
         assert browser.is_text_present('Welcome to Drafter.')
         assert not browser.is_text_present('This text will not be there')
 
-@retry_on_network_error(max_retries=3, delay=2.0)
+@retry_on_network_error(max_retries=3, delay=3.0)
 def test_simple_form(browser, splinter_headless):
     drafter_server = TestServer()
 
@@ -39,7 +39,7 @@ def test_simple_form(browser, splinter_headless):
         assert browser.is_text_present('Hello, Ada Lovelace!')
 
 
-@retry_on_network_error(max_retries=3, delay=2.0)
+@retry_on_network_error(max_retries=3, delay=3.0)
 def test_two_box_form(browser, splinter_headless):
     drafter_server = TestServer()
 
