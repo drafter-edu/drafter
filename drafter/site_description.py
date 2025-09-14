@@ -21,14 +21,55 @@ def site_description(
     site information including title, description, author, and other metadata.
     This is intended to replace the need for students to create separate Markdown files.
     
-    :param title: The title of the website/project
-    :param description: A description of what the website/project does
+    The generated page will have a clean, professional layout that fits with the
+    Drafter framework's styling. All metadata is automatically formatted and displayed
+    in an organized manner.
+    
+    :param title: The title of the website/project (required)
+    :param description: A description of what the website/project does (required)
     :param author: The name of the person/people who created the site
-    :param contact_email: Contact email for the site
+    :param contact_email: Contact email for the site (will be formatted as a mailto link)
     :param creation_date: When the site was created (string or datetime object)
     :param version: Version number of the site/project
     :param url: The URL path for the about page (defaults to "about")
-    :param additional_metadata: Any additional key-value pairs to display
+    :param additional_metadata: Any additional key-value pairs to display.
+                               Keys with underscores will be converted to "Title Case"
+                               (e.g., "project_type" becomes "Project Type")
+    
+    Examples:
+        Basic usage with minimal information:
+        >>> site_description(
+        ...     title="My Website",
+        ...     description="A simple website built with Drafter"
+        ... )
+        
+        Complete usage with all metadata:
+        >>> site_description(
+        ...     title="My Portfolio",
+        ...     description="A showcase of my programming projects",
+        ...     author="Jane Smith",
+        ...     contact_email="jane@example.com",
+        ...     creation_date="September 2024",
+        ...     version="1.0",
+        ...     url="about",
+        ...     course="CS 101",
+        ...     programming_language="Python"
+        ... )
+        
+        Using with datetime object:
+        >>> from datetime import datetime
+        >>> site_description(
+        ...     title="Class Project",
+        ...     description="My final project for web development class",
+        ...     creation_date=datetime(2024, 10, 1)
+        ... )
+    
+    Notes:
+        - The function creates a new route that can be accessed at /{url}
+        - If no URL is specified, the page will be available at /about
+        - The page integrates seamlessly with Drafter's existing styling
+        - Additional metadata keys with underscores are automatically formatted
+          for display (e.g., "target_audience" → "Target Audience")
     """
     
     def about_page() -> Page:
