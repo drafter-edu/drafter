@@ -255,7 +255,8 @@ Components
 
         Button("Submit", some_route, Argument("additional_info", "extra_data"))
 
-    Note that buttons must have unique names, or the arguments will not be distinguishable.
+    Multiple buttons can now have the same text without conflicts, as each button instance is automatically
+    assigned a unique identifier to distinguish its arguments.
 
     :param name: The name of the argument, which will be used to identify the argument when the user submits the form.
                  Make sure this is a valid Python identifier (start with a letter followed only by letters, numerals,
