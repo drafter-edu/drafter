@@ -159,6 +159,8 @@ def extract_button_label(full_key: str):
         return None, full_key
     button_pressed, key = full_key.split(LABEL_SEPARATOR, 1)
     button_pressed = json.loads(unquote(button_pressed))
+    # Return the full button namespace (including ID) and the parameter key
+    # The namespace format is "text#id" where id is the button instance ID
     return button_pressed, key
 
 
