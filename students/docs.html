@@ -394,7 +394,8 @@ to the server when a button is pressed, you can use this component to do so.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Submit&quot;</span><span class="p">,</span> <span class="n">some_route</span><span class="p">,</span> <span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;additional_info&quot;</span><span class="p">,</span> <span class="s2">&quot;extra_data&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>Note that buttons must have unique names, or the arguments will not be distinguishable.</p>
+<p>Multiple buttons can now have the same text without conflicts, as each button instance is automatically
+assigned a unique identifier to distinguish its arguments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
