@@ -310,10 +310,14 @@ class Link(PageContent, LinkContent):
         self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
         self.arguments = arguments
+        # Generate a unique ID for this link instance to avoid namespace collisions
+        self._link_id = id(self)
 
     def __str__(self) -> str:
-        precode = self.create_arguments(self.arguments, self.text)
-        url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: self.text})
+        # Create a unique namespace using both link text and instance ID
+        link_namespace = f"{self.text}#{self._link_id}"
+        precode = self.create_arguments(self.arguments, link_namespace)
+        url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: link_namespace})
         return f"{precode}<a href='{url}' {self.parse_extra_settings()}>{self.text}</a>"
 
 
