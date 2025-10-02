@@ -45,42 +45,4 @@ def cell_clicked(state: State, x: int, y: int) -> Page:
     return index(state)
 
 
-if __name__ == "__main__":
-    # Test without starting server
-    state = State()
-    page = index(state)
-    
-    print("✓ Successfully created page with 9 buttons (all with text 'Click Me')")
-    print(f"✓ Page has {len([c for c in page.content if isinstance(c, Button)])} buttons")
-    
-    # Extract and verify unique namespaces
-    import re
-    button_count = 0
-    namespaces = set()
-    
-    for content in page.content:
-        if isinstance(content, Button):
-            button_count += 1
-            html = str(content)
-            # Extract the button value which includes the namespace
-            # Look specifically for the button element's value
-            value_match = re.search(r"<button[^>]+value='([^']+)'", html)
-            if value_match:
-                namespace = value_match.group(1)
-                # Decode HTML entities
-                namespace = namespace.replace('&quot;', '"')
-                namespaces.add(namespace)
-                if button_count <= 3:  # Debug: show first 3
-                    print(f"  Button {button_count} namespace: {namespace}")
-    
-    print(f"✓ Found {len(namespaces)} unique button namespaces")
-    print(f"✓ All {button_count} buttons have unique identifiers")
-    
-    if len(namespaces) == button_count:
-        print("\n✅ SUCCESS: All buttons with the same text have unique namespaces!")
-        print("   This prevents argument conflicts when buttons are clicked.")
-    else:
-        print("\n❌ FAILURE: Some buttons share namespaces!")
-    
-    # Uncomment to start the server and test interactively
-    # start_server(State())
+start_server(State())
