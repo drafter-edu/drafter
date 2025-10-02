@@ -22,7 +22,9 @@ BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "
                   "onclick", "ondblclick", "onmousedown", "onmouseup", "onmouseover", "onmousemove", "onmouseout",
                   "onkeypress", "onkeydown", "onkeyup",
                   "onfocus", "onblur", "onselect", "onchange", "onsubmit", "onreset", "onabort", "onerror", "onload",
-                  "onunload", "onresize", "onscroll"]
+                  "onunload", "onresize", "onscroll",
+                  "accesskey", "anchor", "role", "spellcheck", "tabindex",
+                  ]
 
 
 BASE_PARAMETER_ERROR = ("""The {component_type} name must be a valid Python identifier name. A string is considered """
@@ -233,6 +235,8 @@ class LinkContent:
     """
     url: str
     text: str
+
+    EXTRA_ATTRS = ["disabled"]
 
     def _handle_url(self, url, external=None):
         if callable(url):
