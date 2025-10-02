@@ -22,7 +22,7 @@ div.btlw-container img {
     display: block;
 }
 
-div.btlw-header .btlw-reset {
+div.btlw-header .btlw-reset,div.btlw-header .btlw-about {
     float: right;
     cursor: pointer;
     background-color: white;

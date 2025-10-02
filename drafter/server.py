@@ -3,7 +3,7 @@ import os
 import traceback
 from dataclasses import dataclass, asdict, replace, field, fields
 from functools import wraps
-from typing import Any, Optional, List, Tuple
+from typing import Any, Optional, List, Tuple, Union
 import json
 import inspect
 import pathlib
@@ -27,6 +27,15 @@ from drafter.image_support import HAS_PILLOW, PILImage
 import logging
 logger = logging.getLogger('drafter')
 
+
+SiteInformationType = Union[str, list, tuple, PageContent]
+@dataclass
+class SiteInformation:
+    author: SiteInformationType
+    description: SiteInformationType
+    sources: SiteInformationType
+    planning: SiteInformationType
+    links: SiteInformationType
 
 DEFAULT_ALLOWED_EXTENSIONS = ('py', 'js', 'css', 'txt', 'json', 'csv', 'html', 'md')
 
@@ -140,6 +149,7 @@ class Server:
         self._state_frozen_history = []
         self._page_history = []
         self._conversion_record = []
+        self._site_information = None
         self.original_routes = []
         self.app = None
         self._custom_name = _custom_name
@@ -264,6 +274,13 @@ class Server:
         self._conversion_record.clear()
         return self.routes['/']()
 
+    def about(self):
+        """
+        Generates the "About" page based on default information.
+        :return:
+        """
+        return "No site information has been set. Use the <code>set_site_information()</code> function to set the information about your site."
+
     def setup(self, initial_state=None):
         """
         Initializes and configures the application. Sets up initial state, error
@@ -320,6 +337,7 @@ class Server:
         if not self.routes:
             raise ValueError("No routes have been defined.\nDid you remember the @route decorator?")
         self.app.route("/--reset", 'GET', self.reset)
+        self.app.route("/--about", "GET", self.about)
         # If not skulpt, then allow them to test the deployment
         if not self.configuration.skulpt:
             self.app.route("/--test-deployment", 'GET', self.test_deployment)

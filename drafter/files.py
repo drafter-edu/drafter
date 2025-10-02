@@ -1,4 +1,6 @@
 """
+Pretty sure this file is mostly deprecated now!
+
 We do not put the <script> and <style> tags directly in the code,
 so that we can rely on language injection to provide syntax highlighting.
 """
@@ -70,7 +72,7 @@ BASIC_STYLE = "<style>" + """"
         display: block;
     }
     
-    div.btlw-header .btlw-reset {
+    div.btlw-header .btlw-reset,div.btlw-header .btlw-about {
         float: right;
         cursor: pointer;
         background-color: white;
@@ -214,6 +216,29 @@ TEMPLATE_ERROR = """
 
 TEMPLATE_404 = TEMPLATE_ERROR
 TEMPLATE_500 = TEMPLATE_ERROR
+
+DEPLOYED_404_TEMPLATE_HTML = """
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecting to Web Site</title>
+    <script type="text/javascript">
+      var pathSegmentsToKeep = 1;
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
+"""
 
 def seek_file_by_line(line, missing_value=None):
     """

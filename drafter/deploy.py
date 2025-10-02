@@ -1,7 +1,7 @@
-from typing import Optional
-from drafter.server import MAIN_SERVER
+from typing import Optional, Union
+from drafter.server import MAIN_SERVER, SiteInformationType
 from drafter.page import Page
-
+from drafter.components import PageContent
 
 def hide_debug_information():
     """
@@ -35,6 +35,31 @@ def set_website_framed(framed: bool):
     :param framed: Whether the website should be framed or not.
     """
     MAIN_SERVER.configuration.framed = framed
+
+
+
+def set_site_information(author: SiteInformationType,
+                         description: SiteInformationType,
+                         sources: SiteInformationType,
+                         planning: SiteInformationType,
+                         github: SiteInformationType,
+                         ):
+    """
+    Sets the information about the website, such as the author, description, sources,
+    :param author:
+    :param description:
+    :param sources:
+    :param planning:
+    :param github:
+    :return:
+    """
+    return MAIN_SERVER.set_information(
+        author=author,
+        description=description,
+        sources=sources,
+        planning=planning,
+        github=github
+    )
 
 
 def set_website_style(style: Optional[str]):

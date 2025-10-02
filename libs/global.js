@@ -34,3 +34,35 @@ for (let i = 0; i < expandables.length; i++) {
         });
     }
 }
+
+window.stopInformationPageListener = function() {
+    throw new Error("Information page listener not initialized yet.");
+};
+document.addEventListener('DOMContentLoaded', () => {
+    let lastPressTime = 0;
+    const doublePressDelay = 600; // milliseconds allowed between presses
+
+    function doubleIHandler(event) {
+        // Check for Ctrl+I (case-insensitive)
+        if (event.ctrlKey && (event.key === 'i' || event.key === 'I')) {
+            const now = Date.now();
+
+            if (now - lastPressTime <= doublePressDelay) {
+                // Detected a double press within the allowed time
+                window.location.href = '--about';
+            }
+
+            // Update the last press time
+            lastPressTime = now;
+
+            // Prevent default browser behavior if needed (e.g., to stop opening dev tools)
+            event.preventDefault();
+        }
+    }
+
+    document.addEventListener('keydown', doubleIHandler);
+    window.stopInformationPageListener = () => {
+        document.removeEventListener('keydown', doubleIHandler);
+    };
+
+});

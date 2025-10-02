@@ -68,7 +68,8 @@ class Page:
         content = f"<form method='POST' enctype='multipart/form-data' accept-charset='utf-8'>{content}</form>"
         if configuration.framed:
             reset_button = self.make_reset_button()
-            content = (f"<div class='container btlw-header'>{configuration.title}{reset_button}</div>"
+            about_button = self.make_about_button()
+            content = (f"<div class='container btlw-header'>{configuration.title}{reset_button}{about_button}</div>"
                        f"<div class='container btlw-container'>{content}</div>")
         return content
 
@@ -83,6 +84,17 @@ class Page:
                     title="Resets the page to its original state. Any data entered will be lost."
                     onclick="return confirm('This will reset the page to its original state. Any data entered will be lost. Are you sure you want to continue?');"
                     >⟳</a>'''
+
+    def make_about_button(self) -> str:
+        """
+        Creates an about button that has the "info" icon and title text that says "About Drafter.".
+        Simply links to the "--about" URL.
+
+        :return: A string of HTML representing the about button.
+        """
+        return '''<a href="--about" class="btlw-about" 
+                    title="More information about this website"
+                    >?</a>'''
 
     def verify_content(self, server) -> bool:
         """

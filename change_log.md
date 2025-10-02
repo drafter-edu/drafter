@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+* Command line creation of the compiled website
+* Script tags are properly escaped when the test deployment is launched.
+
 ## [1.7.4] - 2025-08-08
 
 ### Added
