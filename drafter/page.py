@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Any
+import html
 
 from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
@@ -62,10 +63,14 @@ class Page:
             else:
                 chunked.append(chunk.render(current_state, configuration))
         content = "\n".join(chunked)
-        content = f"<form method='POST' enctype='multipart/form-data' accept-charset='utf-8'>{content}</form>"
+        
+        # Wrap form content in semantic main element with proper ARIA attributes
+        content = f"<main role='main'><form method='POST' enctype='multipart/form-data' accept-charset='utf-8' aria-label='Page content form'>{content}</form></main>"
+        
         if configuration.framed:
             reset_button = self.make_reset_button()
-            content = (f"<div class='container btlw-header'>{configuration.title}{reset_button}</div>"
+            # Add semantic header and proper ARIA landmarks
+            content = (f"<header class='container btlw-header' role='banner'><h1>{html.escape(configuration.title)}</h1>{reset_button}</header>"
                        f"<div class='container btlw-container'>{content}</div>")
         return content
 
@@ -78,6 +83,7 @@ class Page:
         """
         return '''<a href="--reset" class="btlw-reset" 
                     title="Resets the page to its original state. Any data entered will be lost."
+                    aria-label="Reset page to original state"
                     onclick="return confirm('This will reset the page to its original state. Any data entered will be lost. Are you sure you want to continue?');"
                     >⟳</a>'''
 
