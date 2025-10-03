@@ -5,6 +5,7 @@ from drafter.routes import *
 from drafter.server import *
 from drafter.deploy import *
 from drafter.testing import assert_equal
+from drafter.site_description import site_description
 import drafter.hacks
 
 # Provide default route
