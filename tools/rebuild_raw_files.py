@@ -55,12 +55,13 @@ class RawFiles:
     metadata: dict
     scripts: dict
     styles: dict
+    deploy: dict
 
 """)
         f.write("RAW_FILES = {}\n")
         for theme, categories in RAW_FILES.items():
             metadata = categories.pop('metadata', {})
-            f.write(f"RAW_FILES['{theme}'] = RawFiles({json.dumps(metadata)}, {{}}, {{}})\n")
+            f.write(f"RAW_FILES['{theme}'] = RawFiles({json.dumps(metadata)}, {{}}, {{}}, {{}})\n")
 
             for category, files in categories.items():
                 for filename, raw in files.items():
@@ -84,6 +85,7 @@ def get_raw_files(theme):
         RAW_FILES[theme].metadata,
         {k: f"<script>{v}</script>" for k, v in RAW_FILES[theme].scripts.items()},
         {k: f"<style>{v}</style>" for k, v in RAW_FILES[theme].styles.items()},
+        {k: f"<script>{v}</script>" for k, v in RAW_FILES[theme].deploy.items()},
     )
 
 def get_themes():

@@ -42,7 +42,7 @@ def set_site_information(author: SiteInformationType,
                          description: SiteInformationType,
                          sources: SiteInformationType,
                          planning: SiteInformationType,
-                         github: SiteInformationType,
+                         links: SiteInformationType,
                          ):
     """
     Sets the information about the website, such as the author, description, sources,
@@ -50,7 +50,7 @@ def set_site_information(author: SiteInformationType,
     :param description:
     :param sources:
     :param planning:
-    :param github:
+    :param links:
     :return:
     """
     return MAIN_SERVER.set_information(
@@ -58,7 +58,7 @@ def set_site_information(author: SiteInformationType,
         description=description,
         sources=sources,
         planning=planning,
-        github=github
+        links=links
     )
 
 

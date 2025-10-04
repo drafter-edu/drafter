@@ -81,6 +81,7 @@ class ServerConfiguration:
     reloader: bool = False
     # This makes the server not run (e.g., to only run tests)
     skip: bool = bool(os.environ.get('DRAFTER_SKIP', False))
+    must_have_site_information: bool = bool(os.environ.get('DRAFTER_MUST_HAVE_SITE_INFORMATION', True))
 
     # Website configuration
     title: str = "Drafter Website"

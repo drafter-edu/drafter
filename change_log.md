@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-* Command line creation of the compiled website
+* Command line compilation of websites
+* Deploying through skulpt, the setup code stored in Drafter now
 * Script tags are properly escaped when the test deployment is launched.
 
 ## [1.7.4] - 2025-08-08

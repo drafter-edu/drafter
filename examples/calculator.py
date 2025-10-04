@@ -3,6 +3,8 @@ from drafter import *
 from bakery import assert_equal
 
 
+set_site_information("", "", "", "", "")
+
 @dataclass
 class State:
     """

@@ -8,6 +8,9 @@
     "styles": [
       "diff.css",
       "global.css"
+    ],
+    "deploy": [
+      "drafter-setup.js"
     ]
   },
   "skeleton": {

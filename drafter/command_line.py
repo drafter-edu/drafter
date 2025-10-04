@@ -23,10 +23,12 @@ Some work that needs to be done:
 from dataclasses import dataclass
 from drafter import ServerConfiguration, protect_script_tags
 from drafter.files import DEPLOYED_404_TEMPLATE_HTML, TEMPLATE_SKULPT_DEPLOY
+from drafter.raw_files import get_raw_files
 
 import pathlib
 import os
 import argparse
+from typing import Any
 
 @dataclass
 class BuildOptions:
@@ -55,7 +57,7 @@ def build_site(options: BuildOptions) -> None:
     with open(options.site_file, 'r') as f:
         site_code = f.read()
     site_code = protect_script_tags(site_code)
-    js_lines.append(SK_TEMPLATE_LINE.format(filename=options.site_file, content=site_code))
+    js_lines.append(SK_TEMPLATE_LINE.format(filename="main.py", content=site_code))
     print("Adding site file", options.site_file)
 
     for filename in options.additional_files:
@@ -69,12 +71,23 @@ def build_site(options: BuildOptions) -> None:
 
     os.makedirs(options.output_directory, exist_ok=True)
 
+    environment_variables = []
+    if options.warn_missing_info:
+        environment_variables.append(("DRAFTER_MUST_HAVE_SITE_INFORMATION", True))
+    environment_settings = build_environment(environment_variables)
+
+    setup_files = list(get_raw_files('global').deploy.values())
+    setup_files.append("<script>"+environment_settings+"</script>")
+    setup_code = "\n".join(setup_files)
+
+
     complete_website = TEMPLATE_SKULPT_DEPLOY.format(
         cdn_skulpt=options.server_configuration.cdn_skulpt,
         cdn_skulpt_std=options.server_configuration.cdn_skulpt_std,
         cdn_skulpt_drafter=options.server_configuration.cdn_skulpt_drafter,
-        cdn_drafter_setup=options.server_configuration.cdn_drafter_setup,
-        website_code = "".join(js_lines)
+        website_setup=setup_code,
+        website_code = "".join(js_lines),
+        external_pages=options.external_pages,
     )
 
     output_path = os.path.join(options.output_directory, options.output_filename)
@@ -89,33 +102,24 @@ def build_site(options: BuildOptions) -> None:
             f.write(DEPLOYED_404_TEMPLATE_HTML)
         print(f"Wrote 404 file to {output_404_path}")
 
+
     # Need to add warning if the set_site_information is missing
     # Need to handle the additional external links getting added to the about
 
-    """
-
-    ALLOWED_EXTENSIONS = {'py', 'js', 'css', 'txt', 'json', 'csv', 'html', 'md'}
-
-    all_files = {}
-    for root, dirs, files in os.walk('website'):
-        for file in files:
-            path = pathlib.Path(os.path.join(root, file)).relative_to('website')
-            if pathlib.Path(file).suffix[1:].lower() not in ALLOWED_EXTENSIONS:
-                print("Skipping", os.path.join(root, file))
-                continue
-            with open(os.path.join(root, file), 'r') as f:
-                content = f.read()
-                all_files[str(path.as_posix())] = content
-                print("Adding", os.path.join(root, file))
-
-    os.makedirs('tools/build', exist_ok=True)
-
-    with open('tools/build/website_files.js', 'w') as f:
-        for filename, contents in all_files.items():
-            f.write(f"Sk.builtinFiles.files[{filename!r}] = {contents!r};\n")
-
-    print("Bundled", len(all_files), "files into tools/build/website_files.js")
-    """
+SKULPT_ENV_VAR_TEMPLATE = 'Sk.environ.set$item(new Sk.builtin.str("{name}"), {value});'
+def build_environment(variables: list[tuple[str, Any]]) -> str:
+    lines = []
+    for key, value in variables:
+        if isinstance(value, str):
+            js_value = f'new Sk.builtin.str("{value}")'
+        elif value == True:
+            js_value = "Sk.builtin.bool.true$"
+        elif value == False:
+            js_value = "Sk.builtin.bool.false$"
+        else:
+            raise ValueError(f"Unsupported environment variable type: {type(value)} for {key}")
+        lines.append(SKULPT_ENV_VAR_TEMPLATE.format(name=key, value=js_value))
+    return "\n".join(lines)
 
 class ServerConfigurationParser:
     def __init__(self, parsed_server_args):
@@ -127,7 +131,7 @@ class ServerConfigurationParser:
             else:
                 raise ValueError(f"Invalid server configuration argument: {server_arg}")
 
-    def parse_server_arg(self, name: str, value_type: type) -> tuple[str, any]:
+    def parse_server_arg(self, name: str, value_type: type) -> tuple[str, Any]:
         if name in self._server_config_args:
             raw_value = self._server_config_args[name]
             if value_type == bool:
@@ -136,7 +140,7 @@ class ServerConfigurationParser:
                 parsed_value = raw_value.split(',')
             else:
                 parsed_value = value_type(raw_value)
-            del self._server_config_args[name]
+            self._server_config_args[name] = parsed_value
 
     def finalize(self) -> ServerConfiguration:
         return ServerConfiguration(**self._server_config_args)
@@ -177,6 +181,7 @@ def parse_args(args) -> BuildOptions:
     sc.parse_server_arg("cdn_skulpt_setup", str)
 
     server_configuration = sc.finalize()
+    print(server_configuration)
 
     return BuildOptions(
         site_file=parsed_args.site_file,

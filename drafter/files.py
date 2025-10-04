@@ -271,14 +271,14 @@ def seek_file_by_line(line, missing_value=None):
 TEMPLATE_SKULPT_DEPLOY = """
 <html>
     <head>
-        <script src="{cdn_skulpt}" type="text/javascript"></script>
-        <script src="{cdn_skulpt_std}" type="text/javascript"></script>
-        <script src="{cdn_skulpt_drafter}" type="text/javascript"></script>
         <script
             src="https://code.jquery.com/jquery-3.7.1.min.js"
             integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
             crossorigin="anonymous"
         ></script>
+        <script src="{cdn_skulpt}" type="text/javascript"></script>
+        <script src="{cdn_skulpt_std}" type="text/javascript"></script>
+        <script src="{cdn_skulpt_drafter}" type="text/javascript"></script>
         <script type="text/javascript">
 Sk.output = console.log;
 {website_code}
@@ -289,7 +289,7 @@ Sk.output = console.log;
 <div id="website">
 Loading...
 </div>
-        <script src="{cdn_drafter_setup}" type="text/javascript"></script>
+        {website_setup}
     </body>
 </html>
 """

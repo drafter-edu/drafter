@@ -22,6 +22,11 @@ setuptools.setup(
     #package_data={
     #    'websites': [] #'data/emojis.zip']
     #},
+    entry_points={
+        "console_scripts": [
+            "drafter=drafter.command_line:main"
+        ]
+    },
     author_email='acbart@udel.edu',
     description='Student-friendly full stack web development library.',
     install_requires=REQUIREMENTS,

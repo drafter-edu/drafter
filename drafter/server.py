@@ -154,6 +154,9 @@ class Server:
         self.app = None
         self._custom_name = _custom_name
 
+    def set_information(self, **kwargs):
+        self._site_information = SiteInformation(**kwargs)
+
     def __repr__(self):
         """
         Provides a string representation of the current server object. If a custom
@@ -279,7 +282,9 @@ class Server:
         Generates the "About" page based on default information.
         :return:
         """
-        return "No site information has been set. Use the <code>set_site_information()</code> function to set the information about your site."
+        if not self._site_information:
+            return "No site information has been set. Use the <code>set_site_information()</code> function to set the information about your site."
+
 
     def setup(self, initial_state=None):
         """
@@ -841,11 +846,12 @@ class Server:
                                        routes="")
         bundled_js, skipped, added = bundle_files_into_js(student_main_file, os.path.dirname(student_main_file))
         bundled_js = protect_script_tags(bundled_js)
+        drafter_setup_code = "\n".join(get_raw_files('global').deploy.values())
         return TEMPLATE_SKULPT_DEPLOY.format(website_code=bundled_js,
                                              cdn_skulpt=self.configuration.cdn_skulpt,
                                              cdn_skulpt_std=self.configuration.cdn_skulpt_std,
                                              cdn_skulpt_drafter=self.configuration.cdn_skulpt_drafter,
-                                             cdn_drafter_setup=self.configuration.cdn_drafter_setup)
+                                             website_setup=drafter_setup_code)
 
 MAIN_SERVER = Server(_custom_name="MAIN_SERVER")
 
@@ -913,6 +919,9 @@ def start_server(initial_state=None, server: Server = MAIN_SERVER, skip=False, *
         * *port* (``int``) --
           The port to run the server on. Defaults to ``8080``
     """
+    if server.configuration.must_have_site_information:
+        if not server._site_information:
+            raise ValueError("You must set the site information before starting the server. Use set_site_information().")
     if server.configuration.skip or skip:
         logger.info("Skipping server setup and execution")
         return
