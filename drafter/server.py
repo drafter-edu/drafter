@@ -336,6 +336,27 @@ class Server:
             content_parts.append("<h2>Links</h2>")
             content_parts.append(f"<div>{render_site_info(self._site_information.links)}</div>")
         
+        # Add external pages if configured
+        if self.configuration.external_pages:
+            content_parts.append("<h2>External Pages</h2>")
+            external_items = []
+            # Parse semicolon-separated format: "URL Text;URL Text;..."
+            for entry in self.configuration.external_pages.split(';'):
+                entry = entry.strip()
+                if not entry:
+                    continue
+                # Split on first whitespace to separate URL from optional label
+                parts = entry.split(None, 1)
+                if len(parts) == 2:
+                    url, label = parts
+                    external_items.append(f'<a href="{html.escape(url)}">{html.escape(label)}</a>')
+                elif len(parts) == 1:
+                    url = parts[0]
+                    external_items.append(f'<a href="{html.escape(url)}">{html.escape(url)}</a>')
+            if external_items:
+                items_html = "\n".join(f"<li>{item}</li>" for item in external_items)
+                content_parts.append(f"<ul>{items_html}</ul>")
+        
         return "\n".join(content_parts)
 
 

@@ -132,3 +132,49 @@ def test_about_page_partial_information():
     assert "John Doe" in result
     # Other fields should not show headers if empty
     # (we check that the method doesn't crash with empty/None values)
+
+
+def test_about_page_with_external_pages():
+    """Test that external pages from configuration are displayed"""
+    server = Server(_custom_name="TEST_ABOUT")
+    server.set_information(
+        author="John Doe",
+        description="A test website",
+        sources="https://example.com",
+        planning="Planning document",
+        links="https://github.com"
+    )
+    server._state = None
+    # Set external pages in configuration
+    server.configuration.external_pages = "https://github.com/repo GitHub Repository;https://example.com Example Site"
+    
+    result = server.about()
+    
+    # Check that external pages section is present
+    assert "External Pages" in result
+    assert "GitHub Repository" in result
+    assert "https://github.com/repo" in result
+    assert "Example Site" in result
+    assert "https://example.com" in result
+
+
+def test_about_page_with_external_pages_no_labels():
+    """Test that external pages without labels show URLs"""
+    server = Server(_custom_name="TEST_ABOUT")
+    server.set_information(
+        author="John Doe",
+        description="A test website",
+        sources="",
+        planning="",
+        links=""
+    )
+    server._state = None
+    # Set external pages without labels
+    server.configuration.external_pages = "https://github.com/repo;https://example.com"
+    
+    result = server.about()
+    
+    # Check that external pages section is present with URLs as link text
+    assert "External Pages" in result
+    assert "https://github.com/repo" in result
+    assert "https://example.com" in result
