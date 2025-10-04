@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Full API Documentation &#8212; Drafter 1.7.2 documentation</title>
+    <title>Full API Documentation &#8212; Drafter 1.7.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=908dc885"></script>
+    <script src="../_static/documentation_options.js?v=ff7cdc51"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="../students/help.html" title="More Help"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.7.2 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.7.4 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>
@@ -98,6 +98,13 @@ to handle HTTP requests and responses.</p>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.server.Server.about">
+<span class="sig-name descname"><span class="pre">about</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.about" title="Link to this definition">¶</a></dt>
+<dd><p>Generates the “About” page based on default information.
+:return:</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="drafter.server.Server.add_route">
 <span class="sig-name descname"><span class="pre">add_route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.add_route" title="Link to this definition">¶</a></dt>
@@ -557,6 +564,11 @@ and selected style.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.server.SiteInformation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SiteInformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">drafter.components.PageContent</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">drafter.components.PageContent</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">drafter.components.PageContent</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">planning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">drafter.components.PageContent</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">links</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">drafter.components.PageContent</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.SiteInformation" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="drafter.server.bundle_files_into_js">
 <span class="sig-name descname"><span class="pre">bundle_files_into_js</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_extensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('py',</span> <span class="pre">'js',</span> <span class="pre">'css',</span> <span class="pre">'txt',</span> <span class="pre">'json',</span> <span class="pre">'csv',</span> <span class="pre">'html',</span> <span class="pre">'md')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.bundle_files_into_js" title="Link to this definition">¶</a></dt>
@@ -629,6 +641,26 @@ routes specific to this server. If omitted, it defaults to the main server.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The value of the setting, or the default value if not found</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.server.protect_script_tags">
+<span class="sig-name descname"><span class="pre">protect_script_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#drafter.server.protect_script_tags" title="Link to this definition">¶</a></dt>
+<dd><p>Protects <cite>&lt;script&gt;</cite> tags in the given HTML content by escaping them. This is
+particularly useful when embedding HTML content within JavaScript strings, as
+unescaped <cite>&lt;script&gt;</cite> tags can lead to unintended script execution or parsing
+issues.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>content</strong> (<em>str</em>) – The HTML content containing potential <cite>&lt;script&gt;</cite> tags.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The modified HTML content with <cite>&lt;script&gt;</cite> tags escaped.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -731,6 +763,18 @@ while components will be rendered as their respective HTML. Components should be
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="drafter.page.Page.make_about_button">
+<span class="sig-name descname"><span class="pre">make_about_button</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#drafter.page.Page.make_about_button" title="Link to this definition">¶</a></dt>
+<dd><p>Creates an about button that has the “info” icon and title text that says “About Drafter.”.
+Simply links to the “–about” URL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string of HTML representing the about button.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="drafter.page.Page.make_reset_button">
 <span class="sig-name descname"><span class="pre">make_reset_button</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#drafter.page.Page.make_reset_button" title="Link to this definition">¶</a></dt>
@@ -848,6 +892,18 @@ flag to True and turn off debug information, too.</p>
 <span class="sig-name descname"><span class="pre">hide_debug_information</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.hide_debug_information" title="Link to this definition">¶</a></dt>
 <dd><p>Hides debug information from the website, so that it will not appear. Useful
 for deployed websites.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.deploy.set_site_information">
+<span class="sig-name descname"><span class="pre">set_site_information</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">author</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">planning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">links</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#drafter.components.PageContent" title="drafter.components.PageContent"><span class="pre">PageContent</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.deploy.set_site_information" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the information about the website, such as the author, description, sources,
+:param author:
+:param description:
+:param sources:
+:param planning:
+:param links:
+:return:</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1038,7 +1094,7 @@ Shareable link to get a link to the current page
 Download/upload state button</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="drafter.configuration.ServerConfiguration">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ServerConfiguration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'localhost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">8080</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'bottle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reloader:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'Drafter</span> <span class="pre">Website'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framed:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skulpt:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'skeleton'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_header_content:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_css_content:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_image_folder:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_uploaded_files:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deploy_image_path:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'images'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_skulpt:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt.js'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_skulpt_std:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-stdlib.js'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_skulpt_drafter:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-drafter.js'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_drafter_setup:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/drafter-setup.js'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.configuration.ServerConfiguration" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ServerConfiguration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'localhost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">8080</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'bottle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reloader:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">must_have_site_information:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'Drafter</span> <span class="pre">Website'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framed:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skulpt:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'skeleton'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_header_content:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_css_content:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_image_folder:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_uploaded_files:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deploy_image_path:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'images'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_skulpt:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt.js'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_skulpt_std:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-stdlib.js'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_skulpt_drafter:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-drafter.js'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cdn_drafter_setup:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'https://drafter-edu.github.io/drafter-cdn/skulpt/drafter-setup.js'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.configuration.ServerConfiguration" title="Link to this definition">¶</a></dt>
 <dd><p>Represents a configuration for a server, including launch settings, website
 settings, page configurations, and test deployment CDN parameters.</p>
 <p>This class encapsulates all the necessary settings to configure and launch a
@@ -1569,6 +1625,7 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 <li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Full API Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.Server"><code class="docutils literal notranslate"><span class="pre">Server</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.about"><code class="docutils literal notranslate"><span class="pre">Server.about()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.add_route"><code class="docutils literal notranslate"><span class="pre">Server.add_route()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.clear_routes"><code class="docutils literal notranslate"><span class="pre">Server.clear_routes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.convert_parameter"><code class="docutils literal notranslate"><span class="pre">Server.convert_parameter()</span></code></a></li>
@@ -1592,10 +1649,12 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 <li class="toctree-l3"><a class="reference internal" href="#drafter.server.Server.wrap_page"><code class="docutils literal notranslate"><span class="pre">Server.wrap_page()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.server.SiteInformation"><code class="docutils literal notranslate"><span class="pre">SiteInformation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.bundle_files_into_js"><code class="docutils literal notranslate"><span class="pre">bundle_files_into_js()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.get_all_routes"><code class="docutils literal notranslate"><span class="pre">get_all_routes()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.get_main_server"><code class="docutils literal notranslate"><span class="pre">get_main_server()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.get_server_setting"><code class="docutils literal notranslate"><span class="pre">get_server_setting()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.server.protect_script_tags"><code class="docutils literal notranslate"><span class="pre">protect_script_tags()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.set_main_server"><code class="docutils literal notranslate"><span class="pre">set_main_server()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.start_server"><code class="docutils literal notranslate"><span class="pre">start_server()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.testing.BakeryTestCase"><code class="docutils literal notranslate"><span class="pre">BakeryTestCase</span></code></a></li>
@@ -1603,6 +1662,7 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 <li class="toctree-l2"><a class="reference internal" href="#drafter.testing.diff_tests"><code class="docutils literal notranslate"><span class="pre">diff_tests()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.routes.route"><code class="docutils literal notranslate"><span class="pre">route()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.page.Page"><code class="docutils literal notranslate"><span class="pre">Page</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#drafter.page.Page.make_about_button"><code class="docutils literal notranslate"><span class="pre">Page.make_about_button()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#drafter.page.Page.make_reset_button"><code class="docutils literal notranslate"><span class="pre">Page.make_reset_button()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#drafter.page.Page.render_content"><code class="docutils literal notranslate"><span class="pre">Page.render_content()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#drafter.page.Page.verify_content"><code class="docutils literal notranslate"><span class="pre">Page.verify_content()</span></code></a></li>
@@ -1616,6 +1676,7 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 <li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.default_index"><code class="docutils literal notranslate"><span class="pre">default_index()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.deploy_site"><code class="docutils literal notranslate"><span class="pre">deploy_site()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.hide_debug_information"><code class="docutils literal notranslate"><span class="pre">hide_debug_information()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.set_site_information"><code class="docutils literal notranslate"><span class="pre">set_site_information()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.set_website_framed"><code class="docutils literal notranslate"><span class="pre">set_website_framed()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.set_website_style"><code class="docutils literal notranslate"><span class="pre">set_website_style()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.deploy.set_website_title"><code class="docutils literal notranslate"><span class="pre">set_website_title()</span></code></a></li>
@@ -1739,7 +1800,7 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
         <li class="right" >
           <a href="../students/help.html" title="More Help"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.7.2 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.7.4 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>
