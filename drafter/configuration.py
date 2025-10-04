@@ -87,6 +87,7 @@ class ServerConfiguration:
     title: str = "Drafter Website"
     framed: bool = True
     skulpt: bool = bool(os.environ.get('DRAFTER_SKULPT', False))
+    external_pages: str = os.environ.get('DRAFTER_EXTERNAL_PAGES', '')
 
     # Page configuration
     style: str = 'skeleton'
