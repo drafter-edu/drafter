@@ -113,7 +113,7 @@ Flask
 - Need something simpler than Flask's template system
 - Prefer built-in UI components over writing HTML
 
-**Transition Path:** Drafter → Flask is a natural progression. Check out our :doc:`flask` guide.
+**Transition Path:** Drafter → Flask is a natural progression. Check out our :doc:`../reference/flask` guide.
 
 Streamlit
 =========
@@ -269,7 +269,7 @@ After Drafter
 
 **Immediate Next Steps:**
 
-1. **Learn Flask**: Check out our :doc:`flask` transition guide
+1. **Learn Flask**: Check out our :doc:`../reference/flask` transition guide
 2. **Study HTML/CSS**: Understand what Drafter was abstracting away
 3. **Explore Databases**: Learn SQL and SQLAlchemy
 4. **Practice Git**: Version control for collaborative development
@@ -291,9 +291,9 @@ If you're teaching or learning:
 - Appreciate its simplicity as a teaching tool
 - Recognize it's designed for this specific use case
 
------
+-------
 Summary
------
+-------
 
 **Use Drafter when:**
 
@@ -317,6 +317,6 @@ Learn More
 
 - :doc:`installation` - Get started with Drafter
 - :doc:`docs` - Full documentation for Drafter features
-- :doc:`flask` - Transition from Drafter to Flask
+- :doc:`../reference/flask` - Transition from Drafter to Flask
 - :doc:`deployment` - Deploy your Drafter applications
 - :doc:`help` - Get help with common issues
