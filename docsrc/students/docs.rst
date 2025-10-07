@@ -48,7 +48,7 @@ Server Control
 --------------
 
 .. function:: start_server()
-              start_server(inital_state)
+              start_server(initial_state)
               start_server(initial_state, port=8080)
 
     Function to start the server and launch the website. The local URL of the server will be displayed,
@@ -242,6 +242,24 @@ Components
                        function.
     :type components: str | Component
 
+.. function:: Text(body)
+              Text(body, **style_attributes)
+
+    A text component that wraps text content and allows for styling. This is useful when you need to apply specific
+    styles to a piece of text within a page. If you don't need styling, you can just use a plain string in the page content.
+
+    The `body` is the text content to display. Additional keyword parameters can be used to style the text,
+    such as `style_color`, `style_font_size`, `class`, etc.
+
+    .. code-block:: python
+
+        Text("Hello World", style_color="red", style_font_size="20px")
+
+    :param body: The text content to display.
+    :type body: str
+    :param style_attributes: Any additional keyword parameters will be treated as HTML attributes or CSS styles.
+                             Parameters starting with ``style_`` will be converted to CSS style properties.
+
 .. function:: Argument(name, value)
 
     A hidden argument to be passed to the server. The `name` is the name of the argument, and the `value` is the value.
@@ -387,10 +405,12 @@ Debug Information
 -----------------
 
 .. function:: show_debug_information()
+   :no-index:
 
     Show the debug information at the bottom, including the current route, current state, the list of available routes,
     and the history of visited pages.
 
 .. function:: hide_debug_information()
+   :no-index:
 
     Hide the debug information at the bottom.

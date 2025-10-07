@@ -55,6 +55,8 @@ For a more detailed listing, check out: :ref:`components_detailed`
 +-----------------------------------------+--------------+
 | Row(...components)                      | `div`        |
 +-----------------------------------------+--------------+
+| Text(body)                              | `span`       |
++-----------------------------------------+--------------+
 | PreformattedText(text)                  | `pre`        |
 +-----------------------------------------+--------------+
 | Argument(name, value)                   | `input`      |
