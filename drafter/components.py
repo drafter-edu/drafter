@@ -485,7 +485,7 @@ class SelectBox(PageContent):
         # Add the regular options
         for option in self.options:
             selected = 'selected' if option == self.default_value else ''
-            option_list.append(f"<option {selected} value='{html.escape(option)}'>{option}</option>")
+            option_list.append(f"<option {selected} value='{html.escape(option)}'>{html.escape(option)}</option>")
         
         options = "\n".join(option_list)
         return f"<select name='{self.name}' {parsed_settings}>{options}</select>"
