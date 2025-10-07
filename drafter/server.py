@@ -21,7 +21,7 @@ from drafter.page import Page
 from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, \
     TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
 from drafter.raw_files import get_raw_files, get_themes
-from drafter.urls import remove_url_query_params
+from drafter.urls import remove_url_query_params, is_external_url
 from drafter.image_support import HAS_PILLOW, PILImage
 
 import logging
@@ -277,6 +277,34 @@ class Server:
         self._conversion_record.clear()
         return self.routes['/']()
 
+    # Helper function to render different SiteInformationType values
+    def render_site_info(self, value: SiteInformationType) -> str:
+        if isinstance(value, PageContent):
+            # If it's PageContent, render it using its render method
+            return value.render(self._state, self.configuration)
+        elif isinstance(value, (list, tuple)):
+            # If it's a list/tuple of strings, render as an unordered list with links converted to <a> tags
+            items = []
+            for item in value:
+                if isinstance(item, str):
+                    # Check if the item looks like a URL
+                    if is_external_url(item):
+                        items.append(f'<a href="{html.escape(item)}">{html.escape(item)}</a>')
+                    else:
+                        items.append(html.escape(item))
+                else:
+                    items.append(str(item))
+            items_html = "\n".join(f"<li>{item}</li>" for item in items)
+            return f"<ul>{items_html}</ul>"
+        else:
+            # If it's a string, render as text with links converted to <a> tags
+            value_str = str(value)
+            # Check if the value looks like a URL
+            if is_external_url(value_str):
+                return f'<a href="{html.escape(value_str)}">{html.escape(value_str)}</a>'
+            else:
+                return html.escape(value_str)
+
     def about(self):
         """
         Generates the "About" page based on default information.
@@ -284,58 +312,22 @@ class Server:
         """
         if not self._site_information:
             return "No site information has been set. Use the <code>set_site_information()</code> function to set the information about your site."
-        
-        # Helper function to render different SiteInformationType values
-        def render_site_info(value: SiteInformationType) -> str:
-            if isinstance(value, PageContent):
-                # If it's PageContent, render it using its render method
-                return value.render(self._state, self.configuration)
-            elif isinstance(value, (list, tuple)):
-                # If it's a list/tuple of strings, render as an unordered list with links converted to <a> tags
-                items = []
-                for item in value:
-                    if isinstance(item, str):
-                        # Check if the item looks like a URL
-                        if item.startswith('http://') or item.startswith('https://'):
-                            items.append(f'<a href="{html.escape(item)}">{html.escape(item)}</a>')
-                        else:
-                            items.append(html.escape(item))
-                    else:
-                        items.append(str(item))
-                items_html = "\n".join(f"<li>{item}</li>" for item in items)
-                return f"<ul>{items_html}</ul>"
-            else:
-                # If it's a string, render as text with links converted to <a> tags
-                value_str = str(value)
-                # Check if the value looks like a URL
-                if value_str.startswith('http://') or value_str.startswith('https://'):
-                    return f'<a href="{html.escape(value_str)}">{html.escape(value_str)}</a>'
-                else:
-                    return html.escape(value_str)
-        
+
         # Build the about page content
         content_parts = []
-        
-        if self._site_information.author:
-            content_parts.append("<h2>Author</h2>")
-            content_parts.append(f"<p>{render_site_info(self._site_information.author)}</p>")
-        
-        if self._site_information.description:
-            content_parts.append("<h2>Description</h2>")
-            content_parts.append(f"<p>{render_site_info(self._site_information.description)}</p>")
-        
-        if self._site_information.sources:
-            content_parts.append("<h2>Sources</h2>")
-            content_parts.append(f"<div>{render_site_info(self._site_information.sources)}</div>")
-        
-        if self._site_information.planning:
-            content_parts.append("<h2>Planning</h2>")
-            content_parts.append(f"<div>{render_site_info(self._site_information.planning)}</div>")
-        
-        if self._site_information.links:
-            content_parts.append("<h2>Links</h2>")
-            content_parts.append(f"<div>{render_site_info(self._site_information.links)}</div>")
-        
+        site_parts = [
+            ("Author", self._site_information.author),
+            ("Description", self._site_information.description),
+            ("Sources", self._site_information.sources),
+            ("Planning", self._site_information.planning),
+            ("Links", self._site_information.links)
+        ]
+
+        for title, content in site_parts:
+            if content:
+                content_parts.append(f"<h2>{title}</h2>")
+                content_parts.append(f"<div>{self.render_site_info(content)}</div>")
+
         # Add external pages if configured
         if self.configuration.external_pages:
             content_parts.append("<h2>External Pages</h2>")
@@ -356,7 +348,10 @@ class Server:
             if external_items:
                 items_html = "\n".join(f"<li>{item}</li>" for item in external_items)
                 content_parts.append(f"<ul>{items_html}</ul>")
-        
+
+        # Back button
+        content_parts.append('<p><a href="/" class="btlw-back">← Back to the main page</a></p>')
+
         return "\n".join(content_parts)
 
 

@@ -79,6 +79,16 @@ def friendly_urls(url: str) -> str:
 URL_REGEX = r"^(?:http(s)?://)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$"
 
 
+def is_valid_url(url: str) -> bool:
+    """
+    Checks if a URL is a valid URL.
+
+    :param url: The URL to check
+    :return: True if the URL is valid, False otherwise
+    """
+    return re.match(URL_REGEX, url) is not None
+
+
 def check_invalid_external_url(url: str) -> str:
     """
     Checks if a URL is a valid external URL. If it is not, it will return an error message. If it is,
@@ -89,6 +99,15 @@ def check_invalid_external_url(url: str) -> str:
     """
     if url.startswith("file://"):
         return "The URL references a local file on your computer, not a file on a server."
-    if re.match(URL_REGEX, url) is not None:
+    if is_valid_url(url):
         return "is a valid external url"
     return ""
+
+def is_external_url(url: str) -> bool:
+    """
+    Checks if a URL is an external URL.
+
+    :param url: The URL to check
+    :return: True if the URL is external, False otherwise
+    """
+    return url.startswith("http://") or url.startswith("https://")
