@@ -10,6 +10,7 @@ Table of Contents
    examples/examples
    students/docs
    students/html
+   students/design_principles
    students/styling
    students/testing
    students/deployment
