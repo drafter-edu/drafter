@@ -242,6 +242,24 @@ Components
                        function.
     :type components: str | Component
 
+.. function:: Text(body)
+              Text(body, **style_attributes)
+
+    A text component that wraps text content and allows for styling. This is useful when you need to apply specific
+    styles to a piece of text within a page. If you don't need styling, you can just use a plain string in the page content.
+
+    The `body` is the text content to display. Additional keyword parameters can be used to style the text,
+    such as `style_color`, `style_font_size`, `class`, etc.
+
+    .. code-block:: python
+
+        Text("Hello World", style_color="red", style_font_size="20px")
+
+    :param body: The text content to display.
+    :type body: str
+    :param style_attributes: Any additional keyword parameters will be treated as HTML attributes or CSS styles.
+                             Parameters starting with ``style_`` will be converted to CSS style properties.
+
 .. function:: Argument(name, value)
 
     A hidden argument to be passed to the server. The `name` is the name of the argument, and the `value` is the value.

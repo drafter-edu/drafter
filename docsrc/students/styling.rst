@@ -89,6 +89,57 @@ the button align on the right hand side of the screen.
 
 The following functions are available:
 
+General-Purpose Styling Functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These functions provide the most flexibility for styling components.
+
+.. function:: update_style(component, style, value)
+
+    Updates a specific CSS style property of a component. This is the most general-purpose styling function,
+    allowing you to set any CSS property. The function returns the component, so you can chain multiple calls.
+
+    The ``style`` parameter should be the CSS property name (e.g., "color", "background-color", "font-size").
+    Remember to include units in the ``value`` if they are required (e.g., "16px", "2em").
+
+    .. code-block:: python
+
+        update_style(Button("Click me", index), "color", "red")
+        update_style(Text("Hello"), "font-size", "20px")
+
+    :param component: The component to update (can be a string or Component instance).
+    :type component: str | Component
+    :param style: The CSS property name to change.
+    :type style: str
+    :param value: The value to set the CSS property to.
+    :type value: str
+    :return: The updated component.
+    :rtype: Component
+
+.. function:: update_attr(component, attr, value)
+
+    Updates a specific HTML attribute of a component. This allows you to set attributes like ``id``, ``class``,
+    ``title``, etc. The function returns the component, so you can chain multiple calls.
+
+    .. code-block:: python
+
+        update_attr(Text("Hello"), "id", "greeting")
+        update_attr(Button("Click", index), "title", "Click this button to go home")
+
+    :param component: The component to update (can be a string or Component instance).
+    :type component: str | Component
+    :param attr: The HTML attribute name to change.
+    :type attr: str
+    :param value: The value to set the attribute to.
+    :type value: str
+    :return: The updated component.
+    :rtype: Component
+
+Specific Styling Functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These convenience functions apply common styles quickly.
+
 .. function:: float_left(component)
 
     Makes the component "float" to the left, allowing other components to wrap around it.
