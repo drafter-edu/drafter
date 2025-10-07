@@ -32,12 +32,12 @@ def index(state: State) -> Page:
     return Page(state, [
         Header("Function-based Storage Demo"),
         Div(
-            "Current Message: ", Bold(state.message),
+            "Current Message: ", bold(state.message),
             style_padding="10px",
             style_background_color="#f0f0f0"
         ),
         Div(
-            "Counter: ", Bold(str(state.count)),
+            "Counter: ", bold(str(state.count)),
             style_padding="10px",
             style_background_color="#e0e0e0"
         ),
@@ -95,12 +95,12 @@ def save_current_state(state: State) -> Page:
         Header("State Saved!"),
         "Your state has been saved successfully.",
         Div(
-            "Saved message: ", Bold(state.message),
+            "Saved message: ", bold(state.message),
             style_padding="10px",
             style_background_color="#d0ffd0"
         ),
         Div(
-            "Saved counter: ", Bold(str(state.count)),
+            "Saved counter: ", bold(str(state.count)),
             style_padding="10px",
             style_background_color="#c0ffc0"
         ),
@@ -116,12 +116,12 @@ def load_saved_state(state: State) -> Page:
         Header("State Loaded!"),
         "Your state has been loaded from storage.",
         Div(
-            "Loaded message: ", Bold(loaded.message),
+            "Loaded message: ", bold(loaded.message),
             style_padding="10px",
             style_background_color="#d0d0ff"
         ),
         Div(
-            "Loaded counter: ", Bold(str(loaded.count)),
+            "Loaded counter: ", bold(str(loaded.count)),
             style_padding="10px",
             style_background_color="#c0c0ff"
         ),

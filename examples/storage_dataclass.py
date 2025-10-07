@@ -39,28 +39,28 @@ def index(state: State) -> Page:
         Header("Dataclass-based Storage Demo"),
         SubHeader("User Profile"),
         Div(
-            Bold("Username: "), state.username,
+            bold("Username: "), state.username,
             style_padding="10px",
             style_background_color="#ffe0ff",
             style_border_radius="5px",
             style_margin_bottom="10px"
         ),
         Div(
-            Bold("High Score: "), str(state.high_score),
+            bold("High Score: "), str(state.high_score),
             style_padding="10px",
             style_background_color="#e0ffff",
             style_border_radius="5px",
             style_margin_bottom="10px"
         ),
         Div(
-            Bold("Games Played: "), str(state.games_played),
+            bold("Games Played: "), str(state.games_played),
             style_padding="10px",
             style_background_color="#ffffe0",
             style_border_radius="5px",
             style_margin_bottom="10px"
         ),
         Div(
-            Bold("Favorite Color: "), state.favorite_color,
+            bold("Favorite Color: "), state.favorite_color,
             style_padding="10px",
             style_background_color=state.favorite_color.lower(),
             style_border_radius="5px",
@@ -165,17 +165,17 @@ def save_profile(state: State) -> Page:
         Header("Profile Saved!"),
         "Your profile has been saved successfully.",
         Div(
-            "Username: ", Bold(state.username),
+            "Username: ", bold(state.username),
             style_padding="10px",
             style_background_color="#d0ffd0"
         ),
         Div(
-            "High Score: ", Bold(str(state.high_score)),
+            "High Score: ", bold(str(state.high_score)),
             style_padding="10px",
             style_background_color="#c0ffc0"
         ),
         Div(
-            "Games Played: ", Bold(str(state.games_played)),
+            "Games Played: ", bold(str(state.games_played)),
             style_padding="10px",
             style_background_color="#b0ffb0"
         ),
@@ -194,17 +194,17 @@ def load_profile(state: State) -> Page:
         Header("Profile Loaded!"),
         "Your profile has been loaded from storage.",
         Div(
-            "Username: ", Bold(loaded_state.username),
+            "Username: ", bold(loaded_state.username),
             style_padding="10px",
             style_background_color="#d0d0ff"
         ),
         Div(
-            "High Score: ", Bold(str(loaded_state.high_score)),
+            "High Score: ", bold(str(loaded_state.high_score)),
             style_padding="10px",
             style_background_color="#c0c0ff"
         ),
         Div(
-            "Games Played: ", Bold(str(loaded_state.games_played)),
+            "Games Played: ", bold(str(loaded_state.games_played)),
             style_padding="10px",
             style_background_color="#b0b0ff"
         ),
