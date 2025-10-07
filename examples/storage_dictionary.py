@@ -10,6 +10,14 @@ from dataclasses import dataclass
 
 set_website_style('none')
 
+set_site_information(
+    "Drafter Storage Team",
+    "Example demonstrating dictionary-based storage API",
+    "https://github.com/drafter-edu/drafter",
+    "storage_dictionary.py",
+    ["https://github.com/drafter-edu/drafter"]
+)
+
 # Create a storage instance
 storage = Storage(prefix="todo_app_")
 

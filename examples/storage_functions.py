@@ -10,6 +10,14 @@ from dataclasses import dataclass
 
 set_website_style('none')
 
+set_site_information(
+    "Drafter Storage Team",
+    "Example demonstrating function-based storage API",
+    "https://github.com/drafter-edu/drafter",
+    "storage_functions.py",
+    ["https://github.com/drafter-edu/drafter"]
+)
+
 
 @dataclass
 class State:

@@ -307,21 +307,38 @@ def _delete_from_file(key: str) -> None:
             print(f"Error deleting file: {e}")
 
 
-# Skulpt implementations - these will be intercepted by JavaScript
+# Skulpt implementations - these access browser localStorage via JavaScript  
+# Note: Full localStorage support in deployed Skulpt requires additional JavaScript integration
+# For now, these functions provide a fallback that logs the operations
 def _save_to_localstorage(key: str, data: str) -> None:
-    """Save data to browser localStorage (Skulpt only)."""
-    # This is a stub that will be replaced by Skulpt module
-    print(f"localStorage.setItem('{key}', {data!r})")
+    """
+    Save data to browser localStorage (Skulpt only).
+    
+    Note: This is a placeholder. Full localStorage support requires
+    JavaScript integration in the deployed environment.
+    """
+    # Placeholder - in a full implementation, this would call JavaScript's localStorage.setItem
+    print(f"[Storage] Would save to localStorage['{key}']")
 
 
 def _load_from_localstorage(key: str) -> Optional[str]:
-    """Load data from browser localStorage (Skulpt only)."""
-    # This is a stub that will be replaced by Skulpt module
-    print(f"localStorage.getItem('{key}')")
+    """
+    Load data from browser localStorage (Skulpt only).
+    
+    Note: This is a placeholder. Full localStorage support requires
+    JavaScript integration in the deployed environment.
+    """
+    # Placeholder - in a full implementation, this would call JavaScript's localStorage.getItem
+    print(f"[Storage] Would load from localStorage['{key}']")
     return None
 
 
 def _delete_from_localstorage(key: str) -> None:
-    """Delete data from browser localStorage (Skulpt only)."""
-    # This is a stub that will be replaced by Skulpt module
-    print(f"localStorage.removeItem('{key}')")
+    """
+    Delete data from browser localStorage (Skulpt only).
+    
+    Note: This is a placeholder. Full localStorage support requires
+    JavaScript integration in the deployed environment.
+    """
+    # Placeholder - in a full implementation, this would call JavaScript's localStorage.removeItem
+    print(f"[Storage] Would delete from localStorage['{key}']")
