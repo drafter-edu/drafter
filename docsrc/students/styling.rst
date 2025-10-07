@@ -452,6 +452,7 @@ If you don't want to have to include the ``STYLE`` constant in every page, you c
 
 .. function:: add_website_css(css: str)
               add_website_css(selector: str, css: str)
+   :no-index:
 
     Adds additional CSS content to the website. This is useful for adding custom
     CSS to the website, either for specific selectors or for general styles.
@@ -487,6 +488,7 @@ Drafter ships with a default theme called ``skeleton``. You can change the theme
 ``set_website_style`` function. There are currently a few different options.
 
 .. function:: set_website_style(style: str)
+   :no-index:
 
     Sets the website style to the specified theme. The theme must be one of the following:
 

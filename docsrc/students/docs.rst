@@ -48,7 +48,7 @@ Server Control
 --------------
 
 .. function:: start_server()
-              start_server(inital_state)
+              start_server(initial_state)
               start_server(initial_state, port=8080)
 
     Function to start the server and launch the website. The local URL of the server will be displayed,
@@ -405,10 +405,12 @@ Debug Information
 -----------------
 
 .. function:: show_debug_information()
+   :no-index:
 
     Show the debug information at the bottom, including the current route, current state, the list of available routes,
     and the history of visited pages.
 
 .. function:: hide_debug_information()
+   :no-index:
 
     Hide the debug information at the bottom.
