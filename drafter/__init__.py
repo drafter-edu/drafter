@@ -4,8 +4,6 @@ from drafter.styling import *
 from drafter.routes import *
 from drafter.server import *
 from drafter.deploy import *
-from drafter.testing import assert_equal
-import drafter.hacks
 
 # Provide default route
 route('index')(default_index)

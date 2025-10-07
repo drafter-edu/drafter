@@ -25,7 +25,6 @@ from drafter import ServerConfiguration, protect_script_tags
 from drafter.files import DEPLOYED_404_TEMPLATE_HTML, TEMPLATE_SKULPT_DEPLOY
 from drafter.raw_files import get_raw_files
 
-import pathlib
 import os
 import argparse
 from typing import Any
