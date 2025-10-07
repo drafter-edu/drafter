@@ -74,6 +74,10 @@ def build_site(options: BuildOptions) -> None:
     environment_variables = []
     if options.warn_missing_info:
         environment_variables.append(("DRAFTER_MUST_HAVE_SITE_INFORMATION", True))
+    if options.external_pages:
+        # Convert list of external pages to semicolon-separated string
+        external_pages_str = ";".join(options.external_pages)
+        environment_variables.append(("DRAFTER_EXTERNAL_PAGES", external_pages_str))
     environment_settings = build_environment(environment_variables)
 
     setup_files = list(get_raw_files('global').deploy.values())
