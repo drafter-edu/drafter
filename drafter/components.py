@@ -581,6 +581,20 @@ class Row(Div):
         self.extra_settings['style_flex_direction'] = "row"
         self.extra_settings['style_align_items'] = "center"
 
+    def __repr__(self):
+        # Filter out the Row-specific style settings for cleaner representation
+        # Only hide settings that exactly match Row's default values
+        row_defaults = {
+            'style_display': 'flex',
+            'style_flex_direction': 'row',
+            'style_align_items': 'center'
+        }
+        filtered_settings = {k: v for k, v in self.extra_settings.items()
+                           if k not in row_defaults or row_defaults[k] != v}
+        if filtered_settings:
+            return f"Row({', '.join(repr(item) for item in self.content)}, {filtered_settings})"
+        return f"Row({', '.join(repr(item) for item in self.content)})"
+
 
 @dataclass
 class _HtmlList(PageContent):
