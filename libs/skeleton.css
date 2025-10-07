@@ -245,11 +245,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .btlw a {
-    color: #1EAEDB
+    color: #1EAEDB !important;
 }
 
 .btlw a:hover {
-    color: #0FA0CE
+    color: #0FA0CE !important;
 }
 
 .btlw .button,.btlw button,.btlw input[type=button],.btlw input[type=reset],.btlw input[type=submit] {
@@ -269,25 +269,26 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     border-radius: 4px;
     border: 1px solid #bbb;
     cursor: pointer;
-    box-sizing: border-box
+    box-sizing: border-box;
+    vertical-align: middle;
 }
 
 .btlw .button:focus,.btlw .button:hover,.btlw button:focus,.btlw button:hover,.btlw input[type=button]:focus,.btlw input[type=button]:hover,.btlw input[type=reset]:focus,.btlw input[type=reset]:hover,.btlw input[type=submit]:focus,.btlw input[type=submit]:hover {
-    color: #333;
-    border-color: #888;
+    color: #333 !important;
+    border-color: #888 !important;
     outline: 0
 }
 
 .btlw .button.button-primary,.btlw button.button-primary,.btlw input[type=button].button-primary,.btlw input[type=reset].button-primary,.btlw input[type=submit].button-primary {
-    color: #FFF;
-    background-color: #33C3F0;
-    border-color: #33C3F0
+    color: #FFF !important;
+    background-color: #33C3F0 !important;
+    border-color: #33C3F0 !important;
 }
 
 .btlw .button.button-primary:focus,.btlw .button.button-primary:hover,.btlw button.button-primary:focus,.btlw button.button-primary:hover,.btlw input[type=button].button-primary:focus,.btlw input[type=button].button-primary:hover,.btlw input[type=reset].button-primary:focus,.btlw input[type=reset].button-primary:hover,.btlw input[type=submit].button-primary:focus,.btlw input[type=submit].button-primary:hover {
-    color: #FFF;
-    background-color: #1EAEDB;
-    border-color: #1EAEDB
+    color: #FFF !important;
+    background-color: #1EAEDB !important;
+    border-color: #1EAEDB !important;
 }
 
 .btlw input[type=email],.btlw input[type=number],.btlw input[type=password],.btlw input[type=search],.btlw input[type=tel],.btlw input[type=text],.btlw input[type=url],.btlw select,.btlw textarea {
@@ -313,7 +314,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .btlw input[type=email]:focus,.btlw input[type=number]:focus,.btlw input[type=password]:focus,.btlw input[type=search]:focus,.btlw input[type=tel]:focus,.btlw input[type=text]:focus,.btlw input[type=url]:focus,.btlw select:focus,.btlw textarea:focus {
-    border: 1px solid #33C3F0;
+    border: 1px solid #33C3F0 !important;
     outline: 0
 }
 
@@ -432,3 +433,33 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     display: table;
     clear: both
 }
+
+/* Better defaults for inline elements and common layout patterns */
+.btlw img {
+    display: inline-block;
+    vertical-align: middle;
+    max-width: 100%;
+    height: auto;
+}
+
+.btlw span {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Improve button and form element alignment in lists */
+.btlw li button,
+.btlw li .button,
+.btlw li input[type=button],
+.btlw li input[type=reset],
+.btlw li input[type=submit] {
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.btlw li input,
+.btlw li select,
+.btlw li textarea {
+    margin-bottom: 0;
+}
+
