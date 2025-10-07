@@ -10,7 +10,11 @@ import drafter.hacks
 # Provide default route
 route('index')(default_index)
 
-__version__ = '1.7.4'
+__version__ = '1.8.0'
 
 if __name__ == '__main__':
-    print("This package is meant to be imported, not run as a script. For now, at least.")
+    import sys
+    from drafter.command_line import parse_args, build_site
+    # print("This package is meant to be imported, not run as a script. For now, at least.")
+    options = parse_args(sys.argv[1:])
+    build_site(options)
