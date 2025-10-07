@@ -380,18 +380,13 @@ using the ``classes`` keyword parameter. You can then use the class name in your
 
 Don't forget to include the ``STYLE`` constant in every page that uses the ``quit-button`` class.
 
-If you are using the default theme (``skeleton``), then you may need to be more specific with your CSS selectors.
-For example, if you want to style a button, you may need to use the following CSS:
+.. note::
 
-.. code-block:: css
-
-    button.quit-button {
-        color: red;
-        float: right;
-    }
-
-Otherwise, the default theme may override your styles. You can disable the default theme by
-using ``set_website_style("none")`` (see `changing themes`_).
+    With the default ``skeleton`` theme, basic styling properties like ``color``, ``background-color``,
+    ``border-color``, and common layout properties can be easily overridden using simple class selectors.
+    The theme has been designed to be less intrusive and easier to customize. If you need complete
+    control over styling, you can disable the default theme by using ``set_website_style("none")``
+    (see `changing themes`_).
 
 Adding Website CSS
 ------------------
