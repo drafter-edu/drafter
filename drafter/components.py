@@ -476,9 +476,18 @@ class SelectBox(PageContent):
         if self.default_value is not None:
             extra_settings['value'] = html.escape(self.default_value)
         parsed_settings = self.parse_extra_settings(**extra_settings)
-        options = "\n".join(f"<option {'selected' if option == self.default_value else ''} "
-                            f"value='{html.escape(option)}'>{option}</option>"
-                            for option in self.options)
+        
+        # If default_value is not in options and is not empty, add it as a disabled placeholder
+        option_list = []
+        if self.default_value and self.default_value not in self.options:
+            option_list.append(f"<option selected disabled value=''>{html.escape(self.default_value)}</option>")
+        
+        # Add the regular options
+        for option in self.options:
+            selected = 'selected' if option == self.default_value else ''
+            option_list.append(f"<option {selected} value='{html.escape(option)}'>{option}</option>")
+        
+        options = "\n".join(option_list)
         return f"<select name='{self.name}' {parsed_settings}>{options}</select>"
 
 
