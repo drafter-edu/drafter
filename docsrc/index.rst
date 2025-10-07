@@ -14,15 +14,17 @@ full stack websites as you learn to code in Python.
    :caption: Contents:
 
    students/installation
+   students/getting_started
    quickstart/quickstart
    workbook/index
    examples/examples
    students/docs
    students/html
    students/styling
+   students/testing
+   students/deployment
    reference/reference
    students/help
-   students/deployment
    api/api
    
 

@@ -5,6 +5,7 @@ Table of Contents
 .. toctree::
 
    students/installation
+   students/getting_started
    quickstart/quickstart
    workbook/index
    examples/examples
