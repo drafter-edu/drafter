@@ -974,7 +974,7 @@ def get_server_setting(key, default=None, server=None):
     return getattr(server.configuration, key, default)
 
 
-def start_server(initial_state=None, server: Server = None, skip=False, **kwargs):
+def start_server(initial_state=None, server: Optional[Server] = None, skip=False, **kwargs):
     """
     Starts the server with the given initial state and configuration. If the server is set to skip, it will not start.
     Additional keyword arguments will be passed to the server's run method, and therefore to Bottle. This can be
