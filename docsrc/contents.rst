@@ -6,6 +6,7 @@ Table of Contents
 
    students/installation
    quickstart/quickstart
+   students/why_drafter
    workbook/index
    examples/examples
    students/docs
