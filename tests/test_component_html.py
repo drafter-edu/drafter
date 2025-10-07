@@ -351,3 +351,55 @@ def test_text_with_multiple_styles(request):
     component = Text("Styled", style_color="blue", style_font_size="20px", style_font_weight="bold")
     html = str(component)
     assert_matches_snapshot("text_with_multiple_styles", html, request)
+
+
+# Tests for Link and Button components (which have dynamic IDs)
+
+def test_link_simple(request):
+    """Test Link component - note that links include instance IDs"""
+    component = Link("Click Here", "/page")
+    html = str(component)
+    # Links contain dynamic instance IDs, so we'll just check structure
+    assert "<a href=" in html
+    assert "Click Here" in html
+
+
+def test_button_simple(request):
+    """Test Button component - note that buttons include instance IDs"""
+    component = Button("Submit", "/submit")
+    html = str(component)
+    # Buttons contain dynamic instance IDs, so we'll just check structure
+    assert "<button" in html
+    assert "Submit" in html
+    assert "type='submit'" in html
+
+
+# Tests for image component
+
+def test_image_with_url(request):
+    """Test Image component with URL"""
+    component = Image("test.png")
+    html = str(component)
+    # Just verify the basic structure since paths can vary
+    assert "<img src=" in html
+    assert "test.png" in html
+
+
+# Tests for download component
+
+def test_download_component(request):
+    """Test Download component"""
+    component = Download("Download File", "data.txt", "File contents here")
+    html = str(component)
+    assert "<a" in html
+    assert "download" in html
+    assert "Download File" in html
+
+
+# Tests for file upload component
+
+def test_file_upload_component(request):
+    """Test FileUpload component"""
+    component = FileUpload("document")
+    html = str(component)
+    assert_matches_snapshot("file_upload_component", html, request)
