@@ -1,9 +1,13 @@
 from dataclasses import dataclass
 from drafter import *
-from bakery import assert_equal
 
 
-set_site_information("", "", "", "", "")
+set_site_information("acbart@udel.edu",
+                     bold(Text("This is a calculator")),
+                     "https://example.com",
+                     "calculator.py",
+                     ["https://example.com",
+                      "https://example.com/about"],)
 
 @dataclass
 class State:
