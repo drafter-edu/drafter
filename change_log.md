@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.8.0] - 2025-10-06
 
 * Command line compilation of websites
 * Deploying through skulpt, the setup code stored in Drafter now
 * Script tags are properly escaped when the test deployment is launched.
+* About page now shows information using the `set_site_information` function
+* Command line flag for passing in external URLs
 
 ## [1.7.4] - 2025-08-08
 
