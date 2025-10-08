@@ -198,9 +198,12 @@ def parse_args(args) -> BuildOptions:
         server_configuration=server_configuration
     )
 
-if __name__ == "__main__":
+def main():
     import sys
     options = parse_args(sys.argv[1:])
     build_site(options)
+
+if __name__ == "__main__":
+    main()
 
 
