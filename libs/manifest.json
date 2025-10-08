@@ -10,6 +10,7 @@
       "global.css"
     ],
     "deploy": [
+      "global.js",
       "drafter-setup.js"
     ]
   },

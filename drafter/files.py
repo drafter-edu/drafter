@@ -226,6 +226,8 @@ DEPLOYED_404_TEMPLATE_HTML = """
     <script type="text/javascript">
       var pathSegmentsToKeep = 1;
       var l = window.location;
+      // Store the original URL for processing by the main page
+      sessionStorage.redirect = l.href;
       l.replace(
         l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
         l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
@@ -279,6 +281,7 @@ TEMPLATE_SKULPT_DEPLOY = """
         <script src="{cdn_skulpt}" type="text/javascript"></script>
         <script src="{cdn_skulpt_std}" type="text/javascript"></script>
         <script src="{cdn_skulpt_drafter}" type="text/javascript"></script>
+        {website_setup}
         <script type="text/javascript">
 Sk.output = console.log;
 {website_code}
@@ -289,7 +292,6 @@ Sk.output = console.log;
 <div id="website">
 Loading...
 </div>
-        {website_setup}
     </body>
 </html>
 """

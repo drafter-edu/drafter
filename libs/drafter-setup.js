@@ -56,12 +56,29 @@ function startWebserver(pythonSite) {
                     true
                 )
             )
-            .then((result) => console.log(result.$d))
+            .then((result) => {
+                console.log(result.$d);
+                // After Skulpt initializes, check if we need to navigate to a specific page
+                handleRedirectNavigation();
+            })
             .catch((e) => {
                 showError(e, MAIN_FILENAME+".py", pythonSite);
             });
     } catch (e) {
         showError(e, MAIN_FILENAME+".py", pythonSite);
+    }
+}
+
+function handleRedirectNavigation() {
+    // Check if there's a redirect path in the query string
+    const pathMatch = window.location.search.match(/\?\/(.+)/);
+    if (pathMatch) {
+        const targetPath = pathMatch[1].replace(/~and~/g, '&');
+        // Navigate to the target path using the Bottle mechanism
+        // Use setTimeout to ensure Skulpt bottle has fully initialized
+        setTimeout(() => {
+            window.location.href = '--' + targetPath;
+        }, 100);
     }
 }
 
