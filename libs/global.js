@@ -35,6 +35,15 @@ for (let i = 0; i < expandables.length; i++) {
     }
 }
 
+function navigateToAbout() {
+    // if Sk.bottle is available, we'll use that:
+    if (window.Sk && window.Sk.bottle) {
+        window.Sk.bottle.changeLocation('/--about');
+    } else {
+        window.location.href = '--about';
+    }
+}
+
 window.stopInformationPageListener = function() {
     throw new Error("Information page listener not initialized yet.");
 };
@@ -49,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (now - lastPressTime <= doublePressDelay) {
                 // Detected a double press within the allowed time
-                window.location.href = '--about';
+                navigateToAbout();
             }
 
             // Update the last press time

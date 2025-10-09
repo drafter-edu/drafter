@@ -74,7 +74,8 @@ function startWebserver(pythonSite) {
 }
 
 function handleRedirectNavigation() {
-    const pathMatch = window.location.search.match(/\?\/(.+)/);
+    console.log("Handling redirect navigation if needed");
+    const pathMatch = window.location.search.match(/\?(\/.+)/);
     if (pathMatch) {
         // Navigate to the target path using the Bottle mechanism
         const target = pathMatch[1].replace(/~and~/g, '&');
