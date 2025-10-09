@@ -32,7 +32,7 @@ Scroll down to the ``Pages`` section on the left side of the page. Under the sou
 .. image:: images/deployment_github_pages.png
     :alt: Github Pages
 
-Your site will now start deploying whenever you make a change. We can check the progress of the deployment by going to the ``Actions`` tab. But first, we'll need to upload our website code.
+Your site is now configured for deployment. After uploading your website code, you will manually trigger the deployment using the GitHub Actions workflow interface.
 
 Upload Your Website Code
 ------------------------
@@ -54,21 +54,29 @@ When you click on the file, it will show you the contents of the file. You can e
 .. image:: images/deployment_github_edit.png
     :alt: Github Edit Main
 
-The editor area allows you to paste in your code. We recommend that you add the following lines of code to your project.
-They need to be after the import statements, but before the ``start_server(...)`` line.
+The editor area allows you to paste in your code. You must add the following lines of code to your project to set up your site's metadata.
+These lines need to be after the import statements, but before the ``start_server(...)`` line.
 We suggest placing them right before your dataclasses and routes.
 
 .. code-block:: python
 
+    set_site_information(
+        author="your_email@udel.edu",
+        description="A brief description of what your website does",
+        sources="List any help resources or sources you used",
+        planning="your_planning_document.pdf",
+        links=["https://github.com/your-username/your-repo"]
+    )
     hide_debug_information()
     set_website_title("Your Website Title")
     set_website_framed(False)
 
 These lines of code:
 
-1. Hide all of the debug information - you may want to comment this line out while you do any debugging
-2. Set the title of the website in the tab
-3. Make the website stretch to fill the whole screen, instead of just the small box.
+1. **Set the site information** - This is required and provides metadata about your site including your name/email, description, sources, planning document filename, and any relevant links
+2. Hide all of the debug information - you may want to comment this line out while you do any debugging
+3. Set the title of the website in the tab
+4. Make the website stretch to fill the whole screen, instead of just the small box.
 
 There are many other ways to style your website, but these are a starting point. 
 
@@ -91,6 +99,22 @@ Once you have changed the default message to be more descriptive, you must click
     :alt: Github Commit
 
 If you have other files besides ``main.py``, then check the appendix at the bottom of this document for how to upload them: :ref:`appendix_upload_files`.
+
+Deploy Your Website
+-------------------
+
+Once you have uploaded your ``main.py`` file (and any additional files you need), you need to manually trigger the deployment of your website.
+
+1. Go to the ``Actions`` tab of your repository.
+
+.. image:: images/deployment_github_actions.png
+    :alt: Github Actions
+
+2. Click on the ``Deploy Drafter Site`` workflow on the left side.
+
+3. Click the ``Run workflow`` button on the right side, then click the green ``Run workflow`` button in the dropdown.
+
+Your site will now start deploying. You can monitor the progress of the deployment in the Actions tab.
 
 .. _video:
 
@@ -199,7 +223,7 @@ When you are done, click on the ``Commit changes`` button to save your changes.
 View the Deployment
 -------------------
 
-7. When everything is done, you can check out your deployed website. Click on the ``Actions`` link to see the deployments. You can click on the latest deployment to see the logs.
+7. After you have manually triggered the deployment (see the "Deploy Your Website" section above), you can check out your deployed website. Click on the ``Actions`` link to see the deployments. You can click on the latest deployment to see the logs.
 
 .. image:: images/deployment_github_actions.png
     :alt: Github Actions
@@ -227,7 +251,8 @@ The screenshot above is just an example of what can go wrong; you might experien
 In this particular case, the error is simple - the developer forgot to turn on the Github Pages feature in the settings (step 2).
 
 If you see an error, you can try to fix it and push the changes to the repository.
-The website will automatically redeploy when you push changes to the repository, and you can check the progress of the new attempt in the Actions tab again.
+After making your changes, you will need to manually trigger a new deployment by going to the Actions tab and running the workflow again (see the "Deploy Your Website" section above).
+You can check the progress of the new attempt in the Actions tab again.
 
 The Actions section of the repository will list prior deploy attempts in chronological order. So, if you see past attempts with the red X, don't worry about it as long as the top (most recent) deploy attempt was successful. That's the one that matters. 
 
