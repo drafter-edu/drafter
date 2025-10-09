@@ -10,7 +10,8 @@
       "global.css"
     ],
     "deploy": [
-      "drafter-setup.js"
+      "drafter-setup.js",
+      "global.js"
     ]
   },
   "skeleton": {

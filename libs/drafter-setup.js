@@ -20,6 +20,10 @@ Sk.configure({ read: builtinRead, __future__: Sk.python3 });
 
 Sk.inBrowser = false;
 
+if (typeof Sk.console === "undefined") {
+    Sk.console = {};
+}
+
 Sk.console = {
     drafter: {},
     printPILImage: function (img) {
@@ -56,12 +60,23 @@ function startWebserver(pythonSite) {
                     true
                 )
             )
-            .then((result) => console.log(result.$d))
+            .then((result) => {
+                console.log(result.$d);
+                handleRedirectNavigation();
+            })
             .catch((e) => {
                 showError(e, MAIN_FILENAME+".py", pythonSite);
             });
     } catch (e) {
         showError(e, MAIN_FILENAME+".py", pythonSite);
+    }
+}
+
+function handleRedirectNavigation() {
+    const pathMatch = window.location.search.match(/\?\/(.+)/);
+    if (pathMatch) {
+        // Navigate to the target path using the Bottle mechanism
+        window.location.href = pathMatch[1].replace(/~and~/g, '&');
     }
 }
 
