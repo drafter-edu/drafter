@@ -25,6 +25,7 @@ if (typeof Sk.console === "undefined") {
 }
 
 Sk.console = {
+    // TODO: Move handleError into this object, and make it so that drafter is a function that creates the object
     drafter: {},
     printPILImage: function (img) {
         document.body.append(img.image);
@@ -76,7 +77,8 @@ function handleRedirectNavigation() {
     const pathMatch = window.location.search.match(/\?\/(.+)/);
     if (pathMatch) {
         // Navigate to the target path using the Bottle mechanism
-        window.location.href = pathMatch[1].replace(/~and~/g, '&');
+        const target = pathMatch[1].replace(/~and~/g, '&');
+        Sk.bottle.changeLocation(target);
     }
 }
 
