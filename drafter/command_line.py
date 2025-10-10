@@ -64,7 +64,11 @@ def build_site(options: BuildOptions) -> None:
         if not os.path.exists(filename):
             raise FileNotFoundError(f"Additional file {filename} does not exist.")
         with open(filename, 'r') as f:
-            content = f.read()
+            try:
+                content = f.read()
+            except:
+                print(f"Failed to read file {filename} - skipping.")
+                continue
             content = protect_script_tags(content)
             js_lines.append(SK_TEMPLATE_LINE.format(filename=filename, content=content))
             print("Adding additional file", filename)
