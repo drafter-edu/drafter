@@ -6,7 +6,7 @@ Download/upload state button
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List
 import os
 
 from drafter.setup import DEFAULT_BACKEND

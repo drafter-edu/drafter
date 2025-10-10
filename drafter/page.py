@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from drafter.configuration import ServerConfiguration
-from drafter.constants import RESTORABLE_STATE_KEY
 from drafter.components import PageContent, Link
 
 

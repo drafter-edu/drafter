@@ -35,7 +35,7 @@ def get_line_code(depth = DEFAULT_STACK_DEPTH):
         line = frame[1]
         code = frame[3]
         return line, code
-    except Exception as e:
+    except Exception:
         # logger.error(f"Error getting line and code: {e}")
         return None, None
 

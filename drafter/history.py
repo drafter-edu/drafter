@@ -4,7 +4,7 @@ import base64
 import os
 import io
 from urllib.parse import unquote
-from dataclasses import dataclass, is_dataclass, replace, asdict, fields
+from dataclasses import dataclass, is_dataclass, fields
 from dataclasses import field as dataclass_field
 from datetime import timezone, timedelta, datetime
 from typing import Any, Optional, Callable, Dict
@@ -150,7 +150,7 @@ def format_page_content(content, width=80):
     try:
         custom_pretty_printer = CustomPrettyPrinter(indent=DIFF_INDENT_WIDTH, width=width)
         return custom_pretty_printer.pformat(content), True
-    except Exception as e:
+    except Exception:
         return safe_repr(content), False
 
 

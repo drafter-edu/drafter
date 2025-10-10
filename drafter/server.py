@@ -1,7 +1,7 @@
 import html
 import os
 import traceback
-from dataclasses import dataclass, asdict, replace, field, fields
+from dataclasses import dataclass, asdict, replace, fields
 from functools import wraps
 from typing import Any, Optional, List, Tuple, Union
 import json
@@ -18,7 +18,7 @@ from drafter.setup import Bottle, abort, request, static_file
 from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, get_params, \
     remap_hidden_form_parameters, safe_repr
 from drafter.page import Page
-from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, \
+from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, TEMPLATE_200_WITHOUT_HEADER, \
     TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
 from drafter.raw_files import get_raw_files, get_themes
 from drafter.urls import remove_url_query_params, is_external_url
