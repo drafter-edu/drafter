@@ -39,19 +39,16 @@ Upload Your Website Code
 
 Warning: if your instructor has requirements about commit messages, review those before doing this step. **Commit messages are very hard to change after the fact.** 
 
-3. Go to the ``Code`` tab and click on the ``website`` folder.
+3. Go to the ``Code`` tab and you will see a few files listed.
 
-.. image:: images/deployment_github_code.png
+.. image:: images/deployment_github_code2.png
     :alt: Github Code
 
-There will be one file by default in the folder, ``main.py``. You can add other files to this folder, and they will be available on your website. However, we must have a ``main.py`` file, which is where the main code for your site should go. Click on the file.
-
-.. image:: images/deployment_github_files.png
-    :alt: Github Files
+The most important file you will see is ``main.py``. You can add other files to this folder, and they will be available on your website. However, we must have a ``main.py`` file, which is where the main code for your site should go. Click on the file.
 
 When you click on the file, it will show you the contents of the file. You can edit the file by clicking on the pencil icon.
 
-.. image:: images/deployment_github_edit.png
+.. image:: images/deployment_github_edit2.png
     :alt: Github Edit Main
 
 The editor area allows you to paste in your code. You must add the following lines of code to your project to set up your site's metadata.
@@ -73,14 +70,14 @@ We suggest placing them right before your dataclasses and routes.
 
 These lines of code:
 
-1. **Set the site information** - This is required and provides metadata about your site including your name/email, description, sources, planning document filename, and any relevant links
-2. Hide all of the debug information - you may want to comment this line out while you do any debugging
-3. Set the title of the website in the tab
+1. **Set the site information** - This is required and provides metadata about your site including your name/email, description, sources, planning document filename, and any relevant links.
+2. Hide all of the debug information - you may want to comment this line out while you do any debugging.
+3. Set the title of the website in the tab.
 4. Make the website stretch to fill the whole screen, instead of just the small box.
 
-There are many other ways to style your website, but these are a starting point. 
+There are many other ways to style your website, but these are a starting point.
 
-You can change the filename here, but your instructor may penalize you if you do so.
+You can change the filename here, but your instructor may penalize you if you do so, so do not change the filename.
 
 When you are done, click on the ``Commit changes`` button in the top-right of the page.
 
@@ -110,11 +107,11 @@ Once you have uploaded your ``main.py`` file (and any additional files you need)
 .. image:: images/deployment_github_actions.png
     :alt: Github Actions
 
-2. Click on the ``Deploy Drafter Site`` workflow on the left side.
+2. Click on the ``Deploy main branch as website`` workflow on the left side.
 
 3. Click the ``Run workflow`` button on the right side, then click the green ``Run workflow`` button in the dropdown.
 
-Your site will now start deploying. You can monitor the progress of the deployment in the Actions tab.
+Your site will now start deploying. You can monitor the progress of the deployment in the Actions tab. If all goes well, then the deployment will succeed, and a link will be provided to your deployed website. If there are any errors, you will need to fix them and try again.
 
 .. _video:
 
@@ -139,7 +136,7 @@ Here are some details to keep in mind:
 
 Upload the video to a website where it can be viewed by the graders.
 If the video is not publicly accessible, you will not receive credit for this part of the assignment.
-Copy the URL of the video to paste into your ``readme.md`` file later.
+Copy the URL of the video to paste into the call to your ``set_site_information(...)`` function, as one of the strings in the ``links`` argument list.
 
 .. note::
 
@@ -150,7 +147,7 @@ Copy the URL of the video to paste into your ``readme.md`` file later.
 Upload the Planning Document
 ----------------------------
 
-5. Upload your planning document to the website repository in the ``website`` folder.
+5. Upload your planning document to the website repository, alongside the ``main.py`` file.
 
 First, find the file that you created in the planning phase of the project.
 It might be a ``pdf``, ``docx``, ``png``, or some other file type.
@@ -158,63 +155,37 @@ Change the filename of the planning document to something simple and easy to typ
 In particular, we suggest you avoid spaces and special characters in the filename.
 For example, if your planning document is called ``Project Plan.pdf``, you could rename it to just ``plan.pdf``.
 
-Next, you will need to upload the file to the repository, inside of the ``docs`` folder of your website (NOT the ``website`` folder).
-Open the ``docs`` folder.
+Next, you will need to upload the file to the repository.
 
-.. image:: images/deployment_github_docs.png
-    :alt: Github Docs
+.. image:: images/deployment_github_upload2.png
+    :alt: Github Upload
 
 You can either drag your file directly into the folder area or click on the ``Add file`` button and then ``Upload files`` to select the file from your computer.
 Once they have been added ("staged"), you can click on the ``Commit changes`` button to save your changes.
 
-.. image:: images/deployment_github_upload.png
-    :alt: Github Upload
-
-Once the file is committed, you will see it in the ``docs`` folder. Make a careful note of the filename, exactly as it is typed.
+Once the file is committed, you will see it in the interface. Make a careful note of the filename, exactly as it is typed.
 In this case, the file is called ``WebsiteDesign.pdf``
 
 .. image:: images/deployment_github_added.png
     :alt: Github Uploaded
 
-Now we need to link the file in our ``readme.md`` file.
+Writing the ``set_site_information`` Call
+-----------------------------------------
 
-Edit the Readme
----------------
+You still need to link the file in our ``set_site_information`` call.
+If you have not already done so, go back to the ``main.py`` file and click on the pencil icon to edit it.
+Then, in the call to ``set_site_information(...)``, replace the text in the ``planning`` argument with the exact filename of your planning document (e.g., ``WebsiteDesign.pdf``).
 
-6. Now we need to edit your ``readme.md`` file to update the information about your website. Click on the ``readme.md`` file in the ``website`` folder.
-
-.. image:: images/deployment_github_readme.png
-    :alt: Github Readme
-
-Click on the pencil icon to edit the file. You will need to fill in the following fields.
+Other required fields in the ``set_site_information(...)`` call include:
 
 * The name of your site
 * What your web application does
 * Your name and UD email address
 * If you got significant help from a website besides the official Drafter documentation, include links along with explanations of how the site helped you. If someone helped you, this is also a nice place to mention them to thank them for their help. Make sure you provide direct URLs where ever you can.
-* The planning document that you created, provided as a file (see :ref:`planning_document` above). At the minimum, you need to link to the file by replacing the text in parentheses with the filename of your planning document (e.g., ``WebsiteDesign.pdf``). If your planning document is an image, you can also embed it directly in the readme by following one of the guides linked below. Note that you should not put `docs/` in front of the file URL, even though the file is in the `docs` folder; when we deploy your site, we'll fix the URL for you.
+* The planning document that you created, provided as the filename (see :ref:`planning_document` above).
 * The URL (address) of the publicly-accessible video (see :ref:`video` above) that you uploaded, replacing the existing text inside of the angle brackets (``<https://my.video.com/>``) with the URL of your video.
 
-.. image:: images/deployment_github_editme.png
-    :alt: Github Readme
-
-This file is written in Markdown, which is a simple way to format text. You can use the following syntax to format your text:
-
-* ``**use two asterisks for bold text**``
-* ``*use one asterisk for italics*``
-* ``[This text will be hyperlinked to](https://this.url.com/)``
-* ``You can also use backticks to `highlight` code inline``
-* ``# This is a header``
-* ``- This is a bullet point``
-* ``1. This is a numbered list``
-* ``> This is a blockquote``
-* ``--- This is a horizontal rule``
-* ``![This is an image](https://this.url.com/image.png)``
-
-
-You can learn more about Markdown `from the Github Guide <https://guides.github.com/features/mastering-markdown/>`_ or the `MarkdownGuide <https://www.markdownguide.org/basic-syntax/>`_ .
-
-You should also add a section with a bulletted list in the ``readme.md`` document describing the project requirements and how you met them.
+The information above can be a string, a list of strings, or even ``PageContent`` like ``Div``, ``Link``, etc.
 
 When you are done, click on the ``Commit changes`` button to save your changes.
 
@@ -259,18 +230,12 @@ The Actions section of the repository will list prior deploy attempts in chronol
 You can also get more details about the deployment from the deployment dashboard (see :ref:`deployment_dashboard`).
 Unless there is a catastrophic error (e.g., you didn't enable GitHub Pages), you should be able to see the dashboard.
 
-View the Readme
----------------
+View the Site Information
+-------------------------
 
-8. If you formatted your ``readme.md`` file correctly, you will be able to view a nicely formatted version of it.
-
-Take your original deployment URL (e.g., ``https://ud-s24-cs1.github.io/cs1-website-username/``) and add ``docs/`` to the end of it (e.g., ``https://ud-s24-cs1.github.io/cs1-website-username/docs/``).
-
-.. image:: images/deployment_github_docs_public.png
-    :alt: Github Readme View
+8. If you set your site information correctly, it will be available by navigating to the ``--about`` url. For example, if your deployed URL is ``https://ud-s24-cs1.github.io/cs1-website-username/``, then you can view the site information at ``https://ud-s24-cs1.github.io/cs1-website-username/--about``.
 
 Make sure that all of the links work and that the video is visible and audible.
-There should be six sections in the readme: website name, description, author, help resources used, planning document, and video.
 
 .. _deployment_dashboard:
 
@@ -308,13 +273,11 @@ Appendix: Uploading Files
 
 If you have files other than ``main.py`` that you need to upload to your website, you can follow these steps.
 
-1. Go to the ``Code`` tab and click on the ``website`` folder.
+1. Go to the ``Code`` tab.
 2. Click on the ``Add file`` button and then ``Upload files`` to select the file from your computer.
 3. Once they have been added ("staged"), you can click on the ``Commit changes`` button to save your changes. Make sure you write a descriptive commit message!
 
 If you have multiple files, you can upload them all at once by dragging them into the folder area.
-
-Note that you need to upload files to the ``website`` folder, not the ``docs`` folder. The ``docs`` folder is only for the planning document.
 
 If you are using additional Python libraries, you can include a ``requirements.txt`` file in the ``website`` folder to list the libraries you are using.
 This file should be uploaded in the same way as other files.
@@ -323,7 +286,5 @@ However, not all third-party libraries are supported on the deployed version of 
 Common Errors
 -------------
 
-* **Files not linked correctly in Readme**:
-    * Make sure that all of the links in your readme are correct. If you are linking to a file in the ``docs`` folder, you should not include ``docs/`` in the URL. If you are linking to a video, make sure that the video is publicly accessible.
 * **Deployment fails**:
     * If your deployment fails, you can check the logs in the Actions tab to see what went wrong. Common errors include not enabling GitHub Pages, not uploading the correct files, or having a syntax error in your code.
