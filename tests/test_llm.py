@@ -2,8 +2,11 @@
 Tests for LLM API integration functionality
 """
 import pytest
-from drafter import LLMMessage, LLMResponse, LLMError, call_gpt, call_gemini
+from drafter.llm import LLMMessage, LLMResponse, LLMError, call_gpt, call_gemini
+from drafter.llm import call_gpt_structured, call_gemini_structured
 from drafter import ApiKeyBox
+from dataclasses import dataclass
+from typing import List
 
 
 def test_llm_message_creation():
@@ -111,3 +114,160 @@ def test_message_list_conversion():
     assert len(messages) == 4
     assert messages[0].role == "system"
     assert messages[-1].content == "How are you?"
+
+
+def test_structured_output_simple_dataclass():
+    """Test that a simple dataclass can be defined for structured output."""
+    @dataclass
+    class SimpleResponse:
+        """Simple response format.
+        
+        Attributes:
+            message: The response message
+            confidence: Confidence score from 0-100
+        """
+        message: str
+        confidence: int
+    
+    # Just test that we can create the dataclass
+    response = SimpleResponse("Hello", 95)
+    assert response.message == "Hello"
+    assert response.confidence == 95
+
+
+def test_structured_output_nested_dataclass():
+    """Test that nested dataclasses work for structured output."""
+    @dataclass
+    class Author:
+        """Author information.
+        
+        Attributes:
+            name: Author's name
+            country: Author's country
+        """
+        name: str
+        country: str
+    
+    @dataclass
+    class Book:
+        """Book information.
+        
+        Attributes:
+            title: Book title
+            author: Book author
+            year: Publication year
+        """
+        title: str
+        author: Author
+        year: int
+    
+    # Test that we can create nested structures
+    author = Author("Jane Doe", "USA")
+    book = Book("Test Book", author, 2024)
+    assert book.title == "Test Book"
+    assert book.author.name == "Jane Doe"
+    assert book.year == 2024
+
+
+def test_structured_output_with_lists():
+    """Test that dataclasses with lists work for structured output."""
+    @dataclass
+    class Recipe:
+        """Recipe information.
+        
+        Attributes:
+            name: Recipe name
+            ingredients: List of ingredients
+            steps: Cooking steps
+        """
+        name: str
+        ingredients: List[str]
+        steps: List[str]
+    
+    # Test that we can create dataclasses with lists
+    recipe = Recipe("Pasta", ["pasta", "sauce"], ["boil", "mix"])
+    assert recipe.name == "Pasta"
+    assert len(recipe.ingredients) == 2
+    assert len(recipe.steps) == 2
+
+
+def test_call_gpt_structured_no_api_key():
+    """Test that call_gpt_structured returns error when no API key provided."""
+    @dataclass
+    class TestFormat:
+        """Test format.
+        
+        Attributes:
+            value: Test value
+        """
+        value: str
+    
+    messages = [LLMMessage("user", "Hello")]
+    result = call_gpt_structured("", messages, TestFormat)
+    assert isinstance(result, LLMError)
+    assert result.error_type == "AuthenticationError"
+
+
+def test_call_gpt_structured_no_messages():
+    """Test that call_gpt_structured returns error when no messages provided."""
+    @dataclass
+    class TestFormat:
+        """Test format.
+        
+        Attributes:
+            value: Test value
+        """
+        value: str
+    
+    result = call_gpt_structured("fake-key", [], TestFormat)
+    assert isinstance(result, LLMError)
+    assert result.error_type == "ValueError"
+
+
+def test_call_gpt_structured_invalid_format():
+    """Test that call_gpt_structured returns error when format is not a dataclass."""
+    messages = [LLMMessage("user", "Hello")]
+    result = call_gpt_structured("fake-key", messages, str)  # str is not a dataclass
+    assert isinstance(result, LLMError)
+    assert result.error_type == "ValueError"
+
+
+def test_call_gemini_structured_no_api_key():
+    """Test that call_gemini_structured returns error when no API key provided."""
+    @dataclass
+    class TestFormat:
+        """Test format.
+        
+        Attributes:
+            value: Test value
+        """
+        value: str
+    
+    messages = [LLMMessage("user", "Hello")]
+    result = call_gemini_structured("", messages, TestFormat)
+    assert isinstance(result, LLMError)
+    assert result.error_type == "AuthenticationError"
+
+
+def test_call_gemini_structured_no_messages():
+    """Test that call_gemini_structured returns error when no messages provided."""
+    @dataclass
+    class TestFormat:
+        """Test format.
+        
+        Attributes:
+            value: Test value
+        """
+        value: str
+    
+    result = call_gemini_structured("fake-key", [], TestFormat)
+    assert isinstance(result, LLMError)
+    assert result.error_type == "ValueError"
+
+
+def test_call_gemini_structured_invalid_format():
+    """Test that call_gemini_structured returns error when format is not a dataclass."""
+    messages = [LLMMessage("user", "Hello")]
+    result = call_gemini_structured("fake-key", messages, dict)  # dict is not a dataclass
+    assert isinstance(result, LLMError)
+    assert result.error_type == "ValueError"

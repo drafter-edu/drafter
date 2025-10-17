@@ -6,9 +6,10 @@ It handles API key management through local storage and provides a student-frien
 interface using only lists and dataclasses.
 """
 
-from dataclasses import dataclass
-from typing import List, Optional, Any
+from dataclasses import dataclass, fields, is_dataclass, MISSING
+from typing import List, Optional, Any, Type, get_origin, get_args, Union
 import json
+import re
 
 try:
     import requests
@@ -266,6 +267,438 @@ def call_gemini(api_key: str, messages: List[LLMMessage], model: str = "gemini-p
             
     except Exception as e:
         return LLMError("NetworkError", f"Failed to connect to API: {str(e)}")
+
+
+def _parse_google_docstring(docstring: str) -> dict:
+    """
+    Parse Google-style docstring to extract Attributes section.
+    
+    Returns a dictionary mapping attribute names to their descriptions.
+    """
+    if not docstring:
+        return {}
+    
+    # Look for "Attributes:" section
+    attributes_pattern = r'Attributes:\s*\n((?:\s+\w+.*\n)*)'
+    match = re.search(attributes_pattern, docstring)
+    
+    if not match:
+        return {}
+    
+    attributes_section = match.group(1)
+    result = {}
+    
+    # Parse each attribute line (format: "    name: description" or "    name (type): description")
+    lines = attributes_section.split('\n')
+    current_attr = None
+    current_desc = []
+    
+    for line in lines:
+        if not line.strip():
+            continue
+            
+        # Check if this is a new attribute (starts with spaces followed by word and colon)
+        attr_match = re.match(r'\s+(\w+)(?:\s*\([^)]+\))?\s*:\s*(.*)', line)
+        if attr_match:
+            # Save previous attribute if exists
+            if current_attr:
+                result[current_attr] = ' '.join(current_desc).strip()
+            # Start new attribute
+            current_attr = attr_match.group(1)
+            current_desc = [attr_match.group(2)]
+        elif current_attr and line.startswith('        '):
+            # Continuation of previous description
+            current_desc.append(line.strip())
+    
+    # Save last attribute
+    if current_attr:
+        result[current_attr] = ' '.join(current_desc).strip()
+    
+    return result
+
+
+def _dataclass_to_schema(dataclass_type: Type, descriptions: dict = None) -> dict:
+    """
+    Convert a dataclass to JSON Schema format.
+    
+    Supports nested dataclasses, lists, and primitive types.
+    Extracts field descriptions from the class docstring using Google-style format.
+    """
+    if not is_dataclass(dataclass_type):
+        raise ValueError(f"{dataclass_type} is not a dataclass")
+    
+    # Parse docstring for field descriptions if not provided
+    if descriptions is None:
+        descriptions = _parse_google_docstring(dataclass_type.__doc__)
+    
+    schema = {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": False
+    }
+    
+    for field in fields(dataclass_type):
+        field_name = field.name
+        field_type = field.type
+        
+        # Determine if field is required
+        if field.default is MISSING and field.default_factory is MISSING:
+            schema["required"].append(field_name)
+        
+        # Get field description
+        description = descriptions.get(field_name, "")
+        
+        # Convert type to JSON Schema
+        field_schema = _type_to_schema(field_type, description)
+        schema["properties"][field_name] = field_schema
+    
+    return schema
+
+
+def _type_to_schema(field_type: Type, description: str = "") -> dict:
+    """Convert a Python type annotation to JSON Schema."""
+    # Get origin for generic types (List, Optional, etc.)
+    origin = get_origin(field_type)
+    
+    # Handle Optional (Union with None)
+    if origin is Union:
+        args = get_args(field_type)
+        # Check if it's Optional (Union with None)
+        if type(None) in args:
+            # Get the non-None type
+            actual_type = next(arg for arg in args if arg is not type(None))
+            schema = _type_to_schema(actual_type, description)
+            # Optional fields are nullable
+            return schema
+        # For other Unions, just use the first type
+        return _type_to_schema(args[0], description)
+    
+    # Handle List
+    if origin is list or origin is List:
+        args = get_args(field_type)
+        item_type = args[0] if args else Any
+        item_schema = _type_to_schema(item_type, "")
+        schema = {
+            "type": "array",
+            "items": item_schema
+        }
+        if description:
+            schema["description"] = description
+        return schema
+    
+    # Handle dataclasses (nested objects)
+    if is_dataclass(field_type):
+        nested_schema = _dataclass_to_schema(field_type)
+        if description:
+            nested_schema["description"] = description
+        return nested_schema
+    
+    # Handle primitive types
+    type_mapping = {
+        str: "string",
+        int: "integer",
+        float: "number",
+        bool: "boolean"
+    }
+    
+    json_type = type_mapping.get(field_type, "string")
+    schema = {"type": json_type}
+    if description:
+        schema["description"] = description
+    
+    return schema
+
+
+def call_gpt_structured(api_key: str, messages: List[LLMMessage], 
+                       response_format: Type, model: str = "gpt-4o-2024-08-06",
+                       temperature: float = 0.7, max_tokens: int = 1000) -> Any:
+    """
+    Call the OpenAI GPT API with structured output format.
+    
+    This function requests a response in a specific JSON structure defined by a dataclass.
+    The dataclass should have a Google-style docstring with an Attributes section describing
+    each field. Nested dataclasses and lists are supported.
+    
+    :param api_key: Your OpenAI API key
+    :type api_key: str
+    :param messages: List of LLMMessage objects representing the conversation history
+    :type messages: List[LLMMessage]
+    :param response_format: A dataclass type defining the expected response structure
+    :type response_format: Type
+    :param model: The GPT model to use (default: "gpt-4o-2024-08-06", supports structured output)
+    :type model: str
+    :param temperature: Controls randomness (0.0-2.0, default: 0.7)
+    :type temperature: float
+    :param max_tokens: Maximum tokens to generate (default: 1000)
+    :type max_tokens: int
+    :return: An instance of response_format on success, LLMError on failure
+    :rtype: Union[response_format, LLMError]
+    
+    Example:
+        >>> @dataclass
+        ... class RecipeInfo:
+        ...     '''Recipe information.
+        ...     
+        ...     Attributes:
+        ...         name: The name of the recipe
+        ...         ingredients: List of ingredients needed
+        ...         steps: List of preparation steps
+        ...     '''
+        ...     name: str
+        ...     ingredients: List[str]
+        ...     steps: List[str]
+        >>> 
+        >>> messages = [LLMMessage("user", "Give me a simple pasta recipe")]
+        >>> result = call_gpt_structured(api_key, messages, RecipeInfo)
+        >>> if isinstance(result, RecipeInfo):
+        ...     print(f"Recipe: {result.name}")
+        ...     print(f"Ingredients: {', '.join(result.ingredients)}")
+    """
+    if not HAS_REQUESTS:
+        return LLMError("ImportError", "The requests module is required but not available")
+    
+    if not api_key:
+        return LLMError("AuthenticationError", "API key is required")
+    
+    if not messages:
+        return LLMError("ValueError", "At least one message is required")
+    
+    if not is_dataclass(response_format):
+        return LLMError("ValueError", "response_format must be a dataclass")
+    
+    # Convert dataclass to JSON Schema
+    try:
+        schema = _dataclass_to_schema(response_format)
+    except Exception as e:
+        return LLMError("ValueError", f"Failed to convert dataclass to schema: {str(e)}")
+    
+    # Convert LLMMessage objects to the format expected by OpenAI API
+    api_messages = []
+    for msg in messages:
+        api_messages.append({
+            "role": msg.role,
+            "content": msg.content
+        })
+    
+    url = "https://api.openai.com/v1/chat/completions"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
+    
+    payload = {
+        "model": model,
+        "messages": api_messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": response_format.__name__,
+                "strict": True,
+                "schema": schema
+            }
+        }
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        
+        if response.status_code == 200:
+            data = response.json()
+            choice = data["choices"][0]
+            message_content = choice["message"]["content"]
+            
+            # Parse JSON response and create dataclass instance
+            try:
+                json_data = json.loads(message_content)
+                result = _dict_to_dataclass(json_data, response_format)
+                return result
+            except Exception as e:
+                return LLMError("ParseError", f"Failed to parse structured response: {str(e)}")
+            
+        elif response.status_code == 401:
+            return LLMError("AuthenticationError", "Invalid API key")
+        elif response.status_code == 429:
+            return LLMError("RateLimitError", "Rate limit exceeded or quota reached")
+        else:
+            error_data = response.json() if response.text else {}
+            error_message = error_data.get("error", {}).get("message", f"HTTP {response.status_code}")
+            return LLMError("APIError", error_message)
+            
+    except Exception as e:
+        return LLMError("NetworkError", f"Failed to connect to API: {str(e)}")
+
+
+def call_gemini_structured(api_key: str, messages: List[LLMMessage],
+                          response_format: Type, model: str = "gemini-1.5-pro",
+                          temperature: float = 0.7, max_tokens: int = 1000) -> Any:
+    """
+    Call the Google Gemini API with structured output format.
+    
+    This function requests a response in a specific JSON structure defined by a dataclass.
+    The dataclass should have a Google-style docstring with an Attributes section describing
+    each field. Nested dataclasses and lists are supported.
+    
+    :param api_key: Your Google API key
+    :type api_key: str
+    :param messages: List of LLMMessage objects representing the conversation
+    :type messages: List[LLMMessage]
+    :param response_format: A dataclass type defining the expected response structure
+    :type response_format: Type
+    :param model: The Gemini model to use (default: "gemini-1.5-pro")
+    :type model: str
+    :param temperature: Controls randomness (0.0-2.0, default: 0.7)
+    :type temperature: float
+    :param max_tokens: Maximum tokens to generate (default: 1000)
+    :type max_tokens: int
+    :return: An instance of response_format on success, LLMError on failure
+    :rtype: Union[response_format, LLMError]
+    
+    Example:
+        >>> @dataclass
+        ... class MovieReview:
+        ...     '''Movie review information.
+        ...     
+        ...     Attributes:
+        ...         title: The movie title
+        ...         rating: Rating from 1-10
+        ...         summary: Brief review summary
+        ...     '''
+        ...     title: str
+        ...     rating: int
+        ...     summary: str
+        >>> 
+        >>> messages = [LLMMessage("user", "Review the movie Inception")]
+        >>> result = call_gemini_structured(api_key, messages, MovieReview)
+        >>> if isinstance(result, MovieReview):
+        ...     print(f"{result.title}: {result.rating}/10")
+    """
+    if not HAS_REQUESTS:
+        return LLMError("ImportError", "The requests module is required but not available")
+    
+    if not api_key:
+        return LLMError("AuthenticationError", "API key is required")
+    
+    if not messages:
+        return LLMError("ValueError", "At least one message is required")
+    
+    if not is_dataclass(response_format):
+        return LLMError("ValueError", "response_format must be a dataclass")
+    
+    # Convert dataclass to JSON Schema
+    try:
+        schema = _dataclass_to_schema(response_format)
+    except Exception as e:
+        return LLMError("ValueError", f"Failed to convert dataclass to schema: {str(e)}")
+    
+    # Convert messages to Gemini format
+    contents = []
+    for msg in messages:
+        role = "model" if msg.role == "assistant" else "user"
+        if msg.role != "system":
+            contents.append({
+                "role": role,
+                "parts": [{"text": msg.content}]
+            })
+    
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "contents": contents,
+        "generationConfig": {
+            "temperature": temperature,
+            "maxOutputTokens": max_tokens,
+            "responseMimeType": "application/json",
+            "responseSchema": schema
+        }
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            if "candidates" not in data or not data["candidates"]:
+                return LLMError("APIError", "No response generated")
+            
+            candidate = data["candidates"][0]
+            content = candidate["content"]["parts"][0]["text"]
+            
+            # Parse JSON response and create dataclass instance
+            try:
+                json_data = json.loads(content)
+                result = _dict_to_dataclass(json_data, response_format)
+                return result
+            except Exception as e:
+                return LLMError("ParseError", f"Failed to parse structured response: {str(e)}")
+            
+        elif response.status_code == 400:
+            error_data = response.json() if response.text else {}
+            error_message = error_data.get("error", {}).get("message", "Invalid request")
+            return LLMError("ValueError", error_message)
+        elif response.status_code == 403:
+            return LLMError("AuthenticationError", "Invalid API key or permission denied")
+        elif response.status_code == 429:
+            return LLMError("RateLimitError", "Rate limit exceeded or quota reached")
+        else:
+            error_data = response.json() if response.text else {}
+            error_message = error_data.get("error", {}).get("message", f"HTTP {response.status_code}")
+            return LLMError("APIError", error_message)
+            
+    except Exception as e:
+        return LLMError("NetworkError", f"Failed to connect to API: {str(e)}")
+
+
+def _dict_to_dataclass(data: dict, dataclass_type: Type) -> Any:
+    """
+    Convert a dictionary to a dataclass instance, handling nested dataclasses and lists.
+    """
+    if not is_dataclass(dataclass_type):
+        return data
+    
+    field_values = {}
+    for field in fields(dataclass_type):
+        field_name = field.name
+        if field_name not in data:
+            # Use default value if available
+            if field.default is not MISSING:
+                field_values[field_name] = field.default
+            elif field.default_factory is not MISSING:
+                field_values[field_name] = field.default_factory()
+            continue
+        
+        value = data[field_name]
+        field_type = field.type
+        
+        # Handle Optional types
+        origin = get_origin(field_type)
+        if origin is Union:
+            args = get_args(field_type)
+            if type(None) in args:
+                field_type = next(arg for arg in args if arg is not type(None))
+                origin = get_origin(field_type)
+        
+        # Handle List types
+        if origin is list or origin is List:
+            args = get_args(field_type)
+            if args and is_dataclass(args[0]):
+                # List of dataclasses
+                field_values[field_name] = [_dict_to_dataclass(item, args[0]) for item in value]
+            else:
+                field_values[field_name] = value
+        # Handle nested dataclasses
+        elif is_dataclass(field_type):
+            field_values[field_name] = _dict_to_dataclass(value, field_type)
+        else:
+            field_values[field_name] = value
+    
+    return dataclass_type(**field_values)
 
 
 # JavaScript code for local storage management (injected into Skulpt environment)

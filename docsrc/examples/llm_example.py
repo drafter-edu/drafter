@@ -6,6 +6,7 @@ The API key is stored in the browser's local storage for convenience.
 """
 
 from drafter import *
+from drafter.llm import LLMMessage, LLMResponse, call_gpt, call_gemini, save_api_key
 from dataclasses import field
 
 

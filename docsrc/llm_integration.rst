@@ -5,6 +5,10 @@ Drafter provides built-in support for integrating with popular Large Language Mo
 including OpenAI's GPT and Google's Gemini. This feature is designed to work seamlessly in both
 traditional Bottle deployments and Skulpt client-side environments.
 
+.. note::
+   LLM functions must be explicitly imported from ``drafter.llm``. Only the ``ApiKeyBox`` 
+   component is available through the standard Drafter import.
+
 Overview
 --------
 
@@ -12,8 +16,18 @@ The LLM integration provides:
 
 * **Simple API access**: Easy-to-use functions for calling GPT and Gemini APIs
 * **Student-friendly design**: Uses only lists and dataclasses (no dictionaries required)
+* **Structured outputs**: Generate responses in specific formats using dataclasses
 * **API key management**: Built-in component for capturing and storing API keys in browser local storage
 * **Skulpt compatible**: Works with client-side Python execution via Skulpt
+
+Importing LLM Functions
+------------------------
+
+LLM functions require explicit import::
+
+    from drafter import ApiKeyBox  # Available through standard import
+    from drafter.llm import LLMMessage, call_gpt, call_gemini
+    from drafter.llm import call_gpt_structured, call_gemini_structured
 
 Core Components
 ---------------
@@ -23,7 +37,7 @@ LLMMessage
 
 Represents a single message in an LLM conversation::
 
-    from drafter import LLMMessage
+    from drafter.llm import LLMMessage
     
     # Create messages
     system_msg = LLMMessage("system", "You are a helpful assistant")
@@ -40,6 +54,8 @@ LLMResponse
 
 Contains the response from an LLM API call::
 
+    from drafter.llm import call_gpt
+    
     response = call_gpt(api_key, messages)
     if isinstance(response, LLMResponse):
         print(response.content)        # The generated text
@@ -52,6 +68,8 @@ LLMError
 
 Contains error information when an API call fails::
 
+    from drafter.llm import call_gpt, LLMError
+    
     result = call_gpt(api_key, messages)
     if isinstance(result, LLMError):
         print(result.error_type)  # e.g., "AuthenticationError"
@@ -85,7 +103,7 @@ call_gpt()
 
 Call the OpenAI GPT API::
 
-    from drafter import call_gpt, LLMMessage
+    from drafter.llm import call_gpt, LLMMessage
     
     messages = [
         LLMMessage("system", "You are a helpful assistant"),
@@ -131,6 +149,149 @@ Call the Google Gemini API::
 
 Parameters are similar to ``call_gpt()`` but use Gemini-specific model names.
 
+Structured Output Functions
+----------------------------
+
+For applications that need responses in a specific format, use the structured output functions.
+These functions use dataclasses to define the expected response structure and automatically
+parse the JSON response into dataclass instances.
+
+Defining Response Formats
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Create a dataclass with a Google-style docstring that includes an ``Attributes:`` section::
+
+    from dataclasses import dataclass
+    from typing import List
+    
+    @dataclass
+    class RecipeInfo:
+        """Recipe information.
+        
+        Attributes:
+            name: The name of the recipe
+            prep_time: Preparation time in minutes
+            ingredients: List of ingredients needed
+            steps: List of preparation steps
+        """
+        name: str
+        prep_time: int
+        ingredients: List[str]
+        steps: List[str]
+
+**Important**: The docstring must include an ``Attributes:`` section with descriptions for
+each field. This helps the LLM understand what information to provide.
+
+call_gpt_structured()
+~~~~~~~~~~~~~~~~~~~~~
+
+Call GPT with a structured output format::
+
+    from drafter.llm import call_gpt_structured, LLMMessage
+    
+    messages = [
+        LLMMessage("user", "Give me a simple pasta recipe")
+    ]
+    
+    result = call_gpt_structured(
+        api_key="sk-...",
+        messages=messages,
+        response_format=RecipeInfo,
+        model="gpt-4o-2024-08-06",  # Structured output requires this model or newer
+        temperature=0.7,
+        max_tokens=1000
+    )
+    
+    if isinstance(result, RecipeInfo):
+        print(f"Recipe: {result.name}")
+        print(f"Time: {result.prep_time} minutes")
+        for ingredient in result.ingredients:
+            print(f"  - {ingredient}")
+
+Parameters:
+
+* ``api_key`` (str): Your OpenAI API key
+* ``messages`` (List[LLMMessage]): Conversation history
+* ``response_format`` (Type): A dataclass type defining the response structure
+* ``model`` (str): Model to use (default: "gpt-4o-2024-08-06" - structured output requires GPT-4o or newer)
+* ``temperature`` (float): Randomness 0.0-2.0 (default: 0.7)
+* ``max_tokens`` (int): Maximum response length (default: 1000)
+
+Returns an instance of ``response_format`` on success or ``LLMError`` on failure.
+
+call_gemini_structured()
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Call Gemini with a structured output format::
+
+    from drafter.llm import call_gemini_structured, LLMMessage
+    
+    @dataclass
+    class MovieReview:
+        """Movie review information.
+        
+        Attributes:
+            title: The movie title
+            rating: Rating from 1 to 10
+            pros: List of positive aspects
+            cons: List of negative aspects
+            summary: Brief review summary
+        """
+        title: str
+        rating: int
+        pros: List[str]
+        cons: List[str]
+        summary: str
+    
+    messages = [
+        LLMMessage("user", "Review the movie Inception")
+    ]
+    
+    result = call_gemini_structured(
+        api_key="AIza...",
+        messages=messages,
+        response_format=MovieReview,
+        model="gemini-1.5-pro"
+    )
+    
+    if isinstance(result, MovieReview):
+        print(f"{result.title}: {result.rating}/10")
+        print(result.summary)
+
+Nested Dataclasses
+~~~~~~~~~~~~~~~~~~
+
+You can nest dataclasses for complex structures::
+
+    @dataclass
+    class Author:
+        """Author information.
+        
+        Attributes:
+            name: Author's full name
+            country: Author's country of origin
+        """
+        name: str
+        country: str
+    
+    @dataclass
+    class Book:
+        """Book information.
+        
+        Attributes:
+            title: Book title
+            author: Book author information
+            year: Publication year
+            genres: List of genres
+        """
+        title: str
+        author: Author
+        year: int
+        genres: List[str]
+    
+    messages = [LLMMessage("user", "Tell me about The Great Gatsby")]
+    result = call_gpt_structured(api_key, messages, Book)
+
 Local Storage Functions
 -----------------------
 
@@ -141,7 +302,7 @@ save_api_key()
 
 Save an API key to local storage::
 
-    from drafter import save_api_key
+    from drafter.llm import save_api_key
     
     save_api_key("gpt", "sk-...")
     save_api_key("gemini", "AIza...")
@@ -151,7 +312,7 @@ get_stored_api_key()
 
 Retrieve a stored API key::
 
-    from drafter import get_stored_api_key
+    from drafter.llm import get_stored_api_key
     
     api_key = get_stored_api_key("gpt")
     if api_key:
@@ -162,7 +323,7 @@ clear_api_key()
 
 Clear a stored API key::
 
-    from drafter import clear_api_key
+    from drafter.llm import clear_api_key
     
     clear_api_key("gpt")
 
@@ -172,6 +333,7 @@ Complete Example
 Here's a complete chatbot example::
 
     from drafter import *
+    from drafter.llm import LLMMessage, LLMResponse, call_gpt, save_api_key
     from dataclasses import field
     
     @dataclass
