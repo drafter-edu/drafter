@@ -51,7 +51,7 @@
             window.drafterLLM.initializeApiKeyBoxes();
         } catch (e) {
             // Silently fail if there's an issue
-            console.error('Error initializing API key boxes:', e);
+            // Error is caught but not logged to avoid exposing implementation details
         }
     }
 
