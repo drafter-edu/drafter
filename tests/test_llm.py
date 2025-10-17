@@ -91,7 +91,7 @@ def test_api_key_box_renders():
     assert "type='password'" in html
     assert "name='gpt_key'" in html
     assert "GPT API Key:" in html
-    assert "drafterLLM" in html  # Should include JavaScript
+    assert "drafterLLM" in html  # Should include JavaScript for local storage
 
 
 def test_api_key_box_invalid_name():
