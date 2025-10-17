@@ -34,3 +34,6 @@ looking for user documentation, please refer to the :ref:`Student Documentation 
 
 .. automodule:: drafter.styling
     :members:
+
+.. automodule:: drafter.llm
+    :members:
