@@ -162,7 +162,8 @@ def call_gpt(api_key: str, messages: List[LLMMessage], model: str = "gpt-3.5-tur
         return LLMError("NetworkError", f"Failed to connect to API: {str(e)}")
 
 
-def call_gemini(api_key: str, messages: List[LLMMessage], model: str = "gemini-pro",
+def call_gemini(api_key: str, messages: List[LLMMessage],
+                model: str = "gemini-2.5-flash",
                 temperature: float = 0.7, max_tokens: int = 1000) -> Any:
     """
     Call the Google Gemini API with a list of messages.
