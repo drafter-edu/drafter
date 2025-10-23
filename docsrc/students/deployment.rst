@@ -283,6 +283,141 @@ If you are using additional Python libraries, you can include a ``requirements.t
 This file should be uploaded in the same way as other files.
 However, not all third-party libraries are supported on the deployed version of Drafter, so you should check with your instructor before using them.
 
+Deployment Configuration Functions
+-----------------------------------
+
+Drafter provides several functions to help you configure your website for deployment. These functions should be called
+before the ``start_server()`` function in your code. Here is a complete reference:
+
+.. function:: hide_debug_information()
+
+    Hides the debug information panel at the bottom of the page. This is essential for deployed websites as you don't
+    want users to see your internal state and route information.
+
+    .. code-block:: python
+
+        hide_debug_information()
+
+.. function:: show_debug_information()
+
+    Shows the debug information panel at the bottom of the page. Useful during development to see the current state,
+    routes, and page history. This is shown by default.
+
+    .. code-block:: python
+
+        show_debug_information()
+
+.. function:: set_website_title(title)
+
+    Sets the title of the website as it appears in the browser tab.
+
+    :param title: The title text to display in the browser tab.
+    :type title: str
+
+    .. code-block:: python
+
+        set_website_title("My Awesome Website")
+
+.. function:: set_website_framed(framed)
+
+    Sets whether the website should be displayed in a frame (with a border and header) or stretch to fill the entire
+    browser window. For deployment, you typically want to set this to ``False``.
+
+    :param framed: ``True`` to show the frame, ``False`` to hide it.
+    :type framed: bool
+
+    .. code-block:: python
+
+        set_website_framed(False)
+
+.. function:: set_website_style(style)
+
+    Sets the CSS styling theme for the website. Available options include ``"skeleton"`` (default), ``"none"`` (no styling),
+    and potentially other themes in the future. Use ``"none"`` if you want complete control over styling.
+
+    :param style: The name of the style theme to use, or ``None`` for no styling.
+    :type style: str or None
+
+    .. code-block:: python
+
+        set_website_style("skeleton")  # Use the default skeleton theme
+        set_website_style("none")      # No built-in styling
+
+.. function:: add_website_header(header)
+
+    Adds raw HTML content to the ``<head>`` section of your website. This is useful for adding custom CSS, JavaScript,
+    meta tags, or other header content. The content is not wrapped in additional tags, so you need to include any
+    necessary tags yourself.
+
+    :param header: The raw HTML content to add to the header.
+    :type header: str
+
+    .. code-block:: python
+
+        add_website_header('<meta name="description" content="My website description">')
+        add_website_header('<script src="https://example.com/script.js"></script>')
+
+.. function:: add_website_css(selector, css=None)
+
+    Adds custom CSS to your website. This function works in two ways:
+
+    1. If you provide only one parameter, it's treated as raw CSS content and wrapped in ``<style>`` tags.
+    2. If you provide both parameters, the first is a CSS selector and the second is the CSS properties (which will be wrapped in ``{`` ``}``).
+
+    :param selector: Either the complete CSS content, or a CSS selector if ``css`` is also provided.
+    :type selector: str
+    :param css: The CSS properties to apply to the selector (optional).
+    :type css: str or None
+
+    .. code-block:: python
+
+        # Method 1: Provide complete CSS
+        add_website_css("""
+        body {
+            background-color: lightblue;
+            font-size: 18px;
+        }
+        """)
+
+        # Method 2: Provide selector and properties separately
+        add_website_css("body", "background-color: lightblue; font-size: 18px;")
+
+.. function:: deploy_site(image_folder='images')
+
+    Convenience function to prepare the website for deployment. This automatically:
+
+    * Hides debug information
+    * Sets the production flag to ``True``
+    * Configures the image folder path
+
+    :param image_folder: The folder where images are stored. Defaults to ``"images"``.
+    :type image_folder: str
+
+    .. code-block:: python
+
+        deploy_site("images")
+
+.. function:: set_site_information(author, description, sources, planning, links)
+
+    Sets metadata information about your website. This information may be used by the deployment system or displayed
+    in an "About" page. All parameters can be strings or lists of strings, or ``None`` if not applicable.
+
+    :param author: Information about the author(s) of the website.
+    :param description: A description of the website's purpose.
+    :param sources: Information about sources used (images, data, etc.).
+    :param planning: Information about how the website was planned.
+    :param links: External links related to the website.
+
+    .. code-block:: python
+
+        set_site_information(
+            author="Jane Doe",
+            description="A calculator website for learning Python",
+            sources=["Math formulas from textbook", "Icons from flaticon.com"],
+            planning="Sketched interface on paper first",
+            links=["https://github.com/myusername/myproject"]
+        )
+
 Common Errors
 -------------
 
