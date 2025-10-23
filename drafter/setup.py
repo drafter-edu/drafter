@@ -4,7 +4,7 @@ logger = logging.getLogger('drafter')
 
 
 try:
-    from bottle import Bottle, abort, request, static_file
+    from bottle import Bottle, abort, request, static_file  # noqa: F401
 
     DEFAULT_BACKEND = "bottle"
 except ImportError:

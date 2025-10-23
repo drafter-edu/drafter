@@ -1,7 +1,6 @@
-from typing import Optional, Union
+from typing import Optional
 from drafter.server import MAIN_SERVER, SiteInformationType
 from drafter.page import Page
-from drafter.components import PageContent
 
 def hide_debug_information():
     """

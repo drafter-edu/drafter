@@ -4,7 +4,7 @@ import inspect
 import html
 
 from drafter.constants import RESTORABLE_STATE_KEY, PREVIOUSLY_PRESSED_BUTTON
-from drafter.history import ConversionRecord, VisitedPage, format_page_content, make_value_expandable, safe_repr
+from drafter.history import ConversionRecord, VisitedPage, format_page_content, safe_repr
 from drafter.page import Page
 from drafter.urls import merge_url_query_params
 from drafter.testing import bakery, _bakery_tests, DIFF_WRAP_WIDTH, diff_tests

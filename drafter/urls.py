@@ -1,6 +1,6 @@
 from typing import Any, Tuple, Dict
 import re
-from urllib.parse import urlencode, urlparse, parse_qs, quote_plus
+from urllib.parse import urlencode, urlparse, parse_qs
 
 def merge_url_query_params(url: str, additional_params: dict) -> str:
     """

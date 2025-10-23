@@ -41,7 +41,7 @@ RAW_FILES['none'] = RawFiles({}, {}, {}, {})
 def extract(text):
     return gzip.decompress(b64decode(text)).decode()    
     
-CACHED_DECOMPRESSED = {}
+CACHED_DECOMPRESSED: dict[str, RawFiles] = {}
 def get_raw_files(theme):
     if theme in CACHED_DECOMPRESSED:
         return CACHED_DECOMPRESSED[theme]

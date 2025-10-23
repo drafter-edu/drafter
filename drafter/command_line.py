@@ -25,7 +25,6 @@ from drafter import ServerConfiguration, protect_script_tags
 from drafter.files import DEPLOYED_404_TEMPLATE_HTML, TEMPLATE_SKULPT_DEPLOY
 from drafter.raw_files import get_raw_files
 
-import pathlib
 import os
 import argparse
 from typing import Any
@@ -75,7 +74,7 @@ def build_site(options: BuildOptions) -> None:
 
     os.makedirs(options.output_directory, exist_ok=True)
 
-    environment_variables = []
+    environment_variables: list[tuple[str, Any]] = []
     if options.warn_missing_info:
         environment_variables.append(("DRAFTER_MUST_HAVE_SITE_INFORMATION", True))
     if options.external_pages:
@@ -139,7 +138,7 @@ class ServerConfigurationParser:
             else:
                 raise ValueError(f"Invalid server configuration argument: {server_arg}")
 
-    def parse_server_arg(self, name: str, value_type: type) -> tuple[str, Any]:
+    def parse_server_arg(self, name: str, value_type: type) -> None:
         if name in self._server_config_args:
             raw_value = self._server_config_args[name]
             if value_type == bool:
