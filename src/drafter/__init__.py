@@ -1,20 +1,35 @@
-from drafter.setup import *
-from drafter.components import *
-from drafter.styling import *
-from drafter.routes import *
-from drafter.server import *
-from drafter.deploy import *
-from drafter.testing import assert_equal
-import drafter.hacks
+# from drafter.setup import *
+from drafter.components.components import *
+from drafter.launch import start_server
+
+# from drafter.styling import *
+from drafter.client_server import Server, get_main_server, set_main_server, MAIN_SERVER
+from drafter.commands import route
+from drafter.page import Page
+# from drafter.server import *
+# from drafter.deploy import *
+# from drafter.testing import assert_equal
+# import drafter.hacks
 
 # Provide default route
-route('index')(default_index)
+# route("index")(default_index)
 
-__version__ = '1.8.6'
 
-if __name__ == '__main__':
+__all__ = [
+    "Server",
+    "get_main_server",
+    "set_main_server",
+    "MAIN_SERVER",
+    "route",
+    "start_server",
+    "Page",
+]
+
+__version__ = "2.0.0"
+
+if __name__ == "__main__":
     import sys
     from drafter.command_line import parse_args, build_site
-    # print("This package is meant to be imported, not run as a script. For now, at least.")
+
     options = parse_args(sys.argv[1:])
     build_site(options)

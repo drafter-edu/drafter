@@ -9,7 +9,7 @@ default:
 
 # Sync dev dependencies
 dev-sync:
-    uv sync --all-extras --cache-dir .uv_cache --no-install-project
+    uv sync --all-extras --cache-dir .uv_cache
 
 # Sync production dependencies (excludes dev dependencies)
 prod-sync:

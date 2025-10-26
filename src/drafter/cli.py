@@ -12,7 +12,7 @@ from rich.console import Console
 from rich.table import Table
 
 from .server import serve_app_once
-from .templating import render_index_html
+from .app.templating import render_index_html
 from .utils import copy_assets_to, pkg_assets_dir
 
 app = typer.Typer(add_completion=False, help="Drafter CLI")

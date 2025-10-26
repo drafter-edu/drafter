@@ -3,7 +3,7 @@ from typing import Any
 
 from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
-from drafter.components import PageContent, Link
+from drafter.components.components import PageContent, Link
 
 
 @dataclass
@@ -23,6 +23,7 @@ class Page:
     :param state: The state of the page. If only one argument is provided, this will default to be ``None``.
     :param content: The content of the page. Must always be provided as a list of strings and components.
     """
+
     state: Any
     content: list
 
@@ -37,14 +38,18 @@ class Page:
             self.content = [content]
         elif not isinstance(content, list):
             incorrect_type = type(content).__name__
-            raise ValueError("The content of a page must be a list of strings or components."
-                             f" Found {incorrect_type} instead.")
+            raise ValueError(
+                "The content of a page must be a list of strings or components."
+                f" Found {incorrect_type} instead."
+            )
         else:
             for index, chunk in enumerate(content):
                 if not isinstance(chunk, (str, PageContent)):
                     incorrect_type = type(chunk).__name__
-                    raise ValueError("The content of a page must be a list of strings or components."
-                                     f" Found {incorrect_type} at index {index} instead.")
+                    raise ValueError(
+                        "The content of a page must be a list of strings or components."
+                        f" Found {incorrect_type} at index {index} instead."
+                    )
 
     def render_content(self, current_state, configuration: ServerConfiguration) -> str:
         """
@@ -69,8 +74,10 @@ class Page:
         if configuration.framed:
             reset_button = self.make_reset_button()
             about_button = self.make_about_button()
-            content = (f"<div class='container btlw-header'>{configuration.title}{reset_button}{about_button}</div>"
-                       f"<div class='container btlw-container'>{content}</div>")
+            content = (
+                f"<div class='container btlw-header'>{configuration.title}{reset_button}{about_button}</div>"
+                f"<div class='container btlw-container'>{content}</div>"
+            )
         return content
 
     def make_reset_button(self) -> str:
@@ -80,10 +87,10 @@ class Page:
 
         :return: A string of HTML representing the reset button.
         """
-        return '''<a href="--reset" class="btlw-reset" 
+        return """<a href="--reset" class="btlw-reset" 
                     title="Resets the page to its original state. Any data entered will be lost."
                     onclick="return confirm('This will reset the page to its original state. Any data entered will be lost. Are you sure you want to continue?');"
-                    >⟳</a>'''
+                    >⟳</a>"""
 
     def make_about_button(self) -> str:
         """
@@ -92,9 +99,9 @@ class Page:
 
         :return: A string of HTML representing the about button.
         """
-        return '''<a href="--about" class="btlw-about" 
+        return """<a href="--about" class="btlw-about" 
                     title="More information about this website"
-                    >?</a>'''
+                    >?</a>"""
 
     def verify_content(self, server) -> bool:
         """

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 import json
 import os
@@ -16,8 +14,8 @@ from starlette.websockets import WebSocket
 import uvicorn
 from watchfiles import awatch, Change
 
-from drafter.templating import render_index_html
-from drafter.utils import pkg_assets_dir, pkg_scaffold_dir
+from drafter.app.templating import render_index_html
+from drafter.app.utils import pkg_assets_dir, pkg_scaffold_dir
 
 
 @dataclass
@@ -123,10 +121,10 @@ def make_app(cfg: DevConfig) -> Starlette:
 def serve_app_once(
     user_file: str,
     title: str,
-    host: str,
-    port: int,
-    inline_py: bool,
-    open_browser: bool,
+    host: str = "localhost",
+    port: int = 8080,
+    inline_py: bool = True,
+    open_browser: bool = True,
 ):
     cfg = DevConfig(
         title=title,
@@ -156,6 +154,8 @@ def serve_app_once(
             watcher.cancel()
 
     try:
-        loop.run_until_complete(supervisor())
+        asyncio.run(supervisor())
+    except KeyboardInterrupt:
+        pass
     finally:
         loop.close()

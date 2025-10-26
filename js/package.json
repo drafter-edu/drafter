@@ -1,14 +1,23 @@
 {
-  "name": "drafter-js-client",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "build": "tsup src/index.ts --format iife --global-name Drafter --minify --sourcemap --out-dir dist && node scripts/copy-assets.mjs"
-  },
-  "devDependencies": {
-    "tsup": "^8",
-    "typescript": "^5"
-  },
-  "dependencies": {
-  }
+    "name": "drafter-js-client",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "update": "node scripts/update-skulpt.mjs",
+        "build": "tsup --minify --sourcemap",
+        "watch": "tsup --watch",
+        "precompile": "node scripts/precompile-python.mjs --minify",
+        "precompile:watch": "chokidar \"../src/drafter/**/*.py\" -d 200 --initial -c \"node scripts/precompile-python.mjs\"",
+        "dev": "node scripts/update-skulpt.mjs && tsup --watch --onSuccess \"node scripts/sync-dist.mjs\""
+    },
+    "devDependencies": {
+        "@types/jquery": "^3.5.33",
+        "chokidar": "^4.0.3",
+        "chokidar-cli": "^3.0.0",
+        "commander": "^14.0.2",
+        "dotenv": "^17.2.3",
+        "terser": "^5.44.0",
+        "tsup": "^8",
+        "typescript": "^5"
+    }
 }

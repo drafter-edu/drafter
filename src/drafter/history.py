@@ -11,7 +11,6 @@ from typing import Any, Optional, Callable, Dict
 import pprint
 
 from drafter.constants import LABEL_SEPARATOR, JSON_DECODE_SYMBOL
-from drafter.setup import request
 from drafter.testing import DIFF_INDENT_WIDTH
 from drafter.image_support import HAS_PILLOW, PILImage
 
@@ -21,19 +20,23 @@ timezone_UTC = timezone(timedelta(0))
 
 TOO_LONG_VALUE_THRESHOLD = 256
 
+
 def make_value_expandable(value):
     if isinstance(value, str) and len(value) > TOO_LONG_VALUE_THRESHOLD:
         return f"<span class='expandable'>{value}</span>"
     return value
 
+
 def value_to_html(value):
     return make_value_expandable(html.escape(repr(value)))
 
+
 def is_generator(iterable):
-    return hasattr(iterable, '__iter__') and not hasattr(iterable, '__len__')
+    return hasattr(iterable, "__iter__") and not hasattr(iterable, "__len__")
 
 
 # TODO: If no filename data, then could dump base64 representation or something? tobytes perhaps?
+
 
 def safe_repr(value: Any, handled=None):
     obj_id = id(value)
@@ -43,7 +46,9 @@ def safe_repr(value: Any, handled=None):
         handled = set(handled)
     if obj_id in handled:
         return f"<strong>Circular Reference</strong>"
-    if isinstance(value, (int, float, bool, type(None), str, bytes, complex, bytearray)):
+    if isinstance(
+        value, (int, float, bool, type(None), str, bytes, complex, bytearray)
+    ):
         return make_value_expandable(html.escape(repr(value)))
     if isinstance(value, list):
         handled.add(obj_id)
@@ -53,7 +58,10 @@ def safe_repr(value: Any, handled=None):
         return f"{{{', '.join(f'{safe_repr(k, handled)}: {safe_repr(v, handled)}' for k, v in value.items())}}}"
     if is_dataclass(value):
         handled.add(obj_id)
-        fields_repr = ', '.join(f'{f.name}={safe_repr(getattr(value, f.name), handled)}' for f in fields(value))
+        fields_repr = ", ".join(
+            f"{f.name}={safe_repr(getattr(value, f.name), handled)}"
+            for f in fields(value)
+        )
         return f"{value.__class__.__name__}({fields_repr})"
     if isinstance(value, set):
         handled.add(obj_id)
@@ -61,9 +69,15 @@ def safe_repr(value: Any, handled=None):
     if isinstance(value, tuple):
         handled.add(obj_id)
         return f"({', '.join(safe_repr(v, handled) for v in value)})"
-    if isinstance(value, (frozenset, range, )):
+    if isinstance(
+        value,
+        (
+            frozenset,
+            range,
+        ),
+    ):
         handled.add(obj_id)
-        args_repr = ', '.join(safe_repr(v, handled) for v in value)
+        args_repr = ", ".join(safe_repr(v, handled) for v in value)
         return f"{value.__class__.__name__}({{{args_repr}}})"
 
     if HAS_PILLOW and isinstance(value, PILImage.Image):
@@ -75,16 +89,18 @@ def safe_repr(value: Any, handled=None):
     return make_value_expandable(html.escape(repr(value)))
 
 
-
 def repr_pil_image(value):
     from drafter.server import get_server_setting
-    filename = value.filename if hasattr(value, 'filename') else None
+
+    filename = value.filename if hasattr(value, "filename") else None
     if not filename:
         # TODO: Make sure that the imports are provided to the student
-        image_data = base64.b64encode(image_to_bytes(value)).decode('latin1')
+        image_data = base64.b64encode(image_to_bytes(value)).decode("latin1")
         image_src = f"data:image/png;base64,{image_data}"
         escaped_data = json.dumps(image_data)
-        full_call = f"Image.open(io.BytesIO(base64.b64decode({escaped_data}.encode(\"latin1\"))))"
+        full_call = (
+            f'Image.open(io.BytesIO(base64.b64decode({escaped_data}.encode("latin1"))))'
+        )
         return f"<img src={image_src} alt='{full_call}' />"
     try:
         # If the file does not already exist, persist it to the image folder
@@ -113,9 +129,12 @@ class ConversionRecord:
     converted_value: Any
 
     def as_html(self):
-        return (f"<li><code>{html.escape(self.parameter)}</code>: "
-                f"<code>{safe_repr(self.value)}</code> &rarr; "
-                f"<code>{safe_repr(self.converted_value)}</code></li>")
+        return (
+            f"<li><code>{html.escape(self.parameter)}</code>: "
+            f"<code>{safe_repr(self.value)}</code> &rarr; "
+            f"<code>{safe_repr(self.converted_value)}</code></li>"
+        )
+
 
 @dataclass
 class UnchangedRecord:
@@ -124,16 +143,21 @@ class UnchangedRecord:
     expected_type: Any = None
 
     def as_html(self):
-        return (f"<li><code>{html.escape(self.parameter)}</code>: "
-                f"<code>{safe_repr(self.value)}</code></li>")
+        return (
+            f"<li><code>{html.escape(self.parameter)}</code>: "
+            f"<code>{safe_repr(self.value)}</code></li>"
+        )
+
 
 try:
     pprint.PrettyPrinter
 except:
+
     class PrettyPrinter:
         def __init__(self, indent, width, *args, **kwargs):
             self.indent = indent
             self.width = width
+
         def pformat(self, obj):
             return pprint.pformat(obj, indent=self.indent, width=self.width)
 
@@ -146,9 +170,12 @@ class CustomPrettyPrinter(pprint.PrettyPrinter):
             return repr_pil_image(object), True, False
         return pprint.PrettyPrinter.format(self, object, context, maxlevels, level)
 
+
 def format_page_content(content, width=80):
     try:
-        custom_pretty_printer = CustomPrettyPrinter(indent=DIFF_INDENT_WIDTH, width=width)
+        custom_pretty_printer = CustomPrettyPrinter(
+            indent=DIFF_INDENT_WIDTH, width=width
+        )
         return custom_pretty_printer.pformat(content), True
     except Exception as e:
         return safe_repr(content), False
@@ -168,9 +195,13 @@ def add_unless_present(a_dictionary, key, value, from_button=False):
     if key in a_dictionary:
         base_message = f"Parameter {key!r} with new value {value!r} already exists in {a_dictionary!r}"
         if from_button:
-            raise ValueError(f"{base_message}. Did you have a button with the same name as another component?")
+            raise ValueError(
+                f"{base_message}. Did you have a button with the same name as another component?"
+            )
         else:
-            raise ValueError(f"{base_message}. Did you have a component with the same name as another component?")
+            raise ValueError(
+                f"{base_message}. Did you have a component with the same name as another component?"
+            )
     a_dictionary[key] = value
     return a_dictionary
 
@@ -183,10 +214,14 @@ def remap_hidden_form_parameters(kwargs: dict, button_pressed: str):
             try:
                 new_value = json.loads(value)
             except json.JSONDecodeError as e:
-                raise ValueError(f"Could not decode JSON for {possible_key}={value!r}") from e
-            add_unless_present(renamed_kwargs, possible_key, new_value, from_button=True)
+                raise ValueError(
+                    f"Could not decode JSON for {possible_key}={value!r}"
+                ) from e
+            add_unless_present(
+                renamed_kwargs, possible_key, new_value, from_button=True
+            )
         elif key.startswith(JSON_DECODE_SYMBOL):
-            key = key[len(JSON_DECODE_SYMBOL):]
+            key = key[len(JSON_DECODE_SYMBOL) :]
             try:
                 new_value = json.loads(value)
             except json.JSONDecodeError as e:
@@ -206,7 +241,9 @@ class VisitedPage:
     button_pressed: str
     original_page_content: Optional[str] = None
     old_state: Any = None
-    started: datetime = dataclass_field(default_factory=lambda:datetime.now(timezone_UTC))
+    started: datetime = dataclass_field(
+        default_factory=lambda: datetime.now(timezone_UTC)
+    )
     stopped: Optional[datetime] = None
 
     def update(self, new_status, original_page_content=None):
@@ -223,8 +260,11 @@ class VisitedPage:
 
     def as_html(self):
         function_name = self.function.__name__
-        return (f"<strong>Current Route:</strong><br>Route function: <code>{function_name}</code><br>"
-                f"URL: <href='{self.url}'><code>{self.url}</code></href>")
+        return (
+            f"<strong>Current Route:</strong><br>Route function: <code>{function_name}</code><br>"
+            f"URL: <href='{self.url}'><code>{self.url}</code></href>"
+        )
+
 
 def dehydrate_json(value, seen=None):
     if seen is None:
@@ -232,78 +272,96 @@ def dehydrate_json(value, seen=None):
     else:
         seen = set(seen)
     if id(value) in seen:
-        raise ValueError(f"Error while serializing state: Circular reference detected in {value!r}")
+        raise ValueError(
+            f"Error while serializing state: Circular reference detected in {value!r}"
+        )
     if isinstance(value, (list, set, tuple)):
         seen.add(id(value))
         return [dehydrate_json(v, seen) for v in value]
     elif isinstance(value, dict):
         seen.add(id(value))
-        return {dehydrate_json(k, seen): dehydrate_json(v, seen)
-                for k, v in value.items()}
+        return {
+            dehydrate_json(k, seen): dehydrate_json(v, seen) for k, v in value.items()
+        }
     elif isinstance(value, (int, str, float, bool)) or value == None:
         return value
     elif is_dataclass(value):
         seen.add(id(value))
-        return {f.name: dehydrate_json(getattr(value, f.name), seen)
-                for f in fields(value)}
+        return {
+            f.name: dehydrate_json(getattr(value, f.name), seen) for f in fields(value)
+        }
     elif HAS_PILLOW and isinstance(value, PILImage.Image):
-        return image_to_bytes(value).decode('latin1')
+        return image_to_bytes(value).decode("latin1")
     raise ValueError(
-        f"Error while serializing state: The {value!r} is not a int, str, float, bool, list, or dataclass.")
+        f"Error while serializing state: The {value!r} is not a int, str, float, bool, list, or dataclass."
+    )
 
 
 def image_to_bytes(value):
     with io.BytesIO() as output:
-        value.save(output, format='PNG')
+        value.save(output, format="PNG")
         return output.getvalue()
+
 
 def bytes_to_image(value):
     return PILImage.open(io.BytesIO(value))
 
 
-
-
 def rehydrate_json(value, new_type):
     # TODO: More validation that the structure is consistent; what if the target is not these?
     if isinstance(value, list):
-        if hasattr(new_type, '__args__'):
+        if hasattr(new_type, "__args__"):
             element_type = new_type.__args__
             if len(element_type) == 1:
                 element_type = element_type[0]
             else:
-                raise ValueError(f"Error while restoring state: Could not create {new_type!r} from {value!r}. The element type of the list ({new_type!r}) is not a single type.")
+                raise ValueError(
+                    f"Error while restoring state: Could not create {new_type!r} from {value!r}. The element type of the list ({new_type!r}) is not a single type."
+                )
             return [rehydrate_json(v, element_type) for v in value]
-        elif hasattr(new_type, '__origin__') and getattr(new_type, '__origin__') == list:
+        elif (
+            hasattr(new_type, "__origin__") and getattr(new_type, "__origin__") == list
+        ):
             return value
     elif isinstance(value, str):
         if HAS_PILLOW and issubclass(new_type, PILImage.Image):
-            return bytes_to_image(value.encode('latin1'))
+            return bytes_to_image(value.encode("latin1"))
         return value
     elif isinstance(value, (int, float, bool)) or value is None:
         return value
     elif isinstance(value, dict):
-        if hasattr(new_type, '__args__'):
+        if hasattr(new_type, "__args__"):
             # TODO: Handle various kinds of dictionary types more intelligently
             # In particular, should be able to handle dict[int: str] (slicing) and dict[int, str]
             key_type, value_type = new_type.__args__
-            return {rehydrate_json(k, key_type): rehydrate_json(v, value_type)
-                    for k, v in value.items()}
-        elif hasattr(new_type, '__origin__') and getattr(new_type, '__origin__') == dict:
+            return {
+                rehydrate_json(k, key_type): rehydrate_json(v, value_type)
+                for k, v in value.items()
+            }
+        elif (
+            hasattr(new_type, "__origin__") and getattr(new_type, "__origin__") == dict
+        ):
             return value
         elif is_dataclass(new_type):
-            converted = {f.name: rehydrate_json(value[f.name], f.type) if f.name in value else f.default
-                         for f in fields(new_type)}
+            converted = {
+                f.name: rehydrate_json(value[f.name], f.type)
+                if f.name in value
+                else f.default
+                for f in fields(new_type)
+            }
             return new_type(**converted)
         else:
             return value
     # Fall through if an error
-    raise ValueError(f"Error while restoring state: Could not create {new_type!r} from {value!r}")
+    raise ValueError(
+        f"Error while restoring state: Could not create {new_type!r} from {value!r}"
+    )
 
 
 def get_params():
     params = request.params
-    if hasattr(params, 'decode'):
-        params = params.decode('utf-8')
+    if hasattr(params, "decode"):
+        params = params.decode("utf-8")
     for file_object in request.files:
         params[file_object] = request.files[file_object]
     return params

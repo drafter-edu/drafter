@@ -1,37 +1,27 @@
 {
     "editor.formatOnSave": true,
-    // Set Black as the formatter for Python files
     "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "[toml]": {
         "editor.formatOnSave": true
     },
-    "python.formatting.provider": "black",
-    "python.formatting.blackArgs": ["--line-length", "88"],
     // Associate .jinja2 files with django-html for better syntax highlighting
     "files.associations": {
-        "*.jinja2": "django-html"
+        "*.html": "jinja-html"
     },
     // Add emmet tag autocomplete for jinja and django templates
     "emmet.includeLanguages": {
         "jinja2": "html",
-        "jinja-html": "html",
-        "django-html": "html"
+        "jinja-html": "html"
     },
-    // Set djLint as formatter for html, jinja, jinja-html, django-html
-    "[html][jinja][jinja-html][django-html]": {
+    // Set djLint as formatter for html, jinja, jinja-html
+    "[html][jinja][jinja-html]": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "monosans.djlint",
         "editor.detectIndentation": false,
         "editor.linkedEditing": true,
         "editor.tabSize": 2
-    },
-    // Add specific formatting rules as needed, e.g.:
-    "djlint.enableLinting": true,
-    "djlint.closeVoidTags": true,
-    "djlint.formatAttributeTemplateTags": true,
-    "djlint.formatCss": true,
-    "djlint.formatJs": true,
-    "djlint.lineBreakAfterMultilineTag": false,
-    "djlint.maxBlankLines": 2,
-    "djlint.maxLineLength": 100,
-    "djlint.maxAttributeLength": 100
+    }
 }

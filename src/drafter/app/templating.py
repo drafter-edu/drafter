@@ -1,8 +1,9 @@
 from importlib.resources import files
 from typing import Optional
 from jinja2 import Environment, BaseLoader
+from pathlib import Path
 
-from drafter.utils import pkg_assets_dir, pkg_scaffold_dir
+from drafter.app.utils import pkg_scaffold_dir
 
 _env = Environment(loader=BaseLoader(), autoescape=False)
 

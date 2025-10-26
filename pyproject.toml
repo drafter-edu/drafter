@@ -26,6 +26,9 @@ drafter = "drafter.cli:app"
 
 [project.optional-dependencies]
 dev = [
+  # Building
+  "hatchling",
+  "hatch-nodejs-version",
   # Documentation
   "Sphinx",
   "sphinx-rtd-theme",
@@ -58,9 +61,7 @@ dev = [
 ]
 
 [tool.hatch.build]
-include = [
-  "src/drafter/**",
-]
+include = ["src/drafter/**"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/drafter"]

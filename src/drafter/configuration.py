@@ -9,7 +9,6 @@ from dataclasses import dataclass, field
 from typing import List, Dict
 import os
 
-from drafter.setup import DEFAULT_BACKEND
 
 @dataclass
 class ServerConfiguration:
@@ -72,33 +71,48 @@ class ServerConfiguration:
     :ivar cdn_drafter_setup: CDN URL for accessing Skulpt Drafter setup files.
     :type cdn_drafter_setup: str
     """
+
     # Launch parameters
     host: str = "localhost"
     port: int = 8080
     debug: bool = True
     # "none", "flask", etc.
-    backend: str = DEFAULT_BACKEND
+    backend: str = "starlette"
     reloader: bool = False
     # This makes the server not run (e.g., to only run tests)
-    skip: bool = bool(os.environ.get('DRAFTER_SKIP', False))
-    must_have_site_information: bool = bool(os.environ.get('DRAFTER_MUST_HAVE_SITE_INFORMATION', False))
+    skip: bool = bool(os.environ.get("DRAFTER_SKIP", False))
+    must_have_site_information: bool = bool(
+        os.environ.get("DRAFTER_MUST_HAVE_SITE_INFORMATION", False)
+    )
 
     # Website configuration
     title: str = "Drafter Website"
     framed: bool = True
-    skulpt: bool = bool(os.environ.get('DRAFTER_SKULPT', False))
-    external_pages: str = os.environ.get('DRAFTER_EXTERNAL_PAGES', '')
+    skulpt: bool = bool(os.environ.get("DRAFTER_SKULPT", False))
+    external_pages: str = os.environ.get("DRAFTER_EXTERNAL_PAGES", "")
 
     # Page configuration
-    style: str = 'skeleton'
+    style: str = "skeleton"
     additional_header_content: List[str] = field(default_factory=list)
     additional_css_content: List[str] = field(default_factory=list)
-    src_image_folder: str = ''
+    src_image_folder: str = ""
     save_uploaded_files: bool = not skulpt
-    deploy_image_path: str = 'website' if skulpt else 'images'
+    deploy_image_path: str = "website" if skulpt else "images"
 
     # Test Deployment CDN configurations
-    cdn_skulpt: str = os.environ.get("DRAFTER_CDN_SKULPT", "https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt.js")
-    cdn_skulpt_std: str = os.environ.get("DRAFTER_CDN_SKULPT_STD", "https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-stdlib.js")
-    cdn_skulpt_drafter: str = os.environ.get("DRAFTER_CDN_SKULPT_DRAFTER", "https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-drafter.js")
-    cdn_drafter_setup: str = os.environ.get("DRAFTER_CDN_SETUP", "https://drafter-edu.github.io/drafter-cdn/skulpt/drafter-setup.js")
+    cdn_skulpt: str = os.environ.get(
+        "DRAFTER_CDN_SKULPT",
+        "https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt.js",
+    )
+    cdn_skulpt_std: str = os.environ.get(
+        "DRAFTER_CDN_SKULPT_STD",
+        "https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-stdlib.js",
+    )
+    cdn_skulpt_drafter: str = os.environ.get(
+        "DRAFTER_CDN_SKULPT_DRAFTER",
+        "https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt-drafter.js",
+    )
+    cdn_drafter_setup: str = os.environ.get(
+        "DRAFTER_CDN_SETUP",
+        "https://drafter-edu.github.io/drafter-cdn/skulpt/drafter-setup.js",
+    )

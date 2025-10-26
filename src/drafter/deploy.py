@@ -1,7 +1,8 @@
 from typing import Optional, Union
 from drafter.server import MAIN_SERVER, SiteInformationType
 from drafter.page import Page
-from drafter.components import PageContent
+from drafter.components.components import PageContent
+
 
 def hide_debug_information():
     """
@@ -37,13 +38,13 @@ def set_website_framed(framed: bool):
     MAIN_SERVER.configuration.framed = framed
 
 
-
-def set_site_information(author: SiteInformationType,
-                         description: SiteInformationType,
-                         sources: SiteInformationType,
-                         planning: SiteInformationType,
-                         links: SiteInformationType,
-                         ):
+def set_site_information(
+    author: SiteInformationType,
+    description: SiteInformationType,
+    sources: SiteInformationType,
+    planning: SiteInformationType,
+    links: SiteInformationType,
+):
     """
     Sets the information about the website, such as the author, description, sources,
     :param author:
@@ -58,7 +59,7 @@ def set_site_information(author: SiteInformationType,
         description=description,
         sources=sources,
         planning=planning,
-        links=links
+        links=links,
     )
 
 
@@ -97,12 +98,14 @@ def add_website_css(selector: str, css: Optional[str] = None):
     :param css: The CSS content to apply to the selector.
     """
     if css is None:
-        MAIN_SERVER.configuration.additional_css_content.append(selector+"\n")
+        MAIN_SERVER.configuration.additional_css_content.append(selector + "\n")
     else:
-        MAIN_SERVER.configuration.additional_css_content.append(f"{selector} {{{css}}}\n")
+        MAIN_SERVER.configuration.additional_css_content.append(
+            f"{selector} {{{css}}}\n"
+        )
 
 
-def deploy_site(image_folder='images'):
+def deploy_site(image_folder="images"):
     """
     Deploys the website with the given image folder. This will set the production
     flag to True and turn off debug information, too.
