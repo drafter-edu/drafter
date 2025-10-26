@@ -1,0 +1,14 @@
+{
+  "name": "drafter-js-client",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsup src/index.ts --format iife --global-name Drafter --minify --sourcemap --out-dir dist && node scripts/copy-assets.mjs"
+  },
+  "devDependencies": {
+    "tsup": "^8",
+    "typescript": "^5"
+  },
+  "dependencies": {
+  }
+}

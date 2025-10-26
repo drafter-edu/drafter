@@ -1,3 +1,73 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-nodejs-version"]
+build-backend = "hatchling.build"
+
+[project]
+name = "drafter"
+version = "2.0.0"
+description = "Drafter: Python-driven interactive pages via Skulpt + TS"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+  # Server
+  "jinja2",
+  "watchfiles",
+  "websockets>=12",
+  # CLI Tooling
+  "click",
+  "rich",
+  # Actual library
+  "bakery",
+  "pillow",
+  "matplotlib",
+]
+[project.scripts]
+drafter = "drafter.cli:app"
+
+[project.optional-dependencies]
+dev = [
+  # Documentation
+  "Sphinx",
+  "sphinx-rtd-theme",
+  "cloud-sptheme",
+  "sphinxcontrib-applehelp",
+  "sphinxcontrib-devhelp",
+  "sphinxcontrib-htmlhelp",
+  "sphinxcontrib-jsmath",
+  "sphinxcontrib-qthelp",
+  "sphinxcontrib-serializinghtml",
+  "sphinxcontrib-fulltoc",
+  "sphinxjp.themes.basicstrap",
+  "sphinxcontrib-mermaid",
+  "sphinx-autobuild",
+  "sphinx-tabs",
+  "Pygments",
+  "MarkupSafe",
+  # Formatting/Linting
+  "djlint",
+  "mypy",
+  "ruff",
+  # Tools
+  "tqdm",
+  # Testing
+  "pytest",
+  "pytest-cov",
+  "pytest-mock",
+  "coverage",
+  "tox",
+]
+
+[tool.hatch.build]
+include = [
+  "src/drafter/**",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/drafter"]
+
+[tool.hatch.build.hooks.custom]
+# A tiny hook that: npm ci && npm run build && copies assets to src/drafter/assets
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
