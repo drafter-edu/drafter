@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{{ title or "Drafter App" }}</title>
+    </head>
+    <body>
+        <div id="app"></div>
+
+        {% if inline_py %}
+        <script type="text/python" id="user-code">
+            {{ user_code }}
+        </script>
+        {% endif %}
+
+        <script src="{{ static('skulpt.js') }}"></script>
+        <script src="{{ static('skulpt-stdlib.js') }}"></script>
+        <script src="{{ static('drafter.js') }}"></script>
+        <script>
+            (async () => {
+              const app = await window.Drafter.initDrafter({ target: '#app' });
+              {% if inline_py %}
+              await window.Drafter.runInlinePython('#user-code');
+              {% else %}
+              await window.Drafter.runPythonUrl('{{ python_url }}');
+              {% endif %}
+
+              {% if dev_ws_url %}
+              const ws = new WebSocket('{{ dev_ws_url }}');
+              ws.onmessage = (e) => {
+                const msg = JSON.parse(e.data);
+                if (msg.type === 'reload') location.reload();
+              };
+              {% endif %}
+            })();
+        </script>
+    </body>
+</html>
