@@ -49,8 +49,8 @@ def index(state: CounterState) -> Page:
         
         "Technical Notes:",
         NumberedList([
-            "Update() returns update the state without re-rendering the page",
-            "Fragment() returns update a specific element on the page",
+            "Update() updates the state without re-rendering the page",
+            "Fragment() updates a specific element on the page",
             "Full AJAX/event handler support requires client-side JavaScript (planned)",
             "Click 'Refresh Page' to see the background counter updates"
         ])
