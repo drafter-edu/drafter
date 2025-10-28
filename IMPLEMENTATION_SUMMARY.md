@@ -12,7 +12,7 @@ This document summarizes the V2 infrastructure components that were implemented 
 
 ### 2. ResponsePayload Types
 
-All payload types mentioned in README line 44 have been implemented:
+All payload types mentioned in the README have been implemented:
 
 #### Fragment (`src/drafter/payloads/fragment.py`)
 - Represents partial page updates
