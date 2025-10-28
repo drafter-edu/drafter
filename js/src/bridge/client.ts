@@ -72,13 +72,31 @@ function $builtinmodule(name: string) {
         }
         const loadPage = (page: any) => {
             console.log("Setting up navigation:", page);
-            return modifyLinks(element, (url: string, data?: any) => {
-                console.log("Navigating to:", url, data, navigate);
-                const urlObj = new URL(url, window.location.href);
-                // Remove leading slash
-                const pathPart = urlObj.pathname.replace(/^\/+/, "");
-                const args = [new pyStr(pathPart), new pyStr("TEST")];
-                const kwargs = new pyDict();
+            return mountNav(element, (navEvent: NavEvent) => {
+                console.log("Navigation event:", navEvent);
+                
+                let routeName: string;
+                let formData: pyDict | undefined;
+                
+                if (navEvent.kind === 'form') {
+                    // Extract route name from data-nav attribute
+                    routeName = navEvent.name;
+                    
+                    // Convert FormData to Python dict
+                    formData = new pyDict();
+                    for (const [key, value] of navEvent.data.entries()) {
+                        formData.mp$ass_subscript(
+                            new pyStr(key),
+                            new pyStr(String(value))
+                        );
+                    }
+                } else {
+                    // For links and buttons, just use the name
+                    routeName = navEvent.name;
+                }
+                
+                const args = [new pyStr(routeName)];
+                const kwargs = formData || new pyDict();
                 const nextPage = navigate.tp$call(args, kwargs);
                 return Sk.misceval.promiseToSuspension(
                     Sk.misceval.asyncToPromise(() => nextPage)
@@ -88,52 +106,107 @@ function $builtinmodule(name: string) {
         return Sk.misceval.chain<any, any>([], loadPage);
     });
 
-    let oldNavigationHandler: null | ((event: MouseEvent) => void) = null;
-    function modifyLinks(target: HTMLElement, callback: (url: string) => void) {
-        if (oldNavigationHandler) {
-            target.removeEventListener("click", oldNavigationHandler);
+    // Navigation event types
+    type NavEvent =
+        | { kind: 'link' | 'button'; name: string; el: Element }
+        | { kind: 'form'; name: string; el: HTMLFormElement; data: FormData };
+
+    // Track handlers for cleanup
+    let clickHandler: ((event: MouseEvent) => void) | null = null;
+    let submitHandler: ((event: SubmitEvent) => void) | null = null;
+
+    /**
+     * Mount declarative navigation handlers on a root element.
+     * Uses data-nav and data-call attributes for opt-in navigation,
+     * with fallback support for formaction attributes for backward compatibility.
+     */
+    function mountNav(
+        root: HTMLElement,
+        onNav: (e: NavEvent) => Suspension | void
+    ): void {
+        // Clean up old handlers if they exist
+        if (clickHandler) {
+            root.removeEventListener("click", clickHandler);
         }
-        oldNavigationHandler = function (event: MouseEvent) {
-            console.log("CLICKED", event);
-            const el = event.target as Element | null;
-            if (!el) {
-                return;
-            }
-            if (el.matches("a[download]")) {
-                return;
-            }
-            if (el.matches("a")) {
+        if (submitHandler) {
+            root.removeEventListener("submit", submitHandler);
+        }
+
+        // Click handler for links and buttons
+        clickHandler = function (event: MouseEvent) {
+            const target = event.target as Element | null;
+            if (!target) return;
+
+            // First, try to find closest element with data-nav or data-call (opt-in declarative)
+            const optInEl = target.closest?.('[data-nav], [data-call]');
+            if (optInEl && root.contains(optInEl)) {
                 event.preventDefault();
-                return callback((el as HTMLAnchorElement).href);
-            }
-            if (
-                el.matches('input[type="submit"]') ||
-                el.matches('button[type="submit"]')
-            ) {
-                console.log("OH");
-                event.preventDefault();
-                const closestForm = el.closest(
-                    "form"
-                ) as HTMLFormElement | null;
-                const formAction =
-                    (el as HTMLElement).getAttribute("formaction") || "";
-                if (closestForm) {
-                    const data = Object.fromEntries(
-                        new FormData(closestForm, el as any).entries()
-                    );
-                    console.log(
-                        "Clicked!",
-                        closestForm,
-                        data,
-                        formAction,
-                        event,
-                        (event as any).submitter
-                    );
-                    return callback(formAction, data);
+                const name = (optInEl.getAttribute('data-nav') || optInEl.getAttribute('data-call'))!;
+                
+                // Check if this is a button inside a form - if so, collect form data
+                if (optInEl instanceof HTMLButtonElement || optInEl instanceof HTMLInputElement) {
+                    const form = optInEl.closest('form') as HTMLFormElement | null;
+                    if (form) {
+                        const formData = new FormData(form, optInEl);
+                        onNav({ kind: 'form', name, el: form, data: formData });
+                        return;
+                    }
                 }
+                
+                const kind = optInEl.hasAttribute('data-call') ? 'button' : 'link';
+                onNav({ kind, name, el: optInEl });
+                return;
+            }
+
+            // Fallback: handle links with href (legacy behavior, but simplified)
+            if (target instanceof HTMLAnchorElement && target.href) {
+                // Skip download links
+                if (target.hasAttribute('download')) return;
+                
+                event.preventDefault();
+                // Extract path from href, removing leading slashes
+                const url = new URL(target.href, window.location.href);
+                const name = url.pathname.replace(/^\/+/, '') || 'index';
+                onNav({ kind: 'link', name, el: target });
+                return;
+            }
+
+            // Fallback: handle buttons with formaction (legacy behavior, but simplified)
+            const button = target.closest?.('button[type="submit"], input[type="submit"]');
+            if (button && root.contains(button)) {
+                const form = button.closest('form') as HTMLFormElement | null;
+                if (!form) return;
+
+                const formAction = (button as HTMLElement).getAttribute('formaction');
+                // Only proceed if we have a formaction to handle
+                if (!formAction) return;
+                
+                event.preventDefault();
+                
+                // Create URL from formaction, with fallback to form action or current location
+                const url = new URL(formAction || form.action || window.location.href, window.location.href);
+                const name = url.pathname.replace(/^\/+/, '') || 'index';
+                const formData = new FormData(form, button as HTMLButtonElement | HTMLInputElement);
+                
+                onNav({ kind: 'form', name, el: form, data: formData });
             }
         };
-        target.addEventListener("click", oldNavigationHandler);
+
+        // Submit handler for forms
+        submitHandler = function (event: SubmitEvent) {
+            const form = event.target as HTMLFormElement;
+            
+            // Opt-in declarative forms with data-nav
+            if (form.hasAttribute('data-nav')) {
+                event.preventDefault();
+                const name = form.getAttribute('data-nav')!;
+                const formData = new FormData(form, (event as any).submitter ?? undefined);
+                onNav({ kind: 'form', name, el: form, data: formData });
+            }
+        };
+
+        root.addEventListener("click", clickHandler);
+        root.addEventListener("submit", submitHandler);
     }
 
     return {

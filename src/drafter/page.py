@@ -70,7 +70,9 @@ class Page:
             else:
                 chunked.append(chunk.render(current_state, configuration))
         content = "\n".join(chunked)
-        content = f"<form method='POST' enctype='multipart/form-data' accept-charset='utf-8'>{content}</form>"
+        # Wrap content in a div with data-outlet for the main content area
+        # Forms are not needed at the page level with data-nav approach
+        content = f"<div data-outlet>{content}</div>"
         if configuration.framed:
             reset_button = self.make_reset_button()
             about_button = self.make_about_button()
@@ -83,11 +85,11 @@ class Page:
     def make_reset_button(self) -> str:
         """
         Creates a reset button that has the "reset" icon and title text that says "Resets the page to its original state.".
-        Simply links to the "--reset" URL.
+        Uses data-nav for client-side navigation to the "--reset" route.
 
         :return: A string of HTML representing the reset button.
         """
-        return """<a href="--reset" class="btlw-reset" 
+        return """<a data-nav="--reset" class="btlw-reset" 
                     title="Resets the page to its original state. Any data entered will be lost."
                     onclick="return confirm('This will reset the page to its original state. Any data entered will be lost. Are you sure you want to continue?');"
                     >⟳</a>"""
@@ -95,11 +97,11 @@ class Page:
     def make_about_button(self) -> str:
         """
         Creates an about button that has the "info" icon and title text that says "About Drafter.".
-        Simply links to the "--about" URL.
+        Uses data-nav for client-side navigation to the "--about" route.
 
         :return: A string of HTML representing the about button.
         """
-        return """<a href="--about" class="btlw-about" 
+        return """<a data-nav="--about" class="btlw-about" 
                     title="More information about this website"
                     >?</a>"""
 
