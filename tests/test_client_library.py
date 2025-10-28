@@ -202,7 +202,7 @@ class TestComponents:
         """Test creating a TextBox with a default value."""
         textbox = TextBox("username", "default_user")
         assert textbox.name == "username"
-        assert textbox.value == "default_user"
+        assert textbox.default_value == "default_user"
 
     def test_button_component(self):
         """Test creating a Button component."""
@@ -211,15 +211,15 @@ class TestComponents:
         
         button = Button("Click me", on_click)
         assert button is not None
-        assert button.label == "Click me"
-        assert button.on_submit == on_click
+        assert button.text == "Click me"
+        assert button.url == on_click
 
     def test_table_component(self):
         """Test creating a Table component."""
         data = [["A", "B"], ["C", "D"]]
         table = Table(data)
         assert table is not None
-        assert table.data == data
+        assert table.rows == data
 
     def test_textbox_name_validation(self):
         """Test that TextBox validates parameter names."""
