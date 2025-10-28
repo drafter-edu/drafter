@@ -142,6 +142,17 @@ function $builtinmodule(name: string) {
             if (optInEl && root.contains(optInEl)) {
                 event.preventDefault();
                 const name = (optInEl.getAttribute('data-nav') || optInEl.getAttribute('data-call'))!;
+                
+                // Check if this is a button inside a form - if so, collect form data
+                if (optInEl instanceof HTMLButtonElement || optInEl instanceof HTMLInputElement) {
+                    const form = optInEl.closest('form') as HTMLFormElement | null;
+                    if (form) {
+                        const formData = new FormData(form, optInEl);
+                        onNav({ kind: 'form', name, el: form, data: formData });
+                        return;
+                    }
+                }
+                
                 const kind = optInEl.hasAttribute('data-call') ? 'button' : 'link';
                 onNav({ kind, name, el: optInEl });
                 return;

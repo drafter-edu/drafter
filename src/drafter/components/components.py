@@ -321,8 +321,8 @@ class Link(PageContent, LinkContent):
         # Create a unique namespace using both link text and instance ID
         link_namespace = f"{self.text}#{self._link_id}"
         precode = self.create_arguments(self.arguments, link_namespace)
-        url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: link_namespace})
-        return f"{precode}<a href='{url}' {self.parse_extra_settings()}>{self.text}</a>"
+        # Use data-nav for pure client-side navigation
+        return f"{precode}<a data-nav='{self.url}' {self.parse_extra_settings()}>{self.text}</a>"
 
 
 @dataclass
@@ -349,11 +349,11 @@ class Button(PageContent, LinkContent):
         # Create a unique namespace using both button text and instance ID
         button_namespace = f"{self.text}#{self._button_id}"
         precode = self.create_arguments(self.arguments, button_namespace)
-        # Include the button ID in the button value so we know which specific button was clicked
-        url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: button_namespace})
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         value = make_safe_argument(button_namespace)
-        return f"{precode}<button type='submit' name='{SUBMIT_BUTTON_KEY}' value='{value}' formaction='{url}' {parsed_settings}>{self.text}</button>"
+        # Use data-nav for pure client-side navigation
+        # Keep type='submit' so forms can be submitted properly
+        return f"{precode}<button type='submit' data-nav='{self.url}' name='{SUBMIT_BUTTON_KEY}' value='{value}' {parsed_settings}>{self.text}</button>"
 
 
 SubmitButton = Button
