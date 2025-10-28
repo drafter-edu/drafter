@@ -287,6 +287,7 @@ ${traceback}
   }
 
   // src/index.ts
+  var x = new Sk.builtin.str("hello");
   function startDrafter(options) {
     setupSkulpt();
     const targetElement = typeof options.target === "string" ? document.querySelector(options.target) : options.target;

@@ -6,11 +6,17 @@ from drafter.client_server import get_main_server
 def start_server(initial_state=None, main_user_path=None) -> None:
     if is_skulpt():
         print("Starting local Drafter server in Skulpt...")
-        from drafter.bridge import update_root
+        from drafter.bridge import update_root, load_page
 
         server = get_main_server()
         response = server.visit("index")
         update_root("app", response.page.content)
+
+        def rewrite(url: str, *args, **kwargs):
+            response = server.visit(url, *args, **kwargs)
+            update_root("app", response.page.content)
+
+        load_page("index", [], "app", rewrite)
     else:
         from drafter.app.local_server import serve_app_once
 

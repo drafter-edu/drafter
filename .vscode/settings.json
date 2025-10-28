@@ -23,5 +23,6 @@
         "editor.detectIndentation": false,
         "editor.linkedEditing": true,
         "editor.tabSize": 2
-    }
+    },
+    "cSpell.words": ["builtinmodule", "skulpt"]
 }

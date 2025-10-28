@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import "../../src/drafter/assets/skulpt.js";
 import { minify_sync } from "terser";
 import { program } from "commander";
+import { precompileTypeScript } from "./precompile-typescript.mjs";
 
 program.option("-m, --minify", "minify the resulting code").parse(process.argv);
 
@@ -21,8 +22,10 @@ const drafterPythonDir = path.resolve(repoRoot, "src", "drafter");
 const target = path.resolve(repoRoot, "src", "drafter", "assets");
 const targetFilename = path.resolve(target, "skulpt-drafter.js");
 const skulptDir = process.env.SKULPT_DIR || "";
+const javascriptModulesDir = path.resolve(repoRoot, "js", "src");
+const extraJavascriptModules = ["bridge/client.ts"];
 
-const SKIP_FILES = [new RegExp("app/.+")];
+const SKIP_FILES = [new RegExp("app/.+"), new RegExp("bridge/client\\.py")];
 
 Sk.configure({ __future__: Sk.python3 });
 
@@ -101,6 +104,18 @@ for (let filename in result) {
             "'] = " +
             JSON.stringify(contents)
     );
+}
+for (let extraFile of extraJavascriptModules) {
+    const filePath = path.join(javascriptModulesDir, extraFile);
+    const { code } = await precompileTypeScript(filePath, extraFile);
+    const asJsPath = `src/lib/${MODULE_NAME}/${extraFile.replace(
+        /\.ts$/,
+        ".js"
+    )}`;
+    output.push(
+        "Sk.builtinFiles.files['" + asJsPath + "'] = " + JSON.stringify(code)
+    );
+    result[asJsPath] = code;
 }
 fs.writeFileSync(targetFilename, output.join("\n"), "utf8", { flag: "w" });
 

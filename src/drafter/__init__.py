@@ -1,5 +1,5 @@
 # from drafter.setup import *
-from drafter.components.components import *
+from drafter.components.components import Text, Table, TextBox, Button, MatPlotLibPlot
 from drafter.launch import start_server
 
 # from drafter.styling import *
@@ -23,6 +23,11 @@ __all__ = [
     "route",
     "start_server",
     "Page",
+    "Text",
+    "Table",
+    "TextBox",
+    "Button",
+    "MatPlotLibPlot",
 ]
 
 __version__ = "2.0.0"
