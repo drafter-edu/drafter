@@ -163,15 +163,19 @@ function $builtinmodule(name: string) {
             // Fallback: handle buttons with formaction (legacy behavior, but simplified)
             const button = target.closest?.('button[type="submit"], input[type="submit"]');
             if (button && root.contains(button)) {
-                event.preventDefault();
                 const form = button.closest('form') as HTMLFormElement | null;
                 if (!form) return;
 
-                const formAction = (button as HTMLElement).getAttribute('formaction') || '';
-                // Extract path from formaction
-                const url = new URL(formAction || window.location.href, window.location.href);
+                const formAction = (button as HTMLElement).getAttribute('formaction');
+                // Only proceed if we have a formaction to handle
+                if (!formAction) return;
+                
+                event.preventDefault();
+                
+                // Create URL from formaction, with fallback to form action or current location
+                const url = new URL(formAction || form.action || window.location.href, window.location.href);
                 const name = url.pathname.replace(/^\/+/, '') || 'index';
-                const formData = new FormData(form, button as any);
+                const formData = new FormData(form, button as HTMLButtonElement | HTMLInputElement);
                 
                 onNav({ kind: 'form', name, el: form, data: formData });
             }
