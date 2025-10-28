@@ -17,7 +17,7 @@ from drafter.debug import DebugInformation
 from drafter.setup import Bottle, abort, request, static_file
 from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, get_params, \
     remap_hidden_form_parameters, safe_repr
-from drafter.page import Page
+from drafter.page import Page, Update, Fragment
 from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, \
     TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
 from drafter.raw_files import get_raw_files, get_themes
@@ -665,6 +665,29 @@ class Server:
             verification_status = self.verify_page_result(page, original_function)
             if verification_status:
                 return verification_status
+            
+            # Handle Update responses
+            if isinstance(page, Update):
+                self._state_history.append(page.state)
+                self._state = page.state
+                visiting_page.finish("Finished Update")
+                # Return a simple success response for Update
+                return json.dumps({"type": "update", "success": True})
+            
+            # Handle Fragment responses
+            if isinstance(page, Fragment):
+                self._state_history.append(page.state)
+                self._state = page.state
+                visiting_page.update("Rendering Fragment Content")
+                try:
+                    content = page.render_content(self.dump_state(), self.configuration)
+                except Exception as e:
+                    return self.make_error_page("Error rendering fragment content", e, original_function)
+                visiting_page.finish("Finished Fragment Render")
+                # Return a JSON response with the target and content for Fragment
+                return json.dumps({"type": "fragment", "target": page.target, "content": content})
+            
+            # Handle regular Page responses
             try:
                 page.verify_content(self)
             except Exception as e:
@@ -686,39 +709,57 @@ class Server:
 
     def verify_page_result(self, page, original_function):
         """
-        Verifies the result of a function execution to ensure it returns a valid `Page`
-        object. The verification checks whether the returned result is of type `Page`
-        and whether its structure adheres to the expected format. If the validation
-        fails, an error message is generated and returned.
+        Verifies the result of a function execution to ensure it returns a valid `Page`,
+        `Update`, or `Fragment` object. The verification checks whether the returned 
+        result is of the correct type and whether its structure adheres to the expected format. 
+        If the validation fails, an error message is generated and returned.
 
         :param page: The object returned by the endpoint method to be verified.
-        :type page: Union[None, str, list, Any]
+        :type page: Union[None, str, list, Page, Update, Fragment, Any]
         :param original_function: A reference to the function or method where the
-            `Page` object is expected to be returned from.
+            object is expected to be returned from.
         :type original_function: Callable
-        :return: Returns either a valid `Page` object or an error page with diagnostic
+        :return: Returns either None if valid, or an error page with diagnostic
             information when the verification process fails.
-        :rtype: Optional[Page]
+        :rtype: Optional[str]
         """
         message = ""
-        if page is None:
-            message = (f"The server did not return a Page object from {original_function}.\n"
+        
+        # Check for Update or Fragment - these are valid return types
+        if isinstance(page, (Update, Fragment)):
+            # For Update, just verify it has state
+            if isinstance(page, Update):
+                return None  # Update is valid
+            
+            # For Fragment, verify it has all required fields
+            if isinstance(page, Fragment):
+                if not hasattr(page, 'target') or not isinstance(page.target, str):
+                    message = (f"The Fragment returned from {original_function} must have a 'target' field that is a string.\n"
+                               f"The target should be a CSS selector identifying which element to update.")
+                elif not hasattr(page, 'content'):
+                    message = (f"The Fragment returned from {original_function} must have a 'content' field.\n"
+                               f"The content should be a list of strings and/or PageContent components.")
+                else:
+                    return None  # Fragment is valid
+        
+        elif page is None:
+            message = (f"The server did not return a Page, Update, or Fragment object from {original_function}.\n"
                        f"Instead, it returned None (which happens by default when you do not return anything else).\n"
                        f"Make sure you have a proper return statement for every branch!")
         elif isinstance(page, str):
             message = (
-                f"The server did not return a Page() object from {original_function}. Instead, it returned a string:\n"
+                f"The server did not return a Page(), Update(), or Fragment() object from {original_function}. Instead, it returned a string:\n"
                 f"  {page!r}\n"
                 f"Make sure you are returning a Page object with the new state and a list of strings!")
         elif isinstance(page, list):
             message = (
-                f"The server did not return a Page() object from {original_function}. Instead, it returned a list:\n"
+                f"The server did not return a Page(), Update(), or Fragment() object from {original_function}. Instead, it returned a list:\n"
                 f" {page!r}\n"
                 f"Make sure you return a Page object with the new state and the list of strings, not just the list of strings.")
         elif not isinstance(page, Page):
-            message = (f"The server did not return a Page() object from {original_function}. Instead, it returned:\n"
+            message = (f"The server did not return a Page(), Update(), or Fragment() object from {original_function}. Instead, it returned:\n"
                        f" {page!r}\n"
-                       f"Make sure you return a Page object with the new state and the list of strings.")
+                       f"Make sure you return a Page, Update, or Fragment object.")
         else:
             verification_status = self.verify_page_state_history(page, original_function)
             if verification_status:

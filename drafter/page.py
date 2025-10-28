@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Union, List
 
 from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
@@ -109,3 +109,82 @@ class Page:
             if isinstance(chunk, Link):
                 chunk.verify(server)
         return True
+
+
+@dataclass
+class Update:
+    """
+    An Update response is used when you want to update the state without changing the HTML content of the page.
+    This is useful for background updates, form submissions that don't need visual feedback, or other scenarios
+    where you want to modify the application state without re-rendering the entire page.
+
+    When a function returns an Update object, the server will:
+    1. Update the internal state to the new state value
+    2. Send a minimal response to the client indicating success
+    3. Not re-render or replace any HTML content
+
+    :param state: The new state value to be stored on the server. This can be any type (dataclass, dict, list, etc.)
+    """
+    state: Any
+
+    def __init__(self, state):
+        self.state = state
+
+
+@dataclass
+class Fragment:
+    """
+    A Fragment response is used when you want to update a specific element on the page without re-rendering
+    the entire page. This provides a more efficient way to update portions of the UI in response to events.
+
+    When a function returns a Fragment object, the server will:
+    1. Update the internal state to the new state value
+    2. Render only the content specified in the Fragment
+    3. Send instructions to the client to replace the target element's innerHTML with the new content
+
+    The target parameter should be a CSS selector that identifies the element to update. Common selectors include:
+    - "#element-id" for elements with a specific id attribute
+    - ".class-name" for elements with a specific class
+    - "[data-target='name']" for elements with a specific data attribute
+
+    :param state: The new state value to be stored on the server
+    :param target: A CSS selector string identifying which element to update
+    :param content: A list of strings and/or PageContent components to render into the target element
+    """
+    state: Any
+    target: str
+    content: Union[List[Union[str, PageContent]], str, PageContent]
+
+    def __init__(self, state, target: str, content):
+        self.state = state
+        self.target = target
+        # Normalize content to always be a list
+        if isinstance(content, (str, PageContent)):
+            self.content = [content]
+        elif not isinstance(content, list):
+            incorrect_type = type(content).__name__
+            raise ValueError("The content of a Fragment must be a string, PageContent, or a list of strings/components."
+                             f" Found {incorrect_type} instead.")
+        else:
+            for index, chunk in enumerate(content):
+                if not isinstance(chunk, (str, PageContent)):
+                    incorrect_type = type(chunk).__name__
+                    raise ValueError("The content of a Fragment must be a list of strings or components."
+                                     f" Found {incorrect_type} at index {index} instead.")
+            self.content = content
+
+    def render_content(self, current_state, configuration: ServerConfiguration) -> str:
+        """
+        Renders the content of the Fragment to HTML.
+
+        :param current_state: The current state of the server
+        :param configuration: The configuration of the server
+        :return: A string of HTML representing the content
+        """
+        chunked = []
+        for chunk in self.content:
+            if isinstance(chunk, str):
+                chunked.append(f"<p>{chunk}</p>")
+            else:
+                chunked.append(chunk.render(current_state, configuration))
+        return "\n".join(chunked)

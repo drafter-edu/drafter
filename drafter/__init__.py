@@ -4,6 +4,7 @@ from drafter.styling import *
 from drafter.routes import *
 from drafter.server import *
 from drafter.deploy import *
+from drafter.page import Update, Fragment
 from drafter.testing import assert_equal
 import drafter.hacks
 
