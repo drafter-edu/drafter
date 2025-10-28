@@ -5,22 +5,24 @@ from drafter.client_server import get_main_server
 
 def start_server(initial_state=None, main_user_path=None) -> None:
     if is_skulpt():
-        print("Starting local Drafter server in Skulpt...")
-        from drafter.bridge import update_root, load_page
+        from drafter.bridge import update_site, make_initial_request
 
         server = get_main_server()
-        response = server.visit("index")
-        update_root("app", response.page.content)
+        server.start(initial_state=initial_state)
+        initial_request = make_initial_request()
 
-        def rewrite(url: str, *args, **kwargs):
-            response = server.visit(url, *args, **kwargs)
-            update_root("app", response.page.content)
+        def handle_visit(request):
+            response = server.visit(request)
+            outcome = update_site(response, handle_visit)
+            server.report_outcome(outcome)
 
-        load_page("index", [], "app", rewrite)
+        handle_visit(initial_request)
     else:
-        from drafter.app.local_server import serve_app_once
+        from drafter.app.app_server import serve_app_once
 
         if main_user_path is None:
+            # TODO: Provide more ways to specify the main file
             main_user_path = seek_file_by_line("start_server", "main.py")
         print("Starting local Drafter server...")
+        # TODO: Title should come from configuration
         serve_app_once(user_file=main_user_path, title="Local Drafter App")

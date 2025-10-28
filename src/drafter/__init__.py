@@ -3,9 +3,9 @@ from drafter.components.components import Text, Table, TextBox, Button, MatPlotL
 from drafter.launch import start_server
 
 # from drafter.styling import *
-from drafter.client_server import Server, get_main_server, set_main_server, MAIN_SERVER
+from drafter.client_server import get_main_server, set_main_server, MAIN_SERVER
 from drafter.commands import route
-from drafter.page import Page
+from drafter.payloads.page import Page
 # from drafter.server import *
 # from drafter.deploy import *
 # from drafter.testing import assert_equal
@@ -16,7 +16,6 @@ from drafter.page import Page
 
 
 __all__ = [
-    "Server",
     "get_main_server",
     "set_main_server",
     "MAIN_SERVER",

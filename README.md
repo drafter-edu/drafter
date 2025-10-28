@@ -4,28 +4,100 @@ A simple Python library for making websites
 
 ## Organization
 
-If a user runs the program directly, then when it reaches `start_server`, it will start a local development server using Starlette.
+If a user runs the program directly, then when it reaches `start_server`, it will start a local development server (the `AppServer`) using Starlette.
 This server will serve a single page that sets up Skulpt and a hot-reload connection to the server.
-That page will also load the Drafter client library.
-Finally, the page will also load the user's code into Skulpt and run it.
+That page will also load the Drafter client library (`ClientBridge`).
+Finally, the page will also load the user's code into Skulpt and run it, which should inevitably load and run the local server (`ClientServer`).
 Effectively, this is running the program twice. The first time is "server side" with no real implications (other than starting the server, unit tests, print statements, etc.).
 The second time is "client side" in Skulpt, where the user's code is actually run.
 Images will assume to be available via the server.
 
-If the program is then run via Skulpt, the Drafter client library will set up the page content.
-
-If the `build` command is used, then it will instead generate static HTML, CSS, and JS files that can be deployed to any static hosting service.
+If the `build` command is used, then the `AppBuilder` will instead generate static HTML, CSS, and JS files that can be deployed to any static hosting service.
 The main `index.html` file will set up Skulpt and load the user's code into it, as well as load the Drafter client library to set up the page content.
 It will try to precompile the library to populate as much meta information as it can, as well as an HTML preview that can be shown for SEO contexts.
+The `AppBuilder` and `AppServer` are together both referred to as `AppBackend`.
 
-We need to determine all of the dependencies of the project. The user should be able to provide an explicit list, but otherwise we assume that adjacent files will be possible to include.
+The structure of the page is as follows:
 
-## Drafter Client Library
+-   There's a div tag with id `drafter-app--` that contains the entire app.
+-   The first child of that is a `form` tag with id `drafter-form--`.
+-   Subsequent children can be additional tags that are outside the form (e.g., modals, audio players, etc.).
+-   Around the entire app `div` is a `drafter-frame--` div that makes the app look like it is in a browser window, and has additional debug information when in development mode. This frame is not present in production builds.
+-   Site > Frame > App > Form > PageContent (Page)
+-   Site > Frame > DebugInfo
 
-This sets up the initial page structure and runs the user's code in Skulpt to generate the landing page.
-The actual `start_server` is what sets up the page content.
+We'll use a request/response model to update the page content, based around events.
+When the user interacts with the page (clicks a link, submits a form, etc.), the `BridgeClient` will send a request to the `ClientServer` with the relevant information:
 
-Internal links and buttons will call the Skulpt functions to get the new content.
+-   The URL path being requested
+-   The form data
+    -   Inputs
+    -   Files
+    -   Args
+-   Extra event information
+    -   Clicked button
+    -   Scroll position
+    -   Etc.
+
+The `ClientServer` will process the request and choose an appropriate route handler by using the `visit` method.
+The provided function will be called, providing the current State and the request information (via named parameters).
+That function is expected to return a `Page` (or eventually other valid response payload types: `Fragment`, `Update`, `Redirect`, `Download`, `Progress`). That Page gets post-processed and wrapped in a `Response` along with metadata (e.g., status code, errors, headers, etc.) and sent to the `BridgeClient`.
+
+The `BridgeClient` will then unwrap the page contents and update the DOM faithfully according to whatever it got from the `Response`, changing the contents of the `form` and replacing the click handler. It should update the browser history as appropriate, and run any scripts that were included in the response.
+
+The `Page` is rendered in the `ClientServer` by calling its `render` method, which produces HTML. It also generates any additional scripts that need to be run before or after the main content is inserted; these are sent along as part of the `Response` and executed by the `BridgeClient`.
+This is all facilitated by the `channels` of the `BridgeClient` and `ClientServer`, which allow sending messages back and forth; this is also useful for things like controlling page-level audio.
+
+After the response is successfully (or unsuccessfully) processed, the `BridgeClient` sends back an `Outcome` to the `ClientServer`, indicating whether the operation succeeded or failed, along with any relevant info, warnings, or errors.
+
+How is the first page handled? When the server starts up, it will create an initial State object. While Starlette or the compiler is going through its initial setup run of the code, it will find the `index` route and execute it to generate initial page content (this can be disabled if needed). This information is provided in the generated template that the server serves to the client, so that SEO crawlers can see the initial content.
+When the `BridgeClient` connects, it will immediately request the index page, which will be run on the `ClientServer` side to generate the actual page content for the user.
+
+How are errors and warnings handled? At any point during the process, we can generate either errors or warnings, and they get attached to the eventual `Response`. In some cases, we may want to short-circuit the normal flow and return an error response immediately (e.g., if a route handler raises an exception). In other cases, we may want to accumulate warnings and send them along with a successful response. Regardless, the `BridgeClient` will be responsible for displaying these messages to the user in a consistent manner.
+
+How are streaming responses handled? How are long-running tasks handled? In both cases, we can yield `Progress` payloads from route handlers, which will be sent to the `BridgeClient` as they are generated. The `BridgeClient` can then update the page to show progress indicators or partial results as they come in.
+
+From the student developer's perspective, they are building a `Site`, which can have multiple `Route`s. A `Route` is a decorated function that takes in the current `State` and any relevant parameters, and returns a `Page` (or other `ResponsePayload`). A `Site` also has metadata like title, description, favicon, language, etc.
+
+A `URL` is a string that represents a unique `Route` function in the `Site`. It should follow the naming conventions of a Python function (e.g., lowercase letters, numbers, underscores, no spaces or special characters). Eventually, we might support slashes for things like classes or modules (which would probably translate to periods).
+
+Things that have to be kept in the server:
+
+-   State
+-   Initial state (for resetting)
+-   Accessed pages, args
+-   History of state
+
+The debug information present in the frame:
+
+-   Quick link to reset the state and return to index
+-   Link to the About page
+-   Status information:
+    -   Any errors and warnings, nicely formatted
+    -   Current route information
+    -   Request/Response dump
+    -   Current state dump, buttons to save/load state in localStorage or download/upload JSON
+    -   Current page information
+    -   All available routes
+        -   As a flat list
+        -   As a graph
+    -   Page load history
+        -   Pages, state, args, timestamps, etc.
+        -   VCR playback controls
+        -   Automatically produced tests
+    -   Test status information
+-   Test production button
+-   Compile site button
+
+Essentially:
+
+-   The `BridgeClient` handles all DOM manipulation and user interaction on the client side.
+-   The `ClientServer` processes requests, manages state, and generates responses on the server side
+-   The `Page` (and other `ResponsePayload`s) represent the content and structure of the pages being served, and are created by the user-developer.
+-   The `Response` wraps the `ResponsePayload` with metadata for transmission between client and server, and is created by the `ClientServer`.
+-   The `Request` wraps user interaction data for transmission from client to server, and is created by the `BridgeClient`.
+
+How is `open` and `read` handled? We need to determine all of the local file dependencies of the project. The user should be able to provide an explicit list, but otherwise we assume that adjacent files will be possible to include. Starlette can load these files dynamically, but for deployment we need to make sure they get provided such that they can be opened.
 
 ## Development: watch JS assets
 

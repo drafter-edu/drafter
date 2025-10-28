@@ -1,13 +1,16 @@
 from dataclasses import dataclass
 from typing import Any
 
+from drafter.config.client_server import ClientServerConfiguration
 from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
 from drafter.components.components import PageContent, Link
+from drafter.history.state import SiteState
+from drafter.payloads.payloads import ResponsePayload
 
 
 @dataclass
-class Page:
+class Page(ResponsePayload):
     """
     A page is a collection of content to be displayed to the user. This content has two critical parts:
 
@@ -51,7 +54,7 @@ class Page:
                         f" Found {incorrect_type} at index {index} instead."
                     )
 
-    def render_content(self, current_state, configuration: ServerConfiguration) -> str:
+    def render(self, state: SiteState, configuration: ClientServerConfiguration) -> str:
         """
         Renders the content of the page to HTML. This will include the state of the page, if it is restorable.
         Users should not call this method directly; it will be called on their behalf by the server.
@@ -61,22 +64,24 @@ class Page:
         :return: A string of HTML representing the content of the page.
         """
         # TODO: Decide if we want to dump state on the page
-        chunked = [
+        chunked: list[str] = [
             # f'<input type="hidden" name="{RESTORABLE_STATE_KEY}" value={current_state!r}/>'
         ]
         for chunk in self.content:
             if isinstance(chunk, str):
                 chunked.append(f"<p>{chunk}</p>")
             else:
-                chunked.append(chunk.render(current_state, configuration))
+                chunked.append(chunk.render(state, configuration))
         content = "\n".join(chunked)
-        content = f"<form method='POST' enctype='multipart/form-data' accept-charset='utf-8'>{content}</form>"
-        if configuration.framed:
+        content = f"<div id='drafter-page--'>{content}</div>"
+        content = f"<form id='drafter-form--' enctype='multipart/form-data' accept-charset='utf-8'>{content}</form>"
+        # TODO: Introduce a new parent that can handle debug mode rendering
+        if configuration.in_debug_mode:
             reset_button = self.make_reset_button()
             about_button = self.make_about_button()
             content = (
-                f"<div class='container btlw-header'>{configuration.title}{reset_button}{about_button}</div>"
-                f"<div class='container btlw-container'>{content}</div>"
+                f"<div class='container' id='drafter-debug-header--'>{configuration.site_title}{reset_button}{about_button}</div>"
+                f"<div class='container' id='drafter-app--'>{content}</div>"
             )
         return content
 

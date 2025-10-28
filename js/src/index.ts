@@ -1,24 +1,14 @@
 import { getSkulptFile, setupSkulpt, startServer } from "./skulpt-tools";
 
 export interface DrafterInitOptions {
-    target: HTMLElement | string;
     code?: string;
     url?: string;
 }
 
 const x: pyStr = new Sk.builtin.str("hello");
 
-export function startDrafter(options: DrafterInitOptions) {
+export function runStudentCode(options: DrafterInitOptions) {
     setupSkulpt();
-
-    const targetElement: HTMLElement | null =
-        typeof options.target === "string"
-            ? document.querySelector(options.target)
-            : options.target;
-
-    if (!targetElement) {
-        throw new Error("Target element not found");
-    }
 
     if (options.code) {
         return startServer(options.code, "main");

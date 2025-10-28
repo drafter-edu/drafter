@@ -2,34 +2,75 @@ from dataclasses import dataclass, is_dataclass, fields
 from typing import Any, Union, Optional, List, Dict, Tuple
 import io
 import base64
+
 # from urllib.parse import quote_plus
 import json
 import html
 
 from drafter.constants import LABEL_SEPARATOR, SUBMIT_BUTTON_KEY, JSON_DECODE_SYMBOL
-from drafter.urls import remap_attr_styles, friendly_urls, check_invalid_external_url, merge_url_query_params
+from drafter.urls import (
+    remap_attr_styles,
+    friendly_urls,
+    check_invalid_external_url,
+    merge_url_query_params,
+)
 from drafter.image_support import HAS_PILLOW, PILImage
-from drafter.history import safe_repr
+# from drafter.history import safe_repr
 
 try:
     import matplotlib.pyplot as plt
+
     _has_matplotlib = True
 except ImportError:
     _has_matplotlib = False
 
 
-BASELINE_ATTRS = ["id", "class", "style", "title", "lang", "dir", "accesskey", "tabindex", "value",
-                  "onclick", "ondblclick", "onmousedown", "onmouseup", "onmouseover", "onmousemove", "onmouseout",
-                  "onkeypress", "onkeydown", "onkeyup",
-                  "onfocus", "onblur", "onselect", "onchange", "onsubmit", "onreset", "onabort", "onerror", "onload",
-                  "onunload", "onresize", "onscroll",
-                  "accesskey", "anchor", "role", "spellcheck", "tabindex",
-                  ]
+BASELINE_ATTRS = [
+    "id",
+    "class",
+    "style",
+    "title",
+    "lang",
+    "dir",
+    "accesskey",
+    "tabindex",
+    "value",
+    "onclick",
+    "ondblclick",
+    "onmousedown",
+    "onmouseup",
+    "onmouseover",
+    "onmousemove",
+    "onmouseout",
+    "onkeypress",
+    "onkeydown",
+    "onkeyup",
+    "onfocus",
+    "onblur",
+    "onselect",
+    "onchange",
+    "onsubmit",
+    "onreset",
+    "onabort",
+    "onerror",
+    "onload",
+    "onunload",
+    "onresize",
+    "onscroll",
+    "accesskey",
+    "anchor",
+    "role",
+    "spellcheck",
+    "tabindex",
+]
 
 
-BASE_PARAMETER_ERROR = ("""The {component_type} name must be a valid Python identifier name. A string is considered """
-                        """a valid identifier if it only contains alphanumeric letters (a-z) and (0-9), or """
-                        """underscores (_). A valid identifier cannot start with a number, or contain any spaces.""")
+BASE_PARAMETER_ERROR = (
+    """The {component_type} name must be a valid Python identifier name. A string is considered """
+    """a valid identifier if it only contains alphanumeric letters (a-z) and (0-9), or """
+    """underscores (_). A valid identifier cannot start with a number, or contain any spaces."""
+)
+
 
 def validate_parameter_name(name: str, component_type: str):
     """
@@ -48,17 +89,30 @@ def validate_parameter_name(name: str, component_type: str):
     """
     base_error = BASE_PARAMETER_ERROR.format(component_type=component_type)
     if not isinstance(name, str):
-        raise ValueError(base_error + f"\n\nReason: The given name `{name!r}` is not a string.")
+        raise ValueError(
+            base_error + f"\n\nReason: The given name `{name!r}` is not a string."
+        )
     if not name.isidentifier():
         if " " in name:
-            raise ValueError(base_error + f"\n\nReason: The name `{name}` has a space, which is not allowed.")
+            raise ValueError(
+                base_error
+                + f"\n\nReason: The name `{name}` has a space, which is not allowed."
+            )
         if not name:
             raise ValueError(base_error + f"\n\nReason: The name is an empty string.")
         if name[0].isdigit():
-            raise ValueError(base_error + f"\n\nReason: The name `{name}` starts with a digit, which is not allowed.")
+            raise ValueError(
+                base_error
+                + f"\n\nReason: The name `{name}` starts with a digit, which is not allowed."
+            )
         if not name[0].isalpha() and name[0] != "_":
-            raise ValueError(base_error + f"\n\nReason: The name `{name}` does not start with a letter or an underscore.")
-        raise ValueError(base_error + f" The name `{name}` is not a valid Python identifier name.")
+            raise ValueError(
+                base_error
+                + f"\n\nReason: The name `{name}` does not start with a letter or an underscore."
+            )
+        raise ValueError(
+            base_error + f" The name `{name}` is not a valid Python identifier name."
+        )
 
 
 class PageContent:
@@ -75,6 +129,7 @@ class PageContent:
 
     This class also has some helpful methods for verifying URLs and handling attributes/styles.
     """
+
     EXTRA_ATTRS: List[str] = []
     extra_settings: dict
 
@@ -176,6 +231,7 @@ class PageContent:
 
 Content = Union[PageContent, str]
 
+
 def make_safe_json_argument(value):
     """
     Converts the given value to a JSON-compatible string and escapes special
@@ -186,6 +242,7 @@ def make_safe_json_argument(value):
     :return: An HTML-safe JSON string representation of the input value.
     """
     return html.escape(json.dumps(value), True)
+
 
 def make_safe_argument(value):
     """
@@ -205,6 +262,7 @@ def make_safe_argument(value):
     :rtype: str
     """
     return html.escape(json.dumps(value), True)
+
 
 def make_safe_name(value):
     """
@@ -233,6 +291,7 @@ class LinkContent:
     :ivar text: The display text of the link.
     :type text: str
     """
+
     url: str
     text: str
 
@@ -252,17 +311,21 @@ class LinkContent:
             if invalid_external_url_reason == "is a valid external url":
                 return True
             elif invalid_external_url_reason:
-                raise ValueError(f"Link `{self.url}` is not a valid external url.\n{invalid_external_url_reason}.")
-            raise ValueError(f"Link `{self.text}` points to non-existent page `{self.url}`.")
+                raise ValueError(
+                    f"Link `{self.url}` is not a valid external url.\n{invalid_external_url_reason}."
+                )
+            raise ValueError(
+                f"Link `{self.text}` points to non-existent page `{self.url}`."
+            )
         return True
-
-
 
     def create_arguments(self, arguments, label_namespace):
         parameters = self.parse_arguments(arguments, label_namespace)
         if parameters:
-            return "\n".join(f"<input type='hidden' name='{name}' value='{make_safe_json_argument(value)}' />"
-                             for name, value in parameters.items())
+            return "\n".join(
+                f"<input type='hidden' name='{name}' value='{make_safe_json_argument(value)}' />"
+                for name, value in parameters.items()
+            )
         return ""
 
     def parse_arguments(self, arguments, label_namespace):
@@ -272,7 +335,9 @@ class LinkContent:
             return arguments
         if isinstance(arguments, Argument):
             escaped_label_namespace = make_safe_argument(label_namespace)
-            return {f"{escaped_label_namespace}{LABEL_SEPARATOR}{arguments.name}": arguments.value}
+            return {
+                f"{escaped_label_namespace}{LABEL_SEPARATOR}{arguments.name}": arguments.value
+            }
         if isinstance(arguments, list):
             result = {}
             escaped_label_namespace = make_safe_argument(label_namespace)
@@ -283,7 +348,9 @@ class LinkContent:
                     arg, value = arg
                 result[f"{escaped_label_namespace}{LABEL_SEPARATOR}{arg}"] = value
             return result
-        raise ValueError(f"Could not create arguments from the provided value: {arguments}")
+        raise ValueError(
+            f"Could not create arguments from the provided value: {arguments}"
+        )
 
 
 @dataclass
@@ -295,7 +362,9 @@ class Argument(PageContent):
         validate_parameter_name(name, "Argument")
         self.name = name
         if not isinstance(value, (str, int, float, bool)):
-            raise ValueError(f"Argument values must be strings, integers, floats, or booleans. Found {type(value)}")
+            raise ValueError(
+                f"Argument values must be strings, integers, floats, or booleans. Found {type(value)}"
+            )
         self.value = value
         self.extra_settings = kwargs
 
@@ -322,7 +391,7 @@ class Link(PageContent, LinkContent):
         link_namespace = f"{self.text}#{self._link_id}"
         precode = self.create_arguments(self.arguments, link_namespace)
         url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: link_namespace})
-        return f"{precode}<a href='{url}' {self.parse_extra_settings()}>{self.text}</a>"
+        return f"{precode}<a data-nav='{url}' href='{url}' {self.parse_extra_settings()}>{self.text}</a>"
 
 
 @dataclass
@@ -353,7 +422,7 @@ class Button(PageContent, LinkContent):
         url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: button_namespace})
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         value = make_safe_argument(button_namespace)
-        return f"{precode}<button type='submit' name='{SUBMIT_BUTTON_KEY}' value='{value}' formaction='{url}' {parsed_settings}>{self.text}</button>"
+        return f"{precode}<button data-nav='{self.url}'  type='submit' formaction='{url}' {parsed_settings}>{self.text}</button>"
 
 
 SubmitButton = Button
@@ -377,12 +446,16 @@ class Image(PageContent, LinkContent):
 
     def open(self, *args, **kwargs):
         if not HAS_PILLOW:
-            raise ImportError("Pillow is not installed. Please install it to use this feature.")
+            raise ImportError(
+                "Pillow is not installed. Please install it to use this feature."
+            )
         return PILImage.open(*args, **kwargs)
 
     def new(self, *args, **kwargs):
         if not HAS_PILLOW:
-            raise ImportError("Pillow is not installed. Please install it to use this feature.")
+            raise ImportError(
+                "Pillow is not installed. Please install it to use this feature."
+            )
         return PILImage.new(*args, **kwargs)
 
     def render(self, current_state, configuration):
@@ -396,16 +469,16 @@ class Image(PageContent, LinkContent):
         image_data = io.BytesIO()
         image.save(image_data, format="PNG")
         image_data.seek(0)
-        figure = base64.b64encode(image_data.getvalue()).decode('utf-8')
+        figure = base64.b64encode(image_data.getvalue()).decode("utf-8")
         figure = f"data:image/png;base64,{figure}"
         return True, figure
 
     def __str__(self) -> str:
         extra_settings = {}
         if self.width is not None:
-            extra_settings['width'] = self.width
+            extra_settings["width"] = self.width
         if self.height is not None:
-            extra_settings['height'] = self.height
+            extra_settings["height"] = self.height
         was_pil, url = self._handle_pil_image(self.url)
         if was_pil:
             return f"<img src='{url}' {self.parse_extra_settings(**extra_settings)}>"
@@ -425,7 +498,13 @@ class TextBox(PageContent):
     kind: str
     default_value: Optional[str]
 
-    def __init__(self, name: str, default_value: Optional[str] = None, kind: str = "text", **kwargs):
+    def __init__(
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        kind: str = "text",
+        **kwargs,
+    ):
         validate_parameter_name(name, "TextBox")
         self.name = name
         self.kind = kind
@@ -435,7 +514,7 @@ class TextBox(PageContent):
     def __str__(self) -> str:
         extra_settings = {}
         if self.default_value is not None:
-            extra_settings['value'] = html.escape(self.default_value)
+            extra_settings["value"] = html.escape(self.default_value)
         parsed_settings = self.parse_extra_settings(**extra_settings)
         # TODO: investigate whether we need to make the name safer
         return f"<input type='{self.kind}' name='{self.name}' {parsed_settings}>"
@@ -445,7 +524,16 @@ class TextBox(PageContent):
 class TextArea(PageContent):
     name: str
     default_value: str
-    EXTRA_ATTRS = ["rows", "cols", "autocomplete", "autofocus", "disabled", "placeholder", "readonly", "required"]
+    EXTRA_ATTRS = [
+        "rows",
+        "cols",
+        "autocomplete",
+        "autofocus",
+        "disabled",
+        "placeholder",
+        "readonly",
+        "required",
+    ]
 
     def __init__(self, name: str, default_value: Optional[str] = None, **kwargs):
         validate_parameter_name(name, "TextArea")
@@ -464,7 +552,13 @@ class SelectBox(PageContent):
     options: List[str]
     default_value: Optional[str]
 
-    def __init__(self, name: str, options: List[str], default_value: Optional[str] = None, **kwargs):
+    def __init__(
+        self,
+        name: str,
+        options: List[str],
+        default_value: Optional[str] = None,
+        **kwargs,
+    ):
         validate_parameter_name(name, "SelectBox")
         self.name = name
         self.options = [str(option) for option in options]
@@ -474,11 +568,13 @@ class SelectBox(PageContent):
     def __str__(self) -> str:
         extra_settings = {}
         if self.default_value is not None:
-            extra_settings['value'] = html.escape(self.default_value)
+            extra_settings["value"] = html.escape(self.default_value)
         parsed_settings = self.parse_extra_settings(**extra_settings)
-        options = "\n".join(f"<option {'selected' if option == self.default_value else ''} "
-                            f"value='{html.escape(option)}'>{option}</option>"
-                            for option in self.options)
+        options = "\n".join(
+            f"<option {'selected' if option == self.default_value else ''} "
+            f"value='{html.escape(option)}'>{option}</option>"
+            for option in self.options
+        )
         return f"<select name='{self.name}' {parsed_settings}>{options}</select>"
 
 
@@ -496,9 +592,11 @@ class CheckBox(PageContent):
 
     def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        checked = 'checked' if self.default_value else ''
-        return (f"<input type='hidden' name='{self.name}' value='' {parsed_settings}>"
-                f"<input type='checkbox' name='{self.name}' {checked} value='checked' {parsed_settings}>")
+        checked = "checked" if self.default_value else ""
+        return (
+            f"<input type='hidden' name='{self.name}' value='' {parsed_settings}>"
+            f"<input type='checkbox' name='{self.name}' {checked} value='checked' {parsed_settings}>"
+        )
 
 
 @dataclass
@@ -521,12 +619,12 @@ class _HtmlGroup(PageContent):
 
     def __init__(self, *args, **kwargs):
         self.content = list(args)
-        if 'content' in kwargs:
-            self.content.extend(kwargs.pop('content'))
-        if 'kind' in kwargs:
-            self.kind = kwargs.pop('kind')
-        if 'extra_settings' in kwargs:
-            self.extra_settings = kwargs.pop('extra_settings')
+        if "content" in kwargs:
+            self.content.extend(kwargs.pop("content"))
+        if "kind" in kwargs:
+            self.kind = kwargs.pop("kind")
+        if "extra_settings" in kwargs:
+            self.extra_settings = kwargs.pop("extra_settings")
             self.extra_settings.update(kwargs)
         else:
             self.extra_settings = kwargs
@@ -543,7 +641,7 @@ class _HtmlGroup(PageContent):
 
 @dataclass(repr=False)
 class Span(_HtmlGroup):
-    kind = 'span'
+    kind = "span"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -551,7 +649,7 @@ class Span(_HtmlGroup):
 
 @dataclass(repr=False)
 class Div(_HtmlGroup):
-    kind = 'div'
+    kind = "div"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -564,7 +662,7 @@ Box = Div
 @dataclass(repr=False)
 class Pre(_HtmlGroup):
     content: List[Any]
-    kind = 'pre'
+    kind = "pre"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -577,9 +675,9 @@ PreformattedText = Pre
 class Row(Div):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.extra_settings['style_display'] = "flex"
-        self.extra_settings['style_flex_direction'] = "row"
-        self.extra_settings['style_align_items'] = "center"
+        self.extra_settings["style_display"] = "flex"
+        self.extra_settings["style_flex_direction"] = "row"
+        self.extra_settings["style_align_items"] = "center"
 
 
 @dataclass
@@ -629,9 +727,12 @@ class Table(PageContent):
         for field in fields(self.rows):
             value = getattr(self.rows, field.name)
             result.append(
-                [f"<code>{html.escape(field.name)}</code>",
-                 f"<code>{html.escape(field.type.__name__)}</code>",
-                 f"<code>{safe_repr(value)}</code>"])
+                [
+                    f"<code>{html.escape(field.name)}</code>",
+                    f"<code>{html.escape(field.type.__name__)}</code>",
+                    f"<code>{safe_repr(value)}</code>",
+                ]
+            )
         self.rows = result
         if not self.header:
             self.header = ["Field", "Type", "Current Value"]
@@ -646,7 +747,9 @@ class Table(PageContent):
         for row in self.rows:
             if is_dataclass(row):
                 had_dataclasses = True
-                result.append([str(getattr(row, attr)) for attr in row.__dataclass_fields__])
+                result.append(
+                    [str(getattr(row, attr)) for attr in row.__dataclass_fields__]
+                )
             if isinstance(row, str):
                 result.append(row)
             elif isinstance(row, list):
@@ -658,9 +761,15 @@ class Table(PageContent):
 
     def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        rows = "\n".join(f"<tr>{''.join(f'<td>{cell}</td>' for cell in row)}</tr>"
-                         for row in self.rows)
-        header = "" if not self.header else f"<thead><tr>{''.join(f'<th>{cell}</th>' for cell in self.header)}</tr></thead>"
+        rows = "\n".join(
+            f"<tr>{''.join(f'<td>{cell}</td>' for cell in row)}</tr>"
+            for row in self.rows
+        )
+        header = (
+            ""
+            if not self.header
+            else f"<thead><tr>{''.join(f'<th>{cell}</th>' for cell in self.header)}</tr></thead>"
+        )
         return f"<table {parsed_settings}>{header}{rows}</table>"
 
 
@@ -671,18 +780,19 @@ class Text(PageContent):
 
     def __init__(self, body: str, **kwargs):
         self.body = body
-        if 'body' in kwargs:
-            self.body = kwargs.pop('content')
-        if 'extra_settings' in kwargs:
-            self.extra_settings = kwargs.pop('extra_settings')
+        if "body" in kwargs:
+            self.body = kwargs.pop("content")
+        if "extra_settings" in kwargs:
+            self.extra_settings = kwargs.pop("extra_settings")
             self.extra_settings.update(kwargs)
         else:
             self.extra_settings = kwargs
 
     def __eq__(self, other):
         if isinstance(other, Text):
-            return (self.body == other.body and
-                    self.extra_settings == other.extra_settings)
+            return (
+                self.body == other.body and self.extra_settings == other.extra_settings
+            )
         elif isinstance(other, str):
             return self.extra_settings == {} and self.body == other
         return NotImplemented
@@ -699,8 +809,6 @@ class Text(PageContent):
             return f"Text({self.body!r}, {self.extra_settings})"
         return f"Text({self.body!r})"
 
-
-
     def __str__(self):
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         if not parsed_settings:
@@ -713,9 +821,13 @@ class MatPlotLibPlot(PageContent):
     extra_matplotlib_settings: dict
     close_automatically: bool
 
-    def __init__(self, extra_matplotlib_settings=None, close_automatically=True, **kwargs):
+    def __init__(
+        self, extra_matplotlib_settings=None, close_automatically=True, **kwargs
+    ):
         if not _has_matplotlib:
-            raise ImportError("Matplotlib is not installed. Please install it to use this feature.")
+            raise ImportError(
+                "Matplotlib is not installed. Please install it to use this feature."
+            )
         if extra_matplotlib_settings is None:
             extra_matplotlib_settings = {}
         self.extra_matplotlib_settings = extra_matplotlib_settings
@@ -735,14 +847,16 @@ class MatPlotLibPlot(PageContent):
             plt.close()
         image_data.seek(0)
         if self.extra_matplotlib_settings["format"] == "png":
-            figure = base64.b64encode(image_data.getvalue()).decode('utf-8')
+            figure = base64.b64encode(image_data.getvalue()).decode("utf-8")
             figure = f"data:image/png;base64,{figure}"
             return f"<img src='{figure}' {parsed_settings}/>"
         elif self.extra_matplotlib_settings["format"] == "svg":
             figure = image_data.read().decode()
             return figure
         else:
-            raise ValueError(f"Unsupported format {self.extra_matplotlib_settings['format']}")
+            raise ValueError(
+                f"Unsupported format {self.extra_matplotlib_settings['format']}"
+            )
 
 
 @dataclass
@@ -752,7 +866,9 @@ class Download(PageContent):
     content: str
     content_type: str = "text/plain"
 
-    def __init__(self, text: str, filename: str, content: str, content_type: str = "text/plain"):
+    def __init__(
+        self, text: str, filename: str, content: str, content_type: str = "text/plain"
+    ):
         self.text = text
         self.filename = filename
         self.content = content
@@ -765,7 +881,7 @@ class Download(PageContent):
         image_data = io.BytesIO()
         image.save(image_data, format="PNG")
         image_data.seek(0)
-        figure = base64.b64encode(image_data.getvalue()).decode('utf-8')
+        figure = base64.b64encode(image_data.getvalue()).decode("utf-8")
         figure = f"data:image/png;base64,{figure}"
         return True, figure
 
@@ -791,6 +907,7 @@ class FileUpload(PageContent):
     To have multiple files uploaded, use the `multiple` attribute, which will cause
     the corresponding parameter to be a list of files.
     """
+
     name: str
     EXTRA_ATTRS = ["accept", "capture", "multiple", "required"]
 
@@ -803,9 +920,11 @@ class FileUpload(PageContent):
         if accept is not None:
             if isinstance(accept, str):
                 accept = [accept]
-            accept= [f".{ext}" if "/" not in ext and not ext.startswith(".") else ext
-                     for ext in accept]
-            self.extra_settings['accept'] = ", ".join(accept)
+            accept = [
+                f".{ext}" if "/" not in ext and not ext.startswith(".") else ext
+                for ext in accept
+            ]
+            self.extra_settings["accept"] = ", ".join(accept)
 
     def __str__(self):
         parsed_settings = self.parse_extra_settings(**self.extra_settings)

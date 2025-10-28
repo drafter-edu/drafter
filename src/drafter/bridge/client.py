@@ -7,8 +7,10 @@ This module is provided here so that type checkers and IDEs can
 understand its existence and provide type information.
 """
 
+from drafter.data.response import Response
+from drafter.data.outcome import Outcome
 from typing import Callable
 
 
-def load_page(url: str, data: list, target: str, navigate: Callable) -> None:
+def update_site(response: Response, callback: Callable) -> Outcome:  # type: ignore
     pass

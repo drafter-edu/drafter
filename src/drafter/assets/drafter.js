@@ -21,7 +21,7 @@ var Drafter = (() => {
   // src/index.ts
   var src_exports = {};
   __export(src_exports, {
-    startDrafter: () => startDrafter
+    runStudentCode: () => runStudentCode
   });
 
   // src/types/skulpt/index.ts
@@ -288,12 +288,8 @@ ${traceback}
 
   // src/index.ts
   var x = new Sk.builtin.str("hello");
-  function startDrafter(options) {
+  function runStudentCode(options) {
     setupSkulpt();
-    const targetElement = typeof options.target === "string" ? document.querySelector(options.target) : options.target;
-    if (!targetElement) {
-      throw new Error("Target element not found");
-    }
     if (options.code) {
       return startServer(options.code, "main");
     } else if (options.url) {

@@ -1,6 +1,6 @@
 from typing import Optional, Union
 from drafter.server import MAIN_SERVER, SiteInformationType
-from drafter.page import Page
+from drafter.payloads.page import Page
 from drafter.components.components import PageContent
 
 

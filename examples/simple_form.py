@@ -8,7 +8,7 @@ def index(state: str) -> Page:
 
 @route
 def process_form(state: str, name: str) -> Page:
-    return Page(["Hello, " + name + "!"])
+    return Page(["Hello, " + name[0] + "!"])
 
 
 start_server("")

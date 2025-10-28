@@ -2,6 +2,7 @@ from typing import Any, Tuple, Dict
 import re
 from urllib.parse import urlencode, urlparse, parse_qs, quote_plus
 
+
 def merge_url_query_params(url: str, additional_params: dict) -> str:
     """
     Merges additional parameters into a URL. If a parameter already exists, it will be overwritten.
@@ -29,7 +30,9 @@ def remove_url_query_params(url: str, params_to_remove: set) -> str:
     """
     url_components = urlparse(url)
     original_params = parse_qs(url_components.query, keep_blank_values=True)
-    merged_params = {k: v for k, v in original_params.items() if k not in params_to_remove}
+    merged_params = {
+        k: v for k, v in original_params.items() if k not in params_to_remove
+    }
     updated_query = urlencode(merged_params, doseq=True)
     return url_components._replace(query=updated_query).geturl()
 
@@ -46,15 +49,15 @@ def remap_attr_styles(attributes: dict) -> Tuple[dict, dict]:
     styles: Dict[str, Any] = {}
     attrs: Dict[str, Any] = {}
     # Handle classes keyword
-    if 'classes' in attributes:
-        attributes['class'] = attributes.pop('classes')
-        if isinstance(attributes['class'], list):
-            attributes['class'] = " ".join(attributes['class'])
+    if "classes" in attributes:
+        attributes["class"] = attributes.pop("classes")
+        if isinstance(attributes["class"], list):
+            attributes["class"] = " ".join(attributes["class"])
     # Handle styles_ prefixed keyword
     for key, value in attributes.items():
         target = attrs
         if key.startswith("style_"):
-            key = key[len("style_"):]
+            key = key[len("style_") :]
             target = styles
         key = key.replace("_", "-")
         target[key] = value
@@ -69,14 +72,15 @@ def friendly_urls(url: str) -> str:
     :param url: The URL to convert
     :return: The friendly URL
     """
-    if url.strip("/") == "index":
-        return "/"
-    if not url.startswith('/'):
-        url = '/' + url
+    url = url.strip("/")
+    if url == "":
+        return "index"
     return url
 
 
-URL_REGEX = r"^(?:http(s)?://)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$"
+URL_REGEX = (
+    r"^(?:http(s)?://)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$"
+)
 
 
 def is_valid_url(url: str) -> bool:
@@ -98,10 +102,13 @@ def check_invalid_external_url(url: str) -> str:
     :return: An error message if the URL is invalid, otherwise an empty string
     """
     if url.startswith("file://"):
-        return "The URL references a local file on your computer, not a file on a server."
+        return (
+            "The URL references a local file on your computer, not a file on a server."
+        )
     if is_valid_url(url):
         return "is a valid external url"
     return ""
+
 
 def is_external_url(url: str) -> bool:
     """

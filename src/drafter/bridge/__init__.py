@@ -2,14 +2,14 @@
 Bridge functions for interacting with the web page in Skulpt.
 """
 
-from drafter.bridge.client import load_page
+from drafter.data.request import Request
+from drafter.bridge.client import update_site
+from typing import Callable
 import document  # type: ignore
 
 
-def update_root(target: str, content: str) -> None:
-    element = document.getElementById(target)
-    element.innerHTML = content
-    return element
+def make_initial_request() -> Request:
+    return Request(0, "load", "index", [], {}, {})
 
 
 def add_script(src: str) -> None:

@@ -7,11 +7,14 @@
     <meta name="description" content="{{ meta_description }}" />
     <meta name="author" content="{{ meta_author }}" />
     <title>{{ title or "Drafter App" }}</title>
+    <script>window.DRAFTER_SITE_ROOT_ELEMENT_ID="drafter-site--"</script>
   </head>
   <body>
-    <form>
-      <div id="app"></div>
-    </form>
+    <div id="drafter-site--">
+      <form>
+        <div id="app"></div>
+      </form>
+    </div>
     {% if inline_py %}<script type="text/python" id="user-code">{{ user_code }}</script>{% endif %}
     <script src="{{ static('skulpt.js') }}"></script>
     <script src="{{ static('skulpt-stdlib.js') }}"></script>
@@ -27,14 +30,14 @@
               };
               {% endif %}
 
-              const app = await window.Drafter.startDrafter({ 
-                target: '#app', 
+              const app = await window.Drafter.runStudentCode({ 
                 {% if inline_py %}
                 code: document.getElementById('user-code').textContent
                 {% else %}
                 url: '{{ python_url }}'
                 {% endif %}
               });
+              console.log("[Drafter AppServer Scaffolding] Student Code Initialized:", app);
               
             })();
     </script>
