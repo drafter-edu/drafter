@@ -6,17 +6,17 @@ This document summarizes the new testing infrastructure added to the Drafter pro
 
 ### Test Files
 
-1. **`tests/test_starlette_server.py`** (138 lines, 10 test methods)
+1. **`tests/test_starlette_server.py`** (131 lines, 10 test methods)
    - Tests for the Starlette local development server
    - Verifies server startup, asset injection, and WebSocket functionality
    - Uses `starlette.testclient.TestClient` for testing
 
-2. **`tests/test_client_library.py`** (278 lines, 33 test methods)
+2. **`tests/test_client_library.py`** (261 lines, 33 test methods)
    - Unit tests for the Python client library
    - Tests Router, Server, Page, Components, and Response classes
    - Comprehensive coverage of core functionality
 
-3. **`js/tests/client.test.ts`** (352 lines, 24 test cases)
+3. **`js/tests/client.test.ts`** (344 lines, 24 test cases)
    - End-to-end tests for the TypeScript client library
    - Simulates real user interactions
    - Tests component rendering and page navigation
@@ -29,9 +29,9 @@ This document summarizes the new testing infrastructure added to the Drafter pro
 
 ### Documentation
 
-- **`tests/README.md`** - Detailed test documentation by category
-- **`TESTING.md`** - Comprehensive testing guide (260+ lines)
-- **`TESTING-QUICKSTART.md`** - Quick reference guide (240+ lines)
+- **`tests/README.md`** - Detailed test documentation by category (113 lines)
+- **`TESTING.md`** - Comprehensive testing guide (292 lines)
+- **`TESTING-QUICKSTART.md`** - Quick reference guide (214 lines)
 - **`.github/workflows/test-example.yml`** - Example CI configuration
 
 ### Configuration Updates
@@ -185,10 +185,10 @@ These tests use the old Bottle-based infrastructure and Splinter for browser aut
 
 ## File Sizes
 
-- Total test code: ~1,000 lines
-- Total documentation: ~1,600 lines
-- Total configuration: ~100 lines
-- **Grand total: ~2,700 lines of new content**
+- Test code: 736 lines (131 + 261 + 344)
+- Documentation: 836 lines (113 + 292 + 214 + 217)
+- Configuration: ~100 lines
+- **Grand total: ~1,670 lines of new content**
 
 ## Version Requirements
 
