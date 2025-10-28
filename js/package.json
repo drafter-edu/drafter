@@ -8,15 +8,22 @@
         "watch": "tsup --watch",
         "precompile": "node scripts/precompile-python.mjs --minify",
         "precompile:watch": "chokidar \"../src/drafter/**/*.py\" \"./src/bridge/**/*.ts\" -d 200 --initial -c \"node scripts/precompile-python.mjs\"",
-        "dev": "node scripts/update-skulpt.mjs && tsup --watch --onSuccess \"node scripts/sync-dist.mjs\""
+        "dev": "node scripts/update-skulpt.mjs && tsup --watch --onSuccess \"node scripts/sync-dist.mjs\"",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage"
     },
     "devDependencies": {
+        "@types/jest": "^29.5.0",
         "@types/jquery": "^3.5.33",
         "chokidar": "^4.0.3",
         "chokidar-cli": "^3.0.0",
         "commander": "^14.0.2",
         "dotenv": "^17.2.3",
+        "jest": "^29.5.0",
+        "jest-environment-jsdom": "^29.5.0",
         "terser": "^5.44.0",
+        "ts-jest": "^29.1.0",
         "tsup": "^8",
         "typescript": "^5"
     }
