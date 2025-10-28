@@ -117,7 +117,8 @@ function $builtinmodule(name: string) {
 
     /**
      * Mount declarative navigation handlers on a root element.
-     * Uses data-nav and data-call attributes for opt-in navigation.
+     * Uses data-nav and data-call attributes for opt-in navigation,
+     * with fallback support for formaction attributes for backward compatibility.
      */
     function mountNav(
         root: HTMLElement,
@@ -136,30 +137,57 @@ function $builtinmodule(name: string) {
             const target = event.target as Element | null;
             if (!target) return;
 
-            // Find closest element with data-nav or data-call
-            const el = target.closest?.('[data-nav], [data-call]');
-            if (!el || !root.contains(el)) return;
+            // First, try to find closest element with data-nav or data-call (opt-in declarative)
+            const optInEl = target.closest?.('[data-nav], [data-call]');
+            if (optInEl && root.contains(optInEl)) {
+                event.preventDefault();
+                const name = (optInEl.getAttribute('data-nav') || optInEl.getAttribute('data-call'))!;
+                const kind = optInEl.hasAttribute('data-call') ? 'button' : 'link';
+                onNav({ kind, name, el: optInEl });
+                return;
+            }
 
-            // Only intercept opt-in elements
-            event.preventDefault();
+            // Fallback: handle links with href (legacy behavior, but simplified)
+            if (target instanceof HTMLAnchorElement && target.href) {
+                // Skip download links
+                if (target.hasAttribute('download')) return;
+                
+                event.preventDefault();
+                // Extract path from href, removing leading slashes
+                const url = new URL(target.href, window.location.href);
+                const name = url.pathname.replace(/^\/+/, '') || 'index';
+                onNav({ kind: 'link', name, el: target });
+                return;
+            }
 
-            const name = (el.getAttribute('data-nav') || el.getAttribute('data-call'))!;
-            const kind = el.hasAttribute('data-call') ? 'button' : 'link';
-            
-            onNav({ kind, name, el });
+            // Fallback: handle buttons with formaction (legacy behavior, but simplified)
+            const button = target.closest?.('button[type="submit"], input[type="submit"]');
+            if (button && root.contains(button)) {
+                event.preventDefault();
+                const form = button.closest('form') as HTMLFormElement | null;
+                if (!form) return;
+
+                const formAction = (button as HTMLElement).getAttribute('formaction') || '';
+                // Extract path from formaction
+                const url = new URL(formAction || window.location.href, window.location.href);
+                const name = url.pathname.replace(/^\/+/, '') || 'index';
+                const formData = new FormData(form, button as any);
+                
+                onNav({ kind: 'form', name, el: form, data: formData });
+            }
         };
 
         // Submit handler for forms
         submitHandler = function (event: SubmitEvent) {
             const form = event.target as HTMLFormElement;
-            if (!form.hasAttribute('data-nav')) return;
             
-            event.preventDefault();
-
-            const name = form.getAttribute('data-nav')!;
-            const formData = new FormData(form, (event as any).submitter ?? undefined);
-            
-            onNav({ kind: 'form', name, el: form, data: formData });
+            // Opt-in declarative forms with data-nav
+            if (form.hasAttribute('data-nav')) {
+                event.preventDefault();
+                const name = form.getAttribute('data-nav')!;
+                const formData = new FormData(form, (event as any).submitter ?? undefined);
+                onNav({ kind: 'form', name, el: form, data: formData });
+            }
         };
 
         root.addEventListener("click", clickHandler);
