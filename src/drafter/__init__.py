@@ -8,6 +8,7 @@ from drafter.commands import route
 from drafter.payloads.page import Page
 from drafter.payloads import Fragment, Redirect, Download, Progress, Update
 from drafter.site import Site
+from drafter.channels import Channels
 # from drafter.server import *
 # from drafter.deploy import *
 # from drafter.testing import assert_equal
@@ -30,6 +31,7 @@ __all__ = [
     "Progress",
     "Update",
     "Site",
+    "Channels",
     "Text",
     "Table",
     "TextBox",
