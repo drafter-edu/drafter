@@ -56,8 +56,10 @@ dev = [
   "pytest",
   "pytest-cov",
   "pytest-mock",
+  "pytest-asyncio",
   "coverage",
   "tox",
+  "httpx",
 ]
 
 [tool.hatch.build]

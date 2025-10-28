@@ -188,7 +188,7 @@ cd js && npm run test:watch
 The tests are designed to run in CI. See `.github/workflows/test-example.yml` for an example GitHub Actions configuration.
 
 Key points:
-- Tests run on multiple Python versions (3.8-3.12)
+- Tests run on multiple Python versions (3.9-3.12)
 - TypeScript tests run on Node.js 18
 - Coverage reports are generated
 - Tests must pass before merging
