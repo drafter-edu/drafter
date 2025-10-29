@@ -11,9 +11,9 @@ from rich.panel import Panel
 from rich.console import Console
 from rich.table import Table
 
-from .server import serve_app_once
-from .app.templating import render_index_html
-from .utils import copy_assets_to, pkg_assets_dir
+from drafter.server import serve_app_once
+from drafter.app.templating import render_index_html
+from drafter.utils import copy_assets_to, pkg_assets_dir
 
 app = typer.Typer(add_completion=False, help="Drafter CLI")
 

@@ -6,11 +6,11 @@ from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
 from drafter.components.components import PageContent, Link
 from drafter.history.state import SiteState
-from drafter.payloads.payloads import ResponsePayload
+from drafter.payloads.base_page import BasePage
 
 
 @dataclass
-class Page(ResponsePayload):
+class Page(BasePage):
     """
     A page is a collection of content to be displayed to the user. This content has two critical parts:
 
