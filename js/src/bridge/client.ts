@@ -4,6 +4,9 @@ type NavEvent =
     | { kind: "link"; url: string; data: FormData; submitter?: HTMLElement }
     | { kind: "form"; url: string; data: FormData; submitter?: HTMLElement };
 
+// Audio channel management
+let currentAudio: HTMLAudioElement | null = null;
+
 /**
  * This module gets included in the Skulpt build as a built-in module,
  * using a completely separate mechanism. Basically, it is compiled by
@@ -94,6 +97,8 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     const str_request_id = new Sk.builtin.str("request_id");
     const str_response_id = new Sk.builtin.str("response_id");
     const str_id = new Sk.builtin.str("id");
+    const str_channels = new Sk.builtin.str("channels");
+    const str_status_code = new Sk.builtin.str("status_code");
 
     const debug_log = function (...args: any[]) {
         console.log("[Drafter Bridge Client]", ...args);
@@ -105,6 +110,122 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     const ROOT_ELEMENT_ID =
         window.DRAFTER_SITE_ROOT_ELEMENT_ID || "drafter-site--";
     const FORM_ELEMENT_ID = "drafter-form--";
+
+    /**
+     * Process channels from the response
+     */
+    const processChannels = function (channels: any) {
+        if (!channels || channels === pyNone) {
+            return;
+        }
+        
+        const jsChannels = Sk.ffi.remapToJs(channels);
+        debug_log("Processing channels:", jsChannels);
+
+        // Handle 'before' scripts
+        if (jsChannels.before) {
+            const scripts = Array.isArray(jsChannels.before) ? jsChannels.before : [jsChannels.before];
+            scripts.forEach((script: string) => {
+                try {
+                    debug_log("Executing before script:", script);
+                    eval(script);
+                } catch (e) {
+                    console.error("Error executing before script:", e);
+                }
+            });
+        }
+
+        // Handle 'audio' channel
+        if (jsChannels.audio) {
+            const audioMessages = Array.isArray(jsChannels.audio) ? jsChannels.audio : [jsChannels.audio];
+            audioMessages.forEach((msg: any) => {
+                handleAudioMessage(msg);
+            });
+        }
+
+        // Store after scripts to execute after DOM update
+        return jsChannels.after;
+    };
+
+    /**
+     * Handle audio channel messages
+     */
+    const handleAudioMessage = function (message: any) {
+        debug_log("Handling audio message:", message);
+        
+        if (!message || typeof message !== 'object') {
+            return;
+        }
+
+        const action = message.action;
+        
+        switch (action) {
+            case 'play':
+                // Stop current audio if playing
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+                
+                // Create and play new audio
+                if (message.src) {
+                    currentAudio = new Audio(message.src);
+                    currentAudio.loop = message.loop || false;
+                    currentAudio.volume = message.volume !== undefined ? message.volume : 1.0;
+                    currentAudio.play().catch(e => {
+                        console.error("Error playing audio:", e);
+                    });
+                    debug_log("Playing audio:", message.src);
+                }
+                break;
+                
+            case 'pause':
+                if (currentAudio) {
+                    currentAudio.pause();
+                    debug_log("Audio paused");
+                }
+                break;
+                
+            case 'stop':
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                    currentAudio = null;
+                    debug_log("Audio stopped");
+                }
+                break;
+                
+            case 'volume':
+                if (currentAudio && message.volume !== undefined) {
+                    currentAudio.volume = Math.max(0, Math.min(1, message.volume));
+                    debug_log("Audio volume set to:", currentAudio.volume);
+                }
+                break;
+                
+            default:
+                debug_log("Unknown audio action:", action);
+        }
+    };
+
+    /**
+     * Get the payload type name
+     */
+    const getPayloadType = function (payload: any): string {
+        if (!payload || payload === pyNone) {
+            return "Unknown";
+        }
+        
+        try {
+            const payloadClass = payload.ob$type;
+            if (payloadClass && payloadClass.tp$name) {
+                return Sk.ffi.remapToJs(payloadClass.tp$name);
+            }
+        } catch (e) {
+            debug_log("Error getting payload type:", e);
+        }
+        
+        return "Unknown";
+    };
 
     const makeOutcome = function (originalRequestId: pyInt, responseId: pyInt) {
         const args = [new pyInt(outcomeCount), originalRequestId, responseId];
@@ -159,34 +280,110 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         }
         const startSiteUpdate = () => {
             debug_log("Starting site update...");
+            
+            // Get response data
             const body: string = Sk.ffi.remapToJs(
                 response.tp$getattr(str_body)
             );
             const originalRequestId: pyInt =
                 response.tp$getattr(str_request_id);
             const responseId: pyInt = response.tp$getattr(str_id);
-            debug_log("Updating site body to:", body);
-            element.innerHTML = body;
-            const mounted = mountNavigation(element, (navEvent: NavEvent) => {
-                debug_log(
-                    "Navigating to:",
-                    navEvent.url,
-                    navEvent.data,
-                    callback
-                );
-                // TODO: Process data into something Skulpt can understand
-                // const args = [new pyStr(pathPart), new pyStr("TEST")];
-                // const kwargs = new pyDict();
-                const newRequest = makeRequest(navEvent.url, navEvent.data);
-                const nextVisit = callback.tp$call([newRequest]);
-                return Sk.misceval.promiseToSuspension(
-                    Sk.misceval.asyncToPromise(() => nextVisit)
-                );
-            });
-            debug_log("Mounted navigation handlers:", mounted);
+            const payload = response.tp$getattr(str_payload);
+            const channels = response.tp$getattr(str_channels);
+            const statusCode: number = Sk.ffi.remapToJs(
+                response.tp$getattr(str_status_code)
+            );
+            
+            // Get payload type
+            const payloadType = getPayloadType(payload);
+            debug_log("Payload type:", payloadType, "Status:", statusCode);
+            
+            // Process 'before' channel scripts
+            const afterScripts = processChannels(channels);
+            
+            // Handle different payload types
+            switch (payloadType) {
+                case "Fragment":
+                    // Fragment updates a specific part of the page
+                    debug_log("Handling Fragment payload");
+                    // For now, just update the body like a Page
+                    // In the future, could target specific elements
+                    element.innerHTML = body;
+                    break;
+                    
+                case "Redirect":
+                    // Redirect navigates to a different page
+                    debug_log("Handling Redirect payload");
+                    // Extract URL from body or metadata
+                    // For now, treat as navigation
+                    element.innerHTML = body;
+                    break;
+                    
+                case "Progress":
+                    // Progress shows a loading indicator
+                    debug_log("Handling Progress payload");
+                    element.innerHTML = body;
+                    break;
+                    
+                case "Download":
+                    // Download triggers a file download
+                    debug_log("Handling Download payload");
+                    element.innerHTML = body;
+                    break;
+                    
+                case "Update":
+                    // Update changes state without updating HTML
+                    debug_log("Handling Update payload - state update only");
+                    // Don't update innerHTML for Update payloads
+                    // The state is updated on the server side
+                    break;
+                    
+                case "Page":
+                default:
+                    // Page is the default - full page update
+                    debug_log("Handling Page payload");
+                    element.innerHTML = body;
+                    break;
+            }
+            
+            // Re-mount navigation handlers (unless it's just an Update)
+            if (payloadType !== "Update") {
+                const mounted = mountNavigation(element, (navEvent: NavEvent) => {
+                    debug_log(
+                        "Navigating to:",
+                        navEvent.url,
+                        navEvent.data,
+                        callback
+                    );
+                    // TODO: Process data into something Skulpt can understand
+                    // const args = [new pyStr(pathPart), new pyStr("TEST")];
+                    // const kwargs = new pyDict();
+                    const newRequest = makeRequest(navEvent.url, navEvent.data);
+                    const nextVisit = callback.tp$call([newRequest]);
+                    return Sk.misceval.promiseToSuspension(
+                        Sk.misceval.asyncToPromise(() => nextVisit)
+                    );
+                });
+                debug_log("Mounted navigation handlers:", mounted);
+            }
+            
+            // Process 'after' channel scripts
+            if (afterScripts) {
+                const scripts = Array.isArray(afterScripts) ? afterScripts : [afterScripts];
+                scripts.forEach((script: string) => {
+                    try {
+                        debug_log("Executing after script:", script);
+                        eval(script);
+                    } catch (e) {
+                        console.error("Error executing after script:", e);
+                    }
+                });
+            }
+            
             return makeOutcome(originalRequestId, responseId);
         };
         return Sk.misceval.chain<any, any>([], startSiteUpdate);
+    });
     });
 
     // Track handlers for cleanup

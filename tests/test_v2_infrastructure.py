@@ -136,11 +136,11 @@ class TestUpdatePayload:
         """Test rendering an Update."""
         state = SiteState()
         config = ClientServerConfiguration()
-        update = Update(updates={"element1": "<p>New content</p>"})
+        update = Update(state_updates={"counter": 42, "name": "test"})
 
         rendered = update.render(state, config)
-        assert "element1" in rendered
-        assert "New content" in rendered
+        # Update doesn't render HTML content - it's handled by BridgeClient
+        assert rendered == ""
 
 
 class TestChannels:
