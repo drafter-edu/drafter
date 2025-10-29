@@ -226,6 +226,11 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                         form,
                         nearestNavLink as HTMLElement
                     );
+                    // For links, manually add the submit button namespace from data attribute
+                    const submitButton = nearestNavLink.getAttribute("data-submit-button");
+                    if (submitButton) {
+                        formData.append("--submit-button", submitButton);
+                    }
                     return onNavigation({
                         kind: "link",
                         url: name,
