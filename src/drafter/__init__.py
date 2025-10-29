@@ -6,6 +6,10 @@ from drafter.launch import start_server
 from drafter.client_server import get_main_server, set_main_server, MAIN_SERVER
 from drafter.commands import route
 from drafter.payloads.page import Page
+from drafter.payloads import Fragment, Redirect, Download, Progress, Update
+from drafter.site import Site
+from drafter.channels import Channels
+from drafter.app import AppBuilder
 # from drafter.server import *
 # from drafter.deploy import *
 # from drafter.testing import assert_equal
@@ -22,6 +26,14 @@ __all__ = [
     "route",
     "start_server",
     "Page",
+    "Fragment",
+    "Redirect",
+    "Download",
+    "Progress",
+    "Update",
+    "Site",
+    "Channels",
+    "AppBuilder",
     "Text",
     "Table",
     "TextBox",

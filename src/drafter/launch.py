@@ -5,7 +5,7 @@ from drafter.client_server import get_main_server
 
 def start_server(initial_state=None, main_user_path=None) -> None:
     if is_skulpt():
-        from drafter.bridge import update_site, make_initial_request
+        from drafter.bridge import dispatch_response, make_initial_request
 
         server = get_main_server()
         server.start(initial_state=initial_state)
@@ -13,7 +13,7 @@ def start_server(initial_state=None, main_user_path=None) -> None:
 
         def handle_visit(request):
             response = server.visit(request)
-            outcome = update_site(response, handle_visit)
+            outcome = dispatch_response(response, handle_visit)
             server.report_outcome(outcome)
 
         handle_visit(initial_request)
