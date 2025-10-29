@@ -2,14 +2,44 @@
 Bridge functions for interacting with the web page in Skulpt.
 """
 
+from dataclasses import dataclass, field
+from drafter.data.channel import DEFAULT_CHANNEL_AFTER, DEFAULT_CHANNEL_BEFORE, Channel
+from drafter.data.outcome import Outcome
+from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.bridge.client import update_site
-from typing import Callable
+from drafter.payloads.page import Page
+from typing import Callable, Optional
 import document  # type: ignore
 
 
-def make_initial_request() -> Request:
-    return Request(0, "load", "index", [], {}, {})
+@dataclass
+class ClientBridge:
+    channel_history: dict[str, set[str]] = field(default_factory=dict)
+
+    def add_scripts(self, channel: Optional[Channel]) -> None:
+        if channel:
+            for message in channel.messages:
+                if message.sigil is not None:
+                    if channel.name not in self.channel_history:
+                        self.channel_history[channel.name] = set()
+                    if message.sigil in self.channel_history[channel.name]:
+                        continue
+                    self.channel_history[channel.name].add(message.sigil)
+                if message.kind == "script":
+                    # TODO: Handle errors while executing this script
+                    add_script(message.content)
+
+    def handle_response(
+        self, response: Response, callback: Callable[[Request], None]
+    ) -> Outcome:
+        self.add_scripts(response.channels.get(DEFAULT_CHANNEL_BEFORE))
+        outcome = update_site(response, callback)
+        self.add_scripts(response.channels.get(DEFAULT_CHANNEL_AFTER))
+        return outcome
+
+    def make_initial_request(self) -> Request:
+        return Request(0, "load", "index", [], {}, {})
 
 
 def add_script(src: str) -> None:

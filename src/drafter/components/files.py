@@ -4,7 +4,7 @@ import io
 from typing import Union, List
 from drafter.components.page_content import Component
 from drafter.components.utilities.validation import validate_parameter_name
-from drafter.image_support import HAS_PILLOW
+from drafter.components.utilities.image_support import HAS_PILLOW
 
 
 @dataclass

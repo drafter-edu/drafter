@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+from typing import Dict, Optional
+from drafter.data.channel import Channel, Message
 from drafter.data.errors import DrafterError, DrafterWarning
 from drafter.payloads.payloads import ResponsePayload
 
@@ -35,7 +37,28 @@ class Response:
     status_code: int = 200
     message: str = "OK"
     body: str = ""
-    channels: dict = field(default_factory=dict)
+    channels: Dict[str, Channel] = field(default_factory=dict)
     errors: list[DrafterError] = field(default_factory=list)
     warnings: list[DrafterWarning] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
+
+    def send(
+        self,
+        channel_name: str,
+        message: str,
+        kind: str = "script",
+        sigil: Optional[str] = None,
+    ) -> None:
+        """
+        Sends a message through the specified channel.
+
+        :param channel_name: The name of the channel to send the message through.
+        :param message: The content of the message to send.
+        :param kind: The kind of message (default is "script").
+        :param sigil: An optional sigil for special processing.
+        """
+        if channel_name not in self.channels:
+            self.channels[channel_name] = Channel(name=channel_name)
+        self.channels[channel_name].messages.append(
+            Message(kind=kind, sigil=sigil, content=message)
+        )

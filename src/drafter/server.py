@@ -41,7 +41,7 @@ from drafter.files import (
 )
 from drafter.raw_files import get_raw_files, get_themes
 from drafter.urls import remove_url_query_params, is_external_url
-from drafter.image_support import HAS_PILLOW, PILImage
+from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 
 import logging
 

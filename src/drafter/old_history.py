@@ -12,7 +12,7 @@ import pprint
 
 from drafter.constants import LABEL_SEPARATOR, JSON_DECODE_SYMBOL
 from drafter.testing import DIFF_INDENT_WIDTH
-from drafter.image_support import HAS_PILLOW, PILImage
+from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 
 
 timezone_UTC = timezone(timedelta(0))

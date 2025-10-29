@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import base64
 import io
 from typing import Optional
-from drafter.image_support import HAS_PILLOW, PILImage
+from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 from drafter.components.page_content import Component
 from drafter.components.links import LinkContent
 
