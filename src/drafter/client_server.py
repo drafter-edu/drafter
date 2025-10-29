@@ -1,16 +1,12 @@
-import html
-import os
-import traceback
-from dataclasses import dataclass, asdict, replace, field, fields
-from functools import wraps
-from typing import Any, Optional, List, Tuple, Union
+from dataclasses import dataclass
+from typing import Any, List, Tuple
 import json
 import inspect
-import pathlib
+import base64
+import io
 
 from drafter.history.state import SiteState
 from drafter.data.errors import DrafterError
-from drafter.payloads import Page
 from drafter.payloads.error_page import ErrorPage, SimpleErrorPage
 from drafter.payloads.payloads import ResponsePayload
 from drafter.data.request import Request
@@ -19,6 +15,9 @@ from drafter.data.outcome import Outcome
 from drafter.routes import Router
 from drafter.audit import AuditLogger
 from drafter.config.client_server import ClientServerConfiguration
+from drafter.constants import SUBMIT_BUTTON_KEY, PREVIOUSLY_PRESSED_BUTTON
+from drafter.history import remap_hidden_form_parameters, safe_repr
+from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 
 
 @dataclass
@@ -61,6 +60,211 @@ class ClientServer:
             )
             self.state.update(initial_state)
 
+    def prepare_args(
+        self, route_func: Any, request: Request
+    ) -> Tuple[List[Any], dict, str]:
+        """
+        Processes and prepares arguments for the route function call, ensuring compatibility
+        with expected parameters, handling state insertion, remapping parameters,
+        and performing type conversion when necessary.
+
+        :param route_func: The route function whose parameters are being prepared.
+        :param request: The request containing the kwargs to process.
+        :return: A tuple containing:
+            - Processed positional arguments matching the expected parameters.
+            - Processed keyword arguments matching the expected parameters.
+            - A string representation of the final arguments for logging.
+        """
+        args = list(request.args) if request.args else []
+        kwargs = dict(request.kwargs) if request.kwargs else {}
+        button_pressed = ""
+
+        # Extract button pressed from kwargs
+        if SUBMIT_BUTTON_KEY in kwargs:
+            button_value = kwargs.pop(SUBMIT_BUTTON_KEY)
+            # The value might be a list from FormData, extract first element
+            if isinstance(button_value, list) and button_value:
+                button_value = button_value[0]
+            try:
+                button_pressed = json.loads(button_value)
+            except (json.JSONDecodeError, TypeError):
+                button_pressed = button_value
+        elif PREVIOUSLY_PRESSED_BUTTON in kwargs:
+            button_value = kwargs.pop(PREVIOUSLY_PRESSED_BUTTON)
+            if isinstance(button_value, list) and button_value:
+                button_value = button_value[0]
+            try:
+                button_pressed = json.loads(button_value)
+            except (json.JSONDecodeError, TypeError):
+                button_pressed = button_value
+
+        # Get function signature
+        signature_parameters = inspect.signature(route_func).parameters
+        expected_parameters = list(signature_parameters.keys())
+        show_names = {
+            param.name: (
+                param.kind
+                in (inspect.Parameter.KEYWORD_ONLY, inspect.Parameter.VAR_KEYWORD)
+            )
+            for param in signature_parameters.values()
+        }
+
+        # Remap hidden form parameters
+        kwargs = remap_hidden_form_parameters(kwargs, button_pressed)
+
+        # Convert list values from FormData to single values
+        # FormData might wrap values in lists
+        for key, value in kwargs.items():
+            if isinstance(value, list) and len(value) == 1:
+                kwargs[key] = value[0]
+
+        # Insert state into the beginning of args if needed
+        if (expected_parameters and expected_parameters[0] == "state") or (
+            len(expected_parameters) - 1 == len(args) + len(kwargs)
+        ):
+            args.insert(0, self.state.current)
+
+        # Check if there are too many arguments
+        if len(expected_parameters) < len(args) + len(kwargs):
+            self.logger.log_warning(
+                f"Too many arguments for {route_func.__name__}",
+                "client_server.prepare_args",
+                f"Expected {len(expected_parameters)} parameters: {', '.join(expected_parameters)}\n"
+                f"But got {len(args) + len(kwargs)}: args={repr(args)}, kwargs={repr(kwargs)}",
+            )
+            # Trim excess arguments
+            args = args[: len(expected_parameters)]
+            while len(expected_parameters) < len(args) + len(kwargs) and kwargs:
+                kwargs.pop(list(kwargs.keys())[-1])
+
+        # Type conversion if required
+        expected_types = {
+            name: p.annotation
+            for name, p in signature_parameters.items()
+        }
+        args = [
+            self.convert_parameter(param, val, expected_types)
+            for param, val in zip(expected_parameters, args)
+        ]
+        kwargs = {
+            param: self.convert_parameter(param, val, expected_types)
+            for param, val in kwargs.items()
+        }
+
+        # Verify all arguments are in expected_parameters
+        for key, value in kwargs.items():
+            if key not in expected_parameters:
+                self.logger.log_error(
+                    f"Unexpected parameter in {route_func.__name__}",
+                    "client_server.prepare_args",
+                    f"Parameter {key}={value!r} is not in expected parameters: {expected_parameters}",
+                )
+                raise ValueError(
+                    f"Unexpected parameter {key}={value!r} in {route_func.__name__}. "
+                    f"Expected parameters: {expected_parameters}"
+                )
+
+        # Build representation for logging
+        representation = [safe_repr(arg) for arg in args] + [
+            f"{key}={safe_repr(value)}"
+            if show_names.get(key, False)
+            else safe_repr(value)
+            for key, value in sorted(
+                kwargs.items(), key=lambda item: expected_parameters.index(item[0])
+            )
+        ]
+        return args, kwargs, ", ".join(representation)
+
+    def try_file_upload_conversion(self, value: Any, target_type: Any) -> Any:
+        """
+        Attempts to convert file upload data to the specified target type.
+        File uploads come from the client as dicts with filename, content (base64), type, size.
+        
+        :param value: The file upload data (dict with __file_upload__ marker).
+        :param target_type: The desired type to convert to.
+        :return: The converted value.
+        """
+        if not isinstance(value, dict) or not value.get('__file_upload__'):
+            return None
+            
+        # Decode the base64 content
+        content_base64 = value.get('content', '')
+        filename = value.get('filename', 'unknown')
+        
+        try:
+            file_bytes = base64.b64decode(content_base64)
+        except Exception as e:
+            raise ValueError(f"Could not decode file data for {filename}") from e
+        
+        # Convert based on target type
+        if target_type is bytes:
+            return file_bytes
+        elif target_type is str:
+            try:
+                return file_bytes.decode("utf-8")
+            except UnicodeDecodeError as e:
+                raise ValueError(
+                    f"Could not decode file {filename} as utf-8. Perhaps the file is not the type that you expected, or the parameter type is inappropriate?"
+                ) from e
+        elif target_type is dict:
+            return {"filename": filename, "content": file_bytes}
+        elif HAS_PILLOW and (target_type == PILImage.Image or (inspect.isclass(target_type) and issubclass(target_type, PILImage.Image))):
+            try:
+                image = PILImage.open(io.BytesIO(file_bytes))
+                image.filename = filename
+                return image
+            except Exception as e:
+                raise ValueError(
+                    f"Could not open image file {filename} as a PIL.Image. Perhaps the file is not an image, or the parameter type is inappropriate?"
+                ) from e
+        
+        # If no special conversion, return the dict
+        return value
+
+    def convert_parameter(self, param: str, val: Any, expected_types: dict) -> Any:
+        """
+        Converts a parameter value to the expected type if specified.
+
+        :param param: The parameter name.
+        :param val: The current value.
+        :param expected_types: Dictionary mapping parameter names to expected types.
+        :return: The converted value.
+        """
+        if param not in expected_types:
+            return val
+
+        expected_type = expected_types[param]
+        if expected_type == inspect.Parameter.empty:
+            return val
+
+        # Handle generic types (e.g., List[str])
+        if hasattr(expected_type, "__origin__"):
+            expected_type = expected_type.__origin__
+
+        # Check if this is a file upload and try file-specific conversions first
+        # (before checking if it's already the right type, since file uploads come as dicts)
+        file_result = self.try_file_upload_conversion(val, expected_type)
+        if file_result is not None:
+            return file_result
+
+        # If already correct type, return as-is
+        if isinstance(val, expected_type):
+            return val
+
+        # Try to convert
+        try:
+            return expected_type(val)
+        except Exception as e:
+            try:
+                from_name = type(val).__name__
+                to_name = expected_types[param].__name__
+            except (AttributeError, KeyError):
+                from_name = repr(type(val))
+                to_name = repr(expected_types[param])
+            raise ValueError(
+                f"Could not convert {param} ({val!r}) from {from_name} to {to_name}"
+            ) from e
+
     def visit(self, request: Request) -> Any:
         """
         Uses the information in the request to find and call the appropriate route function.
@@ -84,14 +288,33 @@ class ClientServer:
                 request.url,
             )
             return self.make_error_response(request.id, error, status_code=404)
+        
+        # Prepare arguments for the route function
+        try:
+            args, kwargs, arguments_repr = self.prepare_args(route_func, request)
+            self.logger.log_info(
+                f"Prepared arguments for {route_func.__name__}",
+                "client_server.visit",
+                f"Arguments: {arguments_repr}",
+            )
+        except Exception as e:
+            error = self.logger.log_error(
+                f"Error preparing arguments for URL {request.url}: {e}",
+                "client_server.visit",
+                f"Request: {repr(request)}\nRoute function: {route_func.__name__}",
+                request.url,
+                e,
+            )
+            return self.make_error_response(request.id, error)
+        
         # Call the route function to get the payload
         try:
-            payload = route_func(self.state, *request.args, **request.kwargs)
+            payload = route_func(*args, **kwargs)
         except Exception as e:
             error = self.logger.log_error(
                 f"Error while processing request for URL {request.url}: {e}",
                 "client_server.visit",
-                repr(request),
+                f"Request: {repr(request)}\nArguments: {arguments_repr}",
                 request.url,
                 e,
             )

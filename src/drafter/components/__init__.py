@@ -12,9 +12,9 @@ from drafter.components.layout import (
     Box,
 )
 from drafter.components.text import Text, PreformattedText, Header
-from drafter.components.forms import TextBox, TextArea, SelectBox
+from drafter.components.forms import TextBox, TextArea, SelectBox, CheckBox
 from drafter.components.tables import Table
-from drafter.components.links import Link, Button
+from drafter.components.links import Link, Button, Argument
 
 from drafter.components.images import Image
 from drafter.components.files import Download, FileUpload
@@ -42,9 +42,11 @@ __all__ = [
     "TextBox",
     "TextArea",
     "SelectBox",
+    "CheckBox",
     "Table",
     "Link",
     "Button",
+    "Argument",
     "Image",
     "Download",
     "FileUpload",

@@ -117,27 +117,52 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     const makeRequest = function (url: string, formData: FormData) {
         const data: Record<string, FormDataEntryValue | FormDataEntryValue[]> =
             {};
+        const filePromises: Promise<void>[] = [];
+        
         for (const [k, v] of formData.entries()) {
-            data[k] = k in data ? ([] as any[]).concat(data[k] as any, v) : v;
+            if (v instanceof File) {
+                // Handle file uploads - read as base64
+                const promise = v.arrayBuffer().then((buffer) => {
+                    const bytes = new Uint8Array(buffer);
+                    const binary = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
+                    const base64 = btoa(binary);
+                    // Store file data as a dict with filename and content
+                    const fileData = {
+                        filename: v.name,
+                        content: base64,
+                        type: v.type,
+                        size: v.size,
+                        __file_upload__: true  // Marker to identify this as a file upload
+                    };
+                    data[k] = k in data ? ([] as any[]).concat(data[k] as any, fileData) : fileData;
+                });
+                filePromises.push(promise);
+            } else {
+                data[k] = k in data ? ([] as any[]).concat(data[k] as any, v) : v;
+            }
         }
-        const dataDict: pyDict = new pyDict();
-        for (const [k, v] of Object.entries(data)) {
-            dataDict.mp$ass_subscript(
-                new pyStr(k),
-                new pyList([Sk.ffi.remapToPy(v)])
-            );
-        }
-        const args = [
-            new pyInt(requestCount),
-            new pyStr("submit"),
-            new pyStr(url),
-            new pyList([]),
-            dataDict,
-            new pyDict(),
-        ];
-        const request = Sk.misceval.callsimArray(Request, args);
-        requestCount += 1;
-        return request;
+        
+        // Wait for all files to be read
+        return Promise.all(filePromises).then(() => {
+            const dataDict: pyDict = new pyDict();
+            for (const [k, v] of Object.entries(data)) {
+                dataDict.mp$ass_subscript(
+                    new pyStr(k),
+                    new pyList([Sk.ffi.remapToPy(v)])
+                );
+            }
+            const args = [
+                new pyInt(requestCount),
+                new pyStr("submit"),
+                new pyStr(url),
+                new pyList([]),
+                dataDict,
+                new pyDict(),
+            ];
+            const request = Sk.misceval.callsimArray(Request, args);
+            requestCount += 1;
+            return request;
+        });
     };
 
     const update_site = new pyFunc(function update_site_func(
@@ -174,13 +199,12 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                     navEvent.data,
                     callback
                 );
-                // TODO: Process data into something Skulpt can understand
-                // const args = [new pyStr(pathPart), new pyStr("TEST")];
-                // const kwargs = new pyDict();
-                const newRequest = makeRequest(navEvent.url, navEvent.data);
-                const nextVisit = callback.tp$call([newRequest]);
+                // makeRequest now returns a Promise due to file handling
                 return Sk.misceval.promiseToSuspension(
-                    Sk.misceval.asyncToPromise(() => nextVisit)
+                    makeRequest(navEvent.url, navEvent.data).then((newRequest) => {
+                        const nextVisit = callback.tp$call([newRequest]);
+                        return Sk.misceval.asyncToPromise(() => nextVisit);
+                    })
                 );
             });
             debug_log("Mounted navigation handlers:", mounted);
@@ -226,6 +250,11 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                         form,
                         nearestNavLink as HTMLElement
                     );
+                    // For links, manually add the submit button namespace from data attribute
+                    const submitButton = nearestNavLink.getAttribute("data-submit-button");
+                    if (submitButton) {
+                        formData.append("--submit-button", submitButton);
+                    }
                     return onNavigation({
                         kind: "link",
                         url: name,
