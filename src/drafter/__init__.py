@@ -1,8 +1,6 @@
 # from drafter.setup import *
 from drafter.components import (
     PageContent,
-    Content,
-    Component,
     Div,
     Span,
     LineBreak,
@@ -19,6 +17,7 @@ from drafter.components import (
     TextBox,
     TextArea,
     SelectBox,
+    CheckBox,
     Table,
     Link,
     Button,
@@ -67,6 +66,7 @@ __all__ = [
     "TextBox",
     "TextArea",
     "SelectBox",
+    "CheckBox",
     "Table",
     "Link",
     "Button",
