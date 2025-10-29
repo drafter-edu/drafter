@@ -121,7 +121,7 @@ Find the file you created in the planning phase of the project (it might be a ``
 **First, rename your planning document** to something simple and easy to type, avoiding spaces and special characters. For example:
 
 * ``Project Plan.pdf`` → ``plan.pdf``
-* ``Website Design Document.docx`` → ``design.pdf``
+* ``Website Design Document.pdf`` → ``design.pdf``
 
 **Next, upload the file:**
 
@@ -147,7 +147,7 @@ Now you need to update the ``set_site_information(...)`` call in your ``main.py`
 
 Go back to ``main.py`` and click the pencil icon to edit it. Update these fields:
 
-* **author**: Your name and UD email address (e.g., ``"Jane Doe (jdoe@udel.edu)"`` or just ``"jdoe@udel.edu"``)
+* **author**: Your UD email address (e.g., ``"jdoe@udel.edu"``). You can also include your name if you prefer (e.g., ``"Jane Doe (jdoe@udel.edu)"``)
 * **description**: A brief description of what your website does
 * **sources**: If you got help from websites (besides official Drafter docs), include links and explain how they helped. If someone helped you, thank them here. Provide direct URLs wherever possible. If you had no help, you can say "None" or "Official Drafter documentation only"
 * **planning**: The exact filename of your planning document (e.g., ``"plan.pdf"`` or ``"WebsiteDesign.pdf"``)
@@ -254,7 +254,7 @@ After a successful deployment (green checkmark), you need to get the URL of your
     
     Do NOT submit:
     
-    * The URL with ``docs/`` at the end
+    * The URL with ``docs/`` at the end (this is an internal build folder, not your website)
     * The GitHub repository link (e.g., ``https://github.com/ud-s24-cs1/cs1-website-username``)
     * The local URL ``http://localhost:8080`` - this only works on your computer!
     
