@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, List
 from drafter.components.layout import _HtmlGroup
-from drafter.components.page_content import PageContent
+from drafter.components.page_content import Component
 
 
 @dataclass(repr=False)
@@ -17,7 +17,7 @@ PreformattedText = Pre
 
 
 @dataclass
-class Header(PageContent):
+class Header(Component):
     body: str
     level: int = 1
 
@@ -26,7 +26,7 @@ class Header(PageContent):
 
 
 @dataclass
-class Text(PageContent):
+class Text(Component):
     body: str
     extra_settings: dict
 

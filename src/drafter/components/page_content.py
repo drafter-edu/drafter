@@ -1,11 +1,10 @@
-from typing import Any, List, Union
-from dataclasses import dataclass
+from typing import List, Union
 
 from drafter.components.utilities.attributes import BASELINE_ATTRS
 from drafter.urls import remap_attr_styles
 
 
-class PageContent:
+class Component:
     """
     Base class for all content that can be added to a page.
     This class is not meant to be used directly, but rather to be subclassed by other classes.
@@ -119,4 +118,7 @@ class PageContent:
         return str(self)
 
 
-Content = Union[PageContent, str]
+Content = Union[Component, str]
+PageContent = Union[
+    Component, str, List[str], List[Component], List[Union[str, Component]]
+]

@@ -12,7 +12,7 @@ from drafter.urls import (
     check_invalid_external_url,
     merge_url_query_params,
 )
-from drafter.components.page_content import PageContent
+from drafter.components.page_content import Component
 from drafter.components.utilities.validation import validate_parameter_name
 
 
@@ -92,7 +92,7 @@ class LinkContent:
 
 
 @dataclass
-class Argument(PageContent):
+class Argument(Component):
     name: str
     value: Any
 
@@ -112,7 +112,7 @@ class Argument(PageContent):
 
 
 @dataclass
-class Link(PageContent, LinkContent):
+class Link(Component, LinkContent):
     text: str
     url: str
 
@@ -133,7 +133,7 @@ class Link(PageContent, LinkContent):
 
 
 @dataclass
-class Button(PageContent, LinkContent):
+class Button(Component, LinkContent):
     text: str
     url: str
     arguments: List[Argument]

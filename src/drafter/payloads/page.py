@@ -4,7 +4,7 @@ from typing import Any
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
-from drafter.components.components import PageContent, Link
+from drafter.components import Component, PageContent, Link
 from drafter.history.state import SiteState
 from drafter.payloads.base_page import BasePage
 
@@ -36,7 +36,7 @@ class Page(BasePage):
         self.state = state
         self.content = content
 
-        if isinstance(content, (str, PageContent)):
+        if isinstance(content, (str, Component)):
             # If the content is a single string, convert it to a list with that string as the only element.
             self.content = [content]
         elif not isinstance(content, list):
@@ -47,7 +47,7 @@ class Page(BasePage):
             )
         else:
             for index, chunk in enumerate(content):
-                if not isinstance(chunk, (str, PageContent)):
+                if not isinstance(chunk, (str, Component)):
                     incorrect_type = type(chunk).__name__
                     raise ValueError(
                         "The content of a page must be a list of strings or components."

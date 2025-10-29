@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import io
 import base64
-from drafter.components.page_content import PageContent
+from drafter.components.page_content import Component
 
 try:
     import matplotlib.pyplot as plt
@@ -12,7 +12,7 @@ except ImportError:
 
 
 @dataclass
-class MatPlotLibPlot(PageContent):
+class MatPlotLibPlot(Component):
     extra_matplotlib_settings: dict
     close_automatically: bool
 

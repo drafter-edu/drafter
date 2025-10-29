@@ -2,13 +2,13 @@ from dataclasses import dataclass
 import base64
 import io
 from typing import Union, List
-from drafter.components.page_content import PageContent
+from drafter.components.page_content import Component
 from drafter.components.utilities.validation import validate_parameter_name
 from drafter.image_support import HAS_PILLOW
 
 
 @dataclass
-class Download(PageContent):
+class Download(Component):
     text: str
     filename: str
     content: str
@@ -41,7 +41,7 @@ class Download(PageContent):
 
 
 @dataclass
-class FileUpload(PageContent):
+class FileUpload(Component):
     """
     A file upload component that allows users to upload files to the server.
 

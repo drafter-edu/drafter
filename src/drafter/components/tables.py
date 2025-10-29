@@ -1,12 +1,12 @@
 from dataclasses import dataclass, fields, is_dataclass
 import html
 from typing import List, Union, Any
-from drafter.components.page_content import PageContent
+from drafter.components.page_content import Component
 from drafter.old_history import safe_repr
 
 
 @dataclass
-class Table(PageContent):
+class Table(Component):
     rows: Union[List[List[str]], List[Any]]
 
     def __init__(self, rows: List[List[str]], header=None, **kwargs):

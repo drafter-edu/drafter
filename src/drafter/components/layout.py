@@ -1,22 +1,22 @@
 from dataclasses import dataclass
 from typing import Any, List, Dict
-from drafter.components.page_content import PageContent
+from drafter.components.page_content import Component
 
 
 @dataclass
-class LineBreak(PageContent):
+class LineBreak(Component):
     def __str__(self) -> str:
         return "<br />"
 
 
 @dataclass
-class HorizontalRule(PageContent):
+class HorizontalRule(Component):
     def __str__(self) -> str:
         return "<hr />"
 
 
 @dataclass(repr=False)
-class _HtmlGroup(PageContent):
+class _HtmlGroup(Component):
     content: List[Any]
     extra_settings: Dict
     kind: str
@@ -73,7 +73,7 @@ class Row(Div):
 
 
 @dataclass
-class _HtmlList(PageContent):
+class _HtmlList(Component):
     items: List[Any]
     kind: str = ""
 

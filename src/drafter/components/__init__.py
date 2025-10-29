@@ -1,4 +1,4 @@
-from drafter.components.page_content import PageContent
+from drafter.components.page_content import PageContent, Component, Content
 from drafter.components.layout import (
     Div,
     Span,
@@ -24,6 +24,8 @@ from drafter.components.plotting import MatPlotLibPlot
 
 __all__ = [
     "PageContent",
+    "Content",
+    "Component",
     "Div",
     "Span",
     "LineBreak",

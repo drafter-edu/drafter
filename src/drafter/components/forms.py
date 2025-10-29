@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 import html
 from typing import List, Optional
-from drafter.components.page_content import PageContent
+from drafter.components.page_content import Component
 from drafter.components.utilities.validation import validate_parameter_name
 
 
 @dataclass
-class TextBox(PageContent):
+class TextBox(Component):
     name: str
     kind: str
     default_value: Optional[str]
@@ -34,7 +34,7 @@ class TextBox(PageContent):
 
 
 @dataclass
-class TextArea(PageContent):
+class TextArea(Component):
     name: str
     default_value: str
     EXTRA_ATTRS = [
@@ -60,7 +60,7 @@ class TextArea(PageContent):
 
 
 @dataclass
-class SelectBox(PageContent):
+class SelectBox(Component):
     name: str
     options: List[str]
     default_value: Optional[str]
@@ -92,7 +92,7 @@ class SelectBox(PageContent):
 
 
 @dataclass
-class CheckBox(PageContent):
+class CheckBox(Component):
     EXTRA_ATTRS = ["checked"]
     name: str
     default_value: bool

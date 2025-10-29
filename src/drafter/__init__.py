@@ -1,5 +1,32 @@
 # from drafter.setup import *
-from drafter.components.components import Text, Table, TextBox, Button, MatPlotLibPlot
+from drafter.components import (
+    PageContent,
+    Content,
+    Component,
+    Div,
+    Span,
+    LineBreak,
+    HorizontalRule,
+    Row,
+    BulletedList,
+    NumberedList,
+    List,
+    Division,
+    Box,
+    Text,
+    PreformattedText,
+    Header,
+    TextBox,
+    TextArea,
+    SelectBox,
+    Table,
+    Link,
+    Button,
+    Image,
+    Download,
+    FileUpload,
+    MatPlotLibPlot,
+)
 from drafter.launch import start_server
 
 # from drafter.styling import *
@@ -16,16 +43,35 @@ from drafter.payloads.page import Page
 
 
 __all__ = [
+    "Page",
     "get_main_server",
     "set_main_server",
     "MAIN_SERVER",
     "route",
     "start_server",
-    "Page",
+    "PageContent",
+    "Div",
+    "Span",
+    "LineBreak",
+    "HorizontalRule",
+    "Row",
+    "BulletedList",
+    "NumberedList",
+    "List",
+    "Division",
+    "Box",
     "Text",
-    "Table",
+    "PreformattedText",
+    "Header",
     "TextBox",
+    "TextArea",
+    "SelectBox",
+    "Table",
+    "Link",
     "Button",
+    "Image",
+    "Download",
+    "FileUpload",
     "MatPlotLibPlot",
 ]
 
