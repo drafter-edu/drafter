@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from typing import Any, List, Tuple
 import json
 import inspect
+import base64
+import io
 
 from drafter.history.state import SiteState
 from drafter.data.errors import DrafterError
@@ -15,6 +17,7 @@ from drafter.audit import AuditLogger
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.constants import SUBMIT_BUTTON_KEY, PREVIOUSLY_PRESSED_BUTTON
 from drafter.history import remap_hidden_form_parameters, safe_repr
+from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 
 
 @dataclass
@@ -172,6 +175,52 @@ class ClientServer:
         ]
         return args, kwargs, ", ".join(representation)
 
+    def try_file_upload_conversion(self, value: Any, target_type: Any) -> Any:
+        """
+        Attempts to convert file upload data to the specified target type.
+        File uploads come from the client as dicts with filename, content (base64), type, size.
+        
+        :param value: The file upload data (dict with __file_upload__ marker).
+        :param target_type: The desired type to convert to.
+        :return: The converted value.
+        """
+        if not isinstance(value, dict) or not value.get('__file_upload__'):
+            return None
+            
+        # Decode the base64 content
+        content_base64 = value.get('content', '')
+        filename = value.get('filename', 'unknown')
+        
+        try:
+            file_bytes = base64.b64decode(content_base64)
+        except Exception as e:
+            raise ValueError(f"Could not decode file data for {filename}") from e
+        
+        # Convert based on target type
+        if target_type is bytes:
+            return file_bytes
+        elif target_type is str:
+            try:
+                return file_bytes.decode("utf-8")
+            except UnicodeDecodeError as e:
+                raise ValueError(
+                    f"Could not decode file {filename} as utf-8. Perhaps the file is not the type that you expected, or the parameter type is inappropriate?"
+                ) from e
+        elif target_type is dict:
+            return {"filename": filename, "content": file_bytes}
+        elif HAS_PILLOW and (target_type == PILImage.Image or (inspect.isclass(target_type) and issubclass(target_type, PILImage.Image))):
+            try:
+                image = PILImage.open(io.BytesIO(file_bytes))
+                image.filename = filename
+                return image
+            except Exception as e:
+                raise ValueError(
+                    f"Could not open image file {filename} as a PIL.Image. Perhaps the file is not an image, or the parameter type is inappropriate?"
+                ) from e
+        
+        # If no special conversion, return the dict
+        return value
+
     def convert_parameter(self, param: str, val: Any, expected_types: dict) -> Any:
         """
         Converts a parameter value to the expected type if specified.
@@ -191,6 +240,12 @@ class ClientServer:
         # Handle generic types (e.g., List[str])
         if hasattr(expected_type, "__origin__"):
             expected_type = expected_type.__origin__
+
+        # Check if this is a file upload and try file-specific conversions first
+        # (before checking if it's already the right type, since file uploads come as dicts)
+        file_result = self.try_file_upload_conversion(val, expected_type)
+        if file_result is not None:
+            return file_result
 
         # If already correct type, return as-is
         if isinstance(val, expected_type):
