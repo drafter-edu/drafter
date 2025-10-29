@@ -7,52 +7,51 @@ When you have finished developing your website, you can deploy it to the world o
 GitHub Pages is a free and easy way to host your website.
 Although normally Github Pages is only useful for hosting frontend websites, Drafter can still work with it.
 
-To deploy your website to GitHub Pages, you need to follow these steps:
+Follow these 9 steps in order to deploy your website:
 
-Create the Repository
----------------------
+Step 1: Create the Repository
+------------------------------
 
-1. Use the URL provided by your instructor to create a new repository on Github (**Make sure you use the instructor provided URL for your classroom!**)
+Use the URL provided by your instructor to create a new repository on Github. **Make sure you use the instructor provided URL for your classroom!**
 
 Once the repository is created, you will see that there are already a bunch of files present, and a settings bar.
 
 .. image:: images/deployment_github_main.png
     :alt: Github Repository
 
-Enable Github Pages
--------------------
+Step 2: Enable GitHub Pages
+----------------------------
 
-2. You will need to turn on GitHub pages in order to host your site. To do this, go to the ``Settings`` tab of your repository.
+You need to turn on GitHub Pages in order to host your site. Go to the ``Settings`` tab of your repository.
 
 .. image:: images/deployment_github_settings.png
     :alt: Github Settings
 
-Scroll down to the ``Pages`` section on the left side of the page. Under the source dropdown, select ``Github Actions``.
+On the left side of the page, scroll down and click on ``Pages``. Under the source dropdown, select ``GitHub Actions``.
 
 .. image:: images/deployment_github_pages.png
     :alt: Github Pages
 
-Your site is now configured for deployment. After uploading your website code, you will manually trigger the deployment using the GitHub Actions workflow interface.
+Your site is now configured for deployment.
 
-Upload Your Website Code
-------------------------
+Step 3: Edit Your Main.py File
+-------------------------------
 
-Warning: if your instructor has requirements about commit messages, review those before doing this step. **Commit messages are very hard to change after the fact.** 
+.. warning::
+    If your instructor has requirements about commit messages, review those before doing this step. **Commit messages are very hard to change after the fact.**
 
-3. Go to the ``Code`` tab and you will see a few files listed.
+Go to the ``Code`` tab and you will see a few files listed. The most important file is ``main.py``, which is where your website code goes. Click on ``main.py``.
 
 .. image:: images/deployment_github_code2.png
     :alt: Github Code
 
-The most important file you will see is ``main.py``. You can add other files to this folder, and they will be available on your website. However, we must have a ``main.py`` file, which is where the main code for your site should go. Click on the file.
-
-When you click on the file, it will show you the contents of the file. You can edit the file by clicking on the pencil icon.
+When you click on the file, it will show you the contents. Click on the pencil icon to edit the file.
 
 .. image:: images/deployment_github_edit2.png
     :alt: Github Edit Main
 
 The editor area allows you to paste in your code. You must add the following lines of code to your project to set up your site's metadata.
-These lines need to be after the import statements, but before the ``start_server(...)`` line.
+Put these lines after the import statements, but before the ``start_server(...)`` line.
 We suggest placing them right before your dataclasses and routes.
 
 .. code-block:: python
@@ -70,221 +69,261 @@ We suggest placing them right before your dataclasses and routes.
 
 These lines of code:
 
-1. **Set the site information** - This is required and provides metadata about your site including your name/email, description, sources, planning document filename, and any relevant links.
-2. Hide all of the debug information - you may want to comment this line out while you do any debugging.
-3. Set the title of the website in the tab.
-4. Make the website stretch to fill the whole screen, instead of just the small box.
+1. **Set the site information** - This is required and provides metadata about your site including your email, description, sources, planning document filename, and relevant links.
+2. **Hide debug information** - You may want to comment this line out while debugging.
+3. **Set the title** - This sets the title shown in the browser tab.
+4. **Make the website full screen** - This makes the website stretch to fill the whole screen instead of a small box.
 
-There are many other ways to style your website, but these are a starting point.
+There are many other ways to style your website, but these are a good starting point.
 
-You can change the filename here, but your instructor may penalize you if you do so, so do not change the filename.
+.. note::
+    You can change the filename, but your instructor may penalize you if you do so.
 
-When you are done, click on the ``Commit changes`` button in the top-right of the page.
+When you are done editing, click on the ``Commit changes`` button in the top-right of the page.
 
 .. image:: images/deployment_github_editor.png
     :alt: Github Editor
 
-A box will appear that asks you to write a commit message.
-This is a message that describes the changes you made to the file.
-You can write anything you want here, but it is recommended to write something that describes the changes you made.
-For example, you could write ``Added website``. If you leave the default message, your instructor may penalize you.
-**Always write concise, descriptive messages!**
+A box will appear asking you to write a commit message. This describes what you changed.
+The default message is generic - write something descriptive like "Added my website code" instead.
+**Always write concise, descriptive messages!** Your instructor may penalize you for using default messages.
 
-Once you have changed the default message to be more descriptive, you must click on the ``Commit changes`` button to save your changes.
+Click on the ``Commit changes`` button to save your changes.
 
 .. image:: images/deployment_github_commit.png
     :alt: Github Commit
 
-If you have other files besides ``main.py``, then check the appendix at the bottom of this document for how to upload them: :ref:`appendix_upload_files`.
+Step 4: Upload Additional Files (If Needed)
+-------------------------------------------
 
-Deploy Your Website
--------------------
+If you have other files besides ``main.py`` (like images, data files, or other Python files), follow these steps to upload them:
 
-Once you have uploaded your ``main.py`` file (and any additional files you need), you need to manually trigger the deployment of your website.
-
-1. Go to the ``Actions`` tab of your repository.
-
-.. image:: images/deployment_github_actions.png
-    :alt: Github Actions
-
-2. Click on the ``Deploy main branch as website`` workflow on the left side.
-
-3. Click the ``Run workflow`` button on the right side, then click the green ``Run workflow`` button in the dropdown.
-
-Your site will now start deploying. You can monitor the progress of the deployment in the Actions tab. If all goes well, then the deployment will succeed, and a link will be provided to your deployed website. If there are any errors, you will need to fix them and try again.
-
-.. _video:
-
-
-
-Record a Video
---------------
-
-4. Record a video of your web application running, and make sure you show and address all of the following with a voiceover:
-
-* What your web application does
-* What each page of your website looks like in action (i.e., walk through the website)
-* What the state of your website looks (i.e., explain the fields of your State dataclass)
-* Make sure that your video is audible and visible. If we cannot see parts or hear parts, we will treat that those parts as if they do not exist.
-
-Here are some details to keep in mind:
-
-* You do not need to walk through any of the code of your website, but we do want to see all of its features.
-* Aim for a video that is 2-5 minutes in length. Do not pad with unnecessary details, but do not skip important parts.
-* Think of this video as something you will want to put into a portfolio when you apply for internships and jobs. Try to do a good job.
-* Zoom can be used to record videos; again, just make sure that we are able to see and hear everything clearly.
-
-Upload the video to a website where it can be viewed by the graders.
-If the video is not publicly accessible, you will not receive credit for this part of the assignment.
-Copy the URL of the video to paste into the call to your ``set_site_information(...)`` function, as one of the strings in the ``links`` argument list.
-
-.. note::
-
-    If you want to record the deployed version of your website, you can skip this step and record the video after you have deployed your website (see step :ref:`view_deployment` ) . Just make sure to record the video before the deadline.
-
-.. _planning_document:
-
-Upload the Planning Document
-----------------------------
-
-5. Upload your planning document to the website repository, alongside the ``main.py`` file.
-
-First, find the file that you created in the planning phase of the project.
-It might be a ``pdf``, ``docx``, ``png``, or some other file type.
-Change the filename of the planning document to something simple and easy to type.
-In particular, we suggest you avoid spaces and special characters in the filename.
-For example, if your planning document is called ``Project Plan.pdf``, you could rename it to just ``plan.pdf``.
-
-Next, you will need to upload the file to the repository.
+1. Go to the ``Code`` tab
+2. Click on the ``Add file`` button and then ``Upload files``
 
 .. image:: images/deployment_github_upload2.png
     :alt: Github Upload
 
-You can either drag your file directly into the folder area or click on the ``Add file`` button and then ``Upload files`` to select the file from your computer.
-Once they have been added ("staged"), you can click on the ``Commit changes`` button to save your changes.
+3. Either drag your files directly into the folder area or click to select them from your computer
+4. Once they have been added, click on the ``Commit changes`` button to save them
+5. Write a descriptive commit message like "Added image files"
 
-Once the file is committed, you will see it in the interface. Make a careful note of the filename, exactly as it is typed.
-In this case, the file is called ``WebsiteDesign.pdf``
+If you have multiple files, you can upload them all at once.
+
+.. note::
+    If you are using additional Python libraries, you can include a ``requirements.txt`` file to list them. However, not all third-party libraries are supported on deployed Drafter, so check with your instructor before using them.
+
+Step 5: Upload Your Planning Document
+--------------------------------------
+
+Find the file you created in the planning phase of the project (it might be a ``pdf``, ``docx``, ``png``, or other file type).
+
+**First, rename your planning document** to something simple and easy to type, avoiding spaces and special characters. For example:
+
+* ``Project Plan.pdf`` → ``plan.pdf``
+* ``Website Design Document.docx`` → ``design.pdf``
+
+**Next, upload the file:**
+
+1. Go to the ``Code`` tab
+2. Click on ``Add file`` → ``Upload files``
+
+.. image:: images/deployment_github_upload2.png
+    :alt: Github Upload
+
+3. Drag your planning document into the folder area or click to select it
+4. Click ``Commit changes`` to save it
+5. Write a descriptive commit message
+
+After uploading, you'll see the file in the interface. **Write down the exact filename** - you'll need it in the next step.
 
 .. image:: images/deployment_github_added.png
     :alt: Github Uploaded
 
-Writing the ``set_site_information`` Call
------------------------------------------
+Step 6: Update set_site_information with Your Details
+------------------------------------------------------
 
-You still need to link the file in our ``set_site_information`` call.
-If you have not already done so, go back to the ``main.py`` file and click on the pencil icon to edit it.
-Then, in the call to ``set_site_information(...)``, replace the text in the ``planning`` argument with the exact filename of your planning document (e.g., ``WebsiteDesign.pdf``).
+Now you need to update the ``set_site_information(...)`` call in your ``main.py`` file with all your actual information.
 
-Other required fields in the ``set_site_information(...)`` call include:
+Go back to ``main.py`` and click the pencil icon to edit it. Update these fields:
 
-* The name of your site
+* **author**: Your name and UD email address (e.g., ``"Jane Doe (jdoe@udel.edu)"`` or just ``"jdoe@udel.edu"``)
+* **description**: A brief description of what your website does
+* **sources**: If you got help from websites (besides official Drafter docs), include links and explain how they helped. If someone helped you, thank them here. Provide direct URLs wherever possible. If you had no help, you can say "None" or "Official Drafter documentation only"
+* **planning**: The exact filename of your planning document (e.g., ``"plan.pdf"`` or ``"WebsiteDesign.pdf"``)
+* **links**: A list of URLs, including:
+  
+  * The URL to your GitHub repository
+  * The URL to your video (see Step 7 below - you can add this after recording the video)
+
+Example:
+
+.. code-block:: python
+
+    set_site_information(
+        author="jdoe@udel.edu",
+        description="A quiz website about marine biology",
+        sources="Used W3Schools for CSS help: https://www.w3schools.com/css/",
+        planning="plan.pdf",
+        links=["https://github.com/ud-s24-cs1/website-jdoe", "https://youtu.be/abc123"]
+    )
+
+.. note::
+    The information in ``set_site_information`` can be a string, a list of strings, or even ``PageContent`` like ``Div``, ``Link``, etc.
+
+Click ``Commit changes`` and write a descriptive commit message like "Updated site information".
+
+.. image:: images/deployment_github_commit.png
+    :alt: Github Commit
+
+.. _video:
+
+Step 7: Record a Video
+-----------------------
+
+Record a video of your web application running. Make sure you show and address all of the following with a voiceover:
+
 * What your web application does
-* Your name and UD email address
-* If you got significant help from a website besides the official Drafter documentation, include links along with explanations of how the site helped you. If someone helped you, this is also a nice place to mention them to thank them for their help. Make sure you provide direct URLs where ever you can.
-* The planning document that you created, provided as the filename (see :ref:`planning_document` above).
-* The URL (address) of the publicly-accessible video (see :ref:`video` above) that you uploaded, replacing the existing text inside of the angle brackets (``<https://my.video.com/>``) with the URL of your video.
+* What each page of your website looks like in action (walk through the website)
+* What the state of your website looks like (explain the fields of your State dataclass)
+* Make sure your video is audible and visible - if we cannot see or hear parts, we will treat those parts as if they do not exist
 
-The information above can be a string, a list of strings, or even ``PageContent`` like ``Div``, ``Link``, etc.
+Here are some tips:
 
-When you are done, click on the ``Commit changes`` button to save your changes.
+* You do not need to walk through the code, but we do want to see all features
+* Aim for 2-5 minutes in length - don't pad with unnecessary details, but don't skip important parts
+* Think of this as something for your portfolio when you apply for internships and jobs
+* You can use Zoom to record videos - just make sure everything is clear
 
-.. _view_deployment:
+**Upload your video** to a website where it can be viewed by the graders (YouTube, Google Drive with sharing enabled, etc.).
+If the video is not publicly accessible, you will not receive credit for this part.
 
-View the Deployment
--------------------
+**Copy the URL** of your video and add it to the ``links`` list in your ``set_site_information(...)`` call in ``main.py``.
 
-7. After you have manually triggered the deployment (see the "Deploy Your Website" section above), you can check out your deployed website. Click on the ``Actions`` link to see the deployments. You can click on the latest deployment to see the logs.
+.. note::
+
+    You can record the video either before or after deploying your website. If you want to record the deployed version, wait until after Step 8, then come back and add the video URL to your ``main.py`` file. Just make sure to record the video before the deadline.
+
+Step 8: Deploy Your Website
+----------------------------
+
+Once you have uploaded your files and updated your code, you need to manually trigger the deployment of your website.
+
+1. Go to the ``Actions`` tab of your repository
 
 .. image:: images/deployment_github_actions.png
     :alt: Github Actions
 
-If everything is successful, you will see a green checkmark. To actually access your website, you will need to click into the deployment details to get the final URL.
-Click on the green checkmark, and you will be presented with the deployed URL. This is what you will submit on Canvas, but check to make sure your game works!
+2. Click on the ``Deploy main branch as website`` workflow on the left side
 
-Once you have the deployed URL, you can skip down to the last step to submit on Canvas (see :ref:`submit_on_canvas`).
+3. Click the ``Run workflow`` button on the right side, then click the green ``Run workflow`` button in the dropdown
+
+Your site will now start deploying! You can monitor the progress in the Actions tab.
+
+**If the deployment succeeds** (green checkmark), you'll see a link to your deployed website.
+
+**If you see a red X**, there was an error. Click on the red X to see the job summary, then click the next red X to see the deployment logs. The error message will help you understand what went wrong.
+
+Common errors include:
+
+* Forgetting to enable GitHub Pages (Step 2)
+* Syntax errors in your Python code
+* Missing required files
+
+If you see an error, fix it in your code, commit the changes, and then manually trigger a new deployment again (repeat this step).
+
+.. note::
+    The Actions section lists all deploy attempts in chronological order. Past attempts with red X marks are okay as long as the most recent (top) attempt was successful.
+
+Step 9: Get Your Deployed URL and Submit
+-----------------------------------------
+
+After a successful deployment (green checkmark), you need to get the URL of your deployed website.
+
+1. In the ``Actions`` tab, click on the green checkmark of your successful deployment
 
 .. image:: images/deployment_github_success.png
     :alt: Github Success
 
-If you see a red X, there was an error.
-You need to click on the red X to get into the job summary, and then click the next red X to get into the deployment logs.
+2. You will be presented with the deployed URL - this is what you will submit on Canvas
 
-.. image:: images/deployment_github_error.png
-    :alt: Github Error
+3. **Test your deployed website** by clicking the URL and making sure everything works correctly
 
-The error below is just an example of what can go wrong.
+.. warning::
+    Make sure you submit the **deployed URL**, which will look something like: ``https://ud-s24-cs1.github.io/cs1-website-username/``
+    
+    Do NOT submit:
+    
+    * The URL with ``docs/`` at the end
+    * The GitHub repository link (e.g., ``https://github.com/ud-s24-cs1/cs1-website-username``)
+    * The local URL ``http://localhost:8080`` - this only works on your computer!
+    
+    Test the link after you submit, from another device if possible. Submitting the wrong link could earn you zero points!
 
-.. image:: images/deployment_github_details.png
-    :alt: Github Error
+Checking Your Site Information
+-------------------------------
 
-The screenshot above is just an example of what can go wrong; you might experience something completely different.
-In this particular case, the error is simple - the developer forgot to turn on the Github Pages feature in the settings (step 2).
+If you set your site information correctly, it will be available by adding ``--about`` to your deployed URL.
 
-If you see an error, you can try to fix it and push the changes to the repository.
-After making your changes, you will need to manually trigger a new deployment by going to the Actions tab and running the workflow again (see the "Deploy Your Website" section above).
-You can check the progress of the new attempt in the Actions tab again.
+For example, if your deployed URL is ``https://ud-s24-cs1.github.io/cs1-website-username/``, then view your site information at:
 
-The Actions section of the repository will list prior deploy attempts in chronological order. So, if you see past attempts with the red X, don't worry about it as long as the top (most recent) deploy attempt was successful. That's the one that matters. 
+``https://ud-s24-cs1.github.io/cs1-website-username/--about``
 
-You can also get more details about the deployment from the deployment dashboard (see :ref:`deployment_dashboard`).
-Unless there is a catastrophic error (e.g., you didn't enable GitHub Pages), you should be able to see the dashboard.
+Make sure that:
 
-View the Site Information
--------------------------
-
-8. If you set your site information correctly, it will be available by navigating to the ``--about`` url. For example, if your deployed URL is ``https://ud-s24-cs1.github.io/cs1-website-username/``, then you can view the site information at ``https://ud-s24-cs1.github.io/cs1-website-username/--about``.
-
-Make sure that all of the links work and that the video is visible and audible.
-
-.. _deployment_dashboard:
+* All the links work
+* The video is visible and audible
+* The planning document link works
+* All information is accurate
 
 Deployment Dashboard
 --------------------
 
-Whether your deployment succeeds or fails, there will be a lot of useful information available in the deployment dashboard.
+Whether your deployment succeeds or fails, there is useful information available in the deployment dashboard.
 
-Take your original deployment URL (e.g., ``https://ud-s24-cs1.github.io/cs1-website-username/``) and add ``dashboard/`` to the end of it (e.g., ``https://ud-s24-cs1.github.io/cs1-website-username/dashboard/``).
+Take your original deployment URL (e.g., ``https://ud-s24-cs1.github.io/cs1-website-username/``) and add ``dashboard/`` to the end:
+
+``https://ud-s24-cs1.github.io/cs1-website-username/dashboard/``
 
 .. image:: images/deployment_dashboard.png
     :alt: Deployment Dashboard
 
-If there was an error or warning during deployment, that will be shown at the top.
-Then there are quick links to things like the deployed site, the github deployment logs, the GitHub repository, commit messages, and your tests.
-At the bottom you will see your Build Log, which includes all the steps that Drafter took to deploy your site.
+The dashboard shows:
 
-.. _submit_on_canvas:
+* Any errors or warnings during deployment (shown at the top)
+* Quick links to the deployed site, GitHub deployment logs, GitHub repository, commit messages, and tests
+* Your Build Log at the bottom, which includes all the steps Drafter took to deploy your site
 
-Submit on Canvas
-----------------
-
-9. Once you have successfully deployed your website, you can submit the URL of your website.
-
-Make sure that you submit the **deployed URL** of your website, which will look something like this: ``https://ud-s24-cs1.github.io/cs1-website-username/``.
-
-.. warning::
-    Do not the submit the deployed URL with the ``docs/`` extension or the link to the GitHub repository (e.g., ``https://github.com/ud-s24-cs1/cs1-website-username``). Also do not submit the original `https://localhost:8080` link; that URL only works on your computer while the program is running locally, so it will not work on other peoples' machine. Test the link after you submit, from another device. Submitting the wrong link will potentially earn you zero points!
-
+This is very helpful for debugging deployment issues.
 
 .. _appendix_upload_files:
 
-Appendix: Uploading Files
--------------------------
+Common Issues and Tips
+----------------------
 
-If you have files other than ``main.py`` that you need to upload to your website, you can follow these steps.
+**My deployment failed - what should I do?**
 
-1. Go to the ``Code`` tab.
-2. Click on the ``Add file`` button and then ``Upload files`` to select the file from your computer.
-3. Once they have been added ("staged"), you can click on the ``Commit changes`` button to save your changes. Make sure you write a descriptive commit message!
+1. Check the error message in the Actions tab logs
+2. Common problems include:
+   
+   * Not enabling GitHub Pages (go back to Step 2)
+   * Syntax errors in your Python code
+   * Missing files or wrong filenames
 
-If you have multiple files, you can upload them all at once by dragging them into the folder area.
+3. Fix the problem in your code
+4. Commit your changes with a descriptive message
+5. Go back to Step 8 and manually trigger a new deployment
 
-If you are using additional Python libraries, you can include a ``requirements.txt`` file in the ``website`` folder to list the libraries you are using.
-This file should be uploaded in the same way as other files.
-However, not all third-party libraries are supported on the deployed version of Drafter, so you should check with your instructor before using them.
+**How do I update my website after I've deployed it?**
 
-Common Errors
--------------
+1. Make your changes to ``main.py`` or other files in the GitHub editor
+2. Commit your changes with a descriptive message
+3. Go to the Actions tab and manually trigger a new deployment (Step 8)
 
-* **Deployment fails**:
-    * If your deployment fails, you can check the logs in the Actions tab to see what went wrong. Common errors include not enabling GitHub Pages, not uploading the correct files, or having a syntax error in your code.
+**Can I use additional Python files or libraries?**
+
+Yes! Upload additional Python files following the instructions in Step 4. For libraries, create a ``requirements.txt`` file, but check with your instructor first as not all libraries are supported on deployed Drafter.
+
+**What if I recorded my video of the local version but now want to show the deployed version?**
+
+You can record a new video anytime. Just update the ``links`` in your ``set_site_information(...)`` call with the new video URL, commit the change, and redeploy.
