@@ -218,16 +218,22 @@ Once you have uploaded your files and updated your code, you need to manually tr
 
 1. Go to the ``Actions`` tab of your repository
 
-.. image:: images/deployment_github_actions.png
+.. image:: images/deployment_github_actions2.png
     :alt: Github Actions
 
 2. Click on the ``Deploy main branch as website`` workflow on the left side
 
 3. Click the ``Run workflow`` button on the right side, then click the green ``Run workflow`` button in the dropdown
 
+.. image:: images/deployment_github_workflow.png
+    :alt: Run workflow button
+
 Your site will now start deploying! You can monitor the progress in the Actions tab.
 
 **If the deployment succeeds** (green checkmark), you'll see a link to your deployed website.
+
+.. image:: images/deployment_github_actions.png
+    :alt: Github Actions Success
 
 **If you see a red X**, there was an error. Click on the red X to see the job summary, then click the next red X to see the deployment logs. The error message will help you understand what went wrong.
 
