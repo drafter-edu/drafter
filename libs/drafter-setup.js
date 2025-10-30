@@ -79,6 +79,12 @@ function handleRedirectNavigation() {
     if (pathMatch) {
         // Navigate to the target path using the Bottle mechanism
         const target = pathMatch[1].replace(/~and~/g, '&');
+        // Remove the query string so that it does not get consumed again
+        const currentUrl = window.location.href;
+        const baseUrl = currentUrl.split('?')[0]; // Splits at the first '?' and takes the part before it.
+
+        // Update the URL in the browser's history without reloading the page
+        history.replaceState(null, '', baseUrl);
         Sk.bottle.changeLocation(target);
     }
 }
