@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Deployment &#8212; Drafter 1.8.6 documentation</title>
+    <title>Deployment &#8212; Drafter 1.8.7 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=daef7da6"></script>
+    <script src="../_static/documentation_options.js?v=7e97f9bf"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -56,7 +56,7 @@
         <li class="right" >
           <a href="testing.html" title="Testing Drafter Applications"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.8.6 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.8.7 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Deployment</a></li> 
       </ul>
@@ -104,9 +104,10 @@ Put these lines after the import statements, but before the <code class="docutil
 We suggest placing them right before your dataclasses and routes.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">set_site_information</span><span class="p">(</span>
     <span class="n">author</span><span class="o">=</span><span class="s2">&quot;your_email@udel.edu&quot;</span><span class="p">,</span>
-    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A brief description of what your website does&quot;</span><span class="p">,</span>
-    <span class="n">sources</span><span class="o">=</span><span class="s2">&quot;List any help resources or sources you used&quot;</span><span class="p">,</span>
-    <span class="n">planning</span><span class="o">=</span><span class="s2">&quot;your_planning_document.pdf&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;A brief description of what your website does.</span>
+<span class="s2">    Use a triple quoted string if you want to span multiple lines.&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;List any help resources or sources you used&quot;</span><span class="p">],</span>
+    <span class="n">planning</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;your_planning_document.pdf&quot;</span><span class="p">],</span>
     <span class="n">links</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;https://github.com/your-username/your-repo&quot;</span><span class="p">]</span>
 <span class="p">)</span>
 <span class="n">hide_debug_information</span><span class="p">()</span>
@@ -124,7 +125,7 @@ We suggest placing them right before your dataclasses and routes.</p>
 <p>There are many other ways to style your website, but these are a good starting point.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You can change the filename, but your instructor may penalize you if you do so.</p>
+<p>You can change the filename, but this might cause deployment issues. Do not change the filename unless your instructor says it is okay.</p>
 </div>
 <p>When you are done editing, click on the <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> button in the top-right of the page.</p>
 <img alt="Github Editor" src="../_images/deployment_github_editor.png" />
@@ -144,6 +145,9 @@ The default message is generic - write something descriptive like “Added my we
 <img alt="Github Upload" src="../_images/deployment_github_upload2.png" />
 <ol class="arabic simple" start="3">
 <li><p>Either drag your files directly into the folder area or click to select them from your computer</p></li>
+</ol>
+<img alt="Github Upload" src="../_images/deployment_github_upload.png" />
+<ol class="arabic simple" start="4">
 <li><p>Once they have been added, click on the <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> button to save them</p></li>
 <li><p>Write a descriptive commit message like “Added image files”</p></li>
 </ol>
@@ -172,7 +176,8 @@ The default message is generic - write something descriptive like “Added my we
 <li><p>Click <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> to save it</p></li>
 <li><p>Write a descriptive commit message</p></li>
 </ol>
-<p>After uploading, you’ll see the file in the interface. <strong>Write down the exact filename</strong> - you’ll need it in the next step.</p>
+<p>After uploading, you’ll see the file in the interface. <strong>Write down the exact filename</strong> - you’ll need it in the next step.
+The example shown here is <code class="docutils literal notranslate"><span class="pre">WebsiteDesign.png</span></code>.</p>
 <img alt="Github Uploaded" src="../_images/deployment_github_added.png" />
 </section>
 <section id="step-6-update-set-site-information-with-your-details">
@@ -193,17 +198,18 @@ The default message is generic - write something descriptive like “Added my we
 </ul>
 <p>Example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">set_site_information</span><span class="p">(</span>
-    <span class="n">author</span><span class="o">=</span><span class="s2">&quot;jdoe@udel.edu&quot;</span><span class="p">,</span>
-    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A quiz website about marine biology&quot;</span><span class="p">,</span>
-    <span class="n">sources</span><span class="o">=</span><span class="s2">&quot;Used W3Schools for CSS help: https://www.w3schools.com/css/&quot;</span><span class="p">,</span>
-    <span class="n">planning</span><span class="o">=</span><span class="s2">&quot;plan.pdf&quot;</span><span class="p">,</span>
-    <span class="n">links</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;https://github.com/ud-s24-cs1/website-jdoe&quot;</span><span class="p">,</span> <span class="s2">&quot;https://youtu.be/abc123&quot;</span><span class="p">]</span>
+    <span class="n">author</span><span class="o">=</span><span class="s2">&quot;acbart@udel.edu&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;A quiz website about marine biology. Users can take quizzes.&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Used W3Schools for CSS help:&quot;</span><span class="p">,</span> <span class="s2">&quot;https://www.w3schools.com/css/&quot;</span><span class="p">],</span>
+    <span class="n">planning</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plan.pdf&quot;</span><span class="p">],</span>
+    <span class="n">links</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;https://github.com/ud-s24-cs1/website-acbart&quot;</span><span class="p">,</span> <span class="s2">&quot;https://youtu.be/abc123&quot;</span><span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The information in <code class="docutils literal notranslate"><span class="pre">set_site_information</span></code> can be a string, a list of strings, or even <code class="docutils literal notranslate"><span class="pre">PageContent</span></code> like <code class="docutils literal notranslate"><span class="pre">Div</span></code>, <code class="docutils literal notranslate"><span class="pre">Link</span></code>, etc.</p>
+<p>The information in <code class="docutils literal notranslate"><span class="pre">set_site_information</span></code> can be a string, a list of strings, or even <code class="docutils literal notranslate"><span class="pre">PageContent</span></code> like <code class="docutils literal notranslate"><span class="pre">Div</span></code>, <code class="docutils literal notranslate"><span class="pre">Link</span></code>, etc.
+Remember that you can use triple quotes for multi-line strings. If the text is a hyperlink, then it will automatically be turned into a clickable link on the about page.</p>
 </div>
 <p>Click <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">changes</span></code> and write a descriptive commit message like “Updated site information”.</p>
 <img alt="Github Commit" src="../_images/deployment_github_commit.png" />
@@ -246,11 +252,15 @@ If the video is not publicly accessible, you will not receive credit for this pa
 <p>Your site will now start deploying! You can monitor the progress in the Actions tab.</p>
 <p><strong>If the deployment succeeds</strong> (green checkmark), you’ll see a link to your deployed website.</p>
 <p><strong>If you see a red X</strong>, there was an error. Click on the red X to see the job summary, then click the next red X to see the deployment logs. The error message will help you understand what went wrong.</p>
+<img alt="Details about errors during deployment" src="../_images/deployment_github_details.png" />
 <p>Common errors include:</p>
 <ul class="simple">
 <li><p>Forgetting to enable GitHub Pages (Step 2)</p></li>
 <li><p>Syntax errors in your Python code</p></li>
 <li><p>Missing required files</p></li>
+<li><p>Forgetting to update <code class="docutils literal notranslate"><span class="pre">set_site_information(...)</span></code> with your details</p></li>
+<li><p>Using unsupported libraries</p></li>
+<li><p>Changed the filename of <code class="docutils literal notranslate"><span class="pre">main.py</span></code></p></li>
 </ul>
 <p>If you see an error, fix it in your code, commit the changes, and then manually trigger a new deployment again (repeat this step).</p>
 <div class="admonition note">
@@ -259,7 +269,7 @@ If the video is not publicly accessible, you will not receive credit for this pa
 </div>
 </section>
 <section id="step-9-get-your-deployed-url-and-submit">
-<h2>Step 9: Get Your Deployed URL and Submit<a class="headerlink" href="#step-9-get-your-deployed-url-and-submit" title="Link to this heading">¶</a></h2>
+<span id="submit-on-canvas"></span><h2>Step 9: Get Your Deployed URL and Submit<a class="headerlink" href="#step-9-get-your-deployed-url-and-submit" title="Link to this heading">¶</a></h2>
 <p>After a successful deployment (green checkmark), you need to get the URL of your deployed website.</p>
 <ol class="arabic simple">
 <li><p>In the <code class="docutils literal notranslate"><span class="pre">Actions</span></code> tab, click on the green checkmark of your successful deployment</p></li>
@@ -295,7 +305,7 @@ If the video is not publicly accessible, you will not receive credit for this pa
 </ul>
 </section>
 <section id="deployment-dashboard">
-<h2>Deployment Dashboard<a class="headerlink" href="#deployment-dashboard" title="Link to this heading">¶</a></h2>
+<span id="id2"></span><h2>Deployment Dashboard<a class="headerlink" href="#deployment-dashboard" title="Link to this heading">¶</a></h2>
 <p>Whether your deployment succeeds or fails, there is useful information available in the deployment dashboard.</p>
 <p>Take your original deployment URL (e.g., <code class="docutils literal notranslate"><span class="pre">https://ud-s24-cs1.github.io/cs1-website-username/</span></code>) and add <code class="docutils literal notranslate"><span class="pre">dashboard/</span></code> to the end:</p>
 <p><code class="docutils literal notranslate"><span class="pre">https://ud-s24-cs1.github.io/cs1-website-username/dashboard/</span></code></p>
@@ -318,6 +328,11 @@ If the video is not publicly accessible, you will not receive credit for this pa
 <li><p>Not enabling GitHub Pages (go back to Step 2)</p></li>
 <li><p>Syntax errors in your Python code</p></li>
 <li><p>Missing files or wrong filenames</p></li>
+<li><p>Forgot to upload your website code to <code class="docutils literal notranslate"><span class="pre">main.py</span></code></p></li>
+<li><p>Changed <code class="docutils literal notranslate"><span class="pre">set_site_information(...)</span></code> incorrectly</p></li>
+<li><p>Changed the filename of <code class="docutils literal notranslate"><span class="pre">main.py</span></code></p></li>
+<li><p>Using unsupported libraries without checking first</p></li>
+<li><p>Forgot to re-run the deployment after fixing issues</p></li>
 </ul>
 </li>
 <li><p>Fix the problem in your code</p></li>
@@ -440,7 +455,7 @@ If the video is not publicly accessible, you will not receive credit for this pa
         <li class="right" >
           <a href="testing.html" title="Testing Drafter Applications"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.8.6 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.8.7 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Deployment</a></li> 
       </ul>

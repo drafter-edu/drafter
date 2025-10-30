@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Welcome to Drafter’s documentation. &#8212; Drafter 1.8.6 documentation</title>
+    <title>Welcome to Drafter’s documentation. &#8212; Drafter 1.8.7 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="_static/documentation_options.js?v=daef7da6"></script>
+    <script src="_static/documentation_options.js?v=7e97f9bf"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -48,7 +48,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
-    <li><a href="contents.html">Drafter 1.8.6 documentation</a> &#187;</li>
+    <li><a href="contents.html">Drafter 1.8.7 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Welcome to Drafter’s documentation.</a></li> 
       </ul>
@@ -166,6 +166,7 @@ full stack websites as you learn to code in Python.</p>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.deploy.show_debug_information"><code class="docutils literal notranslate"><span class="pre">show_debug_information()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.debug.DebugInformation"><code class="docutils literal notranslate"><span class="pre">DebugInformation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.configuration.ServerConfiguration"><code class="docutils literal notranslate"><span class="pre">ServerConfiguration</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.ApiKeyBox"><code class="docutils literal notranslate"><span class="pre">ApiKeyBox</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.Argument"><code class="docutils literal notranslate"><span class="pre">Argument</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.Box"><code class="docutils literal notranslate"><span class="pre">Box</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.components.BulletedList"><code class="docutils literal notranslate"><span class="pre">BulletedList</span></code></a></li>
@@ -203,6 +204,16 @@ full stack websites as you learn to code in Python.</p>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.styling.float_right"><code class="docutils literal notranslate"><span class="pre">float_right()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.styling.update_attr"><code class="docutils literal notranslate"><span class="pre">update_attr()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.styling.update_style"><code class="docutils literal notranslate"><span class="pre">update_style()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.llm.LLMError"><code class="docutils literal notranslate"><span class="pre">LLMError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.llm.LLMMessage"><code class="docutils literal notranslate"><span class="pre">LLMMessage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.llm.LLMResponse"><code class="docutils literal notranslate"><span class="pre">LLMResponse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.llm.call_gemini"><code class="docutils literal notranslate"><span class="pre">call_gemini()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.llm.call_gemini_structured"><code class="docutils literal notranslate"><span class="pre">call_gemini_structured()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.llm.call_gpt"><code class="docutils literal notranslate"><span class="pre">call_gpt()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.llm.call_gpt_structured"><code class="docutils literal notranslate"><span class="pre">call_gpt_structured()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.llm.clear_api_key"><code class="docutils literal notranslate"><span class="pre">clear_api_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.llm.get_stored_api_key"><code class="docutils literal notranslate"><span class="pre">get_stored_api_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api.html#drafter.llm.save_api_key"><code class="docutils literal notranslate"><span class="pre">save_api_key()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -290,7 +301,7 @@ full stack websites as you learn to code in Python.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
-    <li><a href="contents.html">Drafter 1.8.6 documentation</a> &#187;</li>
+    <li><a href="contents.html">Drafter 1.8.7 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Welcome to Drafter’s documentation.</a></li> 
       </ul>

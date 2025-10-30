@@ -1,0 +1,602 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>LLM API Integration &#8212; Drafter 1.8.7 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=090ae2a6" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="_static/documentation_options.js?v=7e97f9bf"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+
+    
+    
+     
+        <script src="_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="contents.html">Drafter 1.8.7 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">LLM API Integration</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="llm-api-integration">
+<h1>LLM API Integration<a class="headerlink" href="#llm-api-integration" title="Link to this heading">¶</a></h1>
+<p>Drafter provides built-in support for integrating with popular Large Language Model (LLM) APIs,
+including OpenAI’s GPT and Google’s Gemini. This feature is designed to work seamlessly in both
+traditional Bottle deployments and Skulpt client-side environments.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>LLM functions must be explicitly imported from <code class="docutils literal notranslate"><span class="pre">drafter.llm</span></code>. Only the <code class="docutils literal notranslate"><span class="pre">ApiKeyBox</span></code>
+component is available through the standard Drafter import.</p>
+</div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>The LLM integration provides:</p>
+<ul class="simple">
+<li><p><strong>Simple API access</strong>: Easy-to-use functions for calling GPT and Gemini APIs</p></li>
+<li><p><strong>Student-friendly design</strong>: Uses only lists and dataclasses (no dictionaries required)</p></li>
+<li><p><strong>Structured outputs</strong>: Generate responses in specific formats using dataclasses</p></li>
+<li><p><strong>API key management</strong>: Built-in component for capturing and storing API keys in browser local storage</p></li>
+<li><p><strong>Skulpt compatible</strong>: Works with client-side Python execution via Skulpt</p></li>
+</ul>
+</section>
+<section id="importing-llm-functions">
+<h2>Importing LLM Functions<a class="headerlink" href="#importing-llm-functions" title="Link to this heading">¶</a></h2>
+<p>LLM functions require explicit import:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiKeyBox</span>  <span class="c1"># Available through standard import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMMessage</span><span class="p">,</span> <span class="n">call_gpt</span><span class="p">,</span> <span class="n">call_gemini</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_gpt_structured</span><span class="p">,</span> <span class="n">call_gemini_structured</span>
+</pre></div>
+</div>
+</section>
+<section id="core-components">
+<h2>Core Components<a class="headerlink" href="#core-components" title="Link to this heading">¶</a></h2>
+<section id="llmmessage">
+<h3>LLMMessage<a class="headerlink" href="#llmmessage" title="Link to this heading">¶</a></h3>
+<p>Represents a single message in an LLM conversation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMMessage</span>
+
+<span class="c1"># Create messages</span>
+<span class="n">system_msg</span> <span class="o">=</span> <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;You are a helpful assistant&quot;</span><span class="p">)</span>
+<span class="n">user_msg</span> <span class="o">=</span> <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Valid roles are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;user&quot;</span></code> - Messages from the user</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;assistant&quot;</span></code> - Responses from the LLM</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;system&quot;</span></code> - System instructions (for GPT)</p></li>
+</ul>
+</section>
+<section id="llmresponse">
+<h3>LLMResponse<a class="headerlink" href="#llmresponse" title="Link to this heading">¶</a></h3>
+<p>Contains the response from an LLM API call:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_gpt</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">call_gpt</span><span class="p">(</span><span class="n">api_key</span><span class="p">,</span> <span class="n">messages</span><span class="p">)</span>
+<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">LLMResponse</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>        <span class="c1"># The generated text</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>          <span class="c1"># Model used</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">finish_reason</span><span class="p">)</span>  <span class="c1"># Why generation stopped</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">total_tokens</span><span class="p">)</span>   <span class="c1"># Tokens used</span>
+</pre></div>
+</div>
+</section>
+<section id="llmerror">
+<h3>LLMError<a class="headerlink" href="#llmerror" title="Link to this heading">¶</a></h3>
+<p>Contains error information when an API call fails:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_gpt</span><span class="p">,</span> <span class="n">LLMError</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">call_gpt</span><span class="p">(</span><span class="n">api_key</span><span class="p">,</span> <span class="n">messages</span><span class="p">)</span>
+<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">LLMError</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">error_type</span><span class="p">)</span>  <span class="c1"># e.g., &quot;AuthenticationError&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>     <span class="c1"># Human-readable error message</span>
+</pre></div>
+</div>
+</section>
+<section id="apikeybox-component">
+<h3>ApiKeyBox Component<a class="headerlink" href="#apikeybox-component" title="Link to this heading">¶</a></h3>
+<p>A specialized input component for capturing API keys:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiKeyBox</span>
+
+<span class="c1"># In your page</span>
+<span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">([</span>
+    <span class="s2">&quot;Enter your API key:&quot;</span><span class="p">,</span>
+    <span class="n">ApiKeyBox</span><span class="p">(</span><span class="s2">&quot;api_key&quot;</span><span class="p">,</span> <span class="n">service</span><span class="o">=</span><span class="s2">&quot;gpt&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;GPT API Key:&quot;</span><span class="p">),</span>
+    <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Submit&quot;</span><span class="p">,</span> <span class="n">handle_key</span><span class="p">)</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">ApiKeyBox</span></code> automatically:</p>
+<ul class="simple">
+<li><p>Displays a password-style input field</p></li>
+<li><p>Saves the API key to browser local storage</p></li>
+<li><p>Loads previously saved keys automatically</p></li>
+</ul>
+</section>
+</section>
+<section id="api-functions">
+<h2>API Functions<a class="headerlink" href="#api-functions" title="Link to this heading">¶</a></h2>
+<section id="call-gpt">
+<h3>call_gpt()<a class="headerlink" href="#call-gpt" title="Link to this heading">¶</a></h3>
+<p>Call the OpenAI GPT API:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_gpt</span><span class="p">,</span> <span class="n">LLMMessage</span>
+
+<span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;You are a helpful assistant&quot;</span><span class="p">),</span>
+    <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Tell me a joke&quot;</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">call_gpt</span><span class="p">(</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;sk-...&quot;</span><span class="p">,</span>
+    <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">,</span>  <span class="c1"># or &quot;gpt-4&quot;</span>
+    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1000</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">api_key</span></code> (str): Your OpenAI API key</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">messages</span></code> (List[LLMMessage]): Conversation history</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code> (str): Model to use (default: “gpt-3.5-turbo”)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">temperature</span></code> (float): Randomness 0.0-2.0 (default: 0.7)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_tokens</span></code> (int): Maximum response length (default: 1000)</p></li>
+</ul>
+<p>Returns either <code class="docutils literal notranslate"><span class="pre">LLMResponse</span></code> on success or <code class="docutils literal notranslate"><span class="pre">LLMError</span></code> on failure.</p>
+</section>
+<section id="call-gemini">
+<h3>call_gemini()<a class="headerlink" href="#call-gemini" title="Link to this heading">¶</a></h3>
+<p>Call the Google Gemini API:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_gemini</span><span class="p">,</span> <span class="n">LLMMessage</span>
+
+<span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;What is machine learning?&quot;</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">call_gemini</span><span class="p">(</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;AIza...&quot;</span><span class="p">,</span>
+    <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gemini-pro&quot;</span><span class="p">,</span>
+    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1000</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Parameters are similar to <code class="docutils literal notranslate"><span class="pre">call_gpt()</span></code> but use Gemini-specific model names.</p>
+</section>
+</section>
+<section id="structured-output-functions">
+<h2>Structured Output Functions<a class="headerlink" href="#structured-output-functions" title="Link to this heading">¶</a></h2>
+<p>For applications that need responses in a specific format, use the structured output functions.
+These functions use dataclasses to define the expected response structure and automatically
+parse the JSON response into dataclass instances.</p>
+<section id="defining-response-formats">
+<h3>Defining Response Formats<a class="headerlink" href="#defining-response-formats" title="Link to this heading">¶</a></h3>
+<p>Create a dataclass with a Google-style docstring that includes an <code class="docutils literal notranslate"><span class="pre">Attributes:</span></code> section:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RecipeInfo</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recipe information.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        name: The name of the recipe</span>
+<span class="sd">        prep_time: Preparation time in minutes</span>
+<span class="sd">        ingredients: List of ingredients needed</span>
+<span class="sd">        steps: List of preparation steps</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">prep_time</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">ingredients</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">steps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Important</strong>: The docstring must include an <code class="docutils literal notranslate"><span class="pre">Attributes:</span></code> section with descriptions for
+each field. This helps the LLM understand what information to provide.</p>
+</section>
+<section id="call-gpt-structured">
+<h3>call_gpt_structured()<a class="headerlink" href="#call-gpt-structured" title="Link to this heading">¶</a></h3>
+<p>Call GPT with a structured output format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_gpt_structured</span><span class="p">,</span> <span class="n">LLMMessage</span>
+
+<span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Give me a simple pasta recipe&quot;</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">call_gpt_structured</span><span class="p">(</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;sk-...&quot;</span><span class="p">,</span>
+    <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+    <span class="n">response_format</span><span class="o">=</span><span class="n">RecipeInfo</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-4o-2024-08-06&quot;</span><span class="p">,</span>  <span class="c1"># Structured output requires this model or newer</span>
+    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1000</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">RecipeInfo</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Recipe: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">prep_time</span><span class="si">}</span><span class="s2"> minutes&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ingredient</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">ingredients</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">ingredient</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">api_key</span></code> (str): Your OpenAI API key</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">messages</span></code> (List[LLMMessage]): Conversation history</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">response_format</span></code> (Type): A dataclass type defining the response structure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code> (str): Model to use (default: “gpt-4o-2024-08-06” - structured output requires GPT-4o or newer)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">temperature</span></code> (float): Randomness 0.0-2.0 (default: 0.7)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_tokens</span></code> (int): Maximum response length (default: 1000)</p></li>
+</ul>
+<p>Returns an instance of <code class="docutils literal notranslate"><span class="pre">response_format</span></code> on success or <code class="docutils literal notranslate"><span class="pre">LLMError</span></code> on failure.</p>
+</section>
+<section id="call-gemini-structured">
+<h3>call_gemini_structured()<a class="headerlink" href="#call-gemini-structured" title="Link to this heading">¶</a></h3>
+<p>Call Gemini with a structured output format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_gemini_structured</span><span class="p">,</span> <span class="n">LLMMessage</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MovieReview</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Movie review information.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        title: The movie title</span>
+<span class="sd">        rating: Rating from 1 to 10</span>
+<span class="sd">        pros: List of positive aspects</span>
+<span class="sd">        cons: List of negative aspects</span>
+<span class="sd">        summary: Brief review summary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">rating</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">pros</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">cons</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">summary</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Review the movie Inception&quot;</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">call_gemini_structured</span><span class="p">(</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;AIza...&quot;</span><span class="p">,</span>
+    <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+    <span class="n">response_format</span><span class="o">=</span><span class="n">MovieReview</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gemini-1.5-pro&quot;</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">MovieReview</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">rating</span><span class="si">}</span><span class="s2">/10&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="nested-dataclasses">
+<h3>Nested Dataclasses<a class="headerlink" href="#nested-dataclasses" title="Link to this heading">¶</a></h3>
+<p>You can nest dataclasses for complex structures:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Author</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Author information.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        name: Author&#39;s full name</span>
+<span class="sd">        country: Author&#39;s country of origin</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">country</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Book</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Book information.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        title: Book title</span>
+<span class="sd">        author: Book author information</span>
+<span class="sd">        year: Publication year</span>
+<span class="sd">        genres: List of genres</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">author</span><span class="p">:</span> <span class="n">Author</span>
+    <span class="n">year</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">genres</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+<span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Tell me about The Great Gatsby&quot;</span><span class="p">)]</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">call_gpt_structured</span><span class="p">(</span><span class="n">api_key</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">Book</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="local-storage-functions">
+<h2>Local Storage Functions<a class="headerlink" href="#local-storage-functions" title="Link to this heading">¶</a></h2>
+<p>These functions help manage API keys in browser local storage:</p>
+<section id="save-api-key">
+<h3>save_api_key()<a class="headerlink" href="#save-api-key" title="Link to this heading">¶</a></h3>
+<p>Save an API key to local storage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">save_api_key</span>
+
+<span class="n">save_api_key</span><span class="p">(</span><span class="s2">&quot;gpt&quot;</span><span class="p">,</span> <span class="s2">&quot;sk-...&quot;</span><span class="p">)</span>
+<span class="n">save_api_key</span><span class="p">(</span><span class="s2">&quot;gemini&quot;</span><span class="p">,</span> <span class="s2">&quot;AIza...&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-stored-api-key">
+<h3>get_stored_api_key()<a class="headerlink" href="#get-stored-api-key" title="Link to this heading">¶</a></h3>
+<p>Retrieve a stored API key:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_stored_api_key</span>
+
+<span class="n">api_key</span> <span class="o">=</span> <span class="n">get_stored_api_key</span><span class="p">(</span><span class="s2">&quot;gpt&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">api_key</span><span class="p">:</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">call_gpt</span><span class="p">(</span><span class="n">api_key</span><span class="p">,</span> <span class="n">messages</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="clear-api-key">
+<h3>clear_api_key()<a class="headerlink" href="#clear-api-key" title="Link to this heading">¶</a></h3>
+<p>Clear a stored API key:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_api_key</span>
+
+<span class="n">clear_api_key</span><span class="p">(</span><span class="s2">&quot;gpt&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="complete-example">
+<h2>Complete Example<a class="headerlink" href="#complete-example" title="Link to this heading">¶</a></h2>
+<p>Here’s a complete chatbot example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMMessage</span><span class="p">,</span> <span class="n">LLMResponse</span><span class="p">,</span> <span class="n">call_gpt</span><span class="p">,</span> <span class="n">save_api_key</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">field</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ChatState</span><span class="p">:</span>
+    <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">conversation</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">ChatState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">state</span><span class="o">.</span><span class="n">api_key</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Page</span><span class="p">([</span>
+            <span class="s2">&quot;Enter your GPT API key:&quot;</span><span class="p">,</span>
+            <span class="n">ApiKeyBox</span><span class="p">(</span><span class="s2">&quot;api_key&quot;</span><span class="p">,</span> <span class="s2">&quot;gpt&quot;</span><span class="p">),</span>
+            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Start&quot;</span><span class="p">,</span> <span class="n">save_key</span><span class="p">)</span>
+        <span class="p">])</span>
+
+    <span class="c1"># Show conversation</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">conversation</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">&quot;user&quot;</span><span class="p">:</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;You: </span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">msg</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">&quot;assistant&quot;</span><span class="p">:</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bot: </span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">messages</span> <span class="o">+</span> <span class="p">[</span>
+        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;message&quot;</span><span class="p">),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Send&quot;</span><span class="p">,</span> <span class="n">send_message</span><span class="p">)</span>
+    <span class="p">])</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_key</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">ChatState</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">api_key</span>
+    <span class="n">save_api_key</span><span class="p">(</span><span class="s2">&quot;gpt&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">send_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">ChatState</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="c1"># Add user message</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">conversation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">message</span><span class="p">))</span>
+
+    <span class="c1"># Get response</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">call_gpt</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">conversation</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">LLMResponse</span><span class="p">):</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">conversation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">conversation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">start_server</span><span class="p">(</span><span class="n">ChatState</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Always check the result type</strong>: Use <code class="docutils literal notranslate"><span class="pre">isinstance()</span></code> to determine if you got an <code class="docutils literal notranslate"><span class="pre">LLMResponse</span></code> or <code class="docutils literal notranslate"><span class="pre">LLMError</span></code></p></li>
+<li><p><strong>Handle errors gracefully</strong>: Display meaningful error messages to users when API calls fail</p></li>
+<li><p><strong>Use local storage</strong>: Let users save their API keys so they don’t have to re-enter them</p></li>
+<li><p><strong>Keep conversations in lists</strong>: Use Python lists to maintain conversation history</p></li>
+<li><p><strong>Validate API keys</strong>: Check that API keys are provided before making calls</p></li>
+<li><p><strong>Test with small limits</strong>: Start with smaller <code class="docutils literal notranslate"><span class="pre">max_tokens</span></code> values during development</p></li>
+</ol>
+</section>
+<section id="common-error-types">
+<h2>Common Error Types<a class="headerlink" href="#common-error-types" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">AuthenticationError</span></code>: Invalid or missing API key</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RateLimitError</span></code>: Too many requests or quota exceeded</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NetworkError</span></code>: Connection problems</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ValueError</span></code>: Invalid parameters (e.g., empty messages list)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">APIError</span></code>: Other API-specific errors</p></li>
+</ul>
+</section>
+<section id="getting-api-keys">
+<h2>Getting API Keys<a class="headerlink" href="#getting-api-keys" title="Link to this heading">¶</a></h2>
+<p><strong>OpenAI GPT</strong>:</p>
+<ol class="arabic simple">
+<li><p>Go to <a class="reference external" href="https://platform.openai.com/">https://platform.openai.com/</a></p></li>
+<li><p>Sign up or log in</p></li>
+<li><p>Navigate to API Keys section</p></li>
+<li><p>Create a new API key</p></li>
+</ol>
+<p><strong>Google Gemini</strong>:</p>
+<ol class="arabic simple">
+<li><p>Go to <a class="reference external" href="https://makersuite.google.com/app/apikey">https://makersuite.google.com/app/apikey</a></p></li>
+<li><p>Sign in with your Google account</p></li>
+<li><p>Create an API key</p></li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>API keys should be kept secure. Never share them publicly or commit them to version control.
+The <code class="docutils literal notranslate"><span class="pre">ApiKeyBox</span></code> component stores keys in browser local storage, which is client-side only.</p>
+</div>
+</section>
+<section id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Requires the <code class="docutils literal notranslate"><span class="pre">requests</span></code> module (available in Skulpt)</p></li>
+<li><p>Local storage only works in browser environments</p></li>
+<li><p>Some advanced LLM features may not be supported</p></li>
+<li><p>System messages are not used in Gemini calls (they use a different format)</p></li>
+</ul>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt><strong>“requests module not available”</strong></dt><dd><p>The requests module is required. In Skulpt environments, it should be available by default.</p>
+</dd>
+<dt><strong>“Invalid API key”</strong></dt><dd><p>Double-check that your API key is correct and hasn’t expired.</p>
+</dd>
+<dt><strong>“Rate limit exceeded”</strong></dt><dd><p>You’ve made too many requests. Wait a bit and try again, or upgrade your API plan.</p>
+</dd>
+<dt><strong>Empty or no response</strong></dt><dd><p>Check that you’re passing at least one message and that your messages are properly formatted.</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="contents.html">Page contents</a></h3>
+    <ul>
+<li class="toctree-l1"><a class="reference internal" href="students/installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workbook/index.html">Workbook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples.html">Longer Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="students/docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="students/html.html">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="students/styling.html">Styling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="students/testing.html">Testing Drafter Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="students/deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/reference.html">Reference Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="students/help.html">More Help</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api.html">Full API Documentation</a></li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/llm_integration.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="contents.html">Drafter 1.8.7 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">LLM API Integration</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, acbart &amp; nazim.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

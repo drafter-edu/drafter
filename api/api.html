@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Full API Documentation &#8212; Drafter 1.8.6 documentation</title>
+    <title>Full API Documentation &#8212; Drafter 1.8.7 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=daef7da6"></script>
+    <script src="../_static/documentation_options.js?v=7e97f9bf"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="../students/help.html" title="More Help"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.8.6 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.8.7 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>
@@ -1138,6 +1138,24 @@ customization for specific development or testing environments.</p></li>
 </dd></dl>
 
 <dl class="py class" id="module-drafter.components">
+<dt class="sig sig-object py" id="drafter.components.ApiKeyBox">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ApiKeyBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'api'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.ApiKeyBox" title="Link to this definition">¶</a></dt>
+<dd><p>A specialized text box for entering and storing API keys.</p>
+<p>This component provides a password-style input field that integrates with
+local storage to persist API keys across sessions. It’s specifically designed
+for LLM API integrations where API keys need to be captured from users.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The parameter name for this input field</p></li>
+<li><p><strong>service</strong> (<em>str</em>) – The service name for storage (‘gpt’, ‘gemini’, etc.)</p></li>
+<li><p><strong>label</strong> (<em>str</em>) – Optional label to display before the input box</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="drafter.components.Argument">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.components.Argument" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1601,6 +1619,313 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 </dl>
 </dd></dl>
 
+<p id="module-drafter.llm">LLM API Integration for Drafter</p>
+<p>This module provides simplified access to popular LLM APIs like GPT and Gemini.
+It handles API key management through local storage and provides a student-friendly
+interface using only lists and dataclasses.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.llm.LLMError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLMError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.llm.LLMError" title="Link to this definition">¶</a></dt>
+<dd><p>Represents an error from an LLM API call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>error_type</strong> (<em>str</em>) – The type of error that occurred</p></li>
+<li><p><strong>message</strong> (<em>str</em>) – A human-readable error message</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.llm.LLMMessage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLMMessage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.llm.LLMMessage" title="Link to this definition">¶</a></dt>
+<dd><p>Represents a single message in an LLM conversation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>role</strong> (<em>str</em>) – The role of the message sender (‘user’, ‘assistant’, or ‘system’)</p></li>
+<li><p><strong>content</strong> (<em>str</em>) – The text content of the message</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="drafter.llm.LLMResponse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLMResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finish_reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.llm.LLMResponse" title="Link to this definition">¶</a></dt>
+<dd><p>Represents a response from an LLM API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>content</strong> (<em>str</em>) – The generated text response</p></li>
+<li><p><strong>model</strong> (<em>str</em>) – The model that generated the response</p></li>
+<li><p><strong>finish_reason</strong> (<em>str</em>) – Why the model stopped generating (e.g., ‘stop’, ‘length’)</p></li>
+<li><p><strong>total_tokens</strong> (<em>int</em>) – Total number of tokens used in the request and response</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.llm.call_gemini">
+<span class="sig-name descname"><span class="pre">call_gemini</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.llm.LLMMessage" title="drafter.llm.LLMMessage"><span class="pre">LLMMessage</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gemini-2.5-flash'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#drafter.llm.call_gemini" title="Link to this definition">¶</a></dt>
+<dd><p>Call the Google Gemini API with a list of messages.</p>
+<p>This function sends a request to the Google Gemini API and returns either an LLMResponse
+on success or an LLMError on failure. The function is designed to work with Skulpt’s
+<cite>requests</cite> module for client-side execution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>api_key</strong> (<em>str</em>) – Your Google API key</p></li>
+<li><p><strong>messages</strong> (<em>List</em><em>[</em><a class="reference internal" href="#drafter.llm.LLMMessage" title="drafter.llm.LLMMessage"><em>LLMMessage</em></a><em>]</em>) – List of LLMMessage objects representing the conversation</p></li>
+<li><p><strong>model</strong> (<em>str</em>) – The Gemini model to use (default: “gemini-pro”)</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>) – Controls randomness (0.0-2.0, default: 0.7)</p></li>
+<li><p><strong>max_tokens</strong> (<em>int</em>) – Maximum tokens to generate (default: 1000)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>LLMResponse on success, LLMError on failure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[<a class="reference internal" href="#drafter.llm.LLMResponse" title="drafter.llm.LLMResponse">LLMResponse</a>, <a class="reference internal" href="#drafter.llm.LLMError" title="drafter.llm.LLMError">LLMError</a>]</p>
+</dd>
+</dl>
+<dl>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">api_key</span> <span class="o">=</span> <span class="s2">&quot;AIza...&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">call_gemini</span><span class="p">(</span><span class="n">api_key</span><span class="p">,</span> <span class="n">messages</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">LLMResponse</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.llm.call_gemini_structured">
+<span class="sig-name descname"><span class="pre">call_gemini_structured</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.llm.LLMMessage" title="drafter.llm.LLMMessage"><span class="pre">LLMMessage</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gemini-1.5-pro'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#drafter.llm.call_gemini_structured" title="Link to this definition">¶</a></dt>
+<dd><p>Call the Google Gemini API with structured output format.</p>
+<p>This function requests a response in a specific JSON structure defined by a dataclass.
+The dataclass should have a Google-style docstring with an Attributes section describing
+each field. Nested dataclasses and lists are supported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>api_key</strong> (<em>str</em>) – Your Google API key</p></li>
+<li><p><strong>messages</strong> (<em>List</em><em>[</em><a class="reference internal" href="#drafter.llm.LLMMessage" title="drafter.llm.LLMMessage"><em>LLMMessage</em></a><em>]</em>) – List of LLMMessage objects representing the conversation</p></li>
+<li><p><strong>response_format</strong> (<em>Type</em>) – A dataclass type defining the expected response structure</p></li>
+<li><p><strong>model</strong> (<em>str</em>) – The Gemini model to use (default: “gemini-1.5-pro”)</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>) – Controls randomness (0.0-2.0, default: 0.7)</p></li>
+<li><p><strong>max_tokens</strong> (<em>int</em>) – Maximum tokens to generate (default: 1000)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An instance of response_format on success, LLMError on failure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[response_format, <a class="reference internal" href="#drafter.llm.LLMError" title="drafter.llm.LLMError">LLMError</a>]</p>
+</dd>
+</dl>
+<dl>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@dataclass</span>
+<span class="gp">... </span><span class="k">class</span><span class="w"> </span><span class="nc">MovieReview</span><span class="p">:</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">&#39;&#39;&#39;Movie review information.</span>
+<span class="gp">... </span><span class="sd">    </span>
+<span class="gp">... </span><span class="sd">    Attributes:</span>
+<span class="gp">... </span><span class="sd">        title: The movie title</span>
+<span class="gp">... </span><span class="sd">        rating: Rating from 1-10</span>
+<span class="gp">... </span><span class="sd">        summary: Brief review summary</span>
+<span class="gp">... </span><span class="sd">    &#39;&#39;&#39;</span>
+<span class="gp">... </span>    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
+<span class="gp">... </span>    <span class="n">rating</span><span class="p">:</span> <span class="nb">int</span>
+<span class="gp">... </span>    <span class="n">summary</span><span class="p">:</span> <span class="nb">str</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Review the movie Inception&quot;</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">call_gemini_structured</span><span class="p">(</span><span class="n">api_key</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">MovieReview</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">MovieReview</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">rating</span><span class="si">}</span><span class="s2">/10&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.llm.call_gpt">
+<span class="sig-name descname"><span class="pre">call_gpt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.llm.LLMMessage" title="drafter.llm.LLMMessage"><span class="pre">LLMMessage</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gpt-3.5-turbo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#drafter.llm.call_gpt" title="Link to this definition">¶</a></dt>
+<dd><p>Call the OpenAI GPT API with a list of messages.</p>
+<p>This function sends a request to the OpenAI API and returns either an LLMResponse
+on success or an LLMError on failure. The function is designed to work with Skulpt’s
+<cite>requests</cite> module for client-side execution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>api_key</strong> (<em>str</em>) – Your OpenAI API key</p></li>
+<li><p><strong>messages</strong> (<em>List</em><em>[</em><a class="reference internal" href="#drafter.llm.LLMMessage" title="drafter.llm.LLMMessage"><em>LLMMessage</em></a><em>]</em>) – List of LLMMessage objects representing the conversation history</p></li>
+<li><p><strong>model</strong> (<em>str</em>) – The GPT model to use (default: “gpt-3.5-turbo”)</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>) – Controls randomness (0.0-2.0, default: 0.7)</p></li>
+<li><p><strong>max_tokens</strong> (<em>int</em>) – Maximum tokens to generate (default: 1000)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>LLMResponse on success, LLMError on failure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[<a class="reference internal" href="#drafter.llm.LLMResponse" title="drafter.llm.LLMResponse">LLMResponse</a>, <a class="reference internal" href="#drafter.llm.LLMError" title="drafter.llm.LLMError">LLMError</a>]</p>
+</dd>
+</dl>
+<dl>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">api_key</span> <span class="o">=</span> <span class="s2">&quot;sk-...&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">call_gpt</span><span class="p">(</span><span class="n">api_key</span><span class="p">,</span> <span class="n">messages</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">LLMResponse</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.llm.call_gpt_structured">
+<span class="sig-name descname"><span class="pre">call_gpt_structured</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#drafter.llm.LLMMessage" title="drafter.llm.LLMMessage"><span class="pre">LLMMessage</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gpt-4o-2024-08-06'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#drafter.llm.call_gpt_structured" title="Link to this definition">¶</a></dt>
+<dd><p>Call the OpenAI GPT API with structured output format.</p>
+<p>This function requests a response in a specific JSON structure defined by a dataclass.
+The dataclass should have a Google-style docstring with an Attributes section describing
+each field. Nested dataclasses and lists are supported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>api_key</strong> (<em>str</em>) – Your OpenAI API key</p></li>
+<li><p><strong>messages</strong> (<em>List</em><em>[</em><a class="reference internal" href="#drafter.llm.LLMMessage" title="drafter.llm.LLMMessage"><em>LLMMessage</em></a><em>]</em>) – List of LLMMessage objects representing the conversation history</p></li>
+<li><p><strong>response_format</strong> (<em>Type</em>) – A dataclass type defining the expected response structure</p></li>
+<li><p><strong>model</strong> (<em>str</em>) – The GPT model to use (default: “gpt-4o-2024-08-06”, supports structured output)</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>) – Controls randomness (0.0-2.0, default: 0.7)</p></li>
+<li><p><strong>max_tokens</strong> (<em>int</em>) – Maximum tokens to generate (default: 1000)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An instance of response_format on success, LLMError on failure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[response_format, <a class="reference internal" href="#drafter.llm.LLMError" title="drafter.llm.LLMError">LLMError</a>]</p>
+</dd>
+</dl>
+<dl>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@dataclass</span>
+<span class="gp">... </span><span class="k">class</span><span class="w"> </span><span class="nc">RecipeInfo</span><span class="p">:</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">&#39;&#39;&#39;Recipe information.</span>
+<span class="gp">... </span><span class="sd">    </span>
+<span class="gp">... </span><span class="sd">    Attributes:</span>
+<span class="gp">... </span><span class="sd">        name: The name of the recipe</span>
+<span class="gp">... </span><span class="sd">        ingredients: List of ingredients needed</span>
+<span class="gp">... </span><span class="sd">        steps: List of preparation steps</span>
+<span class="gp">... </span><span class="sd">    &#39;&#39;&#39;</span>
+<span class="gp">... </span>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="gp">... </span>    <span class="n">ingredients</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="gp">... </span>    <span class="n">steps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Give me a simple pasta recipe&quot;</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">call_gpt_structured</span><span class="p">(</span><span class="n">api_key</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">RecipeInfo</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">RecipeInfo</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Recipe: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ingredients: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">ingredients</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.llm.clear_api_key">
+<span class="sig-name descname"><span class="pre">clear_api_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#drafter.llm.clear_api_key" title="Link to this definition">¶</a></dt>
+<dd><p>Clear a stored API key from local storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>service</strong> (<em>str</em>) – The service name (‘gpt’ or ‘gemini’)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+<dl>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">clear_api_key</span><span class="p">(</span><span class="s1">&#39;gpt&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.llm.get_stored_api_key">
+<span class="sig-name descname"><span class="pre">get_stored_api_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#drafter.llm.get_stored_api_key" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve a stored API key from local storage.</p>
+<p>This function works in Skulpt environments by using JavaScript’s localStorage.
+In non-Skulpt environments, it returns an empty string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>service</strong> (<em>str</em>) – The service name (‘gpt’ or ‘gemini’)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The stored API key or empty string if not found</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<dl>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">api_key</span> <span class="o">=</span> <span class="n">get_stored_api_key</span><span class="p">(</span><span class="s1">&#39;gpt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">api_key</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">response</span> <span class="o">=</span> <span class="n">call_gpt</span><span class="p">(</span><span class="n">api_key</span><span class="p">,</span> <span class="n">messages</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.llm.save_api_key">
+<span class="sig-name descname"><span class="pre">save_api_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#drafter.llm.save_api_key" title="Link to this definition">¶</a></dt>
+<dd><p>Save an API key to local storage.</p>
+<p>This function works in Skulpt environments by using JavaScript’s localStorage.
+In non-Skulpt environments, it does nothing and returns False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>service</strong> (<em>str</em>) – The service name (‘gpt’ or ‘gemini’)</p></li>
+<li><p><strong>api_key</strong> (<em>str</em>) – The API key to store</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+<dl>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">save_api_key</span><span class="p">(</span><span class="s1">&#39;gpt&#39;</span><span class="p">,</span> <span class="s1">&#39;sk-...&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
@@ -1691,6 +2016,7 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.configuration.ServerConfiguration"><code class="docutils literal notranslate"><span class="pre">ServerConfiguration</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.components.ApiKeyBox"><code class="docutils literal notranslate"><span class="pre">ApiKeyBox</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.Argument"><code class="docutils literal notranslate"><span class="pre">Argument</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.Box"><code class="docutils literal notranslate"><span class="pre">Box</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.components.BulletedList"><code class="docutils literal notranslate"><span class="pre">BulletedList</span></code></a></li>
@@ -1738,6 +2064,16 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
 <li class="toctree-l2"><a class="reference internal" href="#drafter.styling.float_right"><code class="docutils literal notranslate"><span class="pre">float_right()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.styling.update_attr"><code class="docutils literal notranslate"><span class="pre">update_attr()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.styling.update_style"><code class="docutils literal notranslate"><span class="pre">update_style()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.llm.LLMError"><code class="docutils literal notranslate"><span class="pre">LLMError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.llm.LLMMessage"><code class="docutils literal notranslate"><span class="pre">LLMMessage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.llm.LLMResponse"><code class="docutils literal notranslate"><span class="pre">LLMResponse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.llm.call_gemini"><code class="docutils literal notranslate"><span class="pre">call_gemini()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.llm.call_gemini_structured"><code class="docutils literal notranslate"><span class="pre">call_gemini_structured()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.llm.call_gpt"><code class="docutils literal notranslate"><span class="pre">call_gpt()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.llm.call_gpt_structured"><code class="docutils literal notranslate"><span class="pre">call_gpt_structured()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.llm.clear_api_key"><code class="docutils literal notranslate"><span class="pre">clear_api_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.llm.get_stored_api_key"><code class="docutils literal notranslate"><span class="pre">get_stored_api_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.llm.save_api_key"><code class="docutils literal notranslate"><span class="pre">save_api_key()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1800,7 +2136,7 @@ Remember to include units in the <code class="docutils literal notranslate"><spa
         <li class="right" >
           <a href="../students/help.html" title="More Help"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.8.6 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.8.7 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>
