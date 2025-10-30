@@ -278,7 +278,7 @@ class Server:
         return self.routes['/']()
 
     # Helper function to render different SiteInformationType values
-    def render_site_info(self, value: SiteInformationType) -> str:
+    def render_site_info(self, value: SiteInformationType, local_links: bool) -> str:
         if isinstance(value, PageContent):
             # If it's PageContent, render it using its render method
             return value.render(self._state, self.configuration)
@@ -288,7 +288,7 @@ class Server:
             for item in value:
                 if isinstance(item, str):
                     # Check if the item looks like a URL
-                    if is_external_url(item):
+                    if is_external_url(item) or local_links:
                         items.append(f'<a href="{html.escape(item)}">{html.escape(item)}</a>')
                     else:
                         items.append(html.escape(item))
@@ -300,7 +300,7 @@ class Server:
             # If it's a string, render as text with links converted to <a> tags
             value_str = str(value)
             # Check if the value looks like a URL
-            if is_external_url(value_str):
+            if is_external_url(value_str) or local_links:
                 return f'<a href="{html.escape(value_str)}">{html.escape(value_str)}</a>'
             else:
                 return html.escape(value_str)
@@ -316,17 +316,17 @@ class Server:
         # Build the about page content
         content_parts = []
         site_parts = [
-            ("Author", self._site_information.author),
-            ("Description", self._site_information.description),
-            ("Sources", self._site_information.sources),
-            ("Planning", self._site_information.planning),
-            ("Links", self._site_information.links)
+            ("Author", self._site_information.author, False),
+            ("Description", self._site_information.description, False),
+            ("Sources", self._site_information.sources, False),
+            ("Planning", self._site_information.planning, True),
+            ("Links", self._site_information.links, False)
         ]
 
-        for title, content in site_parts:
+        for title, content, local_links in site_parts:
             if content:
                 content_parts.append(f"<h2>{title}</h2>")
-                content_parts.append(f"<div>{self.render_site_info(content)}</div>")
+                content_parts.append(f"<div>{self.render_site_info(content, local_links)}</div>")
 
         # Add external pages if configured
         if self.configuration.external_pages:
