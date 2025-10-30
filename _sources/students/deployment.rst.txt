@@ -297,6 +297,11 @@ Make sure that:
 * The planning document link works
 * All information is accurate
 
+Here is an example of what this might look like:
+
+.. image:: images/deployment_about.png
+    :alt: Example About Page
+
 .. _deployment_dashboard:
 
 Deployment Dashboard
