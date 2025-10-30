@@ -58,9 +58,10 @@ We suggest placing them right before your dataclasses and routes.
 
     set_site_information(
         author="your_email@udel.edu",
-        description="A brief description of what your website does",
-        sources="List any help resources or sources you used",
-        planning="your_planning_document.pdf",
+        description="""A brief description of what your website does.
+        Use a triple quoted string if you want to span multiple lines.""",
+        sources=["List any help resources or sources you used"],
+        planning=["your_planning_document.pdf"],
         links=["https://github.com/your-username/your-repo"]
     )
     hide_debug_information()
@@ -77,7 +78,7 @@ These lines of code:
 There are many other ways to style your website, but these are a good starting point.
 
 .. note::
-    You can change the filename, but your instructor may penalize you if you do so.
+    You can change the filename, but this might cause deployment issues. Do not change the filename unless your instructor says it is okay.
 
 When you are done editing, click on the ``Commit changes`` button in the top-right of the page.
 
@@ -105,6 +106,10 @@ If you have other files besides ``main.py`` (like images, data files, or other P
     :alt: Github Upload
 
 3. Either drag your files directly into the folder area or click to select them from your computer
+
+.. image:: images/deployment_github_upload.png
+    :alt: Github Upload
+
 4. Once they have been added, click on the ``Commit changes`` button to save them
 5. Write a descriptive commit message like "Added image files"
 
@@ -136,6 +141,7 @@ Find the file you created in the planning phase of the project (it might be a ``
 5. Write a descriptive commit message
 
 After uploading, you'll see the file in the interface. **Write down the exact filename** - you'll need it in the next step.
+The example shown here is ``WebsiteDesign.png``.
 
 .. image:: images/deployment_github_added.png
     :alt: Github Uploaded
@@ -161,15 +167,16 @@ Example:
 .. code-block:: python
 
     set_site_information(
-        author="jdoe@udel.edu",
-        description="A quiz website about marine biology",
-        sources="Used W3Schools for CSS help: https://www.w3schools.com/css/",
-        planning="plan.pdf",
-        links=["https://github.com/ud-s24-cs1/website-jdoe", "https://youtu.be/abc123"]
+        author="acbart@udel.edu",
+        description="""A quiz website about marine biology. Users can take quizzes.""",
+        sources=["Used W3Schools for CSS help:", "https://www.w3schools.com/css/"],
+        planning=["plan.pdf"],
+        links=["https://github.com/ud-s24-cs1/website-acbart", "https://youtu.be/abc123"]
     )
 
 .. note::
     The information in ``set_site_information`` can be a string, a list of strings, or even ``PageContent`` like ``Div``, ``Link``, etc.
+    Remember that you can use triple quotes for multi-line strings. If the text is a hyperlink, then it will automatically be turned into a clickable link on the about page.
 
 Click ``Commit changes`` and write a descriptive commit message like "Updated site information".
 
@@ -224,16 +231,24 @@ Your site will now start deploying! You can monitor the progress in the Actions 
 
 **If you see a red X**, there was an error. Click on the red X to see the job summary, then click the next red X to see the deployment logs. The error message will help you understand what went wrong.
 
+.. image:: images/deployment_github_details.png
+    :alt: Details about errors during deployment
+
 Common errors include:
 
 * Forgetting to enable GitHub Pages (Step 2)
 * Syntax errors in your Python code
 * Missing required files
+* Forgetting to update ``set_site_information(...)`` with your details
+* Using unsupported libraries
+* Changed the filename of ``main.py``
 
 If you see an error, fix it in your code, commit the changes, and then manually trigger a new deployment again (repeat this step).
 
 .. note::
     The Actions section lists all deploy attempts in chronological order. Past attempts with red X marks are okay as long as the most recent (top) attempt was successful.
+
+.. _submit_on_canvas:
 
 Step 9: Get Your Deployed URL and Submit
 -----------------------------------------
@@ -276,6 +291,8 @@ Make sure that:
 * The planning document link works
 * All information is accurate
 
+.. _deployment_dashboard:
+
 Deployment Dashboard
 --------------------
 
@@ -309,6 +326,11 @@ Common Issues and Tips
    * Not enabling GitHub Pages (go back to Step 2)
    * Syntax errors in your Python code
    * Missing files or wrong filenames
+   * Forgot to upload your website code to ``main.py``
+   * Changed ``set_site_information(...)`` incorrectly
+   * Changed the filename of ``main.py``
+   * Using unsupported libraries without checking first
+   * Forgot to re-run the deployment after fixing issues
 
 3. Fix the problem in your code
 4. Commit your changes with a descriptive message
