@@ -12,7 +12,7 @@ import drafter.hacks
 # Provide default route
 route('index')(default_index)
 
-__version__ = '1.8.6'
+__version__ = '1.8.7'
 
 if __name__ == '__main__':
     import sys
