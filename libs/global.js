@@ -47,6 +47,17 @@ function navigateToAbout() {
 window.stopInformationPageListener = function() {
     throw new Error("Information page listener not initialized yet.");
 };
+window.addEventListener("popstate", (e) => {
+    if (window.Sk && window.Sk.bottle) {
+        const state = e.state;
+        if (state?.flag === "DRAFTER_LOAD_ROUTE" && state?.realLocation) {
+            window.Sk.bottle.changeLocation(state?.realLocation);
+        } else {
+            // Fallback for entries we didn't create (direct loads, external links, etc.)
+            window.Sk.bottle.changeLocation(location.pathname);
+        }
+    }
+});
 document.addEventListener('DOMContentLoaded', () => {
     let lastPressTime = 0;
     const doublePressDelay = 600; // milliseconds allowed between presses

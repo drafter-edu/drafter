@@ -6,11 +6,13 @@ from drafter.server import *
 from drafter.deploy import *
 from drafter.testing import assert_equal
 import drafter.hacks
+# Note: LLM functions must be explicitly imported via 'from drafter.llm import ...'
+# ApiKeyBox component is available through the components import above
 
 # Provide default route
 route('index')(default_index)
 
-__version__ = '1.8.6'
+__version__ = '1.8.7'
 
 if __name__ == '__main__':
     import sys

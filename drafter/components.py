@@ -810,3 +810,58 @@ class FileUpload(PageContent):
     def __str__(self):
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         return f"<input type='file' name={self.name!r} {parsed_settings} />"
+
+
+@dataclass
+class ApiKeyBox(PageContent):
+    """
+    A specialized text box for entering and storing API keys.
+    
+    This component provides a password-style input field that integrates with
+    local storage to persist API keys across sessions. It's specifically designed
+    for LLM API integrations where API keys need to be captured from users.
+    
+    :param name: The parameter name for this input field
+    :type name: str
+    :param service: The service name for storage ('gpt', 'gemini', etc.)
+    :type service: str
+    :param label: Optional label to display before the input box
+    :type label: str
+    """
+    name: str
+    service: str
+    label: Optional[str] = None
+    
+    def __init__(self, name: str, service: str = "api", label: Optional[str] = None, **kwargs):
+        validate_parameter_name(name, "ApiKeyBox")
+        self.name = name
+        self.service = service
+        self.label = label
+        self.extra_settings = kwargs
+    
+    def __str__(self) -> str:
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        # Add JavaScript to load from local storage and save on change
+        js_code = f"""
+        <script>
+        (function() {{
+            var input = document.currentScript.previousElementSibling;
+            if (window.drafterLLM && window.drafterLLM.loadApiKey) {{
+                var stored = window.drafterLLM.loadApiKey('{self.service}');
+                if (stored) {{
+                    input.value = stored;
+                }}
+            }}
+            input.addEventListener('change', function() {{
+                if (window.drafterLLM && window.drafterLLM.saveApiKey) {{
+                    window.drafterLLM.saveApiKey('{self.service}', this.value);
+                }}
+            }});
+        }})();
+        </script>
+        """
+        
+        label_html = f"<label for='{self.name}'>{self.label}</label> " if self.label else ""
+        input_html = f"<input type='password' id='{self.name}' name='{self.name}' placeholder='Enter API key' {parsed_settings}>"
+        
+        return label_html + input_html + js_code
