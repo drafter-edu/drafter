@@ -22,7 +22,6 @@ from drafter.config.client_server import ClientServerConfiguration
 from drafter.monitor import Monitor
 
 
-@dataclass
 class ClientServer:
     """
     The ClientServer is responsible for handling requests from the BridgeClient,
@@ -37,11 +36,6 @@ class ClientServer:
     :ivar logger: An AuditLogger instance for logging errors, warnings, and info.
     :ivar monitor: A Monitor instance for tracking telemetry and generating debug information.
     """
-
-    custom_name: str
-    state: SiteState
-    configuration: ClientServerConfiguration
-    response_count: int = 0
 
     def __init__(self, custom_name: str) -> None:
         self.custom_name = custom_name

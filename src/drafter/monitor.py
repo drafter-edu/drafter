@@ -530,7 +530,9 @@ class Monitor:
     padding: 10px 15px;
     background: #252526;
     border-bottom: 1px solid #007acc;
-    sticky: top;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .drafter-debug-header h3 {
@@ -749,8 +751,12 @@ function toggleDebugPanel() {
         :param error: The exception that was raised
         """
         try:
-            print(f"[Monitor Internal Error] in {where}: {error}")
-            print(traceback.format_exc())
+            # Log to stderr for debugging purposes
+            # In production, this could be sent to a proper logging system
+            import sys
+            sys.stderr.write(f"[Monitor Internal Error] in {where}: {error}\n")
+            sys.stderr.write(traceback.format_exc())
+            sys.stderr.write("\n")
         except Exception:
             # If even logging fails, silently continue
             pass
