@@ -21,6 +21,7 @@ from drafter.components.files import Download, FileUpload
 
 from drafter.components.plotting import MatPlotLibPlot
 
+# SVG Components - for creating scalable vector graphics
 from drafter.components.svg import (
     Svg,
     SvgRectangle,

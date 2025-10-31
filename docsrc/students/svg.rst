@@ -251,7 +251,7 @@ Text Component
 SvgText
 ~~~~~~~
 
-.. function:: SvgText(x, y, text, fill="black", font_size=16, font_family="Arial", text_anchor="start", **kwargs)
+.. function:: SvgText(x, y, text, fill="black", font_size=16, font_family="Arial, sans-serif", text_anchor="start", **kwargs)
 
     Create text in an SVG.
     
@@ -265,7 +265,7 @@ SvgText
     :type fill: str
     :param font_size: Size of the font in pixels. Defaults to ``16``.
     :type font_size: int
-    :param font_family: Font family to use. Defaults to ``"Arial"``.
+    :param font_family: Font family to use. Defaults to ``"Arial, sans-serif"`` for cross-platform compatibility.
     :type font_family: str
     :param text_anchor: Text alignment - ``"start"``, ``"middle"``, or ``"end"``. Defaults to ``"start"``.
     :type text_anchor: str

@@ -20,7 +20,7 @@ class SvgText(Component):
         text: The text content to display
         fill: Text color (default: "black")
         font_size: Size of the font in pixels (default: 16)
-        font_family: Font family to use (default: "Arial")
+        font_family: Font family to use (default: "Arial, sans-serif")
         text_anchor: Text alignment - "start", "middle", or "end" (default: "start")
         **kwargs: Additional SVG attributes
     
@@ -33,7 +33,7 @@ class SvgText(Component):
     text: str
     fill: str = "black"
     font_size: int = 16
-    font_family: str = "Arial"
+    font_family: str = "Arial, sans-serif"
     text_anchor: str = "start"
     
     def __init__(
@@ -43,7 +43,7 @@ class SvgText(Component):
         text: str,
         fill: str = "black",
         font_size: int = 16,
-        font_family: str = "Arial",
+        font_family: str = "Arial, sans-serif",
         text_anchor: str = "start",
         **kwargs
     ):

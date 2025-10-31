@@ -263,9 +263,12 @@ class SvgPolygon(Component):
     """
     Create a polygon (closed shape with straight sides) in an SVG.
     
+    Note: Polygons are closed shapes, so they have a default fill of "black". 
+    If you want an unfilled polygon, set fill="none".
+    
     Args:
         points: List of (x, y) coordinate tuples or a string of points
-        fill: Fill color (default: "black")
+        fill: Fill color (default: "black" for closed shapes)
         stroke: Outline color
         stroke_width: Width of the outline
         **kwargs: Additional SVG attributes

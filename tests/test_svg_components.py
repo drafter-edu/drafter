@@ -197,7 +197,7 @@ def test_svg_text_defaults():
     assert '<text' in result
     assert 'fill="black"' in result
     assert 'font-size="16"' in result
-    assert 'font-family="Arial"' in result
+    assert 'font-family="Arial, sans-serif"' in result
     assert 'text-anchor="start"' in result
 
 
