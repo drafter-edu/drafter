@@ -53,9 +53,9 @@ class Svg(Component):
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         content_str = ''.join(str(item) for item in self.content)
         
-        return (
-            f'<svg width="{self.width}" height="{self.height}" '
-            f'xmlns="http://www.w3.org/2000/svg" {parsed_settings}>'
-            f'{content_str}'
-            f'</svg>'
-        )
+        # Build the SVG tag with proper spacing
+        svg_attrs = f'width="{self.width}" height="{self.height}" xmlns="http://www.w3.org/2000/svg"'
+        if parsed_settings.strip():
+            svg_attrs += f' {parsed_settings.strip()}'
+        
+        return f'<svg {svg_attrs}>{content_str}</svg>'
