@@ -23,20 +23,25 @@ export function makeRequest(formData: FormData): Promise<any> {
 
   for (const [k, v] of formData.entries()) {
     if (v instanceof File) {
-      // OLD IMPLEMENTATION - convert ArrayBuffer to base64
-      // This is memory-inefficient and may fail on large files
-      const promise = v.arrayBuffer().then((buffer) => {
-        const bytes = new Uint8Array(buffer);
-        const binary = Array.from(bytes).map((b) => String.fromCharCode(b)).join('');
-        const base64 = btoa(binary);
-        const fileData: FileData = {
-          filename: v.name,
-          content: base64,
-          type: v.type,
-          size: v.size,
-          __file_upload__: true
+      // Use FileReader.readAsDataURL for memory-efficient base64 conversion
+      const promise = new Promise<void>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(reader.error);
+        reader.onload = () => {
+          const result = reader.result as string;
+          const comma = result.indexOf(',');
+          const base64 = comma >= 0 ? result.slice(comma + 1) : result;
+          const fileData: FileData = {
+            filename: v.name,
+            content: base64,
+            type: v.type,
+            size: v.size,
+            __file_upload__: true
+          };
+          data[k] = k in data ? ([] as any[]).concat(data[k] as any, fileData) : fileData;
+          resolve();
         };
-        data[k] = k in data ? ([] as any[]).concat(data[k] as any, fileData) : fileData;
+        reader.readAsDataURL(v);
       });
       filePromises.push(promise);
     } else {
