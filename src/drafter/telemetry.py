@@ -5,85 +5,9 @@ Telemetry is information that gets collected from various parts of the system
 (ClientServer, SiteState, AuditLogger, etc.) and sent to the Monitor for
 aggregation and presentation.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Optional, Dict, List
 from datetime import datetime
-
-
-@dataclass
-class RequestTelemetry:
-    """
-    Telemetry data for a single request.
-    
-    :ivar request_id: Unique identifier for the request
-    :ivar timestamp: When the request was received
-    :ivar url: The URL being requested
-    :ivar action: The action being performed
-    :ivar args: Positional arguments
-    :ivar kwargs: Keyword arguments
-    :ivar event: Event information from the client
-    """
-    request_id: int
-    timestamp: datetime
-    url: str
-    action: str
-    args: List[Any]
-    kwargs: Dict[str, Any]
-    event: Dict[str, Any]
-
-
-@dataclass
-class ResponseTelemetry:
-    """
-    Telemetry data for a single response.
-    
-    :ivar response_id: Unique identifier for the response
-    :ivar request_id: The request this is responding to
-    :ivar timestamp: When the response was sent
-    :ivar status_code: HTTP-like status code
-    :ivar message: Human-readable status message
-    :ivar payload_type: Type of the response payload
-    :ivar body_length: Length of the rendered HTML body
-    :ivar has_errors: Whether the response contains errors
-    :ivar has_warnings: Whether the response contains warnings
-    :ivar channels: Names of active channels in the response
-    """
-    response_id: int
-    request_id: int
-    timestamp: datetime
-    status_code: int
-    message: str
-    payload_type: str
-    body_length: int
-    has_errors: bool
-    has_warnings: bool
-    channels: List[str]
-
-
-@dataclass
-class OutcomeTelemetry:
-    """
-    Telemetry data for a single outcome.
-    
-    :ivar outcome_id: Unique identifier for the outcome
-    :ivar request_id: The original request
-    :ivar response_id: The response this is acknowledging
-    :ivar timestamp: When the outcome was received
-    :ivar status_code: Status code from the client
-    :ivar message: Human-readable message from client
-    :ivar has_errors: Whether the outcome contains errors
-    :ivar has_warnings: Whether the outcome contains warnings
-    :ivar has_info: Whether the outcome contains info messages
-    """
-    outcome_id: int
-    request_id: int
-    response_id: int
-    timestamp: datetime
-    status_code: int
-    message: str
-    has_errors: bool
-    has_warnings: bool
-    has_info: bool
 
 
 @dataclass
@@ -91,15 +15,24 @@ class PageVisitTelemetry:
     """
     Telemetry data for a complete request/response/outcome cycle.
     
-    :ivar request: Request telemetry
-    :ivar response: Response telemetry (if completed)
-    :ivar outcome: Outcome telemetry (if received)
+    Uses the actual Request, Response, and Outcome objects instead of
+    creating redundant copies of their data.
+    
+    :ivar request: The actual Request object
+    :ivar request_timestamp: When the request was received
+    :ivar response: The actual Response object (if completed)
+    :ivar response_timestamp: When the response was sent (if completed)
+    :ivar outcome: The actual Outcome object (if received)
+    :ivar outcome_timestamp: When the outcome was received (if received)
     :ivar state_snapshot: Snapshot of state after this visit
     :ivar duration_ms: Duration from request to response in milliseconds
     """
-    request: RequestTelemetry
-    response: Optional[ResponseTelemetry] = None
-    outcome: Optional[OutcomeTelemetry] = None
+    request: Any  # Request object
+    request_timestamp: datetime
+    response: Optional[Any] = None  # Response object
+    response_timestamp: Optional[datetime] = None
+    outcome: Optional[Any] = None  # Outcome object
+    outcome_timestamp: Optional[datetime] = None
     state_snapshot: Any = None
     duration_ms: Optional[float] = None
 

@@ -14,9 +14,6 @@ from drafter.data.errors import DrafterError, DrafterWarning, DrafterInfo
 from drafter.payloads import Page
 from drafter.monitor import Monitor
 from drafter.telemetry import (
-    RequestTelemetry,
-    ResponseTelemetry,
-    OutcomeTelemetry,
     PageVisitTelemetry,
     MonitorSnapshot,
 )
@@ -37,7 +34,7 @@ def test_monitor_tracks_request():
     monitor.track_request(request)
     
     assert monitor.current_visit is not None
-    assert monitor.current_visit.request.request_id == 1
+    assert monitor.current_visit.request.id == 1
     assert monitor.current_visit.request.url == "/index"
 
 
@@ -56,7 +53,7 @@ def test_monitor_tracks_response():
     
     assert server.monitor.current_visit is not None
     assert server.monitor.current_visit.response is not None
-    assert server.monitor.current_visit.response.response_id == response.id
+    assert server.monitor.current_visit.response.id == response.id
 
 
 def test_monitor_tracks_outcome():

@@ -12,9 +12,6 @@ import html
 import json
 
 from drafter.telemetry import (
-    RequestTelemetry,
-    ResponseTelemetry,
-    OutcomeTelemetry,
     PageVisitTelemetry,
     MonitorSnapshot,
 )
@@ -58,17 +55,10 @@ class Monitor:
             return
         
         try:
-            request_telemetry = RequestTelemetry(
-                request_id=request.id,
-                timestamp=datetime.now(),
-                url=request.url,
-                action=request.action,
-                args=list(request.args),
-                kwargs=dict(request.kwargs),
-                event=dict(request.event),
+            self.current_visit = PageVisitTelemetry(
+                request=request,
+                request_timestamp=datetime.now()
             )
-            
-            self.current_visit = PageVisitTelemetry(request=request_telemetry)
         except Exception as e:
             self._handle_internal_error("track_request", e)
     
@@ -85,25 +75,15 @@ class Monitor:
             return
         
         try:
-            response_telemetry = ResponseTelemetry(
-                response_id=response.id,
-                request_id=response.request_id,
-                timestamp=datetime.now(),
-                status_code=response.status_code,
-                message=response.message,
-                payload_type=type(response.payload).__name__,
-                body_length=len(response.body) if response.body else 0,
-                has_errors=len(response.errors) > 0,
-                has_warnings=len(response.warnings) > 0,
-                channels=list(response.channels.keys()),
-            )
+            response_timestamp = datetime.now()
             
-            self.current_visit.response = response_telemetry
+            self.current_visit.response = response
+            self.current_visit.response_timestamp = response_timestamp
             self.current_visit.state_snapshot = state_snapshot
             
             # Calculate duration
-            if self.current_visit.request:
-                duration = (response_telemetry.timestamp - self.current_visit.request.timestamp)
+            if self.current_visit.request_timestamp:
+                duration = (response_timestamp - self.current_visit.request_timestamp)
                 self.current_visit.duration_ms = duration.total_seconds() * 1000
             
             # Track errors and warnings from the response
@@ -125,19 +105,8 @@ class Monitor:
             return
         
         try:
-            outcome_telemetry = OutcomeTelemetry(
-                outcome_id=outcome.id,
-                request_id=outcome.request_id,
-                response_id=outcome.response_id,
-                timestamp=datetime.now(),
-                status_code=outcome.status_code,
-                message=outcome.message,
-                has_errors=len(outcome.errors) > 0,
-                has_warnings=len(outcome.warnings) > 0,
-                has_info=len(outcome.info) > 0,
-            )
-            
-            self.current_visit.outcome = outcome_telemetry
+            self.current_visit.outcome = outcome
+            self.current_visit.outcome_timestamp = datetime.now()
             
             # Track errors, warnings, and info from the outcome
             for error in outcome.errors:
@@ -448,12 +417,16 @@ class Monitor:
         
         # Response details
         if visit.response:
+            payload_type = type(visit.response.payload).__name__
+            body_length = len(visit.response.body) if visit.response.body else 0
+            has_errors = len(visit.response.errors) > 0
+            has_warnings = len(visit.response.warnings) > 0
             parts.extend([
                 "<h5>Response</h5>",
-                f"<p>Payload Type: {html.escape(visit.response.payload_type)}</p>",
-                f"<p>Body Length: {visit.response.body_length} chars</p>",
-                f"<p>Errors: {visit.response.has_errors}</p>",
-                f"<p>Warnings: {visit.response.has_warnings}</p>",
+                f"<p>Payload Type: {html.escape(payload_type)}</p>",
+                f"<p>Body Length: {body_length} chars</p>",
+                f"<p>Errors: {has_errors}</p>",
+                f"<p>Warnings: {has_warnings}</p>",
             ])
         
         # Outcome details
