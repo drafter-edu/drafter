@@ -21,6 +21,18 @@ from drafter.components.files import Download, FileUpload
 
 from drafter.components.plotting import MatPlotLibPlot
 
+from drafter.components.svg import (
+    Svg,
+    SvgRectangle,
+    SvgCircle,
+    SvgEllipse,
+    SvgLine,
+    SvgPolygon,
+    SvgPolyline,
+    SvgPath,
+    SvgText,
+)
+
 
 __all__ = [
     "PageContent",
@@ -49,4 +61,13 @@ __all__ = [
     "Download",
     "FileUpload",
     "MatPlotLibPlot",
+    "Svg",
+    "SvgRectangle",
+    "SvgCircle",
+    "SvgEllipse",
+    "SvgLine",
+    "SvgPolygon",
+    "SvgPolyline",
+    "SvgPath",
+    "SvgText",
 ]
