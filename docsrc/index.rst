@@ -18,6 +18,7 @@ full stack websites as you learn to code in Python.
    workbook/index
    examples/examples
    students/docs
+   students/svg
    students/html
    students/styling
    reference/reference
