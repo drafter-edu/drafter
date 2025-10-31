@@ -1,0 +1,42 @@
+# Ring Example {#ring}
+
+This application demonstrates three pages linked together.
+
+![image](./ring/ring1.png){width="500px"}
+
+![image](./ring/ring2.png){width="500px"}
+
+![image](./ring/ring3.png){width="500px"}
+
+```python
+from drafter import route, start_server, Page, Link
+from bakery import assert_equal
+
+@route()
+def index():
+    return Page(None, [
+        "Hello, World!",
+        Link("Second page", "second")
+    ])
+
+@route
+def second():
+    return Page(None, [
+        "Welcome to the second page.",
+        Link("Third page", third)
+    ])
+
+@route
+def third():
+    return Page(None, [
+        "Welcome to the third page.",
+        Link("Return to start", index)
+    ])
+
+assert_equal(index(), Page(None, ["Hello, World!", Link("Second page", "second")]))
+assert_equal(second(), Page(None, ["Welcome to the second page.", Link("Third page", third)]))
+assert_equal(third(), Page(None, ["Welcome to the third page.", Link("Return to start", index)]))
+
+start_server()
+
+```
