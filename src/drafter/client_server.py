@@ -3,7 +3,7 @@ import os
 import traceback
 from dataclasses import dataclass, asdict, replace, field, fields
 from functools import wraps
-from typing import Any, Optional, List, Tuple, Union
+from typing import Any, Optional, List, Tuple, Union, Dict
 import json
 import inspect
 import pathlib
@@ -19,6 +19,7 @@ from drafter.data.outcome import Outcome
 from drafter.routes import Router
 from drafter.audit import AuditLogger
 from drafter.config.client_server import ClientServerConfiguration
+from drafter.monitor import Monitor
 
 
 @dataclass
@@ -34,6 +35,7 @@ class ClientServer:
     :ivar state: The state information about the student's site.
     :ivar response_count: A counter for the number of responses made, used to assign unique IDs.
     :ivar logger: An AuditLogger instance for logging errors, warnings, and info.
+    :ivar monitor: A Monitor instance for tracking telemetry and generating debug information.
     """
 
     custom_name: str
@@ -46,6 +48,7 @@ class ClientServer:
         self.state = SiteState()
         self.logger = AuditLogger()
         self.configuration = ClientServerConfiguration()
+        self.monitor = Monitor()
 
     def start(self, initial_state: Any = None) -> None:
         """
@@ -68,6 +71,9 @@ class ClientServer:
         :param request: The request to process.
         :return: The result of the route function.
         """
+        # Track the request in the monitor
+        self.monitor.track_request(request)
+        
         self.logger.log_info(
             f"Request received: {request}",
             "client_server.visit",
@@ -83,6 +89,7 @@ class ClientServer:
                 repr(request),
                 request.url,
             )
+            self.monitor.track_error(error)
             return self.make_error_response(request.id, error, status_code=404)
         # Call the route function to get the payload
         try:
@@ -95,6 +102,7 @@ class ClientServer:
                 request.url,
                 e,
             )
+            self.monitor.track_error(error)
             return self.make_error_response(request.id, error)
         # Verify the payload
         if not isinstance(payload, ResponsePayload):
@@ -105,6 +113,7 @@ class ClientServer:
                 f"Request: {repr(request)}\nPage: {repr(payload)}",
                 request.url,
             )
+            self.monitor.track_error(error)
             return self.make_error_response(request.id, error)
         # Render the payload
         try:
@@ -117,6 +126,7 @@ class ClientServer:
                 request.url,
                 e,
             )
+            self.monitor.track_error(error)
             return self.make_error_response(request.id, error)
         # Return successfully
         return self.make_success_response(request.id, body, payload)
@@ -146,6 +156,21 @@ class ClientServer:
             body=body,
         )
         self.response_count += 1
+        
+        # Track the response with the monitor
+        self.monitor.track_response(response, state_snapshot=self.state.current)
+        
+        # Add debug information to the response via a channel
+        if self.configuration.debug_enabled:
+            debug_html = self.monitor.generate_debug_html(
+                current_state=self.state.current,
+                initial_state=self.state.initial,
+                routes=self.router.routes,
+                server_config=self._get_config_dict(),
+            )
+            if debug_html:
+                response.send("debug", debug_html, kind="html")
+        
         return response
 
     def make_error_response(
@@ -189,6 +214,21 @@ class ClientServer:
             errors=[error],
         )
         self.response_count += 1
+        
+        # Track the error response with the monitor
+        self.monitor.track_response(response, state_snapshot=self.state.current)
+        
+        # Add debug information even for error responses
+        if self.configuration.debug_enabled:
+            debug_html = self.monitor.generate_debug_html(
+                current_state=self.state.current,
+                initial_state=self.state.initial,
+                routes=self.router.routes,
+                server_config=self._get_config_dict(),
+            )
+            if debug_html:
+                response.send("debug", debug_html, kind="html")
+        
         return response
 
     def report_outcome(self, outcome: Outcome) -> None:
@@ -198,6 +238,9 @@ class ClientServer:
         :param outcome: The outcome to report.
         :return: None
         """
+        # Track the outcome with the monitor
+        self.monitor.track_outcome(outcome)
+        
         for error in outcome.errors:
             self.logger.log_existing_error(error)
         for warning in outcome.warnings:
@@ -225,6 +268,20 @@ class ClientServer:
             "client_server.add_route",
             f"Function: {repr(func)}",
         )
+    
+    def _get_config_dict(self) -> Dict[str, Any]:
+        """
+        Get the configuration as a dictionary for the monitor.
+        
+        :return: Dictionary representation of the configuration
+        """
+        return {
+            "in_debug_mode": self.configuration.in_debug_mode,
+            "enable_audit_logging": self.configuration.enable_audit_logging,
+            "site_title": self.configuration.site_title,
+            "debug_enabled": self.configuration.debug_enabled,
+            "custom_name": self.custom_name,
+        }
 
 
 MAIN_SERVER = ClientServer(custom_name="MAIN_SERVER")
