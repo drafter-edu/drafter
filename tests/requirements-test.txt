@@ -1,5 +1,0 @@
-# Test dependencies for Drafter
-pytest>=7.0.0
-pytest-asyncio>=0.21.0
-starlette>=0.27.0
-httpx>=0.24.0

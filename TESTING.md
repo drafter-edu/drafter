@@ -1,97 +1,61 @@
 # Testing Infrastructure
 
-This document describes the new testing infrastructure for Drafter, which replaces the old Bottle-based test system.
+This document describes the new testing infrastructure for Drafter, which provides comprehensive tests for the Python library.
 
 ## Overview
 
-The testing infrastructure is organized into three categories:
+The testing infrastructure is organized into two categories:
 
-1. **Starlette Server Tests** - Tests for the local development server
+1. **Bottle Server Tests** - Tests for the server infrastructure
 2. **Python Client Library Tests** - Unit tests for the Python API
-3. **TypeScript/Jest Tests** - End-to-end tests for the JavaScript client
 
 ## Test Categories
 
-### 1. Starlette Server Tests
+### 1. Bottle Server Tests
 
-**Location:** `tests/test_starlette_server.py`
+**Location:** `tests/test_bottle_server.py`
 
-**Purpose:** Verify that the Starlette development server launches correctly and injects all necessary assets for local development.
+**Purpose:** Verify that the Bottle server works correctly with route management and state handling.
 
 **Key Test Areas:**
-- Server startup and response handling
-- HTML page structure and title injection
-- User code embedding (inline and external)
-- Skulpt library injection
-- Drafter client library injection
-- WebSocket configuration for hot reload
-- Static assets routing
-- WebSocket connection establishment
+- Server initialization and configuration
+- Route registration (both add_route method and @route decorator)
+- Server setup with initial state
+- State management across routes
+- Multiple routes on the same server
 
 **Running:**
 ```bash
-pytest tests/test_starlette_server.py -v
+pytest tests/test_bottle_server.py -v
 ```
 
 ### 2. Python Client Library Tests
 
-**Location:** `tests/test_client_library.py`
+**Location:** `tests/test_components.py`
 
 **Purpose:** Unit test the Python library that developers use to build Drafter applications.
 
 **Key Test Areas:**
-- `Router` class: route registration and retrieval
-- `Server` class: initialization, state management, route visiting
-- `route` decorator: function decoration and route registration
 - `Page` class: state and content management, validation
-- Component classes: `TextBox`, `Button`, `Text`, `Table`
-- Component validation: parameter name checking
-- `Response` class: page encapsulation
+- Text components: `Text`, `Header`
+- Input components: `TextBox`, `TextArea`, `CheckBox`, `SelectBox`
+- Interactive components: `Button`, `Link`
+- Layout components: `LineBreak`, `HorizontalRule`, `Div`, `Span`
+- `Table` component: data handling and rendering
+- `Image` component: URL and dimensions
+- `route` decorator: function decoration and route registration
+- Component HTML rendering
 
 **Running:**
 ```bash
-pytest tests/test_client_library.py -v
-```
-
-### 3. TypeScript/Jest Tests
-
-**Location:** `js/tests/client.test.ts`
-
-**Purpose:** End-to-end testing of the TypeScript client library that runs in the browser.
-
-**Key Test Areas:**
-- Client initialization with different target configurations
-- Skulpt setup and configuration
-- Code loading (inline and from URL)
-- User interaction simulation (input, clicks, form submission)
-- Page navigation (internal and external links)
-- Component rendering (text, buttons, inputs, tables)
-- DOM updates and state changes
-- Form validation
-
-**Running:**
-```bash
-cd js
-npm test
-```
-
-**Watch mode:**
-```bash
-cd js
-npm run test:watch
-```
-
-**Coverage report:**
-```bash
-cd js
-npm run test:coverage
+pytest tests/test_components.py -v
 ```
 
 ## Running All Tests
 
-### Python Tests Only
+### Python Tests
 ```bash
-pytest tests/test_client_library.py tests/test_starlette_server.py -v
+pytest tests/test_bottle_server.py tests/test_components.py -v
 ```
 
 or using the Justfile:
@@ -99,55 +63,20 @@ or using the Justfile:
 just test
 ```
 
-### JavaScript Tests Only
-```bash
-cd js && npm test
-```
-
-### All Tests
-```bash
-# Terminal 1: Run Python tests
-pytest tests/test_client_library.py tests/test_starlette_server.py -v
-
-# Terminal 2: Run JavaScript tests
-cd js && npm test
-```
-
 ## Test Dependencies
 
 ### Python
 The following packages are required for testing:
 - `pytest>=7.0.0`
-- `pytest-asyncio>=0.21.0`
-- `starlette>=0.27.0`
-- `httpx>=0.24.0`
 
-Install with:
-```bash
-pip install -r tests/requirements-test.txt
-```
-
-Or install the full dev dependencies:
+Install with the full dev dependencies:
 ```bash
 pip install -e ".[dev]"
 ```
 
-### JavaScript
-The following packages are required for testing:
-- `jest`
-- `ts-jest`
-- `jest-environment-jsdom`
-- `@types/jest`
-
-Install with:
-```bash
-cd js
-npm install
-```
-
 ## Legacy Tests
 
-The following test files are part of the old Bottle-based testing infrastructure and may be deprecated:
+The following test files are part of the old testing infrastructure and may be deprecated:
 - `tests/test_simple_server.py`
 - `tests/test_complex_form.py`
 - `tests/test_about_page.py`
@@ -155,7 +84,7 @@ The following test files are part of the old Bottle-based testing infrastructure
 - `tests/test_button_namespacing.py`
 - `tests/test_unicode.py`
 
-These tests use `bottle`, `splinter`, and browser automation with Selenium/Chrome. They are functional but use outdated infrastructure.
+These tests use browser automation with Selenium/Chrome and are functional but use older patterns.
 
 ## Writing New Tests
 
@@ -173,43 +102,15 @@ Example:
 ```python
 def test_server_handles_state():
     """Test that server maintains state across route visits."""
-    server = Server(custom_name="TEST")
-    server.state = {"count": 0}
+    server = Server(_custom_name="TEST")
+    server.setup({"count": 0})
     
     @route("increment", server=server)
     def increment(state):
         state["count"] += 1
         return Page(state, [f"Count: {state['count']}"])
     
-    response = server.visit("increment")
-    assert server.state["count"] == 1
-```
-
-### TypeScript Tests
-
-When writing new TypeScript tests, follow these guidelines:
-
-1. Use `describe` blocks to group related tests
-2. Use `beforeEach` to reset state between tests
-3. Mock external dependencies (Skulpt, fetch, etc.)
-4. Test both success and error cases
-5. Simulate real user interactions
-
-Example:
-```typescript
-describe('Component Rendering', () => {
-  beforeEach(() => {
-    document.body.innerHTML = '<div id="app"></div>';
-  });
-
-  test('should render button component', () => {
-    const app = document.getElementById('app')!;
-    app.innerHTML = '<button>Click Me</button>';
-    
-    const button = app.querySelector('button');
-    expect(button?.textContent).toBe('Click Me');
-  });
-});
+    assert "increment" in server.routes
 ```
 
 ## Continuous Integration
