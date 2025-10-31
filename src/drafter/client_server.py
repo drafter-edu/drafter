@@ -44,11 +44,13 @@ class ClientServer:
     response_count: int = 0
 
     def __init__(self, custom_name: str) -> None:
+        self.custom_name = custom_name
         self.router = Router()
         self.state = SiteState()
         self.logger = AuditLogger()
         self.configuration = ClientServerConfiguration()
         self.monitor = Monitor()
+        self.response_count = 0
 
     def start(self, initial_state: Any = None) -> None:
         """
