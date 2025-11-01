@@ -26,7 +26,7 @@
       var Sk2 = {};
       Sk2.build = {
         githash: "2c0cb427",
-        date: "2025-10-26T22:37:10.775Z"
+        date: "2025-10-30T16:14:24.120Z"
       };
       Sk2.global = typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};
       Sk2.exportSymbol = function(name, object) {
@@ -28688,7 +28688,7 @@
           sourceLine = this.getSourceLine(lineno);
           Sk.asserts.assert(ast.lineno !== void 0 && ast.col_offset !== void 0);
           let isDocstring = !!(ast.constructor === Sk.astnodes.Expr && ast.value.constructor === Sk.astnodes.Str);
-          if (shouldStep && (!this.filename || !this.filename.startsWith("src/lib/pedal/"))) {
+          if (shouldStep && (!this.filename || !this.filename.startsWith("src/lib/"))) {
             out("\n$currLineNo=", lineno, ";$currColNo=", col_offset, ";");
             let chompedLine = sourceLine;
             if (chompedLine.length > 24) {

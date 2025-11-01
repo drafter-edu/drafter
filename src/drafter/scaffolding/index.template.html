@@ -10,11 +10,7 @@
     <script>window.DRAFTER_SITE_ROOT_ELEMENT_ID="drafter-site--"</script>
   </head>
   <body>
-    <div id="drafter-site--">
-      <form>
-        <div id="app"></div>
-      </form>
-    </div>
+    <div id="{{ drafter_root }}"></div>
     {% if inline_py %}<script type="text/python" id="user-code">{{ user_code }}</script>{% endif %}
     <script src="{{ static('skulpt.js') }}"></script>
     <script src="{{ static('skulpt-stdlib.js') }}"></script>

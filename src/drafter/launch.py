@@ -18,7 +18,11 @@ def start_server(initial_state=None, main_user_path=None) -> None:
             outcome = client_bridge.handle_response(response, handle_visit)
             server.report_outcome(outcome)
 
+        client_bridge.setup_site(server.render_site())
+
         handle_visit(initial_request)
+
+        server.register_monitor_listener(client_bridge.handle_telemetry_event)
     else:
         from drafter.app.app_server import serve_app_once
 

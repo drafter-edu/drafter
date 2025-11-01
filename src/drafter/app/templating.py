@@ -4,6 +4,7 @@ from jinja2 import Environment, BaseLoader
 from pathlib import Path
 
 from drafter.app.utils import pkg_scaffold_dir
+from drafter.site import DRAFTER_TAG_IDS
 
 _env = Environment(loader=BaseLoader(), autoescape=False)
 
@@ -41,5 +42,6 @@ def render_index_html(
         user_code=user_code or "",
         python_url=python_url or "",
         dev_ws_url=dev_ws_url,
+        drafter_root=DRAFTER_TAG_IDS["ROOT"],
         static=static,
     )

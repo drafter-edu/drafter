@@ -1,15 +1,9 @@
-import html
-import os
-import traceback
-from dataclasses import dataclass, asdict, replace, field, fields
-from functools import wraps
-from typing import Any, Optional, List, Tuple, Union
-import json
-import inspect
-import pathlib
+from dataclasses import dataclass
+from typing import Any, Optional, List, Tuple, Union, Dict
 
 from drafter.history.state import SiteState
 from drafter.data.errors import DrafterError
+from drafter.monitor.monitor import Monitor
 from drafter.payloads import Page
 from drafter.payloads.error_page import ErrorPage, SimpleErrorPage
 from drafter.payloads.payloads import ResponsePayload
@@ -18,6 +12,7 @@ from drafter.data.response import Response
 from drafter.data.outcome import Outcome
 from drafter.routes import Router
 from drafter.audit import AuditLogger
+from drafter.site import Site
 from drafter.config.client_server import ClientServerConfiguration
 
 
@@ -34,18 +29,23 @@ class ClientServer:
     :ivar state: The state information about the student's site.
     :ivar response_count: A counter for the number of responses made, used to assign unique IDs.
     :ivar logger: An AuditLogger instance for logging errors, warnings, and info.
+    :ivar monitor: A Monitor instance for tracking telemetry data.
+    :ivar configuration: The ClientServerConfiguration instance for server settings.
     """
 
     custom_name: str
     state: SiteState
     configuration: ClientServerConfiguration
-    response_count: int = 0
 
     def __init__(self, custom_name: str) -> None:
+        self.custom_name = custom_name
+        self.site = Site()
         self.router = Router()
         self.state = SiteState()
         self.logger = AuditLogger()
+        self.monitor = Monitor()
         self.configuration = ClientServerConfiguration()
+        self.response_count = 0
 
     def start(self, initial_state: Any = None) -> None:
         """
@@ -225,6 +225,25 @@ class ClientServer:
             "client_server.add_route",
             f"Function: {repr(func)}",
         )
+
+    def render_site(self) -> str:
+        """
+        Renders the initial site HTML. This is called to create the site
+        framing structure that includes the frame, header, body, footer, form, and
+        debug info.
+
+        :return: The rendered HTML of the initial site.
+        """
+        return self.site.render()
+
+    def register_monitor_listener(self, handler: Any) -> None:
+        """
+        Registers a listener to the monitor.
+
+        :param handler: The handler function to register.
+        :return: None
+        """
+        self.monitor.register_listener(handler)
 
 
 MAIN_SERVER = ClientServer(custom_name="MAIN_SERVER")

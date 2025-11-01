@@ -23,13 +23,23 @@ function $builtinmodule(name: string) {
         (outcome_mod) => {
             drafter_client_mod.Outcome =
                 outcome_mod.$d.data.$d.outcome.$d.Outcome;
-            //     return Sk.importModule("operator", false, true);
+            return Sk.importModule("drafter.site", false, true);
+            //   return Sk.importModule("operator", false, true);
         },
-        // (operator) => {
-        //     drafter_client_mod._itemgetter = operator.$d.itemgetter;
-        // },
+        (site_mod) => {
+            drafter_client_mod.DRAFTER_TAG_IDS = Sk.ffi.remapToJs(
+                site_mod.$d.site.$d.DRAFTER_TAG_IDS
+            );
+        },
         () => drafter_bridge_client_module(drafter_client_mod)
     );
+}
+
+function replaceHTML(tag: HTMLElement, html: string) {
+    const r = document.createRange();
+    r.selectNode(tag);
+    const fragment = r.createContextualFragment(html);
+    tag.replaceChildren(fragment);
 }
 
 function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
@@ -102,10 +112,6 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     let requestCount = 0;
     let outcomeCount = 0;
 
-    const ROOT_ELEMENT_ID =
-        window.DRAFTER_SITE_ROOT_ELEMENT_ID || "drafter-site--";
-    const FORM_ELEMENT_ID = "drafter-form--";
-
     const makeOutcome = function (originalRequestId: pyInt, responseId: pyInt) {
         const args = [new pyInt(outcomeCount), originalRequestId, responseId];
         console.log(Outcome, args);
@@ -140,7 +146,15 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         return request;
     };
 
-    const update_site = new pyFunc(function update_site_func(
+    const {
+        DRAFTER_TAG_IDS: {
+            ROOT: ROOT_ELEMENT_ID,
+            FORM: FORM_ELEMENT_ID,
+            BODY: BODY_ELEMENT_ID,
+        },
+    } = drafter_client_mod;
+
+    const update_body = new pyFunc(function update_body_func(
         response: pyObject,
         callback: pyFunc
     ): Suspension {
@@ -151,14 +165,14 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         navigate: pyFunc
         */
         // Implementation for loading a page
-        debug_log("update_site called with", response, callback);
-        const element = document.getElementById(ROOT_ELEMENT_ID);
+        debug_log("update_body called with", response, callback);
+        const element = document.getElementById(BODY_ELEMENT_ID);
         if (!element) {
             // TODO: Handle this absolutely crisis of an error properly
-            throw new ValueError(`Target element ${ROOT_ELEMENT_ID} not found`);
+            throw new ValueError(`Target element ${BODY_ELEMENT_ID} not found`);
         }
-        const startSiteUpdate = () => {
-            debug_log("Starting site update...");
+        const startBodyUpdate = () => {
+            debug_log("Starting body update...");
             const body: string = Sk.ffi.remapToJs(
                 response.tp$getattr(str_body)
             );
@@ -166,7 +180,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                 response.tp$getattr(str_request_id);
             const responseId: pyInt = response.tp$getattr(str_id);
             debug_log("Updating site body to:", body);
-            element.innerHTML = body;
+            replaceHTML(element, body);
             const mounted = mountNavigation(element, (navEvent: NavEvent) => {
                 debug_log(
                     "Navigating to:",
@@ -186,7 +200,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
             debug_log("Mounted navigation handlers:", mounted);
             return makeOutcome(originalRequestId, responseId);
         };
-        return Sk.misceval.chain<any, any>([], startSiteUpdate);
+        return Sk.misceval.chain<any, any>([], startBodyUpdate);
     });
 
     // Track handlers for cleanup
@@ -243,12 +257,9 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
             FORM_ELEMENT_ID
         ) as HTMLFormElement;
         if (!formRoot) {
+            // TODO: Also handle this crisis properly
             throw new Error(`Form element ${FORM_ELEMENT_ID} not found`);
         }
-        // TODO: Check if still needed; the old handler was probably already removed
-        // if (submitHandler) {
-        //     formRoot.removeEventListener("submit", submitHandler);
-        // }
         submitHandler = function (event: SubmitEvent) {
             debug_log("Form submitted", event);
 
@@ -273,7 +284,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         formRoot.addEventListener("submit", submitHandler);
     }
 
-    drafter_client_mod.update_site = update_site;
+    drafter_client_mod.update_site = update_body;
 
     return drafter_client_mod;
 }

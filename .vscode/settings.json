@@ -24,5 +24,12 @@
         "editor.linkedEditing": true,
         "editor.tabSize": 2
     },
-    "cSpell.words": ["builtinmodule", "skulpt", "Starlette", "stdlib"]
+    "cSpell.words": [
+        "builtinmodule",
+        "callsim",
+        "misceval",
+        "skulpt",
+        "Starlette",
+        "stdlib"
+    ]
 }

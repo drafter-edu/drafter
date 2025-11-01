@@ -4,27 +4,48 @@ A simple Python library for making websites
 
 ## Organization
 
-If a user runs the program directly, then when it reaches `start_server`, it will start a local development server (the `AppServer`) using Starlette.
-This server will serve a single page that sets up Skulpt and a hot-reload connection to the server.
-That page will also load the Drafter client library (`ClientBridge`).
-Finally, the page will also load the user's code into Skulpt and run it, which should inevitably load and run the local server (`ClientServer`).
-Effectively, this is running the program twice. The first time is "server side" with no real implications (other than starting the server, unit tests, print statements, etc.).
-The second time is "client side" in Skulpt, where the user's code is actually run.
-Images will assume to be available via the server.
+When you run a Drafter program that has a `start_server` call, then it will actually trigger the `launch.py` script's logic that will either run the application differently depending on whether it is in Skulpt (skulpt) mode or normal Python (app) mode.
 
-If the `build` command is used, then the `AppBuilder` will instead generate static HTML, CSS, and JS files that can be deployed to any static hosting service.
-The main `index.html` file will set up Skulpt and load the user's code into it, as well as load the Drafter client library to set up the page content.
-It will try to precompile the library to populate as much meta information as it can, as well as an HTML preview that can be shown for SEO contexts.
+If a user runs the program directly, then when it reaches `start_server`, it will start a local development server (the `AppServer`) using Starlette.
+This server will serve a single page with a div that contains the DRAFTER_ROOT.
+The page will sets up Skulpt and a hot-reload connection to the server.
+That page will also load the Drafter library in Skulpt, which includes a specialized version of the client library (which adds new functionality to `ClientBridge`).
+Finally, the page will also load the user's code into Skulpt and run it, which should rerun this process from the beginning, but instead triggering the alternative path where we run in Skulpt mode (see below). Effectively, this is running the program twice. The first time is "server side" with no real implications (other than starting the server, unit tests, print statements, etc.). The second time is "client side" in Skulpt, where the user's code is actually run.
+
+If the `build` command is used from the command line script, then the `AppBuilder` will instead generate static HTML, CSS, and JS files that can be deployed to any static hosting service.
+The main `index.html` file will create the DRAFTER_ROOT div, set up Skulpt and load the user's code into it, as well as load the Skulpt version of the Drafter client library to set up the page content.
+It will try to render the student's initial page to prepopulate as much meta information as it can, as well as an HTML preview that can be shown for SEO contexts.
 The `AppBuilder` and `AppServer` are together both referred to as `AppBackend`.
 
-The structure of the page is as follows:
+If the user is running the program directly in Skulpt, then when it reaches the `start_server` call, it will instead trigger the `launch.py` script's logic to setup the `ClientBridge` and get the main `ClientServer`. Note that the `ClientServer` is not a real server; it is just a class that handles requests from the `BridgeClient` and generates responses.
+The `BridgeClient` is responsible for populating the DOM, tracking user interactions, and sending requests from the client side, while the `ClientServer` is responsible for processing requests, managing state, and generating responses on the server side.
 
--   There's a div tag with id `drafter-app--` that contains the entire app.
--   The first child of that is a `form` tag with id `drafter-form--`.
--   Subsequent children can be additional tags that are outside the form (e.g., modals, audio players, etc.).
--   Around the entire app `div` is a `drafter-frame--` div that makes the app look like it is in a browser window, and has additional debug information when in development mode. This frame is not present in production builds.
--   Site > Frame > App > Form > PageContent (Page)
--   Site > Frame > DebugInfo
+The area that the user sees is the `Site`, which is a frame encapsulating the `Form`, the `PageContent`, the `DebugInfo`, and additional elements that are needed (e.g., audio players).
+The `Site` is a container that holds all the elements of the user interface and is populated by the `BridgeClient` based on the responses it gets from the `ClientServer`.
+The `BridgeClient` is stupid when it comes to the site, and doesn't really understand what it has; as much of that logic as possible is pushed into the `ClientServer`.
+Different parts of the `Site` are updated from different parts of the `ClientServer`: the `Monitor` has control over the `DebugInfo`, while the `Route` handlers have control over the `PageContent`.
+
+The DOM structure of the site is as follows:
+
+-   There's a top-level div tag with id `drafter-root--` that contains the entire site.
+-   There's a div tag with id `drafter-site--` that contains the entire site.
+-   Inside that is a `drafter-frame--` div that contains the main app, followed by the `drafter-debug-info--` div.
+    -   The frame makes the app look like it is in a browser window.
+    -   The frame is only visible in development mode; otherwise, only its content is visible.
+-   Inside the frame is a `drafter-header--` div, a `drafter-body--` div, and a `drafter-footer--` div.
+    -   The header and footer are only visible in development mode.
+    -   The header has things like the site title and quick links for resetting state, going to the about page, etc.
+    -   The footer has quick information like the current route, status, etc.
+-   The first child of the `drafter-body--` is a `form` tag with id `drafter-form--`.
+-   Subsequent children of the body can be additional tags that are outside the form (e.g., modals, audio players, etc.).
+-   When the page content is rendered, it goes inside the `form` tag.
+
+The structure can be summarized as:
+
+-   Root > Site > Frame > Header
+-   Root > Site > Frame > Body > Form > (Page's content goes here)
+-   Root > Site > Frame > Footer
+-   Root > Site > DebugInfo
 
 We'll use a request/response model to update the page content, based around events.
 When the user interacts with the page (clicks a link, submits a form, etc.), the `BridgeClient` will send a request to the `ClientServer` with the relevant information:
@@ -86,18 +107,27 @@ The debug information present in the frame:
         -   VCR playback controls
         -   Automatically produced tests
     -   Test status information
+    -   Button to activate codemirror instance that let's us do a REPL type thing?
 -   Test production button
 -   Compile site button
+
+The `Monitor` tracks information about the server's behavior (and some amount of information from the client), and is a centralized place to log telemetry events for analysis.
+Telemetry entails logging events like page loads, errors, warnings, state, performance metrics, user interactions, etc. Essentially, any debug information from the server should
+be logged as telemetry events.
+These TelemetryEvents are then transformed into other representations as needed: raw information to be printed on stdout, logs for storing on disk, analytics for displaying in the debug panel.
 
 Essentially:
 
 -   The `BridgeClient` handles all DOM manipulation and user interaction on the client side.
 -   The `ClientServer` processes requests, manages state, and generates responses on the server side
 -   The `Page` (and other `ResponsePayload`s) represent the content and structure of the pages being served, and are created by the user-developer.
--   The `Response` wraps the `ResponsePayload` with metadata for transmission between client and server, and is created by the `ClientServer`.
 -   The `Request` wraps user interaction data for transmission from client to server, and is created by the `BridgeClient`.
+-   The `Response` wraps the `ResponsePayload` with metadata for transmission between client and server, and is created by the `ClientServer`.
+-   The `Outcome` wraps the result of processing a response for transmission from client to server, and is created by the `BridgeClient`.
 
 How is `open` and `read` handled? We need to determine all of the local file dependencies of the project. The user should be able to provide an explicit list, but otherwise we assume that adjacent files will be possible to include. Starlette can load these files dynamically, but for deployment we need to make sure they get provided such that they can be opened.
+
+Images will assume to be available via the server.
 
 ## Development: watch JS assets
 

@@ -8,7 +8,9 @@ from drafter.data.outcome import Outcome
 from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.bridge.client import update_site
+from drafter.monitor.telemetry import TelemetryEvent
 from drafter.payloads.page import Page
+from drafter.site import DRAFTER_TAG_IDS
 from typing import Callable, Optional
 import document  # type: ignore
 
@@ -40,6 +42,13 @@ class ClientBridge:
 
     def make_initial_request(self) -> Request:
         return Request(0, "load", "index", [], {}, {})
+
+    def handle_telemetry_event(self, event: TelemetryEvent) -> None:
+        print("Telemetry Event:", event.event_type, event.data)
+
+    def setup_site(self, site_html: str) -> None:
+        root_tag = document.getElementById(DRAFTER_TAG_IDS["ROOT"])
+        root_tag.innerHTML = site_html
 
 
 def add_script(src: str) -> None:
