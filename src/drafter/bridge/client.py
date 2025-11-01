@@ -14,3 +14,7 @@ from typing import Callable
 
 def update_site(response: Response, callback: Callable) -> Outcome:  # type: ignore
     pass
+
+
+def console_log(event) -> None:  # type: ignore
+    pass

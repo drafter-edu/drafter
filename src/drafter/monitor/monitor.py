@@ -12,14 +12,20 @@ import traceback
 import html
 import json
 
-from drafter.monitor.telemetry import (
-    PageVisitTelemetry,
-    MonitorSnapshot,
-)
+from drafter.monitor.bus import EventBus, get_main_event_bus
+from drafter.monitor.telemetry import TelemetryEvent
 from drafter.data.request import Request
 from drafter.data.response import Response
 from drafter.data.outcome import Outcome
 from drafter.data.errors import DrafterError, DrafterWarning, DrafterInfo
+
+
+class MonitorSnapshot:
+    pass
+
+
+class PageVisitTelemetry:
+    pass
 
 
 @dataclass
@@ -39,13 +45,19 @@ class Monitor:
     :ivar enabled: Whether the monitor is currently enabled
     """
 
+    event_history: list[str] = field(default_factory=list)
+    routes: list[str] = field(default_factory=list)
     listeners: List[Callable[[Any], None]] = field(default_factory=list)
-    page_visits: List[PageVisitTelemetry] = field(default_factory=list)
-    current_visit: Optional[PageVisitTelemetry] = None
-    errors: List[DrafterError] = field(default_factory=list)
-    warnings: List[DrafterWarning] = field(default_factory=list)
-    info: List[DrafterInfo] = field(default_factory=list)
     enabled: bool = True
+
+    def listen_for_events(self) -> None:
+        """
+        Listen for telemetry events on the given event bus.
+
+        :param event_bus: The event bus to listen on
+        """
+        event_bus = get_main_event_bus()
+        event_bus.subscribe("*", self._handle_telemetry_event)
 
     def register_listener(self, listener: Callable[[Any], None]) -> None:
         """
@@ -55,168 +67,81 @@ class Monitor:
         """
         self.listeners.append(listener)
 
-    def track_request(self, request: Request) -> None:
+    def _handle_telemetry_event(self, event: TelemetryEvent) -> None:
         """
-        Track an incoming request and start a new page visit.
+        Handle a telemetry event by notifying all registered listeners.
 
-        :param request: The request to track
+        :param event: The telemetry event to handle
         """
-        if not self.enabled:
-            return
+        self.event_history.append(event.event_type)
+        routes = self._handle_route_add(event)
+        content = repr(self.event_history) + "<br>\nRoutes:" + routes
+        for listener in self.listeners:
+            try:
+                listener(f"<pre>{content}</pre>")
+            except Exception as e:
+                self._handle_internal_error("listener invocation", e)
 
-        try:
-            self.current_visit = PageVisitTelemetry(
-                request=request, request_timestamp=datetime.now()
-            )
-        except Exception as e:
-            self._handle_internal_error("track_request", e)
-
-    def track_response(self, response: Response, state_snapshot: Any = None) -> None:
+    def _handle_route_add(self, event: TelemetryEvent) -> str:
         """
-        Track a response and associate it with the current page visit.
+        Handle route addition events to track available routes.
 
-        :param response: The response to track
-        :param state_snapshot: Optional snapshot of the state after response
+        :param event: The telemetry event to check
+        :return: A string representation of the current routes
         """
-        if not self.enabled or self.current_visit is None:
-            return
+        if event.event_type == "server.started":
+            from drafter.client_server.commands import get_main_server
 
-        try:
-            response_timestamp = datetime.now()
+            server = get_main_server()
+            self.routes.extend(server.router.routes.keys())
+        if event.event_type == "route.added":
+            route_info = event.data
+            route_str = f"Added route: {route_info}\n"
+            self.routes.append(route_str)
+        return "\n".join(self.routes)
 
-            self.current_visit.response = response
-            self.current_visit.response_timestamp = response_timestamp
-            self.current_visit.state_snapshot = state_snapshot
+    # def get_snapshot(
+    #     self,
+    #     current_state: Any = None,
+    #     initial_state: Any = None,
+    #     routes: Optional[Dict[str, Callable]] = None,
+    #     server_config: Optional[Dict[str, Any]] = None,
+    # ) -> MonitorSnapshot:
+    #     """
+    #     Get a complete snapshot of the monitor's current state.
 
-            # Calculate duration
-            if self.current_visit.request_timestamp:
-                duration = response_timestamp - self.current_visit.request_timestamp
-                self.current_visit.duration_ms = duration.total_seconds() * 1000
-
-            # Track errors and warnings from the response
-            for error in response.errors:
-                self.track_error(error)
-            for warning in response.warnings:
-                self.track_warning(warning)
-
-        except Exception as e:
-            self._handle_internal_error("track_response", e)
-
-    def track_outcome(self, outcome: Outcome) -> None:
-        """
-        Track an outcome and complete the current page visit.
-
-        :param outcome: The outcome to track
-        """
-        if not self.enabled or self.current_visit is None:
-            return
-
-        try:
-            self.current_visit.outcome = outcome
-            self.current_visit.outcome_timestamp = datetime.now()
-
-            # Track errors, warnings, and info from the outcome
-            for error in outcome.errors:
-                self.track_error(error)
-            for warning in outcome.warnings:
-                self.track_warning(warning)
-            for info_msg in outcome.info:
-                self.track_info(info_msg)
-
-            # Move current visit to history and clear it
-            self.page_visits.append(self.current_visit)
-            self.current_visit = None
-
-        except Exception as e:
-            self._handle_internal_error("track_outcome", e)
-
-    def track_error(self, error: DrafterError) -> None:
-        """
-        Track an error message.
-
-        :param error: The error to track
-        """
-        if not self.enabled:
-            return
-
-        try:
-            if error not in self.errors:
-                self.errors.append(error)
-        except Exception as e:
-            self._handle_internal_error("track_error", e)
-
-    def track_warning(self, warning: DrafterWarning) -> None:
-        """
-        Track a warning message.
-
-        :param warning: The warning to track
-        """
-        if not self.enabled:
-            return
-
-        try:
-            if warning not in self.warnings:
-                self.warnings.append(warning)
-        except Exception as e:
-            self._handle_internal_error("track_warning", e)
-
-    def track_info(self, info: DrafterInfo) -> None:
-        """
-        Track an info message.
-
-        :param info: The info message to track
-        """
-        if not self.enabled:
-            return
-
-        try:
-            if info not in self.info:
-                self.info.append(info)
-        except Exception as e:
-            self._handle_internal_error("track_info", e)
-
-    def get_snapshot(
-        self,
-        current_state: Any = None,
-        initial_state: Any = None,
-        routes: Optional[Dict[str, Callable]] = None,
-        server_config: Optional[Dict[str, Any]] = None,
-    ) -> MonitorSnapshot:
-        """
-        Get a complete snapshot of the monitor's current state.
-
-        :param current_state: Current state of the site
-        :param initial_state: Initial state of the site
-        :param routes: Available routes
-        :param server_config: Server configuration
-        :return: A MonitorSnapshot with all current data
-        """
-        try:
-            return MonitorSnapshot(
-                timestamp=datetime.now(),
-                page_visits=list(self.page_visits),
-                current_state=current_state,
-                initial_state=initial_state,
-                routes=routes or {},
-                errors=list(self.errors),
-                warnings=list(self.warnings),
-                info=list(self.info),
-                server_config=server_config or {},
-            )
-        except Exception as e:
-            self._handle_internal_error("get_snapshot", e)
-            # Return a minimal snapshot on error
-            return MonitorSnapshot(
-                timestamp=datetime.now(),
-                page_visits=[],
-                current_state=None,
-                initial_state=None,
-                routes={},
-                errors=self.errors,
-                warnings=self.warnings,
-                info=self.info,
-                server_config={},
-            )
+    #     :param current_state: Current state of the site
+    #     :param initial_state: Initial state of the site
+    #     :param routes: Available routes
+    #     :param server_config: Server configuration
+    #     :return: A MonitorSnapshot with all current data
+    #     """
+    #     try:
+    #         return MonitorSnapshot(
+    #             timestamp=datetime.now(),
+    #             page_visits=list(self.page_visits),
+    #             current_state=current_state,
+    #             initial_state=initial_state,
+    #             routes=routes or {},
+    #             errors=list(self.errors),
+    #             warnings=list(self.warnings),
+    #             info=list(self.info),
+    #             server_config=server_config or {},
+    #         )
+    #     except Exception as e:
+    #         self._handle_internal_error("get_snapshot", e)
+    #         # Return a minimal snapshot on error
+    #         return MonitorSnapshot(
+    #             timestamp=datetime.now(),
+    #             page_visits=[],
+    #             current_state=None,
+    #             initial_state=None,
+    #             routes={},
+    #             errors=self.errors,
+    #             warnings=self.warnings,
+    #             info=self.info,
+    #             server_config={},
+    #         )
 
     def generate_debug_html(
         self,

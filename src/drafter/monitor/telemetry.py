@@ -6,73 +6,63 @@ Telemetry is information that gets collected from various parts of the system
 aggregation and presentation.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Optional, Dict, List
 from datetime import datetime
 
-from drafter.data import Request, Response, Outcome
+
+@dataclass
+class TelemetryCorrelation:
+    """
+    Correlation information for telemetry events.
+
+    :ivar causation_id: The ID of the causation event; if this event was caused by another event.
+    :ivar route: The route name/url associated with the event
+    :ivar request_id: The ID of the associated request
+    :ivar response_id: The ID of the associated response
+    :ivar outcome_id: The ID of the associated outcome
+    :ivar dom_id: The ID of the associated DOM element if this came from the Bridge Client.
+    """
+
+    causation_id: Optional[int] = None
+    route: Optional[str] = None
+    request_id: Optional[int] = None
+    response_id: Optional[int] = None
+    outcome_id: Optional[int] = None
+    dom_id: Optional[str] = None
 
 
 @dataclass
 class TelemetryEvent:
     """
-    A generic telemetry event.
+    A telemetry event that should be published for anyone listening.
 
-    :ivar event_type: The type of telemetry event
-    :ivar data: The data associated with the event
+    :ivar event_type: The type of telemetry event. This is a dot-separated string indicating
+        the category and subcategory of the event. Major categories include "logger", "request",
+        "response", "outcome", "state", "config", "dom".
+    :ivar correlation: Correlation information for the event. This helps track where the event
+        originated and its context.
+    :ivar source: The source of the event, typically the component/module and the function/method name.
+        For example, "client_server.handle_request".
+    :ivar id: A unique identifier for the telemetry event.
+    :ivar version: The version of the telemetry event structure.
+    :ivar level: The severity level of the event (e.g., "info", "warning", "error").
+    :ivar timestamp: The timestamp when the event was created.
+    :ivar data: Additional data associated with the event. This can be any relevant information
+        that provides context about the event.
     """
 
     event_type: str
-    data: Dict[str, Any]
+    correlation: TelemetryCorrelation
+    source: str
+    id: int = -1
+    version: str = "0.0.1"
+    level: Optional[str] = "info"
+    timestamp: datetime = datetime.now()
+    data: Any = None
 
+    IDS_COUNTER: int = 0
 
-@dataclass
-class PageVisitTelemetry:
-    """
-    Telemetry data for a complete request/response/outcome cycle.
-
-    :ivar request: The actual Request object
-    :ivar request_timestamp: When the request was received
-    :ivar response: The actual Response object (if completed)
-    :ivar response_timestamp: When the response was sent (if completed)
-    :ivar outcome: The actual Outcome object (if received)
-    :ivar outcome_timestamp: When the outcome was received (if received)
-    :ivar state_snapshot: Snapshot of state after this visit
-    :ivar duration_ms: Duration from request to response in milliseconds
-    """
-
-    request: Request
-    request_timestamp: datetime
-    response: Optional[Response] = None  # Response object
-    response_timestamp: Optional[datetime] = None
-    outcome: Optional[Outcome] = None  # Outcome object
-    outcome_timestamp: Optional[datetime] = None
-    state_snapshot: Any = None
-    duration_ms: Optional[float] = None
-
-
-@dataclass
-class MonitorSnapshot:
-    """
-    A complete snapshot of the monitor's state at a point in time.
-
-    :ivar timestamp: When this snapshot was taken
-    :ivar page_visits: History of page visits
-    :ivar current_state: Current state of the site
-    :ivar initial_state: Initial state of the site
-    :ivar routes: Available routes
-    :ivar errors: All errors logged
-    :ivar warnings: All warnings logged
-    :ivar info: All info messages logged
-    :ivar server_config: Server configuration details
-    """
-
-    timestamp: datetime
-    page_visits: List[PageVisitTelemetry]
-    current_state: Any
-    initial_state: Any
-    routes: Dict[str, Any]
-    errors: List[Any]
-    warnings: List[Any]
-    info: List[Any]
-    server_config: Dict[str, Any]
+    def __post_init__(self):
+        type(self).IDS_COUNTER += 1
+        self.id = type(self).IDS_COUNTER

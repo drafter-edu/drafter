@@ -18,18 +18,25 @@ function $builtinmodule(name: string) {
         (request_mod) => {
             drafter_client_mod.Request =
                 request_mod.$d.data.$d.request.$d.Request;
-            return Sk.importModule("drafter.data.outcome", false, true);
-        },
-        (outcome_mod) => {
-            drafter_client_mod.Outcome =
-                outcome_mod.$d.data.$d.outcome.$d.Outcome;
             return Sk.importModule("drafter.site", false, true);
-            //   return Sk.importModule("operator", false, true);
         },
         (site_mod) => {
             drafter_client_mod.DRAFTER_TAG_IDS = Sk.ffi.remapToJs(
                 site_mod.$d.site.$d.DRAFTER_TAG_IDS
             );
+            return Sk.importModule("drafter.monitor.telemetry", false, true);
+        },
+        (telemetry_mod) => {
+            drafter_client_mod.TelemetryEvent =
+                telemetry_mod.$d.monitor.$d.telemetry.$d.TelemetryEvent;
+            drafter_client_mod.TelemetryCorrelation =
+                telemetry_mod.$d.monitor.$d.telemetry.$d.TelemetryCorrelation;
+            return Sk.importModule("drafter.monitor.bus", false, true);
+        },
+        (event_bus_mod) => {
+            drafter_client_mod.get_main_event_bus =
+                event_bus_mod.$d.monitor.$d.bus.$d.get_main_event_bus;
+            return drafter_client_mod;
         },
         () => drafter_bridge_client_module(drafter_client_mod)
     );
@@ -97,7 +104,6 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     drafter_client_mod.__name__ = new pyStr("drafter.bridge.client");
 
     const Request = drafter_client_mod.Request;
-    const Outcome = drafter_client_mod.Outcome;
 
     const str_payload = new Sk.builtin.str("payload");
     const str_body = new Sk.builtin.str("body");
@@ -105,20 +111,47 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     const str_response_id = new Sk.builtin.str("response_id");
     const str_id = new Sk.builtin.str("id");
 
-    const debug_log = function (...args: any[]) {
-        console.log("[Drafter Bridge Client]", ...args);
+    const debug_log = function (event_name: string, ...args: any[]) {
+        let eventBus;
+        try {
+            eventBus = Sk.misceval.callsimArray(
+                drafter_client_mod.get_main_event_bus,
+                []
+            );
+        } catch (e) {
+            console.error(
+                "[Drafter Bridge Client] Failed to get event bus:",
+                e
+            );
+            throw e;
+        }
+        // TODO: Finish populating the event data
+        const event = Sk.misceval.callsimArray(
+            drafter_client_mod.TelemetryEvent,
+            [
+                new pyStr(event_name),
+                Sk.misceval.callsimArray(
+                    drafter_client_mod.TelemetryCorrelation,
+                    []
+                ),
+                new pyStr("bridge.client"),
+            ]
+        );
+        try {
+            Sk.misceval.callsimArray(eventBus.publish, [eventBus, event]);
+        } catch (e) {
+            console.error(
+                "[Drafter Bridge Client] Failed to publish event:",
+                e,
+                event
+            );
+            throw e;
+        }
+
+        console.log("[Drafter Bridge Client]", event_name, ...args);
     };
 
     let requestCount = 0;
-    let outcomeCount = 0;
-
-    const makeOutcome = function (originalRequestId: pyInt, responseId: pyInt) {
-        const args = [new pyInt(outcomeCount), originalRequestId, responseId];
-        console.log(Outcome, args);
-        const outcome = Sk.misceval.callsimArray(Outcome, args);
-        outcomeCount += 1;
-        return outcome;
-    };
 
     const makeRequest = function (url: string, formData: FormData) {
         const data: Record<string, FormDataEntryValue | FormDataEntryValue[]> =
@@ -165,25 +198,28 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         navigate: pyFunc
         */
         // Implementation for loading a page
-        debug_log("update_body called with", response, callback);
         const element = document.getElementById(BODY_ELEMENT_ID);
         if (!element) {
             // TODO: Handle this absolutely crisis of an error properly
             throw new ValueError(`Target element ${BODY_ELEMENT_ID} not found`);
         }
         const startBodyUpdate = () => {
-            debug_log("Starting body update...");
             const body: string = Sk.ffi.remapToJs(
                 response.tp$getattr(str_body)
             );
             const originalRequestId: pyInt =
                 response.tp$getattr(str_request_id);
             const responseId: pyInt = response.tp$getattr(str_id);
-            debug_log("Updating site body to:", body);
             replaceHTML(element, body);
+            debug_log(
+                "dom.updated_body",
+                "update_body called with",
+                response,
+                callback
+            );
             const mounted = mountNavigation(element, (navEvent: NavEvent) => {
                 debug_log(
-                    "Navigating to:",
+                    "request.initiated",
                     navEvent.url,
                     navEvent.data,
                     callback
@@ -197,8 +233,12 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                     Sk.misceval.asyncToPromise(() => nextVisit)
                 );
             });
-            debug_log("Mounted navigation handlers:", mounted);
-            return makeOutcome(originalRequestId, responseId);
+            debug_log(
+                "dom.mount_navigation",
+                "Mounted navigation handlers:",
+                mounted
+            );
+            return Sk.builtin.bool.true$;
         };
         return Sk.misceval.chain<any, any>([], startBodyUpdate);
     });
@@ -216,7 +256,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
             root.removeEventListener("click", clickHandler);
         }
         clickHandler = function (event: MouseEvent) {
-            debug_log("Clicked", event);
+            debug_log("dom.click", event);
             const target = event.target as Element | null;
             if (!target) return;
 
@@ -261,7 +301,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
             throw new Error(`Form element ${FORM_ELEMENT_ID} not found`);
         }
         submitHandler = function (event: SubmitEvent) {
-            debug_log("Form submitted", event);
+            debug_log("dom.form_submit", event);
 
             event.preventDefault();
             const submitter = (event as any).submitter as HTMLElement | null;
@@ -285,6 +325,18 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     }
 
     drafter_client_mod.update_site = update_body;
+
+    drafter_client_mod.console_log = new Sk.builtin.func(
+        function console_log_func(event: pyObject) {
+            try {
+                let repr = event.$r().v;
+                console.log("[Drafter]", repr);
+            } catch (e) {
+                console.log("[Drafter] (unrepresentable event)", e, event);
+            }
+            return pyNone;
+        }
+    );
 
     return drafter_client_mod;
 }

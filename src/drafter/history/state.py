@@ -19,6 +19,8 @@ class SiteState:
         """
         Updates the current state and appends the previous state to history.
 
+        TODO: Throw a warning if there's a type change.
+
         :param new_state: The new state to set as current.
         """
         if not self.initialized:

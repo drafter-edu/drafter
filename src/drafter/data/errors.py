@@ -9,7 +9,6 @@ class DrafterLog:
     message: str
     where: str
     details: str
-    url: str
 
 
 @dataclass

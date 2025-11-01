@@ -95,26 +95,26 @@ The debug information present in the frame:
 -   Link to the About page
 -   Status information:
     -   Any errors and warnings, nicely formatted
-    -   Current route information
-    -   Request/Response dump
-    -   Current state dump, buttons to save/load state in localStorage or download/upload JSON
-    -   Current page information
-    -   All available routes
+    -   Current route information, as given by the `request.visit` events
+    -   Request/Response/Outcome dump, including the metadata and actual contents, time taken.
+    -   Current state dump, buttons to save/load state in localStorage or download/upload JSON (`state.*` events)
+    -   Current page information (`request.*` events)
+    -   All available routes (`request.add` events)
         -   As a flat list
         -   As a graph
-    -   Page load history
+    -   Page load history (`request.*` events)
         -   Pages, state, args, timestamps, etc.
         -   VCR playback controls
         -   Automatically produced tests
-    -   Test status information
+    -   Test status information (`request.visit` events)
     -   Button to activate codemirror instance that let's us do a REPL type thing?
 -   Test production button
 -   Compile site button
 
-The `Monitor` tracks information about the server's behavior (and some amount of information from the client), and is a centralized place to log telemetry events for analysis.
+The `EventBus` is a pub/sub system that allows different parts of the application to communicate with each other without being tightly coupled. Various components can publish events to the bus, and other components can subscribe to those events to receive notifications when they occur (mostly the Monitor).
 Telemetry entails logging events like page loads, errors, warnings, state, performance metrics, user interactions, etc. Essentially, any debug information from the server should
-be logged as telemetry events.
-These TelemetryEvents are then transformed into other representations as needed: raw information to be printed on stdout, logs for storing on disk, analytics for displaying in the debug panel.
+be logged as telemetry events, and certain kinds of client interactions.
+The `Monitor` has visualizers that can handle the rendering logic for different contexts: raw information to be printed on stdout, logs for storing on disk, analytics for displaying in the debug panel.
 
 Essentially:
 

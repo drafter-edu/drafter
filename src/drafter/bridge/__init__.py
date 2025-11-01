@@ -7,7 +7,8 @@ from drafter.data.channel import DEFAULT_CHANNEL_AFTER, DEFAULT_CHANNEL_BEFORE, 
 from drafter.data.outcome import Outcome
 from drafter.data.response import Response
 from drafter.data.request import Request
-from drafter.bridge.client import update_site
+from drafter.bridge.client import update_site, console_log
+from drafter.monitor.bus import get_main_event_bus
 from drafter.monitor.telemetry import TelemetryEvent
 from drafter.payloads.page import Page
 from drafter.site import DRAFTER_TAG_IDS
@@ -43,12 +44,22 @@ class ClientBridge:
     def make_initial_request(self) -> Request:
         return Request(0, "load", "index", [], {}, {})
 
-    def handle_telemetry_event(self, event: TelemetryEvent) -> None:
-        print("Telemetry Event:", event.event_type, event.data)
+    def handle_telemetry_event(self, content: str) -> None:
+        # print("Telemetry Event:", event.event_type, event.data)
+        debug_info = document.getElementById(DRAFTER_TAG_IDS["DEBUG"])
+        if debug_info:
+            debug_info.innerHTML = content
+
+    def console_log_events(self, event: TelemetryEvent) -> None:
+        console_log(event)
 
     def setup_site(self, site_html: str) -> None:
         root_tag = document.getElementById(DRAFTER_TAG_IDS["ROOT"])
         root_tag.innerHTML = site_html
+
+    def connect_to_event_bus(self) -> None:
+        event_bus = get_main_event_bus()
+        event_bus.subscribe("*", self.console_log_events)
 
 
 def add_script(src: str) -> None:

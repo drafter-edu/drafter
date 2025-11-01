@@ -3,6 +3,7 @@ from typing import Any, Optional, List, Tuple, Union, Dict
 
 from drafter.history.state import SiteState
 from drafter.data.errors import DrafterError
+from drafter.monitor.bus import EventBus
 from drafter.monitor.monitor import Monitor
 from drafter.payloads import Page
 from drafter.payloads.error_page import ErrorPage, SimpleErrorPage
@@ -54,12 +55,28 @@ class ClientServer:
         :param initial_state: The initial state to set for the server.
         """
         if initial_state is not None:
-            self.logger.log_info(
-                "Initializing server state",
-                "client_server.start",
-                f"Initial state: {repr(initial_state)}",
-            )
-            self.state.update(initial_state)
+            try:
+                self.state.update(initial_state)
+                self.logger.log_info(
+                    "state.initialized",
+                    "Initializing server state",
+                    "client_server.start",
+                    f"Initial state: {repr(initial_state)}",
+                )
+            except Exception as e:
+                self.logger.log_error(
+                    "state.initialization_failed",
+                    "Failed to initialize server state",
+                    "client_server.start",
+                    f"Initial state: {repr(initial_state)}",
+                    exception=e,
+                )
+        self.logger.log_info(
+            "server.started",
+            "Starting ClientServer",
+            "client_server.start",
+            f"Server name: {self.custom_name}",
+        )
 
     def visit(self, request: Request) -> Any:
         """
@@ -69,57 +86,70 @@ class ClientServer:
         :return: The result of the route function.
         """
         self.logger.log_info(
+            "request.received",
             f"Request received: {request}",
             "client_server.visit",
             repr(request),
-            request.url,
+            route=request.url,
         )
         # Get the route function
         route_func = self.router.get_route(request.url)
         if route_func is None:
             error = self.logger.log_error(
+                "request.route_not_found",
                 f"No route found for URL: {request.url}",
                 "client_server.visit",
                 repr(request),
-                request.url,
+                route=request.url,
             )
-            return self.make_error_response(request.id, error, status_code=404)
+            return self.make_error_response(request, error, status_code=404)
         # Call the route function to get the payload
         try:
             payload = route_func(self.state, *request.args, **request.kwargs)
         except Exception as e:
             error = self.logger.log_error(
+                "request.route_execution_failed",
                 f"Error while processing request for URL {request.url}: {e}",
                 "client_server.visit",
                 repr(request),
-                request.url,
-                e,
+                route=request.url,
+                exception=e,
             )
-            return self.make_error_response(request.id, error)
+            return self.make_error_response(request, error)
         # Verify the payload
         if not isinstance(payload, ResponsePayload):
             page_type_name = type(payload).__name__
             error = self.logger.log_error(
+                "request.invalid_route_response",
                 f"Route function for URL {request.url} did not return a Page. Instead got: {page_type_name}",
                 "client_server.visit",
                 f"Request: {repr(request)}\nPage: {repr(payload)}",
-                request.url,
+                route=request.url,
             )
-            return self.make_error_response(request.id, error)
+            return self.make_error_response(request, error)
         # Render the payload
         try:
             body = self.render(payload)
         except Exception as e:
             error = self.logger.log_error(
+                "request.payload_rendering_failed",
                 f"Error while rendering payload for URL {request.url}: {e}",
                 "client_server.visit",
                 f"Request: {repr(request)}\nPayload: {repr(payload)}",
-                request.url,
-                e,
+                route=request.url,
+                exception=e,
             )
-            return self.make_error_response(request.id, error)
+            return self.make_error_response(request, error)
         # Return successfully
-        return self.make_success_response(request.id, body, payload)
+        response = self.make_success_response(request.id, body, payload)
+        self.logger.log_info(
+            "response.created",
+            f"Response created for request ID {request.id}",
+            "client_server.visit",
+            f"Response: {repr(response)}",
+            route=request.url,
+        )
+        return response
 
     def render(self, payload: ResponsePayload) -> str:
         """
@@ -149,7 +179,7 @@ class ClientServer:
         return response
 
     def make_error_response(
-        self, request_id: int, error: DrafterError, status_code: int = 500
+        self, request: Request, error: DrafterError, status_code: int = 500
     ) -> Response:
         """
         Makes an error response for the server with the given message and status code.
@@ -163,16 +193,17 @@ class ClientServer:
             body = error_payload.render(self.state, self.configuration)
         except Exception as e:
             error_page_error = self.logger.log_error(
+                "error_page.creation_failed",
                 "Failed to create ErrorPage payload",
                 "client_server.make_error_response",
                 f"Original error: {repr(error)}\nError during ErrorPage creation: {repr(e)}",
-                error.url,
-                e,
+                route=request.url,
+                exception=e,
             )
             simpler_error_payload = SimpleErrorPage(error_page_error.message)
             return Response(
                 id=self.response_count,
-                request_id=request_id,
+                request_id=request.id,
                 payload=simpler_error_payload,
                 status_code=500,
                 body=simpler_error_payload.render(self.state, self.configuration),
@@ -181,7 +212,7 @@ class ClientServer:
             )
         response = Response(
             id=self.response_count,
-            request_id=request_id,
+            request_id=request.id,
             body=body,
             payload=error_payload,
             status_code=status_code,
@@ -190,25 +221,6 @@ class ClientServer:
         )
         self.response_count += 1
         return response
-
-    def report_outcome(self, outcome: Outcome) -> None:
-        """
-        Reports the outcome of a request processing back to the server.
-
-        :param outcome: The outcome to report.
-        :return: None
-        """
-        for error in outcome.errors:
-            self.logger.log_existing_error(error)
-        for warning in outcome.warnings:
-            self.logger.log_existing_warning(warning)
-        for info in outcome.info:
-            self.logger.log_existing_info(info)
-        self.logger.log_info(
-            f"Outcome reported: {outcome}",
-            "client_server.report_outcome",
-            repr(outcome),
-        )
 
     def add_route(self, url: str, func: Any) -> None:
         """
@@ -221,6 +233,7 @@ class ClientServer:
         """
         self.router.add_route(url, func)
         self.logger.log_info(
+            "route.added",
             f"Route added: {url} -> {func.__name__}",
             "client_server.add_route",
             f"Function: {repr(func)}",
@@ -234,7 +247,24 @@ class ClientServer:
 
         :return: The rendered HTML of the initial site.
         """
-        return self.site.render()
+        try:
+            site = self.site.render()
+            self.logger.log_info(
+                "site.rendered",
+                "Initial site HTML rendered",
+                "client_server.render_site",
+                f"Site HTML: {site}",
+            )
+        except Exception as e:
+            error = self.logger.log_error(
+                "site.rendering_failed",
+                "Failed to render initial site HTML",
+                "client_server.render_site",
+                f"Original exception: {e}",
+                exception=e,
+            )
+            site = f"<div><h1>Error rendering site</h1><p>{error.message}</p></div>"
+        return site
 
     def register_monitor_listener(self, handler: Any) -> None:
         """
@@ -244,26 +274,3 @@ class ClientServer:
         :return: None
         """
         self.monitor.register_listener(handler)
-
-
-MAIN_SERVER = ClientServer(custom_name="MAIN_SERVER")
-
-
-def set_main_server(server: ClientServer):
-    """
-    Sets the main server to the given server. This is useful for testing purposes.
-
-    :param server: The server to set as the main server
-    :return: None
-    """
-    global MAIN_SERVER
-    MAIN_SERVER = server
-
-
-def get_main_server() -> ClientServer:
-    """
-    Gets the main server. This is useful for testing purposes.
-
-    :return: The main server
-    """
-    return MAIN_SERVER

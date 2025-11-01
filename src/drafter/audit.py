@@ -2,7 +2,8 @@ from dataclasses import dataclass, field
 import traceback
 from typing import Optional
 from drafter.data.errors import DrafterError, DrafterInfo, DrafterWarning
-import sys
+from drafter.monitor.bus import get_main_event_bus
+from drafter.monitor.telemetry import TelemetryCorrelation, TelemetryEvent
 
 
 @dataclass
@@ -13,66 +14,119 @@ class AuditLogger:
 
     def log_error(
         self,
+        event_type: str,
         message: str,
-        where: str,
+        source: str,
         details: str,
-        url: str,
         exception: Optional[Exception] = None,
+        causation_id: Optional[int] = None,
+        request_id: Optional[int] = None,
+        response_id: Optional[int] = None,
+        outcome_id: Optional[int] = None,
+        dom_id: Optional[str] = None,
+        route: Optional[str] = None,
     ) -> DrafterError:
-        print("Logging error:", message, where, details, url, exception)
-        return self.log_existing_error(
-            DrafterError(
-                message=message,
-                where=where,
-                details=details,
-                url=url,
-                # TODO: Skulpt does not let me do format_traceback yet
-                traceback="\n".join(traceback.format_exception(exception))
-                if exception
-                else traceback.format_exc(),
+        print("Logging error:", message, source, details, route, exception)
+        error = DrafterError(
+            message=message,
+            where=source,
+            details=details,
+            # TODO: Skulpt does not let me do format_traceback yet
+            traceback="\n".join(traceback.format_exception(exception))
+            if exception
+            else traceback.format_exc(),
+        )
+        self.errors.append(error)
+        get_main_event_bus().publish(
+            TelemetryEvent(
+                event_type=event_type,
+                correlation=TelemetryCorrelation(
+                    causation_id=causation_id,
+                    route=route,
+                    request_id=request_id,
+                    response_id=response_id,
+                    outcome_id=outcome_id,
+                    dom_id=dom_id,
+                ),
+                source=source,
+                level="error",
+                data=error,
             )
         )
-
-    def log_existing_error(self, error: DrafterError) -> DrafterError:
-        self.errors.append(error)
         return error
 
     def log_warning(
         self,
+        event_type: str,
         message: str,
-        where: str,
+        source: str,
         details: str,
-        url: str,
         exception: Optional[Exception] = None,
+        causation_id: Optional[int] = None,
+        request_id: Optional[int] = None,
+        response_id: Optional[int] = None,
+        outcome_id: Optional[int] = None,
+        dom_id: Optional[str] = None,
+        route: Optional[str] = None,
     ) -> DrafterWarning:
-        return self.log_existing_warning(
-            DrafterWarning(
-                message=message,
-                where=where,
-                details=details,
-                url=url,
-                traceback="".join(traceback.format_exception(exception))
-                if exception
-                else traceback.format_exc(),
+        warning = DrafterWarning(
+            message=message,
+            where=source,
+            details=details,
+            # TODO: Skulpt does not let me do format_traceback yet
+            traceback="\n".join(traceback.format_exception(exception))
+            if exception
+            else traceback.format_exc(),
+        )
+        self.warnings.append(warning)
+        get_main_event_bus().publish(
+            TelemetryEvent(
+                event_type=event_type,
+                correlation=TelemetryCorrelation(
+                    causation_id=causation_id,
+                    route=route,
+                    request_id=request_id,
+                    response_id=response_id,
+                    outcome_id=outcome_id,
+                    dom_id=dom_id,
+                ),
+                source=source,
+                level="warning",
+                data=warning,
             )
         )
-
-    def log_existing_warning(self, warning: DrafterWarning) -> DrafterWarning:
-        self.warnings.append(warning)
         return warning
 
     def log_info(
-        self, message: str, where: str, details: str, url: str = ""
+        self,
+        event_type: str,
+        message: str,
+        source: str,
+        details: str,
+        exception: Optional[Exception] = None,
+        causation_id: Optional[int] = None,
+        request_id: Optional[int] = None,
+        response_id: Optional[int] = None,
+        outcome_id: Optional[int] = None,
+        dom_id: Optional[str] = None,
+        route: Optional[str] = None,
     ) -> DrafterInfo:
-        return self.log_existing_info(
-            DrafterInfo(
-                message=message,
-                where=where,
-                details=details,
-                url=url,
+        info = DrafterInfo(message=message, where=source, details=details)
+        self.info.append(info)
+        get_main_event_bus().publish(
+            TelemetryEvent(
+                event_type=event_type,
+                correlation=TelemetryCorrelation(
+                    causation_id=causation_id,
+                    route=route,
+                    request_id=request_id,
+                    response_id=response_id,
+                    outcome_id=outcome_id,
+                    dom_id=dom_id,
+                ),
+                source=source,
+                level="info",
+                data=info,
             )
         )
-
-    def log_existing_info(self, info: DrafterInfo) -> DrafterInfo:
-        self.info.append(info)
         return info

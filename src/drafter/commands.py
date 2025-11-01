@@ -1,5 +1,6 @@
 from typing import Union, Callable, Optional
-from drafter.client_server import ClientServer, get_main_server
+from drafter.client_server.client_server import ClientServer
+from drafter.client_server.commands import get_main_server
 
 
 def route(
