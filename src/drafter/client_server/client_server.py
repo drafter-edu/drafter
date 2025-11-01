@@ -236,7 +236,7 @@ class ClientServer:
             "route.added",
             f"Route added: {url} -> {func.__name__}",
             "client_server.add_route",
-            f"Function: {repr(func)}",
+            func.__name__,
         )
 
     def render_site(self) -> str:

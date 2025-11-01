@@ -89,15 +89,9 @@ class Monitor:
         :param event: The telemetry event to check
         :return: A string representation of the current routes
         """
-        if event.event_type == "server.started":
-            from drafter.client_server.commands import get_main_server
-
-            server = get_main_server()
-            self.routes.extend(server.router.routes.keys())
         if event.event_type == "route.added":
             route_info = event.data
-            route_str = f"Added route: {route_info}\n"
-            self.routes.append(route_str)
+            self.routes.append(route_info.details)
         return "\n".join(self.routes)
 
     # def get_snapshot(

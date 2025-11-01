@@ -31,6 +31,7 @@ class EventBus:
 
     maximum_queue_size: int = 500
     subscribers: list[Subscription] = field(default_factory=list)
+    unprocessed_events: list[TelemetryEvent] = field(default_factory=list)
 
     def publish(self, event: TelemetryEvent) -> None:
         """
@@ -38,15 +39,26 @@ class EventBus:
 
         :param event: The telemetry event to publish.
         """
-        for subscription in self.subscribers:
-            if (
-                subscription.topic.startswith(event.event_type)
-                or subscription.topic == "*"
-            ):
-                if subscription.filter is None or subscription.filter(event):
-                    subscription.handler(event)
-                if subscription.once:
-                    self.unsubscribe(subscription)
+        if len(self.unprocessed_events) >= self.maximum_queue_size:
+            self.unprocessed_events.pop(0)
+        if not self.subscribers:
+            self.unprocessed_events.append(event)
+        else:
+            for subscription in self.subscribers:
+                self.process_event(event, subscription)
+
+    def process_event(self, event: TelemetryEvent, subscription: Subscription) -> None:
+        """
+        Process an event for a given subscription.
+
+        :param event: The telemetry event to process.
+        :param subscription: The subscription to process the event for.
+        """
+        if subscription.topic.startswith(event.event_type) or subscription.topic == "*":
+            if subscription.filter is None or subscription.filter(event):
+                subscription.handler(event)
+            if subscription.once:
+                self.unsubscribe(subscription)
 
     def subscribe(
         self,
@@ -63,6 +75,8 @@ class EventBus:
         """
         subscription = Subscription(topic, handler, filter, once)
         self.subscribers.append(subscription)
+        for event in self.unprocessed_events:
+            self.process_event(event, subscription)
         return subscription
 
     def unsubscribe(self, subscription: Subscription) -> None:
