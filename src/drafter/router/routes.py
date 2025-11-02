@@ -46,6 +46,7 @@ class Router:
         :param func: The function to call when the route is accessed.
         """
         self.routes[url] = func
+        self.signatures[url] = get_signature(func)
 
     def prepare_arguments(
         self,
@@ -98,6 +99,8 @@ class Router:
     ) -> None:
         """
         Verifies that all provided keyword arguments are expected by the function signature.
+
+        TODO: Enhance all of this functionality to allow default values from the function signature.
 
         :param request: The incoming request object.
         :param signature: The introspection data of the function.
@@ -270,8 +273,7 @@ class Router:
         :param func: The function to look up.
         :return: The introspection data associated with the function, or None if not found.
         """
-        route_func = self.get_route(request.url)
-        signature = get_signature(route_func)
+        signature = self.signatures.get(request.url)
         if not signature:
             raise ValueError(f"No signature found for route '{request.url}'")
         return signature

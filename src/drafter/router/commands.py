@@ -16,6 +16,7 @@ def route(
     :param server: The server to add the route to. Defaults to the main server.
     :return: The modified route function.
     """
+
     server = server or get_main_server()
     if callable(url):
         local_url = url.__name__

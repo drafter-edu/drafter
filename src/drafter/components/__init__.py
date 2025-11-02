@@ -12,7 +12,7 @@ from drafter.components.layout import (
     Box,
 )
 from drafter.components.text import Text, PreformattedText, Header
-from drafter.components.forms import TextBox, TextArea, SelectBox
+from drafter.components.forms import TextBox, TextArea, SelectBox, CheckBox
 from drafter.components.tables import Table
 from drafter.components.links import Link, Button, Argument
 

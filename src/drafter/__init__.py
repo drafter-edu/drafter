@@ -20,6 +20,7 @@ from drafter.components import (
     TextBox,
     TextArea,
     SelectBox,
+    CheckBox,
     Table,
     Link,
     Button,
@@ -45,6 +46,7 @@ from drafter.payloads.page import Page
 
 
 __all__ = [
+    "dataclass",
     "Page",
     "get_main_server",
     "set_main_server",
@@ -67,6 +69,7 @@ __all__ = [
     "Header",
     "TextBox",
     "TextArea",
+    "CheckBox",
     "SelectBox",
     "Table",
     "Link",

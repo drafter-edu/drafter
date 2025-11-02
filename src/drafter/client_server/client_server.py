@@ -13,7 +13,7 @@ from drafter.payloads.payloads import ResponsePayload
 from drafter.data.request import Request
 from drafter.data.response import Response
 from drafter.router.routes import Router
-from drafter.audit import log_error, log_warning, log_info
+from drafter.audit import log_error, log_warning, log_info, log_data
 from drafter.site import Site
 from drafter.config.client_server import ClientServerConfiguration
 
@@ -297,11 +297,10 @@ class ClientServer:
         :param func: The function to call when the route is accessed.
         """
         self.router.add_route(url, func)
-        log_info(
+        log_data(
             "route.added",
-            f"Route added: {url} -> {func.__name__}",
+            self.router.signatures[url],
             "client_server.add_route",
-            func.__name__,
         )
 
     def render_site(self) -> Tuple[str, str]:

@@ -26,7 +26,7 @@
       var Sk2 = {};
       Sk2.build = {
         githash: "2c0cb427",
-        date: "2025-10-30T16:14:24.120Z"
+        date: "2025-11-02T19:55:13.274Z"
       };
       Sk2.global = typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};
       Sk2.exportSymbol = function(name, object) {
@@ -30602,6 +30602,9 @@
           let funcobj;
           if (decos.length > 0) {
             out("$ret = new Sk.builtins['function'](", scopename, ",$gbl", frees, ");");
+            if (func_annotations) {
+              out("$ret", ".func_annotations=", func_annotations, ";");
+            }
             for (let decorator of decos.reverse()) {
               out("$ret = Sk.misceval.callsimOrSuspendArray(", decorator, ",[$ret]);");
               this._checkSuspension();
@@ -30616,9 +30619,9 @@
               frees,
               ")"
             );
-          }
-          if (func_annotations) {
-            out(funcobj, ".func_annotations=", func_annotations, ";");
+            if (func_annotations) {
+              out(funcobj, ".func_annotations=", func_annotations, ";");
+            }
           }
           return funcobj;
         }

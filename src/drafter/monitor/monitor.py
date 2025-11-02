@@ -17,6 +17,7 @@ from drafter.monitor.telemetry import TelemetryEvent
 from drafter.data.request import Request
 from drafter.data.response import Response
 from drafter.data.errors import DrafterError, DrafterWarning, DrafterInfo
+from drafter.router.introspect import RouteIntrospection
 
 
 class MonitorSnapshot:
@@ -74,7 +75,7 @@ class Monitor:
         """
         self.event_history.append(event.event_type)
         routes = self._handle_route_add(event)
-        content = repr(self.event_history) + "<br>\nRoutes:" + routes
+        content = "\n".join(self.event_history) + "<br>\nRoutes:\n" + routes
         for listener in self.listeners:
             try:
                 listener(f"<pre>{content}</pre>")
@@ -89,8 +90,10 @@ class Monitor:
         :return: A string representation of the current routes
         """
         if event.event_type == "route.added":
-            route_info = event.data
-            self.routes.append(route_info.details)
+            route_info: RouteIntrospection = event.data
+            parameters = ", ".join(route_info.expected_parameters)
+            route_function = f"{route_info.function_name}({parameters})"
+            self.routes.append(route_function)
         return "\n".join(self.routes)
 
     # def get_snapshot(

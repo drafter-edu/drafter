@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 import traceback
-from typing import Optional
+from typing import Optional, Any
 from drafter.data.errors import DrafterError, DrafterInfo, DrafterWarning
 from drafter.monitor.bus import get_main_event_bus
 from drafter.monitor.telemetry import TelemetryCorrelation, TelemetryEvent
@@ -115,3 +115,32 @@ def log_info(
         )
     )
     return info
+
+
+def log_data(
+    event_type: str,
+    data: Any,
+    source: str,
+    causation_id: Optional[int] = None,
+    request_id: Optional[int] = None,
+    response_id: Optional[int] = None,
+    outcome_id: Optional[int] = None,
+    dom_id: Optional[str] = None,
+    route: Optional[str] = None,
+) -> None:
+    get_main_event_bus().publish(
+        TelemetryEvent(
+            event_type=event_type,
+            correlation=TelemetryCorrelation(
+                causation_id=causation_id,
+                route=route,
+                request_id=request_id,
+                response_id=response_id,
+                outcome_id=outcome_id,
+                dom_id=dom_id,
+            ),
+            source=source,
+            level="info",
+            data=data,
+        )
+    )

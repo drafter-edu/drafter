@@ -21,3 +21,7 @@ def console_log(event) -> None:  # type: ignore
 
 def setup_navigation(handle_visit: Callable) -> None:  # type: ignore
     pass
+
+
+def set_site_title(title: str) -> None:  # type: ignore
+    pass
