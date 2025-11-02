@@ -6,7 +6,7 @@ import pytest
 import asyncio
 from pathlib import Path
 from starlette.testclient import TestClient
-from drafter.app.app_server import create_app, DevConfig
+from drafter.app.app_server import make_app, DevConfig
 
 
 def test_server_launches():
@@ -31,7 +31,7 @@ def index():
         port=8080
     )
     
-    app = create_app(config)
+    app = make_app(config)
     client = TestClient(app)
     
     # Test that the index route works
@@ -64,7 +64,7 @@ def index():
         port=8080
     )
     
-    app = create_app(config)
+    app = make_app(config)
     client = TestClient(app)
     
     response = client.get("/")
@@ -100,7 +100,7 @@ def index():
         port=8080
     )
     
-    app = create_app(config)
+    app = make_app(config)
     client = TestClient(app)
     
     # Test that assets endpoint exists and returns JS files
@@ -134,7 +134,7 @@ def index():
         port=8080
     )
     
-    app = create_app(config)
+    app = make_app(config)
     client = TestClient(app)
     
     # Test WebSocket endpoint exists
