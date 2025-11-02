@@ -32,5 +32,20 @@ lint:
 test:
 	uv run pytest --verbose --color=yes tests
 
+# Run only Python client library tests
+test-python:
+	uv run pytest --verbose --color=yes tests/test_client_library.py tests/test_starlette_server.py
+
+# Run JavaScript/TypeScript tests
+test-js:
+	cd js && npm test
+
+# Run all tests (Python + JS)
+test-all: test test-js
+
+# Test all examples
+test-examples:
+	python3 tools/test_examples.py
+
 # Run all checks: format, lint, and test
 validate: format lint test
