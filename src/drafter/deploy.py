@@ -1,6 +1,7 @@
 from typing import Optional, Union
 from drafter.payloads.page import Page
 from drafter.components import PageContent
+from drafter.client_server.commands import MAIN_SERVER
 
 
 def hide_debug_information():
@@ -8,14 +9,14 @@ def hide_debug_information():
     Hides debug information from the website, so that it will not appear. Useful
     for deployed websites.
     """
-    MAIN_SERVER.configuration.debug = False
+    MAIN_SERVER.configuration.in_debug_mode = False
 
 
 def show_debug_information():
     """
     Shows debug information on the website. Useful for development.
     """
-    MAIN_SERVER.configuration.debug = True
+    MAIN_SERVER.configuration.in_debug_mode = True
 
 
 def set_website_title(title: str):
@@ -24,7 +25,7 @@ def set_website_title(title: str):
 
     :param title: The title of the website.
     """
-    MAIN_SERVER.configuration.title = title
+    MAIN_SERVER.configuration.site_title = title
 
 
 def set_website_framed(framed: bool):
@@ -38,11 +39,11 @@ def set_website_framed(framed: bool):
 
 
 def set_site_information(
-    author: SiteInformationType,
-    description: SiteInformationType,
-    sources: SiteInformationType,
-    planning: SiteInformationType,
-    links: SiteInformationType,
+    author,
+    description,
+    sources,
+    planning,
+    links,
 ):
     """
     Sets the information about the website, such as the author, description, sources,
@@ -53,13 +54,8 @@ def set_site_information(
     :param links:
     :return:
     """
-    return MAIN_SERVER.set_information(
-        author=author,
-        description=description,
-        sources=sources,
-        planning=planning,
-        links=links,
-    )
+    # TODO: Implement site information storage in V2
+    pass
 
 
 def set_website_style(style: Optional[str]):
@@ -112,8 +108,8 @@ def deploy_site(image_folder="images"):
     :param image_folder: The folder where images are stored.
     """
     hide_debug_information()
-    MAIN_SERVER.production = True
-    MAIN_SERVER.image_folder = image_folder
+    # TODO: Implement production mode and image folder in V2
+    pass
 
 
 def default_index(state) -> Page:
