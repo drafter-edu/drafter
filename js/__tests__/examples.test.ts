@@ -121,8 +121,11 @@ describe('Example: Simple Form', () => {
         let submitted = false;
         const button = simulateButton('Submit', () => {
             submitted = true;
-            // Simulate showing result page
-            form.innerHTML = `<p>Hello, ${input.value}!</p>`;
+            // Simulate showing result page (escape for security)
+            const p = document.createElement('p');
+            p.textContent = `Hello, ${input.value}!`;
+            form.innerHTML = '';
+            form.appendChild(p);
         });
         form.appendChild(button);
         
