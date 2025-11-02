@@ -4,10 +4,14 @@ Bridge functions for interacting with the web page in Skulpt.
 
 from dataclasses import dataclass, field
 from drafter.data.channel import DEFAULT_CHANNEL_AFTER, DEFAULT_CHANNEL_BEFORE, Channel
-from drafter.data.outcome import Outcome
 from drafter.data.response import Response
 from drafter.data.request import Request
-from drafter.bridge.client import update_site, console_log
+from drafter.bridge.client import (
+    update_site,
+    console_log,
+    setup_navigation,
+    set_site_title,
+)
 from drafter.monitor.bus import get_main_event_bus
 from drafter.monitor.telemetry import TelemetryEvent
 from drafter.payloads.page import Page
@@ -35,7 +39,7 @@ class ClientBridge:
 
     def handle_response(
         self, response: Response, callback: Callable[[Request], None]
-    ) -> Outcome:
+    ) -> bool:
         self.add_scripts(response.channels.get(DEFAULT_CHANNEL_BEFORE))
         outcome = update_site(response, callback)
         self.add_scripts(response.channels.get(DEFAULT_CHANNEL_AFTER))
@@ -53,13 +57,17 @@ class ClientBridge:
     def console_log_events(self, event: TelemetryEvent) -> None:
         console_log(event)
 
-    def setup_site(self, site_html: str) -> None:
+    def setup_site(self, site_html: str, site_title: str) -> None:
         root_tag = document.getElementById(DRAFTER_TAG_IDS["ROOT"])
         root_tag.innerHTML = site_html
+        set_site_title(site_title)
 
     def connect_to_event_bus(self) -> None:
         event_bus = get_main_event_bus()
         event_bus.subscribe("*", self.console_log_events)
+
+    def setup_navigation(self, handle_visit: Callable[[Request], None]) -> None:
+        setup_navigation(handle_visit)
 
 
 def add_script(src: str) -> None:

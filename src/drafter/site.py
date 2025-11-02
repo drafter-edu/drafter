@@ -13,19 +13,23 @@ DRAFTER_TAG_IDS = {
 
 SITE_HTML_TEMPLATE = f"""
 <div id="{DRAFTER_TAG_IDS["SITE"]}">
-  <div id="{DRAFTER_TAG_IDS["FRAME"]}">
-    <div id="{DRAFTER_TAG_IDS["HEADER"]}"></div>
-    <div id="{DRAFTER_TAG_IDS["BODY"]}">
-      <form id="{DRAFTER_TAG_IDS["FORM"]}">Loading</form>
+  <form id="{DRAFTER_TAG_IDS["FORM"]}">
+    <div id="{DRAFTER_TAG_IDS["FRAME"]}">
+        <div id="{DRAFTER_TAG_IDS["HEADER"]}"></div>
+        <div id="{DRAFTER_TAG_IDS["BODY"]}">
+        Loading
+        </div>
+        <div id="{DRAFTER_TAG_IDS["FOOTER"]}"></div>
     </div>
-    <div id="{DRAFTER_TAG_IDS["FOOTER"]}"></div>
-  </div>
-  <div id="{DRAFTER_TAG_IDS["DEBUG"]}"></div>
+    <div id="{DRAFTER_TAG_IDS["DEBUG"]}"></div>
+  </form>
 </div>
 """
 
 
 @dataclass
 class Site:
+    title: str = "Drafter Application"
+
     def render(self) -> str:
         return SITE_HTML_TEMPLATE

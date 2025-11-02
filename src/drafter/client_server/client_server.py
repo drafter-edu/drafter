@@ -50,6 +50,11 @@ class ClientServer:
 
         self.requests = Scope()
 
+        self.process_configuration()
+
+    def process_configuration(self):
+        self.site.title = self.configuration.site_title
+
     def start(self, initial_state: Any = None) -> None:
         """
         Starts the server with the given initial state.
@@ -299,7 +304,7 @@ class ClientServer:
             func.__name__,
         )
 
-    def render_site(self) -> str:
+    def render_site(self) -> Tuple[str, str]:
         """
         Renders the initial site HTML. This is called to create the site
         framing structure that includes the frame, header, body, footer, form, and
@@ -324,7 +329,7 @@ class ClientServer:
                 exception=e,
             )
             site = f"<div><h1>Error rendering site</h1><p>{error.message}</p></div>"
-        return site
+        return site, self.site.title
 
     def register_monitor_listener(self, handler: Any) -> None:
         """

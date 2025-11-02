@@ -96,6 +96,14 @@ class Router:
         signature: RouteIntrospection,
         kwargs: Dict[str, Any],
     ) -> None:
+        """
+        Verifies that all provided keyword arguments are expected by the function signature.
+
+        :param request: The incoming request object.
+        :param signature: The introspection data of the function.
+        :param kwargs: The keyword arguments to verify.
+        :raises ValueError: If an unexpected parameter is found.
+        """
         # Verify all arguments are in expected_parameters
         for key, value in kwargs.items():
             if key not in signature.expected_parameters:

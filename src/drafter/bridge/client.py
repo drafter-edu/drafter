@@ -8,13 +8,16 @@ understand its existence and provide type information.
 """
 
 from drafter.data.response import Response
-from drafter.data.outcome import Outcome
 from typing import Callable
 
 
-def update_site(response: Response, callback: Callable) -> Outcome:  # type: ignore
+def update_site(response: Response, callback: Callable) -> bool:  # type: ignore
     pass
 
 
 def console_log(event) -> None:  # type: ignore
+    pass
+
+
+def setup_navigation(handle_visit: Callable) -> None:  # type: ignore
     pass

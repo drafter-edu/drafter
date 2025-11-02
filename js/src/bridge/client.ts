@@ -106,6 +106,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     const Request = drafter_client_mod.Request;
 
     const str_payload = new Sk.builtin.str("payload");
+    const str_url = new Sk.builtin.str("url");
     const str_body = new Sk.builtin.str("body");
     const str_request_id = new Sk.builtin.str("request_id");
     const str_response_id = new Sk.builtin.str("response_id");
@@ -152,6 +153,17 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     };
 
     let requestCount = 0;
+
+    let siteTitle = "";
+    drafter_client_mod.set_site_title = new Sk.builtin.func(
+        function set_site_title_func(title: pyStr): pyNone {
+            const titleStr = Sk.ffi.remapToJs(title);
+            siteTitle = titleStr;
+            document.title = siteTitle;
+            debug_log("site.set_title", siteTitle);
+            return pyNone;
+        }
+    );
 
     const getFile = function (
         file: File,
@@ -210,6 +222,22 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         });
     };
 
+    const addToHistory = function (request: pyObject) {
+        const urlObj = request.tp$getattr(str_url);
+        const url = Sk.ffi.remapToJs(urlObj) as string;
+        const requestIdObj = request.tp$getattr(str_id);
+        const requestId = Sk.ffi.remapToJs(requestIdObj);
+        const state = {
+            request_id: requestId,
+            url: url,
+        };
+        const fullUrl = new URL(window.location.href);
+        document.title = `${siteTitle} - ${url}`;
+        fullUrl.searchParams.set("route", url);
+        window.history.pushState(state, "", fullUrl.toString());
+        debug_log("history.push_state", state, request);
+    };
+
     const {
         DRAFTER_TAG_IDS: {
             ROOT: ROOT_ELEMENT_ID,
@@ -222,12 +250,6 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         response: pyObject,
         callback: pyFunc
     ): Suspension {
-        /*
-        url: pyStr,
-        parameters: typeof pyList,
-        target: pyStr,
-        navigate: pyFunc
-        */
         // Implementation for loading a page
         const element = document.getElementById(BODY_ELEMENT_ID);
         if (!element) {
@@ -258,6 +280,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                 return Sk.misceval.promiseToSuspension(
                     makeRequest(navEvent.url, navEvent.data).then(
                         (newRequest) => {
+                            addToHistory(newRequest);
                             const nextVisit = callback.tp$call([newRequest]);
                             return Sk.misceval.asyncToPromise(() => nextVisit);
                         }
@@ -273,6 +296,8 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         };
         return Sk.misceval.chain<any, any>([], startBodyUpdate);
     });
+
+    drafter_client_mod.update_site = update_body;
 
     // Track handlers for cleanup
     let clickHandler: ((event: MouseEvent) => void) | null = null;
@@ -307,9 +332,11 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                     FORM_ELEMENT_ID
                 ) as HTMLFormElement | null;
                 if (form) {
+                    const isAnchor =
+                        nearestNavLink.tagName.toLowerCase() === "a";
                     const formData = new FormData(
                         form,
-                        nearestNavLink as HTMLElement
+                        isAnchor ? undefined : (nearestNavLink as HTMLElement)
                     );
                     return onNavigation({
                         kind: "link",
@@ -327,7 +354,6 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         const formRoot = document.getElementById(
             FORM_ELEMENT_ID
         ) as HTMLFormElement;
-        console.log("TESTING", formRoot);
         if (!formRoot) {
             // TODO: Also handle this crisis properly
             throw new Error(`Form element ${FORM_ELEMENT_ID} not found`);
@@ -356,7 +382,59 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         formRoot.addEventListener("submit", submitHandler);
     }
 
-    drafter_client_mod.update_site = update_body;
+    let popstateListener: ((event: PopStateEvent) => void) | null = null;
+    drafter_client_mod.setup_navigation = new pyFunc(
+        function setup_navigation_func(callback: pyFunc) {
+            // TODO: Handle navigation on page load by inspecting the query string
+            if (window.location.search) {
+                const params = new URLSearchParams(window.location.search);
+                const route = params.get("route");
+                if (route) {
+                    debug_log("page.load_route", route);
+                    makeRequest(route, new FormData()).then((newRequest) => {
+                        const nextVisit = callback.tp$call([newRequest]);
+                        return Sk.misceval.asyncToPromise(() => nextVisit);
+                    });
+                }
+            }
+            if (popstateListener) {
+                window.removeEventListener("popstate", popstateListener);
+            }
+            // TODO: Handle scroll restoration
+            popstateListener = function (event: PopStateEvent) {
+                debug_log("history.popstate", event);
+                if (event.state && event.state.request_id !== undefined) {
+                    const request_id = event.state.request_id;
+                    const url = event.state.url;
+                    debug_log("request.back", url, event.state);
+                    document.title = `${siteTitle} - ${url}`;
+                    const fullUrl = new URL(window.location.href);
+                    fullUrl.searchParams.set("route", url);
+                    window.history.replaceState(
+                        event.state,
+                        "",
+                        fullUrl.toString()
+                    );
+                    makeRequest(url, new FormData()).then((newRequest) => {
+                        const nextVisit = callback.tp$call([newRequest]);
+                        return Sk.misceval.asyncToPromise(() => nextVisit);
+                    });
+                } else {
+                    debug_log("history.popstate_no_state", event);
+                    document.title = siteTitle;
+                    const fullUrl = new URL(window.location.href);
+                    fullUrl.searchParams.delete("route");
+                    window.history.replaceState({}, "", fullUrl.toString());
+                    makeRequest("index", new FormData()).then((newRequest) => {
+                        const nextVisit = callback.tp$call([newRequest]);
+                        return Sk.misceval.asyncToPromise(() => nextVisit);
+                    });
+                }
+            };
+            window.addEventListener("popstate", popstateListener);
+            return pyNone;
+        }
+    );
 
     drafter_client_mod.console_log = new Sk.builtin.func(
         function console_log_func(event: pyObject) {

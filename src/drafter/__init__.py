@@ -1,4 +1,5 @@
 # from drafter.setup import *
+from dataclasses import dataclass
 from drafter.components import (
     PageContent,
     Content,
@@ -22,6 +23,7 @@ from drafter.components import (
     Table,
     Link,
     Button,
+    Argument,
     Image,
     Download,
     FileUpload,
@@ -69,6 +71,7 @@ __all__ = [
     "Table",
     "Link",
     "Button",
+    "Argument",
     "Image",
     "Download",
     "FileUpload",

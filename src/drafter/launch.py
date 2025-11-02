@@ -11,7 +11,8 @@ def start_server(initial_state=None, main_user_path=None) -> None:
         client_bridge.connect_to_event_bus()
 
         server = get_main_server()
-        client_bridge.setup_site(server.render_site())
+        site_body, site_title = server.render_site()
+        client_bridge.setup_site(site_body, site_title)
         server.register_monitor_listener(client_bridge.handle_telemetry_event)
         server.monitor.listen_for_events()
 
@@ -23,6 +24,7 @@ def start_server(initial_state=None, main_user_path=None) -> None:
             client_bridge.handle_response(response, handle_visit)
 
         handle_visit(initial_request)
+        client_bridge.setup_navigation(handle_visit)
 
     else:
         from drafter.app.app_server import serve_app_once

@@ -16,7 +16,6 @@ from drafter.monitor.bus import EventBus, get_main_event_bus
 from drafter.monitor.telemetry import TelemetryEvent
 from drafter.data.request import Request
 from drafter.data.response import Response
-from drafter.data.outcome import Outcome
 from drafter.data.errors import DrafterError, DrafterWarning, DrafterInfo
 
 

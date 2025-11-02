@@ -125,10 +125,11 @@ class Link(Component, LinkContent):
         self._link_id = id(self)
 
     def __str__(self) -> str:
+        if self.external:
+            return f"<a href='{self.url}' {self.parse_extra_settings()}>{self.text}</a>"
         # Create a unique namespace using both link text and instance ID
         link_namespace = f"{self.text}#{self._link_id}"
         precode = self.create_arguments(self.arguments, link_namespace)
-        url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: link_namespace})
         value = make_safe_argument(link_namespace)
         return f"{precode}<a data-nav='{self.url}' data-submit-button='{value}' href='#' {self.parse_extra_settings()}>{self.text}</a>"
 
@@ -158,7 +159,6 @@ class Button(Component, LinkContent):
         button_namespace = f"{self.text}#{self._button_id}"
         precode = self.create_arguments(self.arguments, button_namespace)
         # Include the button ID in the button value so we know which specific button was clicked
-        url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: button_namespace})
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         value = make_safe_argument(button_namespace)
         return f"{precode}<button data-nav='{self.url}' type='submit' name='{SUBMIT_BUTTON_KEY}' value='{value}' formaction='#' {parsed_settings}>{self.text}</button>"

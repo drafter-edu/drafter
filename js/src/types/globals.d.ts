@@ -7,6 +7,7 @@ declare global {
     type pyTuple = import("./skulpt").pyTuple;
     type pyDict = import("./skulpt").pyDict;
     type pyFunc = import("./skulpt").pyFunc;
+    type pyNone = import("./skulpt").pyNone;
 
     var DRAFTER_SITE_ROOT_ELEMENT_ID: string;
 }
