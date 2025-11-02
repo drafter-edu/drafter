@@ -64,7 +64,8 @@ export function setupSkulpt() {
 
 export async function startServer(
     pythonCode: string,
-    mainFilename = "main"
+    mainFilename = "main",
+    presentErrors = true
 ): Promise<void> {
     try {
         return Sk.misceval
@@ -81,9 +82,29 @@ export async function startServer(
                 return result;
             })
             .catch((error) => {
+                if (!presentErrors) {
+                    //throw error;
+                    const errorMessage = convertSkulptError(
+                        error as pyBaseException,
+                        mainFilename + ".py",
+                        pythonCode,
+                        false
+                    );
+                    throw errorMessage;
+                }
                 showError(error, mainFilename + ".py", pythonCode);
             });
     } catch (error) {
+        if (!presentErrors) {
+            // throw error;
+            const errorMessage = convertSkulptError(
+                error as pyBaseException,
+                mainFilename + ".py",
+                pythonCode,
+                false
+            );
+            throw errorMessage;
+        }
         showError(error as pyBaseException, mainFilename + ".py", pythonCode);
     }
 }
@@ -144,10 +165,41 @@ function buildTraceback(
     });
 }
 
-function convertSkulptError(
+function buildTracebackNoHTML(
     error: pyBaseException,
     filenameExecuted: string,
     code: string
+) {
+    return error.traceback.reverse().map((frame) => {
+        if (!frame) {
+            return "??";
+        }
+        let lineno = frame.lineno;
+        let file = `File "${frame.filename}", `;
+        let line = `on line ${lineno}, `;
+        let scope =
+            frame.scope !== "<module>" && frame.scope !== undefined
+                ? `in scope ${frame.scope}`
+                : "";
+        let source = "";
+        // console.log(filenameExecuted, frame.filename, code);
+        if (frame.source !== undefined) {
+            source = "" + frame.source;
+        } else if (filenameExecuted === frame.filename && code) {
+            const lines = code.split("\n");
+            const lineIndex = lineno - 1;
+            const lineContent = lines[lineIndex];
+            source = lineContent;
+        }
+        return file + line + scope + source;
+    });
+}
+
+function convertSkulptError(
+    error: pyBaseException,
+    filenameExecuted: string,
+    code: string,
+    withFrame: boolean = true
 ) {
     let name = error.tp$name;
     let args = Sk.ffi.remapToJs(error.args);
@@ -155,7 +207,9 @@ function convertSkulptError(
     let traceback = "";
     if (name === "TimeoutError") {
         if (error.err && error.err.traceback && error.err.traceback.length) {
-            const allFrames = buildTraceback(error.err, filenameExecuted, code);
+            const allFrames = (
+                withFrame ? buildTraceback : buildTracebackNoHTML
+            )(error.err, filenameExecuted, code);
             const result = ["Traceback:"];
             if (allFrames.length > 5) {
                 result.push(
@@ -172,8 +226,15 @@ function convertSkulptError(
         }
     } else if (error.traceback && error.traceback.length) {
         traceback =
-            "<strong>Traceback:</strong><br>\n" +
-            buildTraceback(error, filenameExecuted, code).join("\n<br>");
+            (withFrame ? "<strong>Traceback:</strong><br>\n" : "Traceback:\n") +
+            (withFrame ? buildTraceback : buildTracebackNoHTML)(
+                error,
+                filenameExecuted,
+                code
+            ).join("\n<br>");
+    }
+    if (!withFrame) {
+        return top + "\n" + traceback;
     }
     return `<pre style="${preStyle}">${top}</pre>\n<br>\n${traceback}\n<br>\n<div>
     <p><strong>Advice:</strong><br>

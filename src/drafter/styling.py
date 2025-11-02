@@ -7,7 +7,8 @@ TODO:
 """
 
 from typing import Union
-from drafter.components.components import PageContent, Text, Content
+from drafter.components import PageContent, Text, Content
+from drafter.components.layout import Div
 
 
 def update_style(component: Content, style: str, value: str) -> PageContent:
@@ -28,6 +29,9 @@ def update_style(component: Content, style: str, value: str) -> PageContent:
     """
     if isinstance(component, str):
         component = Text(component)
+    # TODO: Consider this approach
+    # if isinstance(component, list):
+    #     component = Div(*component)
     return component.update_style(style, value)
 
 

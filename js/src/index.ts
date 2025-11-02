@@ -3,6 +3,7 @@ import { getSkulptFile, setupSkulpt, startServer } from "./skulpt-tools";
 export interface DrafterInitOptions {
     code?: string;
     url?: string;
+    presentErrors?: boolean;
 }
 
 const x: pyStr = new Sk.builtin.str("hello");
@@ -11,7 +12,7 @@ export function runStudentCode(options: DrafterInitOptions) {
     setupSkulpt();
 
     if (options.code) {
-        return startServer(options.code, "main");
+        return startServer(options.code, "main", options.presentErrors);
     } else if (options.url) {
         return fetch(options.url)
             .then((response) => {

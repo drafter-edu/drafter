@@ -15,6 +15,7 @@ from drafter.components import (
     Division,
     Box,
     Text,
+    Pre,
     PreformattedText,
     Header,
     TextBox,
@@ -36,8 +37,9 @@ from drafter.launch import start_server
 from drafter.client_server.commands import get_main_server, set_main_server, MAIN_SERVER
 from drafter.router.commands import route
 from drafter.payloads.page import Page
+
 # from drafter.server import *
-# from drafter.deploy import *
+# from drafter.deploy import add_website_css
 # from drafter.testing import assert_equal
 # import drafter.hacks
 
@@ -65,6 +67,7 @@ __all__ = [
     "Division",
     "Box",
     "Text",
+    "Pre",
     "PreformattedText",
     "Header",
     "TextBox",
