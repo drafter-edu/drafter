@@ -35,6 +35,14 @@ class Site:
     additional_header: List[str] = field(default_factory=list)
 
     def render(self) -> str:
+        """
+        Renders the site HTML structure.
+        
+        Note: In Skulpt mode, this HTML is injected into the drafter-root div.
+        The CSS and header content will be placed in the document body, which is
+        valid HTML5. For production builds, CSS should ideally be passed to the
+        HTML template's <head> section (see app/templating.py).
+        """
         site_html = SITE_HTML_TEMPLATE
         
         # Add CSS if present

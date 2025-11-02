@@ -247,7 +247,6 @@ class ClientServer:
         self.response_count += 1
         
         # If the payload is a Page with CSS or JS, add them to the response channels
-        from drafter.payloads.page import Page
         if isinstance(payload, Page):
             # Add CSS as style messages in the "before" channel
             for css_content in payload.css:
