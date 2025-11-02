@@ -207,7 +207,11 @@ function generateMarkdownReport(results: ExampleTestResult[]): string {
     markdown += '| Example | Error |\n';
     markdown += '|---------|-------|\n';
     failing.forEach(r => {
-      const errorMsg = (r.error || 'Unknown error').replace(/\|/g, '\\|').substring(0, 100);
+      // Properly escape special characters for markdown table
+      const errorMsg = (r.error || 'Unknown error')
+        .replace(/\\/g, '\\\\')  // Escape backslashes first
+        .replace(/\|/g, '\\|')   // Then escape pipes
+        .substring(0, 100);
       markdown += `| ${r.name} | ${errorMsg} |\n`;
     });
     markdown += '\n';
