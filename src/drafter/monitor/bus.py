@@ -27,6 +27,9 @@ class EventBus:
     different parts of the system.
 
     :ivar subscribers: The list of subscribers to the bus.
+    :ivar unprocessed_events: The list of unprocessed events. When
+        there are no subscribers, events are queued here.
+    :ivar maximum_queue_size: The maximum size of the event queue.
     """
 
     maximum_queue_size: int = 500

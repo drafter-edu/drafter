@@ -6,11 +6,11 @@ from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
 from drafter.components import Component, PageContent, Link
 from drafter.history.state import SiteState
-from drafter.payloads.base_page import BasePage
+from drafter.payloads.payloads import ResponsePayload
 
 
 @dataclass
-class Page(BasePage):
+class Page(ResponsePayload):
     """
     A page is a collection of content to be displayed to the user. This content has two critical parts:
 
@@ -53,6 +53,9 @@ class Page(BasePage):
                         "The content of a page must be a list of strings or components."
                         f" Found {incorrect_type} at index {index} instead."
                     )
+
+    def get_state_updates(self) -> tuple[bool, Any]:
+        return True, self.state
 
     def render(self, state: SiteState, configuration: ClientServerConfiguration) -> str:
         """
