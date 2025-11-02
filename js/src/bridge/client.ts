@@ -153,30 +153,61 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
 
     let requestCount = 0;
 
+    const getFile = function (
+        file: File,
+        data: any,
+        key: string
+    ): Promise<void> {
+        return file.arrayBuffer().then((buffer) => {
+            const bytes = new Uint8Array(buffer);
+            const content = new Sk.builtin.bytes(bytes);
+            const fileData = {
+                filename: file.name,
+                content,
+                type: file.type,
+                size: file.size,
+                __file_upload__: true,
+            };
+            data[key] =
+                key in data
+                    ? ([] as any[]).concat(data[key] as any, fileData)
+                    : fileData;
+        });
+    };
+
     const makeRequest = function (url: string, formData: FormData) {
         const data: Record<string, FormDataEntryValue | FormDataEntryValue[]> =
             {};
+        const filePromises: Promise<void>[] = [];
         for (const [k, v] of formData.entries()) {
-            data[k] = k in data ? ([] as any[]).concat(data[k] as any, v) : v;
+            if (v instanceof File) {
+                const promise = getFile(v, data, k);
+                filePromises.push(promise);
+            } else {
+                data[k] =
+                    k in data ? ([] as any[]).concat(data[k] as any, v) : v;
+            }
         }
-        const dataDict: pyDict = new pyDict();
-        for (const [k, v] of Object.entries(data)) {
-            dataDict.mp$ass_subscript(
-                new pyStr(k),
-                new pyList([Sk.ffi.remapToPy(v)])
-            );
-        }
-        const args = [
-            new pyInt(requestCount),
-            new pyStr("submit"),
-            new pyStr(url),
-            new pyList([]),
-            dataDict,
-            new pyDict(),
-        ];
-        const request = Sk.misceval.callsimArray(Request, args);
-        requestCount += 1;
-        return request;
+        return Promise.all(filePromises).then(() => {
+            const dataDict: pyDict = new pyDict();
+            for (const [k, v] of Object.entries(data)) {
+                dataDict.mp$ass_subscript(
+                    new pyStr(k),
+                    new pyList([Sk.ffi.remapToPy(v)])
+                );
+            }
+            const args = [
+                new pyInt(requestCount),
+                new pyStr("submit"),
+                new pyStr(url),
+                new pyList([]),
+                dataDict,
+                new pyDict(),
+            ];
+            const request = Sk.misceval.callsimArray(Request, args);
+            requestCount += 1;
+            return request;
+        });
     };
 
     const {
@@ -224,13 +255,13 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                     navEvent.data,
                     callback
                 );
-                // TODO: Process data into something Skulpt can understand
-                // const args = [new pyStr(pathPart), new pyStr("TEST")];
-                // const kwargs = new pyDict();
-                const newRequest = makeRequest(navEvent.url, navEvent.data);
-                const nextVisit = callback.tp$call([newRequest]);
                 return Sk.misceval.promiseToSuspension(
-                    Sk.misceval.asyncToPromise(() => nextVisit)
+                    makeRequest(navEvent.url, navEvent.data).then(
+                        (newRequest) => {
+                            const nextVisit = callback.tp$call([newRequest]);
+                            return Sk.misceval.asyncToPromise(() => nextVisit);
+                        }
+                    )
                 );
             });
             debug_log(
@@ -296,6 +327,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         const formRoot = document.getElementById(
             FORM_ELEMENT_ID
         ) as HTMLFormElement;
+        console.log("TESTING", formRoot);
         if (!formRoot) {
             // TODO: Also handle this crisis properly
             throw new Error(`Form element ${FORM_ELEMENT_ID} not found`);

@@ -153,7 +153,6 @@ var Drafter = (() => {
       );
       throw new Error("Skulpt not found");
     }
-    console.log(skulpt_default);
     if (typeof skulpt_default.environ == "undefined") {
       skulpt_default.environ = new skulpt_default.builtin.dict();
     }
@@ -233,7 +232,6 @@ var Drafter = (() => {
       let line = `on line <code class="lineno">${lineno}</code>, `;
       let scope = frame.scope !== "<module>" && frame.scope !== void 0 ? `in scope ${frame.scope}` : "";
       let source = "";
-      console.log(filenameExecuted, frame.filename, code);
       if (frame.source !== void 0) {
         source = `
 <pre style="${preStyle}"><code>${frame.source}</code></pre>`;

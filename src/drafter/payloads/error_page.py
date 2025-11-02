@@ -14,7 +14,7 @@ class ErrorPage(ResponsePayload):
             f"Message: {self.error.message}",
             f"Details: {self.error.details}",
             f"Where: {self.error.where}",
-            f"URL: {self.error.url}",
+            f"Traceback: {self.error.traceback}",
         ]
         if self.error.traceback:
             content.append(f"Traceback:\n{self.error.traceback}")

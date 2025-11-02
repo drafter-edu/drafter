@@ -12,8 +12,7 @@ from drafter.payloads.error_page import ErrorPage, SimpleErrorPage
 from drafter.payloads.payloads import ResponsePayload
 from drafter.data.request import Request
 from drafter.data.response import Response
-from drafter.data.outcome import Outcome
-from drafter.routes import Router
+from drafter.router.routes import Router
 from drafter.audit import log_error, log_warning, log_info
 from drafter.site import Site
 from drafter.config.client_server import ClientServerConfiguration
@@ -99,7 +98,24 @@ class ClientServer:
     def execute_route(self, route_func, request: Request) -> Any:
         # Call the route function to get the payload
         try:
-            return route_func(self.state, *request.args, **request.kwargs)
+            args, kwargs, representation = self.router.prepare_arguments(
+                request, self.state.current
+            )
+        except Exception as e:
+            raise VisitError(
+                log_error(
+                    "request.argument_parsing_failed",
+                    f"Error while parsing arguments for request to URL {request.url}: {e}",
+                    "client_server.visit",
+                    repr(request),
+                    route=request.url,
+                    exception=e,
+                ),
+                400,
+            )
+        print(args, kwargs, representation)
+        try:
+            return route_func(*args, **kwargs)
         except Exception as e:
             raise VisitError(
                 log_error(

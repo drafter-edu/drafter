@@ -44,10 +44,12 @@ class Image(Component, LinkContent):
         if not HAS_PILLOW or isinstance(image, str):
             return False, image
 
+        # print("Handling PIL image.", image)
         image_data = io.BytesIO()
         image.save(image_data, format="PNG")
         image_data.seek(0)
         figure = base64.b64encode(image_data.getvalue()).decode("utf-8")
+        # figure = base64.b64encode(image["content"])
         figure = f"data:image/png;base64,{figure}"
         return True, figure
 

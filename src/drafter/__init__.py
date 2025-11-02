@@ -31,7 +31,7 @@ from drafter.launch import start_server
 
 # from drafter.styling import *
 from drafter.client_server.commands import get_main_server, set_main_server, MAIN_SERVER
-from drafter.commands import route
+from drafter.router.commands import route
 from drafter.payloads.page import Page
 # from drafter.server import *
 # from drafter.deploy import *

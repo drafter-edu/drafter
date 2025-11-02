@@ -19,7 +19,7 @@ export function setupSkulpt(root: string = "#website") {
         );
         throw new Error("Skulpt not found");
     }
-    console.log(Sk);
+    // console.log(Sk);
     if (typeof Sk.environ == "undefined") {
         Sk.environ = new Sk.builtin.dict();
     }
@@ -131,7 +131,7 @@ function buildTraceback(
                 ? `in scope ${frame.scope}`
                 : "";
         let source = "";
-        console.log(filenameExecuted, frame.filename, code);
+        // console.log(filenameExecuted, frame.filename, code);
         if (frame.source !== undefined) {
             source = `\n<pre style="${preStyle}"><code>${frame.source}</code></pre>`;
         } else if (filenameExecuted === frame.filename && code) {

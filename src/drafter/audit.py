@@ -24,10 +24,7 @@ def log_error(
         message=message,
         where=source,
         details=details,
-        # TODO: Skulpt does not let me do format_traceback yet
-        traceback="\n".join(traceback.format_exception(exception))
-        if exception
-        else traceback.format_exc(),
+        traceback=traceback.format_exc() if exception else None,
     )
     get_main_event_bus().publish(
         TelemetryEvent(
@@ -66,9 +63,7 @@ def log_warning(
         where=source,
         details=details,
         # TODO: Skulpt does not let me do format_traceback yet
-        traceback="\n".join(traceback.format_exception(exception))
-        if exception
-        else traceback.format_exc(),
+        traceback=traceback.format_exc() if exception else None,
     )
     get_main_event_bus().publish(
         TelemetryEvent(
