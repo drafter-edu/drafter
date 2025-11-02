@@ -1,7 +1,7 @@
 import Sk from "./types/skulpt/";
 import type { pyBaseException, pyStr } from "./types/skulpt/";
 
-function builtinRead(path: string) {
+export function builtinRead(path: string) {
     if (
         Sk.builtinFiles === undefined ||
         Sk.builtinFiles["files"][path] === undefined
@@ -12,7 +12,7 @@ function builtinRead(path: string) {
 
 const preStyle = `background-color: #f0f0f0; padding: 4px; border: 1px solid lightgrey; margin: 0px`;
 
-export function setupSkulpt(root: string = "#website") {
+export function setupSkulpt() {
     if (typeof Sk === "undefined") {
         console.error(
             "Skulpt (global `Sk`) not found. Ensure skulpt.js and skulpt-stdlib.js are loaded before drafter.js (served from your Python assets or a CDN)."

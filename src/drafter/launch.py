@@ -1,5 +1,4 @@
-from drafter.files import seek_file_by_line
-from drafter.utils import is_skulpt
+from drafter.utils import is_skulpt, seek_file_by_line
 from drafter.client_server.commands import get_main_server
 
 
