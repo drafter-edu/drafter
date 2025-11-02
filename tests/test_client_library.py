@@ -41,7 +41,7 @@ def test_router_registration():
     def test_route(state: str) -> Page:
         return Page(state, ["Test content"])
     
-    server.router.register("test", test_route)
+    server.router.add_route("test", test_route)
     
     assert "test" in server.router.routes
     assert server.router.routes["test"] == test_route
@@ -73,7 +73,7 @@ def test_page_with_button_component():
     assert page is not None
     assert len(page.content) == 2
     assert isinstance(page.content[1], Button)
-    assert page.content[1].label == "Submit"
+    assert page.content[1].text == "Submit"
 
 
 def test_page_with_header_component():
@@ -85,7 +85,7 @@ def test_page_with_header_component():
     
     assert page is not None
     assert isinstance(page.content[0], Header)
-    assert page.content[0].text == "Welcome"
+    assert page.content[0].body == "Welcome"
     assert page.content[0].level == 1
 
 
@@ -112,7 +112,7 @@ def test_page_with_checkbox_component():
     assert page is not None
     assert isinstance(page.content[1], CheckBox)
     assert page.content[1].name == "agree"
-    assert page.content[1].value is False
+    assert page.content[1].default_value is False
 
 
 def test_page_with_multiple_components():
@@ -140,7 +140,9 @@ def test_site_state_initialization():
     state = SiteState()
     
     assert state is not None
-    assert hasattr(state, 'data')
+    assert hasattr(state, 'current')
+    assert hasattr(state, 'history')
+    assert hasattr(state, 'initial')
 
 
 def test_monitor_initialization():
@@ -223,8 +225,8 @@ def test_button_with_target_route():
         return Page(state, ["Target reached"])
     
     button = Button("Go", target_route)
-    assert button.label == "Go"
-    assert button.route == target_route
+    assert button.text == "Go"
+    assert button.url == "target_route"  # Button converts callable to name
 
 
 def test_page_state_preservation():
