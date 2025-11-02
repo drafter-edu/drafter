@@ -24,7 +24,11 @@ import document  # type: ignore
 class ClientBridge:
     channel_history: dict[str, set[str]] = field(default_factory=dict)
 
-    def add_scripts(self, channel: Optional[Channel]) -> None:
+    def add_channel_content(self, channel: Optional[Channel]) -> None:
+        """
+        Processes messages from a channel and adds them to the page.
+        Supports 'script' and 'style' message kinds.
+        """
         if channel:
             for message in channel.messages:
                 if message.sigil is not None:
@@ -36,13 +40,15 @@ class ClientBridge:
                 if message.kind == "script":
                     # TODO: Handle errors while executing this script
                     add_script(message.content)
+                elif message.kind == "style":
+                    add_style(message.content)
 
     def handle_response(
         self, response: Response, callback: Callable[[Request], None]
     ) -> bool:
-        self.add_scripts(response.channels.get(DEFAULT_CHANNEL_BEFORE))
+        self.add_channel_content(response.channels.get(DEFAULT_CHANNEL_BEFORE))
         outcome = update_site(response, callback)
-        self.add_scripts(response.channels.get(DEFAULT_CHANNEL_AFTER))
+        self.add_channel_content(response.channels.get(DEFAULT_CHANNEL_AFTER))
         return outcome
 
     def make_initial_request(self) -> Request:
@@ -76,3 +82,16 @@ def add_script(src: str) -> None:
     head = document.getElementsByTagName("head")[0]
     head.appendChild(script)
     return script
+
+
+def add_style(css: str) -> None:
+    """
+    Adds CSS content to the page by creating a style element.
+    
+    :param css: CSS content to add to the page.
+    """
+    style = document.createElement("style")
+    style.textContent = css
+    head = document.getElementsByTagName("head")[0]
+    head.appendChild(style)
+    return style

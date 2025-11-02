@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Dict, List
 
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.configuration import ServerConfiguration
@@ -25,16 +25,22 @@ class Page(ResponsePayload):
 
     :param state: The state of the page. If only one argument is provided, this will default to be ``None``.
     :param content: The content of the page. Must always be provided as a list of strings and components.
+    :param css: Optional CSS content to inject dynamically when this page is rendered.
+    :param js: Optional JavaScript content to inject dynamically when this page is rendered.
     """
 
     state: Any
     content: list
+    css: List[str] = field(default_factory=list)
+    js: List[str] = field(default_factory=list)
 
-    def __init__(self, state, content=None):
+    def __init__(self, state, content=None, css=None, js=None):
         if content is None:
             state, content = None, state
         self.state = state
         self.content = content
+        self.css = css if css is not None else []
+        self.js = js if js is not None else []
 
         if isinstance(content, (str, Component)):
             # If the content is a single string, convert it to a list with that string as the only element.
