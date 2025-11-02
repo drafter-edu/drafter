@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 
 DRAFTER_TAG_IDS = {
@@ -31,14 +31,8 @@ SITE_HTML_TEMPLATE = f"""
 @dataclass
 class Site:
     title: str = "Drafter Application"
-    additional_css: List[str] = None
-    additional_header: List[str] = None
-
-    def __post_init__(self):
-        if self.additional_css is None:
-            self.additional_css = []
-        if self.additional_header is None:
-            self.additional_header = []
+    additional_css: List[str] = field(default_factory=list)
+    additional_header: List[str] = field(default_factory=list)
 
     def render(self) -> str:
         site_html = SITE_HTML_TEMPLATE

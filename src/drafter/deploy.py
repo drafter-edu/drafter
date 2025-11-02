@@ -85,7 +85,7 @@ def add_website_css(selector: str, css: Optional[str] = None):
     """
     Adds additional CSS content to the website. This is useful for adding custom
     CSS to the website, either for specific selectors or for general styles.
-    If you only provide one parameter, it will be wrapped in <style> tags.
+    If you only provide one parameter, it will be used as raw CSS content.
     If you provide both parameters, they will be used to create a CSS rule; the first parameter
     is the CSS selector, and the second parameter is the CSS content that will be wrapped in {}.
 
@@ -93,10 +93,12 @@ def add_website_css(selector: str, css: Optional[str] = None):
     :param css: The CSS content to apply to the selector.
     """
     if css is None:
-        MAIN_SERVER.configuration.additional_css_content.append(selector + "\n")
+        # Treat selector as raw CSS content
+        MAIN_SERVER.configuration.additional_css_content.append(selector)
     else:
+        # Create a CSS rule from selector and content
         MAIN_SERVER.configuration.additional_css_content.append(
-            f"{selector} {{{css}}}\n"
+            f"{selector} {{{css}}}"
         )
 
 
