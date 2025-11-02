@@ -54,6 +54,8 @@ class ClientServer:
 
     def process_configuration(self):
         self.site.title = self.configuration.site_title
+        self.site.additional_css = self.configuration.additional_css_content
+        self.site.additional_header = self.configuration.additional_header_content
 
     def start(self, initial_state: Any = None) -> None:
         """

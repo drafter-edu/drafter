@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 DRAFTER_TAG_IDS = {
     "ROOT": "drafter-root--",
@@ -30,6 +31,27 @@ SITE_HTML_TEMPLATE = f"""
 @dataclass
 class Site:
     title: str = "Drafter Application"
+    additional_css: List[str] = None
+    additional_header: List[str] = None
+
+    def __post_init__(self):
+        if self.additional_css is None:
+            self.additional_css = []
+        if self.additional_header is None:
+            self.additional_header = []
 
     def render(self) -> str:
-        return SITE_HTML_TEMPLATE
+        site_html = SITE_HTML_TEMPLATE
+        
+        # Add CSS if present
+        if self.additional_css:
+            css_content = "\n".join(self.additional_css)
+            css_tag = f"<style>\n{css_content}\n</style>"
+            site_html = css_tag + site_html
+        
+        # Add header content if present
+        if self.additional_header:
+            header_content = "\n".join(self.additional_header)
+            site_html = header_content + site_html
+        
+        return site_html

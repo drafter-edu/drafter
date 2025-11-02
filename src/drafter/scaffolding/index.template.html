@@ -7,6 +7,14 @@
     <meta name="description" content="{{ meta_description }}" />
     <meta name="author" content="{{ meta_author }}" />
     <title>{{ title or "Drafter App" }}</title>
+    {% if additional_css %}
+    <style>
+{{ additional_css }}
+    </style>
+    {% endif %}
+    {% if additional_header %}
+{{ additional_header }}
+    {% endif %}
   </head>
   <body>
     <div id="{{ drafter_root }}"></div>
