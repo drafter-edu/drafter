@@ -50,8 +50,6 @@ class ClientServer:
 
         self.requests = Scope()
 
-        self.process_configuration()
-
     def process_configuration(self):
         self.site.title = self.configuration.site_title
 
@@ -118,7 +116,7 @@ class ClientServer:
                 ),
                 400,
             )
-        print(args, kwargs, representation)
+        # print(args, kwargs, representation)
         try:
             return route_func(*args, **kwargs)
         except Exception as e:
@@ -311,6 +309,18 @@ class ClientServer:
 
         :return: The rendered HTML of the initial site.
         """
+        try:
+            self.process_configuration()
+        except Exception as e:
+            error = log_error(
+                "site.processing_failed",
+                "Failed to process site configuration",
+                "client_server.render_site",
+                f"Original exception: {e}",
+                exception=e,
+            )
+            site = f"<div><h1>Error processing site configuration</h1><p>{error.message}</p></div>"
+            return site, "Error"
         try:
             site = self.site.render()
             log_info(
