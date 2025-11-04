@@ -2,7 +2,14 @@ from drafter.utils import is_skulpt, seek_file_by_line
 from drafter.client_server.commands import get_main_server
 
 
-def start_server(initial_state=None, main_user_path=None) -> None:
+def start_server(initial_state=None, main_user_path=None, **kwargs) -> None:
+    """
+    Starts the Drafter server with the given initial state.
+    
+    :param initial_state: The initial state to set for the server.
+    :param main_user_path: The path to the main user file (optional).
+    :param kwargs: Additional keyword arguments (for backward compatibility, currently ignored).
+    """
     if is_skulpt():
         from drafter.bridge import ClientBridge
 

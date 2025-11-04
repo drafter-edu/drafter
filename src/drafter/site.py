@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List
 
 DRAFTER_TAG_IDS = {
     "ROOT": "drafter-root--",
@@ -30,6 +31,29 @@ SITE_HTML_TEMPLATE = f"""
 @dataclass
 class Site:
     title: str = "Drafter Application"
+    additional_css: List[str] = field(default_factory=list)
+    additional_header: List[str] = field(default_factory=list)
 
     def render(self) -> str:
-        return SITE_HTML_TEMPLATE
+        """
+        Renders the site HTML structure.
+        
+        Note: In Skulpt mode, this HTML is injected into the drafter-root div.
+        The CSS and header content will be placed in the document body, which is
+        valid HTML5. For production builds, CSS should ideally be passed to the
+        HTML template's <head> section (see app/templating.py).
+        """
+        site_html = SITE_HTML_TEMPLATE
+        
+        # Add CSS if present
+        if self.additional_css:
+            css_content = "\n".join(self.additional_css)
+            css_tag = f"<style>\n{css_content}\n</style>"
+            site_html = css_tag + site_html
+        
+        # Add header content if present
+        if self.additional_header:
+            header_content = "\n".join(self.additional_header)
+            site_html = header_content + site_html
+        
+        return site_html
