@@ -17,8 +17,8 @@ function getAllFiles() {
     const examplesDir = "../examples/";
     const fileNames = fs.readdirSync(examplesDir);
     return fileNames
-        .filter((fileName) => fileName.endsWith(".py"))
-        .map((fileName) => {
+        .filter((fileName: string) => fileName.endsWith(".py"))
+        .map((fileName: string) => {
             const filePath = path.join(examplesDir, fileName);
             const contents = fs.readFileSync(filePath, "utf-8");
             return { fileName, contents };

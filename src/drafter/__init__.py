@@ -40,7 +40,7 @@ from drafter.payloads.page import Page
 
 # from drafter.server import *
 # from drafter.deploy import add_website_css
-# from drafter.testing import assert_equal
+from drafter.testing import assert_equal
 # import drafter.hacks
 
 # Provide default route

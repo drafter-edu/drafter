@@ -1,3 +1,5 @@
+from typing import Callable
+from functools import wraps
 import sys
 
 
@@ -12,6 +14,42 @@ def is_skulpt():
         bool: True if running inside Skulpt, False otherwise.
     """
     return sys.platform in WEB_RUNTIMES
+
+
+def only_skulpt(callable: Callable) -> Callable:
+    """
+    Decorator to make a function only run in Skulpt (web) environments.
+    If not in Skulpt, the function will return None.
+
+    :param callable: The function to decorate.
+    :return: The decorated function.
+    """
+
+    @wraps(callable)
+    def wrapper(*args, **kwargs):
+        if is_skulpt():
+            return callable(*args, **kwargs)
+        return None
+
+    return wrapper
+
+
+def not_in_skulpt(callable: Callable) -> Callable:
+    """
+    Decorator to make a function only run outside of Skulpt (web) environments.
+    If in Skulpt, the function will return None.
+
+    :param callable: The function to decorate.
+    :return: The decorated function.
+    """
+
+    @wraps(callable)
+    def wrapper(*args, **kwargs):
+        if not is_skulpt():
+            return callable(*args, **kwargs)
+        return None
+
+    return wrapper
 
 
 def seek_file_by_line(line, missing_value=None):
@@ -36,7 +74,7 @@ def seek_file_by_line(line, missing_value=None):
 
         trace = extract_stack()
         for data in trace:
-            if data[3].strip().startswith(line):
+            if data[3].strip().startswith(line):  # type: ignore
                 return data[0]
         return missing_value
     except Exception as e:
