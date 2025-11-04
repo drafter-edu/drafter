@@ -52,6 +52,8 @@ class ClientServer:
 
     def process_configuration(self):
         self.site.title = self.configuration.site_title
+        self.site.additional_css = self.configuration.additional_css_content
+        self.site.additional_header = self.configuration.additional_header_content
 
     def start(self, initial_state: Any = None) -> None:
         """
@@ -229,7 +231,9 @@ class ClientServer:
         """
         Makes a successful response for the server with the given page.
 
-        :param page: The page to include in the response.
+        :param request_id: The ID of the request.
+        :param body: The rendered body content.
+        :param payload: The payload to include in the response.
         :return: The response from the server.
         """
         response = Response(
@@ -239,6 +243,17 @@ class ClientServer:
             body=body,
         )
         self.response_count += 1
+        
+        # If the payload is a Page with CSS or JS, add them to the response channels
+        if isinstance(payload, Page):
+            # Add CSS as style messages in the "before" channel
+            for css_content in payload.css:
+                response.send("before", css_content, kind="style")
+            
+            # Add JS as script messages in the "after" channel
+            for js_content in payload.js:
+                response.send("after", js_content, kind="script")
+        
         return response
 
     def make_error_response(

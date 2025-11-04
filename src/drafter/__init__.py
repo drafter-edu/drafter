@@ -34,9 +34,20 @@ from drafter.components import (
 from drafter.launch import start_server
 
 # from drafter.styling import *
-from drafter.client_server.commands import get_main_server, set_main_server, MAIN_SERVER
+from drafter.client_server.commands import get_main_server, set_main_server
 from drafter.router.commands import route
 from drafter.payloads.page import Page
+from drafter.deploy import (
+    hide_debug_information,
+    show_debug_information,
+    set_website_title,
+    set_website_framed,
+    set_website_style,
+    add_website_header,
+    add_website_css,
+    set_site_information,
+    deploy_site,
+)
 
 # from drafter.server import *
 # from drafter.deploy import add_website_css
@@ -52,7 +63,6 @@ __all__ = [
     "Page",
     "get_main_server",
     "set_main_server",
-    "MAIN_SERVER",
     "route",
     "start_server",
     "PageContent",
@@ -82,6 +92,15 @@ __all__ = [
     "Download",
     "FileUpload",
     "MatPlotLibPlot",
+    "hide_debug_information",
+    "show_debug_information",
+    "set_website_title",
+    "set_website_framed",
+    "set_website_style",
+    "add_website_header",
+    "add_website_css",
+    "set_site_information",
+    "deploy_site",
 ]
 
 __version__ = "2.0.0"
