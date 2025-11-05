@@ -198,11 +198,14 @@ class Monitor:
         :param event: The telemetry event to check
         :return: A string representation of the current routes
         """
-        if event.event_type == "route.added":
-            route_info: RouteIntrospection = event.data
-            parameters = ", ".join(route_info.expected_parameters)
-            route_function = f"{route_info.function_name}({parameters})"
-            self.routes.append(route_function)
+        if event.event_type == "route.added" and event.data is not None:
+            try:
+                route_info: RouteIntrospection = event.data
+                parameters = ", ".join(route_info.expected_parameters)
+                route_function = f"{route_info.function_name}({parameters})"
+                self.routes.append(route_function)
+            except (AttributeError, TypeError) as e:
+                self._handle_internal_error("_handle_route_add", e)
         return "\n".join(self.routes)
 
     # def get_snapshot(
