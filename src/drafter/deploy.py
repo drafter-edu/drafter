@@ -1,8 +1,11 @@
-from typing import Optional, Union
+from typing import Optional, Union, Dict, Any
 from drafter.payloads.page import Page
 from drafter.components import PageContent
 from drafter.client_server.commands import get_main_server
 from drafter.client_server.client_server import ClientServer
+
+# Global storage for site information
+_SITE_INFORMATION: Optional[Dict[str, Any]] = None
 
 
 def hide_debug_information(server: Optional[ClientServer] = None):
@@ -62,15 +65,32 @@ def set_site_information(
 ):
     """
     Sets the information about the website, such as the author, description, sources,
-    :param author:
-    :param description:
-    :param sources:
-    :param planning:
-    :param links:
-    :return:
+    planning, and links. This information is used to populate the about page.
+    
+    :param author: The author(s) of the website
+    :param description: A description of the website
+    :param sources: Sources or references used
+    :param planning: Planning information or documentation
+    :param links: External links related to the website
+    :return: None
     """
-    # TODO: Implement site information storage in V2
-    pass
+    global _SITE_INFORMATION
+    _SITE_INFORMATION = {
+        "author": author,
+        "description": description,
+        "sources": sources,
+        "planning": planning,
+        "links": links,
+    }
+
+
+def get_site_information() -> Optional[Dict[str, Any]]:
+    """
+    Gets the site information that was previously set.
+    
+    :return: Dictionary containing site information or None if not set
+    """
+    return _SITE_INFORMATION
 
 
 def set_website_style(style: Optional[str], server: Optional[ClientServer] = None):

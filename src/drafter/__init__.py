@@ -46,6 +46,7 @@ from drafter.deploy import (
     add_website_header,
     add_website_css,
     set_site_information,
+    get_site_information,
     deploy_site,
 )
 
@@ -99,6 +100,7 @@ __all__ = [
     "add_website_header",
     "add_website_css",
     "set_site_information",
+    "get_site_information",
     "deploy_site",
 ]
 
