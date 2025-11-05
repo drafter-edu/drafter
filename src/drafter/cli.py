@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
+from typing import List, Any
 
 import typer
 from rich.panel import Panel
@@ -36,7 +36,7 @@ def _read_user_code(py_path: Path) -> str:
         raise typer.Exit(2)
 
 
-def _build_environment_js(variables: List[tuple[str, any]]) -> str:
+def _build_environment_js(variables: List[tuple[str, Any]]) -> str:
     """Build Skulpt environment variable setup code."""
     SKULPT_ENV_VAR_TEMPLATE = 'Sk.environ.set$item(new Sk.builtin.str("{name}"), {value});'
     lines = []
