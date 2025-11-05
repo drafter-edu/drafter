@@ -126,17 +126,93 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
             );
             throw e;
         }
-        // TODO: Finish populating the event data
+        
+        // Extract correlation information from arguments if available
+        let correlation_kwargs: any = {};
+        
+        // For events with requests, extract request_id and route
+        if (args.length > 0) {
+            const firstArg = args[0];
+            // Check if first argument is a Python object with request attributes
+            if (firstArg && typeof firstArg === 'object' && firstArg.tp$getattr) {
+                try {
+                    const urlObj = firstArg.tp$getattr(str_url);
+                    if (urlObj) {
+                        const url = Sk.ffi.remapToJs(urlObj);
+                        correlation_kwargs.route = new pyStr(url);
+                    }
+                    const idObj = firstArg.tp$getattr(str_id);
+                    if (idObj) {
+                        const requestId = Sk.ffi.remapToJs(idObj);
+                        correlation_kwargs.request_id = new pyInt(requestId);
+                    }
+                } catch (e) {
+                    // If attribute extraction fails, continue without correlation data
+                }
+            }
+            // For DOM events, extract element ID if available
+            else if (firstArg && firstArg.target && firstArg.target.id) {
+                correlation_kwargs.dom_id = new pyStr(firstArg.target.id);
+            }
+            // For state objects with request_id
+            else if (firstArg && firstArg.request_id !== undefined) {
+                correlation_kwargs.request_id = new pyInt(firstArg.request_id);
+                if (firstArg.url) {
+                    correlation_kwargs.route = new pyStr(firstArg.url);
+                }
+            }
+        }
+        
+        // Create correlation with extracted information
+        const correlation = Sk.misceval.callsimArray(
+            drafter_client_mod.TelemetryCorrelation,
+            [],
+            correlation_kwargs
+        );
+        
+        // Convert args to Python-compatible format for data field
+        let pyData = pyNone;
+        try {
+            if (args.length > 0) {
+                // Convert JavaScript arguments to a Python-friendly representation
+                const serializedArgs = args.map((arg) => {
+                    if (arg === null || arg === undefined) {
+                        return "null";
+                    } else if (typeof arg === 'object' && arg.tp$getattr) {
+                        // Python object - try to get its repr
+                        try {
+                            return arg.$r ? arg.$r().v : String(arg);
+                        } catch (e) {
+                            return "[Python Object]";
+                        }
+                    } else if (typeof arg === 'object') {
+                        // JavaScript object - serialize safely
+                        try {
+                            return JSON.stringify(arg, null, 2);
+                        } catch (e) {
+                            return String(arg);
+                        }
+                    } else {
+                        return String(arg);
+                    }
+                });
+                pyData = new pyStr(serializedArgs.join(", "));
+            }
+        } catch (e) {
+            // If serialization fails, use a fallback
+            pyData = new pyStr("[Data serialization failed]");
+        }
+        
         const event = Sk.misceval.callsimArray(
             drafter_client_mod.TelemetryEvent,
             [
                 new pyStr(event_name),
-                Sk.misceval.callsimArray(
-                    drafter_client_mod.TelemetryCorrelation,
-                    []
-                ),
+                correlation,
                 new pyStr("bridge.client"),
-            ]
+            ],
+            {
+                data: pyData
+            }
         );
         try {
             Sk.misceval.callsimArray(eventBus.publish, [eventBus, event]);
