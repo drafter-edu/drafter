@@ -1,6 +1,5 @@
-from typing import Optional, Union, Dict, Any
+from typing import Optional, Dict, Any
 from drafter.payloads.page import Page
-from drafter.components import PageContent
 from drafter.client_server.commands import get_main_server
 from drafter.client_server.client_server import ClientServer
 

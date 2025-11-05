@@ -1,20 +1,16 @@
 from __future__ import annotations
 
-import sys
-import textwrap
 from pathlib import Path
-from typing import Optional, List
+from typing import List
 
 import typer
-from rich import print, box
 from rich.panel import Panel
 from rich.console import Console
 from rich.table import Table
 
 from drafter.app.app_server import serve_app_once
 from drafter.app.templating import render_index_html
-from drafter.app.utils import copy_assets_to, pkg_assets_dir
-from drafter.configuration import ServerConfiguration
+from drafter.app.utils import copy_assets_to
 from drafter.files import TEMPLATE_SKULPT_DEPLOY, DEPLOYED_404_TEMPLATE_HTML
 from drafter.raw_files import get_raw_files
 
