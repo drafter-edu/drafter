@@ -122,7 +122,11 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         } else if (typeof arg === 'object' && arg.tp$getattr) {
             // Python object - try to get its repr
             try {
-                return arg.$r ? arg.$r().v : String(arg);
+                if (arg.$r && typeof arg.$r === 'function') {
+                    const result = arg.$r();
+                    return result && result.v ? result.v : String(arg);
+                }
+                return String(arg);
             } catch (e) {
                 return "[Python Object]";
             }

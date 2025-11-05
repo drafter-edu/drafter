@@ -8,6 +8,7 @@ components to provide comprehensive debugging information to developers.
 from dataclasses import dataclass, field
 from typing import Any, Optional, Dict, List, Callable
 from datetime import datetime
+from collections import deque
 import traceback
 import html
 import json
@@ -45,11 +46,10 @@ class Monitor:
     :ivar enabled: Whether the monitor is currently enabled
     """
 
-    event_history: list[TelemetryEvent] = field(default_factory=list)
+    event_history: deque = field(default_factory=lambda: deque(maxlen=100))
     routes: list[str] = field(default_factory=list)
     listeners: List[Callable[[Any], None]] = field(default_factory=list)
     enabled: bool = True
-    max_history_size: int = 100
     max_data_display_length: int = 200
     max_recent_events_display: int = 10
 
@@ -76,11 +76,8 @@ class Monitor:
 
         :param event: The telemetry event to handle
         """
-        # Store the full event object for history
+        # Store the full event object for history (deque automatically maintains max size)
         self.event_history.append(event)
-        # Keep history bounded
-        if len(self.event_history) > self.max_history_size:
-            self.event_history.pop(0)
         
         # Process specific event types
         routes = self._handle_route_add(event)
