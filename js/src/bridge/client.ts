@@ -112,6 +112,32 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     const str_response_id = new Sk.builtin.str("response_id");
     const str_id = new Sk.builtin.str("id");
 
+    /**
+     * Serialize an argument to a string for telemetry data.
+     * Handles Python objects, JavaScript objects, and primitives.
+     */
+    const serializeArgument = function (arg: any): string {
+        if (arg === null || arg === undefined) {
+            return "null";
+        } else if (typeof arg === 'object' && arg.tp$getattr) {
+            // Python object - try to get its repr
+            try {
+                return arg.$r ? arg.$r().v : String(arg);
+            } catch (e) {
+                return "[Python Object]";
+            }
+        } else if (typeof arg === 'object') {
+            // JavaScript object - serialize safely
+            try {
+                return JSON.stringify(arg, null, 2);
+            } catch (e) {
+                return String(arg);
+            }
+        } else {
+            return String(arg);
+        }
+    };
+
     const debug_log = function (event_name: string, ...args: any[]) {
         let eventBus;
         try {
@@ -174,28 +200,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         let pyData = pyNone;
         try {
             if (args.length > 0) {
-                // Convert JavaScript arguments to a Python-friendly representation
-                const serializedArgs = args.map((arg) => {
-                    if (arg === null || arg === undefined) {
-                        return "null";
-                    } else if (typeof arg === 'object' && arg.tp$getattr) {
-                        // Python object - try to get its repr
-                        try {
-                            return arg.$r ? arg.$r().v : String(arg);
-                        } catch (e) {
-                            return "[Python Object]";
-                        }
-                    } else if (typeof arg === 'object') {
-                        // JavaScript object - serialize safely
-                        try {
-                            return JSON.stringify(arg, null, 2);
-                        } catch (e) {
-                            return String(arg);
-                        }
-                    } else {
-                        return String(arg);
-                    }
-                });
+                const serializedArgs = args.map(serializeArgument);
                 pyData = new pyStr(serializedArgs.join(", "));
             }
         } catch (e) {

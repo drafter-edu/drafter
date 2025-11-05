@@ -50,6 +50,8 @@ class Monitor:
     listeners: List[Callable[[Any], None]] = field(default_factory=list)
     enabled: bool = True
     max_history_size: int = 100
+    max_data_display_length: int = 200
+    max_recent_events_display: int = 10
 
     def listen_for_events(self) -> None:
         """
@@ -133,7 +135,7 @@ class Monitor:
             if latest_event.correlation.route:
                 sections.append(f" <span style='color: #ce9178;'>[{html.escape(latest_event.correlation.route)}]</span>")
             if latest_event.data:
-                data_str = str(latest_event.data)[:200]  # Limit data display length
+                data_str = str(latest_event.data)[:self.max_data_display_length]
                 sections.append(f"<br><span style='color: #9cdcfe; font-size: 0.9em;'>{html.escape(data_str)}</span>")
             sections.append("</div>")
             
@@ -144,8 +146,8 @@ class Monitor:
                 sections.append("<strong style='color: #4ec9b0;'>Recent Activity:</strong>")
                 sections.append("<ul style='margin: 5px 0; padding-left: 20px; font-size: 0.9em;'>")
                 
-                # Show last 10 important events
-                for event in history_events[-10:]:
+                # Show recent important events
+                for event in history_events[-self.max_recent_events_display:]:
                     event_class = self._get_event_display_class(event.event_type)
                     sections.append(
                         f"<li style='color: {event_class};'>"
@@ -173,10 +175,10 @@ class Monitor:
     
     def _get_event_display_class(self, event_type: str) -> str:
         """
-        Get the CSS color class for an event type.
+        Get the CSS color value for an event type.
         
         :param event_type: The event type string
-        :return: CSS color value
+        :return: CSS color value (hex code)
         """
         if event_type.startswith("error."):
             return "#f48771"
