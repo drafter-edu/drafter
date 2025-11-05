@@ -232,6 +232,15 @@ def build(
     - Skulpt deployment (default): Builds a site that runs Python in the browser
     - Static build: Generates a pre-rendered static HTML site
     """
+    # Validate create_404 parameter
+    valid_create_404_options = ["always", "never", "if_missing"]
+    if create_404 not in valid_create_404_options:
+        console.print(
+            f"[red]Error:[/red] Invalid value for --create-404: '{create_404}'. "
+            f"Must be one of: {', '.join(valid_create_404_options)}"
+        )
+        raise typer.Exit(1)
+    
     outdir.mkdir(parents=True, exist_ok=True)
     user_code = _read_user_code(file)
     
