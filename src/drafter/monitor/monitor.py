@@ -8,6 +8,7 @@ components to provide comprehensive debugging information to developers.
 from dataclasses import dataclass, field
 from typing import Any, Optional, Dict, List, Callable
 from datetime import datetime
+from collections import deque
 import traceback
 import html
 import json
@@ -45,10 +46,12 @@ class Monitor:
     :ivar enabled: Whether the monitor is currently enabled
     """
 
-    event_history: list[str] = field(default_factory=list)
+    event_history: deque = field(default_factory=lambda: deque(maxlen=100))
     routes: list[str] = field(default_factory=list)
     listeners: List[Callable[[Any], None]] = field(default_factory=list)
     enabled: bool = True
+    max_data_display_length: int = 200
+    max_recent_events_display: int = 10
 
     def listen_for_events(self) -> None:
         """
@@ -73,14 +76,119 @@ class Monitor:
 
         :param event: The telemetry event to handle
         """
-        self.event_history.append(event.event_type)
+        # Store the full event object for history (deque automatically maintains max size)
+        self.event_history.append(event)
+        
+        # Process specific event types
         routes = self._handle_route_add(event)
-        content = "\n".join(self.event_history) + "<br>\nRoutes:\n" + routes
-        for listener in self.listeners:
-            try:
-                listener(f"<pre>{content}</pre>")
-            except Exception as e:
-                self._handle_internal_error("listener invocation", e)
+        
+        # Filter and render important events
+        if self._is_important_event(event):
+            content = self._render_debug_content(event, routes)
+            for listener in self.listeners:
+                try:
+                    listener(content)
+                except Exception as e:
+                    self._handle_internal_error("listener invocation", e)
+
+    def _is_important_event(self, event: TelemetryEvent) -> bool:
+        """
+        Determine if an event is important enough to display.
+        
+        :param event: The telemetry event to check
+        :return: True if the event should be displayed
+        """
+        # Define important event categories
+        important_prefixes = [
+            "history.",      # History navigation events
+            "request.",      # Request-related events
+            "response.",     # Response-related events
+            "dom.updated",   # DOM update events
+            "route.added",   # Route registration
+            "state.",        # State changes
+            "site.",         # Site configuration
+            "error.",        # Errors
+            "warning.",      # Warnings
+        ]
+        
+        # Check if event type matches important prefixes
+        return any(event.event_type.startswith(prefix) for prefix in important_prefixes)
+    
+    def _render_debug_content(self, latest_event: TelemetryEvent, routes: str) -> str:
+        """
+        Render debug content for display in the debug panel.
+        
+        :param latest_event: The most recent telemetry event
+        :param routes: String representation of available routes
+        :return: HTML content for the debug panel
+        """
+        try:
+            # Build sections
+            sections = []
+            
+            # Latest Event section
+            sections.append("<div style='border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 10px;'>")
+            sections.append(f"<strong style='color: #4ec9b0;'>Latest Event:</strong> {html.escape(latest_event.event_type)}")
+            if latest_event.correlation.route:
+                sections.append(f" <span style='color: #ce9178;'>[{html.escape(latest_event.correlation.route)}]</span>")
+            if latest_event.data:
+                data_str = str(latest_event.data)[:self.max_data_display_length]
+                sections.append(f"<br><span style='color: #9cdcfe; font-size: 0.9em;'>{html.escape(data_str)}</span>")
+            sections.append("</div>")
+            
+            # History section - show recent important events
+            history_events = [e for e in self.event_history if self._is_important_event(e)]
+            if history_events:
+                sections.append("<div style='margin-bottom: 10px;'>")
+                sections.append("<strong style='color: #4ec9b0;'>Recent Activity:</strong>")
+                sections.append("<ul style='margin: 5px 0; padding-left: 20px; font-size: 0.9em;'>")
+                
+                # Show recent important events
+                for event in history_events[-self.max_recent_events_display:]:
+                    event_class = self._get_event_display_class(event.event_type)
+                    sections.append(
+                        f"<li style='color: {event_class};'>"
+                        f"{html.escape(event.event_type)}"
+                    )
+                    if event.correlation.route:
+                        sections.append(f" → <span style='color: #ce9178;'>{html.escape(event.correlation.route)}</span>")
+                    sections.append("</li>")
+                
+                sections.append("</ul>")
+                sections.append("</div>")
+            
+            # Routes section
+            if routes:
+                sections.append("<div>")
+                sections.append("<strong style='color: #4ec9b0;'>Available Routes:</strong>")
+                sections.append(f"<pre style='margin: 5px 0; font-size: 0.85em;'>{html.escape(routes)}</pre>")
+                sections.append("</div>")
+            
+            return f"<div style='font-family: monospace; font-size: 12px; color: #d4d4d4;'>{''.join(sections)}</div>"
+        
+        except Exception as e:
+            self._handle_internal_error("render_debug_content", e)
+            return f"<pre>Error rendering debug content: {html.escape(str(e))}</pre>"
+    
+    def _get_event_display_class(self, event_type: str) -> str:
+        """
+        Get the CSS color value for an event type.
+        
+        :param event_type: The event type string
+        :return: CSS color value (hex code)
+        """
+        if event_type.startswith("error."):
+            return "#f48771"
+        elif event_type.startswith("warning."):
+            return "#cca700"
+        elif event_type.startswith("history."):
+            return "#569cd6"
+        elif event_type.startswith("request.") or event_type.startswith("response."):
+            return "#4ec9b0"
+        elif event_type.startswith("state."):
+            return "#c586c0"
+        else:
+            return "#9cdcfe"
 
     def _handle_route_add(self, event: TelemetryEvent) -> str:
         """
@@ -89,11 +197,14 @@ class Monitor:
         :param event: The telemetry event to check
         :return: A string representation of the current routes
         """
-        if event.event_type == "route.added":
-            route_info: RouteIntrospection = event.data
-            parameters = ", ".join(route_info.expected_parameters)
-            route_function = f"{route_info.function_name}({parameters})"
-            self.routes.append(route_function)
+        if event.event_type == "route.added" and event.data is not None:
+            try:
+                route_info: RouteIntrospection = event.data
+                parameters = ", ".join(route_info.expected_parameters)
+                route_function = f"{route_info.function_name}({parameters})"
+                self.routes.append(route_function)
+            except (AttributeError, TypeError) as e:
+                self._handle_internal_error("_handle_route_add", e)
         return "\n".join(self.routes)
 
     # def get_snapshot(
