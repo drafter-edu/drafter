@@ -701,12 +701,8 @@ class Server:
             
             # Check if conversion is needed
             # We need to be careful with isinstance for Union types
-            needs_conversion = True
             try:
-                if not isinstance(val, actual_type):
-                    needs_conversion = True
-                else:
-                    needs_conversion = False
+                needs_conversion = not isinstance(val, actual_type)
             except TypeError:
                 # isinstance doesn't work for this type, assume conversion is needed
                 needs_conversion = True
