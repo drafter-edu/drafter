@@ -488,6 +488,14 @@ class Server:
         # This allows empty file uploads to work properly
         expected_types = {name: p.annotation for name, p in
                           inspect.signature(original_function).parameters.items()}
+        
+        # Handle empty strings in positional arguments (convert to None for file upload types)
+        for i in range(len(args)):
+            param_name = expected_parameters[i] if i < len(expected_parameters) else None
+            if param_name and args[i] == '' and self.is_file_upload_type(expected_types.get(param_name)):
+                args[i] = None
+        
+        # Handle missing and empty file upload parameters in kwargs
         num_positional_args = len(args)
         for i, param_name in enumerate(expected_parameters):
             # Skip positional args that are already provided
@@ -579,7 +587,7 @@ class Server:
         if annotation in (str, bytes, dict):
             return True
         
-        if HAS_PILLOW and annotation is not inspect.Parameter.empty:
+        if HAS_PILLOW:
             try:
                 if issubclass(annotation, PILImage.Image):
                     return True
@@ -706,7 +714,9 @@ class Server:
             if needs_conversion:
                 try:
                     target_type = expected_types[param]
-                    converted_arg = self.try_special_conversions(val, actual_type if actual_type != expected_type else target_type)
+                    # Use the actual type if we extracted it from a Union, otherwise use the original target type
+                    conversion_type = actual_type if actual_type != expected_type else target_type
+                    converted_arg = self.try_special_conversions(val, conversion_type)
                     self._conversion_record.append(ConversionRecord(param, val, expected_types[param], converted_arg))
                 except Exception as e:
                     try:
