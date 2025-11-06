@@ -496,6 +496,10 @@ class Server:
             # If a parameter is missing and it's a file upload type, provide None
             if param_name not in kwargs and self.is_file_upload_type(expected_types.get(param_name)):
                 kwargs[param_name] = None
+            # Also convert empty strings to None for file upload parameters
+            # (browsers send empty strings for empty file fields)
+            elif param_name in kwargs and kwargs[param_name] == '' and self.is_file_upload_type(expected_types.get(param_name)):
+                kwargs[param_name] = None
         
         # Check if there are too many arguments
         if len(expected_parameters) < len(args) + len(kwargs):

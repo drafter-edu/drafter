@@ -1,0 +1,53 @@
+<html><head>
+        <style type="text/css">
+          .btlw {background-color: #eee; font-family: sans-serif;}
+          div.btlw {background-color: #fff; border: 1px solid #ddd;
+                padding: 15px; margin: 15px;}
+          .btlw pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}
+        </style>
+    </head>
+    <body>
+        <h3>500 Internal Server Error</h3>
+        
+        <p></p><p>Sorry, the requested URL <code>http://localhost:8080/process?--submit-button=Submit%23139971758771232</code> caused an error.</p>
+<p>You might want to return to the <a href="/">index</a> page.</p><p></p>
+        
+        <p>Original error message:</p>
+        <pre>Error preparing arguments for page.
+Error in process:
+Could not convert binary_file ('') from str to bytes
+
+
+
+Traceback (most recent call last):
+  File "/home/runner/work/drafter/drafter/drafter/server.py", line 705, in convert_parameter
+    converted_arg = self.try_special_conversions(val, actual_type if actual_type != expected_type else target_type)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/drafter/drafter/drafter/server.py", line 632, in try_special_conversions
+    return target_type(value)
+           ^^^^^^^^^^^^^^^^^^
+TypeError: string argument without an encoding
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/work/drafter/drafter/drafter/server.py", line 740, in bottle_page
+    args, kwargs, arguments, button_pressed = self.prepare_args(original_function, args, kwargs)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/drafter/drafter/drafter/server.py", line 513, in prepare_args
+    kwargs = {param: self.convert_parameter(param, val, expected_types)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/drafter/drafter/drafter/server.py", line 714, in convert_parameter
+    raise ValueError(
+ValueError: Could not convert binary_file ('') from str to bytes
+
+
+None
+</pre>
+        
+        <p>Available routes:</p>
+        <li><code>'index'</code>: <code><function test_empty_file_upload_bytes.<locals="">.index at 0x7f4db6f43920&gt;</function></code></li>
+<li><code>'process'</code>: <code><function test_empty_file_upload_bytes.<locals="">.process at 0x7f4db6f439c0&gt;</function></code></li>
+    
+
+</body></html>
