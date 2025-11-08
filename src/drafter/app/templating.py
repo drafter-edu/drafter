@@ -4,7 +4,7 @@ from jinja2 import Environment, BaseLoader
 from pathlib import Path
 
 from drafter.app.utils import pkg_scaffold_dir
-from drafter.site import DRAFTER_TAG_IDS
+from drafter.site.site import DRAFTER_TAG_IDS
 
 _env = Environment(loader=BaseLoader(), autoescape=False)
 

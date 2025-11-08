@@ -14,8 +14,7 @@ from drafter.bridge.client import (
 )
 from drafter.monitor.bus import get_main_event_bus
 from drafter.monitor.telemetry import TelemetryEvent
-from drafter.payloads.page import Page
-from drafter.site import DRAFTER_TAG_IDS
+from drafter.site.site import DRAFTER_TAG_IDS
 from typing import Callable, Optional
 import document  # type: ignore
 

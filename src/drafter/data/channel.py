@@ -7,6 +7,7 @@ class Message:
     """
     Represents a message to be sent through a channel.
 
+    :ivar channel_name: The name of the channel through which the message will be sent.
     :ivar content: The content of the message.
     :ivar kind: The kind of message (e.g., "script", "style").
     :ivar sigil: An optional sigil for special processing. A sigil is a marker that indicates
@@ -14,6 +15,7 @@ class Message:
         injections of the same content.
     """
 
+    channel_name: str
     kind: str
     sigil: Optional[str]
     content: str

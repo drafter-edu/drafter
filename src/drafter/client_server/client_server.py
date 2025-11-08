@@ -3,18 +3,19 @@ from typing import Any, Optional, List, Tuple, Union, Dict
 
 from drafter.client_server.context import Scope
 from drafter.client_server.errors import VisitError
+from drafter.data.channel import Message
 from drafter.history.state import SiteState
 from drafter.data.errors import DrafterError
 from drafter.monitor.bus import EventBus
 from drafter.monitor.monitor import Monitor
 from drafter.payloads import Page
-from drafter.payloads.error_page import ErrorPage, SimpleErrorPage
+from drafter.payloads.kinds.error_page import ErrorPage, SimpleErrorPage
 from drafter.payloads.payloads import ResponsePayload
 from drafter.data.request import Request
 from drafter.data.response import Response
 from drafter.router.routes import Router
 from drafter.audit import log_error, log_warning, log_info, log_data
-from drafter.site import Site
+from drafter.site.site import Site
 from drafter.config.client_server import ClientServerConfiguration
 
 
@@ -147,8 +148,24 @@ class ClientServer:
                 ),
                 501,
             )
+        try:
+            payload.verify(self.state, self.configuration)
+        except Exception as e:
+            raise VisitError(
+                log_error(
+                    "request.payload_verification_failed",
+                    f"Payload verification failed for URL {request.url}: {e}",
+                    "client_server.visit",
+                    f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                    route=request.url,
+                    exception=e,
+                ),
+                502,
+            )
 
-    def render_payload(self, request: Request, payload: ResponsePayload) -> str:
+    def render_payload(
+        self, request: Request, payload: ResponsePayload
+    ) -> Optional[str]:
         # Render the payload
         try:
             return payload.render(self.state, self.configuration)
@@ -162,7 +179,7 @@ class ClientServer:
                     route=request.url,
                     exception=e,
                 ),
-                502,
+                503,
             )
 
     def handle_state_updates(self, payload: ResponsePayload) -> None:
@@ -209,13 +226,28 @@ class ClientServer:
                 self.verify_payload(request, payload)
                 body = self.render_payload(request, payload)
                 self.handle_state_updates(payload)
+                messages = self.get_messages(request, payload)
             except VisitError as ve:
                 return self.make_error_response(
                     request, ve.error, status_code=ve.status_code
                 )
 
         # Return successfully
-        response = self.make_success_response(request.id, body, payload)
+        try:
+            response = self.make_success_response(request.id, body, payload, messages)
+        except Exception as e:
+            return self.make_error_response(
+                request,
+                log_error(
+                    "response.creation_failed",
+                    f"Failed to create success response for URL {request.url}: {e}",
+                    "client_server.visit",
+                    f"Request: {repr(request)}",
+                    route=request.url,
+                    exception=e,
+                ),
+                504,
+            )
         log_info(
             "response.created",
             f"Response created for request ID {request.id}",
@@ -226,7 +258,11 @@ class ClientServer:
         return response
 
     def make_success_response(
-        self, request_id: int, body: str, payload: ResponsePayload
+        self,
+        request_id: int,
+        body: Optional[str],
+        payload: ResponsePayload,
+        messages: List[Message],
     ) -> Response:
         """
         Makes a successful response for the server with the given page.
@@ -234,6 +270,7 @@ class ClientServer:
         :param request_id: The ID of the request.
         :param body: The rendered body content.
         :param payload: The payload to include in the response.
+        :param messages: A list of messages to include in the response.
         :return: The response from the server.
         """
         response = Response(
@@ -243,18 +280,28 @@ class ClientServer:
             body=body,
         )
         self.response_count += 1
-        
-        # If the payload is a Page with CSS or JS, add them to the response channels
-        if isinstance(payload, Page):
-            # Add CSS as style messages in the "before" channel
-            for css_content in payload.css:
-                response.send("before", css_content, kind="style")
-            
-            # Add JS as script messages in the "after" channel
-            for js_content in payload.js:
-                response.send("after", js_content, kind="script")
-        
+
         return response
+
+    def get_messages(self, request: Request, payload: ResponsePayload) -> list[Message]:
+        try:
+            messages = payload.get_messages(self.state, self.configuration)
+            if messages is None:
+                messages = []
+        except Exception as e:
+            raise VisitError(
+                log_error(
+                    "request.payload_message_retrieval_failed",
+                    f"Error while retrieving messages from payload for URL {request.url}: {e}",
+                    "client_server.visit",
+                    f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                    route=request.url,
+                    exception=e,
+                ),
+                510,
+            )
+
+        return messages
 
     def make_error_response(
         self, request: Request, error: DrafterError, status_code: int = 500

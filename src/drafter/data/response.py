@@ -36,19 +36,13 @@ class Response:
     payload: ResponsePayload
     status_code: int = 200
     message: str = "OK"
-    body: str = ""
+    body: Optional[str] = None
     channels: Dict[str, Channel] = field(default_factory=dict)
     errors: list[DrafterError] = field(default_factory=list)
     warnings: list[DrafterWarning] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
 
-    def send(
-        self,
-        channel_name: str,
-        message: str,
-        kind: str = "script",
-        sigil: Optional[str] = None,
-    ) -> None:
+    def send(self, message: Message) -> None:
         """
         Sends a message through the specified channel.
 
@@ -57,8 +51,7 @@ class Response:
         :param kind: The kind of message (default is "script").
         :param sigil: An optional sigil for special processing.
         """
+        channel_name = message.channel_name
         if channel_name not in self.channels:
             self.channels[channel_name] = Channel(name=channel_name)
-        self.channels[channel_name].messages.append(
-            Message(kind=kind, sigil=sigil, content=message)
-        )
+        self.channels[channel_name].messages.append(message)

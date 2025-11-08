@@ -1,5 +1,5 @@
 from typing import Optional, Union
-from drafter.payloads.page import Page
+from drafter.payloads.kinds.page import Page
 from drafter.components import PageContent
 from drafter.client_server.commands import get_main_server
 from drafter.client_server.client_server import ClientServer
@@ -9,7 +9,7 @@ def hide_debug_information(server: Optional[ClientServer] = None):
     """
     Hides debug information from the website, so that it will not appear. Useful
     for deployed websites.
-    
+
     :param server: The server to configure. If None, uses the main server.
     """
     if server is None:
@@ -20,7 +20,7 @@ def hide_debug_information(server: Optional[ClientServer] = None):
 def show_debug_information(server: Optional[ClientServer] = None):
     """
     Shows debug information on the website. Useful for development.
-    
+
     :param server: The server to configure. If None, uses the main server.
     """
     if server is None:
@@ -59,6 +59,7 @@ def set_site_information(
     sources,
     planning,
     links,
+    server: Optional[ClientServer] = None,
 ):
     """
     Sets the information about the website, such as the author, description, sources,
@@ -69,8 +70,19 @@ def set_site_information(
     :param links:
     :return:
     """
-    # TODO: Implement site information storage in V2
-    pass
+    if server is None:
+        server = get_main_server()
+    server.site.update_information(author, description, sources, planning, links)
+
+
+def get_site_information(server: Optional[ClientServer] = None):
+    """
+    Gets the information about the website, such as the author, description, sources,
+    :return:
+    """
+    if server is None:
+        server = get_main_server()
+    return server.site.information
 
 
 def set_website_style(style: Optional[str], server: Optional[ClientServer] = None):
@@ -102,7 +114,9 @@ def add_website_header(header: str, server: Optional[ClientServer] = None):
     server.configuration.additional_header_content.append(header)
 
 
-def add_website_css(selector: str, css: Optional[str] = None, server: Optional[ClientServer] = None):
+def add_website_css(
+    selector: str, css: Optional[str] = None, server: Optional[ClientServer] = None
+):
     """
     Adds additional CSS content to the website. This is useful for adding custom
     CSS to the website, either for specific selectors or for general styles.
@@ -121,9 +135,7 @@ def add_website_css(selector: str, css: Optional[str] = None, server: Optional[C
         server.configuration.additional_css_content.append(selector)
     else:
         # Create a CSS rule from selector and content
-        server.configuration.additional_css_content.append(
-            f"{selector} {{{css}}}"
-        )
+        server.configuration.additional_css_content.append(f"{selector} {{{css}}}")
 
 
 def deploy_site(image_folder="images", server: Optional[ClientServer] = None):

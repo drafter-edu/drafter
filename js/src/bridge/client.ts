@@ -18,11 +18,11 @@ function $builtinmodule(name: string) {
         (request_mod) => {
             drafter_client_mod.Request =
                 request_mod.$d.data.$d.request.$d.Request;
-            return Sk.importModule("drafter.site", false, true);
+            return Sk.importModule("drafter.site.site", false, true);
         },
         (site_mod) => {
             drafter_client_mod.DRAFTER_TAG_IDS = Sk.ffi.remapToJs(
-                site_mod.$d.site.$d.DRAFTER_TAG_IDS
+                site_mod.$d.site.$d.site.$d.DRAFTER_TAG_IDS
             );
             return Sk.importModule("drafter.monitor.telemetry", false, true);
         },

@@ -1,1 +1,2 @@
-from drafter.payloads.page import Page
+from drafter.payloads.kinds.page import Page
+from drafter.payloads.payloads import ResponsePayload

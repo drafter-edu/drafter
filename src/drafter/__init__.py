@@ -36,7 +36,7 @@ from drafter.launch import start_server
 # from drafter.styling import *
 from drafter.client_server.commands import get_main_server, set_main_server
 from drafter.router.commands import route
-from drafter.payloads.page import Page
+from drafter.payloads.kinds.page import Page
 from drafter.deploy import (
     hide_debug_information,
     show_debug_information,
@@ -46,6 +46,7 @@ from drafter.deploy import (
     add_website_header,
     add_website_css,
     set_site_information,
+    get_site_information,
     deploy_site,
 )
 
@@ -100,6 +101,7 @@ __all__ = [
     "add_website_header",
     "add_website_css",
     "set_site_information",
+    "get_site_information",
     "deploy_site",
 ]
 
