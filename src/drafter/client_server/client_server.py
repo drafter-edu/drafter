@@ -13,6 +13,10 @@ from drafter.payloads.kinds.error_page import ErrorPage, SimpleErrorPage
 from drafter.payloads.payloads import ResponsePayload
 from drafter.data.request import Request
 from drafter.data.response import Response
+from drafter.payloads.verification import (
+    verify_page_state_history,
+    verify_response_payload_type,
+)
 from drafter.router.routes import Router
 from drafter.audit import log_error, log_warning, log_info, log_data
 from drafter.site.site import Site
@@ -136,20 +140,22 @@ class ClientServer:
             )
 
     def verify_payload(self, request: Request, payload: Any):
-        if not isinstance(payload, ResponsePayload):
-            page_type_name = type(payload).__name__
+        # Check that it's a valid payload type
+        possible_incorrect_type = verify_response_payload_type(request, payload)
+        if possible_incorrect_type is not None:
             raise VisitError(
                 log_error(
-                    "request.invalid_route_response",
-                    f"Route function for URL {request.url} did not return a Page. Instead got: {page_type_name}",
+                    "request.payload_verification_failed",
+                    f"Payload verification failed for URL {request.url}: {possible_incorrect_type}",
                     "client_server.visit",
-                    f"Request: {repr(request)}\nPage: {repr(payload)}",
+                    f"Request: {repr(request)}\nPayload: {repr(payload)}",
                     route=request.url,
                 ),
                 501,
             )
+        # Payload specific verification
         try:
-            payload.verify(self.state, self.configuration)
+            payload.verify(self.router, self.state, self.configuration, request)
         except Exception as e:
             raise VisitError(
                 log_error(
@@ -182,9 +188,24 @@ class ClientServer:
                 503,
             )
 
-    def handle_state_updates(self, payload: ResponsePayload) -> None:
+    def handle_state_updates(self, request: Request, payload: ResponsePayload) -> None:
         is_updated, updated_state = payload.get_state_updates()
         if is_updated:
+            # Check that the state update will be valid
+            possible_state_update_issue = verify_page_state_history(
+                request, updated_state, self.state.history
+            )
+            if possible_state_update_issue is not None:
+                raise VisitError(
+                    log_error(
+                        "request.payload_verification_failed",
+                        f"Payload verification failed for URL {request.url}: {possible_state_update_issue}",
+                        "client_server.visit",
+                        f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                        route=request.url,
+                    ),
+                    501,
+                )
             try:
                 self.state.update(updated_state)
                 log_info(
@@ -225,7 +246,7 @@ class ClientServer:
                 payload = self.execute_route(route_func, request)
                 self.verify_payload(request, payload)
                 body = self.render_payload(request, payload)
-                self.handle_state_updates(payload)
+                self.handle_state_updates(request, payload)
                 messages = self.get_messages(request, payload)
             except VisitError as ve:
                 return self.make_error_response(

@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 from drafter.components.utilities.attributes import BASELINE_ATTRS
 from drafter.urls import remap_attr_styles
@@ -22,7 +22,7 @@ class Component:
     EXTRA_ATTRS: List[str] = []
     extra_settings: dict
 
-    def verify(self, server) -> bool:
+    def verify(self, router, state, configuration, request):
         """
         Verify the status of this component. This method is called before rendering the component
         to ensure that the component is in a valid state. If the component is not valid, this method
@@ -30,10 +30,13 @@ class Component:
 
         Default implementation returns True.
 
-        :param server: The server object that is rendering the component
+        :param router: The router used to resolve URLs
+        :param state: The current state of the server
+        :param configuration: The configuration of the server
+        :param request: The request being processed
         :return: True if the component is valid, False otherwise
         """
-        return True
+        return None
 
     def parse_extra_settings(self, **kwargs):
         """

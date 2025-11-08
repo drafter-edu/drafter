@@ -6,8 +6,11 @@ from drafter.config.client_server import ClientServerConfiguration
 from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
 from drafter.components import Component, PageContent, Link
+from drafter.data.request import Request
 from drafter.history.state import SiteState
 from drafter.payloads.payloads import ResponsePayload
+from drafter.payloads.failure import VerificationFailure
+from drafter.router.routes import Router
 
 
 @dataclass
@@ -149,7 +152,13 @@ class Page(ResponsePayload):
                     title="More information about this website"
                     >?</a>"""
 
-    def verify_content(self, server) -> bool:
+    def verify(
+        self,
+        router: Router,
+        state: SiteState,
+        configuration: ClientServerConfiguration,
+        request: Request,
+    ) -> Optional[VerificationFailure]:
         """
         Verifies that the content of the page is valid. This will check that all links are valid and that
         all components are valid.
@@ -158,7 +167,40 @@ class Page(ResponsePayload):
         :param server: The server to verify the content against.
         :return: True if the content is valid, False otherwise.
         """
-        for chunk in self.content:
-            if isinstance(chunk, Link):
-                chunk.verify(server)
-        return True
+        original_function = request.url
+        if isinstance(self.content, str):
+            return VerificationFailure(
+                f"The server did not return a valid Page() object from {original_function}.\n"
+                f"Instead of a list of strings or content objects, the content field was a string:\n"
+                f" {self.content!r}\n"
+                f"Make sure you return a Page object with the new state and the list of strings/content objects."
+            )
+        elif not isinstance(self.content, list):
+            return VerificationFailure(
+                f"The server did not return a valid Page() object from {original_function}.\n"
+                f"Instead of a list of strings or content objects, the content field was:\n"
+                f" {self.content!r}\n"
+                f"Make sure you return a Page object with the new state and the list of strings/content objects."
+            )
+        else:
+            for item in self.content:
+                if not isinstance(item, (str, PageContent)):
+                    return VerificationFailure(
+                        f"The server did not return a valid Page() object from {original_function}.\n"
+                        f"Instead of a list of strings or content objects, the content field was:\n"
+                        f" {self.content!r}\n"
+                        f"One of those items is not a string or a content object. Instead, it was:\n"
+                        f" {item!r}\n"
+                        f"Make sure you return a Page object with the new state and the list of strings/content objects."
+                    )
+
+        # Recursively verify each content chunk
+        try:
+            for chunk in self.content:
+                chunk.verify(state, configuration, request)
+        except Exception as e:
+            return VerificationFailure(
+                f"While verifying the Page() object returned from {original_function}, an error was encountered:\n"
+                f"{e}"
+            )
+        return None

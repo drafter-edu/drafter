@@ -38,6 +38,15 @@ class Router:
         """
         return self.routes.get(url)
 
+    def has_route(self, url: str) -> bool:
+        """
+        Checks if a route exists for the given URL.
+
+        :param url: The URL to check.
+        :return: True if the route exists, False otherwise.
+        """
+        return url in self.routes
+
     def add_route(self, url: str, func: Callable) -> None:
         """
         Adds a new route to the server.
@@ -62,7 +71,6 @@ class Router:
         args, kwargs = request.args.copy(), request.kwargs.copy()
         button_pressed = self.preprocess_button_press(kwargs)
         signature = self.get_signature(request)
-        print(button_pressed, kwargs)
         kwargs = remap_hidden_form_parameters(kwargs, button_pressed)
         self.flatten_kwargs(kwargs)
         self.inject_state(signature, args, kwargs, current_state)
@@ -181,8 +189,6 @@ class Router:
         content_base64 = value.get("content", "")
         filename = value.get("filename", "unknown")
 
-        print(value, filename, target_type)
-
         file_bytes = content_base64
         # try:
         #     file_bytes = base64.b64decode(content_base64)
@@ -289,6 +295,7 @@ class Router:
             signature.expected_parameters
             and signature.expected_parameters[0] == "state"
         ) or (len(signature.expected_parameters) - 1 == len(args) + len(kwargs)):
+            # TODO: Someone, somewhere needs to copy state, right?
             args.insert(0, current_state)
 
     def flatten_kwargs(self, kwargs: Dict[str, Any]) -> None:

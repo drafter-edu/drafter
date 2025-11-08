@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 from dataclasses import dataclass
 
 from drafter.components.utilities.escaping import (
@@ -43,11 +43,11 @@ class LinkContent:
         url = url if external else friendly_urls(url)
         return url, external
 
-    def verify(self, server) -> bool:
-        if self.url not in server._handle_route:
+    def verify(self, router, state, configuration, request):
+        if not router.has_route(self.url):
             invalid_external_url_reason = check_invalid_external_url(self.url)
             if invalid_external_url_reason == "is a valid external url":
-                return True
+                return None
             elif invalid_external_url_reason:
                 raise ValueError(
                     f"Link `{self.url}` is not a valid external url.\n{invalid_external_url_reason}."
@@ -55,7 +55,7 @@ class LinkContent:
             raise ValueError(
                 f"Link `{self.text}` points to non-existent page `{self.url}`."
             )
-        return True
+        return None
 
     def create_arguments(self, arguments, label_namespace):
         parameters = self.parse_arguments(arguments, label_namespace)

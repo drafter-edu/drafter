@@ -1,8 +1,10 @@
 from typing import Any, Optional
 from drafter.data.channel import Message
+from drafter.data.request import Request
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.history.state import SiteState
 from drafter.payloads.failure import VerificationFailure
+from drafter.router.routes import Router
 
 
 class ResponsePayload:
@@ -12,7 +14,11 @@ class ResponsePayload:
         return None
 
     def verify(
-        self, state: SiteState, configuration: ClientServerConfiguration
+        self,
+        router: Router,
+        state: SiteState,
+        configuration: ClientServerConfiguration,
+        request: Request,
     ) -> Optional[VerificationFailure]:
         return None
 
