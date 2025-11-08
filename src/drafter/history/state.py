@@ -28,3 +28,12 @@ class SiteState:
             self.initialized = True
         self.current = new_state
         self.history.append(new_state)
+
+    def reset(self) -> None:
+        """
+        Resets the site state to its initial configuration.
+        """
+        # TODO: Should this be a deep copy?
+        self.current = self.initial
+        self.history.clear()
+        self.initialized = False

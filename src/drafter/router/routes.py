@@ -57,6 +57,13 @@ class Router:
         self.routes[url] = func
         self.signatures[url] = get_signature(func)
 
+    def reset(self) -> None:
+        """
+        Resets the router by clearing all routes and signatures.
+        """
+        self.routes.clear()
+        self.signatures.clear()
+
     def prepare_arguments(
         self,
         request: Request,

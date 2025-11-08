@@ -50,6 +50,14 @@ class Monitor:
     listeners: List[Callable[[Any], None]] = field(default_factory=list)
     enabled: bool = True
 
+    def reset(self) -> None:
+        """
+        Resets the monitor's internal state.
+        """
+        self.event_history.clear()
+        self.routes.clear()
+        self.listeners.clear()
+
     def listen_for_events(self) -> None:
         """
         Listen for telemetry events on the given event bus.

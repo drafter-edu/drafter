@@ -8,7 +8,16 @@ from drafter.data.response import Response
 class Scope:
     _objs: list = field(default_factory=list)
 
+    def reset(self) -> None:
+        """
+        Resets the scope by clearing all stored objects.
+        """
+        self._objs.clear()
+
     def push(self, obj):
+        """
+        Pushes a new object onto the scope stack.
+        """
         self._objs.append(obj)
         return self
 

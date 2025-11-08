@@ -55,6 +55,17 @@ class ClientServer:
 
         self.requests = Scope()
 
+    def reset(self) -> None:
+        """
+        Resets the server to its initial state.
+        """
+        self.state.reset()
+        self.router.reset()
+        self.site.reset()
+        self.monitor.reset()
+        self.response_count = 0
+        self.requests.reset()
+
     def process_configuration(self):
         self.site.title = self.configuration.site_title
         self.site.additional_css = self.configuration.additional_css_content

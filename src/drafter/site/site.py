@@ -37,6 +37,11 @@ class Site:
     additional_css: List[str] = field(default_factory=list)
     additional_header: List[str] = field(default_factory=list)
 
+    def reset(self):
+        self.information = None
+        self.additional_css.clear()
+        self.additional_header.clear()
+
     def render(self) -> str:
         """
         Renders the site HTML structure.
