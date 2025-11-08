@@ -52,6 +52,7 @@ dev = [
   "ruff",
   # Tools
   "tqdm",
+  "typer",
   # Testing
   "pytest",
   "pytest-cov",

@@ -9,5 +9,6 @@ class ClientServerConfiguration:
     site_title: str = "Drafter Application"
     framed: bool = True
     style: str = "skeleton"
+    deploy_image_path: str = ""
     additional_header_content: List[str] = field(default_factory=list)
     additional_css_content: List[str] = field(default_factory=list)
