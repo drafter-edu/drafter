@@ -23,7 +23,7 @@ import document  # type: ignore
 @dataclass
 class ClientBridge:
     channel_history: dict[str, set[str]] = field(default_factory=dict)
-    
+
     def remove_page_specific_content(self) -> None:
         """
         Removes CSS and JS that were added for the previous page.
@@ -31,11 +31,13 @@ class ClientBridge:
         """
         remove_page_content()
 
-    def add_channel_content(self, channel: Optional[Channel], is_page_specific: bool = False) -> None:
+    def add_channel_content(
+        self, channel: Optional[Channel], is_page_specific: bool = False
+    ) -> None:
         """
         Processes messages from a channel and adds them to the page.
         Supports 'script' and 'style' message kinds.
-        
+
         :param channel: The channel containing messages to process.
         :param is_page_specific: If True, marks content as page-specific (will be removed on navigation).
         """
@@ -58,11 +60,15 @@ class ClientBridge:
     ) -> bool:
         # Remove page-specific content from previous page before adding new content
         self.remove_page_specific_content()
-        
+
         # Add new page-specific content
-        self.add_channel_content(response.channels.get(DEFAULT_CHANNEL_BEFORE), is_page_specific=True)
+        self.add_channel_content(
+            response.channels.get(DEFAULT_CHANNEL_BEFORE), is_page_specific=True
+        )
         outcome = update_site(response, callback)
-        self.add_channel_content(response.channels.get(DEFAULT_CHANNEL_AFTER), is_page_specific=True)
+        self.add_channel_content(
+            response.channels.get(DEFAULT_CHANNEL_AFTER), is_page_specific=True
+        )
         return outcome
 
     def make_initial_request(self) -> Request:
@@ -93,7 +99,7 @@ class ClientBridge:
 def add_script(src: str, is_page_specific: bool = False) -> None:
     """
     Adds a script to the page.
-    
+
     :param src: The script source URL or content.
     :param is_page_specific: If True, marks the script as page-specific (will be removed on navigation).
     """
@@ -109,7 +115,7 @@ def add_script(src: str, is_page_specific: bool = False) -> None:
 def add_style(css: str, is_page_specific: bool = False) -> None:
     """
     Adds CSS content to the page by creating a style element.
-    
+
     :param css: CSS content to add to the page.
     :param is_page_specific: If True, marks the style as page-specific (will be removed on navigation).
     """
@@ -128,25 +134,13 @@ def remove_page_content() -> None:
     This ensures that page-specific styles/scripts don't persist across navigation.
     """
     # Remove page-specific style tags
-    styles = document.getElementsByTagName("style")
-    styles_to_remove = []
-    for i in range(len(styles)):
-        style = styles[i]
-        if hasattr(style, 'getAttribute') and style.getAttribute("data-drafter-page-specific") == "true":
-            styles_to_remove.append(style)
-    
-    for style in styles_to_remove:
-        if style.parentNode:
-            style.parentNode.removeChild(style)
-    
-    # Remove page-specific script tags
-    scripts = document.getElementsByTagName("script")
-    scripts_to_remove = []
-    for i in range(len(scripts)):
-        script = scripts[i]
-        if hasattr(script, 'getAttribute') and script.getAttribute("data-drafter-page-specific") == "true":
-            scripts_to_remove.append(script)
-    
-    for script in scripts_to_remove:
-        if script.parentNode:
-            script.parentNode.removeChild(script)
+    elements = list(
+        document.querySelectorAll("style[data-drafter-page-specific='true']")
+    )
+    elements.extend(
+        document.querySelectorAll("script[data-drafter-page-specific='true']")
+    )
+
+    for element in elements:
+        if element.parentNode:
+            element.parentNode.removeChild(element)

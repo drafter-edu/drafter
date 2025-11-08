@@ -7,11 +7,11 @@ TODO:
 """
 
 from typing import Union
-from drafter.components import PageContent, Text, Content
+from drafter.components import PageContent, Text, PageContent
 from drafter.components.layout import Div
 
 
-def update_style(component: Content, style: str, value: str) -> PageContent:
+def update_style(component: PageContent, style: str, value: str) -> PageContent:
     """
     Updates the style of a component, returning the component (allowing you to chain calls).
     The ``style`` property should match the CSS property name.
@@ -30,12 +30,15 @@ def update_style(component: Content, style: str, value: str) -> PageContent:
     if isinstance(component, str):
         component = Text(component)
     # TODO: Consider this approach
-    # if isinstance(component, list):
-    #     component = Div(*component)
+    if isinstance(component, list):
+        modified = []
+        for i in range(len(component)):
+            modified.append(update_style(component[i], style, value))
+        return modified
     return component.update_style(style, value)
 
 
-def update_attr(component: Content, attr: str, value: str) -> PageContent:
+def update_attr(component: PageContent, attr: str, value: str) -> PageContent:
     """
     Updates the attribute of a component, returning the component (allowing you to chain calls).
     The ``attr`` property should match the HTML attribute name.
@@ -52,10 +55,15 @@ def update_attr(component: Content, attr: str, value: str) -> PageContent:
     """
     if isinstance(component, str):
         component = Text(component)
+    if isinstance(component, list):
+        modified = []
+        for i in range(len(component)):
+            modified.append(update_attr(component[i], attr, value))
+        return modified
     return component.update_attr(attr, value)
 
 
-def float_right(component: Content) -> PageContent:
+def float_right(component: PageContent) -> PageContent:
     """
     Floats the component to the right.
 

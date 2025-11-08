@@ -30,7 +30,7 @@ def get_line_code(depth=DEFAULT_STACK_DEPTH):
         # Find the first assert_equal line
         for data in trace:
             line, code = data[1], data[3]
-            if code.strip().startswith("assert_equal"):
+            if code.strip().startswith("assert_equal"):  # type: ignore
                 return line, code
         # If none found, just try jumping up there and see what we can find
         frame = trace[len(trace) - depth]
@@ -63,6 +63,9 @@ class BakeryTests:
         def new_function(*args, **kwargs):
             line, code = get_line_code(6)
             result = original_function(*args, **kwargs)
+            if line is None or code is None:
+                line = -1
+                code = "<Missing code>"
             self.tests.append(BakeryTestCase(args, kwargs, result, line, code))
             return result
 
@@ -72,8 +75,8 @@ class BakeryTests:
 # Modifies Bakery's copy of assert_equal, and also provides a new version for folks who already imported
 _bakery_tests = BakeryTests()
 if bakery is not None:
-    bakery.assertions.get_line_code = _bakery_tests.wrap_get_line_code(
-        bakery.assertions.get_line_code
+    bakery.assertions.get_line_code = _bakery_tests.wrap_get_line_code(  # type: ignore
+        bakery.assertions.get_line_code  # type: ignore
     )
     bakery.assert_equal = assert_equal = _bakery_tests.track_bakery_tests(
         bakery.assert_equal
