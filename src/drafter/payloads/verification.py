@@ -61,6 +61,8 @@ def verify_page_state_history(
     :return: Returns an error string if a validation issue arises, otherwise none.
     """
     original_function = request.url
+    if not state_history:
+        return None  # No history to compare against
     last_type = state_history[-1].__class__
     if not isinstance(updated_state, last_type):
         return (

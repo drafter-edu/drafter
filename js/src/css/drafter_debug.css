@@ -1,8 +1,11 @@
 #drafter-root-- {
-    background-color: green;
+    background-color: #FAFAFA;
 
     #drafter-frame-- {
         padding: 1em;
+    }
+
+    #drafter-body-- {
         border: 1px solid lightgrey;
     }
 

@@ -161,6 +161,10 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
             siteTitle = titleStr;
             document.title = siteTitle;
             debug_log("site.set_title", siteTitle);
+            const headerTag = document.getElementById(
+                drafter_client_mod.DRAFTER_TAG_IDS["HEADER"]
+            );
+            headerTag.innerHTML = siteTitle;
             return pyNone;
         }
     );
