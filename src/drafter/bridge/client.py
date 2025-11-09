@@ -25,3 +25,13 @@ def setup_navigation(handle_visit: Callable) -> None:  # type: ignore
 
 def set_site_title(title: str) -> None:  # type: ignore
     pass
+
+
+def register_hotkey(keyCombo: str, callback: Callable[[], None]) -> None:  # type: ignore
+    """
+    Registers a hotkey combination to trigger a callback function when pressed.
+
+    :param keyCombo: The key combination string (e.g., "Ctrl+K").
+    :param callback: The function to call when the hotkey is pressed.
+    """
+    pass

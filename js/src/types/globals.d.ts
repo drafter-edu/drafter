@@ -10,6 +10,8 @@ declare global {
     type pyNone = import("./skulpt").pyNone;
 
     var DRAFTER_SITE_ROOT_ELEMENT_ID: string;
+    var stopHotkeyListener: () => void;
+    var hotkeyListenerReady: boolean;
 }
 
 export {};

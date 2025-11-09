@@ -19,6 +19,7 @@ from drafter.payloads.verification import (
 )
 from drafter.router.routes import Router
 from drafter.audit import log_error, log_warning, log_info, log_data
+from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import Site
 from drafter.config.client_server import ClientServerConfiguration
 
@@ -70,6 +71,19 @@ class ClientServer:
         self.site.title = self.configuration.site_title
         self.site.additional_css = self.configuration.additional_css_content
         self.site.additional_header = self.configuration.additional_header_content
+        self.site.in_debug_mode = self.configuration.in_debug_mode
+
+    def change_debug_mode(self):
+        """
+        Toggles the debug mode of the website.
+        """
+        self.configuration.in_debug_mode = not self.configuration.in_debug_mode
+        log_info(
+            "site.debug_mode_changed",
+            "Toggled debug mode",
+            "client_server.change_debug_mode",
+            f"New debug mode: {self.configuration.in_debug_mode}",
+        )
 
     def start(self, initial_state: Any = None) -> None:
         """
@@ -395,7 +409,7 @@ class ClientServer:
             "client_server.add_route",
         )
 
-    def render_site(self) -> Tuple[str, str]:
+    def render_site(self) -> InitialSiteData:
         """
         Renders the initial site HTML. This is called to create the site
         framing structure that includes the frame, header, body, footer, form, and
@@ -414,7 +428,7 @@ class ClientServer:
                 exception=e,
             )
             site = f"<div><h1>Error processing site configuration</h1><p>{error.message}</p></div>"
-            return site, "Error"
+            return InitialSiteData(site_html=site, site_title="Error", error=True)
         try:
             site = self.site.render()
             log_info(
@@ -432,7 +446,8 @@ class ClientServer:
                 exception=e,
             )
             site = f"<div><h1>Error rendering site</h1><p>{error.message}</p></div>"
-        return site, self.site.title
+            return InitialSiteData(site_html=site, site_title="Error", error=True)
+        return site
 
     def register_monitor_listener(self, handler: Any) -> None:
         """

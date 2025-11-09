@@ -15,7 +15,7 @@ class CustomHook(BuildHookInterface):
     def initialize(self, version, build_data):
         repo = pathlib.Path(__file__).parent
         js = repo / "js"
-        out = repo / "src" / "drafter" / "assets"
+        out = repo / "src" / "drafter" / "assets" / "js"
         out.mkdir(parents=True, exist_ok=True)
 
         # 1) Build JS

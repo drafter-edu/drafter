@@ -448,5 +448,48 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         }
     );
 
+    window.stopHotkeyListener = () => {
+        throw new Error("hotkeyListener not set");
+    };
+    window.hotkeyListenerReady = window.hotkeyListenerReady || false;
+    const hotkeyEvents: Record<string, pyFunc> = {};
+    let lastPressTime = 0;
+    const DOUBLE_PRESS_THRESHOLD = 600; // milliseconds
+    function hotkeyHandler(event: KeyboardEvent) {
+        const key = event.key.toLowerCase();
+        const ctrl = event.ctrlKey || event.metaKey;
+
+        if (ctrl && hotkeyEvents[key]) {
+            const now = Date.now();
+            const timeSinceLastPress = now - lastPressTime;
+            if (timeSinceLastPress < DOUBLE_PRESS_THRESHOLD) {
+                debug_log("hotkey.triggered", key);
+                event.preventDefault();
+                Sk.misceval.callsimArray(hotkeyEvents[key], []);
+            }
+            lastPressTime = now;
+        }
+        window.stopHotkeyListener = () => {
+            document.removeEventListener("keydown", hotkeyHandler);
+            window.hotkeyListenerReady = false;
+            debug_log("hotkey.listener_stopped");
+        };
+    }
+    drafter_client_mod.register_hotkey = new Sk.builtin.func(
+        function register_hotkey_func(
+            keyCombo: pyStr,
+            callback: pyFunc
+        ): pyNone {
+            if (!window.hotkeyListenerReady) {
+                document.addEventListener("keydown", hotkeyHandler);
+                window.hotkeyListenerReady = true;
+            }
+            const comboStr = Sk.ffi.remapToJs(keyCombo) as string;
+            debug_log("hotkey.register", comboStr);
+            hotkeyEvents[comboStr.toLowerCase()] = callback;
+            return pyNone;
+        }
+    );
+
     return drafter_client_mod;
 }

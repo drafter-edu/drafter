@@ -11,10 +11,20 @@ from drafter.bridge.client import (
     console_log,
     setup_navigation,
     set_site_title,
+    register_hotkey,
+)
+from drafter.bridge.helpers import (
+    add_script,
+    add_style,
+    add_header,
+    add_link,
+    remove_page_content,
+    remove_existing_theme,
 )
 from drafter.monitor.bus import get_main_event_bus
 from drafter.monitor.telemetry import TelemetryEvent
-from drafter.site.site import DRAFTER_TAG_IDS
+from drafter.site.initial_site_data import InitialSiteData
+from drafter.site.site import DRAFTER_TAG_IDS, DRAFTER_TAG_CLASSES
 from typing import Callable, Optional
 import document  # type: ignore
 
@@ -82,10 +92,17 @@ class ClientBridge:
     def console_log_events(self, event: TelemetryEvent) -> None:
         console_log(event)
 
-    def setup_site(self, site_html: str, site_title: str) -> None:
+    def setup_site(self, initial_site_data: InitialSiteData) -> None:
         root_tag = document.getElementById(DRAFTER_TAG_IDS["ROOT"])
-        root_tag.innerHTML = site_html
-        set_site_title(site_title)
+        root_tag.innerHTML = initial_site_data.site_html
+        set_site_title(initial_site_data.site_title)
+        remove_existing_theme(DRAFTER_TAG_CLASSES["THEME"])
+        for css in initial_site_data.additional_css:
+            add_link(css, with_class=DRAFTER_TAG_CLASSES["THEME"])
+        for js in initial_site_data.additional_js:
+            add_script(js, with_class=DRAFTER_TAG_CLASSES["THEME"])
+        for header in initial_site_data.additional_header:
+            add_header(header)
 
     def connect_to_event_bus(self) -> None:
         event_bus = get_main_event_bus()
@@ -94,52 +111,5 @@ class ClientBridge:
     def setup_navigation(self, handle_visit: Callable[[Request], None]) -> None:
         setup_navigation(handle_visit)
 
-
-def add_script(src: str, is_page_specific: bool = False) -> None:
-    """
-    Adds a script to the page.
-
-    :param src: The script source URL or content.
-    :param is_page_specific: If True, marks the script as page-specific (will be removed on navigation).
-    """
-    script = document.createElement("script")
-    script.src = src
-    if is_page_specific:
-        script.setAttribute("data-drafter-page-specific", "true")
-    head = document.getElementsByTagName("head")[0]
-    head.appendChild(script)
-    return script
-
-
-def add_style(css: str, is_page_specific: bool = False) -> None:
-    """
-    Adds CSS content to the page by creating a style element.
-
-    :param css: CSS content to add to the page.
-    :param is_page_specific: If True, marks the style as page-specific (will be removed on navigation).
-    """
-    style = document.createElement("style")
-    style.textContent = css
-    if is_page_specific:
-        style.setAttribute("data-drafter-page-specific", "true")
-    head = document.getElementsByTagName("head")[0]
-    head.appendChild(style)
-    return style
-
-
-def remove_page_content() -> None:
-    """
-    Removes all page-specific CSS and JS that were added for the previous page.
-    This ensures that page-specific styles/scripts don't persist across navigation.
-    """
-    # Remove page-specific style tags
-    elements = list(
-        document.querySelectorAll("style[data-drafter-page-specific='true']")
-    )
-    elements.extend(
-        document.querySelectorAll("script[data-drafter-page-specific='true']")
-    )
-
-    for element in elements:
-        if element.parentNode:
-            element.parentNode.removeChild(element)
+    def register_hotkey(self, keyCombo: str, callback: Callable[[], None]) -> None:
+        register_hotkey(keyCombo, callback)

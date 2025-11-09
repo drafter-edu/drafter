@@ -1,0 +1,20 @@
+#drafter-root-- {
+    background-color: red;
+
+    #drafter-frame-- {
+        padding: 0;
+        border: 0;
+    }
+
+    #drafter-header-- {
+        display: none;
+    }
+
+    #drafter-footer-- {
+        display: none;
+    }
+
+    #drafter-debug-- {
+        display: none;
+    }
+}

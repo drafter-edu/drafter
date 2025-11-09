@@ -8,7 +8,7 @@ class ClientServerConfiguration:
     enable_audit_logging: bool = True
     site_title: str = "Drafter Application"
     framed: bool = True
-    style: str = "skeleton"
+    theme: str = "default"
     deploy_image_path: str = ""
     additional_header_content: List[str] = field(default_factory=list)
     additional_css_content: List[str] = field(default_factory=list)

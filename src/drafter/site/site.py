@@ -1,7 +1,14 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+from drafter.styling.themes import get_theme_system
+from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site_information import SiteInformation
+
+GLOBAL_DRAFTER_CSS_PATHS = {
+    True: "assets/css/drafter_debug.css",
+    False: "assets/css/drafter_deploy.css",
+}
 
 DRAFTER_TAG_IDS = {
     "ROOT": "drafter-root--",
@@ -12,6 +19,10 @@ DRAFTER_TAG_IDS = {
     "FOOTER": "drafter-footer--",
     "FORM": "drafter-form--",
     "DEBUG": "drafter-debug--",
+}
+
+DRAFTER_TAG_CLASSES = {
+    "THEME": "drafter-theme--",
 }
 
 SITE_HTML_TEMPLATE = f"""
@@ -34,37 +45,54 @@ SITE_HTML_TEMPLATE = f"""
 class Site:
     title: str = "Drafter Application"
     information: Optional[SiteInformation] = None
+    theme: str = "default"
+    in_debug_mode: bool = True
     additional_css: List[str] = field(default_factory=list)
+    additional_js: List[str] = field(default_factory=list)
     additional_header: List[str] = field(default_factory=list)
 
     def reset(self):
         self.information = None
         self.additional_css.clear()
+        self.additional_js.clear()
         self.additional_header.clear()
 
-    def render(self) -> str:
+    def _get_theme_headers(self) -> tuple[list[str], list[str]]:
+        theme_system = get_theme_system()
+        if not theme_system.is_valid_theme(self.theme):
+            raise ValueError(theme_system.suggest_mistake(self.theme))
+        theme = theme_system.get_theme(self.theme)
+        return list(theme.css_paths), list(theme.js_paths)
+
+    def render(self) -> InitialSiteData:
         """
         Renders the site HTML structure.
-
-        Note: In Skulpt mode, this HTML is injected into the drafter-root div.
-        The CSS and header content will be placed in the document body, which is
-        valid HTML5. For production builds, CSS should ideally be passed to the
-        HTML template's <head> section (see app/templating.py).
         """
         site_html = SITE_HTML_TEMPLATE
 
+        additional_css, additional_js = self._get_theme_headers()
+        additional_css.insert(0, GLOBAL_DRAFTER_CSS_PATHS[self.in_debug_mode])
+        additional_headers = []
+
         # Add CSS if present
         if self.additional_css:
-            css_content = "\n".join(self.additional_css)
-            css_tag = f"<style>\n{css_content}\n</style>"
-            site_html = css_tag + site_html
+            additional_css.extend(self.additional_css)
 
         # Add header content if present
         if self.additional_header:
-            header_content = "\n".join(self.additional_header)
-            site_html = header_content + site_html
+            additional_headers.extend(self.additional_header)
 
-        return site_html
+        # Add JavaScript if present
+        if self.additional_js:
+            additional_js.extend(self.additional_js)
+
+        return InitialSiteData(
+            site_html=site_html,
+            site_title=self.title,
+            additional_css=additional_css,
+            additional_js=additional_js,
+            additional_header=additional_headers,
+        )
 
     def update_information(
         self,

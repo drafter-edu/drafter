@@ -1,4 +1,3 @@
-# from drafter.setup import *
 from dataclasses import dataclass
 from drafter.components import (
     PageContent,
@@ -33,7 +32,30 @@ from drafter.components import (
 )
 from drafter.launch import start_server
 
-# from drafter.styling import *
+from drafter.styling.styling import (
+    update_style,
+    update_attr,
+    float_right,
+    float_left,
+    bold,
+    italic,
+    underline,
+    strikethrough,
+    monospace,
+    small_font,
+    large_font,
+    change_color,
+    change_background_color,
+    change_text_size,
+    change_text_font,
+    change_text_align,
+    change_text_decoration,
+    change_height,
+    change_width,
+    change_border,
+    change_margin,
+    change_padding,
+)
 from drafter.client_server.commands import get_main_server, set_main_server
 from drafter.router.commands import route
 from drafter.payloads.kinds.page import Page
@@ -50,18 +72,14 @@ from drafter.deploy import (
     deploy_site,
 )
 
-# from drafter.server import *
-# from drafter.deploy import add_website_css
 from drafter.testing import assert_equal
-# import drafter.hacks
-
-# Provide default route
-# route("index")(default_index)
-
 
 __all__ = [
     "dataclass",
     "Page",
+    "Content",
+    "PageContent",
+    "Component",
     "get_main_server",
     "set_main_server",
     "route",
@@ -103,6 +121,29 @@ __all__ = [
     "set_site_information",
     "get_site_information",
     "deploy_site",
+    "assert_equal",
+    "update_style",
+    "update_attr",
+    "float_right",
+    "float_left",
+    "bold",
+    "italic",
+    "underline",
+    "strikethrough",
+    "monospace",
+    "small_font",
+    "large_font",
+    "change_color",
+    "change_background_color",
+    "change_text_size",
+    "change_text_font",
+    "change_text_align",
+    "change_text_decoration",
+    "change_height",
+    "change_width",
+    "change_border",
+    "change_margin",
+    "change_padding",
 ]
 
 __version__ = "2.0.0"

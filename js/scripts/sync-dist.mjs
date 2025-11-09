@@ -7,6 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const jsRoot = path.resolve(__dirname, "..");
 const distDir = path.join(jsRoot, "dist");
+const distDirectories = ["css", "js"];
 const repoRoot = path.resolve(jsRoot, "..");
 const assetsDir = path.join(repoRoot, "src", "drafter", "assets");
 
@@ -34,16 +35,19 @@ function main() {
 
     ensureDir(assetsDir);
 
-    const entries = fs.readdirSync(distDir);
     let copied = 0;
-    for (const name of entries) {
-        const src = path.join(distDir, name);
-        const stat = fs.statSync(src);
-        if (stat.isFile()) {
-            copyFile(src, assetsDir);
-            copied += 1;
+    distDirectories.forEach((subdir) => {
+        const entries = fs.readdirSync(path.join(distDir, subdir));
+        for (const name of entries) {
+            const src = path.join(distDir, subdir, name);
+            const stat = fs.statSync(src);
+            if (stat.isFile()) {
+                ensureDir(path.join(assetsDir, subdir));
+                copyFile(src, path.join(assetsDir, subdir));
+                copied += 1;
+            }
         }
-    }
+    });
 
     if (copied === 0) {
         console.warn("ℹ No files copied from dist.");

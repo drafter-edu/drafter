@@ -10,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Paths
 const root = path.resolve(__dirname, "..");
 const repoRoot = path.resolve(__dirname, "..", "..");
-const target = path.resolve(repoRoot, "src", "drafter", "assets");
+const target = path.resolve(repoRoot, "src", "drafter", "assets", "js");
 dotenv.config({ path: path.join(repoRoot, ".env") });
 
 const skulptDir = process.env.SKULPT_DIR || "";

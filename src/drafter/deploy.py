@@ -87,18 +87,30 @@ def get_site_information(server: Optional[ClientServer] = None):
 
 def set_website_style(style: Optional[str], server: Optional[ClientServer] = None):
     """
-    Sets the style of the website. This is a string that will be used to determine the
-    CSS style of the website from the available styles (e.g., `skeleton`, `bootstrap`).
-    This list will be expanded in the future.
+    Sets the style of the website. This must be the name of a valid theme.
 
-    :param style: The style of the website.
+    :param style: The theme of the website.
     :param server: The server to configure. If None, uses the main server.
     """
     if server is None:
         server = get_main_server()
     if style is None:
         style = "none"
-    server.configuration.style = style
+    server.configuration.theme = style
+
+
+def set_website_theme(theme: Optional[str], server: Optional[ClientServer] = None):
+    """
+    Sets the theme of the website. This must be the name of a valid theme.
+
+    :param theme: The theme of the website.
+    :param server: The server to configure. If None, uses the main server.
+    """
+    if server is None:
+        server = get_main_server()
+    if theme is None:
+        theme = "none"
+    server.configuration.theme = theme
 
 
 def add_website_header(header: str, server: Optional[ClientServer] = None):

@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import "../../src/drafter/assets/skulpt.js";
+import "../../src/drafter/assets/js/skulpt.js";
 import { minify_sync } from "terser";
 import { program } from "commander";
 import { precompileTypeScript } from "./precompile-typescript.mjs";
@@ -19,7 +19,7 @@ dotenv.config({ path: path.join(repoRoot, ".env") });
 
 const MODULE_NAME = "drafter";
 const drafterPythonDir = path.resolve(repoRoot, "src", "drafter");
-const target = path.resolve(repoRoot, "src", "drafter", "assets");
+const target = path.resolve(repoRoot, "src", "drafter", "assets", "js");
 const targetFilename = path.resolve(target, "skulpt-drafter.js");
 const skulptDir = process.env.SKULPT_DIR || "";
 const javascriptModulesDir = path.resolve(repoRoot, "js", "src");

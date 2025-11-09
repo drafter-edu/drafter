@@ -88,16 +88,6 @@ class Page(ResponsePayload):
             else:
                 chunked.append(chunk.render(state, configuration))
         content = "\n".join(chunked)
-        content = f"<div id='drafter-page--'>{content}</div>"
-        content = f"<form id='drafter-form--' enctype='multipart/form-data' accept-charset='utf-8'>{content}</form>"
-        # TODO: Introduce a new parent that can handle debug mode rendering
-        if configuration.in_debug_mode:
-            reset_button = self.make_reset_button()
-            about_button = self.make_about_button()
-            content = (
-                f"<div class='container' id='drafter-debug-header--'>{configuration.site_title}{reset_button}{about_button}</div>"
-                f"<div class='container' id='drafter-app--'>{content}</div>"
-            )
         return content
 
     def get_messages(

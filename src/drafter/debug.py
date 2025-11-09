@@ -11,7 +11,7 @@ from drafter.history import (
     make_value_expandable,
     safe_repr,
 )
-from drafter.payloads.page import Page
+from drafter.payloads.kinds.page import Page
 from drafter.urls import merge_url_query_params
 from drafter.testing import bakery, _bakery_tests, DIFF_WRAP_WIDTH, diff_tests
 from drafter.components.components import Table

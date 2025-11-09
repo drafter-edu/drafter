@@ -1,0 +1,37 @@
+#drafter-root-- {
+    background-color: green;
+
+    #drafter-frame-- {
+        padding: 1em;
+        border: 1px solid lightgrey;
+    }
+
+    #drafter-header-- {
+        background-color: #EEE;
+        border: 1px solid lightgrey;
+        border-bottom: 0px;
+        padding-left: 1em;
+        font-weight: bold;
+
+        #reset-button--, #about-button--{
+            float: right;
+            cursor: pointer;
+            background-color: white;
+            padding: 4px;
+            text-decoration: none;
+            color: black;
+        }
+    }
+}
+
+div.btlw-debug .copy-button {
+    float: right;
+    cursor: pointer;
+    background-color: white;
+    padding: 4px;
+}
+
+div.btlw-container img {
+    display: block;
+}
+

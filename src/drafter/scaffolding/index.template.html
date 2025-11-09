@@ -8,23 +8,21 @@
     <meta name="author" content="{{ meta_author }}" />
     <title>{{ title or "Drafter App" }}</title>
     {% if additional_css %}
-    <!-- Additional CSS from user configuration (trusted input) -->
-    <style>
-{{ additional_css }}
-    </style>
+      <!-- Additional CSS from user configuration (trusted input) -->
+      <style>{{ additional_css }}</style>
     {% endif %}
     {% if additional_header %}
-    <!-- Additional header content from user configuration (trusted input) -->
-{{ additional_header }}
+      <!-- Additional header content from user configuration (trusted input) -->
+      {{ additional_header }}
     {% endif %}
   </head>
   <body>
     <div id="{{ drafter_root }}"></div>
     {% if inline_py %}<script type="text/python" id="user-code">{{ user_code }}</script>{% endif %}
-    <script src="{{ static('skulpt.js') }}"></script>
-    <script src="{{ static('skulpt-stdlib.js') }}"></script>
-    <script src="{{ static('skulpt-drafter.js') }}"></script>
-    <script src="{{ static('drafter.js') }}"></script>
+    <script src="{{ static('js/skulpt.js') }}"></script>
+    <script src="{{ static('js/skulpt-stdlib.js') }}"></script>
+    <script src="{{ static('js/skulpt-drafter.js') }}"></script>
+    <script src="{{ static('js/drafter.js') }}"></script>
     <script>
             (async () => {
               {% if dev_ws_url %}
