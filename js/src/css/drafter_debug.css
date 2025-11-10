@@ -1,5 +1,6 @@
+@import url("./drafter_base.css");
+
 #drafter-root-- {
-    background-color: #FAFAFA;
 
     #drafter-frame-- {
         padding: 1em;

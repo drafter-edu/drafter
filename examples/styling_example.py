@@ -1,6 +1,6 @@
 from drafter import *
 
-set_website_style("none")
+# set_website_style("none")
 add_website_css("""
 body {
     background-color: lightblue;
@@ -13,19 +13,24 @@ body {
 }
 """)
 
+
 @route
 def index(state: str) -> Page:
-    return Page(state, [
-        """<style>
+    return Page(
+        state,
+        [
+            """<style>
         /* Page specific style */
         .name-box {
             margin: 10px;
         }
         </style>
         """,
-        bold("Welcome to the website!"),
-        TextBox("Name", "Your name goes here", classes="name-box"),
-        Button("Quit", index, style_color="red", style_float='right')
-    ])
+            bold("Welcome to the website!"),
+            TextBox("Name", "Your name goes here", classes="name-box"),
+            Button("Quit", index, style_color="red", style_float="right"),
+        ],
+    )
+
 
 start_server("")
