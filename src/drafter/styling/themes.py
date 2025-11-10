@@ -102,6 +102,20 @@ theme_system.register_theme(
         js_paths=[],
     )
 )
+theme_system.register_theme(
+    Theme(
+        name="dark-mode",
+        css_paths=["assets/css/themes/dark-mode.css"],
+        js_paths=[],
+    )
+)
+theme_system.register_theme(
+    Theme(
+        name="water",
+        css_paths=["assets/css/themes/water.css"],
+        js_paths=[],
+    )
+)
 
 
 def get_theme_system() -> ThemeSystem:

@@ -86,7 +86,7 @@ h1 {
 
 ## New Themes
 
-Ported 7 new themes from the `libs/` directory to the new theme system:
+Ported 7 themes from the `libs/` directory and created 2 new themes for the new theme system:
 
 1. **mvp** - MVP.css minimal theme
 2. **sakura** - Sakura classless theme
@@ -95,6 +95,8 @@ Ported 7 new themes from the `libs/` directory to the new theme system:
 5. **7** - Windows 7 retro theme
 6. **98** - Windows 98 retro theme
 7. **XP** - Windows XP retro theme
+8. **dark-mode** - Modern dark theme with good contrast and accessibility
+9. **water** - Classless CSS theme inspired by water.css principles
 
 ### Using Themes
 
@@ -119,6 +121,8 @@ set_website_style("none")
 - `7` - Windows 7 retro theme
 - `98` - Windows 98 retro theme
 - `XP` - Windows XP retro theme
+- `dark-mode` - Modern dark theme with excellent contrast
+- `water` - Clean, classless theme inspired by water.css
 
 ## Student CSS Override Examples
 

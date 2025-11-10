@@ -9,7 +9,7 @@ from drafter.styling.themes import get_theme_system, Theme
 def test_theme_registration():
     """Test that all expected themes are registered"""
     theme_system = get_theme_system()
-    expected_themes = ['default', 'none', 'mvp', 'sakura', 'tacit', 'skeleton', '7', '98', 'XP']
+    expected_themes = ['default', 'none', 'mvp', 'sakura', 'tacit', 'skeleton', '7', '98', 'XP', 'dark-mode', 'water']
     
     for theme_name in expected_themes:
         assert theme_name in theme_system.themes, f"Theme '{theme_name}' not registered"
@@ -50,7 +50,8 @@ def test_theme_css_files_exist():
     
     # Check that theme CSS files exist
     theme_files = ['themes/mvp.css', 'themes/sakura.css', 'themes/tacit.css', 
-                   'themes/skeleton.css', 'themes/7.css', 'themes/98.css', 'themes/XP.css']
+                   'themes/skeleton.css', 'themes/7.css', 'themes/98.css', 'themes/XP.css',
+                   'themes/dark-mode.css', 'themes/water.css']
     for file in theme_files:
         file_path = assets_dir / file
         assert file_path.exists(), f"Theme CSS file {file} does not exist at {file_path}"
