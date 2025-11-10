@@ -1,9 +1,10 @@
-#drafter-frame-- {
+/* Default theme styling - using low specificity for easy overriding */
+.drafter-frame {
     max-width: 960px;
     margin: 0 auto;
 }
 
-#drafter-body-- {
+.drafter-body {
     background-color: white;
     box-sizing: border-box;
     padding: 20px;
@@ -12,11 +13,11 @@
     font-weight: 400;
     font-family: Raleway, HelveticaNeue, "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #222;
+}
 
-    /* Need to be able to override this easily */
-    h1 {
-        font-size: 4rem !important;
-        line-height: 1.2 !important;
-        letter-spacing: -.1rem !important;
-    }
+/* Heading styles within the body - lower specificity */
+.drafter-body h1 {
+    font-size: 4rem;
+    line-height: 1.2;
+    letter-spacing: -.1rem;
 }

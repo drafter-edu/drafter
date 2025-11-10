@@ -1,21 +1,19 @@
 @import url("./drafter_base.css");
 
-#drafter-root-- {
+/* Deploy mode - hide development elements using class selectors */
+.drafter-frame {
+    padding: 0;
+    border: 0;
+}
 
-    #drafter-frame-- {
-        padding: 0;
-        border: 0;
-    }
+.drafter-header {
+    display: none;
+}
 
-    #drafter-header-- {
-        display: none;
-    }
+.drafter-footer {
+    display: none;
+}
 
-    #drafter-footer-- {
-        display: none;
-    }
-
-    #drafter-debug-- {
-        display: none;
-    }
+.drafter-debug {
+    display: none;
 }
