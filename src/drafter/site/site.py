@@ -22,20 +22,28 @@ DRAFTER_TAG_IDS = {
 }
 
 DRAFTER_TAG_CLASSES = {
+    "ROOT": "drafter-root",
+    "SITE": "drafter-site",
+    "FRAME": "drafter-frame",
+    "HEADER": "drafter-header",
+    "BODY": "drafter-body",
+    "FOOTER": "drafter-footer",
+    "FORM": "drafter-form",
+    "DEBUG": "drafter-debug",
     "THEME": "drafter-theme--",
 }
 
 SITE_HTML_TEMPLATE = f"""
-<div id="{DRAFTER_TAG_IDS["SITE"]}">
-  <form id="{DRAFTER_TAG_IDS["FORM"]}">
-    <div id="{DRAFTER_TAG_IDS["FRAME"]}">
-        <div id="{DRAFTER_TAG_IDS["HEADER"]}"></div>
-        <div id="{DRAFTER_TAG_IDS["BODY"]}">
+<div id="{DRAFTER_TAG_IDS["SITE"]}" class="{DRAFTER_TAG_CLASSES["SITE"]}">
+  <form id="{DRAFTER_TAG_IDS["FORM"]}" class="{DRAFTER_TAG_CLASSES["FORM"]}">
+    <div id="{DRAFTER_TAG_IDS["FRAME"]}" class="{DRAFTER_TAG_CLASSES["FRAME"]}">
+        <div id="{DRAFTER_TAG_IDS["HEADER"]}" class="{DRAFTER_TAG_CLASSES["HEADER"]}"></div>
+        <div id="{DRAFTER_TAG_IDS["BODY"]}" class="{DRAFTER_TAG_CLASSES["BODY"]}">
         Loading
         </div>
-        <div id="{DRAFTER_TAG_IDS["FOOTER"]}"></div>
+        <div id="{DRAFTER_TAG_IDS["FOOTER"]}" class="{DRAFTER_TAG_CLASSES["FOOTER"]}"></div>
     </div>
-    <div id="{DRAFTER_TAG_IDS["DEBUG"]}"></div>
+    <div id="{DRAFTER_TAG_IDS["DEBUG"]}" class="{DRAFTER_TAG_CLASSES["DEBUG"]}"></div>
   </form>
 </div>
 """

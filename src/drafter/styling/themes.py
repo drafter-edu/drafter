@@ -47,9 +47,74 @@ theme_system.register_theme(
 theme_system.register_theme(
     Theme(
         name="none",
-        css_paths=["assets/css/none.css"],
+        css_paths=[],
         js_paths=[],
     ),
+)
+
+# Register ported themes from libs/
+theme_system.register_theme(
+    Theme(
+        name="mvp",
+        css_paths=["assets/css/themes/mvp.css"],
+        js_paths=[],
+    )
+)
+theme_system.register_theme(
+    Theme(
+        name="sakura",
+        css_paths=["assets/css/themes/sakura.css"],
+        js_paths=[],
+    )
+)
+theme_system.register_theme(
+    Theme(
+        name="tacit",
+        css_paths=["assets/css/themes/tacit.css"],
+        js_paths=[],
+    )
+)
+theme_system.register_theme(
+    Theme(
+        name="skeleton",
+        css_paths=["assets/css/themes/skeleton.css"],
+        js_paths=[],
+    )
+)
+theme_system.register_theme(
+    Theme(
+        name="7",
+        css_paths=["assets/css/themes/7.css"],
+        js_paths=[],
+    )
+)
+theme_system.register_theme(
+    Theme(
+        name="98",
+        css_paths=["assets/css/themes/98.css"],
+        js_paths=[],
+    )
+)
+theme_system.register_theme(
+    Theme(
+        name="XP",
+        css_paths=["assets/css/themes/XP.css"],
+        js_paths=[],
+    )
+)
+theme_system.register_theme(
+    Theme(
+        name="dark-mode",
+        css_paths=["assets/css/themes/dark-mode.css"],
+        js_paths=[],
+    )
+)
+theme_system.register_theme(
+    Theme(
+        name="water",
+        css_paths=["assets/css/themes/water.css"],
+        js_paths=[],
+    )
 )
 
 

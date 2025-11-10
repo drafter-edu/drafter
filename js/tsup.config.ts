@@ -13,6 +13,17 @@ for (const file of fs.readdirSync(cssDir)) {
     }
 }
 
+// Add theme CSS files
+const themesDir = path.join(cssDir, "themes");
+if (fs.existsSync(themesDir)) {
+    for (const file of fs.readdirSync(themesDir)) {
+        if (file.endsWith(".css")) {
+            const name = `themes/${path.basename(file, ".css")}`;
+            cssEntries[name] = path.join(themesDir, file);
+        }
+    }
+}
+
 export default defineConfig([
     {
         entry: {

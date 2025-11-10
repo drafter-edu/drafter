@@ -1,31 +1,30 @@
 @import url("./drafter_base.css");
 
-#drafter-root-- {
+/* Debug mode styling - using class selectors for easier overriding */
+.drafter-frame {
+    padding: 1em;
+}
 
-    #drafter-frame-- {
-        padding: 1em;
-    }
+.drafter-body {
+    border: 1px solid lightgrey;
+}
 
-    #drafter-body-- {
-        border: 1px solid lightgrey;
-    }
+.drafter-header {
+    background-color: #EEE;
+    border: 1px solid lightgrey;
+    border-bottom: 0px;
+    padding-left: 1em;
+    font-weight: bold;
+}
 
-    #drafter-header-- {
-        background-color: #EEE;
-        border: 1px solid lightgrey;
-        border-bottom: 0px;
-        padding-left: 1em;
-        font-weight: bold;
-
-        #reset-button--, #about-button--{
-            float: right;
-            cursor: pointer;
-            background-color: white;
-            padding: 4px;
-            text-decoration: none;
-            color: black;
-        }
-    }
+.drafter-header #reset-button--,
+.drafter-header #about-button-- {
+    float: right;
+    cursor: pointer;
+    background-color: white;
+    padding: 4px;
+    text-decoration: none;
+    color: black;
 }
 
 div.btlw-debug .copy-button {
