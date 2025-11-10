@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/css/drafter_base.css"],"sourcesContent":["/* Base styling for drafter body content area using low-specificity class selector */\n.drafter-body {\n    background-color: white;\n}"],"mappings":"AACA,CAAC,aACG,iBAAkB,IACtB","names":[]}
