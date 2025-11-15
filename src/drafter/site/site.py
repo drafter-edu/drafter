@@ -84,6 +84,11 @@ class Site:
 
         additional_css, additional_js = self._get_theme_headers()
         additional_css.insert(0, GLOBAL_DRAFTER_CSS_PATHS[self.in_debug_mode])
+        
+        # Add debug panel CSS when in debug mode
+        if self.in_debug_mode:
+            additional_css.append("assets/css/debug-panel.css")
+        
         additional_headers, additional_styles = [], []
 
         # Add CSS if present

@@ -25,6 +25,7 @@ def start_server(initial_state=None, main_user_path=None, **kwargs) -> None:
         rerender_site()
 
         server.register_monitor_listener(client_bridge.handle_telemetry_event)
+        server.monitor.register_event_listener(client_bridge.handle_telemetry_event_object)
         server.monitor.listen_for_events()
 
         server.start(initial_state=initial_state)

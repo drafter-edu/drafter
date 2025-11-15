@@ -48,6 +48,7 @@ class Monitor:
     event_history: list[str] = field(default_factory=list)
     routes: list[str] = field(default_factory=list)
     listeners: List[Callable[[Any], None]] = field(default_factory=list)
+    event_listeners: List[Callable[[TelemetryEvent], None]] = field(default_factory=list)
     enabled: bool = True
 
     def reset(self) -> None:
@@ -57,6 +58,7 @@ class Monitor:
         self.event_history.clear()
         self.routes.clear()
         self.listeners.clear()
+        self.event_listeners.clear()
 
     def listen_for_events(self) -> None:
         """
@@ -69,11 +71,19 @@ class Monitor:
 
     def register_listener(self, listener: Callable[[Any], None]) -> None:
         """
-        Register a listener to receive telemetry events.
+        Register a listener to receive telemetry events (HTML string format).
 
         :param listener: A callable that takes a telemetry event
         """
         self.listeners.append(listener)
+
+    def register_event_listener(self, listener: Callable[[TelemetryEvent], None]) -> None:
+        """
+        Register a listener to receive raw telemetry event objects.
+
+        :param listener: A callable that takes a TelemetryEvent object
+        """
+        self.event_listeners.append(listener)
 
     def _handle_telemetry_event(self, event: TelemetryEvent) -> None:
         """
@@ -84,11 +94,20 @@ class Monitor:
         self.event_history.append(event.event_type)
         routes = self._handle_route_add(event)
         content = "\n".join(self.event_history) + "<br>\nRoutes:\n" + routes
+        
+        # Notify HTML-format listeners (backward compatibility)
         for listener in self.listeners:
             try:
                 listener(f"<pre>{content}</pre>")
             except Exception as e:
                 self._handle_internal_error("listener invocation", e)
+        
+        # Notify event object listeners (new format)
+        for listener in self.event_listeners:
+            try:
+                listener(event)
+            except Exception as e:
+                self._handle_internal_error("event listener invocation", e)
 
     def _handle_route_add(self, event: TelemetryEvent) -> str:
         """
