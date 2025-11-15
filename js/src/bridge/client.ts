@@ -1,4 +1,5 @@
 import type { Suspension } from "../types/skulpt";
+import type { DebugPanel } from "../debug";
 
 type NavEvent =
     | { kind: "link"; url: string; data: FormData; submitter?: HTMLElement }
@@ -161,15 +162,28 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
             siteTitle = titleStr;
             document.title = siteTitle;
             debug_log("site.set_title", siteTitle);
-            const headerTag = document.getElementById(
-                drafter_client_mod.DRAFTER_TAG_IDS["HEADER"]
+            // const headerTag = document.getElementById(
+            //     drafter_client_mod.DRAFTER_TAG_IDS["HEADER"]
+            // );
+            // if (!headerTag) {
+            //     throw new Error(
+            //         `Header tag ${drafter_client_mod.DRAFTER_TAG_IDS["HEADER"]} not found`
+            //     );
+            // }
+            // headerTag.innerHTML = siteTitle;
+            debugPanel?.setHeaderTitle(siteTitle);
+            return pyNone;
+        }
+    );
+
+    let debugPanel: DebugPanel | null = null;
+    drafter_client_mod.setup_debug_menu = new Sk.builtin.func(
+        function setup_debug_menu_func(clientBridge: pyObject): pyNone {
+            debug_log("site.setup_debug_menu");
+            debugPanel = new Sk.DebugPanel(
+                drafter_client_mod.DRAFTER_TAG_IDS["DEBUG"]
             );
-            if (!headerTag) {
-                throw new Error(
-                    `Header tag ${drafter_client_mod.DRAFTER_TAG_IDS["HEADER"]} not found`
-                );
-            }
-            headerTag.innerHTML = siteTitle;
+            console.log("**", clientBridge);
             return pyNone;
         }
     );
@@ -255,7 +269,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         },
     } = drafter_client_mod;
 
-    const update_body = new pyFunc(function update_body_func(
+    const update_site = new pyFunc(function update_site_func(
         response: pyObject,
         callback: pyFunc
     ): Suspension {
@@ -273,9 +287,12 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                 response.tp$getattr(str_request_id);
             const responseId: pyInt = response.tp$getattr(str_id);
             replaceHTML(element, body);
+            debugPanel?.setRoute(
+                Sk.ffi.remapToJs(response.tp$getattr(str_url))
+            );
             debug_log(
                 "dom.updated_body",
-                "update_body called with",
+                "update_site called with",
                 response,
                 callback
             );
@@ -306,7 +323,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         return Sk.misceval.chain<any, any>([], startBodyUpdate);
     });
 
-    drafter_client_mod.update_site = update_body;
+    drafter_client_mod.update_site = update_site;
 
     // Track handlers for cleanup
     let clickHandler: ((event: MouseEvent) => void) | null = null;

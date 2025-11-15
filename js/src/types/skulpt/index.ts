@@ -1,6 +1,7 @@
 import "./types";
 
 export const {
+    DebugPanel: DebugPanel,
     builtin: {
         bool: { true$: pyTrue, false$: pyFalse },
         none: { none$: pyNone },

@@ -1,0 +1,48 @@
+{
+    "en": {
+        "common": {
+            "app.title": "Drafter Application",
+            "icon.home": "🏠",
+            "button.home": "Home",
+            "icon.reset": "🔄",
+            "button.reset": "Reset",
+            "icon.about": "ℹ️",
+            "button.about": "About",
+            "icon.save": "💾",
+            "button.save": "Save",
+            "icon.load": "📂",
+            "button.load": "Load",
+            "icon.download": "📥",
+            "button.download": "Download",
+            "icon.upload": "📤",
+            "button.upload": "Upload",
+            "icon.toggle": "⚙️",
+            "button.toggle": "Toggle",
+            "icon.close": "❌",
+            "button.close": "Close",
+
+            "footer.route": "Route: "
+        }
+    },
+    "es": {
+        "common": {
+            "app.title": "Aplicación Drafter",
+            "icon.home": "🏠",
+            "icon.reset": "🔄",
+            "button.reset": "Reiniciar",
+            "button.home": "Inicio",
+            "icon.save": "💾",
+            "button.save": "Guardar",
+            "icon.load": "📂",
+            "button.load": "Cargar",
+            "icon.download": "📥",
+            "button.download": "Descargar",
+            "icon.upload": "📤",
+            "button.upload": "Subir",
+            "icon.toggle": "⚙️",
+            "button.toggle": "Alternar",
+            "icon.close": "❌",
+            "button.close": "Cerrar"
+        }
+    }
+}

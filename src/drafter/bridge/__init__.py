@@ -12,6 +12,7 @@ from drafter.bridge.client import (
     setup_navigation,
     set_site_title,
     register_hotkey,
+    setup_debug_menu,
 )
 from drafter.bridge.helpers import (
     add_script,
@@ -85,10 +86,11 @@ class ClientBridge:
         return Request(0, "load", "index", [], {}, {})
 
     def handle_telemetry_event(self, content: str) -> None:
+        pass
         # print("Telemetry Event:", event.event_type, event.data)
-        debug_info = document.getElementById(DRAFTER_TAG_IDS["DEBUG"])
-        if debug_info:
-            debug_info.innerHTML = content
+        # debug_info = document.getElementById(DRAFTER_TAG_IDS["DEBUG"])
+        # if debug_info:
+        #    debug_info.innerHTML = content
 
     def console_log_events(self, event: TelemetryEvent) -> None:
         console_log(event)
@@ -106,6 +108,9 @@ class ClientBridge:
             add_style(style, with_class=DRAFTER_TAG_CLASSES["THEME"])
         for header in initial_site_data.additional_header:
             add_header(header)
+
+    def setup_debug_menu(self) -> None:
+        setup_debug_menu(self)
 
     def connect_to_event_bus(self) -> None:
         event_bus = get_main_event_bus()

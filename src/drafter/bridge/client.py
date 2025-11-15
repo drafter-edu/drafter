@@ -35,3 +35,12 @@ def register_hotkey(keyCombo: str, callback: Callable[[], None]) -> None:  # typ
     :param callback: The function to call when the hotkey is pressed.
     """
     pass
+
+
+def setup_debug_menu(client_bridge) -> None:  # type: ignore
+    """
+    Sets up the debug menu in the client bridge.
+
+    :param client_bridge: The ClientBridge instance to set up the debug menu for.
+    """
+    pass

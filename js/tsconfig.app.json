@@ -16,12 +16,15 @@
         "skipLibCheck": true,
         "resolveJsonModule": true,
 
+        "jsx": "react-jsx",
+        "jsxImportSource": "jsx-dom",
+
         "rootDir": "src",
         "outDir": "build/ts",
 
         "types": ["jquery", "node"],
         "typeRoots": ["./src/types", "./node_modules/@types"]
     },
-    "include": ["src/**/*.ts"],
+    "include": ["src/**/*.ts", "src/**/*.tsx"],
     "exclude": ["dist", "build", "node_modules"]
 }

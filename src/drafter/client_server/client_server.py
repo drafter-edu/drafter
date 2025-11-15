@@ -281,7 +281,9 @@ class ClientServer:
 
         # Return successfully
         try:
-            response = self.make_success_response(request.id, body, payload, messages)
+            response = self.make_success_response(
+                request.id, request.url, body, payload, messages
+            )
         except Exception as e:
             return self.make_error_response(
                 request,
@@ -307,6 +309,7 @@ class ClientServer:
     def make_success_response(
         self,
         request_id: int,
+        url: str,
         body: Optional[str],
         payload: ResponsePayload,
         messages: List[Message],
@@ -321,7 +324,11 @@ class ClientServer:
         :return: The response from the server.
         """
         response = Response(
-            id=self.response_count, request_id=request_id, payload=payload, body=body
+            id=self.response_count,
+            request_id=request_id,
+            payload=payload,
+            body=body,
+            url=url,
         )
         response.send_messages(messages)
         self.response_count += 1
@@ -375,6 +382,7 @@ class ClientServer:
                 id=self.response_count,
                 request_id=request.id,
                 payload=simpler_error_payload,
+                url=request.url,
                 status_code=500,
                 body=simpler_error_payload.render(self.state, self.configuration),
                 message=error_page_error.message,
@@ -384,6 +392,7 @@ class ClientServer:
             id=self.response_count,
             request_id=request.id,
             body=body,
+            url=request.url,
             payload=error_payload,
             status_code=status_code,
             message=error.message,

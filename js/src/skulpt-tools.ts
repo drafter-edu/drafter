@@ -1,5 +1,6 @@
 import Sk from "./types/skulpt/";
 import type { pyBaseException, pyStr } from "./types/skulpt/";
+import { DebugPanel } from "./debug";
 
 export function builtinRead(path: string) {
     if (
@@ -56,6 +57,8 @@ export function setupSkulpt() {
     Sk.console.drafter.handleError = function (code: any, message: any) {
         document.body.innerHTML = `<h1>Error Running Site!</h1><div>There was an error running your site. Here is the error message:</div><div><pre style="${preStyle}">${code}: ${message}</pre></div>`;
     };
+
+    Sk.DebugPanel = DebugPanel;
 
     // Example: touch the global so TS keeps types and users see it's available
     // (no-op to avoid side effects)

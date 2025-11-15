@@ -21,6 +21,7 @@ def start_server(initial_state=None, main_user_path=None, **kwargs) -> None:
         def rerender_site():
             initial_site_data = server.render_site()
             client_bridge.setup_site(initial_site_data)
+            client_bridge.setup_debug_menu()
 
         rerender_site()
 

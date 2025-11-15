@@ -1,3 +1,7 @@
 .drafter-body-- {
     /* Might add more later */
 }
+
+.drafter-body-- .error-page pre {
+    white-space: pre-wrap;
+}

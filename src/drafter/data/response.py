@@ -19,9 +19,12 @@ class Response:
     - 6xx: ClientServer errors
     - 7xx: AppServer/BuildServer errors
 
-    :ivar payload: The page content to send to the client.
+    :ivar id: The unique identifier for this response.
+    :ivar request_id: The identifier of the request this response corresponds to.
+    :ivar payload: The payload content to send to the client (usually a Page).
     :ivar status_code: The status code of the response.
     :ivar message: A human-readable message associated with the response.
+    :ivar url: The URL associated with the response. Could technically be different from the request URL.
     :ivar body: The full HTML body of the response, which will be injected directly into the site's frame.
     :ivar channels: A dictionary of channels for additional communication. Common
         channels include "audio", "before", and "after". The latter two are used to
@@ -34,6 +37,7 @@ class Response:
     id: int
     request_id: int
     payload: ResponsePayload
+    url: str
     status_code: int = 200
     message: str = "OK"
     body: Optional[str] = None

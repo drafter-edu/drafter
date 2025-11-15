@@ -26,6 +26,12 @@ export default defineConfig([
         outExtension({ format }) {
             return { js: ".js" }; // for iife this yields dist/drafter.js
         },
+        esbuildOptions(options) {
+            options.jsx = "automatic";
+            options.jsxImportSource = "jsx-dom";
+        },
+        sourcemap: true,
+        minify: true,
     },
     {
         entry: cssEntries,
