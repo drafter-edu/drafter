@@ -7,15 +7,12 @@ components to provide comprehensive debugging information to developers.
 
 from dataclasses import dataclass, field
 from typing import Any, Optional, Dict, List, Callable
-from datetime import datetime
 import traceback
 import html
 import json
 
-from drafter.monitor.bus import EventBus, get_main_event_bus
+from drafter.monitor.bus import get_main_event_bus
 from drafter.monitor.telemetry import TelemetryEvent
-from drafter.data.request import Request
-from drafter.data.response import Response
 from drafter.monitor.events.errors import DrafterError, DrafterWarning, DrafterInfo
 from drafter.router.introspect import RouteIntrospection
 
@@ -335,8 +332,8 @@ class Monitor:
     def _render_visit(self, index: int, visit: PageVisitTelemetry) -> List[str]:
         """Render a single page visit."""
         parts = [
-            f"<div class='visit-item'>",
-            f"<div class='visit-header'>",
+            "<div class='visit-item'>",
+            "<div class='visit-header'>",
             f"<span class='visit-number'>#{index + 1}</span>",
             f"<span class='visit-url'>{html.escape(visit.request.url)}</span>",
         ]

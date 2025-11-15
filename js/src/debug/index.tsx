@@ -10,6 +10,7 @@ export class DebugPanel {
     private events: TelemetryEvent[] = [];
     private pageHistory: any[] = [];
     private currentState: any = null;
+    private currentRoute: string = "";
     private errors: any[] = [];
     private warnings: any[] = [];
     private isVisible: boolean = true;
@@ -171,6 +172,15 @@ export class DebugPanel {
                 this.clientBridge.goto("index");
             });
         });
+        
+        const resetButtons = document.querySelectorAll(".drafter-reset-button");
+        resetButtons.forEach((button) => {
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                // Reset state by reloading the page
+                window.location.reload();
+            });
+        });
     }
 
     private renderState(newState: any): void {
@@ -184,6 +194,26 @@ export class DebugPanel {
         const stateContent = (
             <div class="state-content">
                 <div dangerouslySetInnerHTML={{ __html: newState }}></div>
+                <div class="state-actions">
+                    <button
+                        class="state-action-btn"
+                        onClick={() => this.saveStateToLocalStorage()}
+                    >
+                        💾 Save to LocalStorage
+                    </button>
+                    <button
+                        class="state-action-btn"
+                        onClick={() => this.loadStateFromLocalStorage()}
+                    >
+                        📂 Load from LocalStorage
+                    </button>
+                    <button
+                        class="state-action-btn"
+                        onClick={() => this.downloadState()}
+                    >
+                        ⬇️ Download JSON
+                    </button>
+                </div>
             </div>
         );
 
@@ -233,10 +263,14 @@ export class DebugPanel {
                 this.renderInfo(event.data);
                 break;
             case "PageVisitEvent":
+                this.currentRoute = event.data.url;
+                this.renderCurrentRoute(this.currentRoute);
                 this.renderPageVisit(event.data);
                 break;
             case "RequestEvent":
                 // Handled as part of PageVisitEvent
+                this.currentRoute = event.data.url;
+                this.renderCurrentRoute(this.currentRoute);
                 break;
             case "ResponseEvent":
                 // Handled as part of PageVisitEvent
@@ -248,6 +282,7 @@ export class DebugPanel {
                 break;
         }
     }
+
 
     private renderError(error: any): void {
         const section = document.getElementById("drafter-debug-errors");
@@ -339,6 +374,70 @@ export class DebugPanel {
             section.insertBefore(visitElement, section.firstChild);
         } else {
             section.appendChild(visitElement);
+        }
+    }
+
+    private renderCurrentRoute(route: string): void {
+        const section = document.getElementById("drafter-debug-current-route");
+        if (!section) {
+            return;
+        }
+        
+        // Find the section header or create one
+        let content = section.querySelector(".current-route-content");
+        if (!content) {
+            content = document.createElement("div");
+            content.className = "current-route-content";
+            section.appendChild(content);
+        }
+        
+        content.textContent = route ? `Currently viewing: ${route}` : "No route visited yet";
+    }
+
+    private saveStateToLocalStorage(): void {
+        if (this.currentState) {
+            try {
+                localStorage.setItem("drafter-debug-state", this.currentState);
+                alert("State saved to LocalStorage");
+            } catch (e) {
+                console.error("Failed to save state to LocalStorage:", e);
+                alert("Failed to save state: " + e);
+            }
+        }
+    }
+
+    private loadStateFromLocalStorage(): void {
+        try {
+            const savedState = localStorage.getItem("drafter-debug-state");
+            if (savedState) {
+                this.currentState = savedState;
+                this.renderState(this.currentState);
+                alert("State loaded from LocalStorage");
+            } else {
+                alert("No saved state found in LocalStorage");
+            }
+        } catch (e) {
+            console.error("Failed to load state from LocalStorage:", e);
+            alert("Failed to load state: " + e);
+        }
+    }
+
+    private downloadState(): void {
+        if (this.currentState) {
+            try {
+                const blob = new Blob([this.currentState], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `drafter-state-${new Date().toISOString()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                console.error("Failed to download state:", e);
+                alert("Failed to download state: " + e);
+            }
         }
     }
 }
