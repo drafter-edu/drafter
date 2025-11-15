@@ -1,4 +1,5 @@
 import { getSkulptFile, setupSkulpt, startServer } from "./skulpt-tools";
+import { initDebugPanel } from "./debug";
 
 export interface DrafterInitOptions {
     code?: string;
@@ -10,6 +11,9 @@ const x: pyStr = new Sk.builtin.str("hello");
 
 export function runStudentCode(options: DrafterInitOptions) {
     setupSkulpt();
+    
+    // Initialize debug panel
+    initDebugPanel('drafter-debug--');
 
     if (options.code) {
         return startServer(options.code, "main", options.presentErrors);

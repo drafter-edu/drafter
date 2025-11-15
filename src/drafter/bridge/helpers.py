@@ -103,3 +103,18 @@ def remove_existing_theme(theme_class: str) -> None:
     if head:
         for element in elements:
             head.removeChild(element)
+
+
+def call_debug_panel_handler(event_data: dict) -> None:
+    """
+    Calls the JavaScript debug panel handler with telemetry event data.
+    
+    :param event_data: Dictionary containing telemetry event data
+    """
+    try:
+        import window  # type: ignore
+        if hasattr(window, 'DrafterDebugPanel') and hasattr(window.DrafterDebugPanel, 'handleTelemetry'):
+            window.DrafterDebugPanel.handleTelemetry(event_data)
+    except Exception as e:
+        # Silently fail if debug panel is not available
+        pass

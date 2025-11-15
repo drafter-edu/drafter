@@ -20,6 +20,7 @@ from drafter.bridge.helpers import (
     add_link,
     remove_page_content,
     remove_existing_theme,
+    call_debug_panel_handler,
 )
 from drafter.monitor.bus import get_main_event_bus
 from drafter.monitor.telemetry import TelemetryEvent
@@ -85,10 +86,41 @@ class ClientBridge:
         return Request(0, "load", "index", [], {}, {})
 
     def handle_telemetry_event(self, content: str) -> None:
-        # print("Telemetry Event:", event.event_type, event.data)
+        # The Monitor calls this with HTML content string
+        # For backward compatibility, also update the debug div
         debug_info = document.getElementById(DRAFTER_TAG_IDS["DEBUG"])
         if debug_info:
             debug_info.innerHTML = content
+
+    def handle_telemetry_event_object(self, event: TelemetryEvent) -> None:
+        """
+        Handle telemetry events and forward them to the TypeScript debug panel.
+        
+        :param event: The telemetry event to handle
+        """
+        try:
+            # Convert event to dictionary for JavaScript
+            event_data = {
+                'event_type': event.event_type,
+                'correlation': {
+                    'causation_id': event.correlation.causation_id,
+                    'route': event.correlation.route,
+                    'request_id': event.correlation.request_id,
+                    'response_id': event.correlation.response_id,
+                    'outcome_id': event.correlation.outcome_id,
+                    'dom_id': event.correlation.dom_id,
+                },
+                'source': event.source,
+                'id': event.id,
+                'version': event.version,
+                'level': event.level,
+                'timestamp': str(event.timestamp),
+                'data': event.data,
+            }
+            call_debug_panel_handler(event_data)
+        except Exception as e:
+            # Log but don't crash
+            console_log(f"Error handling telemetry event: {e}")
 
     def console_log_events(self, event: TelemetryEvent) -> None:
         console_log(event)
@@ -110,6 +142,7 @@ class ClientBridge:
     def connect_to_event_bus(self) -> None:
         event_bus = get_main_event_bus()
         event_bus.subscribe("*", self.console_log_events)
+        event_bus.subscribe("*", self.handle_telemetry_event_object)
 
     def setup_navigation(self, handle_visit: Callable[[Request], None]) -> None:
         setup_navigation(handle_visit)
