@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Any
-import json
 
 from drafter.monitor.events.base import BaseEvent
 

@@ -81,39 +81,59 @@ export class DebugPanel {
                 <div class="drafter-debug-content">
                     <div
                         class="drafter-debug-section"
-                        id="drafter-debug-routes"
+                        id="drafter-debug-errors"
                     >
                         <div class="drafter-debug-section-header">
-                            <h4>Registered Routes</h4>
+                            <h4>❌ Errors</h4>
                         </div>
-                        <div id="drafter-routes-list"></div>
+                    </div>
+                    <div
+                        class="drafter-debug-section"
+                        id="drafter-debug-warnings"
+                    >
+                        <div class="drafter-debug-section-header">
+                            <h4>⚠️ Warnings</h4>
+                        </div>
+                    </div>
+                    <div
+                        class="drafter-debug-section"
+                        id="drafter-debug-history"
+                    >
+                        <div class="drafter-debug-section-header">
+                            <h4>📜 Page Visit History</h4>
+                        </div>
                     </div>
                     <div
                         class="drafter-debug-section"
                         id="drafter-debug-current-route"
-                    ></div>
+                    >
+                        <div class="drafter-debug-section-header">
+                            <h4>🔗 Current Route</h4>
+                        </div>
+                    </div>
                     <div class="drafter-debug-section" id="drafter-debug-state">
                         <div class="drafter-debug-section-header">
-                            <h4>Current State</h4>
+                            <h4>📊 Current State</h4>
                         </div>
                         <div id="drafter-debug-current-state-content"></div>
                     </div>
                     <div
                         class="drafter-debug-section"
-                        id="drafter-debug-history"
-                    ></div>
-                    <div
-                        class="drafter-debug-section"
-                        id="drafter-debug-errors"
-                    ></div>
-                    <div
-                        class="drafter-debug-section"
-                        id="drafter-debug-warnings"
-                    ></div>
+                        id="drafter-debug-routes"
+                    >
+                        <div class="drafter-debug-section-header">
+                            <h4>🗺️ Registered Routes</h4>
+                        </div>
+                        <div id="drafter-routes-list"></div>
+                    </div>
                     <div
                         class="drafter-debug-section"
                         id="drafter-debug-events"
-                    ></div>
+                    >
+                        <div class="drafter-debug-section-header">
+                            <h4>ℹ️ Info Messages</h4>
+                        </div>
+                    </div>
                 </div>
             </div>
         );
@@ -187,7 +207,15 @@ export class DebugPanel {
 
     public handleEvent(event: TelemetryEvent): void {
         this.events.push(event);
-        switch (event.data?.event_type) {
+        
+        if (!event.data) {
+            console.warn(
+                `DebugPanel: Event without data: '${event.event_type}'`
+            );
+            return;
+        }
+        
+        switch (event.data.event_type) {
             case "RouteAdded":
                 this.renderRoute(event.data.url, event.data.signature);
                 break;
@@ -195,11 +223,122 @@ export class DebugPanel {
                 this.currentState = event.data.html;
                 this.renderState(this.currentState);
                 break;
+            case "DrafterError":
+                this.renderError(event.data);
+                break;
+            case "DrafterWarning":
+                this.renderWarning(event.data);
+                break;
+            case "DrafterInfo":
+                this.renderInfo(event.data);
+                break;
+            case "PageVisitEvent":
+                this.renderPageVisit(event.data);
+                break;
+            case "RequestEvent":
+                // Handled as part of PageVisitEvent
+                break;
+            case "ResponseEvent":
+                // Handled as part of PageVisitEvent
+                break;
             default:
                 console.warn(
-                    `DebugPanel: Unhandled event type '${event.event_type}'`
+                    `DebugPanel: Unhandled event type '${event.data.event_type}'`
                 );
                 break;
+        }
+    }
+
+    private renderError(error: any): void {
+        const section = document.getElementById("drafter-debug-errors");
+        if (!section) {
+            return;
+        }
+        
+        const errorElement = (
+            <div class="debug-message error-message">
+                <div class="message-header">{error.message}</div>
+                <div class="message-where">at {error.where}</div>
+                <div class="message-details">{error.details}</div>
+                {error.traceback && (
+                    <details>
+                        <summary>Traceback</summary>
+                        <pre>{error.traceback}</pre>
+                    </details>
+                )}
+            </div>
+        );
+        
+        section.appendChild(errorElement);
+    }
+
+    private renderWarning(warning: any): void {
+        const section = document.getElementById("drafter-debug-warnings");
+        if (!section) {
+            return;
+        }
+        
+        const warningElement = (
+            <div class="debug-message warning-message">
+                <div class="message-header">{warning.message}</div>
+                <div class="message-where">at {warning.where}</div>
+                <div class="message-details">{warning.details}</div>
+            </div>
+        );
+        
+        section.appendChild(warningElement);
+    }
+
+    private renderInfo(info: any): void {
+        const section = document.getElementById("drafter-debug-events");
+        if (!section) {
+            return;
+        }
+        
+        const infoElement = (
+            <div class="debug-message info-message">
+                <div class="message-header">{info.message}</div>
+                <div class="message-where">at {info.where}</div>
+            </div>
+        );
+        
+        section.appendChild(infoElement);
+    }
+
+    private renderPageVisit(visit: any): void {
+        const section = document.getElementById("drafter-debug-history");
+        if (!section) {
+            return;
+        }
+        
+        const visitElement = (
+            <div class="visit-item">
+                <div class="visit-header">
+                    <span class="visit-url">{visit.url}</span>
+                    <span class="visit-function">{visit.function_name}</span>
+                    <span class="visit-duration">{visit.duration_ms.toFixed(1)}ms</span>
+                    <span class={`visit-status ${visit.status_code < 400 ? "status-ok" : "status-error"}`}>
+                        {visit.status_code}
+                    </span>
+                </div>
+                <details>
+                    <summary>Details</summary>
+                    <div class="visit-details">
+                        <p><strong>Arguments:</strong> {visit.arguments}</p>
+                        <p><strong>Timestamp:</strong> {visit.timestamp}</p>
+                        {visit.button_pressed && (
+                            <p><strong>Button:</strong> {visit.button_pressed}</p>
+                        )}
+                    </div>
+                </details>
+            </div>
+        );
+        
+        // Insert at the beginning so newest is on top
+        if (section.firstChild) {
+            section.insertBefore(visitElement, section.firstChild);
+        } else {
+            section.appendChild(visitElement);
         }
     }
 }
