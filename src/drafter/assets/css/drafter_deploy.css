@@ -1,2 +1,2 @@
-@import"./drafter_base.css";.drafter-frame--{padding:0;border:0}.drafter-header--,.drafter-footer--,.drafter-debug--{display:none}
+@import"./drafter_base.css";.drafter-frame--{padding:0;border:0;max-width:960px}.drafter-header--,.drafter-footer--,.drafter-debug--{display:none}
 /*# sourceMappingURL=drafter_deploy.css.map */

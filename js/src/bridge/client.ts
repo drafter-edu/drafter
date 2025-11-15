@@ -1,5 +1,6 @@
 import type { Suspension } from "../types/skulpt";
 import type { DebugPanel } from "../debug";
+import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrapper";
 
 type NavEvent =
     | { kind: "link"; url: string; data: FormData; submitter?: HTMLElement }
@@ -44,10 +45,18 @@ function $builtinmodule(name: string) {
 }
 
 function replaceHTML(tag: HTMLElement, html: string) {
+    // Save current scroll position
+    const scrollTop = window.scrollY;
+    const scrollLeft = window.scrollX;
+
+    // Replace content
     const r = document.createRange();
     r.selectNode(tag);
     const fragment = r.createContextualFragment(html);
     tag.replaceChildren(fragment);
+
+    // Restore scroll position
+    window.scrollTo(scrollLeft, scrollTop);
 }
 
 function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
@@ -176,12 +185,34 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         }
     );
 
+    let handleVisit:
+        | ((url: string, formData?: FormData) => Promise<pyObject>)
+        | null = null;
+
+    class ClientBridgeWrapper implements ClientBridgeWrapperInterface {
+        constructor(private clientBridge: pyObject) {}
+
+        public goto(url: string, formData?: FormData) {
+            if (!handleVisit) {
+                throw new Error("handleVisit not set");
+            }
+            return handleVisit(url, formData);
+        }
+    }
+
+    function wrapClientBridge(clientBridge: pyObject): ClientBridgeWrapper {
+        const wrapped = new ClientBridgeWrapper(clientBridge);
+        console.log("Wrapped client bridge:", wrapped);
+        return wrapped;
+    }
+
     let debugPanel: DebugPanel | null = null;
     drafter_client_mod.setup_debug_menu = new Sk.builtin.func(
         function setup_debug_menu_func(clientBridge: pyObject): pyNone {
             debug_log("site.setup_debug_menu");
             debugPanel = new Sk.DebugPanel(
-                drafter_client_mod.DRAFTER_TAG_IDS["DEBUG"]
+                drafter_client_mod.DRAFTER_TAG_IDS["DEBUG"],
+                wrapClientBridge(clientBridge)
             );
             console.log("**", clientBridge);
             return pyNone;
@@ -210,17 +241,19 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         });
     };
 
-    const makeRequest = function (url: string, formData: FormData) {
+    const makeRequest = function (url: string, formData?: FormData) {
         const data: Record<string, FormDataEntryValue | FormDataEntryValue[]> =
             {};
         const filePromises: Promise<void>[] = [];
-        for (const [k, v] of formData.entries()) {
-            if (v instanceof File) {
-                const promise = getFile(v, data, k);
-                filePromises.push(promise);
-            } else {
-                data[k] =
-                    k in data ? ([] as any[]).concat(data[k] as any, v) : v;
+        if (formData) {
+            for (const [k, v] of formData.entries()) {
+                if (v instanceof File) {
+                    const promise = getFile(v, data, k);
+                    filePromises.push(promise);
+                } else {
+                    data[k] =
+                        k in data ? ([] as any[]).concat(data[k] as any, v) : v;
+                }
             }
         }
         return Promise.all(filePromises).then(() => {
@@ -338,7 +371,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
             root.removeEventListener("click", clickHandler);
         }
         clickHandler = function (event: MouseEvent) {
-            debug_log("dom.click", event);
+            // debug_log("dom.click", event);
             const target = event.target as Element | null;
             if (!target) return;
 
@@ -411,16 +444,21 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     let popstateListener: ((event: PopStateEvent) => void) | null = null;
     drafter_client_mod.setup_navigation = new pyFunc(
         function setup_navigation_func(callback: pyFunc) {
+            handleVisit = function (url: string, formData?: FormData) {
+                debug_log("page.load_route", url);
+                return makeRequest(url, formData || new FormData()).then(
+                    (newRequest) => {
+                        const nextVisit = callback.tp$call([newRequest]);
+                        return Sk.misceval.asyncToPromise(() => nextVisit);
+                    }
+                );
+            };
             // TODO: Handle navigation on page load by inspecting the query string
             if (window.location.search) {
                 const params = new URLSearchParams(window.location.search);
                 const route = params.get("route");
                 if (route) {
-                    debug_log("page.load_route", route);
-                    makeRequest(route, new FormData()).then((newRequest) => {
-                        const nextVisit = callback.tp$call([newRequest]);
-                        return Sk.misceval.asyncToPromise(() => nextVisit);
-                    });
+                    handleVisit(route);
                 }
             }
             if (popstateListener) {
@@ -441,20 +479,20 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                         "",
                         fullUrl.toString()
                     );
-                    makeRequest(url, new FormData()).then((newRequest) => {
-                        const nextVisit = callback.tp$call([newRequest]);
-                        return Sk.misceval.asyncToPromise(() => nextVisit);
-                    });
+                    if (!handleVisit) {
+                        throw new Error("handleVisit not set");
+                    }
+                    handleVisit(url);
                 } else {
                     debug_log("history.popstate_no_state", event);
                     document.title = siteTitle;
                     const fullUrl = new URL(window.location.href);
                     fullUrl.searchParams.delete("route");
                     window.history.replaceState({}, "", fullUrl.toString());
-                    makeRequest("index", new FormData()).then((newRequest) => {
-                        const nextVisit = callback.tp$call([newRequest]);
-                        return Sk.misceval.asyncToPromise(() => nextVisit);
-                    });
+                    if (!handleVisit) {
+                        throw new Error("handleVisit not set");
+                    }
+                    handleVisit("index");
                 }
             };
             window.addEventListener("popstate", popstateListener);

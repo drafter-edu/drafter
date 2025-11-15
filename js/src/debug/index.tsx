@@ -2,6 +2,7 @@ import type { TelemetryEvent } from "./telemetry";
 import { t } from "../i18n";
 import { DebugHeaderBar } from "./header";
 import { DebugFooterBar } from "./footer";
+import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrapper";
 
 export class DebugPanel {
     private panelElement: HTMLElement | null = null;
@@ -16,7 +17,10 @@ export class DebugPanel {
     private headerBar: DebugHeaderBar | null = null;
     private footerBar: DebugFooterBar | null = null;
 
-    constructor(private containerId: string) {
+    constructor(
+        private containerId: string,
+        private clientBridge: ClientBridgeWrapperInterface
+    ) {
         this.initialize();
     }
 
@@ -34,9 +38,9 @@ export class DebugPanel {
         this.contentElement = this.panelElement.querySelector(
             ".drafter-debug-content"
         );
-        this.attachEventHandlers();
         this.headerBar = new DebugHeaderBar("");
         this.footerBar = new DebugFooterBar();
+        this.attachEventHandlers();
     }
 
     public setHeaderTitle(title: string) {
@@ -85,6 +89,13 @@ export class DebugPanel {
     }
 
     private attachEventHandlers(): void {
+        const homeButton = document.querySelector(".drafter-home-button");
+        if (homeButton) {
+            homeButton.addEventListener("click", (event) => {
+                event.preventDefault();
+                this.clientBridge.goto("index");
+            });
+        }
         // const toggleBtn = document.getElementById("debug-toggle-btn");
         // if (toggleBtn) {
         //     toggleBtn.addEventListener("click", () => this.toggleVisibility());

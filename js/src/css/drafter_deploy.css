@@ -3,6 +3,7 @@
 .drafter-frame-- {
     padding: 0;
     border: 0;
+    max-width: 960px;
 }
 
 .drafter-header-- {

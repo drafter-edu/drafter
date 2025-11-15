@@ -15,6 +15,8 @@ body {
 }
 
 .drafter-frame-- {
+    max-width: 100vw;
+    overflow: auto;
     padding: 0em;
     flex-grow: 1;
 }
@@ -85,7 +87,7 @@ body {
 .drafter-footer-- {
     background-color: #EEE;
     border: 1px solid lightgrey;
-    border-bottom: 0px;
+    border-top: 0px;
     padding-top: 0.5em;
     padding-bottom: 0.5em;
     padding-left: 1em;
@@ -116,12 +118,12 @@ body {
 .drafter-debug-- {
     flex-grow: 1;
     background-color: white;
+}
 
-    pre {
-        margin: 0;
-        padding: 1em;
-        overflow: auto;
-    }
+.drafter-debug-- pre {
+    margin: 0;
+    padding: 1em;
+    overflow: auto;
 }
 
 
