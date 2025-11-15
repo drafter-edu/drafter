@@ -11,6 +11,7 @@ import type {
     DrafterWarning,
     DrafterInfo,
 } from "./telemetry/errors";
+import type { TestCaseEvent, TestSummaryEvent } from "./telemetry/tests";
 
 export type TypedEvent =
     | RouteAddedEvent
@@ -21,7 +22,9 @@ export type TypedEvent =
     | PageVisitEvent
     | DrafterError
     | DrafterWarning
-    | DrafterInfo;
+    | DrafterInfo
+    | TestCaseEvent
+    | TestSummaryEvent;
 
 export interface TelemetryEvent {
     event_type: string;

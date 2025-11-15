@@ -18,6 +18,7 @@ from drafter.monitor.events.request import (
     PageVisitEvent,
 )
 from drafter.monitor.events.config import ConfigurationEvent
+from drafter.monitor.events.tests import TestCaseEvent, TestSummaryEvent
 
 __all__ = [
     "BaseEvent",
@@ -32,4 +33,6 @@ __all__ = [
     "OutcomeEvent",
     "PageVisitEvent",
     "ConfigurationEvent",
+    "TestCaseEvent",
+    "TestSummaryEvent",
 ]

@@ -129,6 +129,16 @@ export class DebugPanel {
                     </div>
                     <div
                         class="drafter-debug-section"
+                        id="drafter-debug-tests"
+                    >
+                        <div class="drafter-debug-section-header">
+                            <h4>🧪 Test Status</h4>
+                        </div>
+                        <div id="drafter-test-summary"></div>
+                        <div id="drafter-test-cases"></div>
+                    </div>
+                    <div
+                        class="drafter-debug-section"
                         id="drafter-debug-events"
                     >
                         <div class="drafter-debug-section-header">
@@ -274,6 +284,12 @@ export class DebugPanel {
                 break;
             case "ResponseEvent":
                 // Handled as part of PageVisitEvent
+                break;
+            case "TestCaseEvent":
+                this.renderTestCase(event.data);
+                break;
+            case "TestSummaryEvent":
+                this.renderTestSummary(event.data);
                 break;
             default:
                 console.warn(
@@ -439,5 +455,52 @@ export class DebugPanel {
                 alert("Failed to download state: " + e);
             }
         }
+    }
+
+    private renderTestSummary(summary: any): void {
+        const section = document.getElementById("drafter-test-summary");
+        if (!section) {
+            return;
+        }
+
+        const summaryElement = (
+            <div class="test-summary">
+                <div class="test-summary-stats">
+                    <span class="test-total">Total: {summary.total}</span>
+                    <span class="test-passed">✅ Passed: {summary.passed}</span>
+                    <span class="test-failed">❌ Failed: {summary.failed}</span>
+                </div>
+            </div>
+        );
+
+        section.replaceChildren(summaryElement);
+    }
+
+    private renderTestCase(testCase: any): void {
+        const section = document.getElementById("drafter-test-cases");
+        if (!section) {
+            return;
+        }
+
+        const statusIcon = testCase.passed ? "✅" : "❌";
+        const statusClass = testCase.passed ? "test-passed" : "test-failed";
+
+        const testElement = (
+            <div class={`test-case ${statusClass}`}>
+                <div class="test-case-header">
+                    <span class="test-status">{statusIcon}</span>
+                    <span class="test-line">Line {testCase.line}</span>
+                    <code class="test-caller">{testCase.caller}</code>
+                </div>
+                {!testCase.passed && testCase.diff_html && (
+                    <details class="test-diff">
+                        <summary>Show Difference</summary>
+                        <div dangerouslySetInnerHTML={{ __html: testCase.diff_html }}></div>
+                    </details>
+                )}
+            </div>
+        );
+
+        section.appendChild(testElement);
     }
 }
