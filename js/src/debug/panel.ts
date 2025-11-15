@@ -164,17 +164,45 @@ export class DebugPanel {
         if (event.event_type === 'request.visit') {
             // Update current route information
             this.updateCurrentRouteSection(event.data);
+            
+            // Add to page history
+            this.pageHistory.push({
+                type: 'request',
+                timestamp: event.timestamp,
+                data: event.data,
+                request_id: event.correlation.request_id
+            });
         }
     }
 
     private handleResponseEvent(event: TelemetryEvent): void {
-        // Track response data for history
-        if (event.data) {
-            this.pageHistory.push({
-                type: 'response',
-                timestamp: event.timestamp,
-                data: event.data
-            });
+        if (event.event_type === 'response.created') {
+            // Track response data for history
+            if (event.data) {
+                // Find the matching request in history
+                const requestIndex = this.pageHistory.findIndex(
+                    item => item.type === 'request' && 
+                    item.request_id === event.correlation.request_id
+                );
+                
+                if (requestIndex >= 0) {
+                    // Update the request entry with response data
+                    this.pageHistory[requestIndex] = {
+                        ...this.pageHistory[requestIndex],
+                        response: event.data,
+                        duration_ms: event.data.duration_ms
+                    };
+                } else {
+                    // Add as separate entry if request not found
+                    this.pageHistory.push({
+                        type: 'response',
+                        timestamp: event.timestamp,
+                        data: event.data,
+                        request_id: event.correlation.request_id,
+                        response_id: event.correlation.response_id
+                    });
+                }
+            }
         }
     }
 
@@ -311,13 +339,28 @@ export class DebugPanel {
                 <div class="history-content">
                     ${this.pageHistory.length === 0 ? '<p>No history yet</p>' : `
                         <ul class="history-list">
-                            ${this.pageHistory.slice(-20).reverse().map((item, idx) => `
-                                <li class="history-item">
-                                    <span class="history-index">#${this.pageHistory.length - idx}</span>
-                                    <span class="history-type">${item.type}</span>
-                                    <span class="history-time">${new Date(item.timestamp).toLocaleTimeString()}</span>
-                                </li>
-                            `).join('')}
+                            ${this.pageHistory.slice(-20).reverse().map((item, idx) => {
+                                const route = item.data?.url || item.data?.route || 'unknown';
+                                const duration = item.duration_ms ? `${item.duration_ms.toFixed(1)}ms` : '';
+                                const status = item.response ? 
+                                    `<span class="status-badge status-${item.response.status_code >= 400 ? 'error' : 'ok'}">${item.response.status_code}</span>` : '';
+                                
+                                return `
+                                    <li class="history-item">
+                                        <span class="history-index">#${this.pageHistory.length - idx}</span>
+                                        <span class="history-route">${this.escapeHtml(route)}</span>
+                                        ${duration ? `<span class="history-duration">${duration}</span>` : ''}
+                                        ${status}
+                                        <span class="history-time">${new Date(item.timestamp).toLocaleTimeString()}</span>
+                                        ${item.data ? `
+                                            <details class="history-details">
+                                                <summary>Details</summary>
+                                                <pre>${this.escapeHtml(JSON.stringify(item.data, null, 2))}</pre>
+                                            </details>
+                                        ` : ''}
+                                    </li>
+                                `;
+                            }).join('')}
                         </ul>
                     `}
                 </div>

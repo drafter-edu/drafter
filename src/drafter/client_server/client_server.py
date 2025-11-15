@@ -234,6 +234,16 @@ class ClientServer:
                 )
             try:
                 self.state.update(updated_state)
+                log_data(
+                    "state.updated",
+                    {
+                        "state": updated_state,
+                        "history_length": len(self.state.history),
+                    },
+                    "client_server.handle_state_updates",
+                    route=request.url,
+                    request_id=request.id,
+                )
                 log_info(
                     "state.updated",
                     "Updating server state from payload",
@@ -259,6 +269,22 @@ class ClientServer:
         :param request: The request to process.
         :return: The result of the route function.
         """
+        import time
+        start_time = time.time()
+        
+        log_data(
+            "request.visit",
+            {
+                "request_id": request.id,
+                "action": request.action,
+                "url": request.url,
+                "args": request.args,
+                "kwargs": list(request.kwargs.keys()),
+            },
+            "client_server.visit",
+            route=request.url,
+            request_id=request.id,
+        )
         log_info(
             "request.received",
             f"Request received: {request}",
@@ -295,6 +321,24 @@ class ClientServer:
                 ),
                 504,
             )
+        
+        end_time = time.time()
+        duration_ms = (end_time - start_time) * 1000
+        
+        log_data(
+            "response.created",
+            {
+                "request_id": request.id,
+                "response_id": response.id,
+                "status_code": response.status_code,
+                "duration_ms": duration_ms,
+                "payload_type": type(payload).__name__,
+            },
+            "client_server.visit",
+            route=request.url,
+            request_id=request.id,
+            response_id=response.id,
+        )
         log_info(
             "response.created",
             f"Response created for request ID {request.id}",
