@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, Optional
 from drafter.data.channel import Channel, Message
-from drafter.data.errors import DrafterError, DrafterWarning
+from drafter.monitor.events.errors import DrafterError, DrafterWarning
 from drafter.payloads.payloads import ResponsePayload
 
 

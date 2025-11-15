@@ -4,11 +4,11 @@ import io
 import json
 from typing import Union, Callable, Optional, Tuple, List, Dict, Any
 from dataclasses import dataclass
-from drafter.audit import log_error, log_warning
+from drafter.monitor.audit import log_error, log_warning
 from drafter.client_server.errors import VisitError
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 from drafter.constants import PREVIOUSLY_PRESSED_BUTTON, SUBMIT_BUTTON_KEY
-from drafter.data.errors import DrafterError
+from drafter.monitor.events.errors import DrafterError
 from drafter.history.forms import remap_hidden_form_parameters
 from drafter.data.request import Request
 from drafter.history.state import SiteState

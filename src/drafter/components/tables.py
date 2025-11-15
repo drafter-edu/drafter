@@ -2,7 +2,7 @@ from dataclasses import dataclass, fields, is_dataclass
 import html
 from typing import List, Union, Any
 from drafter.components.page_content import Component
-from drafter.old_history import safe_repr
+from drafter.history.utils import safe_repr
 
 
 @dataclass

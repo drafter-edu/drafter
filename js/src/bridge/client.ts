@@ -1,6 +1,7 @@
 import type { Suspension } from "../types/skulpt";
 import type { DebugPanel } from "../debug";
 import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrapper";
+import type { TelemetryEvent } from "../debug/telemetry";
 
 type NavEvent =
     | { kind: "link"; url: string; data: FormData; submitter?: HTMLElement }
@@ -216,6 +217,23 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
             );
             console.log("**", clientBridge);
             return pyNone;
+        }
+    );
+
+    drafter_client_mod.handle_event = new Sk.builtin.func(
+        function handle_event_func(event: pyDict): pyNone {
+            try {
+                const unpackedEvent = Sk.ffi.remapToJs(event) as TelemetryEvent;
+                debugPanel?.handleEvent(unpackedEvent);
+                return pyNone;
+            } catch (e) {
+                console.error(
+                    "[Drafter Bridge Client] Failed to handle event:",
+                    e,
+                    event
+                );
+                throw e;
+            }
         }
     );
 

@@ -13,6 +13,7 @@ from drafter.bridge.client import (
     set_site_title,
     register_hotkey,
     setup_debug_menu,
+    handle_event,
 )
 from drafter.bridge.helpers import (
     add_script,
@@ -85,8 +86,8 @@ class ClientBridge:
     def make_initial_request(self) -> Request:
         return Request(0, "load", "index", [], {}, {})
 
-    def handle_telemetry_event(self, content: str) -> None:
-        pass
+    def handle_telemetry_event(self, event: TelemetryEvent) -> None:
+        handle_event(event.to_json())
         # print("Telemetry Event:", event.event_type, event.data)
         # debug_info = document.getElementById(DRAFTER_TAG_IDS["DEBUG"])
         # if debug_info:

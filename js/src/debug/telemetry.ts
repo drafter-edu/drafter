@@ -1,3 +1,7 @@
+import type { UpdatedStateEvent } from "./telemetry/state";
+
+export type TypedEvent = RouteAddedEvent | UpdatedStateEvent;
+
 export interface TelemetryEvent {
     event_type: string;
     correlation: {
@@ -13,5 +17,5 @@ export interface TelemetryEvent {
     version: string;
     level?: string;
     timestamp: string;
-    data?: any;
+    data?: TypedEvent;
 }

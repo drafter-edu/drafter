@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 from typing import Any, Optional, Dict, List
 from datetime import datetime
 
+from drafter.monitor.events.base import BaseEvent
+
 
 @dataclass
 class TelemetryCorrelation:
@@ -31,6 +33,21 @@ class TelemetryCorrelation:
     outcome_id: Optional[int] = None
     dom_id: Optional[str] = None
 
+    def to_json(self) -> Dict[str, Any]:
+        """
+        Converts the TelemetryCorrelation instance to a JSON-serializable dictionary.
+
+        :return: A dictionary representation of the TelemetryCorrelation.
+        """
+        return {
+            "causation_id": self.causation_id,
+            "route": self.route,
+            "request_id": self.request_id,
+            "response_id": self.response_id,
+            "outcome_id": self.outcome_id,
+            "dom_id": self.dom_id,
+        }
+
 
 @dataclass
 class TelemetryEvent:
@@ -49,7 +66,8 @@ class TelemetryEvent:
     :ivar level: The severity level of the event (e.g., "info", "warning", "error").
     :ivar timestamp: The timestamp when the event was created.
     :ivar data: Additional data associated with the event. This can be any relevant information
-        that provides context about the event.
+        that provides context about the event. Must be JSON-serializable. The exact
+        structure should be defined based on the event_type.
     """
 
     event_type: str
@@ -59,10 +77,27 @@ class TelemetryEvent:
     version: str = "0.0.1"
     level: Optional[str] = "info"
     timestamp: datetime = datetime.now()
-    data: Any = None
+    data: Optional[BaseEvent] = None
 
     IDS_COUNTER: int = 0
 
     def __post_init__(self):
         type(self).IDS_COUNTER += 1
         self.id = type(self).IDS_COUNTER
+
+    def to_json(self) -> Dict[str, Any]:
+        """
+        Converts the TelemetryEvent instance to a JSON-serializable dictionary.
+
+        :return: A dictionary representation of the TelemetryEvent.
+        """
+        return {
+            "event_type": self.event_type,
+            "correlation": self.correlation.to_json(),
+            "source": self.source,
+            "id": self.id,
+            "version": self.version,
+            "level": self.level,
+            "timestamp": self.timestamp.isoformat(),
+            "data": self.data.to_json() if self.data is not None else None,
+        }

@@ -18,6 +18,24 @@ class RouteIntrospection:
     expected_types: Dict[str, Any]
     function_name: str
 
+    def to_string(self) -> str:
+        """
+        Generate a string representation of the function signature.
+
+        :return: A string representing the function signature.
+        """
+        parts = []
+        for param in self.expected_parameters:
+            expected_type = self.expected_types.get(param, Any)
+            type_name = (
+                expected_type.__name__
+                if hasattr(expected_type, "__name__")
+                else str(expected_type)
+            )
+            parts.append(f"{param}: {type_name}")
+        params_str = ", ".join(parts)
+        return f"{self.function_name}({params_str})"
+
 
 def get_signature(func):
     """

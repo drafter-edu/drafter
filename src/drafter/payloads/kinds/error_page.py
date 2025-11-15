@@ -1,7 +1,7 @@
 from typing import Optional
 from dataclasses import dataclass
 from drafter.config.client_server import ClientServerConfiguration
-from drafter.data.errors import DrafterError
+from drafter.monitor.events.errors import DrafterError
 from drafter.history.state import SiteState
 from drafter.payloads.payloads import ResponsePayload
 

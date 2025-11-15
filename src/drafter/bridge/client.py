@@ -44,3 +44,12 @@ def setup_debug_menu(client_bridge) -> None:  # type: ignore
     :param client_bridge: The ClientBridge instance to set up the debug menu for.
     """
     pass
+
+
+def handle_event(event_json: dict) -> None:  # type: ignore
+    """
+    Handles a telemetry event in the client bridge.
+
+    :param event_json: The telemetry event data as a JSON-serializable dictionary.
+    """
+    pass

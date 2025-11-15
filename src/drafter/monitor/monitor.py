@@ -16,7 +16,7 @@ from drafter.monitor.bus import EventBus, get_main_event_bus
 from drafter.monitor.telemetry import TelemetryEvent
 from drafter.data.request import Request
 from drafter.data.response import Response
-from drafter.data.errors import DrafterError, DrafterWarning, DrafterInfo
+from drafter.monitor.events.errors import DrafterError, DrafterWarning, DrafterInfo
 from drafter.router.introspect import RouteIntrospection
 
 
@@ -47,7 +47,7 @@ class Monitor:
 
     event_history: list[str] = field(default_factory=list)
     routes: list[str] = field(default_factory=list)
-    listeners: List[Callable[[Any], None]] = field(default_factory=list)
+    listeners: List[Callable[[TelemetryEvent], None]] = field(default_factory=list)
     enabled: bool = True
 
     def reset(self) -> None:
@@ -82,11 +82,11 @@ class Monitor:
         :param event: The telemetry event to handle
         """
         self.event_history.append(event.event_type)
-        routes = self._handle_route_add(event)
-        content = "\n".join(self.event_history) + "<br>\nRoutes:\n" + routes
+        # routes = self._handle_route_add(event)
+        # content = "\n".join(self.event_history) + "<br>\nRoutes:\n" + routes
         for listener in self.listeners:
             try:
-                listener(f"<pre>{content}</pre>")
+                listener(event)
             except Exception as e:
                 self._handle_internal_error("listener invocation", e)
 

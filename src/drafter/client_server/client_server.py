@@ -1,12 +1,15 @@
 from dataclasses import dataclass
 from typing import Any, Optional, List, Tuple, Union, Dict
+import time
 
 from drafter.client_server.context import Scope
 from drafter.client_server.errors import VisitError
 from drafter.data.channel import Message
 from drafter.history.state import SiteState
-from drafter.data.errors import DrafterError
+from drafter.monitor.events.errors import DrafterError
 from drafter.monitor.bus import EventBus
+from drafter.monitor.events.routes import RouteAddedEvent
+from drafter.monitor.events.state import UpdatedStateEvent
 from drafter.monitor.monitor import Monitor
 from drafter.payloads import Page
 from drafter.payloads.kinds.error_page import ErrorPage, SimpleErrorPage
@@ -18,7 +21,7 @@ from drafter.payloads.verification import (
     verify_response_payload_type,
 )
 from drafter.router.routes import Router
-from drafter.audit import log_error, log_warning, log_info, log_data
+from drafter.monitor.audit import log_error, log_warning, log_info, log_data
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import Site
 from drafter.config.client_server import ClientServerConfiguration
@@ -234,11 +237,11 @@ class ClientServer:
                 )
             try:
                 self.state.update(updated_state)
-                log_info(
-                    "state.updated",
-                    "Updating server state from payload",
+                log_data(
+                    UpdatedStateEvent.from_state(updated_state),
                     "client_server.handle_state_updates",
-                    f"Updated state: {repr(updated_state)}",
+                    request_id=request.id,
+                    route=request.url,
                 )
             except Exception as e:
                 raise VisitError(
@@ -259,6 +262,7 @@ class ClientServer:
         :param request: The request to process.
         :return: The result of the route function.
         """
+        start_time = time.time()
         log_info(
             "request.received",
             f"Request received: {request}",
@@ -297,6 +301,8 @@ class ClientServer:
                 ),
                 504,
             )
+        end_time = time.time()
+        response_time = end_time - start_time
         log_info(
             "response.created",
             f"Response created for request ID {request.id}",
@@ -412,8 +418,7 @@ class ClientServer:
         """
         self.router.add_route(url, func)
         log_data(
-            "route.added",
-            self.router.signatures[url],
+            RouteAddedEvent(url=url, signature=self.router.signatures[url].to_string()),
             "client_server.add_route",
         )
 

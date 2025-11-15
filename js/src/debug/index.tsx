@@ -8,7 +8,6 @@ export class DebugPanel {
     private panelElement: HTMLElement | null = null;
     private contentElement: HTMLElement | null = null;
     private events: TelemetryEvent[] = [];
-    private routes: Map<string, any> = new Map();
     private pageHistory: any[] = [];
     private currentState: any = null;
     private errors: any[] = [];
@@ -59,74 +58,148 @@ export class DebugPanel {
         panel.className = "drafter-debug-panel";
         panel.id = "drafter-debug-panel";
 
-        const ui = <div></div>;
-
-        panel.innerHTML = `
-            <div class="drafter-debug-header">
-                <h3>🔍 Debug Monitor</h3>
-                <div class="drafter-debug-actions">
-                    <button id="debug-reset-btn" title="Reset state and return to index">🔄 Reset</button>
-                    <button id="debug-about-btn" title="Go to About page">ℹ️ About</button>
-                    <button id="debug-save-state-btn" title="Save state to localStorage">💾 Save State</button>
-                    <button id="debug-load-state-btn" title="Load state from localStorage">📂 Load State</button>
-                    <button id="debug-download-state-btn" title="Download state as JSON">⬇️ Download</button>
-                    <button id="debug-upload-state-btn" title="Upload state from JSON">⬆️ Upload</button>
-                    <button id="debug-toggle-btn" title="Toggle debug panel">👁️</button>
+        const ui = (
+            <div class="drafter-debug-panel">
+                <div class="drafter-debug-header-left">
+                    <div>
+                        <div class="drafter-debug-header-title">
+                            Debug Panel
+                        </div>
+                        <div class="drafter-debug-header-subtitle"></div>
+                    </div>
+                    <div class="drafter-debug-header-buttons">
+                        <a href="#drafter-debug-warnings">Warnings</a> |
+                        <a href="#drafter-debug-errors">Errors</a> |
+                        <a href="#drafter-debug-current-route">Current Route</a>{" "}
+                        |<a href="#drafter-debug-state">State</a> |
+                        <a href="#drafter-debug-history">History</a> |
+                        <a href="#drafter-debug-routes">Routes</a> |
+                        <a href="#drafter-debug-events">Events</a>
+                    </div>
+                </div>
+                {this.createActionButtons()}
+                <div class="drafter-debug-content">
+                    <div
+                        class="drafter-debug-section"
+                        id="drafter-debug-routes"
+                    >
+                        <div class="drafter-debug-section-header">
+                            <h4>Registered Routes</h4>
+                        </div>
+                        <div id="drafter-routes-list"></div>
+                    </div>
+                    <div
+                        class="drafter-debug-section"
+                        id="drafter-debug-current-route"
+                    ></div>
+                    <div class="drafter-debug-section" id="drafter-debug-state">
+                        <div class="drafter-debug-section-header">
+                            <h4>Current State</h4>
+                        </div>
+                        <div id="drafter-debug-current-state-content"></div>
+                    </div>
+                    <div
+                        class="drafter-debug-section"
+                        id="drafter-debug-history"
+                    ></div>
+                    <div
+                        class="drafter-debug-section"
+                        id="drafter-debug-errors"
+                    ></div>
+                    <div
+                        class="drafter-debug-section"
+                        id="drafter-debug-warnings"
+                    ></div>
+                    <div
+                        class="drafter-debug-section"
+                        id="drafter-debug-events"
+                    ></div>
                 </div>
             </div>
-            <div class="drafter-debug-content">
-                <div class="debug-section" id="debug-errors"></div>
-                <div class="debug-section" id="debug-warnings"></div>
-                <div class="debug-section" id="debug-current-route"></div>
-                <div class="debug-section" id="debug-state"></div>
-                <div class="debug-section" id="debug-history"></div>
-                <div class="debug-section" id="debug-routes"></div>
-                <div class="debug-section" id="debug-events"></div>
-            </div>
-        `;
+        );
+        panel.appendChild(ui);
 
         return panel;
     }
 
+    private createActionButtons() {
+        return (
+            <div class="drafter-debug-actions">
+                <button
+                    id="drafter-home-btn"
+                    title={t("button.home.tooltip")}
+                    class="drafter-home-button"
+                >
+                    {t("icon.home")} {t("button.home")}
+                </button>
+                <button
+                    id="debug-reset-btn"
+                    title={t("button.reset.tooltip")}
+                    class="drafter-reset-button"
+                >
+                    {t("icon.reset")} {t("button.reset")}
+                </button>
+            </div>
+        );
+    }
+
     private attachEventHandlers(): void {
-        const homeButton = document.querySelector(".drafter-home-button");
-        if (homeButton) {
-            homeButton.addEventListener("click", (event) => {
+        const homeButtons = document.querySelectorAll(".drafter-home-button");
+        homeButtons.forEach((button) => {
+            button.addEventListener("click", (event) => {
                 event.preventDefault();
                 this.clientBridge.goto("index");
             });
+        });
+    }
+
+    private renderState(newState: any): void {
+        const section = document.getElementById(
+            "drafter-debug-current-state-content"
+        );
+        if (!section) {
+            throw new Error("DebugPanel: State section not found.");
         }
-        // const toggleBtn = document.getElementById("debug-toggle-btn");
-        // if (toggleBtn) {
-        //     toggleBtn.addEventListener("click", () => this.toggleVisibility());
-        // }
-        // const resetBtn = document.getElementById("debug-reset-btn");
-        // if (resetBtn) {
-        //     resetBtn.addEventListener("click", () => this.resetState());
-        // }
-        // const aboutBtn = document.getElementById("debug-about-btn");
-        // if (aboutBtn) {
-        //     aboutBtn.addEventListener("click", () => this.navigateToAbout());
-        // }
-        // const saveBtn = document.getElementById("debug-save-state-btn");
-        // if (saveBtn) {
-        //     saveBtn.addEventListener("click", () =>
-        //         this.saveStateToLocalStorage()
-        //     );
-        // }
-        // const loadBtn = document.getElementById("debug-load-state-btn");
-        // if (loadBtn) {
-        //     loadBtn.addEventListener("click", () =>
-        //         this.loadStateFromLocalStorage()
-        //     );
-        // }
-        // const downloadBtn = document.getElementById("debug-download-state-btn");
-        // if (downloadBtn) {
-        //     downloadBtn.addEventListener("click", () => this.downloadState());
-        // }
-        // const uploadBtn = document.getElementById("debug-upload-state-btn");
-        // if (uploadBtn) {
-        //     uploadBtn.addEventListener("click", () => this.uploadState());
-        // }
+
+        const stateContent = (
+            <div class="state-content">
+                <div dangerouslySetInnerHTML={{ __html: newState }}></div>
+            </div>
+        );
+
+        section.replaceChildren(stateContent);
+    }
+
+    private renderRoute(route: string, signature: string): void {
+        const section = document.getElementById("drafter-routes-list");
+        if (!section) {
+            throw new Error("DebugPanel: Routes section not found.");
+        }
+
+        const newRouteItem = (
+            <div class="route-signature">
+                <strong>{route}</strong>:<pre>{signature}</pre>
+            </div>
+        );
+
+        section.appendChild(newRouteItem);
+    }
+
+    public handleEvent(event: TelemetryEvent): void {
+        this.events.push(event);
+        switch (event.data?.event_type) {
+            case "RouteAdded":
+                this.renderRoute(event.data.url, event.data.signature);
+                break;
+            case "UpdatedState":
+                this.currentState = event.data.html;
+                this.renderState(this.currentState);
+                break;
+            default:
+                console.warn(
+                    `DebugPanel: Unhandled event type '${event.event_type}'`
+                );
+                break;
+        }
     }
 }

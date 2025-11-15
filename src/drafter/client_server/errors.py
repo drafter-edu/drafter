@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from drafter.data.errors import DrafterError
+from drafter.monitor.events.errors import DrafterError
 
 
 @dataclass
