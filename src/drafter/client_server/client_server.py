@@ -70,6 +70,7 @@ class ClientServer:
     def process_configuration(self):
         self.site.title = self.configuration.site_title
         self.site.additional_css = self.configuration.additional_css_content
+        self.site.additional_style = self.configuration.additional_style_content
         self.site.additional_header = self.configuration.additional_header_content
         self.site.in_debug_mode = self.configuration.in_debug_mode
 
@@ -320,11 +321,9 @@ class ClientServer:
         :return: The response from the server.
         """
         response = Response(
-            id=self.response_count,
-            request_id=request_id,
-            payload=payload,
-            body=body,
+            id=self.response_count, request_id=request_id, payload=payload, body=body
         )
+        response.send_messages(messages)
         self.response_count += 1
 
         return response

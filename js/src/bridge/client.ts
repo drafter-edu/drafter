@@ -164,6 +164,11 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
             const headerTag = document.getElementById(
                 drafter_client_mod.DRAFTER_TAG_IDS["HEADER"]
             );
+            if (!headerTag) {
+                throw new Error(
+                    `Header tag ${drafter_client_mod.DRAFTER_TAG_IDS["HEADER"]} not found`
+                );
+            }
             headerTag.innerHTML = siteTitle;
             return pyNone;
         }

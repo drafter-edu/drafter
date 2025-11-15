@@ -11,4 +11,7 @@ class ClientServerConfiguration:
     theme: str = "default"
     deploy_image_path: str = ""
     additional_header_content: List[str] = field(default_factory=list)
+    # Raw literal CSS
+    additional_style_content: List[str] = field(default_factory=list)
+    # Linked CSS Content
     additional_css_content: List[str] = field(default_factory=list)

@@ -19,6 +19,8 @@ DRAFTER_TAG_IDS = {
     "FOOTER": "drafter-footer--",
     "FORM": "drafter-form--",
     "DEBUG": "drafter-debug--",
+    "PADDING_V": "drafter-padding-v--",
+    "PADDING_H": "drafter-padding-h--",
 }
 
 DRAFTER_TAG_CLASSES = {
@@ -26,17 +28,21 @@ DRAFTER_TAG_CLASSES = {
 }
 
 SITE_HTML_TEMPLATE = f"""
-<div id="{DRAFTER_TAG_IDS["SITE"]}">
-  <form id="{DRAFTER_TAG_IDS["FORM"]}">
-    <div id="{DRAFTER_TAG_IDS["FRAME"]}">
-        <div id="{DRAFTER_TAG_IDS["HEADER"]}"></div>
-        <div id="{DRAFTER_TAG_IDS["BODY"]}">
+<div id="{DRAFTER_TAG_IDS["SITE"]}" class="{DRAFTER_TAG_IDS["SITE"]}">
+    <div class="{DRAFTER_TAG_IDS["PADDING_H"]}"></div>
+  <form id="{DRAFTER_TAG_IDS["FORM"]}" class="{DRAFTER_TAG_IDS["FORM"]}">
+    <div class="{DRAFTER_TAG_IDS["PADDING_V"]}"></div>
+    <div id="{DRAFTER_TAG_IDS["FRAME"]}" class="{DRAFTER_TAG_IDS["FRAME"]}">
+        <div id="{DRAFTER_TAG_IDS["HEADER"]}" class="{DRAFTER_TAG_IDS["HEADER"]}"></div>
+        <div id="{DRAFTER_TAG_IDS["BODY"]}" class="{DRAFTER_TAG_IDS["BODY"]}">
         Loading
         </div>
-        <div id="{DRAFTER_TAG_IDS["FOOTER"]}"></div>
+        <div id="{DRAFTER_TAG_IDS["FOOTER"]}" class="{DRAFTER_TAG_IDS["FOOTER"]}"></div>
     </div>
-    <div id="{DRAFTER_TAG_IDS["DEBUG"]}"></div>
+    <div class="{DRAFTER_TAG_IDS["PADDING_V"]}"></div>
   </form>
+  <div class="{DRAFTER_TAG_IDS["PADDING_H"]}"></div>
+  <div id="{DRAFTER_TAG_IDS["DEBUG"]}" class="{DRAFTER_TAG_IDS["DEBUG"]}"></div>
 </div>
 """
 
@@ -47,13 +53,19 @@ class Site:
     information: Optional[SiteInformation] = None
     theme: str = "default"
     in_debug_mode: bool = True
+    # Additional linked CSS
     additional_css: List[str] = field(default_factory=list)
+    # Additional raw style content
+    additional_style: List[str] = field(default_factory=list)
+    # Additional linked JavaScript
     additional_js: List[str] = field(default_factory=list)
+    # Additional raw header content
     additional_header: List[str] = field(default_factory=list)
 
     def reset(self):
         self.information = None
         self.additional_css.clear()
+        self.additional_style.clear()
         self.additional_js.clear()
         self.additional_header.clear()
 
@@ -72,11 +84,15 @@ class Site:
 
         additional_css, additional_js = self._get_theme_headers()
         additional_css.insert(0, GLOBAL_DRAFTER_CSS_PATHS[self.in_debug_mode])
-        additional_headers = []
+        additional_headers, additional_styles = [], []
 
         # Add CSS if present
         if self.additional_css:
             additional_css.extend(self.additional_css)
+
+        # Add raw style content if present
+        if self.additional_style:
+            additional_styles.extend(self.additional_style)
 
         # Add header content if present
         if self.additional_header:
@@ -92,6 +108,7 @@ class Site:
             additional_css=additional_css,
             additional_js=additional_js,
             additional_header=additional_headers,
+            additional_style=additional_styles,
         )
 
     def update_information(

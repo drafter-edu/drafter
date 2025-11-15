@@ -35,16 +35,16 @@ class Page(ResponsePayload):
 
     state: Any
     content: list
-    css: List[str] = field(default_factory=list)
-    js: List[str] = field(default_factory=list)
+    css: Optional[List[str]] = None
+    js: Optional[List[str]] = None
 
     def __init__(self, state, content=None, css=None, js=None):
         if content is None:
             state, content = None, state
         self.state = state
         self.content = content
-        self.css = css if css is not None else []
-        self.js = js if js is not None else []
+        self.css = css
+        self.js = js
 
         if isinstance(content, (str, Component)):
             # If the content is a single string, convert it to a list with that string as the only element.
@@ -97,26 +97,32 @@ class Page(ResponsePayload):
     ) -> list[Message]:
         # Add CSS as style messages in the "before" channel
         messages = []
-        for css_content in self.css:
-            messages.append(
-                Message(
-                    channel_name="before",
-                    kind="style",
-                    sigil=None,
-                    content=css_content,
+        if self.css:
+            if isinstance(self.css, str):
+                self.css = [self.css]
+            for css_content in self.css:
+                messages.append(
+                    Message(
+                        channel_name="before",
+                        kind="style",
+                        sigil=None,
+                        content=css_content,
+                    )
                 )
-            )
 
         # Add JS as script messages in the "after" channel
-        for js_content in self.js:
-            messages.append(
-                Message(
-                    channel_name="after",
-                    kind="script",
-                    sigil=None,
-                    content=js_content,
+        if self.js:
+            if isinstance(self.js, str):
+                self.js = [self.js]
+            for js_content in self.js:
+                messages.append(
+                    Message(
+                        channel_name="after",
+                        kind="script",
+                        sigil=None,
+                        content=js_content,
+                    )
                 )
-            )
         return messages
 
     def make_reset_button(self) -> str:

@@ -26,7 +26,7 @@
       var Sk2 = {};
       Sk2.build = {
         githash: "2c0cb427",
-        date: "2025-11-04T18:18:22.374Z"
+        date: "2025-11-14T17:30:50.983Z"
       };
       Sk2.global = typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};
       Sk2.exportSymbol = function(name, object) {

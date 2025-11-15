@@ -42,6 +42,15 @@ class Response:
     warnings: list[DrafterWarning] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
 
+    def send_messages(self, messages: list[Message]) -> None:
+        """
+        Sends multiple messages through their specified channels.
+
+        :param messages: A list of Message instances to send.
+        """
+        for message in messages:
+            self.send(message)
+
     def send(self, message: Message) -> None:
         """
         Sends a message through the specified channel.

@@ -30,6 +30,7 @@ def index(state: str) -> Page:
             TextBox("Name", "Your name goes here", classes="name-box"),
             Button("Quit", index, style_color="red", style_float="right"),
         ],
+        css=".name-box { border: 2px solid black; }",
     )
 
 

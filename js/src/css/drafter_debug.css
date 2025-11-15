@@ -1,32 +1,72 @@
 @import url("./drafter_base.css");
 
+body {
+    height: 100vh;
+}
+
 #drafter-root-- {
+    height: 100%;
+}
 
-    #drafter-frame-- {
-        padding: 1em;
-    }
+.drafter-site-- {
+    flex-direction: column;
+    display: flex;
+    height: 100%;
+}
 
-    #drafter-body-- {
-        border: 1px solid lightgrey;
-    }
+.drafter-frame-- {
+    padding: 0em;
+    flex-grow: 1;
+}
 
-    #drafter-header-- {
-        background-color: #EEE;
-        border: 1px solid lightgrey;
-        border-bottom: 0px;
-        padding-left: 1em;
-        font-weight: bold;
+.drafter-body-- {
+    border: 1px solid lightgrey;
+}
 
-        #reset-button--, #about-button--{
-            float: right;
-            cursor: pointer;
-            background-color: white;
-            padding: 4px;
-            text-decoration: none;
-            color: black;
-        }
+.drafter-form-- {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+}
+
+.drafter-padding-h-- {
+    flex: 0 0 1em;
+    background-color: white;
+}
+
+.drafter-padding-v-- {
+    flex: 0 0 1em;
+    background-color: white;
+}
+
+.drafter-header-- {
+    background-color: #EEE;
+    border: 1px solid lightgrey;
+    border-bottom: 0px;
+    padding-left: 1em;
+    font-weight: bold;
+
+    .reset-button--, .about-button--{
+        float: right;
+        cursor: pointer;
+        background-color: white;
+        padding: 4px;
+        text-decoration: none;
+        color: black;
     }
 }
+
+.drafter-debug-- {
+    flex-grow: 1;
+    background-color: white;
+
+    pre {
+        margin: 0;
+        padding: 1em;
+        overflow: auto;
+    }
+}
+
 
 div.btlw-debug .copy-button {
     float: right;

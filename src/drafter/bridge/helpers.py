@@ -29,7 +29,7 @@ def add_style(css: str, is_page_specific: bool = False, with_class: str = "") ->
     :param is_page_specific: If True, marks the style as page-specific (will be removed on navigation).
     """
     style = document.createElement("style")
-    style.textContent = css
+    style.innerHTML = css
     if is_page_specific:
         style.setAttribute(ATTR_PAGE_SPECIFIC, "true")
     if with_class:

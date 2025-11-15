@@ -50,6 +50,7 @@ class ClientBridge:
         :param channel: The channel containing messages to process.
         :param is_page_specific: If True, marks content as page-specific (will be removed on navigation).
         """
+        # console_log("Message Received:" + repr(channel))
         if channel:
             for message in channel.messages:
                 if message.sigil is not None:
@@ -101,6 +102,8 @@ class ClientBridge:
             add_link(css, with_class=DRAFTER_TAG_CLASSES["THEME"])
         for js in initial_site_data.additional_js:
             add_script(js, with_class=DRAFTER_TAG_CLASSES["THEME"])
+        for style in initial_site_data.additional_style:
+            add_style(style, with_class=DRAFTER_TAG_CLASSES["THEME"])
         for header in initial_site_data.additional_header:
             add_header(header)
 

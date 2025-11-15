@@ -1,21 +1,21 @@
 @import url("./drafter_base.css");
 
-#drafter-root-- {
+.drafter-root-- {
 
-    #drafter-frame-- {
+    .drafter-frame-- {
         padding: 0;
         border: 0;
     }
 
-    #drafter-header-- {
+    .drafter-header-- {
         display: none;
     }
 
-    #drafter-footer-- {
+    .drafter-footer-- {
         display: none;
     }
 
-    #drafter-debug-- {
+    .drafter-debug-- {
         display: none;
     }
 }

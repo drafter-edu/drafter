@@ -1,10 +1,13 @@
-#drafter-frame-- {
+.drafter-frame-- {
     max-width: 960px;
     margin: 0 auto;
 }
 
-#drafter-body-- {
-    background-color: white;
+body {
+    margin: 0;
+}
+
+.drafter-body-- {
     box-sizing: border-box;
     padding: 20px;
     font-size: 1.5em;

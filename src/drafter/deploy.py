@@ -144,10 +144,10 @@ def add_website_css(
         server = get_main_server()
     if css is None:
         # Treat selector as raw CSS content
-        server.configuration.additional_css_content.append(selector)
+        server.configuration.additional_style_content.append(selector)
     else:
         # Create a CSS rule from selector and content
-        server.configuration.additional_css_content.append(f"{selector} {{{css}}}")
+        server.configuration.additional_style_content.append(f"{selector} {{{css}}}\n")
 
 
 def deploy_site(image_folder="images", server: Optional[ClientServer] = None):
