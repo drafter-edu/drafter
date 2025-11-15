@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/css/drafter_base.css"],"sourcesContent":[".drafter-body-- {\n    /* Might add more later */\n}\n\n.drafter-body-- .error-page pre {\n    white-space: pre-wrap;\n}"],"mappings":"AAIA,CAJC,eAIe,CAAC,WAAW,IACxB,YAAa,QACjB","names":[]}
