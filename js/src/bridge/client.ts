@@ -186,18 +186,16 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         }
     );
 
-    let handleVisit:
-        | ((url: string, formData?: FormData) => Promise<pyObject>)
-        | null = null;
+    let navigationFunc: pyFunc | null = null;
 
     class ClientBridgeWrapper implements ClientBridgeWrapperInterface {
         constructor(private clientBridge: pyObject) {}
 
         public goto(url: string, formData?: FormData) {
-            if (!handleVisit) {
-                throw new Error("handleVisit not set");
+            if (!navigationFunc) {
+                throw new Error("navigationFunc not set");
             }
-            return handleVisit(url, formData);
+            return initiateRequest(url, formData);
         }
     }
 
@@ -304,6 +302,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         const state = {
             request_id: requestId,
             url: url,
+            // TODO: Track parameters as well
         };
         const fullUrl = new URL(window.location.href);
         document.title = `${siteTitle} - ${url}`;
@@ -320,10 +319,27 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         },
     } = drafter_client_mod;
 
+    function initiateRequest(url: string, data?: FormData, remember = true) {
+        if (!navigationFunc) {
+            throw new Error("navigationFunc not set");
+        }
+        debug_log("request.initiated", url, data, navigationFunc);
+        return Sk.misceval.promiseToSuspension(
+            makeRequest(url, data).then((newRequest) => {
+                if (remember) {
+                    addToHistory(newRequest);
+                }
+                const nextVisit = navigationFunc?.tp$call([newRequest]);
+                return Sk.misceval.asyncToPromise(() => nextVisit);
+            })
+        );
+    }
+
     const update_site = new pyFunc(function update_site_func(
         response: pyObject,
         callback: pyFunc
     ): Suspension {
+        navigationFunc = callback;
         // Implementation for loading a page
         const element = document.getElementById(BODY_ELEMENT_ID);
         if (!element) {
@@ -345,24 +361,10 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                 "dom.updated_body",
                 "update_site called with",
                 response,
-                callback
+                navigationFunc
             );
             const mounted = mountNavigation(element, (navEvent: NavEvent) => {
-                debug_log(
-                    "request.initiated",
-                    navEvent.url,
-                    navEvent.data,
-                    callback
-                );
-                return Sk.misceval.promiseToSuspension(
-                    makeRequest(navEvent.url, navEvent.data).then(
-                        (newRequest) => {
-                            addToHistory(newRequest);
-                            const nextVisit = callback.tp$call([newRequest]);
-                            return Sk.misceval.asyncToPromise(() => nextVisit);
-                        }
-                    )
-                );
+                return initiateRequest(navEvent.url, navEvent.data);
             });
             debug_log(
                 "dom.mount_navigation",
@@ -462,21 +464,13 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     let popstateListener: ((event: PopStateEvent) => void) | null = null;
     drafter_client_mod.setup_navigation = new pyFunc(
         function setup_navigation_func(callback: pyFunc) {
-            handleVisit = function (url: string, formData?: FormData) {
-                debug_log("page.load_route", url);
-                return makeRequest(url, formData || new FormData()).then(
-                    (newRequest) => {
-                        const nextVisit = callback.tp$call([newRequest]);
-                        return Sk.misceval.asyncToPromise(() => nextVisit);
-                    }
-                );
-            };
+            navigationFunc = callback;
             // TODO: Handle navigation on page load by inspecting the query string
             if (window.location.search) {
                 const params = new URLSearchParams(window.location.search);
                 const route = params.get("route");
                 if (route) {
-                    handleVisit(route);
+                    initiateRequest(route, undefined, navigationFunc, false);
                 }
             }
             if (popstateListener) {
@@ -497,20 +491,14 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                         "",
                         fullUrl.toString()
                     );
-                    if (!handleVisit) {
-                        throw new Error("handleVisit not set");
-                    }
-                    handleVisit(url);
+                    initiateRequest(url, undefined, false);
                 } else {
                     debug_log("history.popstate_no_state", event);
                     document.title = siteTitle;
                     const fullUrl = new URL(window.location.href);
                     fullUrl.searchParams.delete("route");
                     window.history.replaceState({}, "", fullUrl.toString());
-                    if (!handleVisit) {
-                        throw new Error("handleVisit not set");
-                    }
-                    handleVisit("index");
+                    initiateRequest("index", undefined, false);
                 }
             };
             window.addEventListener("popstate", popstateListener);
