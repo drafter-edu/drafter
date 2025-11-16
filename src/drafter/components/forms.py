@@ -44,7 +44,7 @@ class TextBox(Component):
         kind: str = "text",
         """
         pieces = [repr(self.name)]
-        if self.default_value is not None:
+        if self.default_value != "":
             pieces.append(repr(self.default_value))
         if self.kind != "text":
             pieces.append(repr(self.kind))

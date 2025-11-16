@@ -30,6 +30,7 @@ lint:
 
 # Run tests using pytest
 test:
+	cd js && npm test
 	uv run pytest --verbose --color=yes tests
 
 # Run all checks: format, lint, and test
