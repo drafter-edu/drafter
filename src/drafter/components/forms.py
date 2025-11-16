@@ -24,13 +24,33 @@ class TextBox(Component):
         self.default_value = str(default_value) if default_value is not None else ""
         self.extra_settings = kwargs
 
+    def handle_aria(self, extra_settings: dict) -> None:
+        if "aria-label" not in extra_settings:
+            extra_settings["aria-label"] = self.name
+
     def __str__(self) -> str:
-        extra_settings = {}
+        extra_settings = dict(self.extra_settings)
         if self.default_value is not None:
             extra_settings["value"] = html.escape(self.default_value)
+        self.handle_aria(extra_settings)
         parsed_settings = self.parse_extra_settings(**extra_settings)
         # TODO: investigate whether we need to make the name safer
         return f"<input type='{self.kind}' name='{self.name}' {parsed_settings}>"
+
+    def __repr__(self) -> str:
+        """
+        name: str,
+        default_value: Optional[str] = None,
+        kind: str = "text",
+        """
+        pieces = [repr(self.name)]
+        if self.default_value is not None:
+            pieces.append(repr(self.default_value))
+        if self.kind != "text":
+            pieces.append(repr(self.kind))
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"TextBox({', '.join(pieces)})"
 
 
 @dataclass
@@ -103,10 +123,24 @@ class CheckBox(Component):
         self.default_value = bool(default_value)
         self.extra_settings = kwargs
 
+    def handle_aria(self, extra_settings: dict) -> None:
+        if "aria-label" not in extra_settings:
+            extra_settings["aria-label"] = self.name
+
     def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        extra_settings = dict(self.extra_settings)
+        self.handle_aria(extra_settings)
+        parsed_settings = self.parse_extra_settings(**extra_settings)
         checked = "checked" if self.default_value else ""
         return (
             f"<input type='hidden' name='{self.name}' value='' {parsed_settings}>"
             f"<input type='checkbox' name='{self.name}' {checked} value='checked' {parsed_settings}>"
         )
+
+    def __repr__(self) -> str:
+        pieces = [repr(self.name)]
+        if self.default_value:
+            pieces.append(f"default_value={repr(self.default_value)}")
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"CheckBox({', '.join(pieces)})"

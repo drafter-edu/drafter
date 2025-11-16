@@ -16,6 +16,7 @@
         "@chialab/esbuild-plugin-postcss": "^0.18.0",
         "@jest/globals": "^30.2.0",
         "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/user-event": "^14.6.1",
         "@types/jest": "^30.0.0",
         "@types/jquery": "^3.5.33",
         "@types/node": "^24.10.0",
