@@ -16,6 +16,9 @@ export class DebugPanel {
     private isVisible: boolean = true;
     private headerBar: DebugHeaderBar | null = null;
     private footerBar: DebugFooterBar | null = null;
+    private historyIndex: number = -1;
+    private isPlayingHistory: boolean = false;
+    private playbackInterval: number | null = null;
 
     constructor(
         private containerId: string,
@@ -103,6 +106,47 @@ export class DebugPanel {
                         <div class="drafter-debug-section-header">
                             <h4>📜 Page Visit History</h4>
                         </div>
+                        <div class="vcr-controls">
+                            <button
+                                id="vcr-first"
+                                class="vcr-button"
+                                title="Go to first visit"
+                            >
+                                ⏮
+                            </button>
+                            <button
+                                id="vcr-prev"
+                                class="vcr-button"
+                                title="Previous visit"
+                            >
+                                ⏪
+                            </button>
+                            <button
+                                id="vcr-play"
+                                class="vcr-button"
+                                title="Play/Pause"
+                            >
+                                ▶️
+                            </button>
+                            <button
+                                id="vcr-next"
+                                class="vcr-button"
+                                title="Next visit"
+                            >
+                                ⏩
+                            </button>
+                            <button
+                                id="vcr-last"
+                                class="vcr-button"
+                                title="Go to last visit"
+                            >
+                                ⏭
+                            </button>
+                            <span id="vcr-position" class="vcr-position">
+                                0 / 0
+                            </span>
+                        </div>
+                        <div id="drafter-history-list"></div>
                     </div>
                     <div
                         class="drafter-debug-section"
@@ -191,6 +235,29 @@ export class DebugPanel {
                 window.location.reload();
             });
         });
+        
+        // VCR control event handlers
+        const vcrFirst = document.getElementById("vcr-first");
+        const vcrPrev = document.getElementById("vcr-prev");
+        const vcrPlay = document.getElementById("vcr-play");
+        const vcrNext = document.getElementById("vcr-next");
+        const vcrLast = document.getElementById("vcr-last");
+        
+        if (vcrFirst) {
+            vcrFirst.addEventListener("click", () => this.vcrGoToFirst());
+        }
+        if (vcrPrev) {
+            vcrPrev.addEventListener("click", () => this.vcrStepBackward());
+        }
+        if (vcrPlay) {
+            vcrPlay.addEventListener("click", () => this.vcrTogglePlayback());
+        }
+        if (vcrNext) {
+            vcrNext.addEventListener("click", () => this.vcrStepForward());
+        }
+        if (vcrLast) {
+            vcrLast.addEventListener("click", () => this.vcrGoToLast());
+        }
     }
 
     private renderState(newState: any): void {
@@ -357,39 +424,64 @@ export class DebugPanel {
     }
 
     private renderPageVisit(visit: any): void {
-        const section = document.getElementById("drafter-debug-history");
+        // Store the visit in history
+        this.pageHistory.push(visit);
+        
+        // If not in playback mode, show the latest visit
+        if (!this.isPlayingHistory && this.historyIndex === -1) {
+            this.historyIndex = this.pageHistory.length - 1;
+        }
+        
+        // Re-render the history list
+        this.renderHistoryList();
+        this.updateVcrControls();
+    }
+    
+    private renderHistoryList(): void {
+        const section = document.getElementById("drafter-history-list");
         if (!section) {
             return;
         }
         
-        const visitElement = (
-            <div class="visit-item">
-                <div class="visit-header">
-                    <span class="visit-url">{visit.url}</span>
-                    <span class="visit-function">{visit.function_name}</span>
-                    <span class="visit-duration">{visit.duration_ms.toFixed(1)}ms</span>
-                    <span class={`visit-status ${visit.status_code < 400 ? "status-ok" : "status-error"}`}>
-                        {visit.status_code}
-                    </span>
-                </div>
-                <details>
-                    <summary>Details</summary>
-                    <div class="visit-details">
-                        <p><strong>Arguments:</strong> {visit.arguments}</p>
-                        <p><strong>Timestamp:</strong> {visit.timestamp}</p>
-                        {visit.button_pressed && (
-                            <p><strong>Button:</strong> {visit.button_pressed}</p>
-                        )}
-                    </div>
-                </details>
-            </div>
-        );
+        // Clear existing content
+        section.innerHTML = "";
         
-        // Insert at the beginning so newest is on top
-        if (section.firstChild) {
-            section.insertBefore(visitElement, section.firstChild);
-        } else {
+        // Render all visits with highlighting for current position
+        this.pageHistory.forEach((visit, index) => {
+            const isCurrentVisit = index === this.historyIndex;
+            const visitElement = (
+                <div class={`visit-item ${isCurrentVisit ? "visit-current" : ""}`}>
+                    <div class="visit-header">
+                        <span class="visit-number">#{index + 1}</span>
+                        <span class="visit-url">{visit.url}</span>
+                        <span class="visit-function">{visit.function_name}</span>
+                        <span class="visit-duration">{visit.duration_ms.toFixed(1)}ms</span>
+                        <span class={`visit-status ${visit.status_code < 400 ? "status-ok" : "status-error"}`}>
+                            {visit.status_code}
+                        </span>
+                    </div>
+                    <details>
+                        <summary>Details</summary>
+                        <div class="visit-details">
+                            <p><strong>Arguments:</strong> {visit.arguments}</p>
+                            <p><strong>Timestamp:</strong> {visit.timestamp}</p>
+                            {visit.button_pressed && (
+                                <p><strong>Button:</strong> {visit.button_pressed}</p>
+                            )}
+                        </div>
+                    </details>
+                </div>
+            );
+            
             section.appendChild(visitElement);
+        });
+        
+        // Scroll current visit into view
+        if (this.historyIndex >= 0 && this.historyIndex < this.pageHistory.length) {
+            const currentVisit = section.children[this.historyIndex] as HTMLElement;
+            if (currentVisit) {
+                currentVisit.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
         }
     }
 
@@ -502,5 +594,96 @@ export class DebugPanel {
         );
 
         section.appendChild(testElement);
+    }
+    
+    // VCR Playback Control Methods
+    
+    private updateVcrControls(): void {
+        const position = document.getElementById("vcr-position");
+        if (position) {
+            const current = this.historyIndex + 1;
+            const total = this.pageHistory.length;
+            position.textContent = `${current} / ${total}`;
+        }
+        
+        // Update play button icon
+        const playButton = document.getElementById("vcr-play");
+        if (playButton) {
+            playButton.textContent = this.isPlayingHistory ? "⏸️" : "▶️";
+            playButton.title = this.isPlayingHistory ? "Pause" : "Play";
+        }
+        
+        // Enable/disable buttons based on position
+        const firstButton = document.getElementById("vcr-first") as HTMLButtonElement;
+        const prevButton = document.getElementById("vcr-prev") as HTMLButtonElement;
+        const nextButton = document.getElementById("vcr-next") as HTMLButtonElement;
+        const lastButton = document.getElementById("vcr-last") as HTMLButtonElement;
+        
+        if (firstButton) firstButton.disabled = this.historyIndex <= 0;
+        if (prevButton) prevButton.disabled = this.historyIndex <= 0;
+        if (nextButton) nextButton.disabled = this.historyIndex >= this.pageHistory.length - 1;
+        if (lastButton) lastButton.disabled = this.historyIndex >= this.pageHistory.length - 1;
+    }
+    
+    private vcrGoToFirst(): void {
+        if (this.pageHistory.length > 0) {
+            this.historyIndex = 0;
+            this.renderHistoryList();
+            this.updateVcrControls();
+        }
+    }
+    
+    private vcrStepBackward(): void {
+        if (this.historyIndex > 0) {
+            this.historyIndex--;
+            this.renderHistoryList();
+            this.updateVcrControls();
+        }
+    }
+    
+    private vcrStepForward(): void {
+        if (this.historyIndex < this.pageHistory.length - 1) {
+            this.historyIndex++;
+            this.renderHistoryList();
+            this.updateVcrControls();
+        }
+    }
+    
+    private vcrGoToLast(): void {
+        if (this.pageHistory.length > 0) {
+            this.historyIndex = this.pageHistory.length - 1;
+            this.renderHistoryList();
+            this.updateVcrControls();
+        }
+    }
+    
+    private vcrTogglePlayback(): void {
+        this.isPlayingHistory = !this.isPlayingHistory;
+        
+        if (this.isPlayingHistory) {
+            // Start playback
+            this.playbackInterval = window.setInterval(() => {
+                if (this.historyIndex < this.pageHistory.length - 1) {
+                    this.vcrStepForward();
+                } else {
+                    // Reached the end, stop playback
+                    this.vcrStopPlayback();
+                }
+            }, 2000); // Play one step every 2 seconds
+        } else {
+            // Stop playback
+            this.vcrStopPlayback();
+        }
+        
+        this.updateVcrControls();
+    }
+    
+    private vcrStopPlayback(): void {
+        if (this.playbackInterval !== null) {
+            window.clearInterval(this.playbackInterval);
+            this.playbackInterval = null;
+        }
+        this.isPlayingHistory = false;
+        this.updateVcrControls();
     }
 }
