@@ -1,6 +1,5 @@
-from dataclasses import dataclass, field
 import traceback
-from typing import Optional, Any
+from typing import Optional
 from drafter.monitor.events.base import BaseEvent
 from drafter.monitor.events.errors import DrafterError, DrafterInfo, DrafterWarning
 from drafter.monitor.bus import get_main_event_bus

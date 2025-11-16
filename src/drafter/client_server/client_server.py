@@ -1,17 +1,17 @@
 from dataclasses import dataclass
-from typing import Any, Optional, List, Tuple, Union, Dict
+from typing import Any, Optional, List
 import time
+from datetime import datetime
 
 from drafter.client_server.context import Scope
 from drafter.client_server.errors import VisitError
 from drafter.data.channel import Message
 from drafter.history.state import SiteState
 from drafter.monitor.events.errors import DrafterError
-from drafter.monitor.bus import EventBus
 from drafter.monitor.events.routes import RouteAddedEvent
 from drafter.monitor.events.state import UpdatedStateEvent
+from drafter.monitor.events.request import RequestEvent, ResponseEvent, PageVisitEvent
 from drafter.monitor.monitor import Monitor
-from drafter.payloads import Page
 from drafter.payloads.kinds.error_page import ErrorPage, SimpleErrorPage
 from drafter.payloads.payloads import ResponsePayload
 from drafter.data.request import Request
@@ -21,7 +21,7 @@ from drafter.payloads.verification import (
     verify_response_payload_type,
 )
 from drafter.router.routes import Router
-from drafter.monitor.audit import log_error, log_warning, log_info, log_data
+from drafter.monitor.audit import log_error, log_info, log_data
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import Site
 from drafter.config.client_server import ClientServerConfiguration
@@ -263,6 +263,7 @@ class ClientServer:
         :return: The result of the route function.
         """
         start_time = time.time()
+        route_func = None  # Initialize for tracking
         log_info(
             "request.received",
             f"Request received: {request}",
@@ -270,6 +271,21 @@ class ClientServer:
             repr(request),
             route=request.url,
         )
+
+        # Emit RequestEvent
+        log_data(
+            RequestEvent(
+                url=request.url,
+                action=request.action,
+                args=str(request.args),
+                kwargs=str(request.kwargs),
+                request_id=request.id,
+            ),
+            "client_server.visit",
+            route=request.url,
+            request_id=request.id,
+        )
+
         with self.requests.push(request):
             try:
                 route_func = self.get_route(request)
@@ -302,13 +318,57 @@ class ClientServer:
                 504,
             )
         end_time = time.time()
-        response_time = end_time - start_time
+        response_time = (end_time - start_time) * 1000  # Convert to milliseconds
         log_info(
             "response.created",
             f"Response created for request ID {request.id}",
             "client_server.visit",
             f"Response: {repr(response)}",
             route=request.url,
+        )
+
+        # Emit ResponseEvent
+        log_data(
+            ResponseEvent(
+                status_code=response.status_code,
+                payload_type=type(payload).__name__,
+                body_length=len(body) if body else 0,
+                has_errors=len(response.errors) > 0,
+                has_warnings=len(response.warnings) > 0,
+                duration_ms=response_time,
+                response_id=response.id,
+                request_id=request.id,
+            ),
+            "client_server.visit",
+            route=request.url,
+            request_id=request.id,
+            response_id=response.id,
+        )
+
+        # Emit PageVisitEvent for complete history tracking
+        function_name = (
+            route_func.__name__
+            if route_func and hasattr(route_func, "__name__")
+            else "unknown"
+        )
+        button_pressed = ""
+        if hasattr(request, "kwargs") and isinstance(request.kwargs, dict):
+            button_pressed = request.kwargs.get("button_pressed", "")
+
+        log_data(
+            PageVisitEvent(
+                url=request.url,
+                function_name=function_name,
+                arguments=str(request.args),
+                status_code=response.status_code,
+                duration_ms=response_time,
+                timestamp=datetime.now().isoformat(),
+                button_pressed=button_pressed,
+            ),
+            "client_server.visit",
+            route=request.url,
+            request_id=request.id,
+            response_id=response.id,
         )
         return response
 

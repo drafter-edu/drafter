@@ -264,3 +264,293 @@ div.btlw-container img {
     display: block;
 }
 
+/* Debug panel message styles */
+.drafter-debug-- .debug-message {
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    border-left: 4px solid #ccc;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.drafter-debug-- .error-message {
+    border-left-color: #d9534f;
+    background: rgba(217, 83, 79, 0.1);
+}
+
+.drafter-debug-- .warning-message {
+    border-left-color: #f0ad4e;
+    background: rgba(240, 173, 78, 0.1);
+}
+
+.drafter-debug-- .info-message {
+    border-left-color: #5bc0de;
+    background: rgba(91, 192, 222, 0.1);
+}
+
+.drafter-debug-- .message-header {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.drafter-debug-- .message-where {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.drafter-debug-- .message-details {
+    font-size: 0.9em;
+    margin-top: 4px;
+    font-family: monospace;
+}
+
+/* Page visit styles */
+.drafter-debug-- .visit-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+}
+
+.drafter-debug-- .visit-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.drafter-debug-- .visit-url {
+    font-weight: bold;
+    font-family: monospace;
+}
+
+.drafter-debug-- .visit-function {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.drafter-debug-- .visit-duration {
+    color: #5bc0de;
+    font-size: 0.9em;
+}
+
+.drafter-debug-- .visit-status {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.drafter-debug-- .status-ok {
+    background-color: #5cb85c;
+    color: white;
+}
+
+.drafter-debug-- .status-error {
+    background-color: #d9534f;
+    color: white;
+}
+
+.drafter-debug-- .visit-details {
+    margin-top: 8px;
+    font-size: 0.9em;
+}
+
+/* State action buttons */
+.drafter-debug-- .state-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.drafter-debug-- .state-action-btn {
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color: white;
+    border: 1px solid #3a7db8;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.drafter-debug-- .state-action-btn:hover {
+    background-color: #e6f2ff;
+}
+
+/* Route styles */
+.drafter-debug-- .route-signature {
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+}
+
+.drafter-debug-- .current-route-content {
+    padding: 8px;
+    border-radius: 4px;
+    background: rgba(91, 192, 222, 0.1);
+    border: 1px solid #5bc0de;
+    font-weight: bold;
+}
+
+/* Test status styles */
+.drafter-debug-- .test-summary {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+}
+
+.drafter-debug-- .test-summary-stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.drafter-debug-- .test-total {
+    font-weight: bold;
+    color: #333;
+}
+
+.drafter-debug-- .test-passed {
+    color: #5cb85c;
+    font-weight: bold;
+}
+
+.drafter-debug-- .test-failed {
+    color: #d9534f;
+    font-weight: bold;
+}
+
+.drafter-debug-- .test-case {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+}
+
+.drafter-debug-- .test-case.test-passed {
+    border-left: 4px solid #5cb85c;
+}
+
+.drafter-debug-- .test-case.test-failed {
+    border-left: 4px solid #d9534f;
+    background: rgba(217, 83, 79, 0.05);
+}
+
+.drafter-debug-- .test-case-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.drafter-debug-- .test-status {
+    font-size: 1.2em;
+}
+
+.drafter-debug-- .test-line {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.drafter-debug-- .test-caller {
+    font-family: monospace;
+    font-size: 0.9em;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.drafter-debug-- .test-diff {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 3px;
+}
+
+.drafter-debug-- .test-diff summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #666;
+}
+
+.drafter-debug-- .test-diff summary:hover {
+    color: #333;
+}
+
+.drafter-debug-- .test-diff table {
+    width: 100%;
+    margin-top: 10px;
+    font-size: 0.85em;
+    border-collapse: collapse;
+}
+
+.drafter-debug-- .test-diff table td,
+.drafter-debug-- .test-diff table th {
+    padding: 4px 8px;
+    text-align: left;
+    vertical-align: top;
+    font-family: monospace;
+}
+
+/* VCR Playback Controls */
+.drafter-debug-- .vcr-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.drafter-debug-- .vcr-button {
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #3a7db8;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: all 0.2s;
+}
+
+.drafter-debug-- .vcr-button:hover:not(:disabled) {
+    background: #e6f2ff;
+    transform: scale(1.05);
+}
+
+.drafter-debug-- .vcr-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.drafter-debug-- .vcr-position {
+    margin-left: auto;
+    font-weight: bold;
+    color: #666;
+    font-family: monospace;
+}
+
+.drafter-debug-- .visit-current {
+    border: 2px solid #007acc;
+    background: rgba(0, 122, 204, 0.1);
+    box-shadow: 0 0 8px rgba(0, 122, 204, 0.3);
+}
+
+.drafter-debug-- .visit-number {
+    font-weight: bold;
+    color: #007acc;
+    margin-right: 8px;
+}
+
+.drafter-debug-- #drafter-history-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+

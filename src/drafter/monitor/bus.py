@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Callable, Optional, Dict
+from typing import Callable, Optional
 from drafter.monitor.telemetry import TelemetryEvent
 
 

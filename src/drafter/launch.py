@@ -29,6 +29,12 @@ def start_server(initial_state=None, main_user_path=None, **kwargs) -> None:
         server.monitor.listen_for_events()
 
         server.start(initial_state=initial_state)
+
+        # Emit test summary after server starts (tests run during module loading)
+        from drafter.testing import _bakery_tests
+
+        _bakery_tests.emit_test_summary()
+
         initial_request = client_bridge.make_initial_request()
 
         def handle_visit(request):

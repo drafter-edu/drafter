@@ -37,7 +37,7 @@ def get_line_code(depth=DEFAULT_STACK_DEPTH):
         line = frame[1]
         code = frame[3]
         return line, code
-    except Exception as e:
+    except Exception:
         # logger.error(f"Error getting line and code: {e}")
         return None, None
 
@@ -67,9 +67,95 @@ class BakeryTests:
                 line = -1
                 code = "<Missing code>"
             self.tests.append(BakeryTestCase(args, kwargs, result, line, code))
+
+            # Emit telemetry event for this test
+            self._emit_test_event(BakeryTestCase(args, kwargs, result, line, code))
+
             return result
 
         return new_function
+
+    def _emit_test_event(self, test_case: BakeryTestCase):
+        """Emit a telemetry event for a test case."""
+        try:
+            from drafter.monitor.audit import log_data
+            from drafter.monitor.events.tests import TestCaseEvent
+            from drafter.payloads.kinds.page import Page
+
+            # Only emit events for Page tests
+            if len(test_case.args) == 2:
+                given, expected = test_case.args
+                if isinstance(expected, Page):
+                    # Get string representations
+                    given_str = repr(given)
+                    expected_str = repr(expected)
+
+                    # Generate diff if test failed
+                    diff_html = ""
+                    if not test_case.result:
+                        try:
+                            from drafter.history import format_page_content
+
+                            DIFF_WRAP_WIDTH = 60
+                            given_formatted, _ = format_page_content(
+                                given, DIFF_WRAP_WIDTH
+                            )
+                            expected_formatted, _ = format_page_content(
+                                expected, DIFF_WRAP_WIDTH
+                            )
+                            diff_html = diff_tests(
+                                given_formatted,
+                                expected_formatted,
+                                "Your function returned",
+                                "But the test expected",
+                            )
+                        except Exception:
+                            pass
+
+                    log_data(
+                        TestCaseEvent(
+                            line=test_case.line,
+                            caller=test_case.caller,
+                            passed=bool(test_case.result),
+                            given=given_str,
+                            expected=expected_str,
+                            diff_html=diff_html,
+                        ),
+                        "testing.track_bakery_tests",
+                    )
+        except Exception:
+            # Don't let telemetry errors break tests
+            pass
+
+    def emit_test_summary(self):
+        """Emit a summary of all tests."""
+        try:
+            from drafter.monitor.audit import log_data
+            from drafter.monitor.events.tests import TestSummaryEvent
+            from drafter.payloads.kinds.page import Page
+
+            # Count tests
+            total = 0
+            passed = 0
+            for test_case in self.tests:
+                if len(test_case.args) == 2:
+                    given, expected = test_case.args
+                    if isinstance(expected, Page):
+                        total += 1
+                        if test_case.result:
+                            passed += 1
+
+            if total > 0:
+                log_data(
+                    TestSummaryEvent(
+                        total=total,
+                        passed=passed,
+                        failed=total - passed,
+                    ),
+                    "testing.emit_test_summary",
+                )
+        except Exception:
+            pass
 
 
 # Modifies Bakery's copy of assert_equal, and also provides a new version for folks who already imported
