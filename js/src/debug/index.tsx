@@ -196,9 +196,9 @@ export class DebugPanel {
                 this.renderState(this.currentState);
                 break;
             default:
-                console.warn(
-                    `DebugPanel: Unhandled event type '${event.event_type}'`
-                );
+                // console.warn(
+                //     `DebugPanel: Unhandled event type '${event.event_type}'`
+                // );
                 break;
         }
     }

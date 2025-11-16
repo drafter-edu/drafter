@@ -82,11 +82,13 @@ def remove_page_content() -> None:
     # Remove page-specific style tags
     elements = list(document.querySelectorAll(f"style[{ATTR_PAGE_SPECIFIC}='true']"))
     elements.extend(document.querySelectorAll(f"script[{ATTR_PAGE_SPECIFIC}='true']"))
+    head = document.getElementsByTagName("head")[0]
+
+    if not head:
+        return
 
     for element in elements:
-        if element.parentNode:
-            # TODO: Haven't implemented parentNode yet in skulpt
-            element.parentNode.removeChild(element)
+        head.removeChild(element)
 
 
 def remove_existing_theme(theme_class: str) -> None:

@@ -3,10 +3,10 @@
  */
 
 import { describe, test, expect } from "@jest/globals";
-import "../../../../src/drafter/assets/skulpt.js";
-import "../../../../src/drafter/assets/skulpt-stdlib.js";
-import "../../../../src/drafter/assets/skulpt-drafter.js";
-import "../../../../src/drafter/assets/drafter.js";
+import "../../../../src/drafter/assets/js/skulpt.js";
+import "../../../../src/drafter/assets/js/skulpt-stdlib.js";
+import "../../../../src/drafter/assets/js/skulpt-drafter.js";
+import "../../../../src/drafter/assets/js/drafter.js";
 import { builtinRead, setupSkulpt } from "../../skulpt-tools.js";
 import { runStudentCode } from "../../index";
 import * as fs from "fs";

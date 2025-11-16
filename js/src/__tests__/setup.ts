@@ -9,8 +9,11 @@ globalThis.console = {
     },
 };
 
-globalThis.DecompressionStream = class {
-    constructor() {
-        // Todo
-    }
-};
+const noop = () => {};
+Object.defineProperty(window, "scrollTo", { value: noop, writable: true });
+
+// globalThis.DecompressionStream = class {
+//     constructor() {
+//         // Todo
+//     }
+// };

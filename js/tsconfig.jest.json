@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "lib": ["ES2022", "DOM", "DOM.Iterable"],
+        "strict": true,
+        "jsx": "react-jsx",
+        "jsxImportSource": "jsx-dom",
+        "types": ["node", "jest"],
+        "noEmit": true,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "isolatedModules": false
+    },
+    "include": ["src", "src/__tests__"]
+}
