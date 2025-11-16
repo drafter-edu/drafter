@@ -1,7 +1,11 @@
 from dataclasses import dataclass
 from functools import wraps
 from typing import Any
-import difflib
+
+from drafter.diffing import diff_tests
+from drafter.monitor.audit import log_data
+from drafter.monitor.events.tests import TestCaseEvent
+from drafter.history.formatting import format_page_content
 
 try:
     import bakery
@@ -67,9 +71,52 @@ class BakeryTests:
                 line = -1
                 code = "<Missing code>"
             self.tests.append(BakeryTestCase(args, kwargs, result, line, code))
+            try:
+                self._emit_test_event(BakeryTestCase(args, kwargs, result, line, code))
+            except Exception as e:
+                print(f"Error emitting test event: {e}")
             return result
 
         return new_function
+
+    def _emit_test_event(self, test_case: BakeryTestCase):
+        """Emit a test case event to the main event bus."""
+        if len(test_case.args) >= 2:
+            expected = test_case.args[0]
+            actual = test_case.args[1]
+        elif len(test_case.args) == 1:
+            expected = test_case.args[0]
+            actual = None
+        else:
+            expected = None
+            actual = None
+
+        actual_str = repr(actual)
+        expected_str = repr(expected)
+
+        diff_html = ""
+        if not test_case.result:
+            actual_formatted, _ = format_page_content(actual)
+            expected_formatted, _ = format_page_content(expected)
+
+            diff_html = diff_tests(
+                actual_formatted,
+                expected_formatted,
+                "Your function returned",
+                "But the test expected",
+            )
+
+        log_data(
+            TestCaseEvent(
+                line=test_case.line,
+                caller=test_case.caller,
+                passed=bool(test_case.result),
+                given=actual_str,
+                expected=expected_str,
+                diff_html=diff_html,
+            ),
+            "testing.track_bakery_tests",
+        )
 
 
 # Modifies Bakery's copy of assert_equal, and also provides a new version for folks who already imported
@@ -89,21 +136,3 @@ else:
             "The Bakery testing library is not installed; skipping assert_equal tests. "
             "To fix this, you can install Bakery with 'pip install bakery' or use a different testing framework."
         )
-
-
-DIFF_INDENT_WIDTH = 1
-DIFF_WRAP_WIDTH = 60
-differ = difflib.HtmlDiff(tabsize=DIFF_INDENT_WIDTH, wrapcolumn=DIFF_WRAP_WIDTH)
-
-
-def diff_tests(left, right, left_name, right_name):
-    """Compare two strings and show the differences in a table."""
-    try:
-        table = differ.make_table(
-            left.splitlines(), right.splitlines(), left_name, right_name
-        )
-        return table
-    except:
-        if left == right:
-            return "No differences found."
-        return f"<pre>{left}</pre><pre>{right}</pre>"

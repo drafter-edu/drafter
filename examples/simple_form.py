@@ -4,13 +4,21 @@ from drafter import *
 @route
 def index(state: str) -> Page:
     return Page(
-        state, ["Enter your name:", TextBox("name"), Button("Submit", process_form)]
+        state, ["Enter your name:", TextBox("name"), Button("Submit", "process_form")]
     )
 
 
 @route
 def process_form(state: str, name: str) -> Page:
     return Page(state, ["Hello, " + name[0] + "!"])
+
+
+assert_equal(
+    index("Test"),
+    Page(
+        "Test", ["Enter your name:", TextBox("name"), Button("Submit", "process_form")]
+    ),
+)
 
 
 start_server("")

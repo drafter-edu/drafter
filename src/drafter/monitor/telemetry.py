@@ -6,8 +6,8 @@ Telemetry is information that gets collected from various parts of the system
 aggregation and presentation.
 """
 
-from dataclasses import dataclass, field
-from typing import Any, Optional, Dict, List
+from dataclasses import dataclass
+from typing import Any, Optional, Dict
 from datetime import datetime
 
 from drafter.monitor.events.base import BaseEvent

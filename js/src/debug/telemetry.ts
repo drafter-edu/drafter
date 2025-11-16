@@ -1,6 +1,28 @@
+import type {
+    DrafterError,
+    DrafterWarning,
+    DrafterInfo,
+} from "./telemetry/errors";
+import type {
+    RequestEvent,
+    ResponseEvent,
+    OutcomeEvent,
+    PageVisitEvent,
+} from "./telemetry/requests";
 import type { UpdatedStateEvent } from "./telemetry/state";
+import type { TestCaseEvent } from "./telemetry/tests";
 
-export type TypedEvent = RouteAddedEvent | UpdatedStateEvent;
+export type TypedEvent =
+    | RouteAddedEvent
+    | UpdatedStateEvent
+    | RequestEvent
+    | ResponseEvent
+    | OutcomeEvent
+    | PageVisitEvent
+    | DrafterError
+    | DrafterWarning
+    | DrafterInfo
+    | TestCaseEvent;
 
 export interface TelemetryEvent {
     event_type: string;

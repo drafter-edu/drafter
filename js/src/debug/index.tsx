@@ -108,7 +108,7 @@ export class DebugPanel {
                     ></div>
                     <div
                         class="drafter-debug-section"
-                        id="drafter-debug-warnings"
+                        id="drafter-debug-tests"
                     ></div>
                     <div
                         class="drafter-debug-section"
