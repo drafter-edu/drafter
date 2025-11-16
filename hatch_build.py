@@ -43,7 +43,10 @@ class CustomHook(BuildHookInterface):
         # 2) Copy artifacts
         built = js / "dist"
         for p in built.glob("*"):
-            shutil.copy2(p, out / p.name)
+            if p.is_file():
+                shutil.copy2(p, out / p.name)
+            elif p.is_dir():
+                shutil.copytree(p, out / p.name, dirs_exist_ok=True)
 
         # 3) Ensure Skulpt runtime files exist in assets
         skulpt_dir = os.environ.get("SKULPT_DIR")
