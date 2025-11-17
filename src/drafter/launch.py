@@ -1,5 +1,16 @@
 from drafter.utils import is_skulpt, seek_file_by_line
-from drafter.client_server.commands import get_main_server
+from drafter.client_server.commands import get_main_server, set_main_server
+from drafter.client_server.client_server import ClientServer
+
+
+def reset_server() -> None:
+    """
+    Resets the Drafter server to its initial state.
+    This clears all routes, state, and resets the server configuration.
+    Useful for testing purposes to ensure a clean state between tests.
+    """
+    server = get_main_server()
+    server.reset()
 
 
 def start_server(initial_state=None, main_user_path=None, **kwargs) -> None:
