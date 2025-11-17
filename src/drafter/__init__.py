@@ -30,7 +30,7 @@ from drafter.components import (
     FileUpload,
     MatPlotLibPlot,
 )
-from drafter.launch import start_server
+from drafter.launch import start_server, reset_server
 
 from drafter.styling.styling import (
     update_style,
@@ -84,6 +84,7 @@ __all__ = [
     "set_main_server",
     "route",
     "start_server",
+    "reset_server",
     "PageContent",
     "Div",
     "Span",
