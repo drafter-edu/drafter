@@ -65,11 +65,19 @@ export function setupSkulpt() {
     void Sk;
 }
 
+export function saveSkulptFile(path: string, contents: string) {
+    if (Sk.builtinFiles === undefined) {
+        Sk.builtinFiles = { files: {} };
+    }
+    Sk.builtinFiles["files"][path] = contents;
+}
+
 export async function startServer(
     pythonCode: string,
     mainFilename = "main",
     presentErrors = true
 ): Promise<void> {
+    saveSkulptFile(mainFilename + ".py", pythonCode);
     try {
         return Sk.misceval
             .asyncToPromise(() => {

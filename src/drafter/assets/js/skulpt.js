@@ -25,8 +25,8 @@
     "src/util.js"() {
       var Sk2 = {};
       Sk2.build = {
-        githash: "2c0cb427",
-        date: "2025-11-14T17:30:50.983Z"
+        githash: "51426da0",
+        date: "2025-11-18T18:25:35.279Z"
       };
       Sk2.global = typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};
       Sk2.exportSymbol = function(name, object) {
@@ -10025,12 +10025,58 @@
         },
         base: Exception
       });
+      Sk.builtin.code = function(trace) {
+        if (!(this instanceof Sk.builtin.code)) {
+          return new Sk.builtin.code(trace);
+        }
+        this.co_filename = trace.filename || "<unknown>";
+        this.co_name = trace.scope || "<unknown>";
+        this.co_firstlineno = trace.lineno || -1;
+        this.__class__ = Sk.builtin.code;
+        return this;
+      };
+      Sk.abstr.setUpInheritance("code", Sk.builtin.code, Sk.builtin.object);
+      Sk.builtin.code.prototype.tp$getattr = function(name) {
+        if (name != null && (Sk.builtin.checkString(name) || typeof name === "string")) {
+          var _name = name;
+          if (Sk.builtin.checkString(name)) {
+            _name = Sk.ffi.remapToJs(name);
+          }
+          switch (_name) {
+            case "co_filename":
+              return Sk.ffi.remapToPy(this.co_filename);
+            case "co_name":
+              return Sk.ffi.remapToPy(this.co_name);
+            case "co_firstlineno":
+              return new Sk.builtin.int_(this.co_firstlineno);
+            // Other code object attributes can be added here
+            case "co_argcount":
+              return new Sk.builtin.int_(0);
+            case "co_flags":
+              return new Sk.builtin.int_(0);
+            case "co_nlocals":
+              return new Sk.builtin.int_(0);
+          }
+        }
+        return Sk.generic.getAttr(this, name);
+      };
+      Sk.builtin.code.prototype["$r"] = function() {
+        return new Sk.builtin.str("<code object " + this.co_name + ', file "' + this.co_filename + '", line ' + this.co_firstlineno + ">");
+      };
+      Sk.exportSymbol("Sk.builtin.code", Sk.builtin.code);
       Sk.builtin.frame = function(trace, index = 0) {
         if (!(this instanceof Sk.builtin.frame)) {
-          return new Sk.builtin.frame(trace);
+          return new Sk.builtin.frame(trace, index);
         }
         this.trace = trace;
         this.index = index;
+        this.f_back = Sk.builtin.none.none$;
+        this.f_code = new Sk.builtin.code(trace);
+        this.f_globals = Sk.builtin.none.none$;
+        this.f_locals = Sk.builtin.none.none$;
+        this.f_builtins = Sk.builtin.none.none$;
+        this.f_lasti = new Sk.builtin.int_(-1);
+        this.f_trace = Sk.builtin.none.none$;
         this.__class__ = Sk.builtin.frame;
         return this;
       };
@@ -10051,30 +10097,30 @@
           }
           switch (_name) {
             case "f_back":
-              return Sk.builtin.none.none$;
+              return this.f_back;
             case "f_builtins":
-              return Sk.builtin.none.none$;
+              return this.f_builtins;
             case "f_code":
-              return Sk.builtin.none.none$;
+              return this.f_code;
             case "f_globals":
-              return Sk.builtin.none.none$;
+              return this.f_globals;
             case "f_lasti":
-              return Sk.builtin.none.none$;
+              return this.f_lasti;
             case "f_lineno":
               return Sk.ffi.remapToPy(this.trace.lineno);
             case "f_line":
               return Sk.ffi.remapToPy(line);
             case "f_locals":
-              return Sk.builtin.none.none$;
+              return this.f_locals;
             case "f_trace":
-              return Sk.builtin.none.none$;
+              return this.f_trace;
             case "co_filename":
               return Sk.ffi.remapToPy(this.trace.filename);
             case "co_name":
               return Sk.ffi.remapToPy(this.trace.scope);
           }
         }
-        return Sk.builtin.object.prototype.GenericGetAttr(name);
+        return Sk.generic.getAttr(this, name);
       };
       Sk.builtin.frame.prototype["$r"] = function() {
         return new Sk.builtin.str("<frame object>");
@@ -10094,12 +10140,24 @@
       };
       Sk.abstr.setUpInheritance("traceback", Sk.builtin.traceback, Sk.builtin.object);
       Sk.builtin.traceback.fromList = function(traces) {
-        var current = Sk.builtin.traceback(traces[0]), first = current;
-        for (var i = 1; i < traces.length; i++) {
-          current.tb_next = Sk.builtin.traceback(traces[i]);
+        if (!traces || traces.length === 0) {
+          return Sk.builtin.none.none$;
+        }
+        let current = new Sk.builtin.traceback(traces[0]);
+        let first = current;
+        let frames = [current.tb_frame];
+        for (let i = 1; i < traces.length; i++) {
+          current.tb_next = new Sk.builtin.traceback(traces[i]);
           current = current.tb_next;
+          frames.push(current.tb_frame);
         }
         current.tb_next = Sk.builtin.none.none$;
+        for (let i = 0; i < frames.length - 1; i++) {
+          frames[i].f_back = frames[i + 1];
+        }
+        if (frames.length > 0) {
+          frames[frames.length - 1].f_back = Sk.builtin.none.none$;
+        }
         return first;
       };
       Sk.builtin.traceback.prototype.tp$getattr = function(name) {
@@ -10116,7 +10174,7 @@
               return this[_name];
           }
         }
-        return Sk.builtin.object.prototype.GenericGetAttr(name);
+        return Sk.generic.getAttr(this, name);
       };
       Sk.builtin.traceback.prototype["$r"] = function() {
         return new Sk.builtin.str("<traceback object>");
@@ -10248,6 +10306,21 @@
         }
       };
       Sk.exportSymbol("Sk.misceval.Suspension", Sk.misceval.Suspension);
+      Sk.sourceMaps = Sk.sourceMaps || {};
+      Sk.registerSourceMap = function(filename, source) {
+        if (source) {
+          Sk.sourceMaps[filename] = source.split("\n");
+        }
+      };
+      Sk.exportSymbol("Sk.registerSourceMap", Sk.registerSourceMap);
+      Sk.getSourceLine = function(filename, lineno) {
+        var sourceLines = Sk.sourceMaps[filename];
+        if (sourceLines && lineno > 0 && lineno <= sourceLines.length) {
+          return sourceLines[lineno - 1];
+        }
+        return void 0;
+      };
+      Sk.exportSymbol("Sk.getSourceLine", Sk.getSourceLine);
       Sk.misceval.retryOptionalSuspensionOrThrow = function(susp, message) {
         while (susp instanceof Sk.misceval.Suspension) {
           if (!susp.optional) {
@@ -11021,19 +11094,24 @@
         return klass;
       };
       Sk.exportSymbol("Sk.misceval.buildClass", Sk.misceval.buildClass);
-      Sk.misceval.handleTraceback = function(err, currLineNo, currColNo, currSource, filename, scopeName) {
+      Sk.misceval.handleTraceback = function(err, currLineNo, currColNo, filename, scopeName) {
         if (err instanceof Sk.builtin.TimeoutError) {
           Sk.execStart = Date.now();
           Sk.execPaused = 0;
         }
         if (!(err instanceof Sk.builtin.BaseException)) {
           err = new Sk.builtin.ExternalError(err);
+          console.error("Native Error", err);
         }
         Sk.err = err;
+        let source = void 0;
+        if (filename && currLineNo) {
+          source = Sk.getSourceLine(filename, currLineNo);
+        }
         err.traceback.push({
           lineno: currLineNo,
           colno: currColNo,
-          source: currSource,
+          source,
           filename,
           scope: scopeName
         });
@@ -11079,7 +11157,7 @@
         }
       };
       Sk.exportSymbol("Sk.misceval.timeoutCheck", Sk.misceval.timeoutCheck);
-      Sk.misceval.injectSusp = function($child, $blk, $loc, $gbl, $exc, $err, $postfinally, $filename, $lineno, $colno, $source, $tmps) {
+      Sk.misceval.injectSusp = function($child, $blk, $loc, $gbl, $exc, $err, $postfinally, $filename, $lineno, $colno, $tmps) {
         var susp = new Sk.misceval.Suspension();
         susp.child = $child;
         susp.data = susp.child.data;
@@ -11092,7 +11170,6 @@
         susp.$filename = $filename;
         susp.$lineno = $lineno;
         susp.$colno = $colno;
-        susp.source = $source;
         susp.optional = susp.child.optional;
         susp.$tmps = $tmps;
         return susp;
@@ -28672,29 +28749,18 @@
           }
         };
       };
-      Compiler.prototype.getSourceLine = function(lineno) {
-        Sk.asserts.assert(this.source);
-        return this.source[lineno - 1];
-      };
       Compiler.prototype.annotateSource = function(ast, shouldStep) {
-        var i;
         var col_offset;
         var lineno;
-        var sourceLine;
         if (this.source) {
           const astName = ast._astname;
           lineno = ast.lineno;
           col_offset = ast.col_offset;
-          sourceLine = this.getSourceLine(lineno);
           Sk.asserts.assert(ast.lineno !== void 0 && ast.col_offset !== void 0);
           let isDocstring = !!(ast.constructor === Sk.astnodes.Expr && ast.value.constructor === Sk.astnodes.Str);
-          if (shouldStep && (!this.filename || !this.filename.startsWith("src/lib/"))) {
+          if (shouldStep) {
             out("\n$currLineNo=", lineno, ";$currColNo=", col_offset, ";");
-            let chompedLine = sourceLine;
-            if (chompedLine.length > 24) {
-              chompedLine = chompedLine.substr(0, 24) + "...";
-            }
-            out("Sk.currFilename=$fname;$currSource=", JSON.stringify(chompedLine), ";");
+            out("Sk.currFilename=$fname;");
             out(
               `Sk.afterSingleExecution && Sk.afterSingleExecution($gbl,$getLocals(),${lineno}, ${col_offset}, $fname, ${isDocstring}, '${astName}');
 `
@@ -28780,7 +28846,7 @@
           }
           if (Sk.yieldLimit !== null && this.u.canSuspend) {
             output += "if ($dateNow - Sk.lastYield > Sk.yieldLimit) {";
-            output += "var $susp = $saveSuspension($mys(), $fname,$currLineNo,$currColNo, $currSource);";
+            output += "var $susp = $saveSuspension($mys(), $fname,$currLineNo,$currColNo);";
             output += "$susp.$blk = $blk;";
             output += "$susp.optional = true;";
             output += "return $susp;";
@@ -28816,9 +28882,9 @@
           retblk = this.newBlock("function return or resume suspension");
           this._jump(retblk);
           this.setBlock(retblk);
-          e = e || { lineno: "$currLineNo", col_offset: "$currColNo", source: "$currSource" };
+          e = e || { lineno: "$currLineNo", col_offset: "$currColNo" };
           out(
-            "if ($ret && $ret.$isSuspension) { return $saveSuspension($ret,$fname," + e.lineno + "," + e.col_offset + "," + e.source + "); }"
+            "if ($ret && $ret.$isSuspension) { return $saveSuspension($ret,$fname," + e.lineno + "," + e.col_offset + "); }"
           );
           this.u.doesSuspend = true;
           this.u.tempsToSave = this.u.tempsToSave.concat(this.u.localtemps);
@@ -29232,6 +29298,7 @@
           );
           positionalArgs = "[__class__,self]";
         }
+        out(`Sk.execStack.push(["call", "${this.filename}", ${e.lineno}, ${e.col_offset}]);`);
         out(
           "$ret = (",
           func,
@@ -29249,6 +29316,7 @@
           positionalArgs,
           ");"
         );
+        out(`Sk.execStack.pop();`);
         this._checkSuspension(e);
         return this._gr("call", "$ret");
       };
@@ -29474,6 +29542,7 @@
               );
             }
             Sk.asserts.fail("unhandled Num type");
+            break;
           case Sk.astnodes.Bytes:
             if (Sk.__future__.python3) {
               const source = [];
@@ -29832,8 +29901,7 @@
         localsToSave = localsToSaveWithoutDuplicates;
         var hasCell = unit.ste.blockType === Sk.SYMTAB_CONSTS.FunctionBlock && unit.ste.childHasFree;
         var output = localsToSave.length > 0 ? "var " + localsToSave.join(",") + ";" : "";
-        output += "var $wakeFromSuspension = function() {var susp = " + unit.scopename + ".$wakingSuspension; " + unit.scopename + ".$wakingSuspension = undefined;$blk=susp.$blk; $loc=susp.$loc; $gbl=susp.$gbl; $exc=susp.$exc; $err=susp.$err; $postfinally=susp.$postfinally;$currLineNo=susp.$lineno;$currColNo=susp.$colno;$currSource=susp.$source;Sk.lastYield=Date.now();" + //"console.log('WAKEY', $fname, $loc, $gbl, $exc, $exc.length, $currColNo, $currLineNo, $err, $currSource,$blk);" +
-        (hasCell ? "$cell=susp.$cell;" : "");
+        output += "var $wakeFromSuspension = function() {var susp = " + unit.scopename + ".$wakingSuspension; " + unit.scopename + ".$wakingSuspension = undefined;$blk=susp.$blk; $loc=susp.$loc; $gbl=susp.$gbl; $exc=susp.$exc; $err=susp.$err; $postfinally=susp.$postfinally;$currLineNo=susp.$lineno;$currColNo=susp.$colno;Sk.lastYield=Date.now();" + (hasCell ? "$cell=susp.$cell;" : "");
         for (i = 0; i < localsToSave.length; i++) {
           t = localsToSave[i];
           output += t + "=susp.$tmps." + t + ";";
@@ -29845,7 +29913,7 @@
           localSaveCode.push('"' + t + '":' + t);
         }
         output += "var $mys = function(){return {data: {type: 'Sk.yield'}, resume: function(){} } };";
-        output += "var $saveSuspension = function($child, $filename, $lineno, $colno, $source) {var susp = Sk.misceval.injectSusp($child,$blk,$loc,$gbl,$exc,$err,$postfinally,$filename,$lineno,$colno,$source,{" + localSaveCode.join(",") + "});susp.resume=function(){" + unit.scopename + ".$wakingSuspension=susp; return " + unit.scopename + "(" + (unit.ste.generator ? "$gen" : "") + "); };" + /*"susp.data=susp.child.data;susp.$blk=$blk;susp.$loc=$loc;susp.$gbl=$gbl;susp.$exc=$exc;susp.$err=$err;susp.$postfinally=$postfinally;" +
+        output += "var $saveSuspension = function($child, $filename, $lineno, $colno) {var susp = Sk.misceval.injectSusp($child,$blk,$loc,$gbl,$exc,$err,$postfinally,$filename,$lineno,$colno,{" + localSaveCode.join(",") + "});susp.resume=function(){" + unit.scopename + ".$wakingSuspension=susp; return " + unit.scopename + "(" + (unit.ste.generator ? "$gen" : "") + "); };" + /*"susp.data=susp.child.data;susp.$blk=$blk;susp.$loc=$loc;susp.$gbl=$gbl;susp.$exc=$exc;susp.$err=$err;susp.$postfinally=$postfinally;" +
         "susp.$filename=$filename;susp.$lineno=$lineno;susp.$colno=$colno;susp.source=$source;" +
         "susp.optional=susp.child.optional;" +*/
         (hasCell ? "susp.$cell=$cell;" : "") + //"susp.$tmps={" + localSaveCode.join(",") + "};" +
@@ -29963,7 +30031,7 @@
             var debugBlock = this.newBlock("debug breakpoint for line " + s.lineno);
             out(
               "if (Sk.breakpoints('" + this.filename + "'," + s.lineno + "," + s.col_offset + ")) {",
-              "var $susp = $saveSuspension({data: {type: '" + suspType + "'}, resume: function() {}}, '" + this.filename + "'," + s.lineno + "," + s.col_offset + "," + s.source + ");",
+              "var $susp = $saveSuspension({data: {type: '" + suspType + "'}, resume: function() {}}, '" + this.filename + "'," + s.lineno + "," + s.col_offset + ");",
               "$susp.$blk = " + debugBlock + ";",
               "$susp.optional = true;",
               "return $susp;",
@@ -30015,7 +30083,7 @@
           var debugBlock = this.newBlock("debug breakpoint for line " + s.lineno);
           out(
             "if (Sk.breakpoints('" + this.filename + "'," + s.lineno + "," + s.col_offset + ")) {",
-            "var $susp = $saveSuspension({data: {type: '" + suspType + "'}, resume: function() {}}, '" + this.filename + "'," + s.lineno + "," + s.col_offset + "," + s.source + ");",
+            "var $susp = $saveSuspension({data: {type: '" + suspType + "'}, resume: function() {}}, '" + this.filename + "'," + s.lineno + "," + s.col_offset + ");",
             "$susp.$blk = " + debugBlock + ";",
             "$susp.optional = true;",
             "return $susp;",
@@ -30068,6 +30136,7 @@
             ";} else {throw new Sk.builtin.TypeError('exceptions must derive from BaseException');};"
           );
         } else {
+          out("Sk.execStack.pop();");
           out("throw $err;");
         }
       };
@@ -30461,7 +30530,7 @@
             cells = ",$cell=$gen.gi$cells";
           }
         }
-        this.u.varDeclsCode += "var $blk=" + entryBlock + ",$exc=[],$loc=" + locals + cells + ",$gbl=" + (fastCall ? "this.func_globals" : "this") + (fastCall && hasFree ? ",$free=this.func_closure" : "") + ",$err=undefined,$ret=undefined,$postfinally=undefined,$currLineNo=undefined,$currColNo=undefined,$currSource=undefined;";
+        this.u.varDeclsCode += "var $blk=" + entryBlock + ",$exc=[],$loc=" + locals + cells + ",$gbl=" + (fastCall ? "this.func_globals" : "this") + (fastCall && hasFree ? ",$free=this.func_closure" : "") + ",$err=undefined,$ret=undefined,$postfinally=undefined,$currLineNo=undefined,$currColNo=undefined;";
         if (Sk.execLimit !== null) {
           this.u.varDeclsCode += "Sk.misceval.startTimer();";
         }
@@ -30525,6 +30594,7 @@
         if (this.filename && !this.filename.startsWith("src/lib/")) {
           out("Sk.beforeCall && Sk.beforeCall('" + coname.$jsstr() + "'," + argString + ");");
         }
+        out(`Sk.execStack.push(["${coname.v}", "${this.filename}", ${n.lineno}, ${n.col_offset}]);`);
         callback.call(this, scopename);
         if (args) {
           for (let arg of args.args) {
@@ -30701,6 +30771,7 @@
           s.args,
           function(scopename) {
             this.vseqstmt(s.body);
+            out("Sk.execStack.pop();");
             out("return Sk.builtin.none.none$;");
           },
           class_for_super
@@ -30771,12 +30842,14 @@
         if (genIndex >= generators.length) {
           this.annotateSource(elt, true);
           velt = this.vexpr(elt);
+          out("Sk.execStack.pop();");
           out("return [", skip, "/*resume*/,", velt, "/*ret*/];");
           this.setBlock(skip);
         }
         this._jump(start);
         this.setBlock(end);
         if (genIndex === 1) {
+          out("Sk.execStack.pop();");
           out("return Sk.builtin.none.none$;");
         }
       };
@@ -30807,7 +30880,7 @@
         entryBlock = this.newBlock("class entry");
         this.u.prefixCode = "var " + scopename + "=(function $" + s.name.v + "$class_outer($globals,$locals,$cell){var $gbl=$globals,$loc=$locals,$free=$globals;";
         this.u.switchCode += "(function $" + s.name.v + "$_closure($cell){";
-        this.u.switchCode += "var $blk=" + entryBlock + ",$exc=[],$ret=undefined,$postfinally=undefined,$currLineNo=undefined,$currColNo=undefined;$currSource=undefined;";
+        this.u.switchCode += "var $blk=" + entryBlock + ",$exc=[],$ret=undefined,$postfinally=undefined,$currLineNo=undefined,$currColNo=undefined;";
         if (Sk.execLimit !== null) {
           this.u.switchCode += "Sk.misceval.startTimer();";
         }
@@ -30885,7 +30958,7 @@
           debugBlock = this.newBlock("debug breakpoint for line " + s.lineno);
           out(
             "if (Sk.breakpoints('" + this.filename + "'," + s.lineno + "," + s.col_offset + ")) {",
-            "var $susp = $saveSuspension({data: {type: 'Sk.debug'}, resume: function() {}}, '" + this.filename + "'," + s.lineno + "," + s.col_offset + "," + s.source + ");",
+            "var $susp = $saveSuspension({data: {type: 'Sk.debug'}, resume: function() {}}, '" + this.filename + "'," + s.lineno + "," + s.col_offset + ");",
             "$susp.$blk = " + debugBlock + ";",
             "$susp.optional = true;",
             "return $susp;",
@@ -30916,6 +30989,7 @@
             if (this.filename && !this.filename.startsWith("src/lib/")) {
               out("Sk.beforeReturn && Sk.beforeReturn(" + val + ");");
             }
+            out("Sk.execStack.pop();");
             if (this.u.finallyBlocks.length == 0) {
               out("return ", val, ";");
             } else {
@@ -31230,7 +31304,7 @@
         );
         var entryBlock = this.newBlock("module entry");
         this.u.prefixCode = "var " + modf + "=(function($forcegbl, $forceloc){";
-        this.u.varDeclsCode = "var $gbl = $forcegbl || {}, $blk=" + entryBlock + ",$exc=[],$loc=$forceloc || $gbl,$cell={},$err=undefined;$loc.__file__=new Sk.builtins.str($fname);var $ret=undefined,$postfinally=undefined,$currLineNo=undefined,$currColNo=undefined;$currSource=undefined;";
+        this.u.varDeclsCode = "var $gbl = $forcegbl || {}, $blk=" + entryBlock + ",$exc=[],$loc=$forceloc || $gbl,$cell={},$err=undefined;$loc.__file__=new Sk.builtins.str($fname);var $ret=undefined,$postfinally=undefined,$currLineNo=undefined,$currColNo=undefined;";
         if (Sk.execLimit !== null) {
           this.u.varDeclsCode += "Sk.misceval.startTimer();";
         }
@@ -31257,7 +31331,7 @@
       };
       Compiler.prototype.handleTraceback = function(doContinue, scopeName) {
         doContinue = doContinue ? "continue" : "";
-        return "}catch(err){err=Sk.misceval.handleTraceback(err,$currLineNo,$currColNo,$currSource,$fname,'" + scopeName + "');if($exc.length>0){$err=err;$blk=$exc.pop();" + doContinue + "}else{throw err;}}}";
+        return "}catch(err){err=Sk.misceval.handleTraceback(err,$currLineNo,$currColNo,$fname,'" + scopeName + "');if($exc.length>0){$err=err;$blk=$exc.pop();" + doContinue + `}else{Sk.execStack.pop();Sk.execStack.pop();throw err;}}}`;
       };
       Sk.compile = function(source, filename, mode, canSuspend, annotate) {
         var savedFlags = Sk.__future__;
@@ -31268,6 +31342,9 @@
         flags.cf_flags = parse.flags;
         var st = Sk.symboltable(ast, filename);
         var c = new Compiler(filename, st, flags.cf_flags, canSuspend, annotate ? source : false);
+        if (annotate && source) {
+          Sk.registerSourceMap(filename, source);
+        }
         var funcname = c.cmod(ast);
         Sk.__future__ = savedFlags;
         var shortCutConstants = "const $fname='" + filename + "',$moduleConstants={},$ule=Sk.misceval.errorUL;";
@@ -31576,6 +31653,9 @@
                 module2["$d"]["__path__"] = new Sk.builtin.tuple([
                   new Sk.builtin.str(co.packagePath)
                 ]);
+              }
+              if (co.filename && co.funcname !== "$builtinmodule") {
+                module2["$d"]["__file__"] = new Sk.builtin.str(co.filename);
               }
               let r = modscope(module2["$d"]);
               return r;
@@ -33467,4 +33547,5 @@
     notice and this notice are preserved.  This file is offered as-is,
     without any warranty.
 */
+//!this.filename || !this.filename.startsWith("src/lib/"))) {
 //# sourceMappingURL=skulpt.js.map

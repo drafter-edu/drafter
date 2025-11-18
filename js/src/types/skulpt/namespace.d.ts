@@ -174,8 +174,17 @@ export namespace Sk {
             kwargs?: number,
             free?: number
         ): void;
-        function pyCheckArgsLen(fnName: string, args: Args, minargs: number, maxargs?: number): void;
-        function pyCheckType(fnName: string, excTypeName: string, predicate: (obj: any) => boolean): void;
+        function pyCheckArgsLen(
+            fnName: string,
+            args: Args,
+            minargs: number,
+            maxargs?: number
+        ): void;
+        function pyCheckType(
+            fnName: string,
+            excTypeName: string,
+            predicate: (obj: any) => boolean
+        ): void;
 
         function round(num: pyObject, ndigits?: pyObject): pyObject;
         function len(o: pyObject): pyInt | Suspension;
@@ -192,8 +201,14 @@ export namespace Sk {
         function repr(obj: pyObject): pyStr;
         function ascii(obj: pyObject): pyStr;
 
-        function isinstance(obj: pyObject, type: pyType | pyTuple<pyType>): pyBool;
-        function issubclass(obj: pyType, type: pyType | pyTuple<pyType>): pyBool;
+        function isinstance(
+            obj: pyObject,
+            type: pyType | pyTuple<pyType>
+        ): pyBool;
+        function issubclass(
+            obj: pyType,
+            type: pyType | pyTuple<pyType>
+        ): pyBool;
 
         function compile(source: pyStr, filename: pyStr, mode: pyStr): pyObject;
         function exec(
@@ -203,10 +218,18 @@ export namespace Sk {
         ): { [k: string]: pyObject };
 
         // @ts-ignore
-        function eval(code: string | pyStr, gbl?: { [k: string]: pyObject }, loc?: { [k: string]: pyObject }): pyObject;
+        function eval(
+            code: string | pyStr,
+            gbl?: { [k: string]: pyObject },
+            loc?: { [k: string]: pyObject }
+        ): pyObject;
 
         function hasattr(obj: pyObject, attr: pyStr): pyBool | Suspension;
-        function getattr(obj: pyObject, attr: pyStr, default_?: pyObject): pyObject | Suspension;
+        function getattr(
+            obj: pyObject,
+            attr: pyStr,
+            default_?: pyObject
+        ): pyObject | Suspension;
         function hash(obj: pyObject): pyInt;
         function print(args: Args | string[]): void;
         function __import__(
@@ -220,7 +243,11 @@ export namespace Sk {
 
     export namespace misceval {
         /** @todo possibly just pyCallable<T> but not while we develop */
-        function callsimArray<T = pyObject>(callable: pyCallable<T> | pyObject, args?: Args, kws?: Kws): T;
+        function callsimArray<T = pyObject>(
+            callable: pyCallable<T> | pyObject,
+            args?: Args,
+            kws?: Kws
+        ): T;
         function callsimOrSuspendArray<T = pyObject>(
             callable: pyCallable<T> | pyObject,
             args?: Args,
@@ -239,7 +266,10 @@ export namespace Sk {
         /** @deprecated use callsimArray */
         function callsim(callable: pyObject, ...args: Args): pyObject;
         /** @deprecated use callsimOrSuspendArray */
-        function callsimOrSuspend(callable: pyObject, ...args: Args): pyObject | Suspension;
+        function callsimOrSuspend(
+            callable: pyObject,
+            ...args: Args
+        ): pyObject | Suspension;
 
         /** @deprecated use callsimOrSuspendArray */
         function applyOrSuspend(
@@ -303,17 +333,34 @@ export namespace Sk {
             f1: (prevRet: T) => A | Suspension,
             f2: (prevRet: A) => B | Suspension
         ): B | Suspension;
-        function chain<T, A>(initArg: T | Suspension, f1: (prevRet: T) => A | Suspension): A | Suspension;
-        function chain<T = any, R = any>(initArg: T | Suspension, ...chainedFns: ChainedFns<T, R>): R | Suspension;
-        function chain<R = any>(initArg: any, ...chainedFns: ChainedFns<any, R>): R | Suspension;
+        function chain<T, A>(
+            initArg: T | Suspension,
+            f1: (prevRet: T) => A | Suspension
+        ): A | Suspension;
+        function chain<T = any, R = any>(
+            initArg: T | Suspension,
+            ...chainedFns: ChainedFns<T, R>
+        ): R | Suspension;
+        function chain<R = any>(
+            initArg: any,
+            ...chainedFns: ChainedFns<any, R>
+        ): R | Suspension;
 
-        function tryCatch<R = any, E = any>(fn: () => Suspension | R, catchFn: (e: any) => R | E): R | E | Suspension;
+        function tryCatch<R = any, E = any>(
+            fn: () => Suspension | R,
+            catchFn: (e: any) => R | E
+        ): R | E | Suspension;
 
-        function retryOptionalSuspensionOrThrow<T = any>(obj: T | Suspension): T extends Suspension ? never : T;
+        function retryOptionalSuspensionOrThrow<T = any>(
+            obj: T | Suspension
+        ): T extends Suspension ? never : T;
 
         function promiseToSuspension<T>(p: Promise<T>): Suspension;
 
-        function asyncToPromise<R>(suspFn: () => Suspension | R, suspHandlers?: any): Promise<R>;
+        function asyncToPromise<R>(
+            suspFn: () => Suspension | R,
+            suspHandlers?: any
+        ): Promise<R>;
 
         function iterFor<T = pyObject, R = undefined>(
             iterator: pyIterator<T | Suspension>,
@@ -344,14 +391,21 @@ export namespace Sk {
 
         function objectRepr(obj: pyObject): string;
 
-        function richCompareBool(a: pyObject, b: pyObject, cmpOp: CompareOp): boolean;
+        function richCompareBool(
+            a: pyObject,
+            b: pyObject,
+            cmpOp: CompareOp
+        ): boolean;
 
         const Suspension: SuspensionConstructor;
         const Break: BreakConstructor;
 
         function buildClass<T extends pyObject = pyObject>(
             globals: { [gbl: string]: pyObject },
-            body: (gbl: { [gbl: string]: pyObject }, loc: { [gbl: string]: pyObject }) => void,
+            body: (
+                gbl: { [gbl: string]: pyObject },
+                loc: { [gbl: string]: pyObject }
+            ) => void,
             name: string,
             bases?: pyType[],
             cell?: any,
@@ -433,23 +487,73 @@ export namespace Sk {
 
         const setUpModuleMethods: typeof ABSTR.setUpModuleMethods;
 
-        function gattr<R extends pyObject = pyObject>(obj: pyObject, attr: pyStr, canSuspend?: false): R;
-        function gattr<R extends pyObject = pyObject>(obj: pyObject, attr: pyStr, canSuspend: true): R | Suspension;
+        function gattr<R extends pyObject = pyObject>(
+            obj: pyObject,
+            attr: pyStr,
+            canSuspend?: false
+        ): R;
+        function gattr<R extends pyObject = pyObject>(
+            obj: pyObject,
+            attr: pyStr,
+            canSuspend: true
+        ): R | Suspension;
 
-        function sattr(obj: pyObject, attr: pyStr, val: pyObject, canSuspend: true): void | Suspension;
-        function sattr(obj: pyObject, attr: pyStr, val: pyObject, canSuspend?: false): void;
+        function sattr(
+            obj: pyObject,
+            attr: pyStr,
+            val: pyObject,
+            canSuspend: true
+        ): void | Suspension;
+        function sattr(
+            obj: pyObject,
+            attr: pyStr,
+            val: pyObject,
+            canSuspend?: false
+        ): void;
 
         function iter<T>(obj: pyIterable<T> | pyObject): pyIterator<T>;
 
-        function lookupSpecial<R = pyObject | undefined>(obj: pyObject, attr: pyStr): R;
-        function typeLookup<R = pyObject | undefined>(obj: pyType, attr: pyStr): R;
+        function lookupSpecial<R = pyObject | undefined>(
+            obj: pyObject,
+            attr: pyStr
+        ): R;
+        function typeLookup<R = pyObject | undefined>(
+            obj: pyType,
+            attr: pyStr
+        ): R;
 
-        function objectGetItem<R = pyObject>(obj: pyObject, item: pyObject, canSuspend?: false): R;
-        function objectGetItem<R = pyObject>(obj: pyObject, item: pyObject, canSuspend: true): R | Suspension;
-        function objectSetItem(obj: pyObject, item: pyObject, val: pyObject, canSuspend?: false): void;
-        function objectSetItem(obj: pyObject, item: pyObject, val: pyObject, canSuspend: true): void | Suspension;
-        function objectDelItem(obj: pyObject, item: pyObject, canSuspend?: false): void;
-        function objectDelItem(obj: pyObject, item: pyObject, canSuspend: true): void | Suspension;
+        function objectGetItem<R = pyObject>(
+            obj: pyObject,
+            item: pyObject,
+            canSuspend?: false
+        ): R;
+        function objectGetItem<R = pyObject>(
+            obj: pyObject,
+            item: pyObject,
+            canSuspend: true
+        ): R | Suspension;
+        function objectSetItem(
+            obj: pyObject,
+            item: pyObject,
+            val: pyObject,
+            canSuspend?: false
+        ): void;
+        function objectSetItem(
+            obj: pyObject,
+            item: pyObject,
+            val: pyObject,
+            canSuspend: true
+        ): void | Suspension;
+        function objectDelItem(
+            obj: pyObject,
+            item: pyObject,
+            canSuspend?: false
+        ): void;
+        function objectDelItem(
+            obj: pyObject,
+            item: pyObject,
+            canSuspend: true
+        ): void | Suspension;
 
         function typeName(obj: pyObject): string;
 
@@ -460,13 +564,22 @@ export namespace Sk {
             kws?: Kws,
             defaults?: any[]
         ): any[];
-        function checkArgsLen(funcName: string, args: Args, minargs: number, maxargs?: number): void;
+        function checkArgsLen(
+            funcName: string,
+            args: Args,
+            minargs: number,
+            maxargs?: number
+        ): void;
         function checkOneArg(funcName: string, args: Args, kws?: Kws): void;
         function checkNoArg(funcName: string, args: Args, kws?: Kws): void;
         function checkNoKwargs(funcName: string, kws?: Kws): void;
 
         function numberBinOp(a: pyObject, b: pyObject, op: BinOp): pyObject;
-        function numberInplaceBinOp(a: pyObject, b: pyObject, op: BinOp): pyObject;
+        function numberInplaceBinOp(
+            a: pyObject,
+            b: pyObject,
+            op: BinOp
+        ): pyObject;
         function numberUnaryOp(a: pyObject, op: BinOp): pyObject;
 
         function sequenceContains<S extends boolean>(
@@ -485,7 +598,11 @@ export namespace Sk {
     function importSetUpPath(): void;
 
     /** imports a module by name - use standard dot notation for a nested module, returns the top level module */
-    function importModule(name: string, dumpJs: boolean, canSuspend: boolean): pyModule | Suspension;
+    function importModule(
+        name: string,
+        dumpJs: boolean,
+        canSuspend: boolean
+    ): pyModule | Suspension;
 
     /** @private use at your own risk */
     function importModuleInternal_(
@@ -523,7 +640,10 @@ export namespace Sk {
 
     function setTimeout(fn: () => void, timeout: number): void;
     function output(...args: any): void;
-    function parse(filename: string, input: string): { cst: any; flags: number };
+    function parse(
+        filename: string,
+        input: string
+    ): { cst: any; flags: number };
     function astFromParse(cst: any, filename: string, flags: number): any;
 
     namespace astnodes {
@@ -533,14 +653,14 @@ export namespace Sk {
 
     let builtins: Record<string, pyObject>;
 
-    const builtinFiles: { files: { [filename: string]: string } };
+    let builtinFiles: { files: { [filename: string]: string } };
 }
 
 type ChainedFns<T, R> =
-| [...((prevRet: T) => T | Suspension)[], (prevRet: T) => R]
-| ((prevRet: T) => T | Suspension)[]
-| [(prevRet: T) => R]
-| [];
+    | [...((prevRet: T) => T | Suspension)[], (prevRet: T) => R]
+    | ((prevRet: T) => T | Suspension)[]
+    | [(prevRet: T) => R]
+    | [];
 
 export type Args = pyObject[];
 export type Kws = (string | pyObject)[]; // Can't declare alternating array in TS
@@ -563,13 +683,13 @@ export type BinOp =
 
 export type UnaryOp = "Not" | "USub" | "UAdd" | "Invert";
 
-export type Flags = | { OneArg: true }
-| { NoArgs: true }
-| { FastCall: true }
-| { FastCall: true; NoKwargs: true }
-| { MinArgs: number; MaxArgs?: number }
-| { NamedArgs: string[]; Defaults?: any[] };
-
+export type Flags =
+    | { OneArg: true }
+    | { NoArgs: true }
+    | { FastCall: true }
+    | { FastCall: true; NoKwargs: true }
+    | { MinArgs: number; MaxArgs?: number }
+    | { NamedArgs: string[]; Defaults?: any[] };
 
 type Skulpt = typeof Sk;
 
