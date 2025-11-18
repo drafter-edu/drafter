@@ -470,7 +470,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                 const params = new URLSearchParams(window.location.search);
                 const route = params.get("route");
                 if (route) {
-                    initiateRequest(route, undefined, navigationFunc, false);
+                    initiateRequest(route, undefined, false);
                 }
             }
             if (popstateListener) {
