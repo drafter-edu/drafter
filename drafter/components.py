@@ -117,7 +117,8 @@ class PageContent:
                 styles.append(f"{key}: {value}")
             else:
                 # TODO: Is this safe enough?
-                attrs.append(f"{key}={str(value)!r}")
+                escaped_value = html.escape(str(value), quote=True)
+                attrs.append(f'{key}="{escaped_value}"')
         for key, value in raw_styles.items():
             styles.append(f"{key}: {value}")
         result = " ".join(attrs)
@@ -353,7 +354,9 @@ class Button(PageContent, LinkContent):
         url = merge_url_query_params(self.url, {SUBMIT_BUTTON_KEY: button_namespace})
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         value = make_safe_argument(button_namespace)
-        return f"{precode}<button type='submit' name='{SUBMIT_BUTTON_KEY}' value='{value}' formaction='{url}' {parsed_settings}>{self.text}</button>"
+        text = html.escape(self.text)
+        print(repr(self.text), repr(text))
+        return f"{precode}<button type='submit' name='{SUBMIT_BUTTON_KEY}' value='{value}' formaction='{url}' {parsed_settings}>{text}</button>"
 
 
 SubmitButton = Button
@@ -435,7 +438,7 @@ class TextBox(PageContent):
     def __str__(self) -> str:
         extra_settings = {}
         if self.default_value is not None:
-            extra_settings['value'] = html.escape(self.default_value)
+            extra_settings['value'] = self.default_value
         parsed_settings = self.parse_extra_settings(**extra_settings)
         # TODO: investigate whether we need to make the name safer
         return f"<input type='{self.kind}' name='{self.name}' {parsed_settings}>"
