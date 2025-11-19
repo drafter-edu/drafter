@@ -7,15 +7,37 @@ interface using only lists and dataclasses.
 """
 
 from dataclasses import dataclass, fields, is_dataclass, MISSING
-from typing import List, Optional, Any, Type, get_origin, get_args, Union
+from typing import List, Optional, Any, Union
+try:
+    from typing import get_origin, get_args
+except Exception:
+    print("Some features for LLMs may be incomplete")
 import json
 import re
+import urllib.request as request
+import sys
 
-try:
-    import requests
-    HAS_REQUESTS = True
-except ImportError:
-    HAS_REQUESTS = False
+def is_skulpt():
+    return sys.platform == "skulpt"
+
+@dataclass
+class ResponseWrapper:
+    status_code: int
+    text: str
+
+    def json(self):
+        return json.loads(self.text)
+
+def requests_post(url, headers, payload):
+    data = json.dumps(payload)
+    if not is_skulpt():
+        data = data.encode('utf-8')
+    req = request.Request(url, data, headers, None, None, "POST")
+    with request.urlopen(req) as resp:
+        response_body = resp.read()
+        if not is_skulpt():
+            response_body = response_body.decode('utf-8')
+        return ResponseWrapper(resp.status, response_body)
 
 
 @dataclass
@@ -103,9 +125,6 @@ def call_gpt(api_key: str, messages: List[LLMMessage], model: str = "gpt-3.5-tur
         ... else:
         ...     print(f"Error: {response.message}")
     """
-    if not HAS_REQUESTS:
-        return LLMError("ImportError", "The requests module is required but not available")
-    
     if not api_key:
         return LLMError("AuthenticationError", "API key is required")
     
@@ -134,7 +153,7 @@ def call_gpt(api_key: str, messages: List[LLMMessage], model: str = "gpt-3.5-tur
     }
     
     try:
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests_post(url, headers, payload)
         
         if response.status_code == 200:
             data = response.json()
@@ -196,9 +215,7 @@ def call_gemini(api_key: str, messages: List[LLMMessage],
         ... else:
         ...     print(f"Error: {response.message}")
     """
-    if not HAS_REQUESTS:
-        return LLMError("ImportError", "The requests module is required but not available")
-    
+
     if not api_key:
         return LLMError("AuthenticationError", "API key is required")
     
@@ -232,7 +249,7 @@ def call_gemini(api_key: str, messages: List[LLMMessage],
     }
     
     try:
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests_post(url, headers, payload)
         
         if response.status_code == 200:
             data = response.json()
@@ -318,7 +335,7 @@ def _parse_google_docstring(docstring: str) -> dict:
     return result
 
 
-def _dataclass_to_schema(dataclass_type: Type, descriptions: dict = None) -> dict:
+def _dataclass_to_schema(dataclass_type, descriptions: dict = None) -> dict:
     """
     Convert a dataclass to JSON Schema format.
     
@@ -357,7 +374,7 @@ def _dataclass_to_schema(dataclass_type: Type, descriptions: dict = None) -> dic
     return schema
 
 
-def _type_to_schema(field_type: Type, description: str = "") -> dict:
+def _type_to_schema(field_type, description: str = "") -> dict:
     """Convert a Python type annotation to JSON Schema."""
     # Get origin for generic types (List, Optional, etc.)
     origin = get_origin(field_type)
@@ -412,7 +429,7 @@ def _type_to_schema(field_type: Type, description: str = "") -> dict:
 
 
 def call_gpt_structured(api_key: str, messages: List[LLMMessage], 
-                       response_format: Type, model: str = "gpt-4o-2024-08-06",
+                       response_format, model: str = "gpt-4o-2024-08-06",
                        temperature: float = 0.7, max_tokens: int = 1000) -> Any:
     """
     Call the OpenAI GPT API with structured output format.
@@ -456,9 +473,7 @@ def call_gpt_structured(api_key: str, messages: List[LLMMessage],
         ...     print(f"Recipe: {result.name}")
         ...     print(f"Ingredients: {', '.join(result.ingredients)}")
     """
-    if not HAS_REQUESTS:
-        return LLMError("ImportError", "The requests module is required but not available")
-    
+
     if not api_key:
         return LLMError("AuthenticationError", "API key is required")
     
@@ -504,7 +519,7 @@ def call_gpt_structured(api_key: str, messages: List[LLMMessage],
     }
     
     try:
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests_post(url, headers, payload)
         
         if response.status_code == 200:
             data = response.json()
@@ -533,7 +548,7 @@ def call_gpt_structured(api_key: str, messages: List[LLMMessage],
 
 
 def call_gemini_structured(api_key: str, messages: List[LLMMessage],
-                          response_format: Type, model: str = "gemini-1.5-pro",
+                          response_format, model: str = "gemini-1.5-pro",
                           temperature: float = 0.7, max_tokens: int = 1000) -> Any:
     """
     Call the Google Gemini API with structured output format.
@@ -576,9 +591,6 @@ def call_gemini_structured(api_key: str, messages: List[LLMMessage],
         >>> if isinstance(result, MovieReview):
         ...     print(f"{result.title}: {result.rating}/10")
     """
-    if not HAS_REQUESTS:
-        return LLMError("ImportError", "The requests module is required but not available")
-    
     if not api_key:
         return LLMError("AuthenticationError", "API key is required")
     
@@ -620,7 +632,7 @@ def call_gemini_structured(api_key: str, messages: List[LLMMessage],
     }
     
     try:
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests_post(url, headers, payload)
         
         if response.status_code == 200:
             data = response.json()
@@ -656,7 +668,7 @@ def call_gemini_structured(api_key: str, messages: List[LLMMessage],
         return LLMError("NetworkError", f"Failed to connect to API: {str(e)}")
 
 
-def _dict_to_dataclass(data: dict, dataclass_type: Type) -> Any:
+def _dict_to_dataclass(data: dict, dataclass_type) -> Any:
     """
     Convert a dictionary to a dataclass instance, handling nested dataclasses and lists.
     """
@@ -778,7 +790,7 @@ def save_api_key(service: str, api_key: str) -> bool:
             js.window.drafterLLM.saveApiKey(service, api_key)
             return True
     except (ImportError, AttributeError):
-        pass
+        print("Warning: Failed to save API Key to local storage.")
     
     return False
 

@@ -38,7 +38,7 @@ def index(state: State) -> Page:
             "To get started, you need to enter your API key.",
             "",
             "Choose your LLM service:",
-            SelectBox("service", ["gpt", "gemini"], state.service),
+            SelectBox("service", ["gemini", "gpt"], state.service),
             "",
             ApiKeyBox("api_key", state.service, "API Key:"),
             "",
@@ -139,4 +139,4 @@ def reset_api_key(state: State) -> Page:
     return index(state)
 
 
-start_server(State("", "gpt", []))
+start_server(State("", "gemini", []), cdn_skulpt_drafter="http://localhost:8000/skulpt-drafter.js")
