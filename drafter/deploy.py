@@ -113,6 +113,21 @@ def deploy_site(image_folder='images'):
     MAIN_SERVER.production = True
     MAIN_SERVER.image_folder = image_folder
 
+def set_image_path(image_folder='./'):
+    """
+    Sets the image path for the website. If a deployed site would like to have
+    files in a different folder, this can be used to set that.
+
+    The default is the local directory, which means images will be served from the root.
+    If you wanted to have your images in a folder named `website` or `images`, you would set
+    this to that folder name.
+
+    Don't include a final slash!
+
+    :param image_folder: The folder where images are stored.
+    """
+    MAIN_SERVER.configuration.deploy_image_path = image_folder
+
 
 def default_index(state) -> Page:
     """

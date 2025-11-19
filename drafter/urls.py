@@ -76,7 +76,7 @@ def friendly_urls(url: str) -> str:
     return url
 
 
-URL_REGEX = r"^(?:http(s)?://)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$"
+URL_REGEX = r"^(?:http(s)?://)[\w.-]+(?:\.[\w\.-]+)+[-\w\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$"
 
 
 def is_valid_url(url: str) -> bool:
