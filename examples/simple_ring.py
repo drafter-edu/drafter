@@ -25,4 +25,8 @@ assert_equal(
     third(), Page(None, ["Welcome to the third page.", Link("Return to start", index)])
 )
 
+assert_equal(
+    third(), Page(5, ["Welcome 2 the third page.", Link("Return to start", "second")])
+)
+
 start_server()

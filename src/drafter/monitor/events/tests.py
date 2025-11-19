@@ -3,7 +3,7 @@ Test status events for tracking student test results.
 """
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 from drafter.monitor.events.base import BaseEvent
 
@@ -17,6 +17,8 @@ class TestCaseEvent(BaseEvent):
     :ivar passed: Whether the test passed
     :ivar given: String representation of what was given
     :ivar expected: String representation of what was expected
+    :ivar given_formatted: Formatted version of the given value
+    :ivar expected_formatted: Formatted version of the expected value
     :ivar diff_html: HTML diff showing the differences (if test failed)
     """
 
@@ -25,6 +27,8 @@ class TestCaseEvent(BaseEvent):
     passed: bool = True
     given: str = ""
     expected: str = ""
+    given_formatted: str = ""
+    expected_formatted: str = ""
     diff_html: str = ""
     event_type: str = "TestCaseEvent"
 
@@ -36,5 +40,7 @@ class TestCaseEvent(BaseEvent):
             "passed": self.passed,
             "given": self.given,
             "expected": self.expected,
+            "given_formatted": self.given_formatted,
+            "expected_formatted": self.expected_formatted,
             "diff_html": self.diff_html,
         }

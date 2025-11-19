@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from functools import wraps
 from typing import Any, Optional
 
-from drafter.diffing import diff_tests
+import difflib
 from drafter.monitor.audit import log_data
 from drafter.monitor.events.tests import TestCaseEvent
 from drafter.history.formatting import format_page_content
@@ -111,16 +111,18 @@ class BakeryTests:
         expected_str = repr(expected)
 
         diff_html = ""
+        actual_formatted, _ = format_page_content(actual, escape=False)
+        expected_formatted, _ = format_page_content(expected, escape=False)
         if not test_case.result:
-            actual_formatted, _ = format_page_content(actual)
-            expected_formatted, _ = format_page_content(expected)
-
-            diff_html = diff_tests(
-                actual_formatted,
-                expected_formatted,
-                "Your function returned",
-                "But the test expected",
+            diff_html = "".join(
+                difflib.unified_diff(
+                    actual_formatted.splitlines(keepends=True),
+                    expected_formatted.splitlines(keepends=True),
+                    "Your function returned",
+                    "But the test expected",
+                )
             )
+            print(diff_html)
 
         log_data(
             TestCaseEvent(
@@ -129,6 +131,8 @@ class BakeryTests:
                 passed=bool(test_case.result),
                 given=actual_str,
                 expected=expected_str,
+                given_formatted=actual_formatted,
+                expected_formatted=expected_formatted,
                 diff_html=diff_html,
             ),
             "testing.track_bakery_tests",

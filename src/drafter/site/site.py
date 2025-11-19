@@ -10,6 +10,8 @@ GLOBAL_DRAFTER_CSS_PATHS = {
     False: "assets/css/drafter_deploy.css",
 }
 
+BUILT_IN_ADDITIONAL_CSS_PATHS = ["assets/css/diff2html.min.css"]
+
 DRAFTER_TAG_IDS = {
     "ROOT": "drafter-root--",
     "SITE": "drafter-site--",
@@ -84,6 +86,7 @@ class Site:
 
         additional_css, additional_js = self._get_theme_headers()
         additional_css.insert(0, GLOBAL_DRAFTER_CSS_PATHS[self.in_debug_mode])
+        additional_css.extend(BUILT_IN_ADDITIONAL_CSS_PATHS)
         additional_headers, additional_styles = [], []
 
         # Add CSS if present

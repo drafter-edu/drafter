@@ -24,7 +24,8 @@ def diff_tests(left, right, left_name, right_name):
             left.splitlines(), right.splitlines(), left_name, right_name
         )
         return table
-    except:
+    except Exception as e:
+        raise e
         if left == right:
             return "No differences found."
         return f"<pre>{left}</pre><pre>{right}</pre>"

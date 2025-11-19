@@ -32,11 +32,11 @@ class CustomPrettyPrinter(pprint.PrettyPrinter):  # type: ignore
         return pprint.PrettyPrinter.format(self, object, context, maxlevels, level)
 
 
-def format_page_content(content, width=80):
+def format_page_content(content, width=80, escape=True):
     try:
         custom_pretty_printer = CustomPrettyPrinter(
             indent=get_indent_width(), width=width
         )
         return custom_pretty_printer.pformat(content), True
     except Exception as e:
-        return safe_repr(content), False
+        return safe_repr(content, escape=escape), False

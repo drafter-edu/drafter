@@ -67,7 +67,7 @@ def repr_pil_image(value):
         return f"<img src='{filename}' alt='Image.open({filename!r})' />"
 
 
-def safe_repr(value: Any, handled=None):
+def safe_repr(value: Any, handled=None, escape=True):
     """
     Creates a safe HTML representation of a value, handling circular references.
 
@@ -85,26 +85,28 @@ def safe_repr(value: Any, handled=None):
     if isinstance(
         value, (int, float, bool, type(None), str, bytes, complex, bytearray)
     ):
-        return make_value_expandable(html.escape(repr(value)))
+        if escape:
+            return make_value_expandable(html.escape(repr(value)))
+        return make_value_expandable(repr(value))
     if isinstance(value, list):
         handled.add(obj_id)
-        return f"[{', '.join(safe_repr(v, handled) for v in value)}]"
+        return f"[{', '.join(safe_repr(v, handled, escape) for v in value)}]"
     if isinstance(value, dict):
         handled.add(obj_id)
-        return f"{{{', '.join(f'{safe_repr(k, handled)}: {safe_repr(v, handled)}' for k, v in value.items())}}}"
+        return f"{{{', '.join(f'{safe_repr(k, handled, escape)}: {safe_repr(v, handled, escape)}' for k, v in value.items())}}}"
     if is_dataclass(value):
         handled.add(obj_id)
         fields_repr = ", ".join(
-            f"{f.name}={safe_repr(getattr(value, f.name), handled)}"
+            f"{f.name}={safe_repr(getattr(value, f.name), handled, escape)}"
             for f in fields(value)
         )
         return f"{value.__class__.__name__}({fields_repr})"  # type: ignore
     if isinstance(value, set):
         handled.add(obj_id)
-        return f"{{{', '.join(safe_repr(v, handled) for v in value)}}}"
+        return f"{{{', '.join(safe_repr(v, handled, escape) for v in value)}}}"
     if isinstance(value, tuple):
         handled.add(obj_id)
-        return f"({', '.join(safe_repr(v, handled) for v in value)})"
+        return f"({', '.join(safe_repr(v, handled, escape) for v in value)})"
     if isinstance(
         value,
         (
@@ -113,11 +115,13 @@ def safe_repr(value: Any, handled=None):
         ),
     ):
         handled.add(obj_id)
-        args_repr = ", ".join(safe_repr(v, handled) for v in value)
+        args_repr = ", ".join(safe_repr(v, handled, escape) for v in value)
         return f"{value.__class__.__name__}({{{args_repr}}})"
 
     if HAS_PILLOW and isinstance(value, PILImage.Image):
         return repr_pil_image(value)
 
     # Fallback for other types
-    return make_value_expandable(html.escape(repr(value)))
+    if escape:
+        return make_value_expandable(html.escape(repr(value)))
+    return make_value_expandable(repr(value))

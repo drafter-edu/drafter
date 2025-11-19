@@ -264,3 +264,111 @@ div.btlw-container img {
     display: block;
 }
 
+/* Test status styles */
+.drafter-debug-- .test-summary {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+}
+
+.drafter-debug-- .test-summary-stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.drafter-debug-- .test-total {
+    font-weight: bold;
+    color: #333;
+}
+
+.drafter-debug-- .test-passed {
+    color: #397239;
+    font-weight: bold;
+}
+
+.drafter-debug-- .test-failed {
+    color: #8d3734;
+    font-weight: bold;
+}
+
+.drafter-debug-- .test-case {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+}
+
+.drafter-debug-- .test-case.test-passed {
+    border-left: 4px solid #5cb85c;
+}
+
+.drafter-debug-- .test-case.test-failed {
+    border-left: 4px solid #d9534f;
+    background: rgba(217, 83, 79, 0.05);
+}
+
+.drafter-debug-- .test-case-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.drafter-debug-- .test-status {
+    font-size: 1.2em;
+}
+
+.drafter-debug-- .test-line {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.drafter-debug-- .test-caller {
+    font-family: monospace;
+    font-size: 0.9em;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.drafter-debug-- .test-diff {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 3px;
+}
+
+.drafter-debug-- .test-diff summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #666;
+}
+
+.drafter-debug-- .test-diff summary:hover {
+    color: #333;
+}
+
+.drafter-debug-- .test-diff table {
+    width: 100%;
+    margin-top: 10px;
+    font-size: 0.85em;
+    border-collapse: collapse;
+    background-color: white;
+    color: black;
+    border: 1px solid #CCC;
+}
+
+.drafter-debug-- .test-diff .diff_next {
+    display: none;
+}
+
+.drafter-debug-- .test-diff table td,
+.drafter-debug-- .test-diff table th {
+    padding: 4px 8px;
+    text-align: left;
+    vertical-align: top;
+    font-family: monospace;
+}

@@ -9,5 +9,7 @@ export interface TestCaseEvent extends BaseEvent {
     passed: boolean;
     given: string;
     expected: string;
+    given_formatted: string;
+    expected_formatted: string;
     diff_html: string;
 }

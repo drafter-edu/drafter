@@ -39,9 +39,12 @@
         "typescript": "^5"
     },
     "dependencies": {
+        "diff2html": "^3.4.52",
+        "highlight.js": "^11.11.1",
         "i18next": "^25.6.2",
         "jsx-dom": "^8.1.6",
-        "lit": "^3.3.1"
+        "lit": "^3.3.1",
+        "string-diff-viewer": "^0.4.4"
     },
     "browserslist": [
         "defaults",

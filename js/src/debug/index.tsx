@@ -4,6 +4,8 @@ import { DebugHeaderBar } from "./header";
 import { DebugFooterBar } from "./footer";
 import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrapper";
 import type { TestCaseEvent } from "./telemetry/tests";
+import { decodeHtmlEntities } from "./utils";
+import { TestPanel } from "./panels/testing";
 
 export class DebugPanel {
     private panelElement: HTMLElement | null = null;
@@ -16,7 +18,7 @@ export class DebugPanel {
     private isVisible: boolean = true;
     private headerBar: DebugHeaderBar | null = null;
     private footerBar: DebugFooterBar | null = null;
-    private tests: TestCaseEvent[] = [];
+    private testingPanel: TestPanel | null = null;
 
     constructor(
         private containerId: string,
@@ -41,6 +43,7 @@ export class DebugPanel {
         );
         this.headerBar = new DebugHeaderBar("");
         this.footerBar = new DebugFooterBar();
+        this.testingPanel = new TestPanel();
         this.attachEventHandlers();
     }
 
@@ -194,62 +197,6 @@ export class DebugPanel {
         section.appendChild(newRouteItem);
     }
 
-    private renderTest(testCase: TestCaseEvent): void {
-        const testList = document.getElementById(
-            "drafter-debug-current-tests-content-list"
-        );
-        if (!testList) {
-            throw new Error("DebugPanel: Tests section not found.");
-        }
-
-        const statusIcon = testCase.passed ? "✅" : "❌";
-        const statusClass = testCase.passed ? "test-passed" : "test-failed";
-
-        const testElement = (
-            <div class={`test-case ${statusClass}`}>
-                <div class="test-case-header">
-                    <span class="test-status">{statusIcon}</span>
-                    <span class="test-line">Line {testCase.line}</span>
-                    <code class="test-caller">{testCase.caller}</code>
-                </div>
-                {!testCase.passed && testCase.diff_html && (
-                    <details class="test-diff">
-                        <summary>Show Difference</summary>
-                        <div
-                            dangerouslySetInnerHTML={{
-                                __html: testCase.diff_html,
-                            }}
-                        ></div>
-                    </details>
-                )}
-            </div>
-        );
-
-        testList.appendChild(testElement);
-    }
-
-    private updateTestSummary(): void {
-        const summaryElement = document.getElementById(
-            "drafter-debug-current-tests-summary"
-        );
-        if (!summaryElement) {
-            throw new Error("DebugPanel: Test summary section not found.");
-        }
-
-        const totalTests = this.tests.length;
-        const passedTests = this.tests.filter((t) => t.passed).length;
-        const failedTests = totalTests - passedTests;
-
-        summaryElement.replaceChildren(
-            <div class="test-summary">
-                <strong>Summary:</strong>
-                <div>Total Tests: {totalTests}</div>
-                <div>✅ Passed: {passedTests}</div>
-                <div>❌ Failed: {failedTests}</div>
-            </div>
-        );
-    }
-
     public handleEvent(event: TelemetryEvent): void {
         this.events.push(event);
         switch (event.data?.event_type) {
@@ -261,9 +208,8 @@ export class DebugPanel {
                 this.renderState(this.currentState);
                 break;
             case "TestCaseEvent":
-                this.tests.push(event.data);
-                this.renderTest(event.data);
-                this.updateTestSummary();
+                this.testingPanel?.renderTest(event.data);
+                this.testingPanel?.updateTestSummary();
                 break;
             default:
                 // console.warn(
