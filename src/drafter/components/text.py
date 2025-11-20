@@ -21,8 +21,25 @@ class Header(Component):
     body: str
     level: int = 1
 
+    def __init__(self, body: str, level: int = 1, **kwargs):
+        self.body = body
+        self.level = level
+        if "extra_settings" in kwargs:
+            self.extra_settings = kwargs.pop("extra_settings")
+            self.extra_settings.update(kwargs)
+        else:
+            self.extra_settings = kwargs
+
     def __str__(self):
         return f"<h{self.level}>{self.body}</h{self.level}>"
+
+    def __repr__(self):
+        pieces = [repr(self.body)]
+        if self.level != 1:
+            pieces.append(f"{repr(self.level)}")
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"Header({', '.join(pieces)})"
 
 
 @dataclass

@@ -394,3 +394,11 @@ div.btlw-container img {
     margin-left: 1em;
     padding: 2px 4px;
 }
+
+.drafter-debug-- .history-event.response-event pre {
+    background-color: #e6ffed;
+    border: 1px solid #a3f7b1;
+    padding: 2px 4px;
+    border-radius: 3px;
+    white-space: pre-wrap;
+}

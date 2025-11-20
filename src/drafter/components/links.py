@@ -116,6 +116,13 @@ class Argument(Component):
         value = make_safe_json_argument(self.value)
         return f"<input type='hidden' name='{JSON_DECODE_SYMBOL}{self.name}' value='{value}' {self.parse_extra_settings()} />"
 
+    def __repr__(self) -> str:
+        pieces = [repr(self.name), repr(self.value)]
+        if self.extra_settings:
+            for key, value in self.extra_settings.items():
+                pieces.append(f"{key}={repr(value)}")
+        return f"Argument({', '.join(pieces)})"
+
 
 @dataclass
 class Link(Component, LinkContent):
@@ -139,6 +146,14 @@ class Link(Component, LinkContent):
         value = make_safe_argument(link_namespace)
         return f"{precode}<a data-nav='{self.url}' data-submit-button='{value}' href='#' {self.parse_extra_settings()}>{self.text}</a>"
 
+    def __repr__(self) -> str:
+        pieces = [repr(self.text), repr(self.url)]
+        if self.arguments:
+            pieces.append(repr(self.arguments))
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"Link({', '.join(pieces)})"
+
 
 @dataclass
 class Button(Component, LinkContent):
@@ -156,9 +171,12 @@ class Button(Component, LinkContent):
         self._button_id = id(self)
 
     def __repr__(self):
+        pieces = [repr(self.text), repr(self.url)]
         if self.arguments:
-            return f"Button(text={self.text!r}, url={self.url!r}, arguments={self.arguments!r})"
-        return f"Button(text={self.text!r}, url={self.url!r})"
+            pieces.append(repr(self.arguments))
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"Button({', '.join(pieces)})"
 
     def __str__(self) -> str:
         # Create a unique namespace using both button text and instance ID

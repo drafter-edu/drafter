@@ -5,9 +5,16 @@ from drafter.components.page_content import Component
 from drafter.components.utilities.validation import validate_parameter_name
 
 
-@dataclass
-class TextBox(Component):
+class FormComponent(Component):
     name: str
+
+    def handle_aria(self, extra_settings: dict) -> None:
+        if "aria-label" not in extra_settings:
+            extra_settings["aria-label"] = self.name
+
+
+@dataclass
+class TextBox(FormComponent):
     kind: str
     default_value: Optional[str]
 
@@ -23,10 +30,6 @@ class TextBox(Component):
         self.kind = kind
         self.default_value = str(default_value) if default_value is not None else ""
         self.extra_settings = kwargs
-
-    def handle_aria(self, extra_settings: dict) -> None:
-        if "aria-label" not in extra_settings:
-            extra_settings["aria-label"] = self.name
 
     def __str__(self) -> str:
         extra_settings = dict(self.extra_settings)
@@ -54,8 +57,7 @@ class TextBox(Component):
 
 
 @dataclass
-class TextArea(Component):
-    name: str
+class TextArea(FormComponent):
     default_value: str
     EXTRA_ATTRS = [
         "rows",
@@ -78,10 +80,22 @@ class TextArea(Component):
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         return f"<textarea name='{self.name}' {parsed_settings}>{html.escape(self.default_value)}</textarea>"
 
+    def __repr__(self) -> str:
+        """
+        name: str,
+        default_value: Optional[str] = None,
+        kind: str = "text",
+        """
+        pieces = [repr(self.name)]
+        if self.default_value != "":
+            pieces.append(repr(self.default_value))
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"TextArea({', '.join(pieces)})"
+
 
 @dataclass
-class SelectBox(Component):
-    name: str
+class SelectBox(FormComponent):
     options: List[str]
     default_value: Optional[str]
 
@@ -110,11 +124,23 @@ class SelectBox(Component):
         )
         return f"<select name='{self.name}' {parsed_settings}>{options}</select>"
 
+    def __repr__(self) -> str:
+        """
+        name: str,
+        options: List[str],
+        default_value: Optional[str] = None,
+        """
+        pieces = [repr(self.name), repr(self.options)]
+        if self.default_value != "":
+            pieces.append(repr(self.default_value))
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"SelectBox({', '.join(pieces)})"
+
 
 @dataclass
-class CheckBox(Component):
+class CheckBox(FormComponent):
     EXTRA_ATTRS = ["checked"]
-    name: str
     default_value: bool
 
     def __init__(self, name: str, default_value: bool = False, **kwargs):
@@ -122,10 +148,6 @@ class CheckBox(Component):
         self.name = name
         self.default_value = bool(default_value)
         self.extra_settings = kwargs
-
-    def handle_aria(self, extra_settings: dict) -> None:
-        if "aria-label" not in extra_settings:
-            extra_settings["aria-label"] = self.name
 
     def __str__(self) -> str:
         extra_settings = dict(self.extra_settings)

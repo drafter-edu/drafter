@@ -93,6 +93,7 @@ class Page(ResponsePayload):
     def format(
         self,
         state: SiteState,
+        representation: str,
         configuration: ClientServerConfiguration,
     ) -> str:
         """
@@ -113,7 +114,16 @@ class Page(ResponsePayload):
             pieces.append(f", css={format_page_content(self.css)}")
         if self.js:
             pieces.append(f", js={format_page_content(self.js)}")
-        return f"Page({''.join(pieces)})"
+
+        return "".join(
+            [
+                "assert_equal(",
+                representation + ",\n",
+                indent(f"Page({''.join(pieces)})", " " * 4),
+                ")",
+            ]
+        )
+        return
 
     def get_messages(
         self,

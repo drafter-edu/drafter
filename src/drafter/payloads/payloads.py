@@ -34,6 +34,7 @@ class ResponsePayload:
     def format(
         self,
         state: SiteState,
+        representation: str,
         configuration: ClientServerConfiguration,
     ) -> str:
         """

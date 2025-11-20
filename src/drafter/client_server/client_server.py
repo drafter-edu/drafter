@@ -139,7 +139,7 @@ class ClientServer:
             )
         return route_func
 
-    def execute_route(self, route_func, request: Request) -> Any:
+    def execute_route(self, route_func, request: Request) -> tuple[Any, str]:
         # Call the route function to get the payload
         try:
             args, kwargs, representation = self.router.prepare_arguments(
@@ -168,7 +168,7 @@ class ClientServer:
             )
         # print(args, kwargs, representation)
         try:
-            return route_func(*args, **kwargs)
+            return route_func(*args, **kwargs), representation
         except Exception as e:
             raise VisitError(
                 log_error(
@@ -231,10 +231,12 @@ class ClientServer:
                 503,
             )
 
-    def format_payload(self, request: Request, payload: ResponsePayload) -> str:
+    def format_payload(
+        self, request: Request, representation: str, payload: ResponsePayload
+    ) -> str:
         # Format the payload for display in the history panel
         try:
-            return payload.format(self.state, self.configuration)
+            return payload.format(self.state, representation, self.configuration)
         except Exception as e:
             raise VisitError(
                 log_error(
@@ -303,10 +305,10 @@ class ClientServer:
         with self.requests.push(request):
             try:
                 route_func = self.get_route(request)
-                payload = self.execute_route(route_func, request)
+                payload, representation = self.execute_route(route_func, request)
                 self.verify_payload(request, payload)
                 body = self.render_payload(request, payload)
-                formatted_body = self.format_payload(request, payload)
+                formatted_body = self.format_payload(request, representation, payload)
                 self.handle_state_updates(request, payload)
                 messages = self.get_messages(request, payload)
             except VisitError as ve:
