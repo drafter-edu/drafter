@@ -59,6 +59,11 @@ from drafter.styling.styling import (
 from drafter.client_server.commands import get_main_server, set_main_server
 from drafter.router.commands import route
 from drafter.payloads.kinds.page import Page
+from drafter.payloads.kinds.fragment import Fragment
+from drafter.payloads.kinds.update import Update
+from drafter.payloads.kinds.redirect import Redirect
+from drafter.payloads.kinds.download import Download as DownloadPayload
+from drafter.payloads.kinds.progress import Progress
 from drafter.deploy import (
     hide_debug_information,
     show_debug_information,
@@ -77,6 +82,11 @@ from drafter.testing import assert_equal
 __all__ = [
     "dataclass",
     "Page",
+    "Fragment",
+    "Update",
+    "Redirect",
+    "DownloadPayload",
+    "Progress",
     "Content",
     "PageContent",
     "Component",
