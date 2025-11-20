@@ -85,6 +85,7 @@ class Router:
         args, kwargs = self.convert_argument_types(signature, args, kwargs)
         self.verify_expected_parameters(request, signature, kwargs)
         representation = self.build_argument_representation(signature, args, kwargs)
+        representation = f"{signature.function_name}({representation})"
         return args, kwargs, representation
 
     def build_argument_representation(
@@ -94,11 +95,11 @@ class Router:
         kwargs: Dict[str, Any],
     ) -> str:
         return ", ".join(
-            [safe_repr(arg) for arg in args]
+            [safe_repr(arg, escape=False) for arg in args]
             + [
-                f"{key}={safe_repr(value)}"
+                f"{key}={safe_repr(value, escape=False)}"
                 if signature.show_names.get(key, False)
-                else safe_repr(value)
+                else safe_repr(value, escape=False)
                 for key, value in sorted(
                     kwargs.items(),
                     key=lambda item: signature.expected_parameters.index(item[0]),

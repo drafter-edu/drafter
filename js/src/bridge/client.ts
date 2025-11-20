@@ -163,7 +163,8 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         console.log("[Drafter Bridge Client]", event_name, ...args);
     };
 
-    let requestCount = 0;
+    // Starts at 1 because ClientBridge.make_initial_request uses 0
+    let requestCount = 1;
 
     let siteTitle = "";
     drafter_client_mod.set_site_title = new Sk.builtin.func(
@@ -191,11 +192,11 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
     class ClientBridgeWrapper implements ClientBridgeWrapperInterface {
         constructor(private clientBridge: pyObject) {}
 
-        public goto(url: string, formData?: FormData) {
+        public goto(url: string, formData?: FormData, action = "system") {
             if (!navigationFunc) {
                 throw new Error("navigationFunc not set");
             }
-            return initiateRequest(url, formData);
+            return initiateRequest(url, formData, true, action);
         }
     }
 
@@ -257,7 +258,11 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         });
     };
 
-    const makeRequest = function (url: string, formData?: FormData) {
+    const makeRequest = function (
+        url: string,
+        formData?: FormData,
+        action = "submit"
+    ) {
         const data: Record<string, FormDataEntryValue | FormDataEntryValue[]> =
             {};
         const filePromises: Promise<void>[] = [];
@@ -282,7 +287,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
             }
             const args = [
                 new pyInt(requestCount),
-                new pyStr("submit"),
+                new pyStr(action),
                 new pyStr(url),
                 new pyList([]),
                 dataDict,
@@ -319,13 +324,18 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
         },
     } = drafter_client_mod;
 
-    function initiateRequest(url: string, data?: FormData, remember = true) {
+    function initiateRequest(
+        url: string,
+        data?: FormData,
+        remember = true,
+        action = "submit"
+    ) {
         if (!navigationFunc) {
             throw new Error("navigationFunc not set");
         }
         debug_log("request.initiated", url, data, navigationFunc);
         return Sk.misceval.promiseToSuspension(
-            makeRequest(url, data).then((newRequest) => {
+            makeRequest(url, data, action).then((newRequest) => {
                 if (remember) {
                     addToHistory(newRequest);
                 }
@@ -364,7 +374,12 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                 navigationFunc
             );
             const mounted = mountNavigation(element, (navEvent: NavEvent) => {
-                return initiateRequest(navEvent.url, navEvent.data);
+                return initiateRequest(
+                    navEvent.url,
+                    navEvent.data,
+                    true,
+                    navEvent.kind
+                );
             });
             debug_log(
                 "dom.mount_navigation",
@@ -470,7 +485,7 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                 const params = new URLSearchParams(window.location.search);
                 const route = params.get("route");
                 if (route) {
-                    initiateRequest(route, undefined, false);
+                    initiateRequest(route, undefined, false, "query_string");
                 }
             }
             if (popstateListener) {
@@ -491,14 +506,14 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                         "",
                         fullUrl.toString()
                     );
-                    initiateRequest(url, undefined, false);
+                    initiateRequest(url, undefined, false, "back");
                 } else {
                     debug_log("history.popstate_no_state", event);
                     document.title = siteTitle;
                     const fullUrl = new URL(window.location.href);
                     fullUrl.searchParams.delete("route");
                     window.history.replaceState({}, "", fullUrl.toString());
-                    initiateRequest("index", undefined, false);
+                    initiateRequest("index", undefined, false, "back");
                 }
             };
             window.addEventListener("popstate", popstateListener);

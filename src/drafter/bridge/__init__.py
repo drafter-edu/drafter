@@ -84,7 +84,7 @@ class ClientBridge:
         return outcome
 
     def make_initial_request(self) -> Request:
-        return Request(0, "load", "index", [], {}, {})
+        return Request(0, "page_load", "index", [], {}, {})
 
     def handle_telemetry_event(self, event: TelemetryEvent) -> None:
         handle_event(event.to_json())

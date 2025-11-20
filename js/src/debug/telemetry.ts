@@ -5,6 +5,7 @@ import type {
 } from "./telemetry/errors";
 import type {
     RequestEvent,
+    RequestParseEvent,
     ResponseEvent,
     OutcomeEvent,
     PageVisitEvent,
@@ -16,6 +17,7 @@ export type TypedEvent =
     | RouteAddedEvent
     | UpdatedStateEvent
     | RequestEvent
+    | RequestParseEvent
     | ResponseEvent
     | OutcomeEvent
     | PageVisitEvent

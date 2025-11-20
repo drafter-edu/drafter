@@ -11,6 +11,12 @@ export interface RequestEvent extends BaseEvent {
     request_id: number;
 }
 
+export interface RequestParseEvent extends BaseEvent {
+    event_type: "RequestParseEvent";
+    request_id: number;
+    representation: string;
+}
+
 export interface ResponseEvent extends BaseEvent {
     event_type: "ResponseEvent";
     status_code: number;

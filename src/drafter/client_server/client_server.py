@@ -8,6 +8,11 @@ from drafter.data.channel import Message
 from drafter.history.state import SiteState
 from drafter.monitor.events.errors import DrafterError
 from drafter.monitor.bus import EventBus
+from drafter.monitor.events.request import (
+    RequestEvent,
+    RequestParseEvent,
+    ResponseEvent,
+)
 from drafter.monitor.events.routes import RouteAddedEvent
 from drafter.monitor.events.state import UpdatedStateEvent
 from drafter.monitor.monitor import Monitor
@@ -140,6 +145,15 @@ class ClientServer:
             args, kwargs, representation = self.router.prepare_arguments(
                 request, self.state.current
             )
+            log_data(
+                RequestParseEvent(
+                    request_id=request.id,
+                    representation=representation,
+                ),
+                "client_server.execute_route",
+                route=request.url,
+                request_id=request.id,
+            )
         except Exception as e:
             raise VisitError(
                 log_error(
@@ -263,12 +277,11 @@ class ClientServer:
         :return: The result of the route function.
         """
         start_time = time.time()
-        log_info(
-            "request.received",
-            f"Request received: {request}",
+        log_data(
+            RequestEvent.from_request(request),
             "client_server.visit",
-            repr(request),
             route=request.url,
+            request_id=request.id,
         )
         with self.requests.push(request):
             try:
@@ -302,13 +315,13 @@ class ClientServer:
                 504,
             )
         end_time = time.time()
-        response_time = end_time - start_time
-        log_info(
-            "response.created",
-            f"Response created for request ID {request.id}",
+        response_time = (end_time - start_time) * 1000  # in milliseconds
+        log_data(
+            ResponseEvent.from_response(response, response_time),
             "client_server.visit",
-            f"Response: {repr(response)}",
             route=request.url,
+            request_id=request.id,
+            response_id=response.id,
         )
         return response
 

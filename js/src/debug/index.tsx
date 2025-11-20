@@ -6,19 +6,24 @@ import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrappe
 import type { TestCaseEvent } from "./telemetry/tests";
 import { decodeHtmlEntities } from "./utils";
 import { TestPanel } from "./panels/testing";
+import { StatePanel } from "./panels/state";
+import { RoutesPanel } from "./panels/routes";
+import { HistoryPanel } from "./panels/history";
 
 export class DebugPanel {
     private panelElement: HTMLElement | null = null;
     private contentElement: HTMLElement | null = null;
     private events: TelemetryEvent[] = [];
     private pageHistory: any[] = [];
-    private currentState: any = null;
     private errors: any[] = [];
     private warnings: any[] = [];
     private isVisible: boolean = true;
     private headerBar: DebugHeaderBar | null = null;
     private footerBar: DebugFooterBar | null = null;
     private testingPanel: TestPanel | null = null;
+    private statePanel: StatePanel | null = null;
+    private routesPanel: RoutesPanel | null = null;
+    private historyPanel: HistoryPanel | null = null;
 
     constructor(
         private containerId: string,
@@ -44,6 +49,9 @@ export class DebugPanel {
         this.headerBar = new DebugHeaderBar("");
         this.footerBar = new DebugFooterBar();
         this.testingPanel = new TestPanel();
+        this.statePanel = new StatePanel();
+        this.routesPanel = new RoutesPanel();
+        this.historyPanel = new HistoryPanel();
         this.attachEventHandlers();
     }
 
@@ -73,13 +81,11 @@ export class DebugPanel {
                         <div class="drafter-debug-header-subtitle"></div>
                     </div>
                     <div class="drafter-debug-header-buttons">
-                        <a href="#drafter-debug-warnings">Warnings</a> |
-                        <a href="#drafter-debug-errors">Errors</a> |
-                        <a href="#drafter-debug-current-route">Current Route</a>{" "}
-                        |<a href="#drafter-debug-state">State</a> |
+                        <a href="#drafter-debug-console">Console</a> |
+                        <a href="#drafter-debug-current-route">Routes</a> |
+                        <a href="#drafter-debug-state">State</a> |
                         <a href="#drafter-debug-history">History</a> |
-                        <a href="#drafter-debug-routes">Routes</a> |
-                        <a href="#drafter-debug-events">Events</a>
+                        <a href="#drafter-debug-routes">Routes</a>
                     </div>
                 </div>
                 {this.createActionButtons()}
@@ -106,7 +112,12 @@ export class DebugPanel {
                     <div
                         class="drafter-debug-section"
                         id="drafter-debug-history"
-                    ></div>
+                    >
+                        <div class="drafter-debug-section-header">
+                            <h4>Page History</h4>
+                        </div>
+                        <div id="drafter-debug-page-history-content"></div>
+                    </div>
                     <div class="drafter-debug-section" id="drafter-debug-tests">
                         <div class="drafter-debug-section-header">
                             <h4>Your Tests</h4>
@@ -165,47 +176,26 @@ export class DebugPanel {
         });
     }
 
-    private renderState(newState: any): void {
-        const section = document.getElementById(
-            "drafter-debug-current-state-content"
-        );
-        if (!section) {
-            throw new Error("DebugPanel: State section not found.");
-        }
-
-        const stateContent = (
-            <div class="state-content">
-                <div dangerouslySetInnerHTML={{ __html: newState }}></div>
-            </div>
-        );
-
-        section.replaceChildren(stateContent);
-    }
-
-    private renderRoute(route: string, signature: string): void {
-        const section = document.getElementById("drafter-routes-list");
-        if (!section) {
-            throw new Error("DebugPanel: Routes section not found.");
-        }
-
-        const newRouteItem = (
-            <div class="route-signature">
-                <strong>{route}</strong>:<pre>{signature}</pre>
-            </div>
-        );
-
-        section.appendChild(newRouteItem);
-    }
-
     public handleEvent(event: TelemetryEvent): void {
         this.events.push(event);
         switch (event.data?.event_type) {
             case "RouteAdded":
-                this.renderRoute(event.data.url, event.data.signature);
+                this.routesPanel?.renderRoute(
+                    event.data.url,
+                    event.data.signature
+                );
+                break;
+            case "RequestEvent":
+                this.historyPanel?.addRequest(event.data);
+                break;
+            case "RequestParseEvent":
+                this.historyPanel?.addRequestParse(event.data);
+                break;
+            case "ResponseEvent":
+                this.historyPanel?.addResponse(event.data);
                 break;
             case "UpdatedState":
-                this.currentState = event.data.html;
-                this.renderState(this.currentState);
+                this.statePanel?.renderState(event.data.html);
                 break;
             case "TestCaseEvent":
                 this.testingPanel?.renderTest(event.data);

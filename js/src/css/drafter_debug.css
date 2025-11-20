@@ -376,3 +376,21 @@ div.btlw-container img {
 .drafter-debug-- .d2h-moved-tag {
     display: none;
 }
+
+.drafter-debug-- .history-event.request-parse-event {
+    margin-left: 1em;
+    padding: 2px 4px;
+}
+
+.drafter-debug-- .history-event.request-parse-event code {
+    background-color: #e8f0fe;
+    border: 1px solid #a3c0fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+
+.drafter-debug-- .history-event.response-event {
+    margin-left: 1em;
+    padding: 2px 4px;
+}

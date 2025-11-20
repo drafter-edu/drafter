@@ -36,6 +36,36 @@ class RequestEvent(BaseEvent):
             "request_id": self.request_id,
         }
 
+    @classmethod
+    def from_request(cls, request) -> "RequestEvent":
+        return cls(
+            url=request.url,
+            action=request.action,
+            args=str(request.args),
+            kwargs=str(request.kwargs),
+            request_id=request.id,
+        )
+
+
+@dataclass
+class RequestParseEvent(BaseEvent):
+    """
+    Event emitted when a request is parsed.
+    :ivar request_id: Unique identifier for this request
+    :ivar representation: String representation of the parsed request
+    """
+
+    request_id: int = -1
+    representation: str = ""
+    event_type: str = "RequestParseEvent"
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            **super().to_json(),
+            "request_id": self.request_id,
+            "representation": self.representation,
+        }
+
 
 @dataclass
 class ResponseEvent(BaseEvent):
@@ -74,10 +104,25 @@ class ResponseEvent(BaseEvent):
             "request_id": self.request_id,
         }
 
+    @classmethod
+    def from_response(cls, response, duration_ms: float) -> "ResponseEvent":
+        return cls(
+            status_code=response.status_code,
+            payload_type=type(response.payload).__name__,
+            body_length=len(response.body) if response.body else 0,
+            has_errors=bool(response.errors),
+            has_warnings=bool(response.warnings),
+            duration_ms=duration_ms,
+            response_id=response.id,
+            request_id=response.request_id,
+        )
+
 
 @dataclass
 class OutcomeEvent(BaseEvent):
     """
+    DEPRECATED.
+
     Event emitted when an outcome is received from the client.
     :ivar message: Outcome message
     :ivar success: Whether the outcome was successful
@@ -104,6 +149,8 @@ class OutcomeEvent(BaseEvent):
 @dataclass
 class PageVisitEvent(BaseEvent):
     """
+    DEPRECATED.
+
     Event that combines request, response, and outcome for a complete page visit.
     :ivar url: The URL visited
     :ivar function_name: Name of the function called
