@@ -27,6 +27,7 @@ export interface ResponseEvent extends BaseEvent {
     duration_ms: number;
     response_id: number;
     request_id: number;
+    formatted_page_content: string;
 }
 
 export interface OutcomeEvent extends BaseEvent {

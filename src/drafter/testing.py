@@ -112,8 +112,8 @@ class BakeryTests:
         expected_str = repr(expected)
 
         diff_html = ""
-        actual_formatted, _ = format_page_content(actual, escape=False)
-        expected_formatted, _ = format_page_content(expected, escape=False)
+        actual_formatted = format_page_content(actual, escape=False)
+        expected_formatted = format_page_content(expected, escape=False)
         if not test_case.result:
             diff_html = "".join(
                 difflib.unified_diff(

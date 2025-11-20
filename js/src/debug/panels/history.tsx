@@ -79,6 +79,13 @@ export class HistoryPanel {
             <div class="history-event response-event">
                 <strong>Response:</strong> {response.status_code} for Request
                 ID: {response.request_id} (Response ID: {response.response_id})
+                <details>
+                    <summary>View Page Content</summary>
+                    <pre>
+                        {response.formatted_page_content ||
+                            "No content available."}
+                    </pre>
+                </details>
             </div>
         );
 

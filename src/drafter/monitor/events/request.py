@@ -89,6 +89,7 @@ class ResponseEvent(BaseEvent):
     duration_ms: float = 0.0
     response_id: int = -1
     request_id: int = -1
+    formatted_page_content: str = ""
     event_type: str = "ResponseEvent"
 
     def to_json(self) -> dict[str, Any]:
@@ -102,10 +103,13 @@ class ResponseEvent(BaseEvent):
             "duration_ms": self.duration_ms,
             "response_id": self.response_id,
             "request_id": self.request_id,
+            "formatted_page_content": self.formatted_page_content,
         }
 
     @classmethod
-    def from_response(cls, response, duration_ms: float) -> "ResponseEvent":
+    def from_response(
+        cls, response, formatted_body: str, duration_ms: float
+    ) -> "ResponseEvent":
         return cls(
             status_code=response.status_code,
             payload_type=type(response.payload).__name__,
@@ -115,6 +119,7 @@ class ResponseEvent(BaseEvent):
             duration_ms=duration_ms,
             response_id=response.id,
             request_id=response.request_id,
+            formatted_page_content=formatted_body or response.body or "",
         )
 
 

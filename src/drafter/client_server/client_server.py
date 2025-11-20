@@ -231,6 +231,23 @@ class ClientServer:
                 503,
             )
 
+    def format_payload(self, request: Request, payload: ResponsePayload) -> str:
+        # Format the payload for display in the history panel
+        try:
+            return payload.format(self.state, self.configuration)
+        except Exception as e:
+            raise VisitError(
+                log_error(
+                    "request.payload_formatting_failed",
+                    f"Error while formatting payload for URL {request.url}: {e}",
+                    "client_server.visit",
+                    f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                    route=request.url,
+                    exception=e,
+                ),
+                509,
+            )
+
     def handle_state_updates(self, request: Request, payload: ResponsePayload) -> None:
         is_updated, updated_state = payload.get_state_updates()
         if is_updated:
@@ -289,6 +306,7 @@ class ClientServer:
                 payload = self.execute_route(route_func, request)
                 self.verify_payload(request, payload)
                 body = self.render_payload(request, payload)
+                formatted_body = self.format_payload(request, payload)
                 self.handle_state_updates(request, payload)
                 messages = self.get_messages(request, payload)
             except VisitError as ve:
@@ -317,7 +335,7 @@ class ClientServer:
         end_time = time.time()
         response_time = (end_time - start_time) * 1000  # in milliseconds
         log_data(
-            ResponseEvent.from_response(response, response_time),
+            ResponseEvent.from_response(response, formatted_body, response_time),
             "client_server.visit",
             route=request.url,
             request_id=request.id,

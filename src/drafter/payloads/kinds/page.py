@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from textwrap import indent
 from typing import Any, Dict, List, Optional
 
 from drafter.data.channel import Message
@@ -7,6 +8,7 @@ from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
 from drafter.components import Component, PageContent, Link
 from drafter.data.request import Request
+from drafter.history.formatting import format_page_content
 from drafter.history.state import SiteState
 from drafter.payloads.payloads import ResponsePayload
 from drafter.payloads.failure import VerificationFailure
@@ -79,9 +81,7 @@ class Page(ResponsePayload):
         :return: A string of HTML representing the content of the page.
         """
         # TODO: Decide if we want to dump state on the page
-        chunked: list[str] = [
-            # f'<input type="hidden" name="{RESTORABLE_STATE_KEY}" value={current_state!r}/>'
-        ]
+        chunked: list[str] = []
         for chunk in self.content:
             if isinstance(chunk, str):
                 chunked.append(f"<p>{chunk}</p>")
@@ -89,6 +89,31 @@ class Page(ResponsePayload):
                 chunked.append(chunk.render(state, configuration))
         content = "\n".join(chunked)
         return content
+
+    def format(
+        self,
+        state: SiteState,
+        configuration: ClientServerConfiguration,
+    ) -> str:
+        """
+        Formats the payload for display in the history panel.
+        Essentially, the result should be a `repr` that could be used to recreate
+        the payload.
+        """
+        pieces = [format_page_content(self.state)]
+        if isinstance(self.content, list):
+            pieces.append(", [\n")
+            for item in self.content:
+                pieces.append(indent(format_page_content(item), " " * 4) + ",\n")
+            pieces.append("]")
+        else:
+            pieces.append(f",\n")
+            pieces.append(indent(format_page_content(self.content), " " * 4))
+        if self.css:
+            pieces.append(f", css={format_page_content(self.css)}")
+        if self.js:
+            pieces.append(f", js={format_page_content(self.js)}")
+        return f"Page({''.join(pieces)})"
 
     def get_messages(
         self,
