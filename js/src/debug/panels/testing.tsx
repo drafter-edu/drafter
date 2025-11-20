@@ -1,6 +1,7 @@
 import * as Diff2Html from "diff2html";
 import type { TestCaseEvent } from "../telemetry/tests";
 import { decodeHtmlEntities } from "../utils";
+import type { ReactElement } from "jsx-dom";
 
 export class TestPanel {
     private tests: TestCaseEvent[] = [];
@@ -25,22 +26,18 @@ export class TestPanel {
                     <code class="test-caller">{testCase.caller}</code>
                 </div>
                 <div class="test-case-diff"></div>
-                {/* {!testCase.passed && testCase.diff_html && (
-                    <div
-                        dangerouslySetInnerHTML={{
-                            __html: decodeHtmlEntities(testCase.diff_html),
-                        }}
-                    ></div>
-                    // <details class="test-diff">
-                    //     <summary>Show Difference</summary>
-
-                    // </details>
-                )} */}
             </div>
         );
 
         testList.appendChild(testElement);
 
+        this.addDiffToTestElement(testCase, testElement);
+    }
+
+    private addDiffToTestElement(
+        testCase: TestCaseEvent,
+        testElement: ReactElement
+    ): void {
         if (!testCase.passed) {
             const diffString = testCase.diff_html;
 

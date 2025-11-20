@@ -372,3 +372,7 @@ div.btlw-container img {
     vertical-align: top;
     font-family: monospace;
 }
+
+.drafter-debug-- .d2h-moved-tag {
+    display: none;
+}

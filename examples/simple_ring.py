@@ -1,5 +1,5 @@
-from drafter import route, start_server, Page, Link
 from bakery import assert_equal
+from drafter import route, start_server, Page, Link
 
 
 @route()

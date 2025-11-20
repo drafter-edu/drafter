@@ -1,3 +1,4 @@
+import sys
 from dataclasses import dataclass
 from functools import wraps
 from typing import Any, Optional
@@ -118,11 +119,11 @@ class BakeryTests:
                 difflib.unified_diff(
                     actual_formatted.splitlines(keepends=True),
                     expected_formatted.splitlines(keepends=True),
-                    "Your function returned",
-                    "But the test expected",
+                    "Actually Returned",
+                    "Test Expected",
                 )
             )
-            print(diff_html)
+            # print(diff_html)
 
         log_data(
             TestCaseEvent(
@@ -148,6 +149,9 @@ if bakery is not None:
     bakery.assert_equal = assert_equal = _bakery_tests.track_bakery_tests(
         bakery.assert_equal
     )
+    if "__main__" in sys.modules:
+        if hasattr(sys.modules["__main__"], "assert_equal"):
+            sys.modules["__main__"].assert_equal = assert_equal  # type: ignore
 else:
 
     def assert_equal(*args, **kwargs):

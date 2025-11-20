@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Callable, Union
 from dataclasses import dataclass
 
 from drafter.components.utilities.escaping import (
@@ -14,6 +14,9 @@ from drafter.urls import (
 )
 from drafter.components.page_content import Component
 from drafter.components.utilities.validation import validate_parameter_name
+
+
+UrlOrFunction = Union[str, Callable]
 
 
 class LinkContent:
@@ -35,7 +38,7 @@ class LinkContent:
 
     EXTRA_ATTRS = ["disabled"]
 
-    def _handle_url(self, url, external=None):
+    def _handle_url(self, url: UrlOrFunction, external=None) -> tuple[str, bool]:
         if callable(url):
             url = url.__name__
         if external is None:
@@ -91,12 +94,15 @@ class LinkContent:
         )
 
 
+RouteSafeValue = Union[str, int, float, bool]
+
+
 @dataclass
 class Argument(Component):
     name: str
-    value: Any
+    value: RouteSafeValue
 
-    def __init__(self, name: str, value: Any, **kwargs):
+    def __init__(self, name: str, value: RouteSafeValue, **kwargs):
         validate_parameter_name(name, "Argument")
         self.name = name
         if not isinstance(value, (str, int, float, bool)):
@@ -116,7 +122,7 @@ class Link(Component, LinkContent):
     text: str
     url: str
 
-    def __init__(self, text: str, url: str, arguments=None, **kwargs):
+    def __init__(self, text: str, url: UrlOrFunction, arguments=None, **kwargs):
         self.text = text
         self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
@@ -141,7 +147,7 @@ class Button(Component, LinkContent):
     arguments: List[Argument]
     external: bool = False
 
-    def __init__(self, text: str, url: str, arguments=None, **kwargs):
+    def __init__(self, text: str, url: UrlOrFunction, arguments=None, **kwargs):
         self.text = text
         self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
