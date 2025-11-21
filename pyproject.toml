@@ -13,9 +13,12 @@ dependencies = [
   "jinja2",
   "watchfiles",
   "websockets>=12",
+  "starlette",
+  "uvicorn",
   # CLI Tooling
   "click",
   "rich",
+  "typer",
   # Actual library
   "bakery",
   "pillow",

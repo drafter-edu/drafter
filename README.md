@@ -17,12 +17,12 @@ The main `index.html` file will create the DRAFTER_ROOT div, set up Skulpt and l
 It will try to render the student's initial page to prepopulate as much meta information as it can, as well as an HTML preview that can be shown for SEO contexts.
 The `AppBuilder` and `AppServer` are together both referred to as `AppBackend`.
 
-If the user is running the program directly in Skulpt, then when it reaches the `start_server` call, it will instead trigger the `launch.py` script's logic to setup the `ClientBridge` and get the main `ClientServer`. Note that the `ClientServer` is not a real server; it is just a class that handles requests from the `BridgeClient` and generates responses.
-The `BridgeClient` is responsible for populating the DOM, tracking user interactions, and sending requests from the client side, while the `ClientServer` is responsible for processing requests, managing state, and generating responses on the server side.
+If the user is running the program directly in Skulpt, then when it reaches the `start_server` call, it will instead trigger the `launch.py` script's logic to setup the `ClientBridge` and get the main `ClientServer`. Note that the `ClientServer` is not a real server; it is just a class that handles requests from the `ClientBridge` and generates responses.
+The `ClientBridge` is responsible for populating the DOM, tracking user interactions, and sending requests from the client side, while the `ClientServer` is responsible for processing requests, managing state, and generating responses on the server side.
 
 The area that the user sees is the `Site`, which is a frame encapsulating the `Form`, the `PageContent`, the `DebugInfo`, and additional elements that are needed (e.g., audio players).
-The `Site` is a container that holds all the elements of the user interface and is populated by the `BridgeClient` based on the responses it gets from the `ClientServer`.
-The `BridgeClient` is stupid when it comes to the site, and doesn't really understand what it has; as much of that logic as possible is pushed into the `ClientServer`.
+The `Site` is a container that holds all the elements of the user interface and is populated by the `ClientBridge` based on the responses it gets from the `ClientServer`.
+The `ClientBridge` is stupid when it comes to the site, and doesn't really understand what it has; as much of that logic as possible is pushed into the `ClientServer`.
 Different parts of the `Site` are updated from different parts of the `ClientServer`: the `Monitor` has control over the `DebugInfo`, while the `Route` handlers have control over the `PageContent`.
 
 The DOM structure of the site is as follows:
@@ -48,7 +48,7 @@ The structure can be summarized as:
 -   Root > Site > DebugInfo
 
 We'll use a request/response model to update the page content, based around events.
-When the user interacts with the page (clicks a link, submits a form, etc.), the `BridgeClient` will send a request to the `ClientServer` with the relevant information:
+When the user interacts with the page (clicks a link, submits a form, etc.), the `ClientBridge` will send a request to the `ClientServer` with the relevant information:
 
 -   The URL path being requested
 -   The form data
@@ -62,21 +62,21 @@ When the user interacts with the page (clicks a link, submits a form, etc.), the
 
 The `ClientServer` will process the request and choose an appropriate route handler by using the `visit` method.
 The provided function will be called, providing the current State and the request information (via named parameters).
-That function is expected to return a `Page` (or eventually other valid response payload types: `Fragment`, `Update`, `Redirect`, `Download`, `Progress`). That Page gets post-processed and wrapped in a `Response` along with metadata (e.g., status code, errors, headers, etc.) and sent to the `BridgeClient`.
+That function is expected to return a `Page` (or other valid response payload types: `Fragment`, `Update`, `Redirect`, `Download`, `Progress`). That Page gets post-processed and wrapped in a `Response` along with metadata (e.g., status code, errors, headers, etc.) and sent to the `ClientBridge`.
 
-The `BridgeClient` will then unwrap the page contents and update the DOM faithfully according to whatever it got from the `Response`, changing the contents of the `form` and replacing the click handler. It should update the browser history as appropriate, and run any scripts that were included in the response.
+The `ClientBridge` will then unwrap the page contents and update the DOM faithfully according to whatever it got from the `Response`, changing the contents of the `form` and replacing the click handler. It should update the browser history as appropriate, and run any scripts that were included in the response.
 
-The `Page` is rendered in the `ClientServer` by calling its `render` method, which produces HTML. It also generates any additional scripts that need to be run before or after the main content is inserted; these are sent along as part of the `Response` and executed by the `BridgeClient`.
-This is all facilitated by the `channels` of the `BridgeClient` and `ClientServer`, which allow sending messages back and forth; this is also useful for things like controlling page-level audio.
+The `Page` is rendered in the `ClientServer` by calling its `render` method, which produces HTML. It also generates any additional scripts that need to be run before or after the main content is inserted; these are sent along as part of the `Response` and executed by the `ClientBridge`.
+This is all facilitated by the `channels` of the `ClientBridge` and `ClientServer`, which allow sending messages back and forth; this is also useful for things like controlling page-level audio.
 
-After the response is successfully (or unsuccessfully) processed, the `BridgeClient` sends back an `Outcome` to the `ClientServer`, indicating whether the operation succeeded or failed, along with any relevant info, warnings, or errors.
+After the response is successfully (or unsuccessfully) processed, the `ClientBridge` sends back an `Outcome` to the `ClientServer`, indicating whether the operation succeeded or failed, along with any relevant info, warnings, or errors.
 
 How is the first page handled? When the server starts up, it will create an initial State object. While Starlette or the compiler is going through its initial setup run of the code, it will find the `index` route and execute it to generate initial page content (this can be disabled if needed). This information is provided in the generated template that the server serves to the client, so that SEO crawlers can see the initial content.
-When the `BridgeClient` connects, it will immediately request the index page, which will be run on the `ClientServer` side to generate the actual page content for the user.
+When the `ClientBridge` connects, it will immediately request the index page, which will be run on the `ClientServer` side to generate the actual page content for the user.
 
-How are errors and warnings handled? At any point during the process, we can generate either errors or warnings, and they get attached to the eventual `Response`. In some cases, we may want to short-circuit the normal flow and return an error response immediately (e.g., if a route handler raises an exception). In other cases, we may want to accumulate warnings and send them along with a successful response. Regardless, the `BridgeClient` will be responsible for displaying these messages to the user in a consistent manner.
+How are errors and warnings handled? At any point during the process, we can generate either errors or warnings, and they get attached to the eventual `Response`. In some cases, we may want to short-circuit the normal flow and return an error response immediately (e.g., if a route handler raises an exception). In other cases, we may want to accumulate warnings and send them along with a successful response. Regardless, the `ClientBridge` will be responsible for displaying these messages to the user in a consistent manner.
 
-How are streaming responses handled? How are long-running tasks handled? In both cases, we can yield `Progress` payloads from route handlers, which will be sent to the `BridgeClient` as they are generated. The `BridgeClient` can then update the page to show progress indicators or partial results as they come in.
+How are streaming responses handled? How are long-running tasks handled? In both cases, we can yield `Progress` payloads from route handlers, which will be sent to the `ClientBridge` as they are generated. The `ClientBridge` can then update the page to show progress indicators or partial results as they come in.
 
 From the student developer's perspective, they are building a `Site`, which can have multiple `Route`s. A `Route` is a decorated function that takes in the current `State` and any relevant parameters, and returns a `Page` (or other `ResponsePayload`). A `Site` also has metadata like title, description, favicon, language, etc.
 
@@ -118,16 +118,60 @@ The `Monitor` has visualizers that can handle the rendering logic for different 
 
 Essentially:
 
--   The `BridgeClient` handles all DOM manipulation and user interaction on the client side.
+-   The `ClientBridge` handles all DOM manipulation and user interaction on the client side.
 -   The `ClientServer` processes requests, manages state, and generates responses on the server side
 -   The `Page` (and other `ResponsePayload`s) represent the content and structure of the pages being served, and are created by the user-developer.
--   The `Request` wraps user interaction data for transmission from client to server, and is created by the `BridgeClient`.
+-   The `Request` wraps user interaction data for transmission from client to server, and is created by the `ClientBridge`.
 -   The `Response` wraps the `ResponsePayload` with metadata for transmission between client and server, and is created by the `ClientServer`.
--   The `Outcome` wraps the result of processing a response for transmission from client to server, and is created by the `BridgeClient`.
+-   The `Outcome` wraps the result of processing a response for transmission from client to server, and is created by the `ClientBridge`.
 
 How is `open` and `read` handled? We need to determine all of the local file dependencies of the project. The user should be able to provide an explicit list, but otherwise we assume that adjacent files will be possible to include. Starlette can load these files dynamically, but for deployment we need to make sure they get provided such that they can be opened.
 
 Images will assume to be available via the server.
+
+## Command Line Interface
+
+Drafter provides a CLI tool for building and serving applications:
+
+### Development Server
+
+To run a local development server with hot-reload:
+
+```bash
+drafter serve <python_file>
+```
+
+Options:
+- `--host` - Host to bind to (default: 127.0.0.1)
+- `--port` - Port to bind to (default: 8000)
+- `--title` - Site title (default: "Drafter App")
+- `--inline/--no-inline` - Embed Python source in HTML (default: inline)
+- `--open/--no-open` - Open browser at start (default: open)
+
+### Building for Deployment
+
+To build a static website for deployment:
+
+```bash
+drafter build <python_file> [OPTIONS]
+```
+
+Options:
+- `-o, --output-directory` - Output directory for built files (default: current directory)
+- `--output-filename` - Filename for the main HTML file (default: index.html)
+- `--additional-files` - Additional files to include in the build
+- `--external-pages` - External pages to link to in the generated site
+- `--create-404` - Whether to create a 404.html file (always/never/if_missing, default: if_missing)
+- `--warn-missing-info` - Warn if set_site_information is missing
+- `--title` - Site title (default: "Drafter App")
+- `--deploy-skulpt/--no-deploy-skulpt` - Build for Skulpt deployment vs static build (default: deploy-skulpt)
+- `--cdn-skulpt` - CDN URL for Skulpt library
+- `--cdn-skulpt-std` - CDN URL for Skulpt standard library
+- `--cdn-skulpt-drafter` - CDN URL for Skulpt Drafter library
+
+The build command supports two modes:
+1. **Skulpt deployment** (default): Generates a single HTML file that runs Python code in the browser using Skulpt
+2. **Static build** (`--no-deploy-skulpt`): Generates static HTML with pre-rendered content and copied assets
 
 ## Development: watch JS assets
 
