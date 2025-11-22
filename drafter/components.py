@@ -623,7 +623,9 @@ class Table(PageContent):
 
     def __init__(self, rows: List[List[str]], header=None, **kwargs):
         self.rows = rows
+        self._original_rows = list(rows)
         self.header = header
+        self._original_header = header
         self.extra_settings = kwargs
         self.reformat_as_tabular()
 
@@ -665,6 +667,21 @@ class Table(PageContent):
                          for row in self.rows)
         header = "" if not self.header else f"<thead><tr>{''.join(f'<th>{cell}</th>' for cell in self.header)}</tr></thead>"
         return f"<table {parsed_settings}>{header}{rows}</table>"
+
+    def __repr__(self):
+        pieces = [repr(self._original_rows)]
+        if self._original_header:
+            pieces.append(f"header={repr(self._original_header)}")
+        if self.extra_settings:
+            pieces.append(repr(self.extra_settings))
+        return f"Table({', '.join(pieces)})"
+
+    def __eq__(self, other):
+        if isinstance(other, Table):
+            return (self._original_rows == other._original_rows and
+                    self._original_header == other._original_header and
+                    self.extra_settings == other.extra_settings)
+        return NotImplemented
 
 
 @dataclass

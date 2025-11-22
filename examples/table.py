@@ -49,4 +49,8 @@ def view_dogs_page(state: list[Dog]) -> Page:
         Button("Go back", index)
     ])
 
-start_server([], reloader=True)
+
+assert_equal(Table([[Button("Click me", "index")]]),
+             Table([[Button("Click me", "index")]]))
+
+#start_server([], reloader=True)
