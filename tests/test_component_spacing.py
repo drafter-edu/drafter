@@ -6,7 +6,7 @@ that could cause string comparison issues in unit tests.
 """
 
 import pytest
-from drafter import Row, Div, Span, Text
+from drafter import Row, Div, Span, Text, Table
 
 
 def test_row_component_no_double_spaces():
@@ -86,3 +86,18 @@ def test_nested_row_components():
     
     # Each Row should be properly formatted with style attribute
     assert result.count("style='display: flex") == 4, "Should have 4 Row components with styles"
+
+
+def test_table_component_no_trailing_space():
+    """Test that Table component without settings has no trailing space."""
+    table = Table([["A", "B"], ["C", "D"]])
+    result = str(table)
+    
+    # Should not have trailing space after <table
+    assert not result.startswith("<table >"), f"Found trailing space in: {result!r}"
+    
+    # Should start cleanly
+    assert result.startswith("<table>"), f"Unexpected format: {result!r}"
+    
+    # Should not have double spaces
+    assert "  " not in result, f"Found double space in: {result!r}"

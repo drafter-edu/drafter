@@ -665,7 +665,8 @@ class Table(PageContent):
         rows = "\n".join(f"<tr>{''.join(f'<td>{cell}</td>' for cell in row)}</tr>"
                          for row in self.rows)
         header = "" if not self.header else f"<thead><tr>{''.join(f'<th>{cell}</th>' for cell in self.header)}</tr></thead>"
-        return f"<table {parsed_settings}>{header}{rows}</table>"
+        space = " " if parsed_settings else ""
+        return f"<table{space}{parsed_settings}>{header}{rows}</table>"
 
 
 @dataclass
