@@ -122,7 +122,10 @@ class PageContent:
             styles.append(f"{key}: {value}")
         result = " ".join(attrs)
         if styles:
-            result += f" style='{'; '.join(styles)}'"
+            if result:
+                result += f" style='{'; '.join(styles)}'"
+            else:
+                result = f"style='{'; '.join(styles)}'"
         return result
 
     def update_style(self, style, value):
@@ -538,7 +541,8 @@ class _HtmlGroup(PageContent):
 
     def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<{self.kind} {parsed_settings}>{''.join(str(item) for item in self.content)}</{self.kind}>"
+        space = " " if parsed_settings else ""
+        return f"<{self.kind}{space}{parsed_settings}>{''.join(str(item) for item in self.content)}</{self.kind}>"
 
 
 @dataclass(repr=False)
