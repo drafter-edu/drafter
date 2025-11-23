@@ -557,9 +557,13 @@ class TestText:
         assert text == text
     
     def test_text_equality_after_repr_eval(self):
-        """Test that Text is equal when repr is evaluated"""
+        """Test that Text repr produces a valid representation"""
         text = Text("Test")
         repr_str = repr(text)
+        # Verify repr contains the expected format
+        assert repr_str == "Text('Test')"
+        # Test that evaluating the repr creates an equivalent object
+        # Note: This uses eval() on a controlled string from our own code
         text2 = eval(repr_str)
         assert text == text2
     
