@@ -20,6 +20,13 @@ import sys
 def is_skulpt():
     return sys.platform == "skulpt"
 
+GEMINI_SERVER = ""
+
+def set_gemini_server(url: str):
+    global GEMINI_SERVER
+
+    GEMINI_SERVER = url
+
 @dataclass
 class ResponseWrapper:
     status_code: int
@@ -181,7 +188,8 @@ def call_gpt(api_key: str, messages: List[LLMMessage], model: str = "gpt-3.5-tur
         return LLMError("NetworkError", f"Failed to connect to API: {str(e)}")
 
 
-def call_gemini(api_key: str, messages: List[LLMMessage],
+def call_gemini(messages: List[LLMMessage],
+                api_key: str = "",
                 model: str = "gemini-2.5-flash",
                 temperature: float = 0.7, max_tokens: int = 1000) -> Any:
     """
@@ -216,7 +224,7 @@ def call_gemini(api_key: str, messages: List[LLMMessage],
         ...     print(f"Error: {response.message}")
     """
 
-    if not api_key:
+    if not api_key and not GEMINI_SERVER:
         return LLMError("AuthenticationError", "API key is required")
     
     if not messages:
@@ -234,8 +242,11 @@ def call_gemini(api_key: str, messages: List[LLMMessage],
                 "role": role,
                 "parts": [{"text": msg.content}]
             })
-    
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+
+    if GEMINI_SERVER:
+        url = GEMINI_SERVER
+    else:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
     headers = {
         "Content-Type": "application/json"
     }

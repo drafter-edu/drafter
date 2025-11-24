@@ -5,12 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.9] - 2025-11-23
+
+* Fixes for `repr` of rows, text, buttons, headers, and many other text elements.
+* Explicit change for Gemini URL
+
 ## [1.8.8] - 2025-11-19
 
 * Fixed issue with textbox contents not getting encoded correctly in the HTML
 * Fixed issue with deploys defaulting to the old `'website'` directory instead of top-level
 * Fixed the ability to control the deployment folder for images with `set_image_path` function
 * Improved compatibility of new LLM Gemini call system with Skulpt
+* Fixed issue with tables not testing correctly
 
 ## [1.8.7] - 2025-10-30
 

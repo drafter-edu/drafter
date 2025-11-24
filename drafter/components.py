@@ -1,4 +1,5 @@
 from dataclasses import dataclass, is_dataclass, fields
+from copy import deepcopy
 from typing import Any, Union, Optional, List, Dict, Tuple
 import io
 import base64
@@ -304,6 +305,12 @@ class Argument(PageContent):
         value = make_safe_json_argument(self.value)
         return f"<input type='hidden' name='{JSON_DECODE_SYMBOL}{self.name}' value='{value}' {self.parse_extra_settings()} />"
 
+    def __repr__(self):
+        pieces = [repr(self.name), repr(self.value)]
+        if self.extra_settings:
+            pieces.append(", ".join(f"{key}={value!r}" for key, value in self.extra_settings.items()))
+        return f"Argument({', '.join(pieces)})"
+
 
 @dataclass
 class Link(PageContent, LinkContent):
@@ -342,9 +349,12 @@ class Button(PageContent, LinkContent):
         self._button_id = id(self)
 
     def __repr__(self):
+        pieces = [repr(self.text), repr(self.url)]
         if self.arguments:
-            return f"Button(text={self.text!r}, url={self.url!r}, arguments={self.arguments!r})"
-        return f"Button(text={self.text!r}, url={self.url!r})"
+            pieces.append(f"arguments={self.arguments!r}")
+        if self.extra_settings:
+            pieces.append(", ".join(f"{key}={value!r}" for key, value in self.extra_settings.items()))
+        return f"Button({', '.join(pieces)})"
 
     def __str__(self) -> str:
         # Create a unique namespace using both button text and instance ID
@@ -521,6 +531,7 @@ class _HtmlGroup(PageContent):
     content: List[Any]
     extra_settings: Dict
     kind: str
+    class_name: str = ""
 
     def __init__(self, *args, **kwargs):
         self.content = list(args)
@@ -535,9 +546,14 @@ class _HtmlGroup(PageContent):
             self.extra_settings = kwargs
 
     def __repr__(self):
+        if not self.class_name:
+            class_name = self.kind.capitalize()
+        else:
+            class_name = self.class_name
         if self.extra_settings:
-            return f"{self.kind.capitalize()}({', '.join(repr(item) for item in self.content)}, {self.extra_settings})"
-        return f"{self.kind.capitalize()}({', '.join(repr(item) for item in self.content)})"
+            kwargs = ", ".join(f"{key}={value!r}" for key, value in self.extra_settings.items())
+            return f"{class_name}({', '.join(repr(item) for item in self.content)}, {kwargs})"
+        return f"{class_name}({', '.join(repr(item) for item in self.content)})"
 
     def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
@@ -578,11 +594,21 @@ PreformattedText = Pre
 
 @dataclass(repr=False)
 class Row(Div):
+    class_name = "Row"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.extra_settings['style_display'] = "flex"
         self.extra_settings['style_flex_direction'] = "row"
         self.extra_settings['style_align_items'] = "center"
+
+    def __eq__(self, other):
+        if isinstance(other, Row):
+            return (self.content == other.content and
+                    self.extra_settings == other.extra_settings)
+        elif isinstance(other, Div):
+            return (self.content == other.content and
+                    self.extra_settings == other.extra_settings)
+        return NotImplemented
 
 
 @dataclass
@@ -613,6 +639,13 @@ class Header(PageContent):
     body: str
     level: int = 1
 
+    def __init__(self, body: str, level: int = 1, **kwargs):
+        self.body = body
+        if level < 1 or level > 6:
+            raise ValueError("Header level must be between 1 and 6.")
+        self.level = level
+        self.extra_settings = kwargs
+
     def __str__(self):
         return f"<h{self.level}>{self.body}</h{self.level}>"
 
@@ -623,7 +656,7 @@ class Table(PageContent):
 
     def __init__(self, rows: List[List[str]], header=None, **kwargs):
         self.rows = rows
-        self._original_rows = list(rows)
+        self._original_rows = deepcopy(rows)
         self.header = header
         self._original_header = header
         self.extra_settings = kwargs
@@ -673,7 +706,8 @@ class Table(PageContent):
         if self._original_header:
             pieces.append(f"header={repr(self._original_header)}")
         if self.extra_settings:
-            pieces.append(repr(self.extra_settings))
+            for key, value in self.extra_settings.items():
+                pieces.append(f"{key}={repr(value)}")
         return f"Table({', '.join(pieces)})"
 
     def __eq__(self, other):
@@ -715,9 +749,10 @@ class Text(PageContent):
             return hash(self.body)
 
     def __repr__(self):
+        pieces = [repr(self.body)]
         if self.extra_settings:
-            return f"Text({self.body!r}, {self.extra_settings})"
-        return f"Text({self.body!r})"
+            pieces.append(", ".join(f"{key}={value!r}" for key, value in self.extra_settings.items()))
+        return f"Text({', '.join(pieces)})"
 
 
 
