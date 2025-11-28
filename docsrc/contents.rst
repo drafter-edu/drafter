@@ -13,6 +13,7 @@ Table of Contents
    students/styling
    students/testing
    students/deployment
+   llm_prompt_snippet
    reference/reference
    students/help
    api/api
