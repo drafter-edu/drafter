@@ -44,7 +44,7 @@ start_server(State("Guest", 0))
 | Component | Usage | Description |
 |-----------|-------|-------------|
 | `Button(text, url)` | `Button("Click", next_page)` | Navigates to another route |
-| `Button(text, url, arguments)` | `Button("Go", page, [Argument("x", 5)])` | Pass extra values |
+| `Button(text, url, arguments)` | `Button("Go", page, [Argument("id", 5)])` | Pass extra values |
 | `Link(text, url)` | `Link("Go", "page")` | Hyperlink to route or external URL |
 | `TextBox(name, default)` | `TextBox("email", "")` | Text input; `name` becomes route parameter |
 | `TextArea(name, default)` | `TextArea("bio", "")` | Multi-line text input |
