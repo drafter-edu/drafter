@@ -182,6 +182,21 @@ TEMPLATE_200 = """
     </body>
 </html>
 """
+
+TEMPLATE_200_WITHOUT_FOOTER = """
+<html>
+    <head>
+        {header}
+        {styles}
+        <title>{title}</title>
+    </head>
+    <body>
+        {content}
+        {scripts}
+    </body>
+</html>
+"""
+
 TEMPLATE_200_WITHOUT_HEADER = """
 <script>document.title = {title};</script>
 {header}
