@@ -824,9 +824,9 @@ class Server:
                     title=html.escape(self.configuration.title),
                     credit=credit)
             return TEMPLATE_200_WITHOUT_FOOTER.format(
-                    header=header_content, styles=styles, scripts=scripts, content=content,
-                    title=html.escape(self.configuration.title),
-                    credit=credit)
+                header=header_content, styles=styles, scripts=scripts, content=content,
+                title=html.escape(self.configuration.title),
+                credit=credit)
 
 
     def make_error_page(self, title, error, original_function, additional_details=""):
