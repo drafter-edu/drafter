@@ -166,6 +166,12 @@ INCLUDE_STYLES = {
     }
 }
 
+TEMPLATE_FOOTER = """
+<footer style="text-align: center; margin-top: 1em;">
+    The theme for this page is: {credit}
+</footer>
+"""
+
 TEMPLATE_200 = """
 <html>
     <head>
@@ -176,23 +182,7 @@ TEMPLATE_200 = """
     <body>
         {content}
         {scripts}
-        <footer style="text-align: center; margin-top: 1em;">
-        The theme for this page is: {credit}
-        </footer>
-    </body>
-</html>
-"""
-
-TEMPLATE_200_WITHOUT_FOOTER = """
-<html>
-    <head>
-        {header}
-        {styles}
-        <title>{title}</title>
-    </head>
-    <body>
-        {content}
-        {scripts}
+        {footer}
     </body>
 </html>
 """

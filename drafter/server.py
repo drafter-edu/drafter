@@ -18,8 +18,8 @@ from drafter.setup import Bottle, abort, request, static_file
 from drafter.history import VisitedPage, rehydrate_json, dehydrate_json, ConversionRecord, UnchangedRecord, get_params, \
     remap_hidden_form_parameters, safe_repr
 from drafter.page import Page
-from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, TEMPLATE_200_WITHOUT_FOOTER, \
-    TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
+from drafter.files import TEMPLATE_200, TEMPLATE_404, TEMPLATE_500, INCLUDE_STYLES, TEMPLATE_200_WITHOUT_HEADER, \
+    TEMPLATE_FOOTER, TEMPLATE_SKULPT_DEPLOY, seek_file_by_line
 from drafter.raw_files import get_raw_files, get_themes
 from drafter.urls import remove_url_query_params, is_external_url
 from drafter.image_support import HAS_PILLOW, PILImage
@@ -818,15 +818,11 @@ class Server:
                 header=header_content, styles=styles, scripts=scripts, content=content,
                 title=json.dumps(self.configuration.title))
         else:
-            if credit:
-                return TEMPLATE_200.format(
-                    header=header_content, styles=styles, scripts=scripts, content=content,
-                    title=html.escape(self.configuration.title),
-                    credit=credit)
-            return TEMPLATE_200_WITHOUT_FOOTER.format(
+            footer = TEMPLATE_FOOTER.format(credit=credit) if credit else ""
+            return TEMPLATE_200.format(
                 header=header_content, styles=styles, scripts=scripts, content=content,
                 title=html.escape(self.configuration.title),
-                credit=credit)
+                footer=footer)
 
 
     def make_error_page(self, title, error, original_function, additional_details=""):
