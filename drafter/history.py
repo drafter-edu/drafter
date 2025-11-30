@@ -303,7 +303,19 @@ def rehydrate_json(value, new_type):
 def get_params():
     params = request.params
     if hasattr(params, 'decode'):
-        params = params.decode('utf-8')
+        # Bottle's FormsDict.decode() tries to encode unicode strings to latin1 first,
+        # which fails for non-Latin1 characters like emojis. We need to disable this
+        # re-encoding behavior by setting recode_unicode to False.
+        from bottle import FormsDict
+        if isinstance(params, FormsDict):
+            # Create a copy with recode_unicode disabled to preserve unicode characters
+            params_copy = FormsDict()
+            params_copy.recode_unicode = False
+            for key in params:
+                params_copy[key] = params[key]
+            params = params_copy.decode('utf-8')
+        else:
+            params = params.decode('utf-8')
     for file_object in request.files:
         params[file_object] = request.files[file_object]
     return params
