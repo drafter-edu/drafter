@@ -23,6 +23,7 @@ full stack websites as you learn to code in Python.
    reference/reference
    students/help
    students/deployment
+   llm_prompt_snippet
    api/api
    
 
