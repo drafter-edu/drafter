@@ -354,6 +354,167 @@ class Server:
 
         return "\n".join(content_parts)
 
+    def api_explorer(self):
+        """
+        Generates an interactive API explorer page that lists all routes and allows
+        testing them with different parameter values, similar to Swagger UI.
+        
+        :return: HTML page with interactive route testing interface
+        :rtype: str
+        """
+        content_parts = [
+            "<h1>API Explorer</h1>",
+            "<p>Test your route endpoints by providing parameters and observing results.</p>"
+        ]
+        
+        # Group routes by their base path
+        content_parts.append("<div class='api-routes'>")
+        
+        for route_path, function in self.routes.items():
+            signature = inspect.signature(function)
+            parameters = signature.parameters
+            
+            # Get function docstring
+            docstring = inspect.getdoc(function) or "No description available."
+            
+            # Create a card for each route
+            content_parts.append(f"<div class='api-route-card'>")
+            display_route = route_path if route_path != '/' else '/'
+            if display_route != '/' and not display_route.endswith('/'):
+                display_route += '/'
+            content_parts.append(f"<h3><code>{display_route}</code></h3>")
+            content_parts.append(f"<p class='api-route-description'>{html.escape(docstring.split(chr(10))[0])}</p>")
+            
+            # Show function signature
+            param_list = []
+            for param_name, param in parameters.items():
+                if param.annotation != inspect.Parameter.empty:
+                    param_list.append(f"{param_name}: {param.annotation.__name__}")
+                else:
+                    param_list.append(param_name)
+            
+            content_parts.append(f"<p><strong>Function:</strong> <code>{function.__name__}({', '.join(param_list)})</code></p>")
+            
+            # Create form for testing this route
+            non_state_params = [name for name in parameters.keys() if name != 'state']
+            
+            if non_state_params:
+                form_id = f"form-{route_path.replace('/', '-')}"
+                content_parts.append(f"<details>")
+                content_parts.append(f"<summary><strong>Test this endpoint</strong></summary>")
+                content_parts.append(f"<form class='api-test-form' id='{form_id}'>")
+                
+                # Add input fields for each parameter
+                for param_name in non_state_params:
+                    param = parameters[param_name]
+                    param_type = "text"
+                    if param.annotation != inspect.Parameter.empty:
+                        type_name = param.annotation.__name__
+                        if type_name in ('int', 'float'):
+                            param_type = "number"
+                    
+                    content_parts.append(f"<div class='api-param'>")
+                    content_parts.append(f"<label for='{form_id}-{param_name}'><strong>{param_name}</strong>")
+                    if param.annotation != inspect.Parameter.empty:
+                        content_parts.append(f" <em>({param.annotation.__name__})</em>")
+                    content_parts.append(f":</label>")
+                    content_parts.append(f"<input type='{param_type}' name='{param_name}' id='{form_id}-{param_name}' />")
+                    content_parts.append(f"</div>")
+                
+                content_parts.append(f"<button type='button' onclick='testRoute(\"{route_path}\", \"{form_id}\")'>Test Endpoint</button>")
+                content_parts.append(f"</form>")
+                content_parts.append(f"<div id='{form_id}-result' class='api-result'></div>")
+                content_parts.append(f"</details>")
+            else:
+                # No parameters, just provide a link
+                link_path = route_path if route_path != '/' else '/'
+                content_parts.append(f"<p><a href='{link_path}' class='btlw-button' target='_blank'>Visit this route</a></p>")
+            
+            content_parts.append(f"</div>")
+        
+        content_parts.append("</div>")
+        
+        # Add JavaScript for testing routes
+        content_parts.append("""
+<script>
+function testRoute(routePath, formId) {
+    const form = document.getElementById(formId);
+    const resultDiv = document.getElementById(formId + '-result');
+    const formData = new FormData(form);
+    
+    // Build query string
+    const params = new URLSearchParams(formData);
+    // Build URL without trailing slash unless it's the root
+    const url = routePath + '?' + params.toString();
+    
+    // Show loading state
+    resultDiv.innerHTML = '<p><em>Loading...</em></p>';
+    
+    // Fetch the route
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            // Create an iframe to display the result
+            resultDiv.innerHTML = '<h4>Result:</h4><iframe style="width: 100%; min-height: 400px; border: 1px solid #ccc;"></iframe>';
+            const iframe = resultDiv.querySelector('iframe');
+            iframe.contentDocument.open();
+            iframe.contentDocument.write(html);
+            iframe.contentDocument.close();
+        })
+        .catch(error => {
+            resultDiv.innerHTML = '<p style="color: red;">Error: ' + error.message + '</p>';
+        });
+}
+</script>
+
+<style>
+.api-routes {
+    margin-top: 20px;
+}
+.api-route-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+}
+.api-route-card h3 {
+    margin-top: 0;
+    color: #333;
+}
+.api-route-description {
+    color: #666;
+    font-style: italic;
+}
+.api-test-form {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: white;
+    border-radius: 3px;
+}
+.api-param {
+    margin-bottom: 10px;
+}
+.api-param label {
+    display: block;
+    margin-bottom: 5px;
+}
+.api-param input {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+.api-result {
+    margin-top: 15px;
+}
+</style>
+""")
+        
+        # Back button
+        content_parts.append('<p><a href="/" class="btlw-back">← Back to the main page</a></p>')
+        
+        return "\n".join(content_parts)
 
     def setup(self, initial_state=None):
         """
@@ -412,6 +573,7 @@ class Server:
             raise ValueError("No routes have been defined.\nDid you remember the @route decorator?")
         self.app.route("/--reset", 'GET', self.reset)
         self.app.route("/--about", "GET", self.about)
+        self.app.route("/--api-explorer", "GET", self.api_explorer)
         # If not skulpt, then allow them to test the deployment
         if not self.configuration.skulpt:
             self.app.route("/--test-deployment", 'GET', self.test_deployment)

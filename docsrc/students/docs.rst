@@ -386,6 +386,8 @@ Components
 Debug Information
 -----------------
 
+The debug information panel appears at the bottom of your page when debugging is enabled. It provides several useful features:
+
 .. function:: show_debug_information()
 
     Show the debug information at the bottom, including the current route, current state, the list of available routes,
@@ -394,3 +396,20 @@ Debug Information
 .. function:: hide_debug_information()
 
     Hide the debug information at the bottom.
+
+API Explorer
+~~~~~~~~~~~~
+
+The API Explorer is a special page that helps you test your routes interactively, similar to Swagger UI. You can access
+it by visiting ``http://localhost:8080/--api-explorer`` (or clicking the "🔍 Open API Explorer" link in the debug information).
+
+The API Explorer provides:
+
+- A list of all available routes in your application
+- Function signatures showing parameter names and types
+- Function docstrings as descriptions
+- Interactive forms to test routes with parameters
+- An embedded view of the results
+
+This is particularly useful for testing routes without building full web forms or for quickly experimenting with different
+parameter values.
