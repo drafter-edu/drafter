@@ -961,7 +961,7 @@ def get_all_routes(server: Optional[Server] = None):
     return server.routes
 
 
-def get_server_setting(key, default=None, server=MAIN_SERVER):
+def get_server_setting(key, default=None, server=None):
     """
     Gets a setting from the server's configuration. If the setting is not found, the default value is returned.
 
@@ -970,10 +970,12 @@ def get_server_setting(key, default=None, server=MAIN_SERVER):
     :param server: The server to look up the setting in (defaults to the ``MAIN_SERVER``)
     :return: The value of the setting, or the default value if not found
     """
+    if server is None:
+        server = get_main_server()
     return getattr(server.configuration, key, default)
 
 
-def start_server(initial_state=None, server: Server = MAIN_SERVER, skip=False, **kwargs):
+def start_server(initial_state=None, server: Optional[Server] = None, skip=False, **kwargs):
     """
     Starts the server with the given initial state and configuration. If the server is set to skip, it will not start.
     Additional keyword arguments will be passed to the server's run method, and therefore to Bottle. This can be
@@ -989,6 +991,8 @@ def start_server(initial_state=None, server: Server = MAIN_SERVER, skip=False, *
         * *port* (``int``) --
           The port to run the server on. Defaults to ``8080``
     """
+    if server is None:
+        server = get_main_server()
     if server.configuration.must_have_site_information:
         if not server._site_information:
             raise ValueError("You must set the site information before starting the server. Use set_site_information().")
