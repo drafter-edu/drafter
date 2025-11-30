@@ -136,8 +136,10 @@ Components
     A dropdown box for the user to select a single option. The `name` is the name of the dropdown box, which will be used
     to identify the dropdown box when the user submits the form (and becomes a parameter to the linked page). The
     `options` is a list of strings representing the options in the dropdown box. The `default_value` is the initial
-    value of the dropdown box, which will be displayed to the user. If no `default_value` is provided, the dropdown box
-    is probably the first element of the list, or the last one, or maybe blank.
+    value of the dropdown box, which will be displayed to the user. If `default_value` is one of the options, that
+    option will be pre-selected. If `default_value` is not in the options list (e.g., "Select an option..."), it will
+    be shown as a disabled placeholder that prompts the user to make a selection. If no `default_value` is provided, the
+    dropdown box will show the first option by default.
 
     These boxes are also sometimes called combo boxes, dropdowns, or select lists.
 
@@ -147,8 +149,10 @@ Components
     :type name: str
     :param options: The list of options to display in the select box. Each option should be a string.
     :type options: list[str]
-    :param default_value: The initial value of the select box, which will be displayed to the user. Defaults to `None`,
-                          which will make the select box initially empty.
+    :param default_value: The initial value of the select box. If this value is in the `options` list, that option will
+                          be pre-selected. If this value is not in the `options` list, it will be displayed as a
+                          disabled placeholder option (e.g., "Select one..."). Defaults to `None`, which will show the
+                          first option in the list.
     :type default_value: str
 
 .. function:: CheckBox(name)
