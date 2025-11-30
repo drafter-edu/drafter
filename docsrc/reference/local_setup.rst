@@ -307,7 +307,7 @@ As a student, you get access to professional tools that would normally cost mone
 
 2. Click the **"Sign up for Student Developer Pack"** button
 
-   .. image:: images/github_student_developer.png
+   .. image:: images/vscode_student_developer.png
       :alt: GitHub Student Developer Pack Sign Up Button
 
 3. Log in to your GitHub account if you haven't already
@@ -404,13 +404,13 @@ When working on assignments or collaborative projects, you'll often start with c
 .. image:: images/vscode_git_basics.png
    :alt: GitHub Fork and Clone Diagram
 
-**Step 7a: Fork the Repository**
+**Step 8a: Fork the Repository**
 
 1. Use the URL provided by your instructor to create a new repository on Github. **Make sure you use the instructor provided URL for your classroom!**
 
 2. Wait for GitHub to create your fork. You'll be taken to your forked repository (notice the URL now shows your username).
 
-**Step 7b: Clone the Repository to Your Computer**
+**Step 8b: Clone the Repository to Your Computer**
 
 1. On your forked repository page, click the green **Code** button
 
@@ -448,7 +448,7 @@ When working on assignments or collaborative projects, you'll often start with c
 You now have the project on your computer and open in VS Code!
 
 
-Step 8: Install Dependencies and Run Tests
+Step 9: Install Dependencies and Run Tests
 ===========================================
 
 **What are Dependencies?**
@@ -462,7 +462,7 @@ There are many different libraries for testing in Python. Drafter works particul
 **Why do you need to do this?**
 Before making changes to a project, you should install its dependencies so the code can run, and run the tests to make sure everything is working. This gives you a baseline to compare against after you make changes.
 
-**Step 8a: Open the Terminal in VS Code**
+**Step 9a: Open the Terminal in VS Code**
 
 1. In VS Code, open the integrated terminal if it is not already open:
    
@@ -470,7 +470,7 @@ Before making changes to a project, you should install its dependencies so the c
    - Or press ``Command + ``` on Mac
    - Or go to **View** → **Terminal** in the menu
 
-**Step 8b: Install Dependencies**
+**Step 9b: Install Dependencies**
 
 1. In the terminal, type the following command and press Enter:
 
@@ -480,87 +480,79 @@ Before making changes to a project, you should install its dependencies so the c
 
    This command reads the project's dependency file and installs all required libraries.
 
-2. Wait for UV to download and install all dependencies. You'll see progress messages in the terminal.
+2. Wait for UV to download and install all dependencies. You'll see progress messages in the terminal. You will probably see a lot of output as it installs packages, this is normal.
 
-**Step 8c: Run the Tests**
+3. If you see a message in the bottom-right that says "We noticed a new environment has been created. Do you want to select it for the workspace folder?", click "Yes".
+
+.. image:: images/vscode_use_environment.png
+   :alt: VS Code Use Environment Notification
+
+**Step 9c: Run the Tests**
 
 1. In the terminal, type the following command and press Enter:
 
    .. code-block:: bash
 
-      uv run test
+      uv run tests.py
 
    This runs all the tests in the project.
-
-.. note::
-
-    Why does the command start with ``uv run``? When you use UV to manage your project, it relies on the ``pyproject.toml`` file to define scripts. The ``test`` script is defined in that file to run the appropriate test command for the project (in this case, using Bakery).
 
 2. Look at the output. You should see something like:
 
    .. code-block:: text
 
-      ==================== test session starts ====================
-      collected X items
+        FAILURE - [line 11] assert_equal(index(State()), Page(State(), ["Hello ___!"])), predicted answer was Page(state=State(), content=['Hello ___!']), computed answer was Page(state=State(), content=['Hello World!']).
 
-      tests/test_something.py ..F..
-
-      ==================== 1 failed, X passed ====================
-
-   - A dot (``.``) means a test passed
-   - An ``F`` means a test failed
-
-   .. note::
-      [SCREENSHOT NEEDED: VS Code terminal showing pytest output with some failing tests]
 
 3. If you see failing tests, don't worry! This is expected - your task is to fix them in the next step.
 
 
-Step 9: Fix the Issue and Confirm It Works
-==========================================
+Step 10: Fix the Issue and Confirm It Works
+===========================================
 
 Now that you've set up the project and identified failing tests, it's time to fix the issue.
 
-**Step 9a: Understand the Problem**
+**Step 10a: Understand the Problem**
 
-1. Look at the test output to see which tests are failing
+1. Look at the test output to see the details on the failing test.
 
 2. The failing tests usually give you a clue about what's wrong. Look for:
-   
-   - The name of the failing test
-   - The file and line number where the failure occurred
+
+   - The line number where the failure occurred
    - The expected value vs. the actual value
 
-3. Open the relevant source code files to understand what the code is supposed to do
+3. Open the ``tests.py`` file in VS Code to see the test code. You can find it in the file explorer on the left side.
 
-**Step 9b: Make Your Fix**
+.. image:: images/vscode_test_file.png
+   :alt: VS Code File Explorer showing tests.py file
 
-1. Navigate to the file that needs to be fixed using the file explorer on the left side of VS Code
+Previously, we usually put our tests in the same file as our code, but now they are separated. This is a common practice in professional development. That way, we can run our tests (``tests.py``) independently of our main code (``main.py``). Notice we have a special line of code to prevent the server from starting when we run tests.
 
-2. Make the necessary changes to fix the issue
+We'll break up a lot of our code into multiple files in the future, like separating out our data models into ``state.py``. For now, let's focus on fixing the test.
+
+**Step 10b: Make Your Fix**
+
+1. The failing test is in the ``tests.py`` file. However, the actual issue is in the main code file that gets imported by ``tests.py``. Notice the lines above the tests where we import the code to be tested: ``from main import *``. This means the code to fix is in ``main.py``.
+
+2. Open the ``main.py`` file in VS Code. Notice that the test failure mentioned something about "Hello ___!" vs. "Hello World!". Look for the part of the code that generates this output, and fix the returned value to match the test.
 
 3. Save your file (``Ctrl + S`` on Windows, ``Command + S`` on Mac)
 
-**Step 9c: Run the Tests Again**
+**Step 10c: Run the Tests Again**
 
 1. In the terminal, run the tests again:
 
    .. code-block:: bash
 
-      uv run pytest
+      uv run tests.py
 
 2. Check if your fix worked:
    
-   - If all tests pass (you see only dots, no ``F``), congratulations! Your fix worked!
+   - If all tests pass, congratulations! Your fix worked!
    - If tests still fail, read the error messages, adjust your code, and try again
 
-   .. note::
-      [SCREENSHOT NEEDED: VS Code terminal showing pytest with all tests passing]
 
-**Tip:** Run the tests frequently as you make changes. It's easier to fix problems when you've only made small changes.
-
-
-Step 10: Add, Commit, and Push Your Changes
+Step 11: Add, Commit, and Push Your Changes
 ===========================================
 
 **What is Add, Commit, and Push?**
@@ -572,12 +564,25 @@ Step 10: Add, Commit, and Push Your Changes
 **Why do you need to do this?**
 This is how you save your work to GitHub. Without pushing, your changes only exist on your computer. Pushing ensures your work is backed up and can be submitted.
 
-**Step 10a: Stage Your Changes**
+It may be helpful to think of this process like filling out a shopping cart:
+
+- **Add** is like putting items into your cart
+- **Commit** is like checking out and paying for the items in your cart
+- **Push** is like shipping the items to your home
+
+Often times, you'll make multiple changes before committing. You can add files multiple times before committing, and you can commit multiple times before pushing.
+
+Recall the diagram we showed you before? This will cover most of the remaining parts of it!
+
+.. image:: images/vscode_git_basics.png
+   :alt: GitHub Add, Commit, Push Diagram
+
+**Step 11a: Stage Your Changes**
 
 1. In VS Code, click on the **Source Control** icon in the left sidebar (it looks like a branching line, and may show a number indicating changed files)
 
-   .. note::
-      [SCREENSHOT NEEDED: VS Code sidebar showing Source Control icon with changes indicator]
+.. image:: images/vscode_add_commit.png
+   :alt: VS Code Source Control Icon
 
 2. You'll see a list of files you've changed under "Changes"
 
@@ -585,10 +590,7 @@ This is how you save your work to GitHub. Without pushing, your changes only exi
    
    Or, hover over individual files and click the **+** icon next to each file to stage specific files
 
-   .. note::
-      [SCREENSHOT NEEDED: VS Code Source Control panel showing staged and unstaged changes]
-
-**Step 10b: Commit Your Changes**
+**Step 11b: Commit Your Changes**
 
 1. In the text box at the top of the Source Control panel, type a clear, descriptive message about what you changed. For example:
    
@@ -597,15 +599,9 @@ This is how you save your work to GitHub. Without pushing, your changes only exi
 
 2. Click the **Commit** button (checkmark icon) or press ``Ctrl + Enter`` (Windows) / ``Command + Enter`` (Mac)
 
-   .. note::
-      [SCREENSHOT NEEDED: VS Code Source Control showing commit message and Commit button]
-
-**Step 10c: Push Your Changes to GitHub**
+**Step 11c: Push Your Changes to GitHub**
 
 1. After committing, click the **Sync Changes** button that appears (or click the three dots menu and select **Push**)
-
-   .. note::
-      [SCREENSHOT NEEDED: VS Code showing the Sync Changes button after committing]
 
 2. If this is your first time pushing, VS Code may ask you to log in to GitHub. Follow the prompts to authorize VS Code.
 
@@ -613,89 +609,110 @@ This is how you save your work to GitHub. Without pushing, your changes only exi
 
 **Verify your changes on GitHub:**
 
-1. Go to your forked repository on GitHub (``https://github.com/YOUR-USERNAME/repository-name``)
+1. Go to your forked repository on GitHub (``https://github.com/ORGANIZATION/repository-name``)
 
 2. You should see your recent commit message and the updated files
 
-   .. note::
-      [SCREENSHOT NEEDED: GitHub repository showing the recent commit]
+.. image:: images/vscode_successful_sync.png
+    :alt: VS Code Successful Sync Notification
 
 
-Step 11: Enable and Check GitHub Actions
+Step 12: Enable and Check GitHub Actions
 ========================================
 
 **What is GitHub Actions?**
 GitHub Actions is GitHub's automation system. It can automatically run tests, check code quality, and perform other tasks whenever you push code.
 
+**What is GitHub Pages?**
+GitHub Pages is a service that lets you host websites directly from your GitHub repository. It's often used for project documentation or personal websites.
+We can use GitHub Pages to deploy our Drafter projects online.
+
 **Why do you need to check it?**
-Many projects use GitHub Actions to automatically run tests when you push changes. This gives you (and your instructor) confirmation that your code works correctly. When you fork a repository, Actions are disabled by default for security reasons, so you need to enable them.
+Many projects use GitHub Actions to automatically run tests when you push changes. This gives you (and your instructor) confirmation that your code works correctly.
+It's also used to deploy your project to GitHub Pages so others can access it online.
 
-**Step 11a: Enable GitHub Actions**
+**Step 11a: Enable GitHub Pages**
 
-1. Go to your forked repository on GitHub
+You need to turn on GitHub Pages in order to host your site. Go to the ``Settings`` tab of your repository.
 
-2. Click on the **Actions** tab at the top of the page
+.. image:: ../students/images/deployment_github_settings.png
+    :alt: Github Settings
 
-   .. note::
-      [SCREENSHOT NEEDED: GitHub repository showing the Actions tab]
+On the left side of the page, scroll down and click on ``Pages``. Under the source dropdown, select ``GitHub Actions``.
 
-3. You'll see a message saying "Workflows aren't being run on this forked repository"
+.. image:: ../students/images/deployment_github_pages.png
+    :alt: Github Pages
 
-4. Click the green **"I understand my workflows, go ahead and enable them"** button
-
-   .. note::
-      [SCREENSHOT NEEDED: GitHub Actions page with the enable workflows button]
+Your site is now configured for deployment.
 
 **Step 11b: Run the Workflow**
 
-1. After enabling, you may need to trigger a workflow run. Some workflows run automatically on push; others need to be manually triggered.
+Once you have uploaded your files and updated your code, you need to manually trigger the deployment of your website.
 
-2. If the workflow hasn't run automatically, you can trigger it:
-   
-   - Click on a workflow in the left sidebar
-   - Click the **"Run workflow"** button on the right
-   - Select the branch (usually ``main``) and click **"Run workflow"**
+1. Go to the ``Actions`` tab of your repository
 
-   .. note::
-      [SCREENSHOT NEEDED: GitHub Actions showing Run workflow button]
+.. image:: ../students/images/deployment_github_actions2.png
+    :alt: Github Actions
 
-**Step 11c: Check the Workflow Results**
+2. Click on the ``Deploy main branch as website`` workflow on the left side
 
-1. After the workflow runs, you'll see a status indicator:
-   
-   - **Green checkmark** ✓ : All tests passed! Your code works correctly.
-   - **Red X** ✗ : Something failed. Click on it to see what went wrong.
+3. Click the ``Run workflow`` button on the right side, then click the green ``Run workflow`` button in the dropdown
 
-   .. note::
-      [SCREENSHOT NEEDED: GitHub Actions showing workflow results]
+.. image:: ../students/images/deployment_github_workflow.png
+    :alt: Run workflow button
 
-2. If you see a failure, click on the failed workflow to see the details. Look for error messages that explain what went wrong.
+Your site will now start deploying! You can monitor the progress in the Actions tab.
 
-3. If your tests fail on GitHub but passed locally, double-check:
-   
-   - Did you push all your changes?
-   - Are there any differences between your local environment and the GitHub Actions environment?
+**If the deployment succeeds** (green checkmark), you'll see a link to your deployed website.
 
+.. image:: ../students/images/deployment_github_actions.png
+    :alt: Github Actions Success
+
+**If you see a red X**, there was an error. Click on the red X to see the job summary, then click the next red X to see the deployment logs. The error message will help you understand what went wrong.
+
+.. image:: ../students/images/deployment_github_details.png
+    :alt: Details about errors during deployment
+
+Step 13: Develop
+================
+
+Now that your development environment is set up, you can start building your own projects! Here are some advanced tips to help you get started:
+
+Running Locally
+---------------
+
+Run your site locally with ``uv run main.py`` and open your browser to ``http://localhost:8080`` to see your changes in action. To stop the server, go back to the terminal and press ``Ctrl + C``.
+
+Debug Locally
+-------------
+
+You can set breakpoints in VS Code by clicking in the gutter next to the line numbers. Then, run the debugger by pressing ``F5`` or going to the Run and Debug panel. This lets you step through your code and inspect variables.
+
+.. image:: images/vscode_debug_menu.png
+   :alt: VS Code Debug Menu
+
+AI Help
+-------
+
+You can use the Chat menu to ask questions to an LLM Agent about your code. Click the ``View`` menu, then ``Chat`` to open the chat panel. Type your question and get instant help!
+
+.. image:: images/vscode_chat_panel.png
+   :alt: VS Code Chat Panel
+
+Note that we have created a custom AI agent that is specialized in Drafter and Python development. This agent has access to the Drafter documentation and can help you with specific questions about using Drafter and developing web applications. You are free to modify this agent by editing the ``AGENTS.md`` file in your repository.
 
 Congratulations!
 ================
 
 You've successfully set up your local Python development environment! You now have:
 
-- ✅ Git for version control
-- ✅ Python to run your code
-- ✅ VS Code as your code editor
-- ✅ The Python extension for VS Code features
-- ✅ UV for managing Python packages
-- ✅ GitHub Copilot for AI-assisted coding
-- ✅ The skills to fork, clone, and work with repositories
-- ✅ Knowledge of how to run tests and push changes
-- ✅ Access to the GitHub Student Developer Pack
+- Git for version control
+- Python to run your code
+- VS Code as your code editor
+- The Python extension for VS Code features
+- UV for managing Python packages
+- GitHub Copilot for AI-assisted coding
+- The skills to fork, clone, and work with repositories
+- Knowledge of how to run tests and push changes
+- Access to the GitHub Student Developer Pack
 
-**What's Next?**
-
-- Check out the :ref:`quickstart` to start building with Drafter
-- Learn about :ref:`testing <testing-parts-of-routes>` your code
-- When you're ready to share your project, see :ref:`deployment`
-
-If you run into any problems, check the :ref:`help` page for common issues and solutions.
