@@ -1,3 +1,6 @@
+~$*.pptx
+~$*.docx
+
 examples/index.html
 
 out/
