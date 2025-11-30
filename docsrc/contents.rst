@@ -5,6 +5,7 @@ Table of Contents
 .. toctree::
 
    students/installation
+   students/local_setup
    quickstart/quickstart
    workbook/index
    examples/examples
