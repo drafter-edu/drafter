@@ -1,0 +1,760 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Local Python Development Setup Guide &#8212; Drafter 1.9.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="../_static/documentation_options.js?v=c4cb232b"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/tabs.js?v=3030b3cb"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="More Help" href="../students/help.html" />
+    <link rel="prev" title="Transitioning from Drafter to Flask" href="flask.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../students/help.html" title="More Help"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="flask.html" title="Transitioning from Drafter to Flask"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 1.9.0 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="reference.html" accesskey="U">Reference Lists</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Local Python Development Setup Guide</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="local-python-development-setup-guide">
+<span id="local-setup"></span><h1>Local Python Development Setup Guide<a class="headerlink" href="#local-python-development-setup-guide" title="Link to this heading">¶</a></h1>
+<p>This guide will walk you through setting up your computer for Python development using Visual Studio Code (VS Code).
+By the end of this guide, you will have a fully functional development environment with Git, Python, VS Code, and all the tools you need to write, test, and share your code.</p>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#step-1-install-git" id="id1">Step 1: Install Git</a></p></li>
+<li><p><a class="reference internal" href="#step-2-install-python" id="id2">Step 2: Install Python</a></p></li>
+<li><p><a class="reference internal" href="#step-3-install-visual-studio-code-vs-code" id="id3">Step 3: Install Visual Studio Code (VS Code)</a></p></li>
+<li><p><a class="reference internal" href="#step-4-install-the-python-extension-for-vs-code" id="id4">Step 4: Install the Python Extension for VS Code</a></p></li>
+<li><p><a class="reference internal" href="#step-5-install-uv" id="id5">Step 5: Install UV</a></p></li>
+<li><p><a class="reference internal" href="#step-6-apply-for-github-student-developer-pack" id="id6">Step 6: Apply for GitHub Student Developer Pack</a></p></li>
+<li><p><a class="reference internal" href="#step-7-setup-github-copilot" id="id7">Step 7: Setup GitHub Copilot</a></p></li>
+<li><p><a class="reference internal" href="#step-8-fork-and-clone-a-repository" id="id8">Step 8: Fork and Clone a Repository</a></p></li>
+<li><p><a class="reference internal" href="#step-9-install-dependencies-and-run-tests" id="id9">Step 9: Install Dependencies and Run Tests</a></p></li>
+<li><p><a class="reference internal" href="#step-10-fix-the-issue-and-confirm-it-works" id="id10">Step 10: Fix the Issue and Confirm It Works</a></p></li>
+<li><p><a class="reference internal" href="#step-11-add-commit-and-push-your-changes" id="id11">Step 11: Add, Commit, and Push Your Changes</a></p></li>
+<li><p><a class="reference internal" href="#step-12-enable-and-check-github-actions" id="id12">Step 12: Enable and Check GitHub Actions</a></p></li>
+<li><p><a class="reference internal" href="#step-13-develop" id="id13">Step 13: Develop</a></p>
+<ul>
+<li><p><a class="reference internal" href="#running-locally" id="id14">Running Locally</a></p></li>
+<li><p><a class="reference internal" href="#debug-locally" id="id15">Debug Locally</a></p></li>
+<li><p><a class="reference internal" href="#ai-help" id="id16">AI Help</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#congratulations" id="id17">Congratulations!</a></p></li>
+</ul>
+</nav>
+<section id="step-1-install-git">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Step 1: Install Git</a><a class="headerlink" href="#step-1-install-git" title="Link to this heading">¶</a></h2>
+<p><strong>What is Git?</strong>
+Git is a version control system that tracks changes to your code over time. It lets you save snapshots of your work, go back to previous versions if something breaks, and collaborate with others. Almost all professional developers use Git.</p>
+<p><strong>Why do you need Git?</strong>
+You’ll use Git to download code from GitHub (a website that hosts code), save your own code changes, and submit your work.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-0-V2luZG93cw==" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-0-V2luZG93cw==" name="V2luZG93cw==" role="tab" tabindex="0">Windows</button><button aria-controls="panel-0-TWFj" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-0-TWFj" name="TWFj" role="tab" tabindex="-1">Mac</button></div><div aria-labelledby="tab-0-V2luZG93cw==" class="sphinx-tabs-panel group-tab" id="panel-0-V2luZG93cw==" name="V2luZG93cw==" role="tabpanel" tabindex="0"><ol class="arabic">
+<li><p>Go to the Git download page: <a class="reference external" href="https://git-scm.com/downloads/win">https://git-scm.com/downloads/win</a></p></li>
+<li><p>Click the <strong>“Click here to download”</strong> link to download the installer (it will download a file like <code class="docutils literal notranslate"><span class="pre">Git-2.xx.x-64-bit.exe</span></code>)</p>
+<img alt="Download Git Installer" src="../_images/vscode_download_git.png" />
+</li>
+<li><p>Run the downloaded installer by double-clicking on it</p></li>
+<li><p><strong>Important:</strong> During installation, you will see many screens with options. For most screens, you can just click <strong>Next</strong> to accept the default settings.</p></li>
+<li><p>Click <strong>Install</strong> and wait for the installation to complete</p></li>
+<li><p>Click <strong>Finish</strong> when done</p></li>
+</ol>
+</div><div aria-labelledby="tab-0-TWFj" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-0-TWFj" name="TWFj" role="tabpanel" tabindex="0"><p>There are two ways to install Git on Mac. We recommend installing Homebrew since that will also help you install other tools in the future. If you have trouble with Homebrew, you can use the Xcode Command Line Tools method.</p>
+<p><strong>Option A: Install via Homebrew</strong></p>
+<p>You probably do not have Homebrew installed yet, so first we need to install Homebrew using the Terminal:</p>
+<ol class="arabic simple">
+<li><p>Open Terminal</p></li>
+<li><p>Copy and paste the line of code below into Terminal and press Enter to install Homebrew</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;$(curl-fsSLhttps://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)&quot;</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>When it asks for password, type yours in. It’ll output a lot of text, and then beneath a large list of tags, you see a purple arrow with “Next Steps”.</p></li>
+<li><p>To confirm that Homebrew is installed correctly, type the following command in Terminal and press Enter:</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brew</span> <span class="n">help</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Some help text should appear. If it does, Homebrew is installed correctly! Next you need to install Git using Homebrew. Type the following command in Terminal and press Enter:</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brew</span> <span class="n">install</span> <span class="n">git</span>
+</pre></div>
+</div>
+<p><strong>Option B: Install via Xcode Command Line Tools</strong></p>
+<ol class="arabic">
+<li><p>Open the <strong>Terminal</strong> application:</p>
+<ul class="simple">
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">Command</span> <span class="pre">+</span> <span class="pre">Space</span></code> to open Spotlight Search</p></li>
+<li><p>Type <code class="docutils literal notranslate"><span class="pre">Terminal</span></code> and press Enter</p></li>
+</ul>
+</li>
+<li><p>In Terminal, type the following command and press Enter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>xcode-select<span class="w"> </span>--install
+</pre></div>
+</div>
+</li>
+<li><p>A popup will appear asking you to install the command line developer tools. Click <strong>Install</strong></p></li>
+<li><p>Wait for the installation to complete (this may take several minutes)</p></li>
+</ol>
+</div></div>
+</section>
+<section id="step-2-install-python">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Step 2: Install Python</a><a class="headerlink" href="#step-2-install-python" title="Link to this heading">¶</a></h2>
+<p><strong>What is Python?</strong>
+Python is a programming language - it’s the language you’ll use to write your code. Python is also the name of the program on your computer that runs Python code.</p>
+<p><strong>Why do you need Python?</strong>
+You need Python installed on your computer to run Python programs. While VS Code is where you’ll write your code, Python is what actually executes it. If you used Thonny previously, Python was included with it, but for VS Code, you need to install Python separately.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-1-V2luZG93cw==" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-1-V2luZG93cw==" name="V2luZG93cw==" role="tab" tabindex="0">Windows</button><button aria-controls="panel-1-TWFj" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-1-TWFj" name="TWFj" role="tab" tabindex="-1">Mac</button></div><div aria-labelledby="tab-1-V2luZG93cw==" class="sphinx-tabs-panel group-tab" id="panel-1-V2luZG93cw==" name="V2luZG93cw==" role="tabpanel" tabindex="0"><ol class="arabic">
+<li><p>Go to the Python download page: <a class="reference external" href="https://www.python.org/downloads/">https://www.python.org/downloads/</a></p></li>
+<li><p>Click the large yellow <strong>“Download Python 3.x.x”</strong> button to download the installer. You can get the latest Python version.</p>
+<img alt="Download Python Installer" src="../_images/vscode_download_python.png" />
+</li>
+<li><p>Run the downloaded installer by double-clicking on it</p></li>
+<li><p><strong>IMPORTANT:</strong> On the first screen of the installer, make sure to check the box that says <strong>“Add Python to PATH”</strong> at the bottom of the window. This is crucial!</p>
+<img alt="Add Python to PATH checkbox" src="../_images/vscode_python_installer.png" />
+</li>
+<li><p>Click <strong>“Install Now”</strong></p></li>
+<li><p>Wait for the installation to complete, then click <strong>Close</strong></p></li>
+</ol>
+</div><div aria-labelledby="tab-1-TWFj" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-1-TWFj" name="TWFj" role="tabpanel" tabindex="0"><ol class="arabic simple">
+<li><p>Go to the Python download page: <a class="reference external" href="https://www.python.org/downloads/">https://www.python.org/downloads/</a></p></li>
+<li><p>Click the large yellow <strong>“Download Python 3.x.x”</strong> button</p></li>
+<li><p>Open the downloaded <code class="docutils literal notranslate"><span class="pre">.pkg</span></code> file and follow the installation instructions</p></li>
+<li><p>Click <strong>Continue</strong> through the screens, then <strong>Install</strong></p></li>
+<li><p>Enter your Mac password when prompted, and wait for installation to complete</p></li>
+</ol>
+</div></div>
+</section>
+<section id="step-3-install-visual-studio-code-vs-code">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Step 3: Install Visual Studio Code (VS Code)</a><a class="headerlink" href="#step-3-install-visual-studio-code-vs-code" title="Link to this heading">¶</a></h2>
+<p><strong>What is VS Code?</strong>
+Visual Studio Code (VS Code) is a code editor - it’s like a word processor, but designed specifically for writing code. It has features like syntax highlighting (coloring your code to make it easier to read), error detection, and extensions that add extra functionality.</p>
+<p><strong>Why do you need VS Code?</strong>
+While you could write Python code in any text editor (even Notepad), VS Code makes coding much easier with features like auto-completion, error highlighting, and integrated terminal access.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-2-V2luZG93cw==" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-2-V2luZG93cw==" name="V2luZG93cw==" role="tab" tabindex="0">Windows</button><button aria-controls="panel-2-TWFj" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-2-TWFj" name="TWFj" role="tab" tabindex="-1">Mac</button></div><div aria-labelledby="tab-2-V2luZG93cw==" class="sphinx-tabs-panel group-tab" id="panel-2-V2luZG93cw==" name="V2luZG93cw==" role="tabpanel" tabindex="0"><ol class="arabic">
+<li><p>Go to the VS Code download page: <a class="reference external" href="https://code.visualstudio.com/Download">https://code.visualstudio.com/Download</a></p></li>
+<li><p>Click the <strong>Windows</strong> download button (it will download a file like <code class="docutils literal notranslate"><span class="pre">VSCodeUserSetup-x64-1.xx.x.exe</span></code>)</p>
+<img alt="VS Code Windows Download Button" src="../_images/vscode_download_windows.png" />
+</li>
+<li><p>Run the downloaded installer</p></li>
+<li><p>Accept the license agreement and click <strong>Next</strong></p></li>
+<li><p>On the “Select Additional Tasks” screen, we recommend checking these boxes if they are available:</p>
+<ul class="simple">
+<li><p><strong>“Add ‘Open with Code’ action to Windows Explorer file context menu”</strong> - lets you right-click on files to open them in VS Code</p></li>
+<li><p><strong>“Add ‘Open with Code’ action to Windows Explorer directory context menu”</strong> - lets you right-click on folders to open them in VS Code</p></li>
+<li><p><strong>“Add to PATH”</strong> - lets you open VS Code from the command line</p></li>
+</ul>
+</li>
+<li><p>Click <strong>Next</strong>, then <strong>Install</strong></p></li>
+<li><p>When installation completes, you can check <strong>“Launch Visual Studio Code”</strong> and click <strong>Finish</strong></p></li>
+</ol>
+</div><div aria-labelledby="tab-2-TWFj" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-2-TWFj" name="TWFj" role="tabpanel" tabindex="0"><ol class="arabic">
+<li><p>Go to the VS Code download page: <a class="reference external" href="https://code.visualstudio.com/Download">https://code.visualstudio.com/Download</a></p></li>
+<li><p>Click the <strong>Mac</strong> download button (it will download a <code class="docutils literal notranslate"><span class="pre">.zip</span></code> file)</p>
+<img alt="VS Code Mac Download Button" src="../_images/vscode_download_mac.png" />
+</li>
+<li><p>Open the downloaded <code class="docutils literal notranslate"><span class="pre">.zip</span></code> file (usually in your Downloads folder). This will extract the VS Code application</p></li>
+<li><p>Drag the <strong>Visual Studio Code.app</strong> to your <strong>Applications</strong> folder</p></li>
+<li><p>Open VS Code by going to your Applications folder and double-clicking on <strong>Visual Studio Code</strong></p></li>
+<li><p>If you see a warning that says “Visual Studio Code is an app downloaded from the Internet. Are you sure you want to open it?”, click <strong>Open</strong></p></li>
+</ol>
+</div></div>
+<p>The VS Code Welcome Screen will look something like this:</p>
+<img alt="VS Code Welcome Screen" src="../_images/vscode_welcome_screen.png" />
+</section>
+<section id="step-4-install-the-python-extension-for-vs-code">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Step 4: Install the Python Extension for VS Code</a><a class="headerlink" href="#step-4-install-the-python-extension-for-vs-code" title="Link to this heading">¶</a></h2>
+<p><strong>What is the Python Extension?</strong>
+The Python extension adds Python-specific features to VS Code, like intelligent code completion, debugging, and the ability to run Python code directly from the editor.</p>
+<p><strong>Why do you need it?</strong>
+Without this extension, VS Code is just a text editor. With the extension, VS Code understands Python and can help you write better code faster.</p>
+<ol class="arabic">
+<li><p>Open VS Code</p></li>
+<li><p>Click on the <strong>Extensions</strong> icon in the left sidebar (it looks like four squares, with one square separated from the others)</p>
+<img alt="VS Code Extensions Icon" src="../_images/vscode_extension_button.png" />
+</li>
+<li><p>In the search box at the top, type <code class="docutils literal notranslate"><span class="pre">ms-python.python</span></code></p></li>
+<li><p>Find the extension called <strong>“Python”</strong> by Microsoft (it should be the first result with millions of downloads)</p>
+<img alt="VS Code Python Extension" src="../_images/vscode_python_extension.png" />
+</li>
+<li><p>Click the extension, and then click the <strong>Install</strong> button</p></li>
+<li><p>Wait for the installation to complete. You should see the button change to “Installed” or show a gear icon</p></li>
+</ol>
+<p><strong>Verify the installation:</strong></p>
+<ol class="arabic">
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">Ctrl</span> <span class="pre">+</span> <span class="pre">Shift</span> <span class="pre">+</span> <span class="pre">P</span></code> (Windows) or <code class="docutils literal notranslate"><span class="pre">Command</span> <span class="pre">+</span> <span class="pre">Shift</span> <span class="pre">+</span> <span class="pre">P</span></code> (Mac) to open the Command Palette</p></li>
+<li><p>Type <code class="docutils literal notranslate"><span class="pre">Python:</span> <span class="pre">Select</span> <span class="pre">Interpreter</span></code> and press Enter</p></li>
+<li><p>You should see your installed Python version in the list. Select it.</p>
+<img alt="VS Code Select Python Interpreter" src="../_images/vscode_python_version.png" />
+</li>
+</ol>
+</section>
+<section id="step-5-install-uv">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Step 5: Install UV</a><a class="headerlink" href="#step-5-install-uv" title="Link to this heading">¶</a></h2>
+<p><strong>What is UV?</strong>
+UV is a fast Python package manager. It helps you install Python libraries (pre-written code that you can use in your projects) and manage project dependencies (libraries that your project needs to work).</p>
+<p><strong>Why do you need UV?</strong>
+When you download a Python project, it often requires additional libraries to run. UV makes it easy to install all these libraries with a single command.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-3-V2luZG93cw==" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-3-V2luZG93cw==" name="V2luZG93cw==" role="tab" tabindex="0">Windows</button><button aria-controls="panel-3-TWFj" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-3-TWFj" name="TWFj" role="tab" tabindex="-1">Mac</button></div><div aria-labelledby="tab-3-V2luZG93cw==" class="sphinx-tabs-panel group-tab" id="panel-3-V2luZG93cw==" name="V2luZG93cw==" role="tabpanel" tabindex="0"><ol class="arabic simple">
+<li><p>To install UV, we’ll need to use the Terminal integrated into VS Code. Click the <code class="docutils literal notranslate"><span class="pre">View</span></code> menu at the top and then click <code class="docutils literal notranslate"><span class="pre">Terminal</span></code>:</p></li>
+</ol>
+<img alt="VS Code Open Terminal" src="../_images/vscode_open_terminal.png" />
+<p>This will likely open the PowerShell Terminal by default on Windows. You can verify this by looking at the dropdown in the top-right of the Terminal window. If the dropdown shows “PowerShell”, you’re good to go. If it shows something else (like Command Prompt), click the dropdown arrow and select <strong>PowerShell</strong> from the list.</p>
+<img alt="VS Code Open PowerShell" src="../_images/vscode_choose_powershell.png" />
+<ol class="arabic" start="2">
+<li><p>Copy and paste this command into PowerShell, then press Enter:</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">powershell</span> <span class="n">-ExecutionPolicy</span> <span class="n">ByPass</span> <span class="n">-c</span> <span class="s2">&quot;irm https://astral.sh/uv/install.ps1 | iex&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Wait for the installation to complete</p></li>
+<li><p>In order for the changes to take effect, create a new Powershell tab by clicking the plus (+) icon in the terminal window and selecting <strong>PowerShell</strong> again from the dropdown.</p></li>
+<li><p>In the new PowerShell window, type <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">--version</span></code> and press Enter</p></li>
+<li><p>You should see a version number like <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">0.x.x</span></code> - this means UV is installed correctly!</p>
+<img alt="VS Code Terminal showing uv --version output on Windows" src="../_images/vscode_uv_version.png" />
+</li>
+</ol>
+</div><div aria-labelledby="tab-3-TWFj" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-3-TWFj" name="TWFj" role="tabpanel" tabindex="0"><ol class="arabic simple">
+<li><p>To install UV, we’ll need to use the Terminal integrated into VS Code. Click the <code class="docutils literal notranslate"><span class="pre">View</span></code> menu at the top and then click <code class="docutils literal notranslate"><span class="pre">Terminal</span></code>:</p></li>
+</ol>
+<img alt="VS Code Open Terminal" src="../_images/vscode_open_terminal.png" />
+<ol class="arabic" start="2">
+<li><p>Copy and paste this command, then press Enter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-LsSf<span class="w"> </span>https://astral.sh/uv/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</pre></div>
+</div>
+</li>
+<li><p>Wait for the installation to complete</p></li>
+<li><p>In order for the changes to take effect, create a new Terminal tab by clicking the plus (+) icon in the terminal window.</p></li>
+</ol>
+<p><strong>Verify the installation:</strong></p>
+<ol class="arabic">
+<li><p>In the new Terminal window, type <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">--version</span></code> and press Enter</p></li>
+<li><p>You should see a version number like <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">0.x.x</span></code> - this means UV is installed correctly!</p>
+<img alt="VS Code Terminal showing uv --version output on Windows" src="../_images/vscode_uv_version.png" />
+</li>
+</ol>
+</div></div>
+</section>
+<section id="step-6-apply-for-github-student-developer-pack">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Step 6: Apply for GitHub Student Developer Pack</a><a class="headerlink" href="#step-6-apply-for-github-student-developer-pack" title="Link to this heading">¶</a></h2>
+<p><strong>What is the GitHub Student Developer Pack?</strong>
+The GitHub Student Developer Pack is a collection of free tools and services for students. It includes free access to GitHub Copilot, cloud credits, domain names, and many other developer tools.</p>
+<p><strong>Why should you apply?</strong>
+As a student, you get access to professional tools that would normally cost money. GitHub Copilot alone (which you will set up in Step 7) normally costs $10/month, but it’s free for students!</p>
+<p><strong>How to Apply:</strong></p>
+<ol class="arabic">
+<li><p>Go to <a class="reference external" href="https://education.github.com/pack">https://education.github.com/pack</a></p></li>
+<li><p>Click the <strong>“Sign up for Student Developer Pack”</strong> button</p>
+<img alt="GitHub Student Developer Pack Sign Up Button" src="../_images/vscode_student_developer.png" />
+</li>
+<li><p>Log in to your GitHub account if you haven’t already</p></li>
+<li><p>Select <strong>“Student”</strong> when asked about your academic status</p></li>
+<li><p>Choose your school from the list (or type to search for it)</p></li>
+<li><p><strong>Verify your student status</strong> - you’ll need to provide proof that you’re a student. Options include:</p>
+<ul class="simple">
+<li><p>Using your school email address (often ends in <code class="docutils literal notranslate"><span class="pre">.edu</span></code>)</p></li>
+<li><p>Uploading a photo of your student ID</p></li>
+<li><p>Uploading other academic documents</p></li>
+</ul>
+</li>
+<li><p>Submit your application</p></li>
+<li><p>Verification can sometimes take a few minutes to a few days, depending on the verification method. If you used your school email, it may be instant. If it takes longer, then continue onto step 8 and return here later.</p></li>
+<li><p>Once approved, you’ll receive an email confirming your access to the Student Developer Pack</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you’re having trouble getting verified, try:</p>
+<ul class="simple">
+<li><p>Using your official school email address</p></li>
+<li><p>Making sure your student ID photo is clear and shows your name, the current date/semester, and your school’s name</p></li>
+<li><p>Waiting a few days and trying again if the automatic verification fails</p></li>
+</ul>
+</div>
+</section>
+<section id="step-7-setup-github-copilot">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Step 7: Setup GitHub Copilot</a><a class="headerlink" href="#step-7-setup-github-copilot" title="Link to this heading">¶</a></h2>
+<p><strong>What is GitHub Copilot?</strong>
+GitHub Copilot is an AI-powered coding assistant that suggests code as you type. It can help you write code faster by suggesting completions, entire functions, and even helping you understand unfamiliar code.</p>
+<p><strong>Why should you use it?</strong>
+As a student, you have free access to GitHub Copilot. It’s like having a helpful coding partner that can suggest solutions and help you learn new programming patterns. However, you must think very critically about the suggestions it makes, as they may not always be correct or optimal. Also, as you learn to code, it’s important to understand the code you write rather than relying too heavily on AI suggestions. Over-relying on AI tools can hinder your learning process.</p>
+<p><strong>Prerequisites:</strong></p>
+<ul class="simple">
+<li><p>You need a GitHub account.</p></li>
+<li><p>You need to have the GitHub Student Developer Pack (from Step 6) to access Copilot for free.</p></li>
+</ul>
+<p><strong>Installing the GitHub Copilot Extension:</strong></p>
+<ol class="arabic simple">
+<li><p>Open VS Code</p></li>
+<li><p>Click on the <strong>Extensions</strong> icon in the left sidebar</p></li>
+<li><p>In the search box, type <code class="docutils literal notranslate"><span class="pre">GitHub.copilot</span></code></p></li>
+<li><p>Find and install <strong>“GitHub Copilot”</strong> by GitHub (look for the official one with millions of downloads)</p></li>
+<li><p>Click <strong>Install</strong></p></li>
+<li><p>After installation, you’ll see a prompt to sign in to GitHub. Click <strong>Sign in to GitHub</strong></p></li>
+<li><p>Your browser will open. Log in to your GitHub account if prompted, and authorize VS Code to access your account</p></li>
+<li><p>Return to VS Code. You should see that Copilot is now active.</p></li>
+</ol>
+<p><strong>How to use Copilot:</strong></p>
+<p>Once Copilot is activated, it will automatically suggest code as you type. When you see a gray suggestion appear:</p>
+<ul class="simple">
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">Tab</span></code> to accept the suggestion</p></li>
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">Esc</span></code> to dismiss it</p></li>
+<li><p>Keep typing to ignore it and write your own code</p></li>
+</ul>
+<p>You can also:</p>
+<ul class="simple">
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">Ctrl</span> <span class="pre">+</span> <span class="pre">Enter</span></code> (Windows) or <code class="docutils literal notranslate"><span class="pre">Command</span> <span class="pre">+</span> <span class="pre">Enter</span></code> (Mac) to see multiple suggestions</p></li>
+<li><p>Type a comment describing what you want, and Copilot will suggest code to match</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Copilot suggestions are helpful, but always review them before accepting. The suggestions are not always correct, and understanding what the code does is important for your learning. You may want to disable Copilot temporarily if you find yourself relying on it too much.</p>
+</div>
+</section>
+<section id="step-8-fork-and-clone-a-repository">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Step 8: Fork and Clone a Repository</a><a class="headerlink" href="#step-8-fork-and-clone-a-repository" title="Link to this heading">¶</a></h2>
+<p><strong>What is GitHub?</strong></p>
+<p>GitHub is a website that hosts code repositories. It uses <code class="docutils literal notranslate"><span class="pre">Git</span></code> for version control and makes it easy to share code with others, collaborate on projects, and track changes over time. Since you installed Git in Step 1, you can now use Git to interact with repositories on GitHub.</p>
+<p><strong>What is Forking?</strong>
+Forking creates your own copy of someone else’s project on GitHub. This copy belongs to you, so you can make changes without affecting the original project (referred to as the “Upstream”, as opposed to your “Fork”). Think of it like making a copy of a Google Doc to your own Google Drive so you can edit it.</p>
+<p><strong>What is Cloning?</strong>
+Cloning downloads a copy of a GitHub repository to your computer so you can work on it locally. Think of it like downloading a Google Doc to your computer to edit it offline.</p>
+<p><strong>Why do you need to do this?</strong>
+When working on assignments or collaborative projects, you’ll often start with code that someone else has written. Forking gives you your own copy to work on, and cloning puts that copy on your computer. Later on, we’ll learn how to push your changes back to GitHub.</p>
+<img alt="GitHub Fork and Clone Diagram" src="../_images/vscode_git_basics.png" />
+<p><strong>Step 8a: Fork the Repository</strong></p>
+<ol class="arabic simple">
+<li><p>Use the URL provided by your instructor to create a new repository on Github. <strong>Make sure you use the instructor provided URL for your classroom!</strong></p></li>
+<li><p>Wait for GitHub to create your fork. You’ll be taken to your forked repository (notice the URL now shows your username).</p></li>
+</ol>
+<p><strong>Step 8b: Clone the Repository to Your Computer</strong></p>
+<ol class="arabic simple">
+<li><p>On your forked repository page, click the green <strong>Code</strong> button</p></li>
+</ol>
+<img alt="GitHub Code Button" src="../_images/vscode_clone_button.png" />
+<ol class="arabic simple" start="2">
+<li><p>Make sure <strong>HTTPS</strong> is selected (not SSH), and click the copy icon to copy the URL</p></li>
+<li><p>Return to VS Code.</p></li>
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">Ctrl</span> <span class="pre">+</span> <span class="pre">Shift</span> <span class="pre">+</span> <span class="pre">P</span></code> (Windows) or <code class="docutils literal notranslate"><span class="pre">Command</span> <span class="pre">+</span> <span class="pre">Shift</span> <span class="pre">+</span> <span class="pre">P</span></code> (Mac) to open the Command Palette</p></li>
+<li><p>Type <code class="docutils literal notranslate"><span class="pre">Git:</span> <span class="pre">Clone</span></code> and select it</p></li>
+</ol>
+<img alt="VS Code Git Clone Command" src="../_images/vscode_clone_command.png" />
+<ol class="arabic simple" start="6">
+<li><p>Type <code class="docutils literal notranslate"><span class="pre">Ctrl+V</span></code> (Windows) or <code class="docutils literal notranslate"><span class="pre">Cmd+V</span></code> (Mac) to paste the previously copied link and press enter.</p></li>
+<li><p>If you are asked to authenticate on GitHub, do so.</p></li>
+<li><p>A folder select window will prompt you to “Choose a folder to clone into.” We recommend that you create a “Projects” folder in your home directory to keep all your coding projects organized, and then also create folders for each course inside of that. Select that folder (or any folder you prefer) and click <strong>Select Folder</strong>.</p></li>
+</ol>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>Do not store your projects in system folders like “Program Files” or “Applications”. These folders may have restricted permissions that can interfere with Git operations. Also avoid using folders like “Downloads” since they can get cluttered and make it hard to find your projects later.</p>
+</div>
+<ol class="arabic simple" start="8">
+<li><p>Click <strong>Select as Repository Destination</strong></p></li>
+<li><p>VS Code will download the repository. When it asks “Would you like to open the cloned repository?”, click <strong>Open</strong></p></li>
+<li><p>If prompted to trust the authors of the files in the repository, click <strong>Yes, I trust the authors</strong></p></li>
+</ol>
+<p>You now have the project on your computer and open in VS Code!</p>
+</section>
+<section id="step-9-install-dependencies-and-run-tests">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Step 9: Install Dependencies and Run Tests</a><a class="headerlink" href="#step-9-install-dependencies-and-run-tests" title="Link to this heading">¶</a></h2>
+<p><strong>What are Dependencies?</strong>
+Dependencies are external libraries that a project needs to work. Most Python projects use libraries written by other developers to avoid reinventing the wheel. Drafter is an example of such a library.</p>
+<p><strong>What are Tests?</strong>
+Tests are code that checks if other code works correctly. Running tests tells you if the project is set up correctly and if your changes break anything.</p>
+<p>There are many different libraries for testing in Python. Drafter works particularly well with the Bakery testing framework, which is meant for novices.</p>
+<p><strong>Why do you need to do this?</strong>
+Before making changes to a project, you should install its dependencies so the code can run, and run the tests to make sure everything is working. This gives you a baseline to compare against after you make changes.</p>
+<p><strong>Step 9a: Open the Terminal in VS Code</strong></p>
+<ol class="arabic simple">
+<li><p>In VS Code, open the integrated terminal if it is not already open:</p>
+<ul class="simple">
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">Ctrl</span> <span class="pre">+</span> <span class="pre">`</span></code> (backtick, the key below Escape) on Windows</p></li>
+<li><p>Or press <code class="docutils literal notranslate"><span class="pre">Command</span> <span class="pre">+</span> <span class="pre">`</span></code> on Mac</p></li>
+<li><p>Or go to <strong>View</strong> → <strong>Terminal</strong> in the menu</p></li>
+</ul>
+</li>
+</ol>
+<p><strong>Step 9b: Install Dependencies</strong></p>
+<ol class="arabic">
+<li><p>In the terminal, type the following command and press Enter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync
+</pre></div>
+</div>
+<p>This command reads the project’s dependency file and installs all required libraries.</p>
+</li>
+<li><p>Wait for UV to download and install all dependencies. You’ll see progress messages in the terminal. You will probably see a lot of output as it installs packages, this is normal.</p></li>
+<li><p>If you see a message in the bottom-right that says “We noticed a new environment has been created. Do you want to select it for the workspace folder?”, click “Yes”.</p></li>
+</ol>
+<img alt="VS Code Use Environment Notification" src="../_images/vscode_use_environment.png" />
+<p><strong>Step 9c: Run the Tests</strong></p>
+<ol class="arabic">
+<li><p>In the terminal, type the following command and press Enter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>tests.py
+</pre></div>
+</div>
+<p>This runs all the tests in the project.</p>
+</li>
+<li><p>Look at the output. You should see something like:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FAILURE - [line 11] assert_equal(index(State()), Page(State(), [&quot;Hello ___!&quot;])), predicted answer was Page(state=State(), content=[&#39;Hello ___!&#39;]), computed answer was Page(state=State(), content=[&#39;Hello World!&#39;]).
+</pre></div>
+</div>
+</li>
+<li><p>If you see failing tests, don’t worry! This is expected - your task is to fix them in the next step.</p></li>
+</ol>
+</section>
+<section id="step-10-fix-the-issue-and-confirm-it-works">
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">Step 10: Fix the Issue and Confirm It Works</a><a class="headerlink" href="#step-10-fix-the-issue-and-confirm-it-works" title="Link to this heading">¶</a></h2>
+<p>Now that you’ve set up the project and identified failing tests, it’s time to fix the issue.</p>
+<p><strong>Step 10a: Understand the Problem</strong></p>
+<ol class="arabic simple">
+<li><p>Look at the test output to see the details on the failing test.</p></li>
+<li><p>The failing tests usually give you a clue about what’s wrong. Look for:</p>
+<ul class="simple">
+<li><p>The line number where the failure occurred</p></li>
+<li><p>The expected value vs. the actual value</p></li>
+</ul>
+</li>
+<li><p>Open the <code class="docutils literal notranslate"><span class="pre">tests.py</span></code> file in VS Code to see the test code. You can find it in the file explorer on the left side.</p></li>
+</ol>
+<img alt="VS Code File Explorer showing tests.py file" src="../_images/vscode_test_file.png" />
+<p>Previously, we usually put our tests in the same file as our code, but now they are separated. This is a common practice in professional development. That way, we can run our tests (<code class="docutils literal notranslate"><span class="pre">tests.py</span></code>) independently of our main code (<code class="docutils literal notranslate"><span class="pre">main.py</span></code>). Notice we have a special line of code to prevent the server from starting when we run tests.</p>
+<p>We’ll break up a lot of our code into multiple files in the future, like separating out our data models into <code class="docutils literal notranslate"><span class="pre">state.py</span></code>. For now, let’s focus on fixing the test.</p>
+<p><strong>Step 10b: Make Your Fix</strong></p>
+<ol class="arabic simple">
+<li><p>The failing test is in the <code class="docutils literal notranslate"><span class="pre">tests.py</span></code> file. However, the actual issue is in the main code file that gets imported by <code class="docutils literal notranslate"><span class="pre">tests.py</span></code>. Notice the lines above the tests where we import the code to be tested: <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">main</span> <span class="pre">import</span> <span class="pre">*</span></code>. This means the code to fix is in <code class="docutils literal notranslate"><span class="pre">main.py</span></code>.</p></li>
+<li><p>Open the <code class="docutils literal notranslate"><span class="pre">main.py</span></code> file in VS Code. Notice that the test failure mentioned something about “Hello ___!” vs. “Hello World!”. Look for the part of the code that generates this output, and fix the returned value to match the test.</p></li>
+<li><p>Save your file (<code class="docutils literal notranslate"><span class="pre">Ctrl</span> <span class="pre">+</span> <span class="pre">S</span></code> on Windows, <code class="docutils literal notranslate"><span class="pre">Command</span> <span class="pre">+</span> <span class="pre">S</span></code> on Mac)</p></li>
+</ol>
+<p><strong>Step 10c: Run the Tests Again</strong></p>
+<ol class="arabic">
+<li><p>In the terminal, run the tests again:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>tests.py
+</pre></div>
+</div>
+</li>
+<li><p>Check if your fix worked:</p>
+<ul class="simple">
+<li><p>If all tests pass, congratulations! Your fix worked!</p></li>
+<li><p>If tests still fail, read the error messages, adjust your code, and try again</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="step-11-add-commit-and-push-your-changes">
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">Step 11: Add, Commit, and Push Your Changes</a><a class="headerlink" href="#step-11-add-commit-and-push-your-changes" title="Link to this heading">¶</a></h2>
+<p><strong>What is Add, Commit, and Push?</strong></p>
+<ul class="simple">
+<li><p><strong>Add (Stage)</strong>: Tells Git which file changes you want to include in your next save point</p></li>
+<li><p><strong>Commit</strong>: Creates a save point (snapshot) of your changes with a message describing what you did</p></li>
+<li><p><strong>Push</strong>: Uploads your commits to GitHub so they’re saved online and visible to others</p></li>
+</ul>
+<p><strong>Why do you need to do this?</strong>
+This is how you save your work to GitHub. Without pushing, your changes only exist on your computer. Pushing ensures your work is backed up and can be submitted.</p>
+<p>It may be helpful to think of this process like filling out a shopping cart:</p>
+<ul class="simple">
+<li><p><strong>Add</strong> is like putting items into your cart</p></li>
+<li><p><strong>Commit</strong> is like checking out and paying for the items in your cart</p></li>
+<li><p><strong>Push</strong> is like shipping the items to your home</p></li>
+</ul>
+<p>Often times, you’ll make multiple changes before committing. You can add files multiple times before committing, and you can commit multiple times before pushing.</p>
+<p>Recall the diagram we showed you before? This will cover most of the remaining parts of it!</p>
+<img alt="GitHub Add, Commit, Push Diagram" src="../_images/vscode_git_basics.png" />
+<p><strong>Step 11a: Stage Your Changes</strong></p>
+<ol class="arabic simple">
+<li><p>In VS Code, click on the <strong>Source Control</strong> icon in the left sidebar (it looks like a branching line, and may show a number indicating changed files)</p></li>
+</ol>
+<img alt="VS Code Source Control Icon" src="../_images/vscode_add_commit.png" />
+<ol class="arabic" start="2">
+<li><p>You’ll see a list of files you’ve changed under “Changes”</p></li>
+<li><p>Hover over the “Changes” header and click the <strong>+</strong> icon to stage all changes</p>
+<p>Or, hover over individual files and click the <strong>+</strong> icon next to each file to stage specific files</p>
+</li>
+</ol>
+<p><strong>Step 11b: Commit Your Changes</strong></p>
+<ol class="arabic simple">
+<li><p>In the text box at the top of the Source Control panel, type a clear, descriptive message about what you changed. For example:</p>
+<ul class="simple">
+<li><p>“Fix calculation error in get_total function”</p></li>
+<li><p>“Add missing return statement”</p></li>
+</ul>
+</li>
+<li><p>Click the <strong>Commit</strong> button (checkmark icon) or press <code class="docutils literal notranslate"><span class="pre">Ctrl</span> <span class="pre">+</span> <span class="pre">Enter</span></code> (Windows) / <code class="docutils literal notranslate"><span class="pre">Command</span> <span class="pre">+</span> <span class="pre">Enter</span></code> (Mac)</p></li>
+</ol>
+<p><strong>Step 11c: Push Your Changes to GitHub</strong></p>
+<ol class="arabic simple">
+<li><p>After committing, click the <strong>Sync Changes</strong> button that appears (or click the three dots menu and select <strong>Push</strong>)</p></li>
+<li><p>If this is your first time pushing, VS Code may ask you to log in to GitHub. Follow the prompts to authorize VS Code.</p></li>
+<li><p>Wait for the push to complete. You’ll see a notification when it’s done.</p></li>
+</ol>
+<p><strong>Verify your changes on GitHub:</strong></p>
+<ol class="arabic simple">
+<li><p>Go to your forked repository on GitHub (<code class="docutils literal notranslate"><span class="pre">https://github.com/ORGANIZATION/repository-name</span></code>)</p></li>
+<li><p>You should see your recent commit message and the updated files</p></li>
+</ol>
+<img alt="VS Code Successful Sync Notification" src="../_images/vscode_successful_sync.png" />
+</section>
+<section id="step-12-enable-and-check-github-actions">
+<h2><a class="toc-backref" href="#id12" role="doc-backlink">Step 12: Enable and Check GitHub Actions</a><a class="headerlink" href="#step-12-enable-and-check-github-actions" title="Link to this heading">¶</a></h2>
+<p><strong>What is GitHub Actions?</strong>
+GitHub Actions is GitHub’s automation system. It can automatically run tests, check code quality, and perform other tasks whenever you push code.</p>
+<p><strong>What is GitHub Pages?</strong>
+GitHub Pages is a service that lets you host websites directly from your GitHub repository. It’s often used for project documentation or personal websites.
+We can use GitHub Pages to deploy our Drafter projects online.</p>
+<p><strong>Why do you need to check it?</strong>
+Many projects use GitHub Actions to automatically run tests when you push changes. This gives you (and your instructor) confirmation that your code works correctly.
+It’s also used to deploy your project to GitHub Pages so others can access it online.</p>
+<p><strong>Step 11a: Enable GitHub Pages</strong></p>
+<p>You need to turn on GitHub Pages in order to host your site. Go to the <code class="docutils literal notranslate"><span class="pre">Settings</span></code> tab of your repository.</p>
+<img alt="Github Settings" src="../_images/deployment_github_settings.png" />
+<p>On the left side of the page, scroll down and click on <code class="docutils literal notranslate"><span class="pre">Pages</span></code>. Under the source dropdown, select <code class="docutils literal notranslate"><span class="pre">GitHub</span> <span class="pre">Actions</span></code>.</p>
+<img alt="Github Pages" src="../_images/deployment_github_pages.png" />
+<p>Your site is now configured for deployment.</p>
+<p><strong>Step 11b: Run the Workflow</strong></p>
+<p>Once you have uploaded your files and updated your code, you need to manually trigger the deployment of your website.</p>
+<ol class="arabic simple">
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">Actions</span></code> tab of your repository</p></li>
+</ol>
+<img alt="Github Actions" src="../_images/deployment_github_actions2.png" />
+<ol class="arabic simple" start="2">
+<li><p>Click on the <code class="docutils literal notranslate"><span class="pre">Deploy</span> <span class="pre">main</span> <span class="pre">branch</span> <span class="pre">as</span> <span class="pre">website</span></code> workflow on the left side</p></li>
+<li><p>Click the <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">workflow</span></code> button on the right side, then click the green <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">workflow</span></code> button in the dropdown</p></li>
+</ol>
+<img alt="Run workflow button" src="../_images/deployment_github_workflow.png" />
+<p>Your site will now start deploying! You can monitor the progress in the Actions tab.</p>
+<p><strong>If the deployment succeeds</strong> (green checkmark), you’ll see a link to your deployed website.</p>
+<img alt="Github Actions Success" src="../_images/deployment_github_actions.png" />
+<p><strong>If you see a red X</strong>, there was an error. Click on the red X to see the job summary, then click the next red X to see the deployment logs. The error message will help you understand what went wrong.</p>
+<img alt="Details about errors during deployment" src="../_images/deployment_github_details.png" />
+</section>
+<section id="step-13-develop">
+<h2><a class="toc-backref" href="#id13" role="doc-backlink">Step 13: Develop</a><a class="headerlink" href="#step-13-develop" title="Link to this heading">¶</a></h2>
+<p>Now that your development environment is set up, you can start building your own projects! Here are some advanced tips to help you get started:</p>
+<section id="running-locally">
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">Running Locally</a><a class="headerlink" href="#running-locally" title="Link to this heading">¶</a></h3>
+<p>Run your site locally with <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">main.py</span></code> and open your browser to <code class="docutils literal notranslate"><span class="pre">http://localhost:8080</span></code> to see your changes in action. To stop the server, go back to the terminal and press <code class="docutils literal notranslate"><span class="pre">Ctrl</span> <span class="pre">+</span> <span class="pre">C</span></code>.</p>
+</section>
+<section id="debug-locally">
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">Debug Locally</a><a class="headerlink" href="#debug-locally" title="Link to this heading">¶</a></h3>
+<p>You can set breakpoints in VS Code by clicking in the gutter next to the line numbers. Then, run the debugger by pressing <code class="docutils literal notranslate"><span class="pre">F5</span></code> or going to the Run and Debug panel. This lets you step through your code and inspect variables.</p>
+<img alt="VS Code Debug Menu" src="../_images/vscode_debug_menu.png" />
+</section>
+<section id="ai-help">
+<h3><a class="toc-backref" href="#id16" role="doc-backlink">AI Help</a><a class="headerlink" href="#ai-help" title="Link to this heading">¶</a></h3>
+<p>You can use the Chat menu to ask questions to an LLM Agent about your code. Click the <code class="docutils literal notranslate"><span class="pre">View</span></code> menu, then <code class="docutils literal notranslate"><span class="pre">Chat</span></code> to open the chat panel. Type your question and get instant help!</p>
+<img alt="VS Code Chat Panel" src="../_images/vscode_chat_menu.png" />
+<p>Note that we have created a custom AI agent that is specialized in Drafter and Python development. This agent has access to the Drafter documentation and can help you with specific questions about using Drafter and developing web applications. You are free to modify this agent by editing the <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code> file in your repository.</p>
+</section>
+</section>
+<section id="congratulations">
+<h2><a class="toc-backref" href="#id17" role="doc-backlink">Congratulations!</a><a class="headerlink" href="#congratulations" title="Link to this heading">¶</a></h2>
+<p>You’ve successfully set up your local Python development environment! You now have:</p>
+<ul class="simple">
+<li><p>Git for version control</p></li>
+<li><p>Python to run your code</p></li>
+<li><p>VS Code as your code editor</p></li>
+<li><p>The Python extension for VS Code features</p></li>
+<li><p>UV for managing Python packages</p></li>
+<li><p>GitHub Copilot for AI-assisted coding</p></li>
+<li><p>The skills to fork, clone, and work with repositories</p></li>
+<li><p>Knowledge of how to run tests and push changes</p></li>
+<li><p>Access to the GitHub Student Developer Pack</p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="../contents.html">Page contents</a></h3>
+    <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../students/installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workbook/index.html">Workbook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/html.html">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/styling.html">Styling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/testing.html">Testing Drafter Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/deployment.html">Deployment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="reference.html">Reference Lists</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="colors.html">HTML Colors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="components.html">Components Cheatsheet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fonts.html">HTML Fonts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flask.html">Transitioning from Drafter to Flask</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Local Python Development Setup Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-install-git">Step 1: Install Git</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-install-python">Step 2: Install Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-install-visual-studio-code-vs-code">Step 3: Install Visual Studio Code (VS Code)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-4-install-the-python-extension-for-vs-code">Step 4: Install the Python Extension for VS Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-5-install-uv">Step 5: Install UV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-6-apply-for-github-student-developer-pack">Step 6: Apply for GitHub Student Developer Pack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-7-setup-github-copilot">Step 7: Setup GitHub Copilot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-8-fork-and-clone-a-repository">Step 8: Fork and Clone a Repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-9-install-dependencies-and-run-tests">Step 9: Install Dependencies and Run Tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-10-fix-the-issue-and-confirm-it-works">Step 10: Fix the Issue and Confirm It Works</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-11-add-commit-and-push-your-changes">Step 11: Add, Commit, and Push Your Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-12-enable-and-check-github-actions">Step 12: Enable and Check GitHub Actions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-13-develop">Step 13: Develop</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#running-locally">Running Locally</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#debug-locally">Debug Locally</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ai-help">AI Help</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#congratulations">Congratulations!</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/api.html">Full API Documentation</a></li>
+</ul>
+
+  </div>
+  <div class="sphinxprev">
+    <h4>Previous page</h4>
+    <p class="topless"><a href="flask.html"
+                          title="Previous page">&larr; Transitioning from Drafter to Flask</a></p>
+  </div>
+  <div class="sphinxnext">
+    <h4>Next page</h4>
+    <p class="topless"><a href="../students/help.html"
+                          title="Next page">&rarr; More Help</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/reference/local_setup.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../students/help.html" title="More Help"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="flask.html" title="Transitioning from Drafter to Flask"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 1.9.0 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="reference.html" >Reference Lists</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Local Python Development Setup Guide</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, acbart &amp; nazim.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

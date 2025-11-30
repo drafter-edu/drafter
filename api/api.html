@@ -600,6 +600,20 @@ in the final JavaScript output. Defaults to a predefined set.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="drafter.server.do_not_start_server">
+<span class="sig-name descname"><span class="pre">do_not_start_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">MAIN_SERVER</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.do_not_start_server" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the server to skip starting. This is useful for running tests headlessly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>server</strong> – The server to set to skip (defaults to the <code class="docutils literal notranslate"><span class="pre">MAIN_SERVER</span></code>)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="drafter.server.get_all_routes">
 <span class="sig-name descname"><span class="pre">get_all_routes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.server.Server" title="drafter.server.Server"><span class="pre">Server</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.get_all_routes" title="Link to this definition">¶</a></dt>
 <dd><p>Get all routes available in the given server or the main server if none is provided.</p>
@@ -672,6 +686,24 @@ issues.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>server</strong> – The server to set as the main server</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="drafter.server.set_server_setting">
+<span class="sig-name descname"><span class="pre">set_server_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">MAIN_SERVER</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.set_server_setting" title="Link to this definition">¶</a></dt>
+<dd><p>Sets a setting in the server’s configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> – The key to set in the configuration</p></li>
+<li><p><strong>value</strong> – The value to set the key to</p></li>
+<li><p><strong>server</strong> – The server to set the setting in (defaults to the <code class="docutils literal notranslate"><span class="pre">MAIN_SERVER</span></code>)</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
@@ -1997,11 +2029,13 @@ In non-Skulpt environments, it does nothing and returns False.</p>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.SiteInformation"><code class="docutils literal notranslate"><span class="pre">SiteInformation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.bundle_files_into_js"><code class="docutils literal notranslate"><span class="pre">bundle_files_into_js()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.server.do_not_start_server"><code class="docutils literal notranslate"><span class="pre">do_not_start_server()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.get_all_routes"><code class="docutils literal notranslate"><span class="pre">get_all_routes()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.get_main_server"><code class="docutils literal notranslate"><span class="pre">get_main_server()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.get_server_setting"><code class="docutils literal notranslate"><span class="pre">get_server_setting()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.protect_script_tags"><code class="docutils literal notranslate"><span class="pre">protect_script_tags()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.set_main_server"><code class="docutils literal notranslate"><span class="pre">set_main_server()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drafter.server.set_server_setting"><code class="docutils literal notranslate"><span class="pre">set_server_setting()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.server.start_server"><code class="docutils literal notranslate"><span class="pre">start_server()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.testing.BakeryTestCase"><code class="docutils literal notranslate"><span class="pre">BakeryTestCase</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#drafter.testing.assert_equal"><code class="docutils literal notranslate"><span class="pre">assert_equal()</span></code></a></li>
