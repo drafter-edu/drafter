@@ -972,6 +972,28 @@ def get_server_setting(key, default=None, server=MAIN_SERVER):
     return getattr(server.configuration, key, default)
 
 
+def set_server_setting(key, value, server=MAIN_SERVER):
+    """
+    Sets a setting in the server's configuration.
+
+    :param key: The key to set in the configuration
+    :param value: The value to set the key to
+    :param server: The server to set the setting in (defaults to the ``MAIN_SERVER``)
+    :return: None
+    """
+    setattr(server.configuration, key, value)
+
+
+def do_not_start_server(server=MAIN_SERVER):
+    """
+    Sets the server to skip starting. This is useful for running tests headlessly.
+
+    :param server: The server to set to skip (defaults to the ``MAIN_SERVER``)
+    :return: None
+    """
+    server.configuration.skip = True
+
+
 def start_server(initial_state=None, server: Server = MAIN_SERVER, skip=False, **kwargs):
     """
     Starts the server with the given initial state and configuration. If the server is set to skip, it will not start.

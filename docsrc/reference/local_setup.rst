@@ -696,7 +696,7 @@ AI Help
 
 You can use the Chat menu to ask questions to an LLM Agent about your code. Click the ``View`` menu, then ``Chat`` to open the chat panel. Type your question and get instant help!
 
-.. image:: images/vscode_chat_panel.png
+.. image:: images/vscode_chat_menu.png
    :alt: VS Code Chat Panel
 
 Note that we have created a custom AI agent that is specialized in Drafter and Python development. This agent has access to the Drafter documentation and can help you with specific questions about using Drafter and developing web applications. You are free to modify this agent by editing the ``AGENTS.md`` file in your repository.
