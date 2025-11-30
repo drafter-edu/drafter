@@ -1,0 +1,53 @@
+<html><head>
+        <style type="text/css">
+          .btlw {background-color: #eee; font-family: sans-serif;}
+          div.btlw {background-color: #fff; border: 1px solid #ddd;
+                padding: 15px; margin: 15px;}
+          .btlw pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}
+        </style>
+    </head>
+    <body>
+        <h3>500 Internal Server Error</h3>
+        
+        <p></p><p>Sorry, the requested URL <code>http://localhost:8080/</code> caused an error.</p>
+<p>You might want to return to the <a href="/">index</a> page.</p><p></p>
+        
+        <p>Original error message:</p>
+        <pre>Error preparing arguments for page.
+Error in index:
+Could not convert state (None) from NoneType to int
+
+
+
+Traceback (most recent call last):
+  File "/home/runner/work/drafter/drafter/drafter/server.py", line 615, in convert_parameter
+    converted_arg = self.try_special_conversions(val, target_type)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/drafter/drafter/drafter/server.py", line 581, in try_special_conversions
+    return target_type(value)
+           ^^^^^^^^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/work/drafter/drafter/drafter/server.py", line 650, in bottle_page
+    args, kwargs, arguments, button_pressed = self.prepare_args(original_function, args, kwargs)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/drafter/drafter/drafter/server.py", line 499, in prepare_args
+    args = [self.convert_parameter(param, val, expected_types)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/drafter/drafter/drafter/server.py", line 624, in convert_parameter
+    raise ValueError(
+ValueError: Could not convert state (None) from NoneType to int
+
+
+None
+</pre>
+        
+        <p>Available routes:</p>
+        <li><code>'index'</code>: <code><function test_fragment_response_from_route.<locals="">.index at 0x7f6c488e1e40&gt;</function></code></li>
+<li><code>'increment_fragment'</code>: <code><function test_fragment_response_from_route.<locals="">.increment_fragment at 0x7f6c488e1d00&gt;</function></code></li>
+    
+
+</body></html>
