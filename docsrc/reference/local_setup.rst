@@ -7,10 +7,6 @@ Local Python Development Setup Guide
 This guide will walk you through setting up your computer for Python development using Visual Studio Code (VS Code).
 By the end of this guide, you will have a fully functional development environment with Git, Python, VS Code, and all the tools you need to write, test, and share your code.
 
-.. note::
-    These instructions are written for beginners. Each step explains not just *what* to do, but *why* you're doing it.
-    Follow the steps in order, as each step builds on the previous ones.
-
 .. contents:: Table of Contents
    :local:
    :depth: 2
@@ -26,47 +22,56 @@ You'll use Git to download code from GitHub (a website that hosts code), save yo
 
 .. tabs::
 
-   .. tab:: Windows
+   .. group-tab:: Windows
 
       1. Go to the Git download page: https://git-scm.com/downloads/win
 
       2. Click the **"Click here to download"** link to download the installer (it will download a file like ``Git-2.xx.x-64-bit.exe``)
 
-         .. note::
-            [SCREENSHOT NEEDED: Git download page for Windows showing the download link]
+         .. image:: images/vscode_download_git.png
+            :alt: Download Git Installer
 
       3. Run the downloaded installer by double-clicking on it
 
-      4. **Important:** During installation, you will see many screens with options. For most screens, you can just click **Next** to accept the default settings. However, pay attention to these settings:
-
-         - On the "Adjusting your PATH environment" screen, make sure **"Git from the command line and also from 3rd-party software"** is selected (this is usually the default)
-         - On the "Configuring the line ending conversions" screen, keep the default setting
-
-         .. note::
-            [SCREENSHOT NEEDED: Git installer PATH environment screen showing the recommended option]
+      4. **Important:** During installation, you will see many screens with options. For most screens, you can just click **Next** to accept the default settings.
 
       5. Click **Install** and wait for the installation to complete
 
       6. Click **Finish** when done
 
-      **Verify the installation:**
+   .. group-tab:: Mac
 
-      1. Press ``Windows key + R`` to open the Run dialog
-      2. Type ``cmd`` and press Enter to open Command Prompt
-      3. Type ``git --version`` and press Enter
-      4. You should see something like ``git version 2.xx.x`` - this means Git is installed correctly!
+      There are two ways to install Git on Mac. We recommend installing Homebrew since that will also help you install other tools in the future. If you have trouble with Homebrew, you can use the Xcode Command Line Tools method.
 
-         .. note::
-            [SCREENSHOT NEEDED: Command Prompt showing successful git --version output]
+      **Option A: Install via Homebrew**
 
-   .. tab:: Mac
+      You probably do not have Homebrew installed yet, so first we need to install Homebrew using the Terminal:
 
-      There are two ways to install Git on Mac. Choose the one that works best for you:
+      1. Open Terminal
+      2. Copy and paste the line of code below into Terminal and press Enter to install Homebrew
 
-      **Option A: Install via Xcode Command Line Tools (Simplest)**
+      .. code-block::
+
+        /bin/bash -c "$(curl-fsSLhttps://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      3. When it asks for password, type yours in. It’ll output a lot of text, and then beneath a large list of tags, you see a purple arrow with "Next Steps".
+
+      4. To confirm that Homebrew is installed correctly, type the following command in Terminal and press Enter:
+
+      .. code-block::
+
+        brew help
+
+      5. Some help text should appear. If it does, Homebrew is installed correctly! Next you need to install Git using Homebrew. Type the following command in Terminal and press Enter:
+
+      .. code-block::
+
+        brew install git
+
+      **Option B: Install via Xcode Command Line Tools**
 
       1. Open the **Terminal** application:
-         
+
          - Press ``Command + Space`` to open Spotlight Search
          - Type ``Terminal`` and press Enter
 
@@ -78,101 +83,51 @@ You'll use Git to download code from GitHub (a website that hosts code), save yo
 
       3. A popup will appear asking you to install the command line developer tools. Click **Install**
 
-         .. note::
-            [SCREENSHOT NEEDED: Xcode Command Line Tools installation popup]
-
       4. Wait for the installation to complete (this may take several minutes)
-
-      **Option B: Install via Homebrew (Alternative)**
-
-      If you already have Homebrew installed, you can install Git with:
-
-      .. code-block:: bash
-
-         brew install git
-
-      **Verify the installation:**
-
-      1. Open Terminal (if not already open)
-      2. Type ``git --version`` and press Enter
-      3. You should see something like ``git version 2.xx.x`` - this means Git is installed correctly!
-
-         .. note::
-            [SCREENSHOT NEEDED: Terminal showing successful git --version output on Mac]
 
 
 Step 2: Install Python
 ======================
 
 **What is Python?**
-Python is a programming language - it's the language you'll use to write your code. The Python interpreter reads your code and runs it.
+Python is a programming language - it's the language you'll use to write your code. Python is also the name of the program on your computer that runs Python code.
 
 **Why do you need Python?**
-You need Python installed on your computer to run Python programs. While VS Code is where you'll write your code, Python is what actually executes it.
+You need Python installed on your computer to run Python programs. While VS Code is where you'll write your code, Python is what actually executes it. If you used Thonny previously, Python was included with it, but for VS Code, you need to install Python separately.
 
 .. tabs::
 
-   .. tab:: Windows
+   .. group-tab:: Windows
 
       1. Go to the Python download page: https://www.python.org/downloads/
 
-      2. Click the large yellow **"Download Python 3.x.x"** button to download the installer
+      2. Click the large yellow **"Download Python 3.x.x"** button to download the installer. You can get the latest Python version.
 
-         .. note::
-            [SCREENSHOT NEEDED: Python download page showing the download button]
+         .. image:: images/vscode_download_python.png
+            :alt: Download Python Installer
 
       3. Run the downloaded installer by double-clicking on it
 
       4. **IMPORTANT:** On the first screen of the installer, make sure to check the box that says **"Add Python to PATH"** at the bottom of the window. This is crucial!
 
-         .. note::
-            [SCREENSHOT NEEDED: Python installer first screen with "Add Python to PATH" checkbox highlighted]
+         .. image:: images/vscode_python_installer.png
+            :alt: Add Python to PATH checkbox
 
       5. Click **"Install Now"**
 
       6. Wait for the installation to complete, then click **Close**
 
-      **Verify the installation:**
-
-      1. Open a **new** Command Prompt window (close any existing ones first):
-         - Press ``Windows key + R``
-         - Type ``cmd`` and press Enter
-
-      2. Type ``python --version`` and press Enter
-
-      3. You should see something like ``Python 3.x.x`` - this means Python is installed correctly!
-
-         .. note::
-            [SCREENSHOT NEEDED: Command Prompt showing successful python --version output]
-
-   .. tab:: Mac
+   .. group-tab:: Mac
 
       1. Go to the Python download page: https://www.python.org/downloads/
 
       2. Click the large yellow **"Download Python 3.x.x"** button
-
-         .. note::
-            [SCREENSHOT NEEDED: Python download page for Mac]
 
       3. Open the downloaded ``.pkg`` file and follow the installation instructions
 
       4. Click **Continue** through the screens, then **Install**
 
       5. Enter your Mac password when prompted, and wait for installation to complete
-
-      **Verify the installation:**
-
-      1. Open Terminal (``Command + Space``, type ``Terminal``, press Enter)
-
-      2. Type ``python3 --version`` and press Enter
-
-      3. You should see something like ``Python 3.x.x`` - this means Python is installed correctly!
-
-         .. note::
-            [SCREENSHOT NEEDED: Terminal showing successful python3 --version output on Mac]
-
-      .. warning::
-         On Mac, you should use ``python3`` instead of ``python`` to run Python 3. The ``python`` command on Mac often refers to an older version of Python.
 
 
 Step 3: Install Visual Studio Code (VS Code)
@@ -186,63 +141,52 @@ While you could write Python code in any text editor (even Notepad), VS Code mak
 
 .. tabs::
 
-   .. tab:: Windows
+   .. group-tab:: Windows
 
       1. Go to the VS Code download page: https://code.visualstudio.com/Download
 
       2. Click the **Windows** download button (it will download a file like ``VSCodeUserSetup-x64-1.xx.x.exe``)
 
-         .. note::
-            [SCREENSHOT NEEDED: VS Code download page showing the Windows download button]
+         .. image:: images/vscode_download_windows.png
+            :alt: VS Code Windows Download Button
 
       3. Run the downloaded installer
 
       4. Accept the license agreement and click **Next**
 
-      5. On the "Select Additional Tasks" screen, we recommend checking these boxes:
+      5. On the "Select Additional Tasks" screen, we recommend checking these boxes if they are available:
          
          - **"Add 'Open with Code' action to Windows Explorer file context menu"** - lets you right-click on files to open them in VS Code
          - **"Add 'Open with Code' action to Windows Explorer directory context menu"** - lets you right-click on folders to open them in VS Code
          - **"Add to PATH"** - lets you open VS Code from the command line
 
-         .. note::
-            [SCREENSHOT NEEDED: VS Code installer showing the additional tasks checkboxes]
 
       6. Click **Next**, then **Install**
 
       7. When installation completes, you can check **"Launch Visual Studio Code"** and click **Finish**
 
-   .. tab:: Mac
+   .. group-tab:: Mac
 
       1. Go to the VS Code download page: https://code.visualstudio.com/Download
 
       2. Click the **Mac** download button (it will download a ``.zip`` file)
 
-         .. note::
-            [SCREENSHOT NEEDED: VS Code download page showing the Mac download button]
+         .. image:: images/vscode_download_mac.png
+            :alt: VS Code Mac Download Button
 
       3. Open the downloaded ``.zip`` file (usually in your Downloads folder). This will extract the VS Code application
 
       4. Drag the **Visual Studio Code.app** to your **Applications** folder
 
-         .. note::
-            [SCREENSHOT NEEDED: Dragging VS Code to Applications folder on Mac]
-
       5. Open VS Code by going to your Applications folder and double-clicking on **Visual Studio Code**
 
       6. If you see a warning that says "Visual Studio Code is an app downloaded from the Internet. Are you sure you want to open it?", click **Open**
 
-      **Adding VS Code to your PATH (recommended):**
 
-      This lets you open VS Code from the Terminal by typing ``code``.
+The VS Code Welcome Screen will look something like this:
 
-      1. Open VS Code
-      2. Press ``Command + Shift + P`` to open the Command Palette
-      3. Type ``shell command`` and select **"Shell Command: Install 'code' command in PATH"**
-      4. Click **OK** on any dialogs that appear
-
-         .. note::
-            [SCREENSHOT NEEDED: VS Code Command Palette showing "Install code command in PATH"]
+.. image:: images/vscode_welcome_screen.png
+   :alt: VS Code Welcome Screen
 
 
 Step 4: Install the Python Extension for VS Code
@@ -258,17 +202,17 @@ Without this extension, VS Code is just a text editor. With the extension, VS Co
 
 2. Click on the **Extensions** icon in the left sidebar (it looks like four squares, with one square separated from the others)
 
-   .. note::
-      [SCREENSHOT NEEDED: VS Code sidebar showing the Extensions icon highlighted]
+   .. image:: images/vscode_extension_button.png
+      :alt: VS Code Extensions Icon
 
-3. In the search box at the top, type ``Python``
+3. In the search box at the top, type ``ms-python.python``
 
 4. Find the extension called **"Python"** by Microsoft (it should be the first result with millions of downloads)
 
-   .. note::
-      [SCREENSHOT NEEDED: VS Code Extensions marketplace showing the Python extension by Microsoft]
+   .. image:: images/vscode_python_extension.png
+      :alt: VS Code Python Extension
 
-5. Click the **Install** button
+5. Click the extension, and then click the **Install** button
 
 6. Wait for the installation to complete. You should see the button change to "Installed" or show a gear icon
 
@@ -278,8 +222,8 @@ Without this extension, VS Code is just a text editor. With the extension, VS Co
 2. Type ``Python: Select Interpreter`` and press Enter
 3. You should see your installed Python version in the list. Select it.
 
-   .. note::
-      [SCREENSHOT NEEDED: VS Code Python interpreter selection showing the installed Python version]
+   .. image:: images/vscode_python_version.png
+      :alt: VS Code Select Python Interpreter
 
 
 Step 5: Install UV
@@ -289,20 +233,21 @@ Step 5: Install UV
 UV is a fast Python package manager. It helps you install Python libraries (pre-written code that you can use in your projects) and manage project dependencies (libraries that your project needs to work).
 
 **Why do you need UV?**
-When you download a Python project, it often requires additional libraries to run. UV makes it easy to install all these libraries with a single command. It's much faster than the traditional ``pip`` tool.
+When you download a Python project, it often requires additional libraries to run. UV makes it easy to install all these libraries with a single command.
 
 .. tabs::
 
-   .. tab:: Windows
+   .. group-tab:: Windows
 
-      1. Open **PowerShell** (not Command Prompt):
-         
-         - Press ``Windows key``
-         - Type ``PowerShell``
-         - Click on **Windows PowerShell** (make sure it's PowerShell, not Command Prompt)
+      1. To install UV, we'll need to use the Terminal integrated into VS Code. Click the ``View`` menu at the top and then click ``Terminal``:
 
-         .. note::
-            [SCREENSHOT NEEDED: Windows search showing PowerShell]
+      .. image:: images/vscode_open_terminal.png
+        :alt: VS Code Open Terminal
+
+      This will likely open the PowerShell Terminal by default on Windows. You can verify this by looking at the dropdown in the top-right of the Terminal window. If the dropdown shows "PowerShell", you're good to go. If it shows something else (like Command Prompt), click the dropdown arrow and select **PowerShell** from the list.
+
+      .. image:: images/vscode_choose_powershell.png
+         :alt: VS Code Open PowerShell
 
       2. Copy and paste this command into PowerShell, then press Enter:
 
@@ -312,20 +257,21 @@ When you download a Python project, it often requires additional libraries to ru
 
       3. Wait for the installation to complete
 
-      4. **Close PowerShell and open a new one** for the changes to take effect
+      4. In order for the changes to take effect, create a new Powershell tab by clicking the plus (+) icon in the terminal window and selecting **PowerShell** again from the dropdown.
 
-      **Verify the installation:**
+      5. In the new PowerShell window, type ``uv --version`` and press Enter
 
-      1. In the new PowerShell window, type ``uv --version`` and press Enter
+      6. You should see a version number like ``uv 0.x.x`` - this means UV is installed correctly!
 
-      2. You should see a version number like ``uv 0.x.x`` - this means UV is installed correctly!
+         .. image:: images/vscode_uv_version.png
+            :alt: VS Code Terminal showing uv --version output on Windows
 
-         .. note::
-            [SCREENSHOT NEEDED: PowerShell showing successful uv --version output]
+   .. group-tab:: Mac
 
-   .. tab:: Mac
+      1. To install UV, we'll need to use the Terminal integrated into VS Code. Click the ``View`` menu at the top and then click ``Terminal``:
 
-      1. Open **Terminal** (``Command + Space``, type ``Terminal``, press Enter)
+      .. image:: images/vscode_open_terminal.png
+        :alt: VS Code Open Terminal
 
       2. Copy and paste this command, then press Enter:
 
@@ -335,7 +281,7 @@ When you download a Python project, it often requires additional libraries to ru
 
       3. Wait for the installation to complete
 
-      4. **Close Terminal and open a new one** for the changes to take effect
+      4. In order for the changes to take effect, create a new Terminal tab by clicking the plus (+) icon in the terminal window.
 
       **Verify the installation:**
 
@@ -343,23 +289,66 @@ When you download a Python project, it often requires additional libraries to ru
 
       2. You should see a version number like ``uv 0.x.x`` - this means UV is installed correctly!
 
-         .. note::
-            [SCREENSHOT NEEDED: Terminal showing successful uv --version output on Mac]
+         .. image:: images/vscode_uv_version.png
+            :alt: VS Code Terminal showing uv --version output on Windows
+
+Step 6: Apply for GitHub Student Developer Pack
+===============================================
+
+**What is the GitHub Student Developer Pack?**
+The GitHub Student Developer Pack is a collection of free tools and services for students. It includes free access to GitHub Copilot, cloud credits, domain names, and many other developer tools.
+
+**Why should you apply?**
+As a student, you get access to professional tools that would normally cost money. GitHub Copilot alone (which you will set up in Step 7) normally costs $10/month, but it's free for students!
+
+**How to Apply:**
+
+1. Go to https://education.github.com/pack
+
+2. Click the **"Sign up for Student Developer Pack"** button
+
+   .. image:: images/github_student_developer.png
+      :alt: GitHub Student Developer Pack Sign Up Button
+
+3. Log in to your GitHub account if you haven't already
+
+4. Select **"Student"** when asked about your academic status
+
+5. Choose your school from the list (or type to search for it)
+
+6. **Verify your student status** - you'll need to provide proof that you're a student. Options include:
+
+   - Using your school email address (often ends in ``.edu``)
+   - Uploading a photo of your student ID
+   - Uploading other academic documents
+
+7. Submit your application
+
+8. Verification can sometimes take a few minutes to a few days, depending on the verification method. If you used your school email, it may be instant. If it takes longer, then continue onto step 8 and return here later.
+
+9. Once approved, you'll receive an email confirming your access to the Student Developer Pack
+
+.. note::
+   If you're having trouble getting verified, try:
+
+   - Using your official school email address
+   - Making sure your student ID photo is clear and shows your name, the current date/semester, and your school's name
+   - Waiting a few days and trying again if the automatic verification fails
 
 
-Step 6: Setup GitHub Copilot
+Step 7: Setup GitHub Copilot
 ============================
 
 **What is GitHub Copilot?**
 GitHub Copilot is an AI-powered coding assistant that suggests code as you type. It can help you write code faster by suggesting completions, entire functions, and even helping you understand unfamiliar code.
 
 **Why should you use it?**
-As a student, you have free access to GitHub Copilot. It's like having a helpful coding partner that can suggest solutions and help you learn new programming patterns.
+As a student, you have free access to GitHub Copilot. It's like having a helpful coding partner that can suggest solutions and help you learn new programming patterns. However, you must think very critically about the suggestions it makes, as they may not always be correct or optimal. Also, as you learn to code, it's important to understand the code you write rather than relying too heavily on AI suggestions. Over-relying on AI tools can hinder your learning process.
 
 **Prerequisites:**
 
-- You need a GitHub account. If you don't have one, go to https://github.com/signup and create a free account.
-- You should apply for the GitHub Student Developer Pack (see the last section of this guide) to get free access to Copilot.
+- You need a GitHub account.
+- You need to have the GitHub Student Developer Pack (from Step 6) to access Copilot for free.
 
 **Installing the GitHub Copilot Extension:**
 
@@ -367,19 +356,13 @@ As a student, you have free access to GitHub Copilot. It's like having a helpful
 
 2. Click on the **Extensions** icon in the left sidebar
 
-3. In the search box, type ``GitHub Copilot``
+3. In the search box, type ``GitHub.copilot``
 
 4. Find and install **"GitHub Copilot"** by GitHub (look for the official one with millions of downloads)
-
-   .. note::
-      [SCREENSHOT NEEDED: VS Code Extensions showing GitHub Copilot extension]
 
 5. Click **Install**
 
 6. After installation, you'll see a prompt to sign in to GitHub. Click **Sign in to GitHub**
-
-   .. note::
-      [SCREENSHOT NEEDED: VS Code showing the GitHub sign-in prompt for Copilot]
 
 7. Your browser will open. Log in to your GitHub account if prompted, and authorize VS Code to access your account
 
@@ -399,67 +382,68 @@ You can also:
 - Type a comment describing what you want, and Copilot will suggest code to match
 
 .. note::
-   Copilot suggestions are helpful, but always review them before accepting. The suggestions are not always correct, and understanding what the code does is important for your learning.
+   Copilot suggestions are helpful, but always review them before accepting. The suggestions are not always correct, and understanding what the code does is important for your learning. You may want to disable Copilot temporarily if you find yourself relying on it too much.
 
 
-Step 7: Fork and Clone a Repository
+Step 8: Fork and Clone a Repository
 ===================================
 
+**What is GitHub?**
+
+GitHub is a website that hosts code repositories. It uses ``Git`` for version control and makes it easy to share code with others, collaborate on projects, and track changes over time. Since you installed Git in Step 1, you can now use Git to interact with repositories on GitHub.
+
 **What is Forking?**
-Forking creates your own copy of someone else's project on GitHub. This copy belongs to you, so you can make changes without affecting the original project.
+Forking creates your own copy of someone else's project on GitHub. This copy belongs to you, so you can make changes without affecting the original project (referred to as the "Upstream", as opposed to your "Fork"). Think of it like making a copy of a Google Doc to your own Google Drive so you can edit it.
 
 **What is Cloning?**
-Cloning downloads a copy of a GitHub repository to your computer so you can work on it locally.
+Cloning downloads a copy of a GitHub repository to your computer so you can work on it locally. Think of it like downloading a Google Doc to your computer to edit it offline.
 
 **Why do you need to do this?**
-When working on assignments or collaborative projects, you'll often start with code that someone else has written. Forking gives you your own copy to work on, and cloning puts that copy on your computer.
+When working on assignments or collaborative projects, you'll often start with code that someone else has written. Forking gives you your own copy to work on, and cloning puts that copy on your computer. Later on, we'll learn how to push your changes back to GitHub.
+
+.. image:: images/vscode_git_basics.png
+   :alt: GitHub Fork and Clone Diagram
 
 **Step 7a: Fork the Repository**
 
-1. Go to the repository link provided by your instructor (this will be a GitHub URL like ``https://github.com/username/repository-name``)
+1. Use the URL provided by your instructor to create a new repository on Github. **Make sure you use the instructor provided URL for your classroom!**
 
-2. Make sure you are logged into your GitHub account
-
-3. Click the **Fork** button in the top-right corner of the page
-
-   .. note::
-      [SCREENSHOT NEEDED: GitHub repository page showing the Fork button]
-
-4. On the "Create a new fork" page, keep the default settings and click **Create fork**
-
-5. Wait for GitHub to create your fork. You'll be taken to your forked repository (notice the URL now shows your username)
-
-   .. note::
-      [SCREENSHOT NEEDED: Forked repository showing the user's username in the URL]
+2. Wait for GitHub to create your fork. You'll be taken to your forked repository (notice the URL now shows your username).
 
 **Step 7b: Clone the Repository to Your Computer**
 
 1. On your forked repository page, click the green **Code** button
 
+.. image:: images/vscode_clone_button.png
+   :alt: GitHub Code Button
+
 2. Make sure **HTTPS** is selected (not SSH), and click the copy icon to copy the URL
 
-   .. note::
-      [SCREENSHOT NEEDED: GitHub Code button dropdown showing the HTTPS URL and copy button]
-
-3. Open VS Code
+3. Return to VS Code.
 
 4. Press ``Ctrl + Shift + P`` (Windows) or ``Command + Shift + P`` (Mac) to open the Command Palette
 
 5. Type ``Git: Clone`` and select it
 
-   .. note::
-      [SCREENSHOT NEEDED: VS Code Command Palette showing Git: Clone option]
 
-6. Paste the URL you copied and press Enter
+.. image:: images/vscode_clone_command.png
+   :alt: VS Code Git Clone Command
 
-7. Choose a folder on your computer where you want to save the project (for example, a "Projects" folder in your Documents)
+6. Type ``Ctrl+V`` (Windows) or ``Cmd+V`` (Mac) to paste the previously copied link and press enter.
+
+7. If you are asked to authenticate on GitHub, do so.
+
+8. A folder select window will prompt you to "Choose a folder to clone into." We recommend that you create a "Projects" folder in your home directory to keep all your coding projects organized, and then also create folders for each course inside of that. Select that folder (or any folder you prefer) and click **Select Folder**.
+
+.. danger::
+
+    Do not store your projects in system folders like "Program Files" or "Applications". These folders may have restricted permissions that can interfere with Git operations. Also avoid using folders like "Downloads" since they can get cluttered and make it hard to find your projects later.
 
 8. Click **Select as Repository Destination**
 
 9. VS Code will download the repository. When it asks "Would you like to open the cloned repository?", click **Open**
 
-   .. note::
-      [SCREENSHOT NEEDED: VS Code dialog asking to open the cloned repository]
+10. If prompted to trust the authors of the files in the repository, click **Yes, I trust the authors**
 
 You now have the project on your computer and open in VS Code!
 
@@ -468,24 +452,23 @@ Step 8: Install Dependencies and Run Tests
 ===========================================
 
 **What are Dependencies?**
-Dependencies are external libraries that a project needs to work. Most Python projects use libraries written by other developers to avoid reinventing the wheel.
+Dependencies are external libraries that a project needs to work. Most Python projects use libraries written by other developers to avoid reinventing the wheel. Drafter is an example of such a library.
 
 **What are Tests?**
 Tests are code that checks if other code works correctly. Running tests tells you if the project is set up correctly and if your changes break anything.
+
+There are many different libraries for testing in Python. Drafter works particularly well with the Bakery testing framework, which is meant for novices.
 
 **Why do you need to do this?**
 Before making changes to a project, you should install its dependencies so the code can run, and run the tests to make sure everything is working. This gives you a baseline to compare against after you make changes.
 
 **Step 8a: Open the Terminal in VS Code**
 
-1. In VS Code, open the integrated terminal:
+1. In VS Code, open the integrated terminal if it is not already open:
    
    - Press ``Ctrl + ``` (backtick, the key below Escape) on Windows
    - Or press ``Command + ``` on Mac
    - Or go to **View** → **Terminal** in the menu
-
-   .. note::
-      [SCREENSHOT NEEDED: VS Code with the integrated terminal open at the bottom]
 
 **Step 8b: Install Dependencies**
 
@@ -499,18 +482,19 @@ Before making changes to a project, you should install its dependencies so the c
 
 2. Wait for UV to download and install all dependencies. You'll see progress messages in the terminal.
 
-   .. note::
-      [SCREENSHOT NEEDED: VS Code terminal showing uv sync running and completing]
-
 **Step 8c: Run the Tests**
 
 1. In the terminal, type the following command and press Enter:
 
    .. code-block:: bash
 
-      uv run pytest
+      uv run test
 
    This runs all the tests in the project.
+
+.. note::
+
+    Why does the command start with ``uv run``? When you use UV to manage your project, it relies on the ``pyproject.toml`` file to define scripts. The ``test`` script is defined in that file to run the appropriate test command for the project (in this case, using Bakery).
 
 2. Look at the output. You should see something like:
 
@@ -691,59 +675,6 @@ Many projects use GitHub Actions to automatically run tests when you push change
    
    - Did you push all your changes?
    - Are there any differences between your local environment and the GitHub Actions environment?
-
-
-Step 12: Apply for GitHub Student Developer Pack
-================================================
-
-**What is the GitHub Student Developer Pack?**
-The GitHub Student Developer Pack is a collection of free tools and services for students. It includes free access to GitHub Copilot, cloud credits, domain names, and many other developer tools.
-
-**Why should you apply?**
-As a student, you get access to professional tools that would normally cost money. GitHub Copilot alone (which you set up in Step 6) normally costs $10/month, but it's free for students!
-
-**How to Apply:**
-
-1. Go to https://education.github.com/pack
-
-2. Click the **"Sign up for Student Developer Pack"** button
-
-   .. note::
-      [SCREENSHOT NEEDED: GitHub Education page with the sign-up button]
-
-3. Log in to your GitHub account if you haven't already
-
-4. Select **"Student"** when asked about your academic status
-
-5. Choose your school from the list (or type to search for it)
-
-6. **Verify your student status** - you'll need to provide proof that you're a student. Options include:
-   
-   - Using your school email address (often ends in ``.edu``)
-   - Uploading a photo of your student ID
-   - Uploading other academic documents
-
-   .. note::
-      [SCREENSHOT NEEDED: GitHub Education verification page]
-
-7. Submit your application
-
-8. Wait for verification. This usually takes a few minutes to a few days, depending on the verification method.
-
-9. Once approved, you'll receive an email confirming your access to the Student Developer Pack
-
-**After You're Approved:**
-
-- GitHub Copilot will become available (you may need to restart VS Code)
-- Explore the other benefits at https://education.github.com/pack
-- Your benefits last as long as you're a student, and you may need to re-verify periodically
-
-.. note::
-   If you're having trouble getting verified, try:
-   
-   - Using your official school email address
-   - Making sure your student ID photo is clear and shows your name, the current date/semester, and your school's name
-   - Waiting a few days and trying again if the automatic verification fails
 
 
 Congratulations!

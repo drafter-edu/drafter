@@ -8,3 +8,4 @@ Reference Lists
     components
     fonts
     flask
+    local_setup

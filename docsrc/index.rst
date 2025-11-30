@@ -14,7 +14,6 @@ full stack websites as you learn to code in Python.
    :caption: Contents:
 
    students/installation
-   students/local_setup
    quickstart/quickstart
    workbook/index
    examples/examples
