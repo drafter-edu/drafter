@@ -101,7 +101,7 @@ You need Python installed on your computer to run Python programs. While VS Code
 
       1. Go to the Python download page: https://www.python.org/downloads/
 
-      2. Click the large yellow **"Download Python 3.x.x"** button to download the installer. You can get the latest Python version.
+      2. Click the link underneath the large yellow button (do not click the button) to download the "Stand-alone installer". You can get the latest Python version.
 
          .. image:: images/vscode_download_python.png
             :alt: Download Python Installer
@@ -407,6 +407,10 @@ When working on assignments or collaborative projects, you'll often start with c
 **Step 8a: Fork the Repository**
 
 1. Use the URL provided by your instructor to create a new repository on Github. **Make sure you use the instructor provided URL for your classroom!**
+
+.. note::
+
+    You must use the link from the assignment on Canvas. Do **NOT** use the URL from your final project. This is a different repository!
 
 2. Wait for GitHub to create your fork. You'll be taken to your forked repository (notice the URL now shows your username).
 
