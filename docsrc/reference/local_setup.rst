@@ -88,52 +88,8 @@ You'll use Git to download code from GitHub (a website that hosts code), save yo
       4. Wait for the installation to complete (this may take several minutes)
 
 
-Step 2: Install Python
-======================
-
-**What is Python?**
-Python is a programming language - it's the language you'll use to write your code. Python is also the name of the program on your computer that runs Python code.
-
-**Why do you need Python?**
-You need Python installed on your computer to run Python programs. While VS Code is where you'll write your code, Python is what actually executes it. If you used Thonny previously, Python was included with it, but for VS Code, you need to install Python separately.
-
-.. tabs::
-
-   .. group-tab:: Windows
-
-      1. Go to the Python download page: https://www.python.org/downloads/ or use this direct link: https://www.python.org/ftp/python/3.13.9/python-3.13.9-amd64.exe
-
-      2. If you don't do the direct download, then click the link underneath the large yellow button (do not click the button) to download the "Stand-alone installer". You can get the latest Python version.
-
-         .. image:: images/vscode_download_python.png
-            :alt: Download Python Installer
-
-      3. Run the downloaded installer by double-clicking on it
-
-      4. **IMPORTANT:** On the first screen of the installer, make sure to check the box that says **"Add Python to PATH"** at the bottom of the window. This is crucial!
-
-         .. image:: images/vscode_python_installer.png
-            :alt: Add Python to PATH checkbox
-
-      5. Click **"Install Now"**
-
-      6. Wait for the installation to complete, then click **Close**
-
-   .. group-tab:: Mac
-
-      1. Go to the Python download page: https://www.python.org/downloads/
-
-      2. Click the large yellow **"Download Python 3.x.x"** button
-
-      3. Open the downloaded ``.pkg`` file and follow the installation instructions
-
-      4. Click **Continue** through the screens, then **Install**
-
-      5. Enter your Mac password when prompted, and wait for installation to complete
-
-
-Step 3: Install Visual Studio Code (VS Code)
-=============================================
+Step 2: Install Visual Studio Code (VS Code)
+============================================
 
 **What is VS Code?**
 Visual Studio Code (VS Code) is a code editor - it's like a word processor, but designed specifically for writing code. It has features like syntax highlighting (coloring your code to make it easier to read), error detection, and extensions that add extra functionality.
@@ -190,52 +146,24 @@ The VS Code Welcome Screen will look something like this:
 .. image:: images/vscode_welcome_screen.png
    :alt: VS Code Welcome Screen
 
-
-Step 4: Install the Python Extension for VS Code
-================================================
-
-**What is the Python Extension?**
-The Python extension adds Python-specific features to VS Code, like intelligent code completion, debugging, and the ability to run Python code directly from the editor.
-
-**Why do you need it?**
-Without this extension, VS Code is just a text editor. With the extension, VS Code understands Python and can help you write better code faster.
-
-1. Open VS Code
-
-2. Click on the **Extensions** icon in the left sidebar (it looks like four squares, with one square separated from the others)
-
-   .. image:: images/vscode_extension_button.png
-      :alt: VS Code Extensions Icon
-
-3. In the search box at the top, type ``ms-python.python``
-
-4. Find the extension called **"Python"** by Microsoft (it should be the first result with millions of downloads)
-
-   .. image:: images/vscode_python_extension.png
-      :alt: VS Code Python Extension
-
-5. Click the extension, and then click the **Install** button
-
-6. Wait for the installation to complete. You should see the button change to "Installed" or show a gear icon
-
-**Verify the installation:**
-
-1. Press ``Ctrl + Shift + P`` (Windows) or ``Command + Shift + P`` (Mac) to open the Command Palette
-2. Type ``Python: Select Interpreter`` and press Enter
-3. You should see your installed Python version in the list. Select it.
-
-   .. image:: images/vscode_python_version.png
-      :alt: VS Code Select Python Interpreter
-
-
-Step 5: Install UV
+Step 3: Install UV
 ==================
 
+**What is Python?**
+Python is a programming language - it's the language you'll use to write your code. Python is also the name of the program on your computer that runs Python code.
+
+**Why do you need Python?**
+You need Python installed on your computer to run Python programs. While VS Code is where you'll write your code, Python is what actually executes it. If you used Thonny previously, Python was included with it, but for VS Code, you need to install Python separately.
+
 **What is UV?**
-UV is a fast Python package manager. It helps you install Python libraries (pre-written code that you can use in your projects) and manage project dependencies (libraries that your project needs to work).
+UV is a fast Python package manager.
+It helps you install Pythonn and libraries (pre-written code that you can use in your projects) and manage project dependencies (libraries that your project needs to work).
 
 **Why do you need UV?**
+First, we can use UV to easily install Python itself.
+Second, UV helps manage dependencies for your projects.
 When you download a Python project, it often requires additional libraries to run. UV makes it easy to install all these libraries with a single command.
+
 
 .. tabs::
 
@@ -293,6 +221,66 @@ When you download a Python project, it often requires additional libraries to ru
 
          .. image:: images/vscode_uv_version.png
             :alt: VS Code Terminal showing uv --version output on Windows
+
+Step 4: Install Python
+======================
+
+1. In the VS Code terminal, type the following command and press Enter:
+
+   .. code-block:: bash
+
+      uv install python
+
+2. Wait for the installation to complete. UV will download and install Python for you.
+
+3. After installation, type the following command and press Enter to verify Python is installed:
+
+   .. code-block:: bash
+
+      uv run python
+
+   This should open the Python interactive shell, showing the Python version number and system information.
+   At the time of this writing, it is Python 3.14.0a6, but you might see a different version if a newer one is available.
+   You can actually run Python code here, but we just wanted to verify the installation.
+
+4. You can exit the Python shell by typing ``exit()`` and pressing Enter.
+
+Step 5: Install the Python Extension for VS Code
+================================================
+
+**What is the Python Extension?**
+The Python extension adds Python-specific features to VS Code, like intelligent code completion, debugging, and the ability to run Python code directly from the editor.
+
+**Why do you need it?**
+Without this extension, VS Code is just a text editor. With the extension, VS Code understands Python and can help you write better code faster.
+
+1. Open VS Code
+
+2. Click on the **Extensions** icon in the left sidebar (it looks like four squares, with one square separated from the others)
+
+   .. image:: images/vscode_extension_button.png
+      :alt: VS Code Extensions Icon
+
+3. In the search box at the top, type ``ms-python.python``
+
+4. Find the extension called **"Python"** by Microsoft (it should be the first result with millions of downloads)
+
+   .. image:: images/vscode_python_extension.png
+      :alt: VS Code Python Extension
+
+5. Click the extension, and then click the **Install** button
+
+6. Wait for the installation to complete. You should see the button change to "Installed" or show a gear icon
+
+**Verify the installation:**
+
+1. Press ``Ctrl + Shift + P`` (Windows) or ``Command + Shift + P`` (Mac) to open the Command Palette
+2. Type ``Python: Select Interpreter`` and press Enter
+3. You should see your installed Python version in the list. Select it.
+
+   .. image:: images/vscode_python_version.png
+      :alt: VS Code Select Python Interpreter
+
 
 Step 6: Apply for GitHub Student Developer Pack
 ===============================================
