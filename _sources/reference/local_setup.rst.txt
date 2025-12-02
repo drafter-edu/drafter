@@ -56,13 +56,15 @@ You'll use Git to download code from GitHub (a website that hosts code), save yo
 
       3. When it asks for password, type yours in. It’ll output a lot of text, and then beneath a large list of tags, you see a purple arrow with "Next Steps".
 
-      4. To confirm that Homebrew is installed correctly, type the following command in Terminal and press Enter:
+      4. Close the terminal and start a new Terminal window to ensure Homebrew is added to your PATH.
+
+      5. To confirm that Homebrew is installed correctly, type the following command in Terminal and press Enter:
 
       .. code-block::
 
         brew help
 
-      5. Some help text should appear. If it does, Homebrew is installed correctly! Next you need to install Git using Homebrew. Type the following command in Terminal and press Enter:
+      6. Some help text should appear. If it does, Homebrew is installed correctly! Next you need to install Git using Homebrew. Type the following command in Terminal and press Enter:
 
       .. code-block::
 
@@ -101,7 +103,7 @@ You need Python installed on your computer to run Python programs. While VS Code
 
       1. Go to the Python download page: https://www.python.org/downloads/ or use this direct link: https://www.python.org/ftp/python/3.13.9/python-3.13.9-amd64.exe
 
-      2. Click the link underneath the large yellow button (do not click the button) to download the "Stand-alone installer". You can get the latest Python version.
+      2. If you don't do the direct download, then click the link underneath the large yellow button (do not click the button) to download the "Stand-alone installer". You can get the latest Python version.
 
          .. image:: images/vscode_download_python.png
             :alt: Download Python Installer
