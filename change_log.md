@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Footer can now be disabled (thanks to @BJT207)
 * Documentation for using Drafter in VS Code
 * New `set_server_setting` and `do_not_start_server` functions to control server settings
+* Fix for `additional-files` cli option to correctly collect ALL files and not just the last one
 
 ## [1.8.9] - 2025-11-23
 

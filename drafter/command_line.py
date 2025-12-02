@@ -157,7 +157,7 @@ class ServerConfigurationParser:
 def parse_args(args) -> BuildOptions:
     parser = argparse.ArgumentParser(description="Build a static website from a Drafter site file.")
     parser.add_argument("site_file", help="The Drafter site file to build the website from.")
-    parser.add_argument("--additional-files", nargs='*', default=[], help="Additional files to include in the output.")
+    parser.add_argument("--additional-files", default=[], help="Additional files to include in the output.", action="append")
     parser.add_argument("--external-pages", action='append', default=[], help="External pages to link to in the generated site.")
     parser.add_argument("--output-directory", default="./", help="The directory to output the built website to.")
     parser.add_argument("--output-filename", default="index.html", help="The filename for the main output HTML file.")
