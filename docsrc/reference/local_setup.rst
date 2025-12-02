@@ -362,7 +362,7 @@ As a student, you have free access to GitHub Copilot. It's like having a helpful
 
 5. Click **Install**
 
-6. After installation, you'll see a prompt to sign in to GitHub. Click **Sign in to GitHub**
+6. After installation, you'll see a prompt to sign in to GitHub. Click **Sign in to GitHub**. If you don't see a prompt, then look in the bottom corner of the screen for a button that says "Signed out", and click that.
 
 7. Your browser will open. Log in to your GitHub account if prompted, and authorize VS Code to access your account
 
