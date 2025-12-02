@@ -99,7 +99,7 @@ You need Python installed on your computer to run Python programs. While VS Code
 
    .. group-tab:: Windows
 
-      1. Go to the Python download page: https://www.python.org/downloads/
+      1. Go to the Python download page: https://www.python.org/downloads/ or use this direct link: https://www.python.org/ftp/python/3.13.9/python-3.13.9-amd64.exe
 
       2. Click the link underneath the large yellow button (do not click the button) to download the "Stand-alone installer". You can get the latest Python version.
 
