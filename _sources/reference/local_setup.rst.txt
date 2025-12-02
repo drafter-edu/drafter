@@ -609,6 +609,17 @@ Recall the diagram we showed you before? This will cover most of the remaining p
 
 2. If this is your first time pushing, VS Code may ask you to log in to GitHub. Follow the prompts to authorize VS Code.
 
+.. danger:: "Need to Configure Git"
+
+    If you encounter an error like “need to configure git” before you can push, then you can run the following commands in the terminal, substituting your email address and name.
+
+    .. code-block::
+
+        git config --global user.email "YOUREMAIL@udel.edu"
+        git config --global user.name "YOUR NAME"
+
+    Make sure you replace ``YOUREMAIL`` with your UD Email, and ``YOUR NAME`` with your name (e.g., ``Austin Bart``).
+
 3. Wait for the push to complete. You'll see a notification when it's done.
 
 **Verify your changes on GitHub:**

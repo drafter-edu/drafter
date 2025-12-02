@@ -554,6 +554,18 @@ This is how you save your work to GitHub. Without pushing, your changes only exi
 <ol class="arabic simple">
 <li><p>After committing, click the <strong>Sync Changes</strong> button that appears (or click the three dots menu and select <strong>Push</strong>)</p></li>
 <li><p>If this is your first time pushing, VS Code may ask you to log in to GitHub. Follow the prompts to authorize VS Code.</p></li>
+</ol>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>“Need to Configure Git”</p>
+<p>If you encounter an error like “need to configure git” before you can push, then you can run the following commands in the terminal, substituting your email address and name.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="k">global</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span> <span class="s2">&quot;YOUREMAIL@udel.edu&quot;</span>
+<span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="k">global</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span> <span class="s2">&quot;YOUR NAME&quot;</span>
+</pre></div>
+</div>
+<p>Make sure you replace <code class="docutils literal notranslate"><span class="pre">YOUREMAIL</span></code> with your UD Email, and <code class="docutils literal notranslate"><span class="pre">YOUR</span> <span class="pre">NAME</span></code> with your name (e.g., <code class="docutils literal notranslate"><span class="pre">Austin</span> <span class="pre">Bart</span></code>).</p>
+</div>
+<ol class="arabic simple" start="3">
 <li><p>Wait for the push to complete. You’ll see a notification when it’s done.</p></li>
 </ol>
 <p><strong>Verify your changes on GitHub:</strong></p>
