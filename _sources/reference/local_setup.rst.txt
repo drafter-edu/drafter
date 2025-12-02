@@ -257,7 +257,7 @@ When you download a Python project, it often requires additional libraries to ru
 
       3. Wait for the installation to complete
 
-      4. In order for the changes to take effect, create a new Powershell tab by clicking the plus (+) icon in the terminal window and selecting **PowerShell** again from the dropdown.
+      4. In order for the changes to take effect, restart VS Code.
 
       5. In the new PowerShell window, type ``uv --version`` and press Enter
 
