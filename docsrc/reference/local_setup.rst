@@ -229,7 +229,7 @@ Step 4: Install Python
 
    .. code-block:: bash
 
-      uv install python
+      uv python install
 
 2. Wait for the installation to complete. UV will download and install Python for you.
 
