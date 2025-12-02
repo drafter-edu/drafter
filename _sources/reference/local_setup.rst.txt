@@ -52,7 +52,7 @@ You'll use Git to download code from GitHub (a website that hosts code), save yo
 
       .. code-block::
 
-        /bin/bash -c "$(curl-fsSLhttps://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
       3. When it asks for password, type yours in. It’ll output a lot of text, and then beneath a large list of tags, you see a purple arrow with "Next Steps".
 
