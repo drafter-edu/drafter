@@ -101,6 +101,7 @@ Now that your proxy server is set up, you need to configure your Drafter site to
 .. code-block:: python
 
     from drafter import *
+    from drafter.llm import *
 
     set_gemini_server("https://drafter-gemini-proxy.your-username.workers.dev")
 
