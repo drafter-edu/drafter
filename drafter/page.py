@@ -25,12 +25,26 @@ class Page:
     """
     state: Any
     content: list
+    js: list
 
-    def __init__(self, state, content=None):
+    def __init__(self, state, content=None, js=None):
         if content is None:
             state, content = None, state
         self.state = state
         self.content = content
+        if isinstance(js, str):
+            self.js = [js]
+        elif js is None:
+            self.js = []
+        elif isinstance(js, list):
+            for index, line in enumerate(js):
+                if not isinstance(line, str):
+                    incorrect_type = type(line).__name__
+                    raise ValueError("The js parameter must be a string or a list of strings."
+                                     f" Found {incorrect_type} at index {index} instead.")
+            self.js = js
+        else:
+            raise ValueError("The js parameter must be a string or a list of strings.")
 
         if isinstance(content, (str, PageContent)):
             # If the content is a single string, convert it to a list with that string as the only element.
@@ -46,7 +60,13 @@ class Page:
                     raise ValueError("The content of a page must be a list of strings or components."
                                      f" Found {incorrect_type} at index {index} instead.")
 
-    def render_content(self, current_state, configuration: ServerConfiguration) -> str:
+
+    def __repr__(self):
+        if not self.js:
+            return f"Page(state={self.state!r}, content={self.content!r})"
+        return f"Page(state={self.state!r}, content={self.content!r}, js={self.js!r})"
+
+    def render_content(self, current_state, configuration: ServerConfiguration) -> tuple[str, str]:
         """
         Renders the content of the page to HTML. This will include the state of the page, if it is restorable.
         Users should not call this method directly; it will be called on their behalf by the server.
@@ -71,7 +91,11 @@ class Page:
             about_button = self.make_about_button()
             content = (f"<div class='container btlw-header'>{configuration.title}{reset_button}{about_button}</div>"
                        f"<div class='container btlw-container'>{content}</div>")
-        return content
+
+        js  = "\n".join([line if line.strip().startswith("<script") else f"<script>{line}</script>"
+                         for line in self.js])
+
+        return content, js
 
     def make_reset_button(self) -> str:
         """

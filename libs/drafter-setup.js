@@ -5,18 +5,94 @@ if (typeof Sk.environ == "undefined") {
 }
 Sk.environ.set$item(new Sk.builtin.str("DRAFTER_SKULPT"), Sk.builtin.bool.true$);
 
-function builtinRead(x) {
-    if (
-        Sk.builtinFiles === undefined ||
-        Sk.builtinFiles["files"][x] === undefined
-    )
-        throw "File not found: '" + x + "'";
-    return Sk.builtinFiles["files"][x];
+class SimpleLocalStorageFileSystem {
+    LS_PREFIX = "drafter_fs_";
+
+    constructor() {
+        this.storage = window.localStorage;
+    }
+
+    readFile(path) {
+        const content = this.readFileOrNull(path);
+        if (content === null) {
+            throw new Error(`File not found: ${path}`);
+        }
+        return content;
+    }
+
+    readFileOrNull(path) {
+        if (path.startsWith("./")) {
+            path = path.slice(2);
+        }
+        return this.storage.getItem(this.LS_PREFIX + path);
+    }
+
+    writeFile(path, content) {
+        if (path.startsWith("./")) {
+            path = path.slice(2);
+        }
+        this.storage.setItem(this.LS_PREFIX + path, content);
+    }
+
+    clearFile(path) {
+        if (path.startsWith("./")) {
+            path = path.slice(2);
+        }
+        this.storage.setItem(this.LS_PREFIX + path, "");
+    }
+
+    deleteFile(path) {
+        if (path.startsWith("./")) {
+            path = path.slice(2);
+        }
+        this.storage.removeItem(this.LS_PREFIX + path);
+    }
+
+    fileExists(path) {
+        if (path.startsWith("./")) {
+            path = path.slice(2);
+        }
+        return this.storage.getItem(this.LS_PREFIX + path) !== null;
+    }
+}
+
+const lsFileSystem = new SimpleLocalStorageFileSystem();
+
+function builtinWrite(file, content) {
+    const filename = file.name;
+    const existing = lsFileSystem.readFileOrNull(filename) || "";
+    lsFileSystem.writeFile(filename, existing + content);
+}
+
+function builtinRead(x, mode) {
+    console.log(x, mode);
+    if (lsFileSystem.fileExists(x)) {
+        if (mode === "w" || mode === "wb") {
+            lsFileSystem.clearFile(x);
+        }
+        return lsFileSystem.readFile(x);
+    }
+    if (mode === "w" || mode === "wb") {
+        return "";
+    }
+    if (Sk.builtinFiles === undefined) {
+        throw "Sk.builtinFiles not found; files are not available.";
+    }
+    if (Sk.builtinFiles["files"][x] !== undefined) {
+        return Sk.builtinFiles["files"][x];
+    }
+    if (Sk.builtinFiles["files"]["./"+x] !== undefined) {
+        return Sk.builtinFiles["files"]["./"+x];
+    }
+    if (mode === "a" || mode === "ab") {
+        return "";
+    }
+    throw "File not found: '" + x + "'";
 }
 // (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = "mycanvas";
 Sk.BottleSiteTarget = "#website";
 
-Sk.configure({ read: builtinRead, __future__: Sk.python3 });
+Sk.configure({ read: builtinRead, filewrite: builtinWrite, nonreadopen: true, __future__: Sk.python3 });
 
 Sk.inBrowser = false;
 
@@ -26,7 +102,7 @@ if (typeof Sk.console === "undefined") {
 
 Sk.console = {
     // TODO: Move handleError into this object, and make it so that drafter is a function that creates the object
-    drafter: {},
+    drafter: () => {},
     printPILImage: function (img) {
         document.body.append(img.image);
     },

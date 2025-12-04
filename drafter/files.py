@@ -183,6 +183,7 @@ TEMPLATE_200 = """
         {content}
         {scripts}
         {footer}
+        {extra_js}
     </body>
 </html>
 """
@@ -193,6 +194,9 @@ TEMPLATE_200_WITHOUT_HEADER = """
 {styles}
 {content}
 {scripts}
+<div id="extra-js-container" class="extra-js-container">
+{extra_js}
+</div>
 """
 
 TEMPLATE_ERROR = """

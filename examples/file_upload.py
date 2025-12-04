@@ -61,4 +61,7 @@ def download_page(state: State) -> Page:
 
 
 start_server(State("NO TEXT YET", b"NO BITS YET".decode('utf-8'), SIMPLE_IMAGE),
-             src_image_folder="images")
+             src_image_folder="images",
+             cdn_skulpt="http://localhost:8000/skulpt.js",
+             cdn_skulpt_std="http://localhost:8000/skulpt-stdlib.js"
+             )

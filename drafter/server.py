@@ -673,13 +673,13 @@ class Server:
             self._state = page.state
             visiting_page.update("Rendering Page Content")
             try:
-                content = page.render_content(self.dump_state(), self.configuration)
+                content, js = page.render_content(self.dump_state(), self.configuration)
             except Exception as e:
                 return self.make_error_page("Error rendering content", e, original_function)
             visiting_page.finish("Finished Page Load")
             if self.configuration.debug:
                 content = content + self.make_debug_page()
-            content = self.wrap_page(content)
+            content = self.wrap_page(content, js)
             return content
 
         return bottle_page
@@ -776,7 +776,7 @@ class Server:
         if message:
             return self.make_error_page("Error after creating page", ValueError(message), original_function)
 
-    def wrap_page(self, content):
+    def wrap_page(self, content, js):
         """
         Wraps provided content in a styled HTML template, applying additional headers,
         scripts, styles, and any configuration-specific content.
@@ -816,13 +816,13 @@ class Server:
         if self.configuration.skulpt:
             return TEMPLATE_200_WITHOUT_HEADER.format(
                 header=header_content, styles=styles, scripts=scripts, content=content,
-                title=json.dumps(self.configuration.title))
+                title=json.dumps(self.configuration.title), extra_js=js)
         else:
             footer = TEMPLATE_FOOTER.format(credit=credit) if credit else ""
             return TEMPLATE_200.format(
                 header=header_content, styles=styles, scripts=scripts, content=content,
                 title=html.escape(self.configuration.title),
-                footer=footer)
+                footer=footer, extra_js=js)
 
 
     def make_error_page(self, title, error, original_function, additional_details=""):
