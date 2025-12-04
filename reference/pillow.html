@@ -1,0 +1,241 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Pillow Support &#8212; Drafter 1.9.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="../_static/documentation_options.js?v=f333a941"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Deployed Site Compatibility" href="compatibility.html" />
+    <link rel="prev" title="Gemini Support" href="llms.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="compatibility.html" title="Deployed Site Compatibility"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="llms.html" title="Gemini Support"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 1.9.3 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="reference.html" accesskey="U">Reference Lists</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Pillow Support</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="pillow-support">
+<span id="pillow"></span><h1>Pillow Support<a class="headerlink" href="#pillow-support" title="Link to this heading">¶</a></h1>
+<p>Pillow is a popular Python Imaging Library (PIL) fork that adds image processing capabilities to your
+Python applications. Drafter has partial support for Pillow when deployed via GitHub Actions.</p>
+<p>Here is an example Drafter application that uses Pillow to manipulate images.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span> <span class="k">as</span> <span class="n">PIL_Image</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">random</span><span class="w"> </span><span class="kn">import</span> <span class="n">randint</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">PIL_Image</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">Image</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">image</span><span class="p">),</span>
+        <span class="n">FileUpload</span><span class="p">(</span><span class="s2">&quot;next_image&quot;</span><span class="p">,</span> <span class="n">accept</span><span class="o">=</span><span class="s2">&quot;image/*&quot;</span><span class="p">),</span>
+        <span class="n">Download</span><span class="p">(</span><span class="s2">&quot;Download Image&quot;</span><span class="p">,</span> <span class="s2">&quot;my_image.png&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">image</span><span class="p">),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Upload New Image&quot;</span><span class="p">,</span> <span class="s2">&quot;upload&quot;</span><span class="p">),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Recolor randomly&quot;</span><span class="p">,</span> <span class="n">recolor</span><span class="p">)</span>
+    <span class="p">])</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">upload</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">next_image</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">PIL_Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">next_image</span><span class="p">))</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="n">MAX_RGB</span> <span class="o">=</span> <span class="mi">255</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">recolor</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">):</span>
+    <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">putpixel</span><span class="p">((</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">),</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">height</span><span class="p">)),</span>
+                         <span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">MAX_RGB</span><span class="p">),</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">MAX_RGB</span><span class="p">),</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">MAX_RGB</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="n">initial_image</span> <span class="o">=</span> <span class="n">PIL_Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="n">initial_image</span><span class="o">.</span><span class="n">putpixel</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="n">initial_image</span><span class="o">.</span><span class="n">putpixel</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="n">initial_image</span><span class="o">.</span><span class="n">putpixel</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="n">initial_image</span><span class="o">.</span><span class="n">putpixel</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">initial_image</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="../contents.html">Page contents</a></h3>
+    <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../students/installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workbook/index.html">Workbook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/html.html">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/styling.html">Styling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/testing.html">Testing Drafter Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/deployment.html">Deployment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="reference.html">Reference Lists</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="colors.html">HTML Colors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="components.html">Components Cheatsheet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fonts.html">HTML Fonts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flask.html">Transitioning from Drafter to Flask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="local_setup.html">Local Python Development Setup Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="llms.html">Gemini Support</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Pillow Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html">Deployed Site Compatibility</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/api.html">Full API Documentation</a></li>
+</ul>
+
+  </div>
+  <div class="sphinxprev">
+    <h4>Previous page</h4>
+    <p class="topless"><a href="llms.html"
+                          title="Previous page">&larr; Gemini Support</a></p>
+  </div>
+  <div class="sphinxnext">
+    <h4>Next page</h4>
+    <p class="topless"><a href="compatibility.html"
+                          title="Next page">&rarr; Deployed Site Compatibility</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/reference/pillow.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="compatibility.html" title="Deployed Site Compatibility"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="llms.html" title="Gemini Support"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 1.9.3 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="reference.html" >Reference Lists</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Pillow Support</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, acbart &amp; nazim.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

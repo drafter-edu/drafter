@@ -35,7 +35,7 @@
 
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Deployed Site Compatibility" href="compatibility.html" />
+    <link rel="next" title="Pillow Support" href="pillow.html" />
     <link rel="prev" title="Local Python Development Setup Guide" href="local_setup.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
@@ -51,7 +51,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="compatibility.html" title="Deployed Site Compatibility"
+          <a href="pillow.html" title="Pillow Support"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
           <a href="local_setup.html" title="Local Python Development Setup Guide"
@@ -226,6 +226,116 @@ You should use the URL of your CloudFlare Worker that you noted in the previous 
 <p>And theoretically, this should work! You’ll get back a <code class="docutils literal notranslate"><span class="pre">LLMResponse</span></code> object as usual, which should have the <code class="docutils literal notranslate"><span class="pre">content</span></code> field
 with the results of your query.</p>
 </section>
+<section id="example-llm-integration">
+<h2>Example LLM Integration<a class="headerlink" href="#example-llm-integration" title="Link to this heading">¶</a></h2>
+<p>Here’s a complete example of how to set up a simple Drafter site that uses Gemini via the proxy server.
+This is a simple chatbot application.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bakery</span><span class="w"> </span><span class="kn">import</span> <span class="n">assert_equal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drafter.llm</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMMessage</span><span class="p">,</span> <span class="n">LLMResponse</span><span class="p">,</span> <span class="n">call_gemini</span><span class="p">,</span> <span class="n">set_gemini_server</span>
+
+
+
+<span class="n">set_site_information</span><span class="p">(</span>
+    <span class="n">author</span><span class="o">=</span><span class="s2">&quot;your_email@udel.edu&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A brief description of what your website does&quot;</span><span class="p">,</span>
+    <span class="n">sources</span><span class="o">=</span><span class="s2">&quot;List any help resources or sources you used&quot;</span><span class="p">,</span>
+    <span class="n">planning</span><span class="o">=</span><span class="s2">&quot;your_planning_document.pdf&quot;</span><span class="p">,</span>
+    <span class="n">links</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;https://github.com/your-username/your-repo&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">set_gemini_server</span><span class="p">(</span><span class="s2">&quot;https://your-url-goes-here.workers.dev/&quot;</span><span class="p">)</span>
+
+
+<span class="n">hide_debug_information</span><span class="p">()</span>
+<span class="n">set_website_title</span><span class="p">(</span><span class="s2">&quot;Your Drafter Website&quot;</span><span class="p">)</span>
+<span class="n">set_website_framed</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The state of our chatbot application.</span>
+
+<span class="sd">    :param conversation: List of messages in the conversation</span>
+<span class="sd">    :type conversation: List[LLMMessage]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conversation</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">LLMMessage</span><span class="p">]</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main page of the chatbot application.</span>
+<span class="sd">    Shows API key setup if not configured, otherwise shows the chat interface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">show_chat</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">show_chat</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Display the chat interface with conversation history.&quot;&quot;&quot;</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;Chatbot using Gemini&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;---&quot;</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Show conversation history</span>
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">conversation</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">conversation</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">&quot;user&quot;</span><span class="p">:</span>
+                <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;You: </span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">msg</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">&quot;assistant&quot;</span><span class="p">:</span>
+                <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bot: </span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;---&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Input for new message</span>
+    <span class="n">content</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+        <span class="s2">&quot;Your message:&quot;</span><span class="p">,</span>
+        <span class="n">TextArea</span><span class="p">(</span><span class="s2">&quot;user_message&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">rows</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">50</span><span class="p">),</span>
+        <span class="n">LineBreak</span><span class="p">(),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Send&quot;</span><span class="p">,</span> <span class="n">send_message</span><span class="p">),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Clear Conversation&quot;</span><span class="p">,</span> <span class="n">clear_conversation</span><span class="p">),</span>
+    <span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">send_message</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">user_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Send a message to the LLM and get a response.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_message</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">show_chat</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+    <span class="c1"># Add user message to conversation</span>
+    <span class="n">user_msg</span> <span class="o">=</span> <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">user_message</span><span class="p">)</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">conversation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user_msg</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">call_gemini</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">conversation</span><span class="p">)</span>
+
+    <span class="c1"># Handle the result</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">LLMResponse</span><span class="p">):</span>
+        <span class="c1"># Success! Add the response to conversation</span>
+        <span class="n">assistant_msg</span> <span class="o">=</span> <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">conversation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assistant_msg</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Error occurred</span>
+        <span class="n">error_msg</span> <span class="o">=</span> <span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">conversation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">show_chat</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">clear_conversation</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clear the conversation history.&quot;&quot;&quot;</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">conversation</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="n">show_chat</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">([]))</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -257,8 +367,10 @@ with the results of your query.</p>
 <li class="toctree-l3"><a class="reference internal" href="#get-your-gemini-api-key">Get Your Gemini API Key</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#setting-up-a-proxy-server">Setting Up a Proxy Server</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#configure-drafter-to-use-the-proxy">Configure Drafter to Use the Proxy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-llm-integration">Example LLM Integration</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="pillow.html">Pillow Support</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compatibility.html">Deployed Site Compatibility</a></li>
 </ul>
 </li>
@@ -274,8 +386,8 @@ with the results of your query.</p>
   </div>
   <div class="sphinxnext">
     <h4>Next page</h4>
-    <p class="topless"><a href="compatibility.html"
-                          title="Next page">&rarr; Deployed Site Compatibility</a></p>
+    <p class="topless"><a href="pillow.html"
+                          title="Next page">&rarr; Pillow Support</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -327,7 +439,7 @@ with the results of your query.</p>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="compatibility.html" title="Deployed Site Compatibility"
+          <a href="pillow.html" title="Pillow Support"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
           <a href="local_setup.html" title="Local Python Development Setup Guide"
