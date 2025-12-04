@@ -30,6 +30,7 @@ Pages
 -----
 
 .. function:: Page(state, content)
+              Page(state, content, js)
 
     Constructor function for the ``Page`` object, which holds all the information for a viewable web page.
     The `state` is hidden from the user, but the `content` is rendered into HTML.
@@ -43,6 +44,12 @@ Pages
     :param content: The actual content of the page, eventually rendered as HTML in the browser. Can combine both
         string values and `Component` instances.
     :type content: list[str | Component]
+    :param js: Optional JavaScript code to include in the page. This should be a string containing valid JavaScript,
+               or a list of strings, each containing valid JavaScript code. If a list is provided, each string will be
+               included in the page in the order they are given. If no JavaScript is needed, this does not need to be
+               included. The `<script>` tags will be automatically added around the code, so only the code itself is
+               needed.
+    :type js: str | list[str] | None
 
 Server Control
 --------------

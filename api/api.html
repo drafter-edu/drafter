@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Full API Documentation &#8212; Drafter 1.9.0 documentation</title>
+    <title>Full API Documentation &#8212; Drafter 1.9.3 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=c4cb232b"></script>
+    <script src="../_static/documentation_options.js?v=f333a941"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -52,7 +52,7 @@
         <li class="right" >
           <a href="../students/help.html" title="More Help"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.9.0 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.9.3 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>
@@ -540,7 +540,7 @@ message highlighting the inconsistency and generates an error page.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="drafter.server.Server.wrap_page">
-<span class="sig-name descname"><span class="pre">wrap_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.wrap_page" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">wrap_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">js</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.server.Server.wrap_page" title="Link to this definition">¶</a></dt>
 <dd><p>Wraps provided content in a styled HTML template, applying additional headers,
 scripts, styles, and any configuration-specific content.</p>
 <dl class="field-list simple">
@@ -776,7 +776,7 @@ When you go to the URL, the function will be called and its return value will be
 
 <dl class="py class" id="module-drafter.page">
 <dt class="sig sig-object py" id="drafter.page.Page">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.page.Page" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">js</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#drafter.page.Page" title="Link to this definition">¶</a></dt>
 <dd><p>A page is a collection of content to be displayed to the user. This content has two critical parts:</p>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">state</span></code>, which is the current value of the backend server for this user’s session. This is used to
@@ -821,7 +821,7 @@ Simply links to the “–reset” URL.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="drafter.page.Page.render_content">
-<span class="sig-name descname"><span class="pre">render_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.configuration.ServerConfiguration" title="drafter.configuration.ServerConfiguration"><span class="pre">ServerConfiguration</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#drafter.page.Page.render_content" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">render_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#drafter.configuration.ServerConfiguration" title="drafter.configuration.ServerConfiguration"><span class="pre">ServerConfiguration</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#drafter.page.Page.render_content" title="Link to this definition">¶</a></dt>
 <dd><p>Renders the content of the page to HTML. This will include the state of the page, if it is restorable.
 Users should not call this method directly; it will be called on their behalf by the server.</p>
 <dl class="field-list simple">
@@ -2193,7 +2193,7 @@ In non-Skulpt environments, it does nothing and returns False.</p>
         <li class="right" >
           <a href="../students/help.html" title="More Help"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.9.0 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.9.3 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Full API Documentation</a></li> 
       </ul>

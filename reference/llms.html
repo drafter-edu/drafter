@@ -1,0 +1,347 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Gemini Support &#8212; Drafter 1.9.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="../_static/documentation_options.js?v=f333a941"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="More Help" href="../students/help.html" />
+    <link rel="prev" title="Local Python Development Setup Guide" href="local_setup.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../students/help.html" title="More Help"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="local_setup.html" title="Local Python Development Setup Guide"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 1.9.3 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="reference.html" accesskey="U">Reference Lists</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Gemini Support</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="gemini-support">
+<span id="llms"></span><h1>Gemini Support<a class="headerlink" href="#gemini-support" title="Link to this heading">¶</a></h1>
+<p>If you’re interested in using Gemini in Drafter, then you’ll have to do some setup.</p>
+<p>A key limitation of Drafter, when deployed through GitHub Actions, is that it cannot directly
+access private LLMs or APIs that require authentication. To work around this, you can set
+up a proxy server that handles requests to the LLM on behalf of Drafter. This actually can work
+with any LLM that provides an HTTP API, not just Gemini, and can be adapted for other deployment
+platforms and backends as well.</p>
+<p>Note that this is NOT officially supported by Drafter, and you’ll need to manage the proxy server
+yourself. There are security implications to consider, especially if you’re dealing with sensitive data.
+This approach does not ensure any kind of authentication or authorization for requests made to the LLM;
+anyone who can access the proxy server can potentially make requests to the LLM using your API key.
+Generally, this is not recommended for production use. Use at your own risk!</p>
+<section id="deploy-your-site">
+<h2>Deploy Your Site<a class="headerlink" href="#deploy-your-site" title="Link to this heading">¶</a></h2>
+<p>Before setting up the proxy server, ensure that your Drafter site is deployed using GitHub Actions.
+Follow the steps in the “Deploying with GitHub Actions” section of the Drafter documentation: <a class="reference internal" href="../students/deployment.html#deployment"><span class="std std-ref">Deployment</span></a>.</p>
+<p>Note the URL of your deployed site. You will need the origin (protocol + domain) for configuring the proxy server.
+For example, if your site is deployed at <code class="docutils literal notranslate"><span class="pre">https://ud-f25-cs1.github.io/my-site-name</span></code>, the origin is
+<code class="docutils literal notranslate"><span class="pre">https://ud-f25-cs1.github.io</span></code>.</p>
+</section>
+<section id="get-your-gemini-api-key">
+<h2>Get Your Gemini API Key<a class="headerlink" href="#get-your-gemini-api-key" title="Link to this heading">¶</a></h2>
+<p>To use Gemini, you’ll need an API key from Google Cloud: <a class="reference external" href="https://aistudio.google.com/api-keys">https://aistudio.google.com/api-keys</a></p>
+<p>Use the “Create API Key” button to generate a new API key. Make sure to keep this key secure and do not share it publicly.</p>
+<p>The key will look something like <code class="docutils literal notranslate"><span class="pre">AIzaSyAeFylvq4swfvDPKuacQVZGq0oYWsGlwI4</span></code>, which is just an example and not a real key.</p>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>Never expose your API keys or sensitive information in client-side code or code repositories.
+Definitely do NOT include your API keys directly in your Drafter site code or GitHub repository.
+If you accidentally leak the key, make sure you delete it and generate a new one!</p>
+</div>
+</section>
+<section id="setting-up-a-proxy-server">
+<h2>Setting Up a Proxy Server<a class="headerlink" href="#setting-up-a-proxy-server" title="Link to this heading">¶</a></h2>
+<p>You are going to create a <strong>CloudFlare Worker</strong> that will act as the proxy server.</p>
+<p>CloudFlare is a platform that provides various web services, including specialized functions called “Workers”
+that can run JavaScript code without requiring you to manage your own server infrastructure.</p>
+<ol class="arabic simple">
+<li><p>Create a CloudFlare account using your GitHub account: <a class="reference external" href="https://dash.cloudflare.com/login">https://dash.cloudflare.com/login</a></p></li>
+<li><p>On the left sidebar, click on “Workers &amp; Pages”.</p></li>
+<li><p>Click on “Create application” and select “Start with Hello World!”.</p></li>
+<li><p>Set the Worker name to something descriptive like “drafter-gemini-proxy”.</p></li>
+<li><p>Click “Deploy”.</p></li>
+<li><p>Once the worker is created, click the “Settings” tab in the top menu of the screen (right of the “Overview”).</p></li>
+<li><p>Look for the section titled “Variables and Secrets” and click on the “+ Add” button to the right.</p></li>
+<li><p>Add a new Text variable with the Variable name <code class="docutils literal notranslate"><span class="pre">GEMINI_API_KEY</span></code> and set its value to your Gemini API key.</p></li>
+<li><p>Click the blue arrow button next to the “Deploy” button to choose “Save version”.</p></li>
+<li><p>Click the “Edit code” button in the top-right corner.</p></li>
+<li><p>In the editor that appears, replace the default code with the following code snippet:</p></li>
+</ol>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// Cloudflare Worker: Simple Gemini Proxy with CORS Protection</span>
+<span class="linenos"> 2</span><span class="c1">// -----------------------------------------------------------</span>
+<span class="linenos"> 3</span><span class="c1">// This worker forwards requests from your GitHub Pages frontend to the Gemini API.</span>
+<span class="linenos"> 4</span><span class="c1">// It does **not** inspect or log request/response data.</span>
+<span class="linenos"> 5</span><span class="c1">// It uses a Cloudflare stored secret (GEMINI_API_KEY).</span>
+<span class="linenos"> 6</span><span class="c1">// CORS is restricted so only your GitHub Pages origin can call this proxy.</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="c1">// Set this in Cloudflare Dashboard → Workers → Variables → Environment Variables</span>
+<span class="linenos">10</span><span class="c1">// Name: GEMINI_API_KEY</span>
+<span class="linenos">11</span><span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">12</span><span class="w">  </span><span class="k">async</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">request</span><span class="p">,</span><span class="w"> </span><span class="nx">env</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="linenos">13</span><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">allowedOrigin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://ud-f25-cs1.github.io&quot;</span><span class="p">;</span><span class="w"> </span><span class="c1">// &lt;-- CHANGE THIS</span>
+</span><span class="linenos">14</span><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;gemini-2.5-flash&quot;</span><span class="p">;</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="w">  </span><span class="c1">// CORS preflight</span>
+<span class="linenos">18</span><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">request</span><span class="p">.</span><span class="nx">method</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;OPTIONS&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">19</span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Response</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">20</span><span class="w">      </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">21</span><span class="w">        </span><span class="s2">&quot;Access-Control-Allow-Origin&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">allowedOrigin</span><span class="p">,</span>
+<span class="linenos">22</span><span class="w">        </span><span class="s2">&quot;Access-Control-Allow-Methods&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;POST, GET, OPTIONS&quot;</span><span class="p">,</span>
+<span class="linenos">23</span><span class="w">        </span><span class="s2">&quot;Access-Control-Allow-Headers&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">request</span><span class="p">.</span><span class="nx">headers</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;Access-Control-Request-Headers&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
+<span class="linenos">24</span><span class="w">        </span><span class="s2">&quot;Access-Control-Max-Age&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;86400&quot;</span><span class="p">,</span>
+<span class="linenos">25</span><span class="w">      </span><span class="p">},</span>
+<span class="linenos">26</span><span class="w">    </span><span class="p">});</span>
+<span class="linenos">27</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>
+<span class="linenos">30</span><span class="w">  </span><span class="c1">// Only allow your frontend</span>
+<span class="linenos">31</span><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">origin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">request</span><span class="p">.</span><span class="nx">headers</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;Origin&quot;</span><span class="p">);</span>
+<span class="linenos">32</span><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">origin</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="nx">allowedOrigin</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">33</span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Response</span><span class="p">(</span><span class="s2">&quot;Forbidden&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="mf">403</span><span class="w"> </span><span class="p">});</span>
+<span class="linenos">34</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos">35</span>
+<span class="linenos">36</span>
+<span class="linenos">37</span><span class="w">  </span><span class="c1">// Forward request to Gemini</span>
+<span class="linenos">38</span>
+<span class="linenos">39</span><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">geminiURL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`https://generativelanguage.googleapis.com/v1beta/models/</span><span class="si">${</span><span class="nx">model</span><span class="si">}</span><span class="sb">:generateContent`</span><span class="p">;</span><span class="w"> </span><span class="c1">// adjust endpoint as needed</span>
+<span class="linenos">40</span>
+<span class="linenos">41</span>
+<span class="linenos">42</span><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">apiKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">env</span><span class="p">.</span><span class="nx">GEMINI_API_KEY</span><span class="p">;</span>
+<span class="linenos">43</span><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">newURL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`</span><span class="si">${</span><span class="nx">geminiURL</span><span class="si">}</span><span class="sb">?key=</span><span class="si">${</span><span class="nx">apiKey</span><span class="si">}</span><span class="sb">`</span><span class="p">;</span>
+<span class="linenos">44</span>
+<span class="linenos">45</span>
+<span class="linenos">46</span><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">forwarded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">newURL</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">47</span><span class="w">    </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="nx">request</span><span class="p">.</span><span class="nx">method</span><span class="p">,</span>
+<span class="linenos">48</span><span class="w">    </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">49</span><span class="w">      </span><span class="s2">&quot;Content-Type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+<span class="linenos">50</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos">51</span><span class="w">    </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nx">request</span><span class="p">.</span><span class="nx">body</span><span class="p">,</span>
+<span class="linenos">52</span><span class="w">  </span><span class="p">});</span>
+<span class="linenos">53</span>
+<span class="linenos">54</span>
+<span class="linenos">55</span><span class="w">  </span><span class="c1">// Return Gemini response with CORS</span>
+<span class="linenos">56</span><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">responseBody</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">forwarded</span><span class="p">.</span><span class="nx">arrayBuffer</span><span class="p">();</span>
+<span class="linenos">57</span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Response</span><span class="p">(</span><span class="nx">responseBody</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">58</span><span class="w">      </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="nx">forwarded</span><span class="p">.</span><span class="nx">status</span><span class="p">,</span>
+<span class="linenos">59</span><span class="w">      </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">60</span><span class="w">        </span><span class="s2">&quot;Content-Type&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">forwarded</span><span class="p">.</span><span class="nx">headers</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+<span class="linenos">61</span><span class="w">        </span><span class="s2">&quot;Access-Control-Allow-Origin&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">allowedOrigin</span><span class="p">,</span>
+<span class="linenos">62</span><span class="w">      </span><span class="p">},</span>
+<span class="linenos">63</span><span class="w">    </span><span class="p">});</span>
+<span class="linenos">64</span><span class="w">  </span><span class="p">},</span>
+<span class="linenos">65</span><span class="p">};</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="12">
+<li><p>Edit line 13 (highlighted above) to be the origin of your deployed Drafter site</p></li>
+</ol>
+<blockquote>
+<div><p>(e.g., <code class="docutils literal notranslate"><span class="pre">https://ud-f25-cs1.github.io</span></code>).</p>
+</div></blockquote>
+<ol class="arabic simple" start="13">
+<li><p>Click the blue “Deploy” button in the top-right corner to save and deploy your changes.</p></li>
+<li><p>You can click the “Visit” button next to the “Deploy” button, but that will most likely show a page that
+only says “Forbidden”. That’s expected, since the worker is not meant to be accessed directly.
+Make a note of the URL of your worker (it will be something like
+<code class="docutils literal notranslate"><span class="pre">https://drafter-gemini-proxy.your-username.workers.dev</span></code>). You will need this URL in the next step.</p></li>
+</ol>
+</section>
+<section id="configure-drafter-to-use-the-proxy">
+<h2>Configure Drafter to Use the Proxy<a class="headerlink" href="#configure-drafter-to-use-the-proxy" title="Link to this heading">¶</a></h2>
+<p>Now that your proxy server is set up, you need to configure your Drafter site to use it for Gemini requests.</p>
+<ol class="arabic simple">
+<li><p>At the top of your Drafter file, after the import, you need to set the LLM to Gemini and specify the proxy URL.
+You should use the URL of your CloudFlare Worker that you noted in the previous step.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">set_gemini_server</span><span class="p">(</span><span class="s2">&quot;https://drafter-gemini-proxy.your-username.workers.dev&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then, subsequently, you can call the LLM as usual in your Drafter code, except you no longer need to set the API key.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conversation</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="n">conversation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LLMMessage</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Hello, Gemini!&quot;</span><span class="p">))</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">call_gemini</span><span class="p">(</span><span class="n">conversation</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And theoretically, this should work! You’ll get back a <code class="docutils literal notranslate"><span class="pre">LLMResponse</span></code> object as usual, which should have the <code class="docutils literal notranslate"><span class="pre">content</span></code> field
+with the results of your query.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="../contents.html">Page contents</a></h3>
+    <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../students/installation.html">How to Install Drafter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/quickstart.html">Drafter Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workbook/index.html">Workbook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Longer Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/docs.html">Drafter Documentation for Students</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/html.html">HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/styling.html">Styling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/testing.html">Testing Drafter Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../students/deployment.html">Deployment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="reference.html">Reference Lists</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="colors.html">HTML Colors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="components.html">Components Cheatsheet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fonts.html">HTML Fonts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flask.html">Transitioning from Drafter to Flask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="local_setup.html">Local Python Development Setup Guide</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Gemini Support</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#deploy-your-site">Deploy Your Site</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-your-gemini-api-key">Get Your Gemini API Key</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-up-a-proxy-server">Setting Up a Proxy Server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-drafter-to-use-the-proxy">Configure Drafter to Use the Proxy</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../students/help.html">More Help</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/api.html">Full API Documentation</a></li>
+</ul>
+
+  </div>
+  <div class="sphinxprev">
+    <h4>Previous page</h4>
+    <p class="topless"><a href="local_setup.html"
+                          title="Previous page">&larr; Local Python Development Setup Guide</a></p>
+  </div>
+  <div class="sphinxnext">
+    <h4>Next page</h4>
+    <p class="topless"><a href="../students/help.html"
+                          title="Next page">&rarr; More Help</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/reference/llms.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../students/help.html" title="More Help"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="local_setup.html" title="Local Python Development Setup Guide"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../contents.html">Drafter 1.9.3 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="reference.html" >Reference Lists</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Gemini Support</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, acbart &amp; nazim.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

@@ -7,13 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Drafter Documentation for Students &#8212; Drafter 1.9.0 documentation</title>
+    <title>Drafter Documentation for Students &#8212; Drafter 1.9.3 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=f9ae72be" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=090ae2a6" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script src="../_static/documentation_options.js?v=c4cb232b"></script>
+    <script src="../_static/documentation_options.js?v=f333a941"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
 
@@ -56,7 +56,7 @@
         <li class="right" >
           <a href="../examples/nested_data.html" title="Nested Data"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.9.0 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.9.3 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Documentation for Students</a></li> 
       </ul>
@@ -102,6 +102,8 @@ case that route will be used as the index of the website (the front, default pag
 <dl class="py function">
 <dt class="sig sig-object py" id="Page">
 <span class="sig-name descname"><span class="pre">Page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Page" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">js</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Constructor function for the <code class="docutils literal notranslate"><span class="pre">Page</span></code> object, which holds all the information for a viewable web page.
 The <cite>state</cite> is hidden from the user, but the <cite>content</cite> is rendered into HTML.
 This should be returned from any <cite>route</cite> function.</p>
@@ -114,6 +116,11 @@ HTML, which will be injected directly into the page. The <cite>Component</cite> 
 If there is no change to the state, then will just be the <cite>state</cite> parameter.</p></li>
 <li><p><strong>content</strong> (<em>list</em><em>[</em><em>str</em><em> | </em><em>Component</em><em>]</em>) – The actual content of the page, eventually rendered as HTML in the browser. Can combine both
 string values and <cite>Component</cite> instances.</p></li>
+<li><p><strong>js</strong> (<em>str</em><em> | </em><em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – Optional JavaScript code to include in the page. This should be a string containing valid JavaScript,
+or a list of strings, each containing valid JavaScript code. If a list is provided, each string will be
+included in the page in the order they are given. If no JavaScript is needed, this does not need to be
+included. The <cite>&lt;script&gt;</cite> tags will be automatically added around the code, so only the code itself is
+needed.</p></li>
 </ul>
 </dd>
 </dl>
@@ -684,7 +691,7 @@ and the history of visited pages.</p>
         <li class="right" >
           <a href="../examples/nested_data.html" title="Nested Data"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../contents.html">Drafter 1.9.0 documentation</a> &#187;</li>
+    <li><a href="../contents.html">Drafter 1.9.3 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Drafter Documentation for Students</a></li> 
       </ul>
