@@ -10,3 +10,4 @@ Reference Lists
     flask
     local_setup
     llms
+    compatibility
