@@ -285,6 +285,11 @@ TEMPLATE_SKULPT_DEPLOY = """
             integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
             crossorigin="anonymous"
         ></script>
+        <script 
+            src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.3.1/d3.min.js" 
+            integrity="sha512-9H86d5lhAwgf2/u29K4N5G6pZThNOojI8kMT4nT4NHvVR02cM85M06KJRQXkI0XgQWBpzQyIyr8LVomyu1AQdw==" 
+            crossorigin="anonymous" 
+        ></script>
         <script src="{cdn_skulpt}" type="text/javascript"></script>
         <script src="{cdn_skulpt_std}" type="text/javascript"></script>
         <script src="{cdn_skulpt_drafter}" type="text/javascript"></script>

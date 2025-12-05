@@ -572,6 +572,12 @@ class Server:
                 return {'filename': value.filename, 'content': value.file.read()}
             elif HAS_PILLOW and issubclass(target_type, PILImage.Image):
                 try:
+                    if not value or not value.file:
+                        return None
+                    contents = value.file.read()
+                    if not contents:
+                        return None
+                    value.file.seek(0)
                     image = PILImage.open(value.file)
                     image.filename = value.filename
                     return image

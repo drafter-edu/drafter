@@ -406,6 +406,8 @@ class Image(PageContent, LinkContent):
         if not HAS_PILLOW or isinstance(image, str):
             return False, image
 
+        if image is None:
+            return True, ""
         image_data = io.BytesIO()
         image.save(image_data, format="PNG")
         image_data.seek(0)
