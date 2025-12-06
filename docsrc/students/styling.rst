@@ -11,6 +11,11 @@ You can use the built-in styling functions, keyword parameters, CSS classes, CSS
 Drafter generates plain HTML and CSS, so you can use any CSS styling you want. However, Drafter also provides
 some built-in functions to make styling easier.
 
+.. note::
+    **New to web design?** Check out our :ref:`design_principles` guide first! It teaches you fundamental
+    design concepts like visual hierarchy, color theory, and typography—helping you understand *why* and *when* 
+    to use these styling functions, not just *how*.
+
 The following section gives examples of how to style your components using these methods,
 with links to the more detailed sub-sections.
 
