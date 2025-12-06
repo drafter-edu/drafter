@@ -75,6 +75,9 @@ class Page:
         :param configuration: The configuration of the server. This will be used to determine how the page is rendered.
         :return: A string of HTML representing the content of the page.
         """
+        # Check for duplicate form field names before rendering
+        self._check_duplicate_form_names()
+        
         # TODO: Decide if we want to dump state on the page
         chunked = [
             # f'<input type="hidden" name="{RESTORABLE_STATE_KEY}" value={current_state!r}/>'
@@ -133,3 +136,52 @@ class Page:
             if isinstance(chunk, Link):
                 chunk.verify(server)
         return True
+
+    def _check_duplicate_form_names(self):
+        """
+        Checks for duplicate form field names in the page content and issues warnings.
+        
+        This method examines all PageContent components in the page that have form names
+        (excluding Button components which use --submit-button as their actual name)
+        and warns if multiple components use the same name.
+        """
+        form_field_names = []
+        
+        for chunk in self.content:
+            if isinstance(chunk, PageContent) and hasattr(chunk, 'name'):
+                # Skip Button components as they don't actually use their 'name' parameter
+                # as a form field name (they use --submit-button instead)
+                from drafter.components import Button
+                if not isinstance(chunk, Button):
+                    form_field_names.append(chunk.name)
+        
+        # Find duplicates
+        seen_names = set()
+        duplicate_names = set()
+        for name in form_field_names:
+            if name in seen_names:
+                duplicate_names.add(name)
+            seen_names.add(name)
+        
+        # Issue warnings for duplicates
+        if duplicate_names:
+            import warnings
+            duplicate_list = sorted(duplicate_names)
+            if len(duplicate_list) == 1:
+                warnings.warn(
+                    f"Multiple form components use the same name '{duplicate_list[0]}'. "
+                    f"This can cause unpredictable behavior when the form is submitted, "
+                    f"as only one value may be received by the server. Consider using "
+                    f"different names for each form component.",
+                    UserWarning,
+                    stacklevel=3
+                )
+            else:
+                warnings.warn(
+                    f"Multiple form components use the same names: {', '.join(repr(name) for name in duplicate_list)}. "
+                    f"This can cause unpredictable behavior when the form is submitted, "
+                    f"as only one value may be received by the server for each duplicate name. "
+                    f"Consider using different names for each form component.",
+                    UserWarning,
+                    stacklevel=3
+                )
