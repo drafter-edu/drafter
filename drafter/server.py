@@ -923,6 +923,7 @@ class Server:
         bundled_js, skipped, added = bundle_files_into_js(student_main_file, os.path.dirname(student_main_file))
         bundled_js = protect_script_tags(bundled_js)
         drafter_setup_code = "\n".join(get_raw_files('global').deploy.values())
+        drafter_setup_code += f'<script>Sk.environ.set$item(new Sk.builtin.str("DRAFTER_DEPLOY_IMAGE_PATH"), new Sk.builtin.str("images"));</script>\n'
         return TEMPLATE_SKULPT_DEPLOY.format(website_code=bundled_js,
                                              cdn_skulpt=self.configuration.cdn_skulpt,
                                              cdn_skulpt_std=self.configuration.cdn_skulpt_std,

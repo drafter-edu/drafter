@@ -416,6 +416,8 @@ class Image(PageContent, LinkContent):
         return True, figure
 
     def __str__(self) -> str:
+        from drafter.server import get_server_setting
+        self.base_image_folder = get_server_setting("deploy_image_path", self.base_image_folder)
         extra_settings = {}
         if self.width is not None:
             extra_settings['width'] = self.width

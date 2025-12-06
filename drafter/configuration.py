@@ -95,7 +95,7 @@ class ServerConfiguration:
     additional_css_content: List[str] = field(default_factory=list)
     src_image_folder: str = ''
     save_uploaded_files: bool = not skulpt
-    deploy_image_path: str = './' if skulpt else 'images'
+    deploy_image_path: str = os.environ.get('DRAFTER_DEPLOY_IMAGE_PATH', './' if skulpt else 'images')
 
     # Test Deployment CDN configurations
     cdn_skulpt: str = os.environ.get("DRAFTER_CDN_SKULPT", "https://drafter-edu.github.io/drafter-cdn/skulpt/skulpt.js")
