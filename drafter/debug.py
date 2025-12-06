@@ -140,6 +140,7 @@ class DebugInformation:
         # Routes
         yield f"<details open><summary><strong>Available Routes</strong></summary>"
         yield f"{self.INDENTATION_START_HTML}"
+        yield f"<p><a href='/--api-explorer' target='_blank'>🔍 Open API Explorer</a> - Test endpoints interactively</p>"
         yield f"<ul>"
         for original_route, function in self.routes.items():
             parameter_list = inspect.signature(function).parameters.keys()
