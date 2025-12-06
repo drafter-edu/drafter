@@ -483,6 +483,32 @@ class Server:
         if (expected_parameters and expected_parameters[0] == "state") or (
                 len(expected_parameters) - 1 == len(args) + len(kwargs)):
             args.insert(0, self._state)
+        
+        # Handle missing file upload parameters by providing None as default
+        # This allows empty file uploads to work properly
+        expected_types = {name: p.annotation for name, p in
+                          inspect.signature(original_function).parameters.items()}
+        
+        # Handle empty strings in positional arguments (convert to None for file upload types)
+        for i in range(len(args)):
+            param_name = expected_parameters[i] if i < len(expected_parameters) else None
+            if param_name and args[i] == '' and self.is_file_upload_type(expected_types.get(param_name)):
+                args[i] = None
+        
+        # Handle missing and empty file upload parameters in kwargs
+        num_positional_args = len(args)
+        for i, param_name in enumerate(expected_parameters):
+            # Skip positional args that are already provided
+            if i < num_positional_args:
+                continue
+            # If a parameter is missing and it's a file upload type, provide None
+            if param_name not in kwargs and self.is_file_upload_type(expected_types.get(param_name)):
+                kwargs[param_name] = None
+            # Also convert empty strings to None for file upload parameters
+            # (browsers send empty strings for empty file fields)
+            elif param_name in kwargs and kwargs[param_name] == '' and self.is_file_upload_type(expected_types.get(param_name)):
+                kwargs[param_name] = None
+        
         # Check if there are too many arguments
         if len(expected_parameters) < len(args) + len(kwargs):
             self.flash_warning(
@@ -494,8 +520,6 @@ class Server:
             while len(expected_parameters) < len(args) + len(kwargs) and kwargs:
                 kwargs.pop(list(kwargs.keys())[-1])
         # Type conversion if required
-        expected_types = {name: p.annotation for name, p in
-                          inspect.signature(original_function).parameters.items()}
         args = [self.convert_parameter(param, val, expected_types)
                 for param, val in zip(expected_parameters, args)]
         kwargs = {param: self.convert_parameter(param, val, expected_types)
@@ -538,6 +562,40 @@ class Server:
         """
         return static_file(path, root='./' + self.configuration.src_image_folder, mimetype='image/png')
 
+    def is_file_upload_type(self, annotation):
+        """
+        Determines if a parameter annotation suggests it expects a file upload.
+        File upload types include: str, bytes, dict, PIL.Image, or Optional versions of these.
+        
+        :param annotation: The type annotation of a parameter.
+        :return: True if the annotation is a file upload type, False otherwise.
+        """
+        if annotation == inspect.Parameter.empty:
+            return False
+        
+        # Handle Optional[T] which is Union[T, None]
+        origin = getattr(annotation, '__origin__', None)
+        if origin is Union:
+            # Get the non-None types from the Union
+            args = getattr(annotation, '__args__', ())
+            non_none_types = [arg for arg in args if arg is not type(None)]
+            if len(non_none_types) == 1:
+                annotation = non_none_types[0]
+                origin = getattr(annotation, '__origin__', None)
+        
+        # Check if it's a file upload type
+        if annotation in (str, bytes, dict):
+            return True
+        
+        if HAS_PILLOW:
+            try:
+                if issubclass(annotation, PILImage.Image):
+                    return True
+            except TypeError:
+                pass
+        
+        return False
+
     def try_special_conversions(self, value, target_type):
         """
         Attempts to convert the input value to the specified target type using various
@@ -554,13 +612,18 @@ class Server:
         :type target_type: type
         :return: The converted value as an instance of the specified target type.
             If no special conversion logic applies, the original value is passed
-            to the target type directly for conversion.
+            to the target type directly for conversion. Returns None for empty file uploads.
         :rtype: Any
         :raises ValueError: If the method encounters an error during conversion,
             such as failure to decode file content as UTF-8, or if a file cannot be
             opened as an image using PIL.Image when `HAS_PILLOW` is `True`.
         """
         if isinstance(value, bottle.FileUpload):
+            # Check if the file upload is empty (no file selected)
+            # An empty file upload has an empty filename
+            if not value.filename:
+                return None
+            
             if target_type == bytes:
                 return target_type(value.file.read())
             elif target_type == str:
@@ -612,13 +675,50 @@ class Server:
             if expected_type == inspect.Parameter.empty:
                 self._conversion_record.append(UnchangedRecord(param, val, expected_types[param]))
                 return val
+            
+            # Handle None values for file upload types
+            # If value is None and the type is a file upload type (or Optional file upload type),
+            # just return None without trying to convert
+            if val is None and self.is_file_upload_type(expected_type):
+                self._conversion_record.append(UnchangedRecord(param, val, expected_type))
+                return None
+            
+            # Extract the actual type from Union types (like Optional[T])
+            actual_type = expected_type
             if hasattr(expected_type, '__origin__'):
-                # TODO: Ignoring the element type for now, but should really handle that properly
-                expected_type = expected_type.__origin__
-            if not isinstance(val, expected_type):
+                # Handle Union types (like Optional[T])
+                if expected_type.__origin__ is Union:
+                    # Get non-None types from the Union
+                    args = getattr(expected_type, '__args__', ())
+                    non_none_types = [arg for arg in args if arg is not type(None)]
+                    if len(non_none_types) == 1:
+                        actual_type = non_none_types[0]
+                    elif len(non_none_types) == 0:
+                        # Union with only None, just return the value
+                        self._conversion_record.append(UnchangedRecord(param, val, expected_types[param]))
+                        return val
+                    # If multiple non-None types, use the first one for conversion
+                    # This is a simplification; proper handling would be more complex
+                    if len(non_none_types) > 1:
+                        actual_type = non_none_types[0]
+                else:
+                    # For other generic types, use the origin (e.g., list from List[int])
+                    actual_type = expected_type.__origin__
+            
+            # Check if conversion is needed
+            # We need to be careful with isinstance for Union types
+            try:
+                needs_conversion = not isinstance(val, actual_type)
+            except TypeError:
+                # isinstance doesn't work for this type, assume conversion is needed
+                needs_conversion = True
+            
+            if needs_conversion:
                 try:
                     target_type = expected_types[param]
-                    converted_arg = self.try_special_conversions(val, target_type)
+                    # Use the actual type if we extracted it from a Union, otherwise use the original target type
+                    conversion_type = actual_type if actual_type != expected_type else target_type
+                    converted_arg = self.try_special_conversions(val, conversion_type)
                     self._conversion_record.append(ConversionRecord(param, val, expected_types[param], converted_arg))
                 except Exception as e:
                     try:

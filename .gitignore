@@ -62,6 +62,9 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# pytest-splinter test artifacts
+tests.*/
+
 # Translations
 *.mo
 *.pot
