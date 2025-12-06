@@ -124,7 +124,10 @@ class PageContent:
             styles.append(f"{key}: {value}")
         result = " ".join(attrs)
         if styles:
-            result += f" style='{'; '.join(styles)}'"
+            if result:
+                result += f" style='{'; '.join(styles)}'"
+            else:
+                result = f"style='{'; '.join(styles)}'"
         return result
 
     def update_style(self, style, value):
@@ -561,7 +564,8 @@ class _HtmlGroup(PageContent):
 
     def __str__(self) -> str:
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<{self.kind} {parsed_settings}>{''.join(str(item) for item in self.content)}</{self.kind}>"
+        space = " " if parsed_settings else ""
+        return f"<{self.kind}{space}{parsed_settings}>{''.join(str(item) for item in self.content)}</{self.kind}>"
 
 
 @dataclass(repr=False)
@@ -703,7 +707,8 @@ class Table(PageContent):
         rows = "\n".join(f"<tr>{''.join(f'<td>{cell}</td>' for cell in row)}</tr>"
                          for row in self.rows)
         header = "" if not self.header else f"<thead><tr>{''.join(f'<th>{cell}</th>' for cell in self.header)}</tr></thead>"
-        return f"<table {parsed_settings}>{header}{rows}</table>"
+        space = " " if parsed_settings else ""
+        return f"<table{space}{parsed_settings}>{header}{rows}</table>"
 
     def __repr__(self):
         pieces = [repr(self._original_rows)]
