@@ -8,18 +8,19 @@ WEB_RUNTIMES = ("skulpt", "emscripten")
 
 def is_skulpt():
     """
-    Detect if we're running inside Skulpt. Relies on the `sys.platform` setting to be "skulpt" or "emscripten".
+    Detect if we're running inside a browser-based Python runtime (Skulpt or Pyodide).
+    Relies on the `sys.platform` setting to be "skulpt" (for Skulpt) or "emscripten" (for Pyodide).
 
     Returns:
-        bool: True if running inside Skulpt, False otherwise.
+        bool: True if running inside a browser-based Python runtime, False otherwise.
     """
     return sys.platform in WEB_RUNTIMES
 
 
 def only_skulpt(callable: Callable) -> Callable:
     """
-    Decorator to make a function only run in Skulpt (web) environments.
-    If not in Skulpt, the function will return None.
+    Decorator to make a function only run in browser-based Python environments (Skulpt or Pyodide).
+    If not in a web runtime, the function will return None.
 
     :param callable: The function to decorate.
     :return: The decorated function.
@@ -36,8 +37,8 @@ def only_skulpt(callable: Callable) -> Callable:
 
 def not_in_skulpt(callable: Callable) -> Callable:
     """
-    Decorator to make a function only run outside of Skulpt (web) environments.
-    If in Skulpt, the function will return None.
+    Decorator to make a function only run outside of browser-based Python environments.
+    If in a web runtime (Skulpt or Pyodide), the function will return None.
 
     :param callable: The function to decorate.
     :return: The decorated function.

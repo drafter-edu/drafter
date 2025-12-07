@@ -5,6 +5,10 @@ from drafter.client_server.commands import get_main_server
 def start_server(initial_state=None, main_user_path=None, **kwargs) -> None:
     """
     Starts the Drafter server with the given initial state.
+    
+    This function works differently depending on the environment:
+    - In browser runtimes (Skulpt or Pyodide): Sets up the client-side bridge and server
+    - In regular Python: Starts a local development server
 
     :param initial_state: The initial state to set for the server.
     :param main_user_path: The path to the main user file (optional).

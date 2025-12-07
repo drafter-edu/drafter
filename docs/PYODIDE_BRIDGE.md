@@ -17,6 +17,7 @@ Drafter now supports two Python runtimes for running Python code in the browser:
 - Custom module system with `$builtinmodule`
 - Uses `import document` for DOM access
 - Bridge compiled into Skulpt as built-in module
+- Sets `sys.platform` to `"skulpt"`
 
 ### Pyodide
 - Full CPython 3.11 with extensive library support
@@ -24,6 +25,11 @@ Drafter now supports two Python runtimes for running Python code in the browser:
 - Standard Python import system
 - Uses `from js import document` for DOM access
 - Bridge registered as JavaScript module
+- Sets `sys.platform` to `"emscripten"`
+
+## Runtime Detection
+
+Both Skulpt and Pyodide are detected by the existing `is_skulpt()` function in `drafter.utils`, which checks if `sys.platform` is in `("skulpt", "emscripten")`. This means existing code that uses `is_skulpt()` will work correctly with both runtimes without modification.
 
 ## Architecture Changes
 
@@ -73,7 +79,8 @@ pyodide.registerJsModule("drafter.bridge.client", bridgeModule);
   runStudentCode({
     code: pythonCode,
     runtime: 'pyodide',  // or 'skulpt' (default)
-    presentErrors: true
+    presentErrors: true,
+    pyodideIndexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/'  // optional
   });
 </script>
 ```
@@ -83,8 +90,8 @@ pyodide.registerJsModule("drafter.bridge.client", bridgeModule);
 ```javascript
 import { setupPyodide, startServerPyodide } from 'drafter';
 
-// Initialize Pyodide
-await setupPyodide();
+// Initialize Pyodide with optional custom CDN URL
+await setupPyodide('https://cdn.jsdelivr.net/pyodide/v0.25.0/full/');
 
 // Run Python code
 await startServerPyodide(pythonCode);
@@ -130,6 +137,7 @@ When extending the bridge:
 
 4. **Test both runtimes:**
    - Ensure functionality works in both Skulpt and Pyodide
+   - Remember that `is_skulpt()` returns True for both runtimes
 
 ## Performance Considerations
 
