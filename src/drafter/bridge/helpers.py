@@ -1,4 +1,9 @@
-import document  # type: ignore
+try:
+    # Pyodide
+    from js import document  # type: ignore
+except ImportError:
+    # Skulpt
+    import document  # type: ignore
 
 ATTR_PAGE_SPECIFIC = "data-drafter-page-specific"
 

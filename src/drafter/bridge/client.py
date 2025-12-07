@@ -1,7 +1,8 @@
 """
-This module is not actually built in the Skulpt deployment.
-Instead, the js/src/bridge/client.ts file is compiled and included
-instead.
+This module is not actually built in the Skulpt or Pyodide deployment.
+Instead:
+- For Skulpt: the js/src/bridge/client.ts file is compiled and included
+- For Pyodide: the js/src/bridge/client_pyodide.ts file is used
 
 This module is provided here so that type checkers and IDEs can
 understand its existence and provide type information.
