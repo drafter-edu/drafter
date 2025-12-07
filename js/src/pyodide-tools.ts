@@ -10,7 +10,9 @@ declare global {
 
 const preStyle = `background-color: #f0f0f0; padding: 4px; border: 1px solid lightgrey; margin: 0px`;
 
-export async function setupPyodide() {
+const DEFAULT_PYODIDE_INDEX_URL = "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/";
+
+export async function setupPyodide(indexURL?: string) {
     if (typeof window.loadPyodide === "undefined") {
         console.error(
             "Pyodide loader not found. Ensure pyodide.js is loaded before drafter.js."
@@ -21,7 +23,7 @@ export async function setupPyodide() {
     if (!window.pyodide) {
         console.log("Loading Pyodide...");
         window.pyodide = await window.loadPyodide({
-            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/",
+            indexURL: indexURL || DEFAULT_PYODIDE_INDEX_URL,
         });
         console.log("Pyodide loaded successfully");
     }

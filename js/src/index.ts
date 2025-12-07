@@ -6,9 +6,8 @@ export interface DrafterInitOptions {
     url?: string;
     presentErrors?: boolean;
     runtime?: "skulpt" | "pyodide";
+    pyodideIndexURL?: string;
 }
-
-const x: pyStr = new Sk.builtin.str("hello");
 
 export function runStudentCode(options: DrafterInitOptions) {
     const runtime = options.runtime || "skulpt";
@@ -46,7 +45,7 @@ function runStudentCodeSkulpt(options: DrafterInitOptions) {
 }
 
 async function runStudentCodePyodide(options: DrafterInitOptions) {
-    await setupPyodide();
+    await setupPyodide(options.pyodideIndexURL);
 
     if (options.code) {
         return startServerPyodide(options.code, "main", options.presentErrors);
