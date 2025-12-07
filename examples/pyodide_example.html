@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drafter with Pyodide Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .loading {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Drafter with Pyodide Example</h1>
+    <div id="status" class="status loading">Loading Pyodide...</div>
+    
+    <div id="drafter-root--"></div>
+
+    <!-- Load Pyodide from CDN -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    
+    <!-- Load Drafter JS build -->
+    <script src="../dist/js/drafter.js"></script>
+
+    <script type="text/javascript">
+        async function main() {
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                statusDiv.textContent = 'Initializing Drafter with Pyodide...';
+                
+                // Example Python code using Drafter
+                const pythonCode = `
+from drafter import *
+
+@route
+def index():
+    return Page(None, [
+        Header("Hello from Pyodide!", 1),
+        "This page is powered by Pyodide instead of Skulpt!"
+    ])
+
+start_server()
+`;
+
+                // Run the code with Pyodide runtime
+                await window.runStudentCode({
+                    code: pythonCode,
+                    runtime: 'pyodide',
+                    presentErrors: true
+                });
+                
+                statusDiv.textContent = 'Drafter loaded successfully with Pyodide!';
+                statusDiv.className = 'status success';
+            } catch (error) {
+                console.error('Error loading Drafter:', error);
+                statusDiv.textContent = `Error: ${error.message}`;
+                statusDiv.className = 'status error';
+            }
+        }
+
+        // Run when the page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', main);
+        } else {
+            main();
+        }
+    </script>
+</body>
+</html>
