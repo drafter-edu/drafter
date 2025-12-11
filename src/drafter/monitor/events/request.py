@@ -51,6 +51,13 @@ class RequestEvent(BaseEvent):
 class RequestParseEvent(BaseEvent):
     """
     Event emitted when a request is parsed.
+
+    TODO: Also track argument type changes, unused arguments, unmatched arguments, etc.
+    TODO: if a button namespace was used,
+
+    Files and images get special handling so they can be
+    rendered properly in the client, and also in the history.
+
     :ivar request_id: Unique identifier for this request
     :ivar representation: String representation of the parsed request
     """

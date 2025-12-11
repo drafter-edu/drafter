@@ -1,0 +1,49 @@
+-   [ ] Debug panel: registered routes: make them links, allow the user to input text
+-   [ ] Debug panel: hot bar: button to hide/show the frame
+-   [ ] Debug panel: current state: show type
+-   [ ] Debug panel: page history:
+    -   [ ] change 200 to "Success"
+    -   [ ] link to recreate the request
+    -   [ ] show parameters
+    -   [ ] lighten font for "via"
+    -   [ ] Handle files, images, other media types better
+-   [ ] Debug panel: Console: REPL
+-   [ ] Debug panel: Download regression tests
+-   [ ] Debug panel: Interactive form to help create unit tests
+    -   [ ] "What text/component do you expect to see on the page?"
+    -   [ ] "What should the state's fields be?"
+-   [ ] Clicking on a button should make it have a spinner by default, but easily turned off
+-   [ ] Route function for custom error pages
+-   [ ] Convert existing unit tests to Jest approach
+-   [ ] Shareable links
+-   [ ] State download/upload
+-   [ ] File upload handling
+    -   [ ] Store in memory, localstorage, etc. as needed to allow restoration on back/forward navigation
+-   [ ] Default parameters
+    -   [ ] Allow urls to be re-entrant with default parameters
+-   [ ] Type change warnings
+-   [ ] Warnings for parameters that were never matched to arguments
+-   [ ] Deep copy strategy for state
+-   [ ] Fetch support for opening files in Skulpt
+-   [ ] Convert skulpt bridge to be handled via Python code rather than JS code
+-   [ ] Properly recursively render components
+-   [ ] Fragment support
+-   [ ] Progress support
+-   [ ] State support
+-   [ ] New elements and features:
+    -   [ ] Audio element
+    -   [ ] Lat/Long
+    -   [ ] PDF processing
+    -   [ ] Image capture
+    -   [ ] Video element
+    -   [ ] Canvas element
+    -   [ ] SVG element
+-   [ ] Timer route
+-   [ ] Remove logic for "Outcome" since we have better ways to handle it now
+
+Pie in the sky:
+
+-   [ ] Authentication system
+-   [ ] Database integration
+-   [ ] Real-time collaboration
+-   [ ] Pyodide + Skulpt backends

@@ -123,9 +123,8 @@ Essentially:
 -   The `Page` (and other `ResponsePayload`s) represent the content and structure of the pages being served, and are created by the user-developer.
 -   The `Request` wraps user interaction data for transmission from client to server, and is created by the `BridgeClient`.
 -   The `Response` wraps the `ResponsePayload` with metadata for transmission between client and server, and is created by the `ClientServer`.
--   The `Outcome` wraps the result of processing a response for transmission from client to server, and is created by the `BridgeClient`.
 
-How is `open` and `read` handled? We need to determine all of the local file dependencies of the project. The user should be able to provide an explicit list, but otherwise we assume that adjacent files will be possible to include. Starlette can load these files dynamically, but for deployment we need to make sure they get provided such that they can be opened.
+How is `open` and `read` handled? We need to determine all of the local file dependencies of the project. The user should be able to provide an explicit list, but otherwise we assume that adjacent files will be possible to include. Starlette can load these files dynamically, but for deployment we need to make sure they get provided such that they can be opened. - Correction: Skulpt should first check builtinFiles, then localStorage, and then ask its server using fetch.
 
 Images will assume to be available via the server.
 
