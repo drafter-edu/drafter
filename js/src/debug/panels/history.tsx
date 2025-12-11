@@ -10,6 +10,8 @@ export class HistoryPanel {
     private contentElement: HTMLElement;
     private listElement: HTMLElement;
 
+    private MAX_URL_LENGTH = 42;
+
     constructor() {
         const content = document.getElementById(
             "drafter-debug-page-history-content"
@@ -30,26 +32,35 @@ export class HistoryPanel {
 
     public addRequest(request: RequestEvent): void {
         const requestElement = (
-            <div
-                class="history-event request-event"
-                data-request-id={request.request_id}
-            >
-                <strong>Request:</strong> {request.url} (ID:{" "}
-                {request.request_id}) via {request.action}
+            <div class="history-event" data-request-id={request.request_id}>
+                <div class="request-event">
+                    <strong>Request:</strong>{" "}
+                    <code class="drafter-history-request-url truncate">
+                        {request.url}
+                    </code>{" "}
+                    <span class="drafter-history-request-meta">
+                        {request.action} (ID: {request.request_id})
+                    </span>
+                </div>
             </div>
         );
 
-        this.listElement.appendChild(requestElement);
+        const historyElement = this.listElement.appendChild(requestElement);
+        historyElement
+            .querySelector(".drafter-history-request-url")
+            ?.addEventListener("click", (d) => {
+                (d.target as HTMLElement).classList.toggle("truncate");
+            });
     }
 
     public addRequestParse(parseEvent: RequestParseEvent): void {
         const requestEventElement = this.contentElement.querySelector(
-            `.history-event.request-event[data-request-id="${parseEvent.request_id}"]`
+            `.history-event[data-request-id="${parseEvent.request_id}"]`
         );
 
         if (requestEventElement) {
             const parseElement = (
-                <div class="history-event request-parse-event">
+                <div class="request-parse-event">
                     <strong>Called: </strong>
                     <code>{parseEvent.representation}</code>
                 </div>
@@ -65,7 +76,7 @@ export class HistoryPanel {
 
     public addResponse(response: ResponseEvent): void {
         const requestEventElement = this.contentElement.querySelector(
-            `.history-event.request-event[data-request-id="${response.request_id}"]`
+            `.history-event[data-request-id="${response.request_id}"]`
         );
 
         if (requestEventElement) {
@@ -76,7 +87,7 @@ export class HistoryPanel {
             );
         }
         const responseElement = (
-            <div class="history-event response-event">
+            <div class="response-event">
                 <strong>Response:</strong> {response.status_code} for Request
                 ID: {response.request_id} (Response ID: {response.response_id})
                 <details>

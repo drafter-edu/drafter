@@ -98,12 +98,35 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
+.drafter-footer-- .drafter-footer-bar {
+    display: flex;
+    flex-direction: row;
+
+    align-items: baseline;
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+}
+
 .drafter-footer-- .drafter-footer-route {
     font-family: 'Courier New', Courier, monospace;
     background-color: white;
     padding: 2px 4px;
     border: 1px solid #CCC;
     border-radius: 4px;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: normal;
+    word-break: break-all;
+}
+
+.drafter-footer-- .drafter-footer-label {
+    flex: 0 0 auto;
+}
+
+.drafter-footer-- .drafter-footer-route.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /*.reset-button--,
@@ -375,12 +398,46 @@ div.btlw-container img {
     display: none;
 }
 
-.drafter-debug-- .history-event.request-parse-event {
+.drafter-debug-- .history-event .request-event {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+}
+
+.drafter-debug-- .history-event .request-event > strong, 
+.drafter-debug-- .history-event .request-event>span {
+    flex: 0 0 auto;
+}
+
+.drafter-debug-- .history-event .request-event .drafter-history-request-url {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: monospace;
+    cursor: pointer;
+
+    white-space: normal;
+    word-break: break-all;
+}
+
+.drafter-debug-- .history-event .request-event .drafter-history-request-url.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.drafter-debug-- .history-event .request-event .drafter-history-request-meta {
+    flex: 0 0 auto;
+    font-size: 0.9em;
+    color: #506784;
+}
+
+.drafter-debug-- .history-event .request-parse-event {
     margin-left: 1em;
     padding: 2px 4px;
 }
 
-.drafter-debug-- .history-event.request-parse-event code {
+.drafter-debug-- .history-event .request-parse-event code {
     background-color: #e8f0fe;
     border: 1px solid #a3c0fa;
     padding: 2px 4px;
@@ -388,12 +445,12 @@ div.btlw-container img {
 }
 
 
-.drafter-debug-- .history-event.response-event {
+.drafter-debug-- .history-event .response-event {
     margin-left: 1em;
     padding: 2px 4px;
 }
 
-.drafter-debug-- .history-event.response-event pre {
+.drafter-debug-- .history-event .response-event pre {
     background-color: #e6ffed;
     border: 1px solid #a3f7b1;
     padding: 2px 4px;

@@ -63,6 +63,7 @@ class ClientServer:
         self.response_count = 0
 
         self.requests = Scope()
+        self.start_time = 0.0
 
     def reset(self) -> None:
         """
@@ -134,6 +135,7 @@ class ClientServer:
                     "client_server.visit",
                     repr(request),
                     route=request.url,
+                    request_id=request.id,
                 ),
                 404,
             )
@@ -287,6 +289,12 @@ class ClientServer:
                     ),
                     403,
                 )
+                
+    def start_timer(self):
+        self.start_time = time.time()
+        
+    def check_timer(self) -> float:
+        return (time.time() - self.start_time) * 1000  # in milliseconds
 
     def visit(self, request: Request) -> Any:
         """
@@ -295,7 +303,7 @@ class ClientServer:
         :param request: The request to process.
         :return: The result of the route function.
         """
-        start_time = time.time()
+        self.start_timer()
         log_data(
             RequestEvent.from_request(request),
             "client_server.visit",
@@ -334,10 +342,8 @@ class ClientServer:
                 ),
                 504,
             )
-        end_time = time.time()
-        response_time = (end_time - start_time) * 1000  # in milliseconds
         log_data(
-            ResponseEvent.from_response(response, formatted_body, response_time),
+            ResponseEvent.from_response(response, formatted_body, self.check_timer()),
             "client_server.visit",
             route=request.url,
             request_id=request.id,
@@ -417,7 +423,7 @@ class ClientServer:
                 exception=e,
             )
             simpler_error_payload = SimpleErrorPage(error_page_error.message)
-            return Response(
+            response = Response(
                 id=self.response_count,
                 request_id=request.id,
                 payload=simpler_error_payload,
@@ -427,15 +433,23 @@ class ClientServer:
                 message=error_page_error.message,
                 errors=[error, error_page_error],
             )
-        response = Response(
-            id=self.response_count,
+        else:
+            response = Response(
+                id=self.response_count,
+                request_id=request.id,
+                body=body,
+                url=request.url,
+                payload=error_payload,
+                status_code=status_code,
+                message=error.message,
+                errors=[error],
+            )
+        log_data(
+            ResponseEvent.from_response(response, "", self.check_timer()),
+            "client_server.make_error_response",
+            route=request.url,
             request_id=request.id,
-            body=body,
-            url=request.url,
-            payload=error_payload,
-            status_code=status_code,
-            message=error.message,
-            errors=[error],
+            response_id=response.id,
         )
         self.response_count += 1
         return response

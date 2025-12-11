@@ -289,7 +289,6 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
                 new pyInt(requestCount),
                 new pyStr(action),
                 new pyStr(url),
-                new pyList([]),
                 dataDict,
                 new pyDict(),
             ];

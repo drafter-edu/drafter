@@ -14,15 +14,15 @@ class RequestEvent(BaseEvent):
     Event emitted when a request is received.
     :ivar url: The URL being requested
     :ivar action: The action being performed
-    :ivar args: Request arguments
     :ivar kwargs: Request keyword arguments
+    :ivar event: Additional event information
     :ivar request_id: Unique identifier for this request
     """
 
     url: str = ""
     action: str = ""
-    args: str = ""
     kwargs: str = ""
+    event: str = ""
     request_id: int = -1
     event_type: str = "RequestEvent"
 
@@ -31,8 +31,8 @@ class RequestEvent(BaseEvent):
             **super().to_json(),
             "url": self.url,
             "action": self.action,
-            "args": self.args,
             "kwargs": self.kwargs,
+            "event": self.event,
             "request_id": self.request_id,
         }
 
@@ -41,8 +41,8 @@ class RequestEvent(BaseEvent):
         return cls(
             url=request.url,
             action=request.action,
-            args=str(request.args),
             kwargs=str(request.kwargs),
+            event=str(request.event),
             request_id=request.id,
         )
 
@@ -129,67 +129,3 @@ class ResponseEvent(BaseEvent):
             formatted_page_content=formatted_body or response.body or "",
         )
 
-
-@dataclass
-class OutcomeEvent(BaseEvent):
-    """
-    DEPRECATED.
-
-    Event emitted when an outcome is received from the client.
-    :ivar message: Outcome message
-    :ivar success: Whether the outcome was successful
-    :ivar outcome_id: Unique identifier for this outcome
-    :ivar response_id: ID of the associated response
-    """
-
-    message: str = ""
-    success: bool = True
-    outcome_id: int = -1
-    response_id: int = -1
-    event_type: str = "OutcomeEvent"
-
-    def to_json(self) -> dict[str, Any]:
-        return {
-            **super().to_json(),
-            "message": self.message,
-            "success": self.success,
-            "outcome_id": self.outcome_id,
-            "response_id": self.response_id,
-        }
-
-
-@dataclass
-class PageVisitEvent(BaseEvent):
-    """
-    DEPRECATED.
-
-    Event that combines request, response, and outcome for a complete page visit.
-    :ivar url: The URL visited
-    :ivar function_name: Name of the function called
-    :ivar arguments: String representation of arguments
-    :ivar status_code: Response status code
-    :ivar duration_ms: Total duration in milliseconds
-    :ivar timestamp: ISO timestamp of the visit
-    :ivar button_pressed: Name of button pressed (if any)
-    """
-
-    url: str = ""
-    function_name: str = ""
-    arguments: str = ""
-    status_code: int = 200
-    duration_ms: float = 0.0
-    timestamp: str = ""
-    button_pressed: str = ""
-    event_type: str = "PageVisitEvent"
-
-    def to_json(self) -> dict[str, Any]:
-        return {
-            **super().to_json(),
-            "url": self.url,
-            "function_name": self.function_name,
-            "arguments": self.arguments,
-            "status_code": self.status_code,
-            "duration_ms": self.duration_ms,
-            "timestamp": self.timestamp,
-            "button_pressed": self.button_pressed,
-        }

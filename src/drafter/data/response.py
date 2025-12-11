@@ -10,15 +10,6 @@ class Response:
     """
     Represents a response sent from the server to the client.
 
-    Status codes loosely follow HTTP status code conventions.
-    - 1xx: Informational (not used currently)
-    - 2xx: Success
-    - 3xx: Redirects (not used currently)
-    - 4xx: User developer errors (i.e., in the route itself)
-    - 5xx: BridgeClient errors
-    - 6xx: ClientServer errors
-    - 7xx: AppServer/BuildServer errors
-
     :ivar id: The unique identifier for this response.
     :ivar request_id: The identifier of the request this response corresponds to.
     :ivar payload: The payload content to send to the client (usually a Page).

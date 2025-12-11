@@ -75,7 +75,7 @@ class Router:
         :param request: The incoming request object.
         :return: A tuple containing a list of positional arguments, a dictionary of keyword arguments, and a string representation of the arguments.
         """
-        args, kwargs = request.args.copy(), request.kwargs.copy()
+        args, kwargs = [], request.kwargs.copy()
         button_pressed = self.preprocess_button_press(kwargs)
         signature = self.get_signature(request)
         kwargs = remap_hidden_form_parameters(kwargs, button_pressed)

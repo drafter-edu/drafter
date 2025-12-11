@@ -6,7 +6,7 @@ export interface RequestEvent extends BaseEvent {
     event_type: "RequestEvent";
     url: string;
     action: string;
-    args: string;
+    event: string;
     kwargs: string;
     request_id: number;
 }
