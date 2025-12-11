@@ -1,8 +1,13 @@
+-   [ ] Compilation pipeline
+    -   [ ] Compile initial page for faster load times
+-   [ ] Configuration should be smoother
+-   [ ] Delete old files and old_history
 -   [ ] Debug panel: registered routes: make them links, allow the user to input text
 -   [ ] Debug panel: hot bar: button to hide/show the frame
 -   [ ] Debug panel: current state: show type
 -   [ ] Debug panel: page history:
     -   [ ] change 200 to "Success"
+    -   [ ] Make very long URLs get truncated with "..." in the middle, click to expand
     -   [ ] link to recreate the request
     -   [ ] show parameters
     -   [ ] lighten font for "via"
@@ -40,6 +45,12 @@
     -   [ ] SVG element
 -   [ ] Timer route
 -   [ ] Remove logic for "Outcome" since we have better ways to handle it now
+-   [ ] Attributes for events should allow both "on_click" and "onclick"
+-   [ ] Better testing features
+    -   [ ] `assert_has` and `assert_in` for checking page contents
+    -   [ ] `assert_state` for checking state contents
+-   [ ] Allow the route to explicitly ignore certain parameters
+-   [ ]
 
 Pie in the sky:
 
