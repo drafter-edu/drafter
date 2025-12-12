@@ -86,10 +86,17 @@ export class HistoryPanel {
                 `DebugPanel: Corresponding request ${response.request_id} not found for response ID ${response.response_id}.`
             );
         }
+        // Choose a red marker, green marker, or yellow marker based on errors/warnings
+        const marker = response.has_errors
+            ? "🔴"
+            : response.has_warnings
+            ? "🟡"
+            : "🟢";
         const responseElement = (
             <div class="response-event">
-                <strong>Response:</strong> {response.status_code} for Request
-                ID: {response.request_id} (Response ID: {response.response_id})
+                <strong>Response:</strong> {marker} {response.status_code} for
+                Request ID: {response.request_id} (Response ID:{" "}
+                {response.response_id})
                 <details>
                     <summary>View Page Content</summary>
                     <pre>

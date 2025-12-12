@@ -4,7 +4,7 @@
 -   [ ] Delete old files and old_history
 -   [ ] Debug panel: registered routes: make them links, allow the user to input text
 -   [ ] Debug panel: hot bar: button to hide/show the frame
--   [ ] Debug panel: current state: show type
+-   [ ] Debug panel: current state: show types, in nice table
 -   [ ] Debug panel: page history:
     -   [ ] change 200 to "Success"
     -   [ ] Make very long URLs get truncated with "..." in the middle, click to expand
@@ -12,6 +12,7 @@
     -   [ ] show parameters
     -   [ ] lighten font for "via"
     -   [ ] Handle files, images, other media types better
+-   [ ] Debug panel: History: Clear old history button
 -   [ ] Debug panel: Console: REPL
 -   [ ] Debug panel: Download regression tests
 -   [ ] Debug panel: Interactive form to help create unit tests

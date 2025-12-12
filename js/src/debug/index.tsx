@@ -9,6 +9,7 @@ import { TestPanel } from "./panels/testing";
 import { StatePanel } from "./panels/state";
 import { RoutesPanel } from "./panels/routes";
 import { HistoryPanel } from "./panels/history";
+import { LogPanel } from "./panels/log";
 
 export class DebugPanel {
     private panelElement: HTMLElement | null = null;
@@ -24,6 +25,7 @@ export class DebugPanel {
     private statePanel: StatePanel | null = null;
     private routesPanel: RoutesPanel | null = null;
     private historyPanel: HistoryPanel | null = null;
+    private logPanel: LogPanel | null = null;
 
     constructor(
         private containerId: string,
@@ -52,6 +54,7 @@ export class DebugPanel {
         this.statePanel = new StatePanel();
         this.routesPanel = new RoutesPanel();
         this.historyPanel = new HistoryPanel();
+        this.logPanel = new LogPanel();
         this.attachEventHandlers();
     }
 
@@ -81,7 +84,7 @@ export class DebugPanel {
                         <div class="drafter-debug-header-subtitle"></div>
                     </div>
                     <div class="drafter-debug-header-buttons">
-                        <a href="#drafter-debug-console">Console</a> |
+                        <a href="#drafter-debug-log">Event Log</a> |
                         <a href="#drafter-debug-current-route">Routes</a> |
                         <a href="#drafter-debug-state">State</a> |
                         <a href="#drafter-debug-history">History</a> |
@@ -129,10 +132,12 @@ export class DebugPanel {
                             <div id="drafter-debug-current-tests-content-list"></div>
                         </div>
                     </div>
-                    <div
-                        class="drafter-debug-section"
-                        id="drafter-debug-errors"
-                    ></div>
+                    <div class="drafter-debug-section" id="drafter-debug-log">
+                        <div class="drafter-debug-section-header">
+                            <h4>Event Log</h4>
+                        </div>
+                        <div class="drafter-debug-log-content"></div>
+                    </div>
                     <div
                         class="drafter-debug-section"
                         id="drafter-debug-events"
@@ -201,7 +206,17 @@ export class DebugPanel {
                 this.testingPanel?.renderTest(event.data);
                 this.testingPanel?.updateTestSummary();
                 break;
+            case "DrafterError":
+                this.logPanel?.renderLogError(event.data);
+                break;
+            case "DrafterWarning":
+                this.logPanel?.renderLogWarning(event.data);
+                break;
+            case "DrafterInfo":
+                this.logPanel?.renderLogInfo(event.data);
+                break;
             default:
+                this.logPanel?.renderLogDefault(event.event_type);
                 // console.warn(
                 //     `DebugPanel: Unhandled event type '${event.event_type}'`
                 // );
