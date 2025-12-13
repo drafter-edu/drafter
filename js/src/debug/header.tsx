@@ -52,6 +52,12 @@ export class DebugHeaderBar {
                     {t("icon.download")}
                 </button>
                 <button
+                    title={t("button.upload")}
+                    class="drafter-upload-button"
+                >
+                    {t("icon.upload")}
+                </button>
+                <button
                     title={t("button.toggle")}
                     class="drafter-toggle-button"
                 >

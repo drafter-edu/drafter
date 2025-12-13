@@ -198,6 +198,113 @@ function drafter_bridge_client_module(drafter_client_mod: Record<string, any>) {
             }
             return initiateRequest(url, formData, true, action);
         }
+
+        public reset() {
+            // Call the reset method on the Python clientBridge object
+            const resetMethod = genericGetAttr(this.clientBridge, new pyStr("reset"));
+            return pyCallOrSuspend(resetMethod, []);
+        }
+
+        public saveState() {
+            // Get the current state from the Python clientBridge
+            const stateAttr = genericGetAttr(this.clientBridge, new pyStr("state"));
+            const currentState = genericGetAttr(stateAttr, new pyStr("current"));
+            const stateJson = Sk.ffi.remapToJs(currentState);
+            
+            // Save to localStorage
+            try {
+                localStorage.setItem("drafter-state", JSON.stringify(stateJson));
+                alert("State saved to local storage!");
+            } catch (e) {
+                console.error("Failed to save state:", e);
+                alert("Failed to save state to local storage.");
+            }
+        }
+
+        public loadState() {
+            // Load from localStorage
+            try {
+                const stateJson = localStorage.getItem("drafter-state");
+                if (stateJson) {
+                    const state = JSON.parse(stateJson);
+                    const pyState = Sk.ffi.remapToPy(state);
+                    
+                    // Update the state on the Python clientBridge
+                    const stateAttr = genericGetAttr(this.clientBridge, new pyStr("state"));
+                    const updateMethod = genericGetAttr(stateAttr, new pyStr("update"));
+                    pyCallOrSuspend(updateMethod, [pyState]);
+                    
+                    alert("State loaded from local storage!");
+                    // Refresh the page to reflect the loaded state
+                    this.goto("index");
+                } else {
+                    alert("No saved state found in local storage.");
+                }
+            } catch (e) {
+                console.error("Failed to load state:", e);
+                alert("Failed to load state from local storage.");
+            }
+        }
+
+        public downloadState() {
+            // Get the current state from the Python clientBridge
+            const stateAttr = genericGetAttr(this.clientBridge, new pyStr("state"));
+            const currentState = genericGetAttr(stateAttr, new pyStr("current"));
+            const stateJson = Sk.ffi.remapToJs(currentState);
+            
+            // Create a download
+            try {
+                const blob = new Blob([JSON.stringify(stateJson, null, 2)], {
+                    type: "application/json",
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "drafter-state.json";
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                console.error("Failed to download state:", e);
+                alert("Failed to download state.");
+            }
+        }
+
+        public uploadState() {
+            // Create a file input element
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "application/json";
+            
+            input.onchange = (e: Event) => {
+                const target = e.target as HTMLInputElement;
+                const file = target.files?.[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (readerEvent) => {
+                    try {
+                        const content = readerEvent.target?.result as string;
+                        const state = JSON.parse(content);
+                        const pyState = Sk.ffi.remapToPy(state);
+                        
+                        // Update the state on the Python clientBridge
+                        const stateAttr = genericGetAttr(this.clientBridge, new pyStr("state"));
+                        const updateMethod = genericGetAttr(stateAttr, new pyStr("update"));
+                        pyCallOrSuspend(updateMethod, [pyState]);
+                        
+                        alert("State uploaded successfully!");
+                        // Refresh the page to reflect the loaded state
+                        this.goto("index");
+                    } catch (err) {
+                        console.error("Failed to parse or load state:", err);
+                        alert("Failed to load state from file.");
+                    }
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
     }
 
     function wrapClientBridge(clientBridge: pyObject): ClientBridgeWrapper {

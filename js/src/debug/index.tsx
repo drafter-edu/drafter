@@ -66,6 +66,13 @@ export class DebugPanel {
         }
     }
 
+    public toggleVisibility() {
+        this.isVisible = !this.isVisible;
+        if (this.panelElement) {
+            this.panelElement.style.display = this.isVisible ? "block" : "none";
+        }
+    }
+
     private createPanelStructure(): HTMLElement {
         const panel = document.createElement("div");
         panel.className = "drafter-debug-panel";
@@ -172,6 +179,65 @@ export class DebugPanel {
             button.addEventListener("click", (event) => {
                 event.preventDefault();
                 this.clientBridge.goto("index");
+            });
+        });
+
+        const resetButtons = document.querySelectorAll(".drafter-reset-button");
+        resetButtons.forEach((button) => {
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                if (confirm("Are you sure you want to reset the state and return to the index page?")) {
+                    this.clientBridge.reset();
+                    this.clientBridge.goto("index");
+                }
+            });
+        });
+
+        const aboutButtons = document.querySelectorAll(".drafter-about-button");
+        aboutButtons.forEach((button) => {
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                this.clientBridge.goto("--about");
+            });
+        });
+
+        const saveButtons = document.querySelectorAll(".drafter-save-button");
+        saveButtons.forEach((button) => {
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                this.clientBridge.saveState();
+            });
+        });
+
+        const loadButtons = document.querySelectorAll(".drafter-load-button");
+        loadButtons.forEach((button) => {
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                this.clientBridge.loadState();
+            });
+        });
+
+        const downloadButtons = document.querySelectorAll(".drafter-download-button");
+        downloadButtons.forEach((button) => {
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                this.clientBridge.downloadState();
+            });
+        });
+
+        const uploadButtons = document.querySelectorAll(".drafter-upload-button");
+        uploadButtons.forEach((button) => {
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                this.clientBridge.uploadState();
+            });
+        });
+
+        const toggleButtons = document.querySelectorAll(".drafter-toggle-button");
+        toggleButtons.forEach((button) => {
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                this.toggleVisibility();
             });
         });
     }
