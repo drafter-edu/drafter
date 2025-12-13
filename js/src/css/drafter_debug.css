@@ -575,3 +575,86 @@ div.btlw-container img {
     color: #666;
     font-style: italic;
 }
+
+/* Routes Panel Styles */
+.drafter-debug-- .routes-view-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.drafter-debug-- .view-toggle-btn {
+    padding: 6px 12px;
+    border: 1px solid #cbd5e0;
+    background-color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s;
+}
+
+.drafter-debug-- .view-toggle-btn:hover {
+    background-color: #f7fafc;
+}
+
+.drafter-debug-- .view-toggle-btn.active {
+    background-color: #4299e1;
+    color: white;
+    border-color: #2b6cb0;
+}
+
+.drafter-debug-- .routes-empty {
+    color: #a0aec0;
+    font-style: italic;
+    padding: 20px;
+    text-align: center;
+}
+
+.drafter-debug-- .routes-graph {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.drafter-debug-- .route-category {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px;
+    background-color: #f7fafc;
+}
+
+.drafter-debug-- .category-header {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 8px;
+    color: #2d3748;
+    text-transform: capitalize;
+}
+
+.drafter-debug-- .category-routes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.drafter-debug-- .route-node {
+    padding: 6px 12px;
+    background-color: white;
+    border: 2px solid #4299e1;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.drafter-debug-- .route-node:hover {
+    background-color: #ebf8ff;
+    border-color: #2b6cb0;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.drafter-debug-- .route-name {
+    font-family: monospace;
+    font-size: 0.9em;
+    color: #2c5282;
+}
