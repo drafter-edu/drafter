@@ -2,6 +2,7 @@ import type {
     RequestEvent,
     RequestParseEvent,
     ResponseEvent,
+    OutcomeEvent,
 } from "../telemetry/requests";
 
 type HistoryEvent = RequestEvent | ResponseEvent;
@@ -34,8 +35,16 @@ export class HistoryPanel {
                 class="history-event request-event"
                 data-request-id={request.request_id}
             >
-                <strong>Request:</strong> {request.url} (ID:{" "}
-                {request.request_id}) via {request.action}
+                <div class="history-event-header">
+                    <strong>Request #{request.request_id}:</strong> {request.url}
+                    <span class="request-action">[{request.action}]</span>
+                </div>
+                {(request.args || request.kwargs) && (
+                    <div class="request-params">
+                        {request.args && <div><strong>Args:</strong> {request.args}</div>}
+                        {request.kwargs && <div><strong>Kwargs:</strong> {request.kwargs}</div>}
+                    </div>
+                )}
             </div>
         );
 
@@ -75,10 +84,26 @@ export class HistoryPanel {
                 `DebugPanel: Corresponding request ${response.request_id} not found for response ID ${response.response_id}.`
             );
         }
+        
+        const statusClass = response.has_errors ? "status-error" : 
+                           response.has_warnings ? "status-warning" : 
+                           "status-success";
+        
         const responseElement = (
-            <div class="history-event response-event">
-                <strong>Response:</strong> {response.status_code} for Request
-                ID: {response.request_id} (Response ID: {response.response_id})
+            <div class={`history-event response-event ${statusClass}`}>
+                <div class="response-header">
+                    <strong>Response #{response.response_id}:</strong>
+                    <span class={`status-code ${statusClass}`}>
+                        {response.status_code}
+                    </span>
+                    <span class="response-type">{response.payload_type}</span>
+                    <span class="response-duration">{response.duration_ms}ms</span>
+                </div>
+                <div class="response-metadata">
+                    <span>Body: {response.body_length} bytes</span>
+                    {response.has_errors && <span class="has-errors">❌ Has Errors</span>}
+                    {response.has_warnings && <span class="has-warnings">⚠️ Has Warnings</span>}
+                </div>
                 <details>
                     <summary>View Page Content</summary>
                     <pre>
@@ -90,5 +115,25 @@ export class HistoryPanel {
         );
 
         requestEventElement?.appendChild(responseElement);
+    }
+
+    public addOutcome(outcome: OutcomeEvent): void {
+        const responseEventElement = this.contentElement.querySelector(
+            `[data-request-id] .response-event`
+        );
+
+        if (responseEventElement) {
+            const outcomeElement = (
+                <div class={`history-event outcome-event ${outcome.success ? "outcome-success" : "outcome-failure"}`}>
+                    <strong>Outcome #{outcome.outcome_id}:</strong>
+                    <span class="outcome-status">
+                        {outcome.success ? "✅ Success" : "❌ Failed"}
+                    </span>
+                    <span class="outcome-message">{outcome.message}</span>
+                </div>
+            );
+
+            responseEventElement.appendChild(outcomeElement);
+        }
     }
 }

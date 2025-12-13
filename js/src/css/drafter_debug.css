@@ -470,3 +470,108 @@ div.btlw-container img {
     overflow-x: auto;
     font-size: 0.85em;
 }
+
+/* Enhanced History Panel Styles */
+.drafter-debug-- .history-event-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.drafter-debug-- .request-action {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.drafter-debug-- .request-params {
+    margin-left: 1em;
+    padding: 4px 8px;
+    background-color: #f7fafc;
+    border-left: 2px solid #cbd5e0;
+    font-size: 0.9em;
+}
+
+.drafter-debug-- .response-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.drafter-debug-- .status-code {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.drafter-debug-- .status-success {
+    background-color: #c6f6d5;
+    color: #22543d;
+}
+
+.drafter-debug-- .status-error {
+    background-color: #fed7d7;
+    color: #742a2a;
+}
+
+.drafter-debug-- .status-warning {
+    background-color: #feebc8;
+    color: #744210;
+}
+
+.drafter-debug-- .response-type,
+.drafter-debug-- .response-duration {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.drafter-debug-- .response-duration {
+    font-weight: bold;
+    color: #2b6cb0;
+}
+
+.drafter-debug-- .response-metadata {
+    margin-left: 1em;
+    display: flex;
+    gap: 12px;
+    font-size: 0.85em;
+    color: #666;
+}
+
+.drafter-debug-- .has-errors {
+    color: #e53e3e;
+    font-weight: bold;
+}
+
+.drafter-debug-- .has-warnings {
+    color: #ed8936;
+    font-weight: bold;
+}
+
+.drafter-debug-- .outcome-event {
+    margin-left: 2em;
+    padding: 4px 8px;
+    border-left: 2px solid;
+    font-size: 0.9em;
+}
+
+.drafter-debug-- .outcome-success {
+    border-left-color: #48bb78;
+    background-color: #f0fff4;
+}
+
+.drafter-debug-- .outcome-failure {
+    border-left-color: #f56565;
+    background-color: #fff5f5;
+}
+
+.drafter-debug-- .outcome-status {
+    margin: 0 8px;
+}
+
+.drafter-debug-- .outcome-message {
+    color: #666;
+    font-style: italic;
+}

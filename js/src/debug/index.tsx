@@ -269,6 +269,9 @@ export class DebugPanel {
             case "ResponseEvent":
                 this.historyPanel?.addResponse(event.data);
                 break;
+            case "OutcomeEvent":
+                this.historyPanel?.addOutcome(event.data);
+                break;
             case "UpdatedState":
                 this.statePanel?.renderState(event.data.html);
                 break;
