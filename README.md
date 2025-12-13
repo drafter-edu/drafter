@@ -91,22 +91,22 @@ Things that have to be kept in the server:
 
 The debug information present in the frame:
 
--   Quick link to reset the state and return to index
--   Link to the About page
+-   ✅ Quick link to reset the state and return to index
+-   ✅ Link to the About page
 -   Status information:
-    -   Any errors and warnings, nicely formatted
-    -   Current route information, as given by the `request.visit` events
-    -   Request/Response/Outcome dump, including the metadata and actual contents, time taken.
-    -   Current state dump, buttons to save/load state in localStorage or download/upload JSON (`state.*` events)
+    -   ✅ Any errors and warnings, nicely formatted
+    -   ✅ Current route information, as given by the `request.visit` events
+    -   ✅ Request/Response/Outcome dump, including the metadata and actual contents, time taken.
+    -   ✅ Current state dump, buttons to save/load state in localStorage or download/upload JSON (`state.*` events)
     -   Current page information (`request.*` events)
-    -   All available routes (`request.add` events)
-        -   As a flat list
-        -   As a graph
-    -   Page load history (`request.*` events)
-        -   Pages, state, args, timestamps, etc.
+    -   ✅ All available routes (`request.add` events)
+        -   ✅ As a flat list
+        -   ✅ As a graph
+    -   ✅ Page load history (`request.*` events)
+        -   ✅ Pages, state, args, timestamps, etc.
         -   VCR playback controls
         -   Automatically produced tests
-    -   Test status information (`request.visit` events)
+    -   ✅ Test status information (`request.visit` events)
     -   Button to activate codemirror instance that let's us do a REPL type thing?
 -   Test production button
 -   Compile site button
