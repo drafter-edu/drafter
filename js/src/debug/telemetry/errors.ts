@@ -2,6 +2,8 @@
  * Error/Warning/Info event types.
  */
 
+import type { BaseEvent } from "./base";
+
 export interface DrafterLog extends BaseEvent {
     event_type:
         | "DrafterLog"

@@ -9,6 +9,8 @@ import { TestPanel } from "./panels/testing";
 import { StatePanel } from "./panels/state";
 import { RoutesPanel } from "./panels/routes";
 import { HistoryPanel } from "./panels/history";
+import { ErrorsPanel } from "./panels/errors";
+import type { DrafterError, DrafterWarning, DrafterInfo } from "./telemetry/errors";
 
 export class DebugPanel {
     private panelElement: HTMLElement | null = null;
@@ -24,6 +26,7 @@ export class DebugPanel {
     private statePanel: StatePanel | null = null;
     private routesPanel: RoutesPanel | null = null;
     private historyPanel: HistoryPanel | null = null;
+    private errorsPanel: ErrorsPanel | null = null;
 
     constructor(
         private containerId: string,
@@ -52,6 +55,7 @@ export class DebugPanel {
         this.statePanel = new StatePanel();
         this.routesPanel = new RoutesPanel();
         this.historyPanel = new HistoryPanel();
+        this.errorsPanel = new ErrorsPanel();
         this.attachEventHandlers();
     }
 
@@ -139,7 +143,12 @@ export class DebugPanel {
                     <div
                         class="drafter-debug-section"
                         id="drafter-debug-errors"
-                    ></div>
+                    >
+                        <div class="drafter-debug-section-header">
+                            <h4>Errors & Warnings</h4>
+                        </div>
+                        <div id="drafter-debug-errors-content"></div>
+                    </div>
                     <div
                         class="drafter-debug-section"
                         id="drafter-debug-events"
@@ -266,6 +275,15 @@ export class DebugPanel {
             case "TestCaseEvent":
                 this.testingPanel?.renderTest(event.data);
                 this.testingPanel?.updateTestSummary();
+                break;
+            case "DrafterError":
+                this.errorsPanel?.addError(event.data as DrafterError);
+                break;
+            case "DrafterWarning":
+                this.errorsPanel?.addWarning(event.data as DrafterWarning);
+                break;
+            case "DrafterInfo":
+                this.errorsPanel?.addInfo(event.data as DrafterInfo);
                 break;
             default:
                 // console.warn(

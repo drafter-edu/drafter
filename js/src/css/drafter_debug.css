@@ -402,3 +402,71 @@ div.btlw-container img {
     border-radius: 3px;
     white-space: pre-wrap;
 }
+/* Errors Panel Styles */
+.drafter-debug-- .error-item,
+.drafter-debug-- .warning-item,
+.drafter-debug-- .info-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border-left: 4px solid;
+}
+
+.drafter-debug-- .error-item {
+    background-color: #fff5f5;
+    border-left-color: #e53e3e;
+}
+
+.drafter-debug-- .warning-item {
+    background-color: #fffaf0;
+    border-left-color: #ed8936;
+}
+
+.drafter-debug-- .info-item {
+    background-color: #ebf8ff;
+    border-left-color: #4299e1;
+}
+
+.drafter-debug-- .error-header,
+.drafter-debug-- .warning-header,
+.drafter-debug-- .info-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.drafter-debug-- .error-icon,
+.drafter-debug-- .warning-icon,
+.drafter-debug-- .info-icon {
+    font-size: 20px;
+}
+
+.drafter-debug-- .error-details,
+.drafter-debug-- .warning-details,
+.drafter-debug-- .info-details {
+    margin-left: 28px;
+}
+
+.drafter-debug-- .error-where,
+.drafter-debug-- .warning-where,
+.drafter-debug-- .info-where {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.drafter-debug-- .error-traceback,
+.drafter-debug-- .warning-traceback {
+    margin-top: 8px;
+}
+
+.drafter-debug-- .error-traceback pre,
+.drafter-debug-- .warning-traceback pre {
+    background-color: #2d3748;
+    color: #e2e8f0;
+    padding: 8px;
+    border-radius: 3px;
+    overflow-x: auto;
+    font-size: 0.85em;
+}
