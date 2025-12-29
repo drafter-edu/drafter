@@ -155,6 +155,10 @@ def mount_navigation(root: Any, on_navigation: Callable[[NavEvent], None]) -> di
     """Mount navigation event handlers."""
     global _click_handler, _submit_handler
     
+    # Clean up old handlers if they exist
+    if _click_handler:
+        root.removeEventListener("click", _click_handler)
+    
     # Store the navigation callback
     def handle_click(event: Any) -> None:
         """Handle click events for navigation."""
@@ -187,6 +191,7 @@ def mount_navigation(root: Any, on_navigation: Callable[[NavEvent], None]) -> di
     
     def handle_submit(event: Any) -> None:
         """Handle form submission events."""
+        debug_log("dom.form_submit", event)
         event.preventDefault()
         
         submitter = getattr(event, 'submitter', None)
@@ -217,7 +222,16 @@ def mount_navigation(root: Any, on_navigation: Callable[[NavEvent], None]) -> di
     _submit_handler = handle_submit
     
     # Attach event listeners
-    # Note: Proper event listener attachment would need js support
+    root.addEventListener("click", handle_click)
+    
+    form_root = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
+    if form_root:
+        if _submit_handler:
+            # Clean up old submit handler
+            # Note: We can't easily remove it without storing the form element
+            pass
+        form_root.addEventListener("submit", handle_submit)
+    
     debug_log("dom.mount_navigation", "Mounted navigation handlers")
     
     return {"click": True, "submit": True}
@@ -263,10 +277,13 @@ def setup_navigation(handle_visit: Callable) -> None:
     _navigation_func = handle_visit
     
     # Check for initial route in query string
-    # Note: This would need proper URL parsing support
+    # Note: This would need proper URL parsing support via js.window.location
     debug_log("site.setup_navigation")
     
     # Set up popstate listener for browser back/forward
+    if _popstate_listener:
+        js.window.removeEventListener("popstate", _popstate_listener)
+    
     def handle_popstate(event: Any) -> None:
         """Handle browser back/forward navigation."""
         global _site_title
@@ -285,7 +302,7 @@ def setup_navigation(handle_visit: Callable) -> None:
             initiate_request("index", None, False, "back")
     
     _popstate_listener = handle_popstate
-    # Note: Actual event listener attachment would need js support
+    js.window.addEventListener("popstate", handle_popstate)
 
 
 def console_log(event: Any) -> None:
@@ -323,7 +340,7 @@ def register_hotkey(keyCombo: str, callback: Callable[[], None]) -> None:
             _last_press_time = now
     
     if not _hotkey_listener_ready:
-        # Note: Actual event listener attachment would need js support
+        js.document.addEventListener("keydown", hotkey_handler)
         _hotkey_listener_ready = True
     
     debug_log("hotkey.register", combo_lower)

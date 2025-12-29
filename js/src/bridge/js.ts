@@ -189,6 +189,7 @@ function js_module(js_mod: Record<string, any>) {
         const ElementProxyClass = function ($gbl: any, $loc: any) {
             $loc.__init__ = new pyFunc(function (self: any) {
                 self._element = element;
+                self._eventListeners = {}; // Store Python callbacks
                 return pyNone;
             });
 
@@ -253,9 +254,101 @@ function js_module(js_mod: Record<string, any>) {
                 }
                 return pyNone;
             });
+
+            // Add addEventListener support
+            $loc.addEventListener = new pyFunc(function (self: any, eventType: any, callback: any) {
+                const eventTypeStr = Sk.ffi.remapToJs(eventType);
+                
+                // Create a wrapper that converts JS events to Python-friendly format
+                const jsCallback = function (event: Event) {
+                    // Create a simple event proxy
+                    const eventProxy = createEventProxy(event);
+                    return Sk.misceval.callsimOrSuspendArray(callback, [eventProxy]);
+                };
+                
+                // Store the wrapper so we can remove it later
+                if (!self._eventListeners[eventTypeStr]) {
+                    self._eventListeners[eventTypeStr] = [];
+                }
+                self._eventListeners[eventTypeStr].push({ python: callback, js: jsCallback });
+                
+                (self._element as HTMLElement).addEventListener(eventTypeStr, jsCallback);
+                return pyNone;
+            });
+
+            // Add removeEventListener support
+            $loc.removeEventListener = new pyFunc(function (self: any, eventType: any, callback: any) {
+                const eventTypeStr = Sk.ffi.remapToJs(eventType);
+                
+                if (self._eventListeners[eventTypeStr]) {
+                    const listeners = self._eventListeners[eventTypeStr];
+                    const index = listeners.findIndex((l: any) => l.python === callback);
+                    if (index !== -1) {
+                        const jsCallback = listeners[index].js;
+                        (self._element as HTMLElement).removeEventListener(eventTypeStr, jsCallback);
+                        listeners.splice(index, 1);
+                    }
+                }
+                return pyNone;
+            });
         };
 
         const proxyInstance = Sk.misceval.buildClass(js_mod, ElementProxyClass, "Element", []);
+        return Sk.misceval.callsimArray(proxyInstance, []);
+    }
+
+    // Create a proxy for Event objects
+    function createEventProxy(event: Event): any {
+        const EventProxyClass = function ($gbl: any, $loc: any) {
+            $loc.__init__ = new pyFunc(function (self: any) {
+                self._event = event;
+                return pyNone;
+            });
+
+            $loc.__getattr__ = new pyFunc(function (self: any, name: any) {
+                const nameStr = Sk.ffi.remapToJs(name);
+                const value = (self._event as any)[nameStr];
+
+                if (value === undefined) {
+                    // Return None for missing attributes instead of throwing
+                    return pyNone;
+                }
+
+                // If it's a function, wrap it
+                if (typeof value === "function") {
+                    return new pyFunc(function (...args: any[]) {
+                        const jsArgs = args.map((arg) => {
+                            if (arg === self) return undefined;
+                            return Sk.ffi.remapToJs(arg);
+                        }).filter(arg => arg !== undefined);
+
+                        const result = value.apply(self._event, jsArgs);
+                        return result === undefined || result === null 
+                            ? pyNone 
+                            : Sk.ffi.remapToPy(result);
+                    });
+                }
+
+                // Handle target specially - it should return a DOM element proxy
+                if (nameStr === 'target' && value instanceof Element) {
+                    return createDOMElementProxy(value);
+                }
+
+                return Sk.ffi.remapToPy(value);
+            });
+
+            $loc.preventDefault = new pyFunc(function (self: any) {
+                self._event.preventDefault();
+                return pyNone;
+            });
+
+            $loc.stopPropagation = new pyFunc(function (self: any) {
+                self._event.stopPropagation();
+                return pyNone;
+            });
+        };
+
+        const proxyInstance = Sk.misceval.buildClass(js_mod, EventProxyClass, "Event", []);
         return Sk.misceval.callsimArray(proxyInstance, []);
     }
 
@@ -298,6 +391,7 @@ function js_module(js_mod: Record<string, any>) {
     const DocumentProxyClass = function ($gbl: any, $loc: any) {
         $loc.__init__ = new pyFunc(function (self: any) {
             self._jsObject = document;
+            self._eventListeners = {}; // Store Python callbacks
             return pyNone;
         });
 
@@ -357,6 +451,39 @@ function js_module(js_mod: Record<string, any>) {
             }
             return pyNone;
         });
+
+        // Add addEventListener support
+        $loc.addEventListener = new pyFunc(function (self: any, eventType: any, callback: any) {
+            const eventTypeStr = Sk.ffi.remapToJs(eventType);
+            
+            const jsCallback = function (event: Event) {
+                const eventProxy = createEventProxy(event);
+                return Sk.misceval.callsimOrSuspendArray(callback, [eventProxy]);
+            };
+            
+            if (!self._eventListeners[eventTypeStr]) {
+                self._eventListeners[eventTypeStr] = [];
+            }
+            self._eventListeners[eventTypeStr].push({ python: callback, js: jsCallback });
+            
+            document.addEventListener(eventTypeStr, jsCallback);
+            return pyNone;
+        });
+
+        $loc.removeEventListener = new pyFunc(function (self: any, eventType: any, callback: any) {
+            const eventTypeStr = Sk.ffi.remapToJs(eventType);
+            
+            if (self._eventListeners[eventTypeStr]) {
+                const listeners = self._eventListeners[eventTypeStr];
+                const index = listeners.findIndex((l: any) => l.python === callback);
+                if (index !== -1) {
+                    const jsCallback = listeners[index].js;
+                    document.removeEventListener(eventTypeStr, jsCallback);
+                    listeners.splice(index, 1);
+                }
+            }
+            return pyNone;
+        });
     };
 
     const documentProxy = Sk.misceval.buildClass(js_mod, DocumentProxyClass, "document", []);
@@ -366,6 +493,7 @@ function js_module(js_mod: Record<string, any>) {
     const WindowProxyClass = function ($gbl: any, $loc: any) {
         $loc.__init__ = new pyFunc(function (self: any) {
             self._jsObject = window;
+            self._eventListeners = {}; // Store Python callbacks
             return pyNone;
         });
 
@@ -401,6 +529,39 @@ function js_module(js_mod: Record<string, any>) {
             }
 
             return Sk.ffi.remapToPy(value);
+        });
+
+        // Add addEventListener support
+        $loc.addEventListener = new pyFunc(function (self: any, eventType: any, callback: any) {
+            const eventTypeStr = Sk.ffi.remapToJs(eventType);
+            
+            const jsCallback = function (event: Event) {
+                const eventProxy = createEventProxy(event);
+                return Sk.misceval.callsimOrSuspendArray(callback, [eventProxy]);
+            };
+            
+            if (!self._eventListeners[eventTypeStr]) {
+                self._eventListeners[eventTypeStr] = [];
+            }
+            self._eventListeners[eventTypeStr].push({ python: callback, js: jsCallback });
+            
+            window.addEventListener(eventTypeStr, jsCallback);
+            return pyNone;
+        });
+
+        $loc.removeEventListener = new pyFunc(function (self: any, eventType: any, callback: any) {
+            const eventTypeStr = Sk.ffi.remapToJs(eventType);
+            
+            if (self._eventListeners[eventTypeStr]) {
+                const listeners = self._eventListeners[eventTypeStr];
+                const index = listeners.findIndex((l: any) => l.python === callback);
+                if (index !== -1) {
+                    const jsCallback = listeners[index].js;
+                    window.removeEventListener(eventTypeStr, jsCallback);
+                    listeners.splice(index, 1);
+                }
+            }
+            return pyNone;
         });
     };
 
