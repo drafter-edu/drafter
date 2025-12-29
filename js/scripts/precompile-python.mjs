@@ -23,9 +23,9 @@ const target = path.resolve(repoRoot, "src", "drafter", "assets", "js");
 const targetFilename = path.resolve(target, "skulpt-drafter.js");
 const skulptDir = process.env.SKULPT_DIR || "";
 const javascriptModulesDir = path.resolve(repoRoot, "js", "src");
-const extraJavascriptModules = ["bridge/client.ts"];
+const extraJavascriptModules = ["bridge/client.ts", "bridge/js.ts"];
 
-const SKIP_FILES = [new RegExp("app/.+"), new RegExp("bridge/client\\.py")];
+const SKIP_FILES = [new RegExp("app/.+")];
 
 Sk.configure({ __future__: Sk.python3 });
 
