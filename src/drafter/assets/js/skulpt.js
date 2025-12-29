@@ -25,8 +25,8 @@
     "src/util.js"() {
       var Sk2 = {};
       Sk2.build = {
-        githash: "3c96e405",
-        date: "2025-12-06T04:24:04.097Z"
+        githash: "35b8d84b",
+        date: "2025-12-29T17:59:28.575Z"
       };
       Sk2.global = typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};
       Sk2.exportSymbol = function(name, object) {
@@ -2373,6 +2373,7 @@
               tp$new,
               tp$getattr,
               tp$setattr,
+              nb$or,
               $r
             },
             writable: true
@@ -2581,6 +2582,10 @@
             this.$allocateSlot(jsName, value);
           }
         }
+      }
+      function nb$or(other) {
+        const pair = new Sk.builtin.tuple([this, other]);
+        return Sk.builtin.unionFromTuple(pair);
       }
       function fastLookup(pyName) {
         var jsName = pyName.$mangled;
@@ -6395,6 +6400,9 @@
             tp$as_number: true,
             nb$bool() {
               return false;
+            },
+            nb$or(other) {
+              return Sk.builtin.unionFromTuple(new Sk.builtin.tuple([this, other]));
             }
           }
         ),
@@ -9019,7 +9027,7 @@
         return new Sk.builtin.file(filename, mode, bufsize, encoding, errors, newline, closedf, opener);
       };
       Sk.builtin.isinstance = function isinstance(obj, type) {
-        if (!Sk.builtin.checkClass(type) && !(type instanceof Sk.builtin.tuple)) {
+        if (!Sk.builtin.checkClass(type) && !(type instanceof Sk.builtin.tuple) && !(type instanceof Sk.builtin.uniontype)) {
           throw new Sk.builtin.TypeError(
             "isinstance() arg 2 must be a class, type, or tuple of classes and types"
           );
@@ -9027,6 +9035,14 @@
         const act_type = obj.ob$type;
         if (act_type === type) {
           return Sk.builtin.bool.true$;
+        }
+        if (type instanceof Sk.builtin.uniontype) {
+          for (let i = 0; i < type.$args.v.length; ++i) {
+            if (Sk.misceval.isTrue(Sk.builtin.isinstance(obj, type.$args.v[i]))) {
+              return Sk.builtin.bool.true$;
+            }
+          }
+          return Sk.builtin.bool.false$;
         }
         if (!(type instanceof Sk.builtin.tuple)) {
           if (act_type.$isSubType(type)) {
@@ -32622,6 +32638,9 @@
             }
             return h0 ^ h1;
           },
+          nb$or(other) {
+            return Sk.builtin.unionFromTuple(new Sk.builtin.tuple([this, other]));
+          },
           tp$call(args, kwargs) {
             const obj = Sk.misceval.callsimArray(this.$origin, args, kwargs);
             try {
@@ -32763,6 +32782,255 @@
           ].map((x) => new Sk.builtin.str(x))
         }
       });
+    }
+  });
+
+  // src/union.js
+  var require_union = __commonJS({
+    "src/union.js"() {
+      function noneToNoneType(obj) {
+        if (obj === Sk.builtin.none.none$) {
+          return Sk.builtin.none;
+        }
+        return obj;
+      }
+      function isUnionable(obj) {
+        return obj === Sk.builtin.none.none$ || obj instanceof Sk.builtin.type || obj instanceof Sk.builtin.uniontype || obj instanceof Sk.builtin.GenericAlias;
+      }
+      function typeRepr(o) {
+        if (o instanceof Sk.builtin.type) {
+          return new Sk.builtin.str(o.tp$name);
+        }
+        return Sk.builtin.repr(o);
+      }
+      function containsSequence(seq, item) {
+        const n = seq.v.length;
+        for (let i = 0; i < n; i++) {
+          const eq = Sk.misceval.richCompareBool(seq.v[i], item, "Eq");
+          if (eq) {
+            return true;
+          }
+        }
+        return false;
+      }
+      function tryHash(obj) {
+        try {
+          const h = Sk.builtin.hash(obj);
+          return { ok: true, hash: h };
+        } catch (e) {
+          return { ok: false, err: e };
+        }
+      }
+      var UnionBuilder = class {
+        constructor({ checked }) {
+          this.argsList = [];
+          this.hashableSet = new Sk.builtin.set([]);
+          this.unhashableList = null;
+          this.checked = checked;
+        }
+        addTuple(tup) {
+          const arr = tup.v;
+          for (let i = 0; i < arr.length; i++) {
+            this.addSingle(arr[i]);
+          }
+        }
+        typeCheck(arg) {
+          if (!isUnionable(arg)) {
+            throw new Sk.builtin.TypeError(
+              "Union[arg, ...]: each arg must be a type."
+            );
+          }
+          return arg;
+        }
+        addSingle(arg) {
+          arg = noneToNoneType(arg);
+          if (arg instanceof Sk.builtin.uniontype) {
+            this.addTuple(arg.$args);
+            return;
+          }
+          if (this.checked) {
+            arg = this.typeCheck(arg);
+          }
+          this.addSingleUnchecked(arg);
+        }
+        addSingleUnchecked(arg) {
+          const h = tryHash(arg);
+          if (!h.ok) {
+            if (this.unhashableList === null) {
+              this.unhashableList = [];
+            } else {
+              for (let i = 0; i < this.unhashableList.length; i++) {
+                if (Sk.misceval.richCompareBool(this.unhashableList[i], arg, "Eq")) {
+                  return;
+                }
+              }
+            }
+            this.unhashableList.push(arg);
+          } else {
+            if (this.hashableSet.sq$contains(arg)) {
+              return;
+            }
+            this.hashableSet.set$add(arg);
+          }
+          this.argsList.push(arg);
+        }
+        makeUnion() {
+          if (this.argsList.length === 0) {
+            throw new Sk.builtin.TypeError("Cannot take a Union of no types.");
+          }
+          if (this.argsList.length === 1) {
+            return this.argsList[0];
+          }
+          const argsTuple = new Sk.builtin.tuple(this.argsList.slice());
+          const hashableFrozen = new Sk.builtin.frozenset(this.hashableSet);
+          let unhashableTuple = null;
+          if (this.unhashableList !== null) {
+            unhashableTuple = new Sk.builtin.tuple(this.unhashableList.slice());
+          }
+          return new Sk.builtin.uniontype(argsTuple, hashableFrozen, unhashableTuple);
+        }
+      };
+      Sk.builtin.uniontype = Sk.abstr.buildNativeClass("types.UnionType", {
+        constructor: function UnionType(argsTuple, hashableFrozen, unhashableTupleOrNull) {
+          this.$args = argsTuple;
+          this.$hashable_args = hashableFrozen;
+          this.$unhashable_args = unhashableTupleOrNull;
+          this.$parameters = null;
+        },
+        slots: {
+          tp$getattr: Sk.generic.getAttr,
+          tp$doc: "Represent a union type\n\nE.g., for int | str",
+          tp$as_number: true,
+          $r() {
+            const typeNames = this.$args.v.map(typeRepr);
+            return new Sk.builtin.str(typeNames.join(" | "));
+          },
+          tp$hash() {
+            if (this.$unhashable_args !== null) {
+              const arr = this.$unhashable_args.v;
+              try {
+                for (let i = 0; i < arr.length; i++) {
+                  Sk.abstr.objectHash(arr[i]);
+                }
+              } catch (e) {
+                throw new Sk.builtin.TypeError(
+                  "union contains " + arr.length + " unhashable elements"
+                );
+              }
+            }
+            return Sk.abstr.objectHash(this.$hashable_args);
+          },
+          tp$richcompare(other, op) {
+            if (op !== "Eq" && op !== "NotEq" || !(other instanceof Sk.builtin.uniontype)) {
+              return Sk.builtin.NotImplemented.NotImplemented$;
+            }
+            const equal = unionsEqual(this, other);
+            return new Sk.builtin.bool(op === "Eq" ? equal : !equal);
+          },
+          // Enable `union | X` and `X | union`
+          nb$or: function(other) {
+            const ub = new UnionBuilder({ checked: true });
+            ub.addSingle(this);
+            ub.addSingle(other);
+            return ub.makeUnion();
+          },
+          // Optional: `union[item]` (subscript) used for parameter substitution.
+          mp$subscript: function(item) {
+            return this;
+          }
+        },
+        getsets: {
+          __args__: {
+            $get: function() {
+              return this.$args;
+            },
+            $doc: "The arguments to the Union"
+          },
+          __origin__: {
+            $get: function() {
+              return Sk.builtin.uniontype;
+            },
+            $doc: "The origin of the Union"
+          },
+          __name__: {
+            $get: function() {
+              return new Sk.builtin.str("Union");
+            },
+            $doc: "The name of the Union"
+          },
+          __qualname__: {
+            $get: function() {
+              return new Sk.builtin.str("Union");
+            },
+            $doc: "The qualified name of the Union"
+          },
+          __parameters__: {
+            $get: function() {
+              if (this.$parameters === null) {
+                this.$parameters = new Sk.builtin.tuple([]);
+              }
+              return this.$parameters;
+            },
+            $doc: "The type variables in the Union, if any"
+          }
+        },
+        methods: {
+          __mro_entries__: {
+            $meth: function() {
+              throw new Sk.builtin.TypeError("Cannot subclass " + Sk.builtin.repr(this).v);
+            },
+            $flags: { OneArg: true }
+          }
+        }
+      });
+      function unionsEqual(a, b) {
+        const hsEq = Sk.misceval.richCompareBool(a.$hashable_args, b.$hashable_args, "Eq");
+        if (!hsEq) {
+          return false;
+        }
+        const ua = a.$unhashable_args;
+        const ub = b.$unhashable_args;
+        if (ua !== null && ub !== null) {
+          const na = ua.v.length;
+          const nb = ub.v.length;
+          if (na !== nb) {
+            return false;
+          }
+          for (let i = 0; i < na; i++) {
+            if (!containsSequence(ub, ua.v[i])) {
+              return false;
+            }
+          }
+          for (let i = 0; i < nb; i++) {
+            if (!containsSequence(ua, ub.v[i])) {
+              return false;
+            }
+          }
+          return true;
+        }
+        if (ua !== null || ub !== null) {
+          return false;
+        }
+        return true;
+      }
+      Sk.builtin.unionFromTuple = function unionFromTuple(args) {
+        const ub = new UnionBuilder({ checked: true });
+        if (args instanceof Sk.builtin.tuple) {
+          ub.addTuple(args);
+        } else {
+          ub.addSingle(args);
+        }
+        return ub.makeUnion();
+      };
+      Sk.builtin.unionTypeOr = function unionTypeOr(a, b) {
+        if (!isUnionable(a) || !isUnionable(b)) {
+          return Sk.builtin.NotImplemented.NotImplemented$;
+        }
+        const ub = new UnionBuilder({ checked: false });
+        ub.addSingle(a);
+        ub.addSingle(b);
+        return ub.makeUnion();
+      };
     }
   });
 
@@ -33536,6 +33804,7 @@
   require_timsort();
   require_super();
   require_generic_alias();
+  require_union();
   require_builtindict();
   require_constants();
   require_internalpython();

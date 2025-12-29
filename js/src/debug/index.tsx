@@ -200,27 +200,16 @@ export class DebugPanel {
                 this.historyPanel?.addResponse(event.data);
                 break;
             case "UpdatedState":
-                this.statePanel?.renderState(event.data.html);
+                this.statePanel?.renderState(
+                    event.data.items ?? [],
+                    event.data.html
+                );
                 break;
             case "TestCaseEvent":
                 this.testingPanel?.renderTest(event.data);
                 this.testingPanel?.updateTestSummary();
                 break;
-            case "DrafterError":
-                this.logPanel?.renderLogError(event.data);
-                break;
-            case "DrafterWarning":
-                this.logPanel?.renderLogWarning(event.data);
-                break;
-            case "DrafterInfo":
-                this.logPanel?.renderLogInfo(event.data);
-                break;
-            default:
-                this.logPanel?.renderLogDefault(event.event_type);
-                // console.warn(
-                //     `DebugPanel: Unhandled event type '${event.event_type}'`
-                // );
-                break;
         }
+        this.logPanel?.renderEvent(event);
     }
 }

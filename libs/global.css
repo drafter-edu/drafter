@@ -1,3 +1,36 @@
+.drafter-state-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.drafter-state-table th,
+.drafter-state-table td {
+    border: 1px solid #ddd;
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.drafter-state-table thead th {
+    background-color: #f7f7f9;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.drafter-state-table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.drafter-state-collapsible details {
+    margin-bottom: 8px;
+}
+
+.drafter-state-collapsible summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 4px 0;
+}
 div.btlw-debug .copy-button {
      float: right;
      cursor: pointer;

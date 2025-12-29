@@ -29,9 +29,11 @@
     -   [ ] Allow urls to be re-entrant with default parameters
 -   [ ] Type change warnings
 -   [ ] Warnings for parameters that were never matched to arguments
+-   [ ] Error screens need to have better styling
+-   [ ] Links for error screen to help them navigate out of the error
 -   [ ] Deep copy strategy for state
 -   [ ] Fetch support for opening files in Skulpt
--   [ ] Convert skulpt bridge to be handled via Python code rather than JS code
+-   [ ] Convert skulpt bridge to be handled via Python code rather than JS code, with a proper js bridge library
 -   [ ] Properly recursively render components
 -   [ ] Fragment support
 -   [ ] Progress support
@@ -51,7 +53,18 @@
     -   [ ] `assert_has` and `assert_in` for checking page contents
     -   [ ] `assert_state` for checking state contents
 -   [ ] Allow the route to explicitly ignore certain parameters
--   [ ]
+-   [ ] Components:
+    -   [ ] Label Component, with optional `for_id` attribute
+    -   [ ] Boolean attributes handling (e.g., disabled, checked, readonly)
+    -   [ ] Handle datetime inputs and types
+    -   [ ] RawHTML component
+    -   [ ] Rendering components should accept None as a valid input and render to nothing
+    -   [ ] Hooks for Component class (pre_render, post_render)
+    -   [ ] Path to failing node (breadcrumbs) for debugging when rendering/formatting/verifying components
+    -   [ ] Support data-\* attributes
+    -   [ ] Components should have a stable unique ID
+    -   [ ] Include sufficient whitespace and formatting in rendered HTML for easier debugging
+    -   [ ] Functions for testing if a component has certain attributes, styles, children, etc.
 
 Pie in the sky:
 

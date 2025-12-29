@@ -1,12 +1,21 @@
-from typing import Union, Callable, Optional
+from typing import Union, Callable, Optional, TypeVar, overload, ParamSpec, cast
+from functools import wraps
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import get_main_server
 from drafter.router.introspect import get_signature
 
+T = TypeVar("T", bound=Callable[..., object])
 
+@overload
+def route(url: T) -> T: ...
+@overload
 def route(
-    url: Union[Callable, str, None] = None, server: Optional[ClientServer] = None
-):
+    url: Union[str, None] = None, server: Optional[ClientServer] = None
+) -> Callable[[T], T]: ...
+def route(
+    url: Union[str, None, T] = None,
+    server: Optional[ClientServer] = None,
+) -> Union[T, Callable[[T], T]]:
     """
     Main function to add a new route to the server. Recommended to use as a decorator.
     Once added, the route will be available at the given URL; the function name will be used if no URL is provided.
@@ -19,15 +28,13 @@ def route(
 
     server = server or get_main_server()
     if callable(url):
-        local_url = url.__name__
-        server.add_route(local_url, url)
-        return url
-
-    def make_route(func: Callable) -> Callable:
-        if url is None:
-            local_url = func.__name__
-        else:
-            local_url = url
+        func = cast(T, url)
+        local_url = func.__name__
+        server.add_route(local_url, func)
+        return func
+    
+    def make_route(func: T) -> T:
+        local_url = url if url is not None else func.__name__
         server.add_route(local_url, func)
         return func
 

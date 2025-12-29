@@ -15,12 +15,14 @@ class Download(Component):
     content_type: str = "text/plain"
 
     def __init__(
-        self, text: str, filename: str, content: str, content_type: str = "text/plain"
+        self, text: str, filename: str, content: str, content_type: str = "text/plain",
+        **kwargs
     ):
         self.text = text
         self.filename = filename
         self.content = content
         self.content_type = content_type
+        self.extra_settings = kwargs
 
     def _handle_pil_image(self, image):
         if not HAS_PILLOW or isinstance(image, str):
@@ -32,12 +34,19 @@ class Download(Component):
         figure = base64.b64encode(image_data.getvalue()).decode("utf-8")
         figure = f"data:image/png;base64,{figure}"
         return True, figure
+    
+    def render(self, current_state, configuration):
+        return str(self)
 
     def __str__(self):
+        extra_settings = dict(self.extra_settings)
+        extra_settings["download"] = self.filename
         was_pil, url = self._handle_pil_image(self.content)
         if was_pil:
-            return f'<a download="{self.filename}" href="{url}">{self.text}</a>'
-        return f'<a download="{self.filename}" href="data:{self.content_type},{self.content}">{self.text}</a>'
+            extra_settings["href"] = url
+        else:
+            extra_settings["href"] = f"data:{self.content_type},{self.content}"
+        return self._render_tag("a", self.text, **extra_settings)
 
 
 @dataclass

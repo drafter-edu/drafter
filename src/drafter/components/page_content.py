@@ -1,26 +1,53 @@
+'''
+
+There are three main types defined here:
+- `Component`: The base class for all content that can be added to a page. It provides methods for verifying the component's state, parsing extra settings into HTML attributes and styles, updating styles and attributes, and rendering the component to HTML.
+- `Content`: A type alias that represents either a `Component` or a string. This allows for flexibility in content representation.
+- `PageContent`: A type alias that represents either a single `Content` item or a list of `Content` items. This allows for multiple pieces of content to be grouped together for a page.
+
+Note that `str` is also considered a valid `Content` type, allowing for simple text content to be used directly without needing to create a `Component` instance.
+
+
+Some HTML elements are actually composed of child elements (e.g., a `<div>` containing multiple `<p>` tags). They might also have dedicated JavaScript and CSS associated with them, that should have their own lifecycle.
+
+To create custom components, you can subclass the `Component` class.
+
+Attribute order should always be consistent, with styles at the end. Generally, this means that they should be alphabetized.
+
+A Component should always:
+- Have a **kwargs** parameter in its constructor to accept extra settings.
+- Store those extra settings in the `extra_settings` property.
+- Use the `parse_extra_settings` method to convert those settings into valid HTML attributes and styles.
+- Implement a `render` method that returns the HTML representation of the component.
+- Avoid mutating any fields in the `pre_render`, `render`, or `post_render` methods.
+
+
+Technically, we need the component to return not just its HTML, but also its CSS and JS additions. It might also want to add other messages to the page, such as an instruction to start a timer or something. So our render should really return a more complex structure.
+
+'''
 from typing import List, Optional, Union
 
 from drafter.components.utilities.attributes import BASELINE_ATTRS
 from drafter.urls import remap_attr_styles
 
-
 class Component:
     """
     Base class for all content that can be added to a page.
     This class is not meant to be used directly, but rather to be subclassed by other classes.
-    Critically, each subclass must implement a ``__str__`` method that returns the HTML representation.
+    Critically, each subclass must implement a `__str__` method that returns the HTML representation.
+    Note that generally, we prefer to try to `render` the component rather than directly converting it to a string.
 
-    Under most circumstances, a string value can be used in place of a ``PageContent`` object
-    (in which case we say it is a ``Content`` type). However, the ``PageContent`` object
+    Under any student-facing circumstances, a string value can be used in place of a `Component` object
+    (in which case we say it is a `Content` type). However, the `Component` object
     allows for more customization and control over the content.
 
-    Ultimately, the ``PageContent`` object is converted to a string when it is rendered.
-
+    Ultimately, the `Component` object is converted to a string when it is rendered.
+    
     This class also has some helpful methods for verifying URLs and handling attributes/styles.
     """
-
-    EXTRA_ATTRS: List[str] = []
+    
     extra_settings: dict
+    EXTRA_ATTRS: List[str] = []
 
     def verify(self, router, state, configuration, request):
         """
@@ -71,6 +98,21 @@ class Component:
         if styles:
             result += f" style='{'; '.join(styles)}'"
         return result
+    
+    def _render_tag(self, tag_name: str, content: str = "", self_closing: bool = False, **kwargs) -> str:
+        """
+        Renders an HTML tag with the given name and attributes.
+
+        :param tag_name: The name of the HTML tag to render
+        :param self_closing: Whether the tag is self-closing (e.g., <br />)
+        :param kwargs: Additional attributes to include in the tag
+        :return: The rendered HTML tag as a string
+        """
+        parsed_settings = self.parse_extra_settings(**kwargs)
+        if self_closing:
+            return f"<{tag_name} {parsed_settings}/>"
+        else:
+            return f"<{tag_name} {parsed_settings}>{content}</{tag_name}>"
 
     def update_style(self, style, value):
         """
@@ -110,7 +152,9 @@ class Component:
         """
         This method is called when the component is being rendered to a string. It should return
         the HTML representation of the component, using the current State and configuration to
-        determine the final output.
+        determine the final output. The fall back for every component is to simply convert it to a string using str().
+        
+        Parents are responsible for calling the render method of their children as needed!
 
         :param current_state: The current state of the component
         :type current_state: Any
@@ -118,8 +162,59 @@ class Component:
         :type configuration: Configuration
         :return: The HTML representation of the component
         """
-        return str(self)
+        self.pre_render(current_state, configuration)
+        result = str(self)
+        self.post_render(current_state, configuration)
+        return result
+    
+    def pre_render(self, current_state, configuration):
+        """
+        This method is called before the component is rendered. It can be used to perform any
+        necessary setup or initialization before the component is converted to a string.
+
+        :param current_state: The current state of the component
+        :type current_state: Any
+        :param configuration: The configuration settings for the component
+        :type configuration: Configuration
+        """
+        pass
+    
+    def post_render(self, current_state, configuration):
+        """
+        This method is called after the component is rendered. It can be used to perform any
+        necessary cleanup or finalization after the component has been converted to a string.
+
+        :param current_state: The current state of the component
+        :type current_state: Any
+        :param configuration: The configuration settings for the component
+        :type configuration: Configuration
+        """
+        pass
 
 
 Content = Union[Component, str]
 PageContent = Union[Content, List[Content]]
+
+"""
+@dataclass
+class RenderedContent:
+    html: list[str]
+    css: list[str]
+    js: list[str]
+    messages: list[Message] = None
+    
+    def __init__(self):
+        self.html = []
+        self.css = []
+        self.js = []
+        self.messages = []
+
+    def render(self, component: PageContent, state: SiteState, configuration: ClientServerConfiguration):
+        if isinstance(component, str):
+            self.html.append(component)
+        elif isinstance(component, Component):
+            should_stop = component.pre_render(state, configuration)
+            if not should_stop:
+                rendered_content = component.render(state, configuration)
+                component.post_render(state, configuration)
+"""

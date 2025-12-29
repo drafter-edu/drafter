@@ -5,6 +5,14 @@ from drafter.components.page_content import Component
 
 @dataclass
 class LineBreak(Component):
+    TEMPLATE: str = "<br {parsed_settings}/>"
+    
+    def __init__(self, **kwargs):
+        self.extra_settings = kwargs
+        
+    def render(self, current_state, configuration):
+        return str(self)
+    
     def __str__(self) -> str:
         return "<br />"
 

@@ -1,3 +1,4 @@
+import type { TelemetryEvent } from "../telemetry";
 import type { DrafterWarning } from "../telemetry/errors";
 
 export class LogPanel {
@@ -9,6 +10,23 @@ export class LogPanel {
             throw new Error("DebugPanel: Log section not found.");
         }
         return content as HTMLElement;
+    }
+
+    public renderEvent(event: TelemetryEvent): void {
+        switch (event.data?.event_type) {
+            case "DrafterError":
+                this.renderLogError(event.data);
+                break;
+            case "DrafterWarning":
+                this.renderLogWarning(event.data);
+                break;
+            case "DrafterInfo":
+                this.renderLogInfo(event.data);
+                break;
+            default:
+                this.renderLogDefault(event.event_type);
+                break;
+        }
     }
 
     public renderLogWarning(warning: DrafterWarning): void {

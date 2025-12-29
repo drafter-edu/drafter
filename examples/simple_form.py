@@ -12,6 +12,7 @@ def index(state: str) -> Page:
 def process_form(state: str, name: str) -> Page:
     return Page(state, ["Hello, " + name[0] + "!"])
 
+page = index("Test")
 
 assert_equal(
     index("Test"),
