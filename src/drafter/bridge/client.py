@@ -10,6 +10,7 @@ from drafter.monitor.telemetry import TelemetryEvent, TelemetryCorrelation
 from drafter.monitor.bus import get_main_event_bus
 from typing import Callable, Optional, Any
 from dataclasses import dataclass
+import time
 import js
 
 # Module-level state
@@ -75,10 +76,13 @@ def setup_debug_menu(client_bridge: Any) -> None:
     """Set up the debug menu for the application."""
     global _debug_panel
     debug_log("site.setup_debug_menu")
-    # This would need the DebugPanel class to be ported as well
-    # For now, we'll just log that it was called
-    # In a full implementation, you'd import and instantiate DebugPanel here
-    print("Debug menu setup called with client bridge:", client_bridge)
+    
+    # TODO: Implement full debug menu support
+    # This requires porting the DebugPanel class from TypeScript to Python
+    # or creating a compatible Python version that uses the js package.
+    # For now, we just log that the function was called.
+    # The debug panel functionality is currently handled by the TypeScript client.ts
+    _debug_panel = None  # Placeholder - will be replaced with actual DebugPanel instance
 
 
 def handle_event(event_json: dict) -> None:
@@ -97,11 +101,14 @@ def make_request(url: str, form_data: Optional[Any] = None, action: str = "submi
     
     data: dict[str, Any] = {}
     
-    if form_data:
-        # Extract data from FormData
-        # Note: In a real implementation, you'd iterate through the FormData
-        # For now, we'll pass it through
-        pass
+    # TODO: Implement proper FormData extraction
+    # FormData objects need special handling to extract all entries including files
+    # For now, pass empty data dict - this will need to be implemented when FormData support is added
+    # Requirements:
+    # - Iterate through FormData entries
+    # - Handle file uploads (convert to bytes)
+    # - Handle multiple values for same key
+    # - Support both Skulpt and Pyodide FormData APIs
     
     request = Request(
         id=_request_count,
@@ -177,9 +184,8 @@ def mount_navigation(root: Any, on_navigation: Callable[[NavEvent], None]) -> di
             # Get the form element
             form = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
             if form:
-                # Create FormData from the form
-                # Note: This would need proper FormData support
-                form_data = None  # Placeholder
+                # TODO: Create FormData from the form - see make_request() for details
+                form_data = None
                 
                 nav_event = NavEvent(
                     kind="link",
@@ -200,9 +206,8 @@ def mount_navigation(root: Any, on_navigation: Callable[[NavEvent], None]) -> di
         if not form_root:
             raise RuntimeError(f"Form element {DRAFTER_TAG_IDS['FORM']} not found")
         
-        # Create FormData from the form
-        # Note: This would need proper FormData support
-        form_data = None  # Placeholder
+        # TODO: Create FormData from the form - see make_request() for details
+        form_data = None
         
         # Determine the URL
         url = form_root.action if hasattr(form_root, 'action') else None
@@ -315,27 +320,32 @@ def console_log(event: Any) -> None:
 
 
 def register_hotkey(keyCombo: str, callback: Callable[[], None]) -> None:
-    """Register a hotkey combination to trigger a callback."""
+    """Register a hotkey combination to trigger a callback.
+    
+    Note: Currently only supports single key + Ctrl/Meta modifier.
+    For example: "k" registers Ctrl+K (or Cmd+K on Mac).
+    The key should be pressed twice within DOUBLE_PRESS_THRESHOLD milliseconds to trigger.
+    """
     global _hotkey_events, _hotkey_listener_ready
     
-    combo_lower = keyCombo.lower()
+    # Extract the key from the combo (e.g., "Ctrl+K" -> "k")
+    key = keyCombo.lower().split('+')[-1].strip()
     
     def hotkey_handler(event: Any) -> None:
         """Handle keyboard events for hotkeys."""
         global _last_press_time
         
-        key = event.key.lower() if hasattr(event, 'key') else ""
+        event_key = event.key.lower() if hasattr(event, 'key') else ""
         ctrl = getattr(event, 'ctrlKey', False) or getattr(event, 'metaKey', False)
         
-        if ctrl and key in _hotkey_events:
-            import time
+        if ctrl and event_key in _hotkey_events:
             now = time.time() * 1000  # Convert to milliseconds
             time_since_last = now - _last_press_time
             
             if time_since_last < DOUBLE_PRESS_THRESHOLD:
-                debug_log("hotkey.triggered", key)
+                debug_log("hotkey.triggered", event_key)
                 event.preventDefault()
-                _hotkey_events[key]()
+                _hotkey_events[event_key]()
             
             _last_press_time = now
     
@@ -343,5 +353,5 @@ def register_hotkey(keyCombo: str, callback: Callable[[], None]) -> None:
         js.document.addEventListener("keydown", hotkey_handler)
         _hotkey_listener_ready = True
     
-    debug_log("hotkey.register", combo_lower)
-    _hotkey_events[combo_lower] = callback
+    debug_log("hotkey.register", key)
+    _hotkey_events[key] = callback

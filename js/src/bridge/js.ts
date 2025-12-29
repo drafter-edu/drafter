@@ -57,6 +57,24 @@ function js_module(js_mod: Record<string, any>) {
 
     js_mod.__name__ = new pyStr("js");
 
+    // Utility function to convert function arguments from Python to JS
+    // Filters out 'self' parameter and unwraps proxy objects
+    function convertArgsToJs(args: any[], self?: any): any[] {
+        return args.map((arg) => {
+            if (arg === self) return undefined;
+            
+            // Handle DocumentFragment and other special types
+            if (arg._fragment !== undefined) {
+                return arg._fragment;
+            }
+            if (arg._element !== undefined) {
+                return arg._element;
+            }
+            
+            return Sk.ffi.remapToJs(arg);
+        }).filter(arg => arg !== undefined);
+    }
+
     // FormData class wrapper
     const FormDataClass = function FormDataClass($gbl: any, $loc: any) {
         $loc.__init__ = new pyFunc(function (self: any) {
@@ -206,20 +224,7 @@ function js_module(js_mod: Record<string, any>) {
                 // If it's a function, wrap it
                 if (typeof value === "function") {
                     return new pyFunc(function (...args: any[]) {
-                        const jsArgs = args.map((arg) => {
-                            if (arg === self) return undefined;
-                            
-                            // Handle DocumentFragment and other special types
-                            if (arg._fragment !== undefined) {
-                                return arg._fragment;
-                            }
-                            if (arg._element !== undefined) {
-                                return arg._element;
-                            }
-                            
-                            return Sk.ffi.remapToJs(arg);
-                        }).filter(arg => arg !== undefined);
-
+                        const jsArgs = convertArgsToJs(args, self);
                         const result = value.apply(self._element, jsArgs);
 
                         if (result === undefined || result === null) {
@@ -311,17 +316,17 @@ function js_module(js_mod: Record<string, any>) {
 
                 if (value === undefined) {
                     // Return None for missing attributes instead of throwing
+                    // This is intentional: Event objects have many optional properties
+                    // (e.g., key, ctrlKey, metaKey) that may not exist for all event types.
+                    // Returning None allows code to safely check for properties without
+                    // needing try/except blocks.
                     return pyNone;
                 }
 
                 // If it's a function, wrap it
                 if (typeof value === "function") {
                     return new pyFunc(function (...args: any[]) {
-                        const jsArgs = args.map((arg) => {
-                            if (arg === self) return undefined;
-                            return Sk.ffi.remapToJs(arg);
-                        }).filter(arg => arg !== undefined);
-
+                        const jsArgs = convertArgsToJs(args, self);
                         const result = value.apply(self._event, jsArgs);
                         return result === undefined || result === null 
                             ? pyNone 
