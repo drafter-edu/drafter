@@ -8,7 +8,7 @@ import "../../../src/drafter/assets/js/skulpt-stdlib.js";
 import "../../../src/drafter/assets/js/skulpt-drafter.js";
 import "../../../src/drafter/assets/js/drafter.js";
 import { builtinRead, setupSkulpt } from "../skulpt-tools";
-import { runStudentCode } from "../index";
+import { runStudentCode } from "../skulpt.index";
 
 describe("TypeScript Client Basic Tests", () => {
     test("basic test infrastructure works", () => {

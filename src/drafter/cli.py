@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import List, Any
+from enum import Enum
 
 import typer
 from rich.panel import Panel
@@ -278,6 +279,11 @@ def build(
             output_filename=output_filename,
             title=title,
         )
+        
+        
+class JSEngine(str, Enum):
+    SKULPT = "skulpt"
+    PYODIDE = "pyodide"
 
 
 @app.command(help="Run the dev server with hot reload for a given Python file.")
@@ -296,6 +302,7 @@ def serve(
     open_browser: bool = typer.Option(
         True, "--open/--no-open", help="Open browser at start."
     ),
+    engine: JSEngine = JSEngine.SKULPT,
 ):
     # One-shot handoff to the server module. It will manage watch & reload.
     serve_app_once(
@@ -305,6 +312,7 @@ def serve(
         port=port,
         inline_py=inline,
         open_browser=open_browser,
+        engine=engine.value
     )
 
 

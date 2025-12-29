@@ -28,7 +28,8 @@ from drafter.monitor.telemetry import TelemetryEvent
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import DRAFTER_TAG_IDS, DRAFTER_TAG_CLASSES
 from typing import Callable, Optional
-import document  # type: ignore
+import js
+document = js.document# type: ignore
 
 
 @dataclass

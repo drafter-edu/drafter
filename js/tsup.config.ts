@@ -16,12 +16,31 @@ for (const file of fs.readdirSync(cssDir)) {
 export default defineConfig([
     {
         entry: {
-            drafter: "src/index.ts",
+            "drafter.skulpt": "src/skulpt.index.ts",
         },
-        format: ["iife"], // or 'esm', 'cjs' if you want others
+        format: ["iife"],
         globalName: "Drafter", // what gets attached to window.Drafter
         outDir: "dist/js",
-        clean: true,
+        clean: false,
+        target: browserslistToEsbuild(), // keep JS output aligned with your Browserslist
+        outExtension({ format }) {
+            return { js: ".js" }; // for iife this yields dist/drafter.js
+        },
+        esbuildOptions(options) {
+            options.jsx = "automatic";
+            options.jsxImportSource = "jsx-dom";
+        },
+        sourcemap: true,
+        minify: true,
+    },
+    {
+        entry: {
+            "drafter.pyodide": "src/pyodide.index.ts",
+        },
+        format: ["iife"],
+        globalName: "Drafter", // what gets attached to window.Drafter
+        outDir: "dist/js",
+        clean: false,
         target: browserslistToEsbuild(), // keep JS output aligned with your Browserslist
         outExtension({ format }) {
             return { js: ".js" }; // for iife this yields dist/drafter.js

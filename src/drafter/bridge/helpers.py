@@ -1,4 +1,5 @@
-import document  # type: ignore
+import js
+document = js.document  # type: ignore
 
 ATTR_PAGE_SPECIFIC = "data-drafter-page-specific"
 

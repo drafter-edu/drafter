@@ -13,8 +13,11 @@ dependencies = [
   "jinja2",
   "watchfiles",
   "websockets>=12",
+  "starlette",
+  "uvicorn[standard]",
   # CLI Tooling
   "click",
+  "typer",
   "rich",
   # Actual library
   "bakery",
@@ -78,3 +81,18 @@ include = ["src/drafter/**"]
 [tool.black]
 line-length = 88
 target-version = ['py38']
+
+# [tool.hatch.envs.pyodide]
+# description = "Pyodide build and watch environment"
+# dependencies = ["pyodide-build", "watchfiles"]
+
+# # Need to document the following
+# # cd js && npm run dev
+# # cd js && npm run precompile:watch
+
+# [tool.hatch.envs.pyodide.scripts]
+# # One-shot Pyodide wheel build
+# build = "pyodide build --out-dir dist/pyodide"
+
+# # Rebuild on source changes
+# watch = "watchfiles 'hatch run pyodide:build' src"

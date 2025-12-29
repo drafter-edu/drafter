@@ -8,7 +8,7 @@ import "../../../src/drafter/assets/js/skulpt-stdlib.js";
 import "../../../src/drafter/assets/js/skulpt-drafter.js";
 import "../../../src/drafter/assets/js/drafter.js";
 import { builtinRead, setupSkulpt } from "../skulpt-tools.js";
-import { runStudentCode } from "../index";
+import { runStudentCode } from "../skulpt.index";
 import * as fs from "fs";
 import * as path from "path";
 import { screen, waitFor, within } from "@testing-library/dom";

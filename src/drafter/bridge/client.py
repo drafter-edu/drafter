@@ -8,7 +8,29 @@ understand its existence and provide type information.
 """
 
 from drafter.data.response import Response
-from typing import Callable
+from drafter.data.request import Request
+from drafter.site.site import DRAFTER_TAG_IDS, DRAFTER_TAG_CLASSES
+from drafter.monitor.telemetry import TelemetryEvent, TelemetryCorrelation
+from drafter.monitor.bus import get_main_event_bus
+from typing import Callable, Optional
+from dataclasses import dataclass
+import js
+
+@dataclass
+class NavEvent:
+    kind: str
+    url: str
+    data: js.FormData
+    submitter: Optional[str] = None
+    
+def replaceHTML(tag, html: str):
+    scroll_top = js.scrollY
+    scroll_left = js.scrollX
+    r = js.document.createRange()
+    r.selectNode(tag)
+    fragment = r.createContextualFragment(html)
+    tag.replaceWith(fragment)
+    js.window.scrollTo(scroll_left, scroll_top)
 
 
 def update_site(response: Response, callback: Callable) -> bool:  # type: ignore

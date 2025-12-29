@@ -20,6 +20,7 @@
         "@types/jest": "^30.0.0",
         "@types/jquery": "^3.5.33",
         "@types/node": "^24.10.0",
+        "@types/wicg-file-system-access": "^2023.10.7",
         "autoprefixer": "^10.4.21",
         "browserslist-to-esbuild": "^2.1.1",
         "chokidar": "^4.0.3",
@@ -44,6 +45,7 @@
         "i18next": "^25.6.2",
         "jsx-dom": "^8.1.6",
         "lit": "^3.3.1",
+        "pyodide": "^0.29.0",
         "string-diff-viewer": "^0.4.4"
     },
     "browserslist": [

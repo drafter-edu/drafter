@@ -25,6 +25,7 @@ class DevConfig:
     inline_py: bool
     host: str
     port: int
+    engine: str
 
     @property
     def ws_url(self) -> str:
@@ -71,6 +72,7 @@ async def index(req) -> Response:
         python_url=str(cfg.user_path) if not cfg.inline_py else None,
         dev_ws_url=cfg.ws_url,
         assets_url_override="assets",  # we mount package assets under /assets
+        engine=cfg.engine,
     )
     return HTMLResponse(html)
 
@@ -125,6 +127,7 @@ def serve_app_once(
     port: int = 8080,
     inline_py: bool = True,
     open_browser: bool = True,
+    engine: str = "skulpt",
 ):
     cfg = DevConfig(
         title=title,
@@ -132,6 +135,7 @@ def serve_app_once(
         inline_py=inline_py,
         host=host,
         port=port,
+        engine=engine,
     )
     app = make_app(cfg)
 
