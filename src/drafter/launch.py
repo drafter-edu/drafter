@@ -54,4 +54,4 @@ def start_server(initial_state=None, main_user_path=None, **kwargs) -> None:
         print("Starting local Drafter server...")
         # TODO: Title should come from configuration
         serve_app_once(user_file=main_user_path, title="Local Drafter App",
-                       engine="pyodide")
+                       engine="skulpt")

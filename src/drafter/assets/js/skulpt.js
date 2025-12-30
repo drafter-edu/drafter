@@ -1,9 +1,26 @@
 (() => {
   var __defProp = Object.defineProperty;
+  var __defProps = Object.defineProperties;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
   var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __getOwnPropSymbols = Object.getOwnPropertySymbols;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __propIsEnum = Object.prototype.propertyIsEnumerable;
   var __pow = Math.pow;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __spreadValues = (a, b) => {
+    for (var prop in b || (b = {}))
+      if (__hasOwnProp.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    if (__getOwnPropSymbols)
+      for (var prop of __getOwnPropSymbols(b)) {
+        if (__propIsEnum.call(b, prop))
+          __defNormalProp(a, prop, b[prop]);
+      }
+    return a;
+  };
+  var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
   var __esm = (fn, res) => function __init() {
     return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
   };
@@ -26,7 +43,7 @@
       var Sk2 = {};
       Sk2.build = {
         githash: "35b8d84b",
-        date: "2025-12-29T18:16:04.506Z"
+        date: "2025-12-30T18:39:29.417Z"
       };
       Sk2.global = typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};
       Sk2.exportSymbol = function(name, object) {
@@ -6408,6 +6425,11 @@
         ),
         flags: {
           sk$unacceptableBase: true
+        },
+        proto: {
+          valueOf() {
+            return null;
+          }
         }
       });
       Sk.builtin.none.none$ = /** @type {Sk.builtin.none} */
@@ -7064,6 +7086,9 @@
               throw new Sk.builtin.TypeError(
                 "a str instance is required not '" + Sk.abstr.typeName(tgt) + "'"
               );
+            },
+            valueOf() {
+              return this.v;
             },
             $isIdentifier() {
               return Sk.token.isIdentifier(this.v);
@@ -8291,8 +8316,16 @@
           __defaults__: {
             $get() {
               return new Sk.builtin.tuple(this.$defaults);
+            },
+            $set(v) {
+              if (v === void 0 || Sk.builtin.checkNone(v)) {
+                this.$defaults = null;
+              } else if (!(v instanceof Sk.builtin.tuple)) {
+                throw new Sk.builtin.TypeError("__defaults__ must be set to a tuple object");
+              } else {
+                this.$defaults = v.valueOf();
+              }
             }
-            // technically this is a writable property but we'll leave it as read-only for now
           },
           __doc__: {
             $get() {
@@ -11693,6 +11726,9 @@
                 this.v.splice(i - dec, 1);
                 dec += offdir;
               });
+            },
+            valueOf() {
+              return this.v;
             }
           }
         )
@@ -13769,6 +13805,9 @@
             },
             sk$asarray() {
               return this.v.slice(0);
+            },
+            valueOf() {
+              return this.v;
             }
           }
         ),
@@ -15985,7 +16024,10 @@
         },
         proto: {
           str$False: new Sk.builtin.str("False"),
-          str$True: new Sk.builtin.str("True")
+          str$True: new Sk.builtin.str("True"),
+          valueOf() {
+            return !!this.v;
+          }
         }
       });
       Sk.exportSymbol("Sk.builtin.bool", Sk.builtin.bool);
@@ -16240,7 +16282,12 @@
               $doc: Sk.builtin.none.none$
             }
           }
-        )
+        ),
+        proto: {
+          valueOf() {
+            return this.v;
+          }
+        }
       });
       function frexp(arg) {
         const res = [arg, 0];
@@ -18568,6 +18615,7 @@
             }
           }
         } else {
+          console.trace();
           throw new Sk.builtin.IOError("File not open for writing");
         }
         return Sk.builtin.none.none$;
@@ -18579,141 +18627,842 @@
   // src/ffi.js
   var require_ffi = __commonJS({
     "src/ffi.js"() {
-      Sk.ffi = Sk.ffi || {};
-      Sk.ffi.remapToPy = function(obj) {
-        var k;
-        var kvs;
-        var i;
-        var arr;
-        if (obj === null || typeof obj === "undefined") {
+      Sk.ffi = {
+        remapToPy: toPy,
+        remapToJs: toJs,
+        remapToJsOrWrap,
+        toPy,
+        toJs,
+        isTrue,
+        toJsString,
+        toJsNumber,
+        toJsArray,
+        toJsHashMap,
+        toPyDict,
+        toPyFloat,
+        toPyInt,
+        toPyNumber,
+        toPyStr,
+        toPyList,
+        toPyTuple,
+        toPySet,
+        numberToPy,
+        proxy
+      };
+      var OBJECT_PROTO = Object.prototype;
+      var FUNC_PROTO = Function.prototype;
+      var MAP_PROTO = Map.prototype;
+      var SET_PROTO = Set.prototype;
+      function toPy(obj, hooks) {
+        if (obj === null || obj === void 0) {
           return Sk.builtin.none.none$;
         }
-        if (obj.ob$type) {
-          return obj;
-        }
-        if (obj instanceof Sk.misceval.Suspension) {
-          return obj;
-        }
-        if (Object.prototype.toString.call(obj) === "[object Array]") {
-          arr = [];
-          for (i = 0; i < obj.length; ++i) {
-            arr.push(Sk.ffi.remapToPy(obj[i]));
+        const type = typeof obj;
+        if (type === "object" || type === "function") {
+          if ("sk$object" in obj && obj.sk$object === true) {
+            return obj;
+          } else if ("$isPyWrapped" in obj && obj.$isPyWrapped === true && obj.unwrap) {
+            return obj.unwrap();
           }
-          return new Sk.builtin.list(arr);
         }
-        if (typeof obj === "object") {
-          kvs = [];
-          for (k in obj) {
-            kvs.push(Sk.ffi.remapToPy(k));
-            kvs.push(Sk.ffi.remapToPy(obj[k]));
-          }
-          return new Sk.builtin.dict(kvs);
-        }
-        if (typeof obj === "string") {
+        hooks = hooks || {};
+        if (type === "string") {
           return new Sk.builtin.str(obj);
-        }
-        if (typeof obj === "number") {
-          return Sk.builtin.assk$(obj);
-        }
-        if (typeof obj === "boolean") {
+        } else if (type === "symbol") {
+          return new WrappedSymbol(obj);
+        } else if (type === "number") {
+          return numberToPy(obj);
+        } else if (type === "boolean") {
           return new Sk.builtin.bool(obj);
-        } else if (typeof obj === "undefined") {
+        } else if (type === "function") {
+          return hooks.funcHook ? hooks.funcHook(obj) : proxy(obj);
+        } else if (JSBI.__isBigInt(obj)) {
+          return new Sk.builtin.int_(JSBI.numberIfSafe(obj));
+        } else if (Array.isArray(obj)) {
+          return hooks.arrayHook ? hooks.arrayHook(obj) : new Sk.builtin.list(obj.map((x) => toPy(x, hooks)));
+        } else if (type === "object") {
+          const constructor = obj.constructor;
+          if (constructor === Object && Object.getPrototypeOf(obj) === OBJECT_PROTO || constructor === void 0) {
+            return hooks.dictHook ? hooks.dictHook(obj) : toPyDict(obj, hooks);
+          } else if (constructor === Uint8Array) {
+            return new Sk.builtin.bytes(obj);
+          } else if (constructor === Set) {
+            return hooks.setHook ? hooks.setHook(obj) : toPySet(obj, hooks);
+          } else if (constructor === Map) {
+            if (hooks.mapHook) {
+              return hooks.mapHook(obj);
+            }
+            const ret = new Sk.builtin.dict();
+            obj.forEach((val, key) => {
+              ret.mp$ass_subscript(toPy(key, hooks), toPy(val, hooks));
+            });
+            return ret;
+          } else if (constructor === Sk.misceval.Suspension) {
+            return obj;
+          } else {
+            return hooks.proxyHook ? hooks.proxyHook(obj) : proxy(obj);
+          }
+        } else if (hooks.unhandledHook) {
+          return hooks.unhandledHook(obj);
+        }
+        Sk.asserts.fail("unhandled remap case of type " + type);
+      }
+      function toJs(obj, hooks) {
+        if (obj === void 0 || obj === null) {
+          return obj;
+        }
+        const val = obj.valueOf();
+        if (val === null) {
+          return val;
+        }
+        const type = typeof val;
+        hooks = hooks || {};
+        if (type === "string") {
+          return hooks.stringHook ? hooks.stringHook(val) : val;
+        } else if (type === "symbol") {
+          return val;
+        } else if (type === "boolean") {
+          return val;
+        } else if (type === "number") {
+          return hooks.numberHook ? hooks.numberHook(val, obj) : val;
+        } else if (JSBI.__isBigInt(val)) {
+          return hooks.bigintHook ? hooks.bigintHook(val, obj) : val;
+        } else if (Array.isArray(val)) {
+          return hooks.arrayHook ? hooks.arrayHook(val, obj) : val.map((x) => toJs(x, hooks));
+        } else if (val.sk$object) {
+          if (obj instanceof Sk.builtin.dict) {
+            return hooks.dictHook ? hooks.dictHook(obj) : toJsHashMap(obj, hooks);
+          } else if (obj instanceof Sk.builtin.set) {
+            return hooks.setHook ? hooks.setHook(obj) : new Set(toJsArray(obj, hooks));
+          } else {
+            return hooks.unhandledHook ? hooks.unhandledHook(obj) : void 0;
+          }
+        } else if (type === "object") {
+          return hooks.objectHook ? hooks.objectHook(val, obj) : val;
+        } else if (type === "function") {
+          return hooks.funcHook ? hooks.funcHook(val, obj) : val;
+        }
+        Sk.asserts.fail("unhandled type " + type);
+      }
+      function remapToJsOrWrap(obj) {
+        return toJs(obj, jsHooks);
+      }
+      function isTrue(obj) {
+        return obj != null && obj.nb$bool ? obj.nb$bool() : obj.sq$length ? obj.sq$length() !== 0 : Boolean(obj);
+      }
+      function toJsNumber(obj) {
+        return Number(obj);
+      }
+      function toJsString(obj) {
+        return String(obj);
+      }
+      function toJsArray(obj, hooks) {
+        return Array.from(obj, (x) => toJs(x, hooks));
+      }
+      function toJsHashMap(dict, hooks) {
+        const obj = {};
+        dict.$items().forEach(([key, val]) => {
+          obj[key.valueOf()] = toJs(val, hooks);
+        });
+        return obj;
+      }
+      function numberToPy(val) {
+        if (Number.isInteger(val)) {
+          if (Math.abs(val) < Number.MAX_SAFE_INTEGER) {
+            return new Sk.builtin.int_(val);
+          }
+          return new Sk.builtin.int_(JSBI.BigInt(val));
+        }
+        return new Sk.builtin.float_(val);
+      }
+      var isInteger = /^-?\d+$/;
+      function toPyNumber(obj) {
+        const type = typeof obj;
+        if (type === "number") {
+          return numberToPy(obj);
+        }
+        if (type === "string") {
+          if (obj.match(isInteger)) {
+            return new Sk.builtin.int_(obj);
+          }
+          return new Sk.builtin.float_(parseFloat(obj));
+        }
+        if (JSBI.__isBigInt(obj)) {
+          return new Sk.builtin.int_(JSBI.numberIfSafe(obj));
+        }
+        return new Sk.builtin.float_(Number(obj));
+      }
+      function toPyFloat(num) {
+        return new Sk.builtin.float_(Number(num));
+      }
+      function toPyStr(obj) {
+        return new Sk.builtin.str(obj);
+      }
+      function toPyList(obj, hooks) {
+        return new Sk.builtin.list(Array.from(obj, (x) => toPy(x, hooks)));
+      }
+      function toPySet(obj, hooks) {
+        return new Sk.builtin.set(Array.from(obj, (x) => toPy(x, hooks)));
+      }
+      function toPyTuple(obj, hooks) {
+        return new Sk.builtin.tuple(Array.from(obj, (x) => toPy(x, hooks)));
+      }
+      function toPyInt(num) {
+        if (typeof num === "number") {
+          num = Math.trunc(num);
+          return Math.abs(num) < Number.MAX_SAFE_INTEGER ? new Sk.builtin.int_(num) : new Sk.builtin.int_(JSBI.BigInt(num));
+        } else if (JSBI.__isBigInt(num)) {
+          return new Sk.builtin.int_(JSBI.numberIfSafe(num));
+        } else if (typeof num === "string" && num.match(isInteger)) {
+          return new Sk.builtin.int_(num);
+        } else {
+          throw new TypeError("bad type passed to toPyInt() got " + num);
+        }
+      }
+      function toPyDict(obj, hooks) {
+        const ret = new Sk.builtin.dict();
+        Object.entries(obj).forEach(([key, val]) => {
+          ret.mp$ass_subscript(new Sk.builtin.str(key), toPy(val, hooks));
+        });
+        return ret;
+      }
+      function isCrossOriginWindow(obj) {
+        return obj !== null && typeof obj === "object" && obj.window === obj && Object.getPrototypeOf(obj) === null;
+      }
+      var _proxied = /* @__PURE__ */ new WeakMap();
+      var methodSelfCache = /* @__PURE__ */ new WeakMap();
+      function proxy(obj, flags) {
+        if (obj === null || obj === void 0) {
           return Sk.builtin.none.none$;
         }
-        if (typeof obj === "function") {
-          return new Sk.builtin.func(obj);
+        const type = typeof obj;
+        if (type !== "object" && type !== "function") {
+          return toPy(obj);
         }
-        Sk.asserts.fail("unhandled remap type " + typeof obj);
+        flags = flags || {};
+        const cached = _proxied.get(obj);
+        if (cached) {
+          if (flags.bound === cached.$bound) {
+            return cached;
+          }
+          if (!flags.name) {
+            flags.name = cached.$name;
+          }
+        }
+        let rv;
+        if (type === "function") {
+          rv = new JsProxy(obj, flags);
+        } else if (Array.isArray(obj)) {
+          rv = new JsProxyList(obj);
+        } else {
+          const proto = Object.getPrototypeOf(obj);
+          if (proto === MAP_PROTO) {
+            rv = new JsProxyMap(obj);
+          } else if (proto === SET_PROTO) {
+            rv = new JsProxySet(obj);
+          } else {
+            rv = new JsProxy(obj, flags);
+          }
+        }
+        _proxied.set(obj, rv);
+        return rv;
+      }
+      var proxyHook = (obj) => proxy(obj);
+      var dictHook = proxyHook;
+      var mapHook = proxyHook;
+      var setHook = proxyHook;
+      var arrayHook = (obj) => {
+        if (Object.isFrozen(obj)) {
+          return toPyList(obj, pyHooks);
+        }
+        return proxy(obj);
       };
-      Sk.exportSymbol("Sk.ffi.remapToPy", Sk.ffi.remapToPy);
-      Sk.ffi.remapToJs = function(obj) {
-        var i;
-        var kAsJs;
-        var ret;
-        if (obj instanceof Sk.builtin.dict) {
-          ret = {};
-          obj.$items().forEach(([key, val]) => {
-            kAsJs = Sk.ffi.remapToJs(key);
-            ret[kAsJs] = Sk.ffi.remapToJs(val);
-          });
-          return ret;
-        } else if (obj instanceof Sk.builtin.list || obj instanceof Sk.builtin.tuple) {
-          ret = [];
-          for (i = 0; i < obj.v.length; ++i) {
-            ret.push(Sk.ffi.remapToJs(obj.v[i]));
+      var unhandledHook = (obj) => String(obj);
+      var pyHooks = { arrayHook, dictHook, unhandledHook, setHook, mapHook };
+      var boundHook = (bound, name) => ({
+        dictHook,
+        funcHook: (obj) => proxy(obj, { bound, name }),
+        unhandledHook,
+        arrayHook,
+        setHook,
+        mapHook
+      });
+      var constructorHook = (name) => ({
+        dictHook,
+        proxyHook: (obj) => proxy(obj, { name }),
+        arrayHook,
+        setHook,
+        mapHook
+      });
+      var DEBUG_SUSP_HANDLER = "Sk.debug";
+      var unhandledPythonObject = (obj) => {
+        const _cached = _proxied.get(obj);
+        if (_cached) {
+          return _cached;
+        }
+        const pyWrapped = { v: obj, $isPyWrapped: true, unwrap: () => obj };
+        if (obj.tp$call === void 0) {
+          _proxied.set(obj, pyWrapped);
+          return pyWrapped;
+        }
+        if (obj.ob$type === Sk.builtin.method) {
+          const self2 = obj.im_self;
+          const func = obj.im_func;
+          let cachedFuncs = methodSelfCache.get(self2);
+          if (cachedFuncs === void 0) {
+            cachedFuncs = /* @__PURE__ */ new Map();
+            methodSelfCache.set(self2, cachedFuncs);
+          }
+          let cachedMethod = cachedFuncs.get(func);
+          if (cachedMethod === void 0) {
+            cachedMethod = obj;
+            cachedFuncs.set(func, obj);
+          } else {
+            obj = cachedMethod;
+            const cached = _proxied.get(obj);
+            if (cached) {
+              return cached;
+            }
+          }
+        }
+        const pyWrappedCallable = (...args) => {
+          args = args.map((x) => toPy(x, pyHooks));
+          let ret = Sk.misceval.tryCatch(
+            () => Sk.misceval.chain(obj.tp$call(args), (res) => toJs(res, jsHooks)),
+            (e) => {
+              if (Sk.uncaughtException) {
+                Sk.uncaughtException(e);
+              } else {
+                throw e;
+              }
+            }
+          );
+          while (ret instanceof Sk.misceval.Suspension) {
+            if (!ret.optional) {
+              return Sk.misceval.asyncToPromise(() => ret);
+            }
+            if (ret.data && ret.data.type === DEBUG_SUSP_HANDLER && DEBUG_SUSP_HANDLER in Sk.misceval.defaultHandlers) {
+              return Sk.misceval.asyncToPromise(() => ret);
+            }
+            ret = ret.resume();
           }
           return ret;
-        } else if (obj instanceof Sk.builtin.bool) {
-          return obj.v ? true : false;
-        } else if (obj instanceof Sk.builtin.int_) {
-          return Sk.builtin.asnum$(obj);
-        } else if (obj instanceof Sk.builtin.float_) {
-          return Sk.builtin.asnum$(obj);
-        } else if (obj instanceof Sk.builtin.lng) {
-          return Sk.builtin.asnum$(obj);
-        } else if (typeof obj === "number" || typeof obj === "boolean" || typeof obj === "string") {
-          return obj;
-        } else if (obj === void 0) {
-          return void 0;
-        } else {
-          return obj.v;
-        }
-      };
-      Sk.exportSymbol("Sk.ffi.remapToJs", Sk.ffi.remapToJs);
-      Sk.ffi.callback = function(fn) {
-        if (fn === void 0) {
-          return fn;
-        }
-        return function() {
-          return Sk.misceval.apply(
-            fn,
-            void 0,
-            void 0,
-            void 0,
-            Array.prototype.slice.call(arguments, 0)
-          );
         };
+        _proxied.set(obj, Object.assign(pyWrappedCallable, pyWrapped));
+        return pyWrappedCallable;
       };
-      Sk.exportSymbol("Sk.ffi.callback", Sk.ffi.callback);
-      Sk.ffi.stdwrap = function(type, towrap) {
-        var inst = new type();
-        inst["v"] = towrap;
-        return inst;
+      var jsHooks = {
+        unhandledHook: unhandledPythonObject,
+        arrayHook: (obj) => {
+          return obj[PROXY_SYMBOL] || obj.map((x) => toJs(x, jsHooks));
+        }
       };
-      Sk.exportSymbol("Sk.ffi.stdwrap", Sk.ffi.stdwrap);
-      Sk.ffi.basicwrap = function(obj) {
-        if (obj instanceof Sk.builtin.int_) {
-          return Sk.builtin.asnum$(obj);
+      function setJsProxyAttr(pyName, pyValue) {
+        const jsName = pyName.toString();
+        if (pyValue === void 0) {
+          delete this.js$wrapped[jsName];
+        } else {
+          this.js$wrapped[jsName] = toJs(pyValue, jsHooks);
         }
-        if (obj instanceof Sk.builtin.float_) {
-          return Sk.builtin.asnum$(obj);
+      }
+      function proxyDir() {
+        const dir = [];
+        let obj = this.js$wrapped;
+        while (obj != null && obj !== OBJECT_PROTO && obj !== FUNC_PROTO) {
+          dir.push(...Object.getOwnPropertyNames(obj));
+          obj = Object.getPrototypeOf(obj);
         }
-        if (obj instanceof Sk.builtin.lng) {
-          return Sk.builtin.asnum$(obj);
+        const pyDir = toJsArray(Sk.misceval.callsimArray(Sk.builtin.type.prototype.__dir__, [this.ob$type]));
+        return new toPyList(/* @__PURE__ */ new Set([...pyDir, ...dir]));
+      }
+      var proxyDirMethodDef = {
+        __dir__: {
+          $meth: proxyDir,
+          $flags: { NoArgs: true }
         }
-        if (typeof obj === "number" || typeof obj === "boolean") {
-          return obj;
-        }
-        if (typeof obj === "string") {
-          return new Sk.builtin.str(obj);
-        }
-        Sk.asserts.fail("unexpected type for basicwrap");
       };
-      Sk.exportSymbol("Sk.ffi.basicwrap", Sk.ffi.basicwrap);
-      Sk.ffi.unwrapo = function(obj) {
-        if (obj === void 0) {
-          return void 0;
+      var JsProxy = Sk.abstr.buildNativeClass("Proxy", {
+        constructor: function JsProxy2(obj, flags) {
+          if (obj === void 0) {
+            throw new Sk.builtin.TypeError("Proxy cannot be called from python");
+          }
+          this.js$wrapped = obj;
+          this.$module = null;
+          this.$methods = /* @__PURE__ */ Object.create(null);
+          this.in$repr = false;
+          flags || (flags = {});
+          Object.defineProperties(this, this.memoized$slots);
+          if (typeof obj === "function") {
+            this.is$callable = true;
+            this.$bound = flags.bound;
+            this.$name = flags.name || obj.name || "(native JS)";
+            if (this.$name.length <= 2) {
+              this.$name = this.$name + " (native JS)";
+            }
+          } else {
+            this.is$callable = false;
+            delete this.is$type;
+            this.is$type = false;
+            this.$name = flags.name;
+          }
+        },
+        slots: {
+          tp$doc: "proxy for a javascript object",
+          tp$hash() {
+            return Sk.builtin.object.prototype.tp$hash.call(this.js$wrapped);
+          },
+          tp$getattr(pyName) {
+            return this.$lookup(pyName) || Sk.generic.getAttr.call(this, pyName);
+          },
+          tp$setattr: setJsProxyAttr,
+          $r() {
+            if (this.is$callable) {
+              if (this.is$type || !this.$bound) {
+                return new Sk.builtin.str("<" + this.tp$name + " '" + this.$name + "'>");
+              }
+              const boundRepr = Sk.misceval.objectRepr(proxy(this.$bound));
+              return new Sk.builtin.str("<bound " + this.tp$name + " '" + this.$name + "' of " + boundRepr + ">");
+            } else if (this.js$proto === OBJECT_PROTO) {
+              if (this.in$repr) {
+                return new Sk.builtin.str("{...}");
+              }
+              this.in$repr = true;
+              const entries = Object.entries(this.js$wrapped).map(([key, val]) => {
+                val = toPy(val, boundHook(this.js$wrapped, key));
+                return "'" + key + "': " + Sk.misceval.objectRepr(val);
+              });
+              const ret = new Sk.builtin.str("proxyobject({" + entries.join(", ") + "})");
+              this.in$repr = false;
+              return ret;
+            }
+            const object = this.tp$name === "proxyobject" ? "object" : "proxyobject";
+            return new Sk.builtin.str("<" + this.tp$name + " " + object + ">");
+          },
+          tp$as_sequence_or_mapping: true,
+          mp$subscript(pyItem) {
+            const ret = this.$lookup(pyItem);
+            if (ret === void 0) {
+              throw new Sk.builtin.LookupError(pyItem);
+            }
+            return ret;
+          },
+          mp$ass_subscript(pyItem, value) {
+            return this.tp$setattr(pyItem, value);
+          },
+          sq$contains(item) {
+            return toJs(item) in this.js$wrapped;
+          },
+          ob$eq(other) {
+            return this.js$wrapped === other.js$wrapped;
+          },
+          ob$ne(other) {
+            return this.js$wrapped !== other.js$wrapped;
+          },
+          tp$as_number: true,
+          nb$bool() {
+            if (this.js$proto === OBJECT_PROTO) {
+              return Object.keys(this.js$wrapped).length > 0;
+            } else if (this.sq$length) {
+              return this.sq$length() > 0;
+            } else {
+              return true;
+            }
+          }
+        },
+        methods: __spreadProps(__spreadValues({}, proxyDirMethodDef), {
+          __new__: {
+            // this is effectively a static method
+            $meth(js_proxy, ...args) {
+              if (!(js_proxy instanceof JsProxy)) {
+                throw new Sk.builtin.TypeError(
+                  "expected a proxy object as the first argument not " + Sk.abstr.typeName(js_proxy)
+                );
+              }
+              try {
+                return js_proxy.$new(args);
+              } catch (e) {
+                if (e instanceof TypeError && e.message.includes("not a constructor")) {
+                  throw new Sk.builtin.TypeError(Sk.misceval.objectRepr(js_proxy) + " is not a constructor");
+                }
+                throw e;
+              }
+            },
+            $flags: { MinArgs: 1 }
+          },
+          __call__: {
+            $meth(args, kwargs) {
+              if (typeof this.js$wrapped !== "function") {
+                throw new Sk.builtin.TypeError("'" + this.tp$name + "' object is not callable");
+              }
+              return this.$call(args, kwargs);
+            },
+            $flags: { FastCall: true }
+          },
+          keys: {
+            $meth() {
+              return new Sk.builtin.list(Object.keys(this.js$wrapped).map((x) => new Sk.builtin.str(x)));
+            },
+            $flags: { NoArgs: true }
+          },
+          get: {
+            $meth(pyName, _default) {
+              return this.$lookup(pyName) || _default || Sk.builtin.none.none$;
+            },
+            $flags: { MinArgs: 1, MaxArgs: 2 }
+          }
+        }),
+        getsets: {
+          __class__: {
+            $get() {
+              return toPy(this.js$wrapped.constructor, pyHooks);
+            },
+            $set() {
+              throw new Sk.builtin.TypeError("not writable");
+            }
+          },
+          __name__: {
+            $get() {
+              return new Sk.builtin.str(this.$name);
+            }
+          },
+          __module__: {
+            $get() {
+              return this.$module || Sk.builtin.none.none$;
+            },
+            $set(v) {
+              this.$module = v;
+            }
+          }
+        },
+        proto: {
+          valueOf() {
+            return this.js$wrapped;
+          },
+          $new(args, kwargs) {
+            Sk.abstr.checkNoKwargs("__new__", kwargs);
+            return toPy(new this.js$wrapped(...args.map((x) => toJs(x, jsHooks))), constructorHook(this.$name));
+          },
+          $call(args, kwargs) {
+            Sk.abstr.checkNoKwargs("__call__", kwargs);
+            return Sk.misceval.chain(
+              this.js$wrapped.apply(
+                this.$bound,
+                args.map((x) => toJs(x, jsHooks))
+              ),
+              (res) => res instanceof Promise ? Sk.misceval.promiseToSuspension(res) : res,
+              (res) => toPy(res, pyHooks)
+            );
+          },
+          $lookup(pyName) {
+            const jsName = pyName.toString();
+            const attr = this.js$wrapped[jsName];
+            if (attr !== void 0) {
+              if (isCrossOriginWindow(attr)) {
+                return proxy(attr, { name: "CrossOriginWindow" });
+              }
+              return toPy(attr, boundHook(this.js$wrapped, jsName));
+            } else if (jsName in this.js$wrapped) {
+              return Sk.builtin.none.none$;
+            }
+          },
+          // only get these if we need them
+          memoized$slots: {
+            js$proto: {
+              configurable: true,
+              get() {
+                delete this.js$proto;
+                return this.js$proto = Object.getPrototypeOf(this.js$wrapped);
+              }
+            },
+            tp$iter: {
+              configurable: true,
+              get() {
+                delete this.tp$iter;
+                if (this.js$wrapped[Symbol.iterator] !== void 0) {
+                  return this.tp$iter = () => {
+                    return proxy(this.js$wrapped[Symbol.iterator]());
+                  };
+                } else {
+                  return this.tp$iter = () => {
+                    throw new Sk.builtin.TypeError(Sk.misceval.objectRepr(this) + " is not iterable");
+                  };
+                }
+              }
+            },
+            tp$iternext: {
+              configurable: true,
+              get() {
+                delete this.tp$iternext;
+                if (this.js$wrapped.next !== void 0) {
+                  return this.tp$iternext = () => {
+                    const nxt = this.js$wrapped.next().value;
+                    return nxt && toPy(nxt, pyHooks);
+                  };
+                }
+              }
+            },
+            sq$length: {
+              configurable: true,
+              get() {
+                delete this.sq$length;
+                if (!this.is$callable && this.js$wrapped.length !== void 0) {
+                  return this.sq$length = () => this.js$wrapped.length;
+                }
+              }
+            },
+            tp$call: {
+              configurable: true,
+              get() {
+                delete this.tp$call;
+                if (this.is$callable) {
+                  return this.tp$call = this.is$type ? this.$new : this.$call;
+                }
+              }
+            },
+            tp$name: {
+              configurable: true,
+              get() {
+                delete this.tp$name;
+                if (!this.is$callable) {
+                  const obj = this.js$wrapped;
+                  let tp$name = obj[Symbol.toStringTag] || this.$name || obj.constructor && obj.constructor.name || "proxyobject";
+                  if (tp$name === "Object") {
+                    tp$name = this[Symbol.toStringTag];
+                    tp$name = "proxyobject";
+                  } else if (tp$name.length <= 2) {
+                    tp$name = proxy(obj.constructor).$name;
+                  }
+                  return this.tp$name = tp$name;
+                } else {
+                  return this.tp$name = this.is$type ? "proxyclass" : this.$bound ? "proxymethod" : "proxyfunction";
+                }
+              }
+            },
+            is$type: {
+              configurable: true,
+              get() {
+                delete this.is$type;
+                const jsFunc = this.js$wrapped;
+                const proto = jsFunc.prototype;
+                if (proto === void 0) {
+                  return this.is$type = jsFunc === Sk.global.Proxy;
+                }
+                const maybeConstructor = checkBodyIsMaybeConstructor(jsFunc);
+                if (maybeConstructor === true) {
+                  return this.is$type = true;
+                } else if (maybeConstructor === false) {
+                  return this.is$type = false;
+                }
+                const protoLen = Object.getOwnPropertyNames(proto).length;
+                if (protoLen > 1) {
+                  return this.is$type = true;
+                }
+                return this.is$type = Object.getPrototypeOf(proto) !== OBJECT_PROTO;
+              }
+            }
+          }
+        },
+        flags: {
+          sk$unacceptableBase: true
         }
-        return obj["v"];
+      });
+      var JsProxyObjectAsDict = Sk.abstr.buildNativeClass("ProxyObject", {
+        constructor: function(obj) {
+          Sk.builtin.dict.call(this);
+          this.js$wrapped = obj;
+        }
+      });
+      function proxyGetAttr(pyName) {
+        return Sk.generic.getAttr.call(this, pyName) || this.$lookup(pyName);
+      }
+      function dict$clear() {
+        this.js$wrapped.clear();
+      }
+      function dict$copy() {
+        return Sk.misceval.callsimOrSuspendArray(Sk.builtin.dict, [this]);
+      }
+      function get$size() {
+        return this.js$wrapped.size;
+      }
+      function mp$lookup(k) {
+        const jsKey = toJs(k, jsHooks);
+        if (this.js$wrapped.has(jsKey)) {
+          return this.proxy$getItem(jsKey);
+        }
+      }
+      function pop$item(k) {
+        const jsKey = toJs(k, jsHooks);
+        if (this.js$wrapped.has(jsKey)) {
+          const rv = this.proxy$getItem(jsKey);
+          this.js$wrapped.delete(jsKey);
+          return rv;
+        }
+      }
+      var JsProxyMap = Sk.abstr.buildNativeClass("ProxyMap", {
+        base: Sk.builtin.dict,
+        constructor: function(obj) {
+          Sk.builtin.dict.call(this);
+          this.js$wrapped = obj;
+        },
+        slots: {
+          tp$getattr: proxyGetAttr,
+          $r() {
+            return new Sk.builtin.str(`ProxyMap(${Sk.builtin.dict.prototype.$r.call(this)})`);
+          }
+        },
+        methods: proxyDirMethodDef,
+        proto: {
+          $lookup: JsProxy.prototype.$lookup,
+          proxy$getItem(jsKey) {
+            return toPy(this.js$wrapped.get(jsKey), pyHooks);
+          },
+          mp$lookup,
+          dict$setItem(k, v) {
+            this.js$wrapped.set(toJs(k, jsHooks), toJs(v, jsHooks));
+          },
+          dict$clear,
+          pop$item,
+          dict$copy,
+          get$size,
+          $items() {
+            return [...this.js$wrapped].map(([k, v]) => [toPy(k, pyHooks), toPy(v, pyHooks)]);
+          },
+          valueOf: JsProxy.prototype.valueOf
+        },
+        flags: {
+          sk$unacceptableBase: true
+        }
+      });
+      var InternalProxySet = Sk.abstr.buildNativeClass("InternalProxySet", {
+        base: Sk.builtin.dict,
+        constructor: function(obj) {
+          Sk.builtin.dict.call(this);
+          this.js$wrapped = obj;
+        },
+        proto: {
+          proxy$getItem(k) {
+            return true;
+          },
+          mp$lookup,
+          dict$setItem(k, v) {
+            this.js$wrapped.add(toJs(k, jsHooks));
+          },
+          dict$clear,
+          pop$item,
+          dict$copy,
+          get$size,
+          $items() {
+            return [...this.js$wrapped].map((k) => [toPy(k, pyHooks), true]);
+          }
+        },
+        flags: {
+          sk$unacceptableBase: true
+        }
+      });
+      var JsProxySet = Sk.abstr.buildNativeClass("ProxySet", {
+        base: Sk.builtin.set,
+        constructor: function(obj) {
+          Sk.builtin.set.call(this);
+          this.v = new InternalProxySet(obj);
+          this.js$wrapped = obj;
+        },
+        slots: {
+          tp$getattr: proxyGetAttr
+        },
+        methods: proxyDirMethodDef,
+        proto: {
+          $lookup: JsProxy.prototype.$lookup,
+          valueOf: JsProxy.prototype.valueOf
+        },
+        flags: {
+          sk$unacceptableBase: true
+        }
+      });
+      var ArrayFunction = {
+        apply(target, thisArg, argumentsList) {
+          const jsArgs = toJsArray(argumentsList, jsHooks);
+          return target.apply(thisArg, jsArgs);
+        }
       };
-      Sk.exportSymbol("Sk.ffi.unwrapo", Sk.ffi.unwrapo);
-      Sk.ffi.unwrapn = function(obj) {
-        if (obj === null) {
+      var arrayMethods = {};
+      var ArrayProto = Array.prototype;
+      var PROXY_SYMBOL = Symbol("$proxy");
+      var arrayHandler = {
+        get(target, attr) {
+          if (attr === PROXY_SYMBOL) {
+            return target;
+          }
+          const rv = target[attr];
+          if (attr in ArrayProto) {
+            if (typeof rv === "function") {
+              return arrayMethods[attr] || (arrayMethods[attr] = new Proxy(rv, ArrayFunction));
+            }
+            return rv;
+          }
+          if (rv === void 0 && !(attr in target)) {
+            return rv;
+          }
+          return toPy(rv, pyHooks);
+        },
+        set(target, attr, value) {
+          target[attr] = toJs(value, jsHooks);
+          return true;
+        }
+      };
+      var JsProxyList = Sk.abstr.buildNativeClass("ProxyList", {
+        base: Sk.builtin.list,
+        constructor: function(L) {
+          Sk.builtin.list.call(this, L);
+          this.js$wrapped = this.v;
+          this.v = new Proxy(this.v, arrayHandler);
+        },
+        slots: {
+          tp$getattr: proxyGetAttr,
+          tp$setattr: setJsProxyAttr,
+          $r() {
+            return new Sk.builtin.str("proxylist(" + Sk.builtin.list.prototype.$r.call(this) + ")");
+          }
+        },
+        methods: proxyDirMethodDef,
+        proto: {
+          $lookup: JsProxy.prototype.$lookup
+        }
+      });
+      var is_constructor = /^class|^function[a-zA-Z\d\(\)\{\s]+\[native code\]\s+\}$/;
+      var getFunctionBody = FUNC_PROTO.toString;
+      var noNewNeeded = /* @__PURE__ */ new Set([Number, String, Symbol, Boolean]);
+      if (typeof Sk.global.BigInt !== "undefined") {
+        noNewNeeded.add(Sk.global.BigInt);
+      }
+      function checkBodyIsMaybeConstructor(obj) {
+        const body = getFunctionBody.call(obj);
+        const match = body.match(is_constructor);
+        if (match === null) {
           return null;
+        } else if (match[0] === "class") {
+          return true;
+        } else {
+          return !noNewNeeded.has(obj);
         }
-        return obj["v"];
-      };
-      Sk.exportSymbol("Sk.ffi.unwrapn", Sk.ffi.unwrapn);
+      }
+      var WrappedSymbol = Sk.abstr.buildNativeClass("ProxySymbol", {
+        constructor: function WrappedSymbol2(symbol) {
+          this.v = symbol;
+        },
+        slots: {
+          $r() {
+            return new Sk.builtin.str(this.toString());
+          }
+        },
+        proto: {
+          toString() {
+            return this.v.toString();
+          },
+          valueOf() {
+            return this.v;
+          }
+        }
+      });
     }
   });
 

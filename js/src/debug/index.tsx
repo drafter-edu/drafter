@@ -200,10 +200,10 @@ export class DebugPanel {
                 this.historyPanel?.addResponse(event.data);
                 break;
             case "UpdatedState":
-                this.statePanel?.renderState(
-                    event.data.items ?? [],
-                    event.data.html
-                );
+                // this.statePanel?.renderState(
+                //     event.data.items ?? [],
+                //     event.data.html
+                // );
                 break;
             case "TestCaseEvent":
                 this.testingPanel?.renderTest(event.data);
