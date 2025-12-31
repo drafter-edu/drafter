@@ -6,6 +6,13 @@ import sys
 WEB_RUNTIMES = ("skulpt", "emscripten")
 
 
+def is_pyodide():
+    return sys.platform == "emscripten"
+
+def is_web():
+    return sys.platform in WEB_RUNTIMES
+
+
 def is_skulpt():
     """
     Detect if we're running inside Skulpt. Relies on the `sys.platform` setting to be "skulpt" or "emscripten".
@@ -13,7 +20,7 @@ def is_skulpt():
     Returns:
         bool: True if running inside Skulpt, False otherwise.
     """
-    return sys.platform in WEB_RUNTIMES
+    return sys.platform == "skulpt"
 
 
 def only_skulpt(callable: Callable) -> Callable:

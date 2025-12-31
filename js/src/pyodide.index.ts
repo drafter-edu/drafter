@@ -1,5 +1,8 @@
 import { loadPyodide } from "pyodide";
 import { mountDirectory } from "./pyodide_bridge/directories";
+import { DebugPanel } from "./debug";
+
+window.DebugPanel = DebugPanel;
 
 export interface PyodideInitOptions {
     code?: string;

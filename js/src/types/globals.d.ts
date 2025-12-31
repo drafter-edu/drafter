@@ -12,6 +12,7 @@ declare global {
     var DRAFTER_SITE_ROOT_ELEMENT_ID: string;
     var stopHotkeyListener: () => void;
     var hotkeyListenerReady: boolean;
+    var DebugPanel: typeof import("../debug").DebugPanel;
 }
 
 export {};

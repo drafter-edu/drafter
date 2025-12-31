@@ -2,6 +2,8 @@ import Sk from "./types/skulpt/";
 import type { pyBaseException, pyStr } from "./types/skulpt/";
 import { DebugPanel } from "./debug";
 
+window.DebugPanel = DebugPanel;
+
 export function builtinRead(path: string) {
     if (
         Sk.builtinFiles === undefined ||

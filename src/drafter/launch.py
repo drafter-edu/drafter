@@ -1,4 +1,4 @@
-from drafter.utils import is_skulpt, seek_file_by_line
+from drafter.utils import is_web, seek_file_by_line
 from drafter.client_server.commands import get_main_server
 
 
@@ -10,7 +10,7 @@ def start_server(initial_state=None, main_user_path=None, **kwargs) -> None:
     :param main_user_path: The path to the main user file (optional).
     :param kwargs: Additional keyword arguments (for backward compatibility, currently ignored).
     """
-    if is_skulpt():
+    if is_web():
         from drafter.bridge import ClientBridge
 
         client_bridge = ClientBridge()

@@ -176,7 +176,11 @@ export class DebugPanel {
         homeButtons.forEach((button) => {
             button.addEventListener("click", (event) => {
                 event.preventDefault();
-                this.clientBridge.goto("index");
+                console.log(this);
+                //this.clientBridge.goto("index");
+                window.dispatchEvent(
+                    new CustomEvent("drafter-navigate", { detail: "index" })
+                );
             });
         });
     }

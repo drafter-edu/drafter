@@ -7,6 +7,7 @@ from drafter.data.channel import DEFAULT_CHANNEL_AFTER, DEFAULT_CHANNEL_BEFORE, 
 from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.bridge.client import (
+    get_client,
     update_site,
     console_log,
     setup_navigation,

@@ -82,6 +82,9 @@ include = ["src/drafter/**"]
 line-length = 88
 target-version = ['py38']
 
+[tool.mypy]
+mypy_path = ["typings"]
+
 # [tool.hatch.envs.pyodide]
 # description = "Pyodide build and watch environment"
 # dependencies = ["pyodide-build", "watchfiles"]
