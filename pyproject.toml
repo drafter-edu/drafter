@@ -85,6 +85,10 @@ target-version = ['py38']
 [tool.mypy]
 mypy_path = ["typings"]
 
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
 # [tool.hatch.envs.pyodide]
 # description = "Pyodide build and watch environment"
 # dependencies = ["pyodide-build", "watchfiles"]

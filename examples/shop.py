@@ -10,15 +10,16 @@ class Item:
 
 @dataclass
 class State:
-    items: list[Item]
+    items2: list[Item]
     bought: list[str]
     money: int
+    tiles: list[list[str]]
 
 
 @route
 def index(state: State) -> Page:
     for_sale = []
-    for item in state.items:
+    for item in state.items2:
         if item.stock > 0:
             content = Span("Buy",
                            Button(item.name, purchase, arguments=Argument("name", item.name)),
@@ -33,8 +34,8 @@ def index(state: State) -> Page:
     ])
 
 
-def find_item(items: list[Item], name: str) -> Item:
-    for item in items:
+def find_item(items2: list[Item], name: str) -> Item:
+    for item in items2:
         if item.name == name:
             return item
     return None
@@ -43,7 +44,7 @@ def find_item(items: list[Item], name: str) -> Item:
 @route
 def purchase(state: State, name: str) -> Page:
     # Is the item in the store?
-    item = find_item(state.items, name)
+    item = find_item(state.items2, name)
     if item is None:
         return Page(state, [
             "Sorry, we do not have a " + name + " in stock",
@@ -77,4 +78,8 @@ start_server(State([
     Item("Sword of Hope", 100, 3),
     Item("John's Shield", 50, 5),
     Item("Potion", 25, 10)
-], [], 200))
+], ["Potion", "Vulnery"], 200, [
+    ["Grass", "Grass", "Tree"],
+    ["Water", "Water", "Grass"],
+    ["Mountain", "Grass", "Grass"],
+]))

@@ -85,14 +85,23 @@ export class DebugPanel {
                     </div>
                     <div class="drafter-debug-header-buttons">
                         <a href="#drafter-debug-log">Event Log</a> |
-                        <a href="#drafter-debug-current-route">Routes</a> |
                         <a href="#drafter-debug-state">State</a> |
+                        <a href="#drafter-debug-current-route">Routes</a> |
                         <a href="#drafter-debug-history">History</a> |
                         <a href="#drafter-debug-routes">Routes</a>
                     </div>
                 </div>
                 {this.createActionButtons()}
                 <div class="drafter-debug-content">
+                    <div class="drafter-debug-section" id="drafter-debug-state">
+                        <div class="drafter-debug-section-header">
+                            <h4>Current State</h4>
+                        </div>
+                        <div
+                            id="drafter-debug-current-state-content"
+                            class="drafter-debug-current-state-content"
+                        ></div>
+                    </div>
                     <div
                         class="drafter-debug-section"
                         id="drafter-debug-routes"
@@ -106,12 +115,6 @@ export class DebugPanel {
                         class="drafter-debug-section"
                         id="drafter-debug-current-route"
                     ></div>
-                    <div class="drafter-debug-section" id="drafter-debug-state">
-                        <div class="drafter-debug-section-header">
-                            <h4>Current State</h4>
-                        </div>
-                        <div id="drafter-debug-current-state-content"></div>
-                    </div>
                     <div
                         class="drafter-debug-section"
                         id="drafter-debug-history"
@@ -204,10 +207,7 @@ export class DebugPanel {
                 this.historyPanel?.addResponse(event.data);
                 break;
             case "UpdatedState":
-                // this.statePanel?.renderState(
-                //     event.data.items ?? [],
-                //     event.data.html
-                // );
+                this.statePanel?.renderState(event.data.representation);
                 break;
             case "TestCaseEvent":
                 this.testingPanel?.renderTest(event.data);

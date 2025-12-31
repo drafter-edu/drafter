@@ -1,8 +1,10 @@
 -   [ ] Compilation pipeline
     -   [ ] Compile initial page for faster load times
+    -   [ ] `launch.py` doesn't use the compilation pipeline correctly
 -   [ ] Configuration should be smoother
 -   [ ] Delete old files and old_history
 -   [ ] Debug panel: registered routes: make them links, allow the user to input text
+-   [ ] Debug panel: Disable state representation option (for performance)
 -   [ ] Debug panel: hot bar: button to hide/show the frame
 -   [ ] Debug panel: current state: show types, in nice table
 -   [ ] Debug panel: page history:

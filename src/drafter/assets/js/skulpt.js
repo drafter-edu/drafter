@@ -43,7 +43,7 @@
       var Sk2 = {};
       Sk2.build = {
         githash: "35b8d84b",
-        date: "2025-12-30T18:56:40.621Z"
+        date: "2025-12-31T21:07:43.221Z"
       };
       Sk2.global = typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};
       Sk2.exportSymbol = function(name, object) {
@@ -28399,7 +28399,7 @@
       var DEF_NONLOCAL = 2 << 10;
       var DEF_ANNOT = 2 << 11;
       var DEF_BOUND = DEF_LOCAL | DEF_PARAM | DEF_IMPORT;
-      var SCOPE_OFF = 11;
+      var SCOPE_OFF = 12;
       var SCOPE_MASK = 7;
       var LOCAL = 1;
       var GLOBAL_EXPLICIT = 2;

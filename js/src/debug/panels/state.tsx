@@ -1,19 +1,113 @@
-export type Table = {
-    columns: ["Field", "Type", "Value"] | string[];
-    rows: Array<{
-        name: string;
-        type: string;
-        value: string | Table;
-    }>;
-};
+import type {
+    SpecificRepresentation,
+    UpdatedStateEvent,
+} from "../telemetry/state";
+
+// TODO: Cycle background colors for instances of the same type for easier distinction
+// Need to track unique types seen so far, so promote to class later if needed
+
+function renderRepresentation(rep: SpecificRepresentation) {
+    switch (rep.kind) {
+        case "primitive":
+            return (
+                <div class="drafter-debug-rep-primitive drafter-debug-rep-row">
+                    <div class="drafter-debug-rep-primitive-value drafter-debug-rep-cell">
+                        {rep.value}
+                    </div>
+                    <div class="drafter-debug-rep-primitive-type drafter-debug-rep-cell">
+                        {rep.type}
+                    </div>
+                </div>
+            );
+        case "empty_linear_collection":
+            return (
+                <div class="drafter-debug-rep-empty-linear-collection drafter-debug-rep-row">
+                    <div class="drafter-debug-rep-elc-value drafter-debug-rep-cell">
+                        []
+                    </div>
+                    <div class="drafter-debug-rep-elc-type drafter-debug-rep-cell">
+                        Empty {rep.type}
+                    </div>
+                </div>
+            );
+        case "homogenous_linear_collection":
+            return (
+                <div class="drafter-debug-rep-homogenous-linear-collection drafter-debug-rep-column">
+                    <div class="drafter-debug-rep-hlc-type drafter-debug-rep-cell">
+                        {rep.type}[{rep.elementType}]
+                    </div>
+                    <div class="drafter-debug-rep-hlc-elements drafter-debug-rep-cell drafter-debug-rep-row">
+                        {rep.elements.map((el, index) => (
+                            <div class="drafter-debug-rep-hlc-element drafter-debug-rep-row">
+                                <div class="drafter-debug-rep-hlc-element-value drafter-debug-rep-cell">
+                                    {renderRepresentation(el)}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        case "dataclass":
+            return (
+                <div class="drafter-debug-rep-dataclass drafter-debug-rep-col">
+                    <div class="drafter-debug-rep-dataclass-type drafter-debug-rep-cell">
+                        {rep.type}
+                    </div>
+                    <div class="drafter-debug-rep-dataclass-fields drafter-debug-rep-cell">
+                        {rep.fields.map((field) => (
+                            <>
+                                <div class="drafter-debug-rep-dataclass-field-name  drafter-debug-rep-cell">
+                                    {field.name}:
+                                </div>
+                                <div class="drafter-debug-rep-dataclass-field-value  drafter-debug-rep-cell">
+                                    {renderRepresentation(field.value)}
+                                </div>
+                            </>
+                        ))}
+                    </div>
+                </div>
+            );
+        case "homogenous_grid":
+            return (
+                <div class="drafter-debug-rep-homogenous-grid drafter-debug-rep-column">
+                    <div class="drafter-debug-rep-hg-type drafter-debug-rep-cell">
+                        {rep.type}[{rep.type}[{rep.elementType}]]
+                    </div>
+                    <div class="drafter-debug-rep-hg-rows">
+                        {rep.rows.map((row) => (
+                            <div class="drafter-debug-rep-hg-row">
+                                {row.elements.map((el) => (
+                                    <div class="drafter-debug-rep-hg-element">
+                                        {renderRepresentation(el)}
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        default:
+            return (
+                <div class="drafter-debug-rep-default drafter-debug-rep-row">
+                    <div class="drafter-debug-rep-default-kind drafter-debug-rep-cell">
+                        {rep.kind}
+                    </div>
+                    <div class="drafter-debug-rep-default-type drafter-debug-rep-cell">
+                        {rep.type}
+                    </div>
+                </div>
+            );
+    }
+}
 
 export class StatePanel {
-    private currentTable: Table | null = null;
-    private fallbackHtml: string = "";
+    private currentState: SpecificRepresentation | null = null;
 
-    public renderState(table: Table | null, html?: string): void {
-        this.currentTable = table ?? null;
-        this.fallbackHtml = html ?? "";
+    public renderState(
+        state: SpecificRepresentation | null,
+        html?: string
+    ): void {
+        this.currentState = state ?? null;
 
         const section = document.getElementById(
             "drafter-debug-current-state-content"
@@ -22,51 +116,9 @@ export class StatePanel {
             throw new Error("DebugPanel: State section not found.");
         }
 
-        console.log(table);
+        console.log(state);
 
-        // Render nested tables; else fallback to html
-        const renderNestedTable = (tbl: Table): HTMLElement => {
-            const tableEl = (
-                <table class="drafter-state-table">
-                    <thead>
-                        <tr>
-                            <th>Field</th>
-                            <th>Type</th>
-                            <th>Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tbl.rows.map((row) => (
-                            <tr>
-                                <td>{row.name}</td>
-                                <td>{row.type}</td>
-                                <td>
-                                    {typeof row.value === "string" ? (
-                                        <pre style="margin:0">{row.value}</pre>
-                                    ) : (
-                                        renderNestedTable(row.value)
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            ) as unknown as HTMLElement;
-            return tableEl;
-        };
-
-        console.log(this.currentTable);
-
-        const result =
-            this.currentTable && this.currentTable.rows.length ? (
-                renderNestedTable(this.currentTable)
-            ) : (
-                <div class="state-content">
-                    <div
-                        dangerouslySetInnerHTML={{ __html: this.fallbackHtml }}
-                    ></div>
-                </div>
-            );
+        const result = renderRepresentation(state!);
 
         section.replaceChildren(result);
     }

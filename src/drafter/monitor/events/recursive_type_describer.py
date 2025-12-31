@@ -1,5 +1,72 @@
 '''
 Returns a dictionary with at least the fields: name, type, value
+
+Value is always able to be a single or nested Representation
+
+String/Integer/Boolean/None primitive: Value and Type boxes
+
+List[Primitive]: Two column, value and type. Value is a set of rows.
+Dict[T, Primitive]: Three columns: (Key, Value) in rows, then type column
+Class[Primitives]: Three columns: (Field, Value, Type) in rows
+Dict[Any, Any]: Four columns: (Key, Key Type, Value, Value Type) in rows
+
+List[Union]:  Need to show type per item
+
+- [X] Primitive types: str, int, float, bool, None
+- [X] Homogenous Composite types: list, dict, set, tuple
+- [+] Heterogenous Dataclass types: dataclass, class, namedtuple, dict, TypedDict
+    - [ ] namedtuple
+    - [ ] TypedDict
+    - [ ] class (non-dataclass)
+- [*] Recursive Types: Linked List, Tree Node, Graph Node
+- [ ] Type Unions: Optional, Union
+- [ ] Images (PIL): PIL.Image.Image
+- [ ] Files: pathlib.Path, io.StringIO, io.BytesIO, DrafterFile
+- [ ] Drafter components: Drafter-specific types with custom reprs
+- [ ] Binary data: bytes, bytearray
+- [ ] Functions/Methods: function, method, lambda
+- [ ] Iterator/Generators: iterator, generator, range, enumerate
+- [ ] Meta types: type, module
+- [ ] Literal Types: Literal
+- [ ] Special Types: Any, Never
+- [ ] Exceptions: Exception, BaseException
+
+Also measure complexity to provide meaningful explanations to students.
+(Could be used as a heuristic for when to trigger IndexDB storage of state snapshots.)
+
+When rendering large lists, only show the first N and last N items, with an ellipsis in between.
+
+Examples:
+
+Primitives:
+    str: "Hello World"
+    int: 42
+    float: 3.14
+    
+List of Primitives:
+    list[str]: ["apple", "banana", "cherry"]
+    list[int]: [1, 2, 3, 4, 5]
+    
+2D List of Primitives: Try to show as a table
+    list[list[int]]: [ [1, 2, 3], [4, 5, 6], [7, 8, 9] ]
+    
+
+List of Unions:
+    list[str | int]: [ ("apple", str), (42, int), ("banana", str) ]
+    
+Dataclass with Primitives:
+    Dog
+    [name, str, "Fido"]
+    [age, int, 5]
+    [is_good, bool, True]
+
+List of Dataclasses:
+    list[Dog]: [
+        [name, str, "Fido"], [age, int, 5], [is_good, bool, True]
+        [name, str, "Rex"], [age, int, 3], [is_good, bool, False]
+        [name, str, "Spot"], [age, int, 4], [is_good, bool, True]
+    ],
+
 '''
 
 from dataclasses import fields, is_dataclass
@@ -8,19 +75,61 @@ from typing import Any
 from drafter.history.utils import safe_repr
 
 
-class RecursiveTypeDescriber:
-    """Utility to describe nested Python structures as nested tables.
+def first_shared_base(cls1, cls2):
+    """
+    Return the first shared base class in the MRO of obj1 and obj2.
+    """
+    mro1 = cls1.__mro__
+    mro2 = cls2.__mro__
 
-    - Expands dataclasses, dicts, lists/tuples recursively
-    - Detects cycles and emits a placeholder
-    - Limits recursion with max_depth
-    - Produces a JSON-friendly "table" structure
+    for cls in mro1:
+        if cls in mro2:
+            return cls
+
+    return None
+
+# Adding a list of dogs
+# Then adding a list of cats
+
+
+class TypeFlattener:
+    # TODO: Need to handle shared common ancestors, collection types
+    # Should also be checking the actual types of things, not just the
+    # string representation
+    def __init__(self):
+        self._types: set[str] = set()
+        
+    def add_type(self, representation: dict):
+        full_type = representation.get("fullType", representation.get("type", "unknown"))
+        self._types.add(full_type)
+    
+    def flatten(self) -> tuple[str, list[str]]:
+        if len(self._types) == 1:
+            return "homogenous", [self._types.pop()]
+        elif len(self._types) > 1:
+            return "union", sorted(self._types)
+        else:
+            return "none", []
+    
+
+
+class RecursiveTypeDescriber:
+    """
+    Utility to describe nested Python structures as nested representations.
     """
 
-    def __init__(self, *, max_depth: int = 4, list_ellipsis_length = 10) -> None:
+    def __init__(self, *, max_depth: int = 5) -> None:
         self.max_depth: int = max_depth
-        self.list_ellipsis_length: int = list_ellipsis_length
-        self._seen: set[int] = set()
+        
+    def analyze(self, value: Any) -> dict[str, Any]:
+        try:
+            result = self._walk(value, 0, set())
+            return result
+        except Exception as e:
+            try:
+                return self._visit_error(value, e)
+            except Exception as new_e:
+                return self._visit_complete_failure(value, e, new_e)
 
     @staticmethod
     def value_type(value: Any) -> str:
@@ -28,111 +137,235 @@ class RecursiveTypeDescriber:
             return value.__class__.__name__
         except Exception:
             return type(value).__name__
-
-    def _row(self, name: str, value: Any) -> dict[str, Any]:
+        
+    def _visit_error(self, value: Any, error: Exception):
         return {
-            "name": name or "(state)",
+            "kind": "error",
+            "error_message": str(error),
             "type": self.value_type(value),
-            "value": safe_repr(value),
+            "value": repr(value),
+            "id": id(value),
+            "complexity": 0,
+        }
+    
+    def _visit_complete_failure(self, value: Any, original_error: Exception, new_error: Exception):
+        return {
+            "kind": "complete_failure",
+            "error_message": str(original_error),
+            "new_error_message": str(new_error),
+            "id": id(value),
+            "type": "?",
+            "complexity": 0,
+        }
+        
+    def _visit_primitive(self, value: str | int | float | bool | None):
+        return {
+            "kind": "primitive",
+            "value": value,
+            "type": type(value).__name__,
+            "id": id(value),
+            "complexity": 1,
+        }
+    
+    def _visit_cycle(self, value: Any):
+        return {
+            "kind": "cycle_reference",
+            "type": self.value_type(value),
+            "targetId": id(value),
+            "complexity": 100,
+        }
+        
+    def _visit_past_max_depth(self, value: Any):
+        return {
+            "kind": "max_depth_reached",
+            "type": self.value_type(value),
+            "id": id(value),
+            "complexity": 1,
+        }
+        
+    def _visit_class_instance(self, value: Any, is_a_dataclass: bool, depth: int, seen_ids: set[int]):
+        rows: list[dict[str, Any]] = []
+        total_complexity = 0
+        for f in fields(value):
+            row = self._walk(
+                getattr(value, f.name),
+                depth + 1,
+                seen_ids
+            )
+            rows.append({"name": f.name, "value": row})
+            total_complexity += row.get("complexity", 0)
+        
+        return {
+            "kind": "dataclass" if is_a_dataclass else "class",
+            "type": value.__class__.__name__,
+            "id": id(value),
+            "fields": rows,
+            "complexity": 10+total_complexity,
+        }
+        
+    def _visit_unknown(self, value: Any):
+        return {
+            "kind": "unknown",
+            "type": self.value_type(value),
+            "value": repr(value),
+            "id": id(value),
+            "complexity": 1,
         }
 
-    def _walk(self, value: Any, name: str, depth: int) -> dict[str, Any]:
+    def _walk(self, value: Any, depth: int, seen_ids: set[int]) -> dict[str, Any]:
         # Prevent infinite recursion on cyclic refs
-        try:
-            obj_id = id(value)
-        except Exception:
-            obj_id = None
-        if obj_id is not None:
-            if obj_id in self._seen:
-                return {
-                    "name": name or "(state)",
-                    "type": self.value_type(value),
-                    "value": "<cycle>",
-                }
-            self._seen.add(obj_id)
+        obj_id = id(value)
+        
+        if obj_id in seen_ids:
+            return self._visit_cycle(value)
+        
+        new_seen_ids = seen_ids | {obj_id}
+        
+        # Primitive Types
+        if isinstance(value, (str, int, float, bool, type(None))):
+            return self._visit_primitive(value)
 
         # Stop at max depth
         if depth > self.max_depth:
-            return self._row(name, value)
+            return self._visit_past_max_depth(value)
 
         # Dataclass expansion
         if is_dataclass(value):
-            rows: list[dict[str, Any]] = []
-            for f in fields(value):
-                child = getattr(value, f.name)
-                child_row = self._walk(child, f"{name}.{f.name}" if name else f.name, depth + 1)
-                rows.append(child_row)
-            return {
-                "name": name or "(state)",
-                "type": self.value_type(value),
-                "value": {
-                    "columns": ["Field", "Type", "Value"],
-                    "rows": rows,
-                },
-            }
+            return self._visit_class_instance(value, True, depth, new_seen_ids)
+        
+        # Tuple expansion
+        if isinstance(value, tuple):
+            return self._visit_tuple(value, depth, new_seen_ids)
 
+        # List/Set expansion
+        if isinstance(value, (list, set, frozenset)):
+            return self._visit_linear_collection(value, depth, new_seen_ids)
+        
         # Dict expansion
         if isinstance(value, dict):
-            rows: list[dict[str, Any]] = []
-            for k, v in value.items():
-                key_name = str(k)
-                child_row = self._walk(v, f"{name}.{key_name}" if name else key_name, depth + 1)
-                rows.append(child_row)
-            return {
-                "name": name or "(state)",
-                "type": self.value_type(value),
-                "value": {
-                    "columns": ["Field", "Type", "Value"],
-                    "rows": rows,
-                },
-            }
-
-        # List/Tuple expansion
-        if isinstance(value, (list, tuple)):
-            rows: list[dict[str, Any]] = []
-            length = len(value)
-            if length > self.list_ellipsis_length:
-                indices = list(range(self.list_ellipsis_length // 2)) + ["..."] + list(
-                    range(length - self.list_ellipsis_length // 2, length)
-                )
-            else:
-                indices = range(length)
-            for idx in indices:
-                if idx == "...":
-                    rows.append({
-                        "name": f"{name}[...]" if name else "[...]",
-                        "type": "ellipsis",
-                        "value": "...",
-                    })
-                else:
-                    child_row = self._walk(value[idx], f"{name}[{idx}]" if name else f"[{idx}]", depth + 1)  # type: ignore
-                    rows.append(child_row)
-            return {
-                "name": name or "(state)",
-                "type": self.value_type(value),
-                "value": {
-                    "columns": ["Field", "Type", "Value"],
-                    "rows": rows,
-                },
-            }
-
+            return self._visit_dict(value, depth, new_seen_ids)
         # Primitive or other object: record leaf
-        return self._row(name, value)
+        return self._visit_unknown(value)
+    
+    def _visit_tuple(self, value: Any, depth: int, seen_ids: set[int]) -> dict[str, Any]:
+        rows: list[dict[str, Any]] = []
+        types: list[str] = []
+        total_complexity = 0
+        for index, item in enumerate(value):
+            child_row = self._walk(item, depth + 1, seen_ids)
+            types.append(child_row.get("fullType", child_row.get("type", "unknown")))
+            rows.append(child_row)
+            total_complexity += child_row.get("complexity", 0)
+        if not types:
+            return {
+                "kind": "empty_tuple",
+                "type": self.value_type(value),
+                "id": id(value),
+                "complexity": 10+total_complexity,
+            }
+        else:
+            return {
+                "kind": "tuple",
+                "type": "tuple",
+                "fullType": f"tuple[{', '.join(types)}]",
+                "elements": rows,
+                "id": id(value),
+                "complexity": 10+total_complexity,
+            }
+     
+    def _visit_linear_collection(self, value: Any, depth: int, seen_ids: set[int]) -> dict[str, Any]:
+        rows: list[dict[str, Any]] = []
+        type_flattener = TypeFlattener()
+        maximum_complexity = 0
+        for index, item in enumerate(value):
+            child_row = self._walk(item, depth + 1, seen_ids)
+            type_flattener.add_type(child_row)
+            rows.append(child_row)
+            maximum_complexity = max(maximum_complexity, child_row.get("complexity", 0))
+        element_kind, element_type = type_flattener.flatten()
+        if element_kind == "none":
+            return {
+                "kind": "empty_linear_collection",
+                "type": self.value_type(value),
+                "id": id(value),
+                "complexity": 10+maximum_complexity,
+            }
+        elif element_kind == "homogenous":
+            if element_type[0].startswith("list["):
+                return {
+                    "kind": "homogenous_grid",
+                    "type": "list",
+                    "elementType": element_type[0],
+                    "rows": rows,
+                    "fullType": f"list[{element_type[0]}]",
+                    "id": id(value),
+                    "complexity": 20+maximum_complexity,
+                }
+            return {
+                "kind": "homogenous_linear_collection",
+                "type": self.value_type(value),
+                "elementType": element_type[0],
+                "fullType": f"{self.value_type(value)}[{element_type[0]}]",
+                "elements": rows,
+                "id": id(value),
+                "complexity": 10+maximum_complexity,
+            }
+        elif element_kind == "union":
+            flat_type = " | ".join(element_type)
+            return {
+                "kind": "linear_collection",
+                "type": self.value_type(value),
+                "elementType": flat_type,
+                "fullType": f"{self.value_type(value)}[{flat_type}]",
+                "elements": rows,
+                "id": id(value),
+                "complexity": 10+maximum_complexity,
+            }
+        else:
+            return self._visit_unknown(value)
+        
+    def _visit_dict(self, value: Any, depth: int, seen_ids: set[int]) -> dict[str, Any]:
+        rows: list[dict[str, Any]] = []
+        key_type_flattener = TypeFlattener()
+        value_type_flattener = TypeFlattener()
+        maximum_complexity = 0
+        for key, val in value.items():
+            child_key_row = self._walk(key, depth + 1, seen_ids)
+            child_value_row = self._walk(val, depth + 1, seen_ids)
+            key_type_flattener.add_type(child_key_row)
+            value_type_flattener.add_type(child_value_row)
+            maximum_complexity = max(
+                maximum_complexity,
+                child_key_row.get("complexity", 0),
+                child_value_row.get("complexity", 0),
+            )
+            rows.append({
+                "key": child_key_row,
+                "value": child_value_row,
+            })
+        key_kind, key_types = key_type_flattener.flatten()
+        value_kind, value_types = value_type_flattener.flatten()
+        if not rows:
+            return {
+                "kind": "empty_dict",
+                "type": self.value_type(value),
+                "id": id(value),
+                "complexity": 20+maximum_complexity,
+            }
+        else:
+            flat_keys, flat_values = " | ".join(key_types), " | ".join(value_types)
+            return {
+                "kind": "dict",
+                "type": self.value_type(value),
+                "areKeysHomogenous": key_kind == "homogenous",
+                "areValuesHomogenous": value_kind == "homogenous",
+                "keyType": flat_keys,
+                "valueType": flat_values,
+                "fullType": f"dict[{flat_keys}, {flat_values}]",
+                "entries": rows,
+                "id": id(value),
+                "complexity": 20+maximum_complexity,
+            }
 
-    def describe_table(self, state: Any) -> dict[str, Any]:
-        """Return a nested table structure for the given state.
-
-        Schema:
-        {
-          "columns": ["Field", "Type", "Value"],
-          "rows": [
-             { "name": str, "type": str, "value": str | Table }
-          ]
-        }
-        """
-        self._seen = set()
-        top_row = self._walk(state, "", 0)
-        return {
-            "columns": ["Field", "Type", "Value"],
-            "rows": [top_row],
-        }
+def analyze_type(value: Any, max_depth: int = 5) -> dict[str, Any]:
+    return RecursiveTypeDescriber(max_depth=max_depth).analyze(value)

@@ -481,3 +481,61 @@ div.btlw-container img {
 .drafter-debug-- .drafter-debug-log-content .drafter-log-warning-item {
     color: #e07c07;
 }
+
+.drafter-debug-current-state-content {
+    font-family: monospace;
+}
+
+.drafter-debug-rep-row {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+.drafter-debug-rep-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.drafter-debug-rep-cell {
+    padding: 4px 8px;
+    border: 1px solid #CCC;
+}
+
+.drafter-debug-rep-primitive {
+    background-color: #f9f9f9;
+    gap: 0px;
+}
+
+.drafter-debug-rep-dataclass {
+    background-color: #ffffe6;
+    gap: 0px;
+}
+
+/* This should be a two column wide grid */
+.drafter-debug-rep-dataclass-fields {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 4px 12px;
+}
+
+.drafter-debug-rep-empty-linear-collection,.drafter-debug-rep-homogenous-linear-collection {
+    background-color: #f0f0f0;
+    gap: 0px;
+}
+
+.drafter-debug-rep-hg-rows {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.drafter-debug-rep-hg-row {
+    display: table-row;
+}
+
+.drafter-debug-rep-hg-element {
+    display: table-cell;
+    border: 1px solid #CCC;
+    padding: 4px 8px;
+}
