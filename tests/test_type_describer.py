@@ -39,7 +39,7 @@ def test_primitive_representation():
     assert analyze_type("hello") == {
         "type": "str",
         "kind": "primitive",
-        "value": "hello",
+        "value": "'hello'",
         "id": id("hello"),
         "complexity": 1,
     }
@@ -82,9 +82,9 @@ def test_primitive_lists_representation():
         "fullType": "list[str]",
         "id": id(values),
         "elements": [
-            {"type": "str", "kind": "primitive", "value": "a", "id": id("a"), "complexity": 1},
-            {"type": "str", "kind": "primitive", "value": "b", "id": id("b"), "complexity": 1},
-            {"type": "str", "kind": "primitive", "value": "c", "id": id("c"), "complexity": 1},
+            {"type": "str", "kind": "primitive", "value": "'a'", "id": id("a"), "complexity": 1},
+            {"type": "str", "kind": "primitive", "value": "'b'", "id": id("b"), "complexity": 1},
+            {"type": "str", "kind": "primitive", "value": "'c'", "id": id("c"), "complexity": 1},
         ],
         "complexity": 11,
     }
@@ -105,7 +105,7 @@ def test_dataclass_representation():
         "kind": "dataclass",
         "id": id(dog),
         "fields": [
-            {"name": "name", "value": {"type": "str", "kind": "primitive", "value": "Buddy", "id": id("Buddy"), "complexity": 1}},
+            {"name": "name", "value": {"type": "str", "kind": "primitive", "value": "'Buddy'", "id": id("Buddy"), "complexity": 1}},
             {"name": "age", "value": {"type": "int", "kind": "primitive", "value": 5, "id": id(5), "complexity": 1}},
             {"name": "is_fuzzy", "value": {"type": "bool", "kind": "primitive", "value": True, "id": id(True), "complexity": 1}},
         ],
@@ -118,7 +118,7 @@ def test_dataclass_representation():
         "kind": "dataclass",
         "id": id(cat),
         "fields": [
-            {"name": "name", "value": {"type": "str", "kind": "primitive", "value": "Whiskers", "id": id("Whiskers"), "complexity": 1}},
+            {"name": "name", "value": {"type": "str", "kind": "primitive", "value": "'Whiskers'", "id": id("Whiskers"), "complexity": 1}},
             {"name": "lives_left", "value": {"type": "int", "kind": "primitive", "value": 9, "id": id(9), "complexity": 1}},
         ],
         "complexity": 12,
@@ -141,7 +141,7 @@ def test_list_of_dataclasses_representation():
                 "kind": "dataclass",
                 "id": id(dogs[0]),
                 "fields": [
-                    {"name": "name", "value": {"type": "str", "kind": "primitive", "value": "Buddy", "id": id("Buddy"), "complexity": 1}},
+                    {"name": "name", "value": {"type": "str", "kind": "primitive", "value": "'Buddy'", "id": id("Buddy"), "complexity": 1}},
                     {"name": "age", "value": {"type": "int", "kind": "primitive", "value": 5, "id": id(5), "complexity": 1}},
                     {"name": "is_fuzzy", "value": {"type": "bool", "kind": "primitive", "value": True, "id": id(True), "complexity": 1}},
                 ],
@@ -152,7 +152,7 @@ def test_list_of_dataclasses_representation():
                 "kind": "dataclass",
                 "id": id(dogs[1]),
                 "fields": [
-                    {"name": "name", "value": {"type": "str", "kind": "primitive", "value": "Max", "id": id("Max"), "complexity": 1}},
+                    {"name": "name", "value": {"type": "str", "kind": "primitive", "value": "'Max'", "id": id("Max"), "complexity": 1}},
                     {"name": "age", "value": {"type": "int", "kind": "primitive", "value": 3, "id": id(3), "complexity": 1}},
                     {"name": "is_fuzzy", "value": {"type": "bool", "kind": "primitive", "value": False, "id": id(False), "complexity": 1}},
                 ],
@@ -172,7 +172,7 @@ def test_mixed_list_representation():
         "id": id(value),
         "elements": [
             {"type": "int", "kind": "primitive", "value": 1, "id": id(1), "complexity": 1},
-            {"type": "str", "kind": "primitive", "value": "two", "id": id("two"), "complexity": 1},
+            {"type": "str", "kind": "primitive", "value": "'two'", "id": id("two"), "complexity": 1},
             {"type": "float", "kind": "primitive", "value": 3.0, "id": id(3.0), "complexity": 1},
         ],
         "complexity": 11,
@@ -234,7 +234,7 @@ def test_shop_state_representation():
                             "kind": "dataclass",
                             "id": id(state.items[0]),
                             "fields": [
-                                {"name": "name", "value": {"type": "str", "kind": "primitive", "value": "Sword", "id": id("Sword"), "complexity": 1}},
+                                {"name": "name", "value": {"type": "str", "kind": "primitive", "value": "'Sword'", "id": id("Sword"), "complexity": 1}},
                                 {"name": "price", "value": {"type": "int", "kind": "primitive", "value": 100, "id": id(100), "complexity": 1}},
                                 {"name": "stock", "value": {"type": "int", "kind": "primitive", "value": 5, "id": id(5), "complexity": 1}},
                             ],
@@ -245,7 +245,7 @@ def test_shop_state_representation():
                             "kind": "dataclass",
                             "id": id(state.items[1]),
                             "fields": [
-                                {"name": "name", "value": {"type": "str", "kind": "primitive", "value": "Shield", "id": id("Shield"), "complexity": 1}},
+                                {"name": "name", "value": {"type": "str", "kind": "primitive", "value": "'Shield'", "id": id("Shield"), "complexity": 1}},
                                 {"name": "price", "value": {"type": "int", "kind": "primitive", "value": 150, "id": id(150), "complexity": 1}},
                                 {"name": "stock", "value": {"type": "int", "kind": "primitive", "value": 2, "id": id(2), "complexity": 1}},
                             ],
@@ -264,7 +264,7 @@ def test_shop_state_representation():
                     "fullType": "list[str]",
                     "id": id(state.bought),
                     "elements": [
-                        {"type": "str", "kind": "primitive", "value": "Potion", "id": id("Potion"), "complexity": 1},
+                        {"type": "str", "kind": "primitive", "value": "'Potion'", "id": id("Potion"), "complexity": 1},
                     ],
                     "complexity": 11,
                 },
@@ -305,9 +305,9 @@ def test_simple_dictionary_representation():
         "fullType": "dict[str, int]",
         "id": id(value),
         "entries": [
-            { "key": {"type": "str", "kind": "primitive", "value": "a", "id": id("a"), "complexity": 1},
+            { "key": {"type": "str", "kind": "primitive", "value": "'a'", "id": id("a"), "complexity": 1},
               "value": {"type": "int", "kind": "primitive", "value": 1, "id": id(1), "complexity": 1} },
-            { "key": {"type": "str", "kind": "primitive", "value": "b", "id": id("b"), "complexity": 1},
+            { "key": {"type": "str", "kind": "primitive", "value": "'b'", "id": id("b"), "complexity": 1},
               "value": {"type": "int", "kind": "primitive", "value": 2, "id": id(2), "complexity": 1} },
         ],
         "complexity": 21,

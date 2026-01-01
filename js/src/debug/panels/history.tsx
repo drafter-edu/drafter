@@ -6,6 +6,18 @@ import type {
 
 type HistoryEvent = RequestEvent | ResponseEvent;
 
+/**
+ * Converts HTTP status codes to human-readable status names
+ */
+function statusCodeToText(statusCode: number): string {
+    if (statusCode === 200) return "Success";
+    if (statusCode >= 200 && statusCode < 300) return `Success (${statusCode})`;
+    if (statusCode >= 300 && statusCode < 400) return `Redirect (${statusCode})`;
+    if (statusCode >= 400 && statusCode < 500) return `Client Error (${statusCode})`;
+    if (statusCode >= 500) return `Server Error (${statusCode})`;
+    return `${statusCode}`;
+}
+
 export class HistoryPanel {
     private contentElement: HTMLElement;
     private listElement: HTMLElement;
@@ -103,9 +115,10 @@ export class HistoryPanel {
             : response.has_warnings
             ? "🟡"
             : "🟢";
+        const statusText = statusCodeToText(response.status_code);
         const responseElement = (
             <div class="response-event">
-                <strong>Response:</strong> {marker} {response.status_code} for
+                <strong>Response:</strong> {marker} {statusText} for
                 Request ID: {response.request_id} (Response ID:{" "}
                 {response.response_id})
                 <details>
