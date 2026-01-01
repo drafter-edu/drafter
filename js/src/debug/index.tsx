@@ -93,6 +93,15 @@ export class DebugPanel {
                 </div>
                 {this.createActionButtons()}
                 <div class="drafter-debug-content">
+                    <div
+                        class="drafter-debug-section"
+                        id="drafter-debug-current-route"
+                    >
+                        <div class="drafter-debug-section-header">
+                            <h4>Current Route</h4>
+                        </div>
+                        <div id="drafter-debug-current-route-content"></div>
+                    </div>
                     <div class="drafter-debug-section" id="drafter-debug-state">
                         <div class="drafter-debug-section-header">
                             <h4>Current State</h4>
@@ -111,10 +120,6 @@ export class DebugPanel {
                         </div>
                         <div id="drafter-routes-list"></div>
                     </div>
-                    <div
-                        class="drafter-debug-section"
-                        id="drafter-debug-current-route"
-                    ></div>
                     <div
                         class="drafter-debug-section"
                         id="drafter-debug-history"

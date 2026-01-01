@@ -23,7 +23,12 @@ export class HistoryPanel {
 
         this.contentElement = content;
 
-        const initialContent = <div id="drafter-debug-page-history-list"></div>;
+        const initialContent = (
+            <div
+                id="drafter-debug-page-history-list"
+                class="drafter-debug-page-history-list"
+            ></div>
+        );
         content?.appendChild(initialContent);
         this.listElement = document.getElementById(
             "drafter-debug-page-history-list"
@@ -31,10 +36,16 @@ export class HistoryPanel {
     }
 
     public addRequest(request: RequestEvent): void {
+        const now = new Date();
+        const prettyTime = now.toLocaleTimeString();
+
         const requestElement = (
             <div class="history-event" data-request-id={request.request_id}>
                 <div class="request-event">
                     <strong>Request:</strong>{" "}
+                    <span class="drafter-history-request-time">
+                        {prettyTime}
+                    </span>
                     <code class="drafter-history-request-url truncate">
                         {request.url}
                     </code>{" "}
@@ -45,8 +56,8 @@ export class HistoryPanel {
             </div>
         );
 
-        const historyElement = this.listElement.appendChild(requestElement);
-        historyElement
+        this.listElement.prepend(requestElement);
+        requestElement
             .querySelector(".drafter-history-request-url")
             ?.addEventListener("click", (d) => {
                 (d.target as HTMLElement).classList.toggle("truncate");

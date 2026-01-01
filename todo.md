@@ -7,6 +7,11 @@
 -   [ ] Debug panel: Disable state representation option (for performance)
 -   [ ] Debug panel: hot bar: button to hide/show the frame
 -   [ ] Debug panel: current state: show types, in nice table
+    -   [ ] Finish implementing other types
+    -   [ ] Use better color options for background and text
+    -   [ ] Render strings with quotes
+    -   [ ] Truncate long strings with "..." in the middle, click to expand
+    -   [ ] Show total number of keys/fields/items at the top
 -   [ ] Debug panel: page history:
     -   [ ] change 200 to "Success"
     -   [ ] Make very long URLs get truncated with "..." in the middle, click to expand
@@ -14,6 +19,7 @@
     -   [ ] show parameters
     -   [ ] lighten font for "via"
     -   [ ] Handle files, images, other media types better
+    -   [ ] Show in reverse order (newest at top)
 -   [ ] Debug panel: History: Clear old history button
 -   [ ] Debug panel: Console: REPL
 -   [ ] Debug panel: Download regression tests

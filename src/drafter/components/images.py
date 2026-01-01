@@ -59,7 +59,10 @@ class Image(Component, LinkContent):
             extra_settings["width"] = self.width
         if self.height is not None:
             extra_settings["height"] = self.height
-        was_pil, url = self._handle_pil_image(self.url)
+        try:
+            was_pil, url = self._handle_pil_image(self.url)
+        except Exception:
+            return "<strong>Error displaying image</strong>"
         if was_pil:
             return f"<img src='{url}' {self.parse_extra_settings(**extra_settings)}>"
         url, external = self._handle_url(self.url)

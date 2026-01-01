@@ -4,6 +4,7 @@ import io
 import json
 from typing import Union, Callable, Optional, Tuple, List, Dict, Any
 from dataclasses import dataclass
+from drafter.data.files import DrafterBinaryFile, DrafterTextFile
 from drafter.monitor.audit import log_error, log_warning
 from drafter.client_server.errors import VisitError
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
@@ -183,51 +184,72 @@ class Router:
     def try_file_upload_conversion(self, value: Any, target_type: Any) -> Any:
         """
         Attempts to convert file upload data to the specified target type.
-        File uploads come from the client as dicts with filename, content (base64), type, size.
+        File uploads come from the client as dicts with filename, content, type, size.
 
         :param value: The file upload data (dict with __file_upload__ marker).
         :param target_type: The desired type to convert to.
         :return: The converted value.
         """
-        print("Trying file upload conversion.", value, target_type)
+        # print("Trying file upload conversion.", value, target_type)
         if not isinstance(value, dict) or not value.get("__file_upload__"):
             return None
 
         # Decode the base64 content
-        content_base64 = value.get("content", "")
+        content = value.get("content", b"")
         filename = value.get("filename", "unknown")
-
-        file_bytes = content_base64
-        # try:
-        #     file_bytes = base64.b64decode(content_base64)
-        # except Exception as e:
-        #     raise ValueError(f"Could not decode file data for {filename}") from e
-
+        
         # Convert based on target type
         if target_type is bytes:
-            return file_bytes
+            return content
         elif target_type is str:
+            if not content:
+                return ""
             try:
-                return file_bytes  # .decode("utf-8")
+                return content.decode("utf-8")
             except UnicodeDecodeError as e:
                 raise ValueError(
-                    f"Could not decode file {filename} as utf-8. Perhaps the file is not the type that you expected, or the parameter type is inappropriate?"
+                    f"Could not decode file {filename} as a string of unicode text (utf-8). Perhaps the file is not the type that you expected, or the parameter type is inappropriate?"
                 ) from e
         elif target_type is dict:
             return {
                 "filename": filename,
-                "content": file_bytes,
+                "content": content,
                 "type": value.get("type"),
                 "size": value.get("size"),
             }
+        elif target_type is DrafterBinaryFile:
+            return DrafterBinaryFile(
+                filename=filename,
+                content=content,
+                content_type=value.get("type", "application/octet-stream"),
+                size=value.get("size", len(content)),
+            )
+        elif target_type is DrafterTextFile:
+            if not content:
+                text_content = ""
+            else:
+                try:
+                    text_content = content.decode("utf-8")
+                except UnicodeDecodeError as e:
+                    raise ValueError(
+                        f"Could not decode file {filename} as a string of unicode text (utf-8). Perhaps the file is not the type that you expected, or the parameter type is inappropriate?"
+                    ) from e
+            return DrafterTextFile(
+                filename=filename,
+                content=text_content,
+                content_type=value.get("type", "text/plain"),
+                size=value.get("size", len(text_content)),
+            )
         elif HAS_PILLOW and (
             target_type == PILImage.Image
             or (
                 inspect.isclass(target_type) and issubclass(target_type, PILImage.Image)
             )
         ):
+            if not content:
+                return None
             try:
-                image = PILImage.open(io.BytesIO(file_bytes))
+                image = PILImage.open(io.BytesIO(content))
                 image.filename = filename
                 return image
             except Exception as e:

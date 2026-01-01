@@ -3,12 +3,14 @@ Utility functions for the Drafter history module.
 """
 
 import html
+import json
 import base64
 import io
 from dataclasses import fields, is_dataclass
 from typing import Any
 
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
+from drafter.utils import is_pyodide, is_skulpt
 
 
 TOO_LONG_VALUE_THRESHOLD = 256
@@ -46,6 +48,19 @@ def is_generator(iterable):
     return hasattr(iterable, "__iter__") and not hasattr(iterable, "__len__")
 
 
+def image_to_bytes(value):
+    if is_skulpt():
+        with io.BytesIO() as output:
+            value.save(output, format='PNG')
+            return output.getvalue()
+    elif is_pyodide():
+        with io.BytesIO() as output:
+            value.save(output, format='PNG')
+            return output.getvalue()
+    else:
+        raise RuntimeError("Unsupported environment for image_to_bytes")
+
+
 def repr_pil_image(value):
     """
     Creates an HTML representation of a PIL Image.
@@ -56,12 +71,21 @@ def repr_pil_image(value):
     filename = value.filename if hasattr(value, "filename") else None
     if not filename:
         # Encode image as base64 data URI
-        image_data = io.BytesIO()
-        value.save(image_data, format="PNG")
-        image_data.seek(0)
-        encoded = base64.b64encode(image_data.getvalue()).decode("latin1")
-        image_src = f"data:image/png;base64,{encoded}"
-        return f"<img src='{image_src}' alt='PIL Image' />"
+        # image_data = io.BytesIO()
+        # value.save(image_data, format="PNG")
+        # image_data.seek(0)
+        # encoded = base64.b64encode(image_data.getvalue()).decode("latin1")
+        # image_src = f"data:image/png;base64,{encoded}"
+        if not value:
+            return "<strong>Empty Image</strong>"
+        try:
+            image_data = base64.b64encode(image_to_bytes(value)).decode('latin1')
+            image_src = f"data:image/png;base64,{image_data}"
+            escaped_data = json.dumps(image_data)
+            full_call = f"Image.open(io.BytesIO(base64.b64decode({escaped_data}.encode(\"latin1\"))))"
+            return f"<img src='{image_src}' alt='PIL Image' />"
+        except Exception as e:
+            return f"<strong>Error displaying image: {e}</strong>"
     else:
         # Reference by filename
         return f"<img src='{filename}' alt='Image.open({filename!r})' />"

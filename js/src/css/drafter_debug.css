@@ -398,11 +398,22 @@ div.btlw-container img {
     display: none;
 }
 
+.drafter-debug-- .drafter-debug-page-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.drafter-debug-- .history-event .drafter-history-request-time {
+    color: #506784;
+    font-size: 0.9em;
+}
+
 .drafter-debug-- .history-event .request-event {
     display: flex;
     align-items: baseline;
     flex-wrap: nowrap;
-    gap: 0.25rem;
+    gap: 0.5rem;
 }
 
 .drafter-debug-- .history-event .request-event > strong, 

@@ -321,6 +321,7 @@ def get_file_skulpt(file: Any, data: Any, key: str):
     buffer = file.arrayBuffer()
     raw_bytes = js.Uint8Array(buffer)
     content = bytes(raw_bytes)
+    # TODO: Handle TypeError, RangeError, and any other errors thrown during this process
     file_data = {
         "filename": file.name,
         "content": content,
