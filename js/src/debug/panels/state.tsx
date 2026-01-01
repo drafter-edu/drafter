@@ -70,7 +70,7 @@ function renderRepresentation(rep: SpecificRepresentation) {
             return (
                 <div class="drafter-debug-rep-homogenous-linear-collection drafter-debug-rep-column">
                     <div class="drafter-debug-rep-hlc-type drafter-debug-rep-cell">
-                        {rep.type}[{rep.elementType}]
+                        {rep.type}[{rep.elementType}] <span class="drafter-debug-count">({rep.elements.length} items)</span>
                     </div>
                     <div class="drafter-debug-rep-hlc-elements drafter-debug-rep-cell drafter-debug-rep-row">
                         {rep.elements.map((el, index) => (
@@ -87,7 +87,7 @@ function renderRepresentation(rep: SpecificRepresentation) {
             return (
                 <div class="drafter-debug-rep-dataclass drafter-debug-rep-col">
                     <div class="drafter-debug-rep-dataclass-type drafter-debug-rep-cell">
-                        {rep.type}
+                        {rep.type} <span class="drafter-debug-count">({rep.fields.length} fields)</span>
                     </div>
                     <div class="drafter-debug-rep-dataclass-fields drafter-debug-rep-cell">
                         {rep.fields.map((field) => (
@@ -107,7 +107,7 @@ function renderRepresentation(rep: SpecificRepresentation) {
             return (
                 <div class="drafter-debug-rep-homogenous-grid drafter-debug-rep-column">
                     <div class="drafter-debug-rep-hg-type drafter-debug-rep-cell">
-                        {rep.type}[{rep.type}[{rep.elementType}]]
+                        {rep.type}[{rep.type}[{rep.elementType}]] <span class="drafter-debug-count">({rep.rows.length} rows)</span>
                     </div>
                     <div class="drafter-debug-rep-hg-rows">
                         {rep.rows.map((row) => (
@@ -117,6 +117,60 @@ function renderRepresentation(rep: SpecificRepresentation) {
                                         {renderRepresentation(el)}
                                     </div>
                                 ))}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        case "linear_collection":
+            return (
+                <div class="drafter-debug-rep-linear-collection drafter-debug-rep-column">
+                    <div class="drafter-debug-rep-lc-type drafter-debug-rep-cell">
+                        {rep.type} <span class="drafter-debug-count">({rep.elements.length} items)</span>
+                    </div>
+                    <div class="drafter-debug-rep-lc-elements drafter-debug-rep-cell drafter-debug-rep-row">
+                        {rep.elements.map((el, index) => (
+                            <div class="drafter-debug-rep-lc-element drafter-debug-rep-row">
+                                <div class="drafter-debug-rep-lc-element-value drafter-debug-rep-cell">
+                                    {renderRepresentation(el)}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        case "tuple":
+            return (
+                <div class="drafter-debug-rep-tuple drafter-debug-rep-column">
+                    <div class="drafter-debug-rep-tuple-type drafter-debug-rep-cell">
+                        {rep.type} <span class="drafter-debug-count">({rep.elements.length} items)</span>
+                    </div>
+                    <div class="drafter-debug-rep-tuple-elements drafter-debug-rep-cell drafter-debug-rep-row">
+                        {rep.elements.map((el, index) => (
+                            <div class="drafter-debug-rep-tuple-element drafter-debug-rep-row">
+                                <div class="drafter-debug-rep-tuple-element-value drafter-debug-rep-cell">
+                                    {renderRepresentation(el)}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        case "dict":
+            return (
+                <div class="drafter-debug-rep-dict drafter-debug-rep-column">
+                    <div class="drafter-debug-rep-dict-type drafter-debug-rep-cell">
+                        {rep.type} <span class="drafter-debug-count">({rep.entries.length} entries)</span>
+                    </div>
+                    <div class="drafter-debug-rep-dict-entries drafter-debug-rep-cell">
+                        {rep.entries.map((entry, index) => (
+                            <div class="drafter-debug-rep-dict-entry drafter-debug-rep-row">
+                                <div class="drafter-debug-rep-dict-key drafter-debug-rep-cell">
+                                    {renderRepresentation(entry.key)}:
+                                </div>
+                                <div class="drafter-debug-rep-dict-value drafter-debug-rep-cell">
+                                    {renderRepresentation(entry.value)}
+                                </div>
                             </div>
                         ))}
                     </div>

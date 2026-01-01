@@ -572,3 +572,11 @@ div.btlw-container img {
 .truncatable-url:hover {
     background-color: #f0f0f0;
 }
+
+/* Count display for collections and dataclasses */
+.drafter-debug-count {
+    font-size: 0.9em;
+    color: #666;
+    font-weight: normal;
+    font-style: italic;
+}
