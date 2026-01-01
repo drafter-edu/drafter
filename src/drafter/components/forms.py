@@ -302,3 +302,38 @@ class TimeInput(FormComponent):
         for key, value in self.extra_settings.items():
             pieces.append(f"{key}={repr(value)}")
         return f"TimeInput({', '.join(pieces)})"
+
+
+@dataclass
+class Progress(Component):
+    """
+    HTML5 progress bar element for showing task completion.
+    
+    Args:
+        value: Current progress value (typically 0-max)
+        max: Maximum value (default: 100)
+        **kwargs: Additional HTML attributes
+        
+    Example:
+        Progress(50, max=100)  # 50% progress bar
+        Progress(30, max=50, style_width="200px")  # 60% progress, custom width
+    """
+    value: float
+    max: float
+    
+    def __init__(self, value: float, max: float = 100, **kwargs):
+        self.value = float(value)
+        self.max = float(max)
+        self.extra_settings = kwargs
+    
+    def __str__(self) -> str:
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        return f"<progress value='{self.value}' max='{self.max}' {parsed_settings}></progress>"
+    
+    def __repr__(self) -> str:
+        pieces = [repr(self.value)]
+        if self.max != 100:
+            pieces.append(f"max={repr(self.max)}")
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"Progress({', '.join(pieces)})"

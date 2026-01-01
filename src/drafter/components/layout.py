@@ -101,3 +101,29 @@ class NumberedList(_HtmlList):
 
 class BulletedList(_HtmlList):
     kind = "ul"
+
+
+@dataclass(repr=False)
+class Fragment(Component):
+    """
+    A Fragment component that renders its children without wrapping them in any HTML element.
+    Useful for grouping components without adding extra DOM nodes.
+    
+    Example:
+        Fragment(Text("Hello"), Text("World"))  # Renders: HelloWorld (no wrapper)
+    """
+    content: List[Any]
+    
+    def __init__(self, *args, **kwargs):
+        self.content = list(args)
+        if "content" in kwargs:
+            self.content.extend(kwargs.pop("content"))
+        # Fragments don't accept extra settings since they don't render a wrapper element
+        self.extra_settings = {}
+    
+    def __repr__(self):
+        return f"Fragment({', '.join(repr(item) for item in self.content)})"
+    
+    def __str__(self) -> str:
+        # Just concatenate all content without wrapping
+        return ''.join(str(item) for item in self.content)

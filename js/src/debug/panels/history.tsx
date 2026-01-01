@@ -113,6 +113,13 @@ export class HistoryPanel {
             )
             : null;
         
+        // Create a link to recreate the request
+        const recreateLink = (
+            <a href={request.url} class="request-recreate-link" title="Click to recreate this request">
+                🔄 Recreate
+            </a>
+        );
+        
         const requestElement = (
             <div class="history-event" data-request-id={request.request_id}>
                 <div class="request-event">
@@ -121,6 +128,7 @@ export class HistoryPanel {
                         {prettyTime}
                     </span>
                     {urlElement}{" "}
+                    {recreateLink}{" "}
                     <span class="drafter-history-request-meta">
                         <span class="drafter-history-via">via</span> {request.action} (ID: {request.request_id})
                     </span>

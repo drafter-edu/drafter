@@ -828,3 +828,29 @@ div.btlw-container img {
     font-size: 0.85em;
     overflow-x: auto;
 }
+
+/* Recreate request link */
+.request-recreate-link {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 6px;
+    font-size: 0.85em;
+    color: #0066cc;
+    background-color: #e8f4f8;
+    border: 1px solid #b3d9ff;
+    border-radius: 3px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.request-recreate-link:hover {
+    background-color: #d0e9ff;
+    border-color: #66b3ff;
+    text-decoration: none;
+}
+
+.request-recreate-link:active {
+    background-color: #b3d9ff;
+    transform: scale(0.98);
+}
