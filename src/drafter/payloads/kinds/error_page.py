@@ -28,7 +28,9 @@ class ErrorPage(ResponsePayload):
         if self.error.traceback:
             content.append(f"Traceback:\n{self.error.traceback}")
         body = "\n".join(content)
-        content = f"<div class='error-page'>\n<pre>{body}</pre>\n</div>"
+        content = f"<div class='error-page'>\n"
+        content += f"<div class='error-navigation'><a href='index' class='error-home-link'>🏠 Go Home</a></div>\n"
+        content += f"<pre>{body}</pre>\n</div>"
         site = "<form id='drafter-form--' enctype='multipart/form-data' accept-charset='utf-8'>"
         site += content
         site += "</form>"
