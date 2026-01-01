@@ -72,7 +72,7 @@ from drafter.deploy import (
     deploy_site,
 )
 
-from drafter.testing import assert_equal
+from drafter.testing import assert_equal, assert_has, assert_in, assert_state
 
 __all__ = [
     "dataclass",
@@ -122,6 +122,9 @@ __all__ = [
     "get_site_information",
     "deploy_site",
     "assert_equal",
+    "assert_has",
+    "assert_in",
+    "assert_state",
     "update_style",
     "update_attr",
     "float_right",

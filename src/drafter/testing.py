@@ -160,3 +160,85 @@ else:
             "The Bakery testing library is not installed; skipping assert_equal tests. "
             "To fix this, you can install Bakery with 'pip install bakery' or use a different testing framework."
         )
+
+
+def assert_has(page_content: str, expected_text: str, message: str = "") -> bool:
+    """
+    Assert that the page content contains the expected text.
+    
+    Args:
+        page_content: The full page HTML content to search in
+        expected_text: The text that should be present in the page
+        message: Optional custom error message
+        
+    Returns:
+        True if assertion passes, False otherwise
+        
+    Example:
+        assert_has(page.render(), "Welcome")
+        assert_has(page.render(), "Hello, World!", "Homepage should greet user")
+    """
+    if expected_text in page_content:
+        return True
+    else:
+        error_msg = message or f"Expected to find '{expected_text}' in page content"
+        print(f"AssertionError: {error_msg}")
+        return False
+
+
+def assert_in(expected_text: str, page_content: str, message: str = "") -> bool:
+    """
+    Assert that the expected text is in the page content.
+    Alternative to assert_has with reversed parameter order.
+    
+    Args:
+        expected_text: The text that should be present in the page
+        page_content: The full page HTML content to search in
+        message: Optional custom error message
+        
+    Returns:
+        True if assertion passes, False otherwise
+        
+    Example:
+        assert_in("Welcome", page.render())
+        assert_in("Hello, World!", page.render(), "Homepage should greet user")
+    """
+    return assert_has(page_content, expected_text, message)
+
+
+def assert_state(state: Any, expected_fields: dict, message: str = "") -> bool:
+    """
+    Assert that the state object has the expected field values.
+    
+    Args:
+        state: The state object to check (can be dict or object with attributes)
+        expected_fields: Dictionary of field names to expected values
+        message: Optional custom error message
+        
+    Returns:
+        True if all assertions pass, False otherwise
+        
+    Example:
+        assert_state(state, {'count': 5, 'name': 'Alice'})
+        assert_state(state, {'logged_in': True}, "User should be logged in")
+    """
+    all_passed = True
+    
+    for field_name, expected_value in expected_fields.items():
+        # Try dictionary access first, then attribute access
+        try:
+            if isinstance(state, dict):
+                actual_value = state.get(field_name)
+            else:
+                actual_value = getattr(state, field_name, None)
+            
+            if actual_value != expected_value:
+                error_msg = message or f"Expected state.{field_name} to be {expected_value!r}, but got {actual_value!r}"
+                print(f"AssertionError: {error_msg}")
+                all_passed = False
+        except (KeyError, AttributeError) as e:
+            error_msg = message or f"Field '{field_name}' not found in state"
+            print(f"AssertionError: {error_msg}")
+            all_passed = False
+    
+    return all_passed

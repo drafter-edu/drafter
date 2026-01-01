@@ -265,6 +265,50 @@ function renderRepresentation(rep: SpecificRepresentation) {
 
 export class StatePanel {
     private currentState: SpecificRepresentation | null = null;
+    private isEnabled: boolean = true;
+    private toggleButton: HTMLButtonElement | null = null;
+
+    constructor() {
+        this.addToggleButton();
+    }
+
+    private addToggleButton(): void {
+        const section = document.getElementById(
+            "drafter-debug-current-state-content"
+        );
+        if (!section) {
+            return;
+        }
+
+        // Add toggle button at the top of the state panel
+        this.toggleButton = (
+            <button 
+                class="drafter-debug-state-toggle-btn"
+                title="Toggle state representation (improves performance when disabled)"
+            >
+                🔄 State Enabled
+            </button>
+        ) as HTMLButtonElement;
+
+        this.toggleButton.addEventListener("click", () => this.toggleState());
+        section.parentElement?.insertBefore(this.toggleButton, section);
+    }
+
+    private toggleState(): void {
+        this.isEnabled = !this.isEnabled;
+        
+        if (this.toggleButton) {
+            this.toggleButton.textContent = this.isEnabled 
+                ? "🔄 State Enabled" 
+                : "⏸️ State Disabled";
+            this.toggleButton.classList.toggle("disabled", !this.isEnabled);
+        }
+
+        // Re-render current state if available
+        if (this.currentState) {
+            this.renderState(this.currentState);
+        }
+    }
 
     public renderState(
         state: SpecificRepresentation | null,
@@ -280,6 +324,16 @@ export class StatePanel {
         }
 
         console.log(state);
+
+        // If state representation is disabled, show a simple message
+        if (!this.isEnabled) {
+            section.replaceChildren(
+                <div class="drafter-debug-state-disabled">
+                    State representation disabled for performance. Click the button above to enable.
+                </div>
+            );
+            return;
+        }
 
         const result = renderRepresentation(state!);
 
