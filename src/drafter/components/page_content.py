@@ -30,6 +30,15 @@ from typing import List, Optional, Union
 from drafter.components.utilities.attributes import BASELINE_ATTRS
 from drafter.urls import remap_attr_styles
 
+# Global counter for generating stable component IDs
+_component_id_counter = 0
+
+def _generate_component_id() -> str:
+    """Generates a stable unique ID for a component instance."""
+    global _component_id_counter
+    _component_id_counter += 1
+    return f"drafter-component-{_component_id_counter}"
+
 class Component:
     """
     Base class for all content that can be added to a page.
@@ -44,10 +53,23 @@ class Component:
     Ultimately, the `Component` object is converted to a string when it is rendered.
     
     This class also has some helpful methods for verifying URLs and handling attributes/styles.
+    
+    Each component instance gets a stable unique ID that can be used for tracking and debugging.
     """
     
     extra_settings: dict
     EXTRA_ATTRS: List[str] = []
+    _component_id: Optional[str] = None
+    
+    @property
+    def component_id(self) -> str:
+        """
+        Returns a stable unique ID for this component instance.
+        The ID is generated lazily on first access and remains consistent.
+        """
+        if self._component_id is None:
+            object.__setattr__(self, '_component_id', _generate_component_id())
+        return self._component_id
 
     def verify(self, router, state, configuration, request):
         """

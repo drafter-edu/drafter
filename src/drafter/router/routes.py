@@ -24,11 +24,13 @@ class Router:
 
     :ivar routes: A dictionary mapping URLs to their corresponding functions.
     :ivar signatures: A dictionary mapping functions to their introspection data.
+    :ivar ignore_parameters: A dictionary mapping URLs to lists of parameter names to ignore.
     """
 
     def __init__(self) -> None:
         self.routes = {}
         self.signatures = {}
+        self.ignore_parameters = {}
 
     def get_route(self, url: str) -> Optional[Callable]:
         """
@@ -48,15 +50,17 @@ class Router:
         """
         return url in self.routes
 
-    def add_route(self, url: str, func: Callable) -> None:
+    def add_route(self, url: str, func: Callable, ignore_parameters: Optional[List[str]] = None) -> None:
         """
         Adds a new route to the server.
 
         :param url: The URL to add the route to.
         :param func: The function to call when the route is accessed.
+        :param ignore_parameters: List of parameter names to ignore when routing.
         """
         self.routes[url] = func
         self.signatures[url] = get_signature(func)
+        self.ignore_parameters[url] = ignore_parameters or []
 
     def reset(self) -> None:
         """
@@ -64,6 +68,7 @@ class Router:
         """
         self.routes.clear()
         self.signatures.clear()
+        self.ignore_parameters.clear()
 
     def prepare_arguments(
         self,
@@ -77,6 +82,12 @@ class Router:
         :return: A tuple containing a list of positional arguments, a dictionary of keyword arguments, and a string representation of the arguments.
         """
         args, kwargs = [], request.kwargs.copy()
+        
+        # Remove ignored parameters for this route
+        ignored = self.ignore_parameters.get(request.url, [])
+        for param in ignored:
+            kwargs.pop(param, None)
+        
         button_pressed = self.preprocess_button_press(kwargs)
         signature = self.get_signature(request)
         kwargs = remap_hidden_form_parameters(kwargs, button_pressed)

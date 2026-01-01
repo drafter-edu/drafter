@@ -1,4 +1,4 @@
-from typing import Union, Callable, Optional, TypeVar, overload, ParamSpec, cast
+from typing import Union, Callable, Optional, TypeVar, overload, ParamSpec, cast, List
 from functools import wraps
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import get_main_server
@@ -10,11 +10,14 @@ T = TypeVar("T", bound=Callable[..., object])
 def route(url: T) -> T: ...
 @overload
 def route(
-    url: Union[str, None] = None, server: Optional[ClientServer] = None
+    url: Union[str, None] = None, 
+    server: Optional[ClientServer] = None,
+    ignore_parameters: Optional[List[str]] = None
 ) -> Callable[[T], T]: ...
 def route(
     url: Union[str, None, T] = None,
     server: Optional[ClientServer] = None,
+    ignore_parameters: Optional[List[str]] = None,
 ) -> Union[T, Callable[[T], T]]:
     """
     Main function to add a new route to the server. Recommended to use as a decorator.
@@ -23,6 +26,8 @@ def route(
 
     :param url: The URL to add the route to. If None, the function name will be used.
     :param server: The server to add the route to. Defaults to the main server.
+    :param ignore_parameters: List of parameter names to ignore when routing. These parameters
+                             will be silently dropped and not cause warnings or errors.
     :return: The modified route function.
     """
 
@@ -30,12 +35,12 @@ def route(
     if callable(url):
         func = cast(T, url)
         local_url = func.__name__
-        server.add_route(local_url, func)
+        server.add_route(local_url, func, ignore_parameters=ignore_parameters or [])
         return func
     
     def make_route(func: T) -> T:
         local_url = url if url is not None else func.__name__
-        server.add_route(local_url, func)
+        server.add_route(local_url, func, ignore_parameters=ignore_parameters or [])
         return func
 
     return make_route
