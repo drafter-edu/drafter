@@ -514,12 +514,12 @@ div.btlw-container img {
 }
 
 .drafter-debug-rep-primitive {
-    background-color: #f9f9f9;
+    background-color: #e8f4f8;
     gap: 0px;
 }
 
 .drafter-debug-rep-dataclass {
-    background-color: #ffffe6;
+    background-color: #fff4e6;
     gap: 0px;
 }
 
@@ -531,7 +531,22 @@ div.btlw-container img {
 }
 
 .drafter-debug-rep-empty-linear-collection,.drafter-debug-rep-homogenous-linear-collection {
-    background-color: #f0f0f0;
+    background-color: #f0f7f0;
+    gap: 0px;
+}
+
+.drafter-debug-rep-linear-collection {
+    background-color: #f0f7f0;
+    gap: 0px;
+}
+
+.drafter-debug-rep-tuple {
+    background-color: #f5f0ff;
+    gap: 0px;
+}
+
+.drafter-debug-rep-dict {
+    background-color: #fff0f5;
     gap: 0px;
 }
 
@@ -579,4 +594,37 @@ div.btlw-container img {
     color: #666;
     font-weight: normal;
     font-style: italic;
+}
+
+/* Type labels with better colors */
+.drafter-debug-rep-primitive-type {
+    color: #0066cc;
+    font-weight: 600;
+}
+
+.drafter-debug-rep-dataclass-type {
+    color: #cc6600;
+    font-weight: 600;
+}
+
+.drafter-debug-rep-hlc-type,
+.drafter-debug-rep-lc-type,
+.drafter-debug-rep-elc-type {
+    color: #009900;
+    font-weight: 600;
+}
+
+.drafter-debug-rep-tuple-type {
+    color: #9900cc;
+    font-weight: 600;
+}
+
+.drafter-debug-rep-dict-type {
+    color: #cc0066;
+    font-weight: 600;
+}
+
+.drafter-debug-rep-hg-type {
+    color: #006699;
+    font-weight: 600;
 }
