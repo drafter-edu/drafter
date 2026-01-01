@@ -58,13 +58,20 @@ class Page(ResponsePayload):
                 f" Found {incorrect_type} instead."
             )
         else:
+            # Filter out None values - they render to nothing
+            filtered_content = []
             for index, chunk in enumerate(content):
-                if not isinstance(chunk, (str, Component)):
+                if chunk is None:
+                    continue  # None values are valid and render to nothing
+                elif not isinstance(chunk, (str, Component)):
                     incorrect_type = type(chunk).__name__
                     raise ValueError(
                         "The content of a page must be a list of strings or components."
                         f" Found {incorrect_type} at index {index} instead."
                     )
+                else:
+                    filtered_content.append(chunk)
+            self.content = filtered_content
 
     def get_state_updates(self) -> tuple[bool, Any]:
         return True, self.state

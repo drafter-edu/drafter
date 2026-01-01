@@ -74,6 +74,11 @@ class Component:
         and then consolidates the processed values into the appropriate output format. Attributes
         not explicitly defined in the baseline or extra attribute lists are converted into inline
         style declarations.
+        
+        Boolean attributes (disabled, checked, readonly, required, autofocus, etc.) are rendered
+        as valueless attributes when True, and omitted when False.
+        
+        Data attributes (data-*) are supported and rendered as-is.
 
         :param kwargs: Arbitrary keyword arguments containing extra configuration settings to be
             applied or overridden. The keys represent attribute or style names, and the values
@@ -82,16 +87,35 @@ class Component:
             if any styles are provided.
         :rtype: str
         """
+        # List of HTML boolean attributes
+        BOOLEAN_ATTRS = {
+            'disabled', 'checked', 'readonly', 'required', 'autofocus', 
+            'autoplay', 'controls', 'loop', 'muted', 'selected', 'multiple',
+            'novalidate', 'formnovalidate', 'open', 'reversed', 'async', 'defer'
+        }
+        
         extra_settings = self.extra_settings.copy()
         extra_settings.update(kwargs)
         raw_styles, raw_attrs = remap_attr_styles(extra_settings)
         styles, attrs = [], []
         for key, value in raw_attrs.items():
-            if key not in self.EXTRA_ATTRS and key not in BASELINE_ATTRS:
+            # Check if it's a data-* attribute
+            is_data_attr = key.startswith('data-')
+            # Check if it's a known attribute
+            is_known_attr = key in self.EXTRA_ATTRS or key in BASELINE_ATTRS
+            
+            if not is_data_attr and not is_known_attr:
+                # Unknown attribute -> treat as style
                 styles.append(f"{key}: {value}")
             else:
-                # TODO: Is this safe enough?
-                attrs.append(f"{key}={str(value)!r}")
+                # Handle boolean attributes
+                if key in BOOLEAN_ATTRS:
+                    if value:  # Only include if True
+                        attrs.append(key)
+                else:
+                    # Regular attribute or data-* attribute
+                    # TODO: Is this safe enough?
+                    attrs.append(f"{key}={str(value)!r}")
         for key, value in raw_styles.items():
             styles.append(f"{key}: {value}")
         result = " ".join(attrs)
@@ -192,7 +216,7 @@ class Component:
         pass
 
 
-Content = Union[Component, str]
+Content = Union[Component, str, None]
 PageContent = Union[Content, List[Content]]
 
 """
