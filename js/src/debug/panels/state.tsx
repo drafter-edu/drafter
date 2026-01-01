@@ -176,6 +176,79 @@ function renderRepresentation(rep: SpecificRepresentation) {
                     </div>
                 </div>
             );
+        case "empty_tuple":
+            return (
+                <div class="drafter-debug-rep-empty-tuple drafter-debug-rep-row">
+                    <div class="drafter-debug-rep-et-value drafter-debug-rep-cell">
+                        ()
+                    </div>
+                    <div class="drafter-debug-rep-et-type drafter-debug-rep-cell">
+                        Empty tuple
+                    </div>
+                </div>
+            );
+        case "empty_dict":
+            return (
+                <div class="drafter-debug-rep-empty-dict drafter-debug-rep-row">
+                    <div class="drafter-debug-rep-ed-value drafter-debug-rep-cell">
+                        {{}}
+                    </div>
+                    <div class="drafter-debug-rep-ed-type drafter-debug-rep-cell">
+                        Empty dict
+                    </div>
+                </div>
+            );
+        case "cycle_reference":
+            return (
+                <div class="drafter-debug-rep-cycle drafter-debug-rep-row">
+                    <div class="drafter-debug-rep-cycle-message drafter-debug-rep-cell">
+                        ↻ Circular reference to {rep.type} (ID: {rep.targetId})
+                    </div>
+                </div>
+            );
+        case "max_depth_reached":
+            return (
+                <div class="drafter-debug-rep-max-depth drafter-debug-rep-row">
+                    <div class="drafter-debug-rep-max-depth-message drafter-debug-rep-cell">
+                        ... (max depth reached for {rep.type})
+                    </div>
+                </div>
+            );
+        case "unknown":
+            return (
+                <div class="drafter-debug-rep-unknown drafter-debug-rep-row">
+                    <div class="drafter-debug-rep-unknown-type drafter-debug-rep-cell">
+                        {rep.type}
+                    </div>
+                    <div class="drafter-debug-rep-unknown-value drafter-debug-rep-cell">
+                        {rep.value}
+                    </div>
+                </div>
+            );
+        case "error":
+            return (
+                <div class="drafter-debug-rep-error drafter-debug-rep-column">
+                    <div class="drafter-debug-rep-error-message drafter-debug-rep-cell">
+                        ⚠️ Error: {rep.error_message}
+                    </div>
+                    <div class="drafter-debug-rep-error-details drafter-debug-rep-cell">
+                        Type: {rep.type}, Value: {rep.value}
+                    </div>
+                </div>
+            );
+        case "complete_failure":
+            return (
+                <div class="drafter-debug-rep-failure drafter-debug-rep-column">
+                    <div class="drafter-debug-rep-failure-message drafter-debug-rep-cell">
+                        ❌ Complete Failure
+                    </div>
+                    <div class="drafter-debug-rep-failure-details drafter-debug-rep-cell">
+                        Original error: {rep.error_message}
+                        <br />
+                        Recovery error: {rep.new_error_message}
+                    </div>
+                </div>
+            );
         default:
             return (
                 <div class="drafter-debug-rep-default drafter-debug-rep-row">

@@ -5,9 +5,16 @@ export class RoutesPanel {
             throw new Error("DebugPanel: Routes section not found.");
         }
 
+        // Create a clickable link for the route
+        const routeLink = (
+            <a href={route} class="route-link">
+                <strong>{route}</strong>
+            </a>
+        ) as HTMLAnchorElement;
+
         const newRouteItem = (
             <div class="route-signature">
-                <strong>{route}</strong>:<pre>{signature}</pre>
+                {routeLink}:<pre>{signature}</pre>
             </div>
         );
 

@@ -664,3 +664,70 @@ div.btlw-container img {
 .drafter-debug-clear-history-btn:active {
     background-color: #d0d0d0;
 }
+
+/* Route links */
+.route-link {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.route-link:hover {
+    text-decoration: underline;
+}
+
+.route-link strong {
+    color: inherit;
+}
+
+/* Empty collection types */
+.drafter-debug-rep-empty-tuple,
+.drafter-debug-rep-empty-dict {
+    background-color: #fafafa;
+    gap: 0px;
+}
+
+/* Special representation types */
+.drafter-debug-rep-cycle {
+    background-color: #fff9e6;
+    gap: 0px;
+}
+
+.drafter-debug-rep-cycle-message {
+    color: #cc8800;
+    font-style: italic;
+}
+
+.drafter-debug-rep-max-depth {
+    background-color: #f0f0f0;
+    gap: 0px;
+}
+
+.drafter-debug-rep-max-depth-message {
+    color: #888;
+    font-style: italic;
+}
+
+.drafter-debug-rep-unknown {
+    background-color: #f5f5f5;
+    gap: 0px;
+}
+
+.drafter-debug-rep-error {
+    background-color: #ffe6e6;
+    gap: 0px;
+}
+
+.drafter-debug-rep-error-message {
+    color: #cc0000;
+    font-weight: 600;
+}
+
+.drafter-debug-rep-failure {
+    background-color: #ffcccc;
+    gap: 0px;
+}
+
+.drafter-debug-rep-failure-message {
+    color: #990000;
+    font-weight: 700;
+}
