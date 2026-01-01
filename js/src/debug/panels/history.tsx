@@ -68,11 +68,22 @@ export class HistoryPanel {
 
         this.contentElement = content;
 
+        const clearButton = (
+            <button class="drafter-debug-clear-history-btn">
+                Clear History
+            </button>
+        ) as HTMLButtonElement;
+        
+        clearButton.addEventListener("click", () => this.clearHistory());
+
         const initialContent = (
-            <div
-                id="drafter-debug-page-history-list"
-                class="drafter-debug-page-history-list"
-            ></div>
+            <div>
+                {clearButton}
+                <div
+                    id="drafter-debug-page-history-list"
+                    class="drafter-debug-page-history-list"
+                ></div>
+            </div>
         );
         content?.appendChild(initialContent);
         this.listElement = document.getElementById(
@@ -80,11 +91,27 @@ export class HistoryPanel {
         )!;
     }
 
+    public clearHistory(): void {
+        if (this.listElement) {
+            this.listElement.innerHTML = "";
+        }
+    }
+
     public addRequest(request: RequestEvent): void {
         const now = new Date();
         const prettyTime = now.toLocaleTimeString();
 
         const urlElement = createTruncatableUrl(request.url);
+        
+        // Show parameters if available
+        const paramsElement = request.kwargs && request.kwargs !== "{}" 
+            ? (
+                <div class="request-params">
+                    <strong>Parameters: </strong>
+                    <code class="drafter-history-request-params">{request.kwargs}</code>
+                </div>
+            )
+            : null;
         
         const requestElement = (
             <div class="history-event" data-request-id={request.request_id}>
@@ -98,6 +125,7 @@ export class HistoryPanel {
                         {request.action} (ID: {request.request_id})
                     </span>
                 </div>
+                {paramsElement}
             </div>
         );
 

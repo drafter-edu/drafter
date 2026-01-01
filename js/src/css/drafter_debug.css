@@ -628,3 +628,39 @@ div.btlw-container img {
     color: #006699;
     font-weight: 600;
 }
+
+/* Request parameters display */
+.request-params {
+    margin-left: 20px;
+    margin-top: 4px;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.drafter-history-request-params {
+    background-color: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.95em;
+}
+
+/* Clear history button */
+.drafter-debug-clear-history-btn {
+    margin-bottom: 10px;
+    padding: 6px 12px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #333;
+}
+
+.drafter-debug-clear-history-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.drafter-debug-clear-history-btn:active {
+    background-color: #d0d0d0;
+}
