@@ -122,7 +122,7 @@ export class HistoryPanel {
                     </span>
                     {urlElement}{" "}
                     <span class="drafter-history-request-meta">
-                        {request.action} (ID: {request.request_id})
+                        <span class="drafter-history-via">via</span> {request.action} (ID: {request.request_id})
                     </span>
                 </div>
                 {paramsElement}

@@ -175,6 +175,13 @@ export class DebugPanel {
                 >
                     {t("icon.reset")} {t("button.reset")}
                 </button>
+                <button
+                    id="drafter-toggle-frame-btn"
+                    title="Show/Hide Frame"
+                    class="drafter-toggle-frame-button"
+                >
+                    👁️ Toggle Frame
+                </button>
             </div>
         );
     }
@@ -191,6 +198,25 @@ export class DebugPanel {
                 );
             });
         });
+
+        const toggleFrameButton = document.getElementById("drafter-toggle-frame-btn");
+        if (toggleFrameButton) {
+            toggleFrameButton.addEventListener("click", () => {
+                this.toggleFrame();
+            });
+        }
+    }
+
+    private toggleFrame(): void {
+        const frameElement = document.querySelector(".drafter-frame--");
+        if (frameElement) {
+            const currentDisplay = window.getComputedStyle(frameElement).display;
+            if (currentDisplay === "none") {
+                (frameElement as HTMLElement).style.display = "";
+            } else {
+                (frameElement as HTMLElement).style.display = "none";
+            }
+        }
     }
 
     public handleEvent(event: TelemetryEvent): void {
