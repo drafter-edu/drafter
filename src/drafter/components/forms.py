@@ -198,3 +198,107 @@ class Label(Component):
         for key, value in self.extra_settings.items():
             pieces.append(f"{key}={repr(value)}")
         return f"Label({', '.join(pieces)})"
+
+
+# Datetime input components for handling date and time inputs
+
+@dataclass
+class DateTimeInput(FormComponent):
+    """
+    A datetime-local input component for selecting both date and time.
+    
+    :param name: The name of the form field
+    :param default_value: Optional default value in ISO 8601 format (YYYY-MM-DDTHH:MM)
+    :param kwargs: Additional HTML attributes
+    """
+    default_value: Optional[str]
+    
+    def __init__(self, name: str, default_value: Optional[str] = None, **kwargs):
+        validate_parameter_name(name, "DateTimeInput")
+        self.name = name
+        self.default_value = default_value
+        self.extra_settings = kwargs
+    
+    def __str__(self) -> str:
+        extra_settings = dict(self.extra_settings)
+        if self.default_value is not None:
+            extra_settings["value"] = html.escape(self.default_value)
+        self.handle_aria(extra_settings)
+        parsed_settings = self.parse_extra_settings(**extra_settings)
+        return f"<input type='datetime-local' name='{self.name}' {parsed_settings}>"
+    
+    def __repr__(self) -> str:
+        pieces = [repr(self.name)]
+        if self.default_value:
+            pieces.append(repr(self.default_value))
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"DateTimeInput({', '.join(pieces)})"
+
+
+@dataclass
+class DateInput(FormComponent):
+    """
+    A date input component for selecting dates.
+    
+    :param name: The name of the form field
+    :param default_value: Optional default value in ISO 8601 format (YYYY-MM-DD)
+    :param kwargs: Additional HTML attributes
+    """
+    default_value: Optional[str]
+    
+    def __init__(self, name: str, default_value: Optional[str] = None, **kwargs):
+        validate_parameter_name(name, "DateInput")
+        self.name = name
+        self.default_value = default_value
+        self.extra_settings = kwargs
+    
+    def __str__(self) -> str:
+        extra_settings = dict(self.extra_settings)
+        if self.default_value is not None:
+            extra_settings["value"] = html.escape(self.default_value)
+        self.handle_aria(extra_settings)
+        parsed_settings = self.parse_extra_settings(**extra_settings)
+        return f"<input type='date' name='{self.name}' {parsed_settings}>"
+    
+    def __repr__(self) -> str:
+        pieces = [repr(self.name)]
+        if self.default_value:
+            pieces.append(repr(self.default_value))
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"DateInput({', '.join(pieces)})"
+
+
+@dataclass
+class TimeInput(FormComponent):
+    """
+    A time input component for selecting times.
+    
+    :param name: The name of the form field
+    :param default_value: Optional default value in ISO 8601 format (HH:MM or HH:MM:SS)
+    :param kwargs: Additional HTML attributes
+    """
+    default_value: Optional[str]
+    
+    def __init__(self, name: str, default_value: Optional[str] = None, **kwargs):
+        validate_parameter_name(name, "TimeInput")
+        self.name = name
+        self.default_value = default_value
+        self.extra_settings = kwargs
+    
+    def __str__(self) -> str:
+        extra_settings = dict(self.extra_settings)
+        if self.default_value is not None:
+            extra_settings["value"] = html.escape(self.default_value)
+        self.handle_aria(extra_settings)
+        parsed_settings = self.parse_extra_settings(**extra_settings)
+        return f"<input type='time' name='{self.name}' {parsed_settings}>"
+    
+    def __repr__(self) -> str:
+        pieces = [repr(self.name)]
+        if self.default_value:
+            pieces.append(repr(self.default_value))
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"TimeInput({', '.join(pieces)})"

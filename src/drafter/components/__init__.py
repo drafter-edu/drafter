@@ -12,7 +12,7 @@ from drafter.components.layout import (
     Box,
 )
 from drafter.components.text import Text, PreformattedText, Header, Pre, RawHTML
-from drafter.components.forms import TextBox, TextArea, SelectBox, CheckBox, Label
+from drafter.components.forms import TextBox, TextArea, SelectBox, CheckBox, Label, DateTimeInput, DateInput, TimeInput
 from drafter.components.tables import Table
 from drafter.components.links import Link, Button, Argument
 
@@ -45,6 +45,9 @@ __all__ = [
     "SelectBox",
     "CheckBox",
     "Label",
+    "DateTimeInput",
+    "DateInput",
+    "TimeInput",
     "Table",
     "Link",
     "Button",

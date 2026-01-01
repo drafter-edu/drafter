@@ -25,12 +25,14 @@ class Router:
     :ivar routes: A dictionary mapping URLs to their corresponding functions.
     :ivar signatures: A dictionary mapping functions to their introspection data.
     :ivar ignore_parameters: A dictionary mapping URLs to lists of parameter names to ignore.
+    :ivar default_parameters: A dictionary mapping URLs to dictionaries of default parameter values.
     """
 
     def __init__(self) -> None:
         self.routes = {}
         self.signatures = {}
         self.ignore_parameters = {}
+        self.default_parameters = {}
 
     def get_route(self, url: str) -> Optional[Callable]:
         """
@@ -50,17 +52,19 @@ class Router:
         """
         return url in self.routes
 
-    def add_route(self, url: str, func: Callable, ignore_parameters: Optional[List[str]] = None) -> None:
+    def add_route(self, url: str, func: Callable, ignore_parameters: Optional[List[str]] = None, default_parameters: Optional[Dict[str, Any]] = None) -> None:
         """
         Adds a new route to the server.
 
         :param url: The URL to add the route to.
         :param func: The function to call when the route is accessed.
         :param ignore_parameters: List of parameter names to ignore when routing.
+        :param default_parameters: Dictionary of default parameter values to use when not provided.
         """
         self.routes[url] = func
         self.signatures[url] = get_signature(func)
         self.ignore_parameters[url] = ignore_parameters or []
+        self.default_parameters[url] = default_parameters or {}
 
     def reset(self) -> None:
         """
@@ -69,6 +73,7 @@ class Router:
         self.routes.clear()
         self.signatures.clear()
         self.ignore_parameters.clear()
+        self.default_parameters.clear()
 
     def prepare_arguments(
         self,
@@ -82,6 +87,12 @@ class Router:
         :return: A tuple containing a list of positional arguments, a dictionary of keyword arguments, and a string representation of the arguments.
         """
         args, kwargs = [], request.kwargs.copy()
+        
+        # Apply default parameters for this route
+        defaults = self.default_parameters.get(request.url, {})
+        for key, value in defaults.items():
+            if key not in kwargs:
+                kwargs[key] = value
         
         # Remove ignored parameters for this route
         ignored = self.ignore_parameters.get(request.url, [])

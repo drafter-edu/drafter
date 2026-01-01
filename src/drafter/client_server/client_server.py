@@ -454,7 +454,7 @@ class ClientServer:
         self.response_count += 1
         return response
 
-    def add_route(self, url: str, func: Any, ignore_parameters: Optional[List[str]] = None) -> None:
+    def add_route(self, url: str, func: Any, ignore_parameters: Optional[List[str]] = None, default_parameters: Optional[Dict[str, Any]] = None) -> None:
         """
         Adds a new route to the server.
 
@@ -463,8 +463,9 @@ class ClientServer:
         :param url: The URL to add the route to.
         :param func: The function to call when the route is accessed.
         :param ignore_parameters: List of parameter names to ignore when routing.
+        :param default_parameters: Dictionary of default parameter values to use when not provided.
         """
-        self.router.add_route(url, func, ignore_parameters=ignore_parameters or [])
+        self.router.add_route(url, func, ignore_parameters=ignore_parameters or [], default_parameters=default_parameters or {})
         log_data(
             RouteAddedEvent(url=url, signature=self.router.signatures[url].to_string()),
             "client_server.add_route",

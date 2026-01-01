@@ -25,7 +25,7 @@ A Component should always:
 Technically, we need the component to return not just its HTML, but also its CSS and JS additions. It might also want to add other messages to the page, such as an instruction to start a timer or something. So our render should really return a more complex structure.
 
 '''
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Any
 
 from drafter.components.utilities.attributes import BASELINE_ATTRS
 from drafter.urls import remap_attr_styles
@@ -236,6 +236,48 @@ class Component:
         :type configuration: Configuration
         """
         pass
+    
+    # Testing utility methods
+    
+    def has_attribute(self, attr_name: str) -> bool:
+        """
+        Check if this component has a specific attribute in its extra_settings.
+        
+        :param attr_name: The attribute name to check for
+        :return: True if the attribute exists, False otherwise
+        """
+        return attr_name in self.extra_settings
+    
+    def get_attribute(self, attr_name: str, default: Any = None) -> Any:
+        """
+        Get the value of a specific attribute from extra_settings.
+        
+        :param attr_name: The attribute name to retrieve
+        :param default: Default value if attribute doesn't exist
+        :return: The attribute value or default
+        """
+        return self.extra_settings.get(attr_name, default)
+    
+    def has_style(self, style_name: str) -> bool:
+        """
+        Check if this component has a specific style in its extra_settings.
+        
+        :param style_name: The style name to check for (with or without 'style_' prefix)
+        :return: True if the style exists, False otherwise
+        """
+        style_key = f"style_{style_name}" if not style_name.startswith("style_") else style_name
+        return style_key in self.extra_settings
+    
+    def get_style(self, style_name: str, default: Any = None) -> Any:
+        """
+        Get the value of a specific style from extra_settings.
+        
+        :param style_name: The style name to retrieve (with or without 'style_' prefix)
+        :param default: Default value if style doesn't exist
+        :return: The style value or default
+        """
+        style_key = f"style_{style_name}" if not style_name.startswith("style_") else style_name
+        return self.extra_settings.get(style_key, default)
 
 
 Content = Union[Component, str, None]
