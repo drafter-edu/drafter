@@ -91,10 +91,19 @@ class Page(ResponsePayload):
         chunked: list[str] = []
         for chunk in self.content:
             if isinstance(chunk, str):
-                chunked.append(f"<p>{chunk}</p>")
+                # Add formatting and whitespace for easier debugging
+                chunked.append(f"\n  <p>{chunk}</p>")
             else:
-                chunked.append(chunk.render(state, configuration))
-        content = "\n".join(chunked)
+                rendered = chunk.render(state, configuration)
+                # Add indentation for nested components
+                if rendered and not rendered.startswith('\n'):
+                    chunked.append(f"\n  {rendered}")
+                else:
+                    chunked.append(rendered)
+        # Join with newlines and add trailing newline for better readability
+        content = "".join(chunked)
+        if content:
+            content += "\n"
         return content
 
     def format(

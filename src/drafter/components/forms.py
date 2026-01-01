@@ -166,3 +166,35 @@ class CheckBox(FormComponent):
         for key, value in self.extra_settings.items():
             pieces.append(f"{key}={repr(value)}")
         return f"CheckBox({', '.join(pieces)})"
+
+
+@dataclass
+class Label(Component):
+    """
+    A label component for form fields. Can be associated with a form element using the for_id parameter.
+    
+    :param text: The text content of the label
+    :param for_id: Optional ID of the form element this label is for
+    """
+    text: str
+    for_id: Optional[str] = None
+    
+    def __init__(self, text: str, for_id: Optional[str] = None, **kwargs):
+        self.text = text
+        self.for_id = for_id
+        self.extra_settings = kwargs
+    
+    def __str__(self) -> str:
+        extra_settings = dict(self.extra_settings)
+        if self.for_id:
+            extra_settings["for"] = self.for_id
+        parsed_settings = self.parse_extra_settings(**extra_settings)
+        return f"<label {parsed_settings}>{html.escape(self.text)}</label>"
+    
+    def __repr__(self) -> str:
+        pieces = [repr(self.text)]
+        if self.for_id:
+            pieces.append(f"for_id={repr(self.for_id)}")
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"Label({', '.join(pieces)})"

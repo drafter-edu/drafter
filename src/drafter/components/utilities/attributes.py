@@ -8,6 +8,7 @@ BASELINE_ATTRS = [
     "accesskey",
     "tabindex",
     "value",
+    "for",  # Added for Label component
     "onclick",
     "ondblclick",
     "onmousedown",
