@@ -42,6 +42,8 @@ def remap_attr_styles(attributes: dict) -> Tuple[dict, dict]:
     Remaps attributes into styles and attributes dictionaries. This is useful for handling style and class attributes.
     The 'classes' key's vales will be moved to 'class' and joined with a space. Any key prefixed with 'style_' will be
     moved to the styles dictionary. All other keys will be moved to the attributes dictionary.
+    
+    Event attributes (starting with 'on_') are normalized to use no underscore (e.g., 'on_click' becomes 'onclick').
 
     :param attributes: The attributes to remap
     :return: A tuple of the styles and attributes dictionaries
@@ -59,7 +61,11 @@ def remap_attr_styles(attributes: dict) -> Tuple[dict, dict]:
         if key.startswith("style_"):
             key = key[len("style_") :]
             target = styles
-        key = key.replace("_", "-")
+        # Normalize event handlers: on_click -> onclick, on_change -> onchange, etc.
+        elif key.startswith("on_"):
+            key = key.replace("_", "")
+        else:
+            key = key.replace("_", "-")
         target[key] = value
     # All done
     return styles, attrs

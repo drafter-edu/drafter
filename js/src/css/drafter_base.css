@@ -2,6 +2,24 @@
     /* Might add more later */
 }
 
+.drafter-body-- .error-page {
+    background-color: #fff5f5;
+    border: 2px solid #e53e3e;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .drafter-body-- .error-page pre {
     white-space: pre-wrap;
+    background-color: #fffaf0;
+    border-left: 4px solid #e53e3e;
+    padding: 15px;
+    border-radius: 4px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #2d3748;
+    overflow-x: auto;
 }
