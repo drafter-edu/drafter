@@ -6,13 +6,49 @@ import type {
 // TODO: Cycle background colors for instances of the same type for easier distinction
 // Need to track unique types seen so far, so promote to class later if needed
 
+/**
+ * Truncates a string value by showing start and end with "..." in the middle.
+ * Makes the truncated text clickable to expand/collapse.
+ */
+function createTruncatableString(value: string, maxLength: number = 80): HTMLElement {
+    if (value.length <= maxLength) {
+        return <span>{value}</span>;
+    }
+    
+    const halfLength = Math.floor((maxLength - 3) / 2);
+    const truncated = value.slice(0, halfLength) + "..." + value.slice(-halfLength);
+    
+    const span = (
+        <span class="truncatable-string truncated" data-full-value={value}>
+            {truncated}
+        </span>
+    ) as HTMLElement;
+    
+    span.addEventListener("click", (e) => {
+        const target = e.target as HTMLElement;
+        const isTruncated = target.classList.contains("truncated");
+        if (isTruncated) {
+            target.textContent = target.dataset.fullValue || value;
+            target.classList.remove("truncated");
+        } else {
+            target.textContent = truncated;
+            target.classList.add("truncated");
+        }
+    });
+    
+    return span;
+}
+
 function renderRepresentation(rep: SpecificRepresentation) {
     switch (rep.kind) {
         case "primitive":
+            const valueElement = rep.type === "str" 
+                ? createTruncatableString(String(rep.value))
+                : rep.value;
             return (
                 <div class="drafter-debug-rep-primitive drafter-debug-rep-row">
                     <div class="drafter-debug-rep-primitive-value drafter-debug-rep-cell">
-                        {rep.value}
+                        {valueElement}
                     </div>
                     <div class="drafter-debug-rep-primitive-type drafter-debug-rep-cell">
                         {rep.type}

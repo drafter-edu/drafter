@@ -18,6 +18,39 @@ function statusCodeToText(statusCode: number): string {
     return `${statusCode}`;
 }
 
+/**
+ * Truncates a URL by showing start and end with "..." in the middle.
+ * Returns a clickable element that can expand/collapse.
+ */
+function createTruncatableUrl(url: string, maxLength: number = 50): HTMLElement {
+    if (url.length <= maxLength) {
+        return <code class="drafter-history-request-url">{url}</code>;
+    }
+    
+    const halfLength = Math.floor((maxLength - 3) / 2);
+    const truncated = url.slice(0, halfLength) + "..." + url.slice(-halfLength);
+    
+    const code = (
+        <code class="drafter-history-request-url truncatable-url truncated" data-full-value={url}>
+            {truncated}
+        </code>
+    ) as HTMLElement;
+    
+    code.addEventListener("click", (e) => {
+        const target = e.target as HTMLElement;
+        const isTruncated = target.classList.contains("truncated");
+        if (isTruncated) {
+            target.textContent = target.dataset.fullValue || url;
+            target.classList.remove("truncated");
+        } else {
+            target.textContent = truncated;
+            target.classList.add("truncated");
+        }
+    });
+    
+    return code;
+}
+
 export class HistoryPanel {
     private contentElement: HTMLElement;
     private listElement: HTMLElement;
@@ -51,6 +84,8 @@ export class HistoryPanel {
         const now = new Date();
         const prettyTime = now.toLocaleTimeString();
 
+        const urlElement = createTruncatableUrl(request.url);
+        
         const requestElement = (
             <div class="history-event" data-request-id={request.request_id}>
                 <div class="request-event">
@@ -58,9 +93,7 @@ export class HistoryPanel {
                     <span class="drafter-history-request-time">
                         {prettyTime}
                     </span>
-                    <code class="drafter-history-request-url truncate">
-                        {request.url}
-                    </code>{" "}
+                    {urlElement}{" "}
                     <span class="drafter-history-request-meta">
                         {request.action} (ID: {request.request_id})
                     </span>
@@ -69,11 +102,6 @@ export class HistoryPanel {
         );
 
         this.listElement.prepend(requestElement);
-        requestElement
-            .querySelector(".drafter-history-request-url")
-            ?.addEventListener("click", (d) => {
-                (d.target as HTMLElement).classList.toggle("truncate");
-            });
     }
 
     public addRequestParse(parseEvent: RequestParseEvent): void {

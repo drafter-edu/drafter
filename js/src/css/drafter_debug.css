@@ -550,3 +550,25 @@ div.btlw-container img {
     border: 1px solid #CCC;
     padding: 4px 8px;
 }
+
+/* Truncatable strings - clickable to expand/collapse */
+.truncatable-string {
+    cursor: pointer;
+    color: #0066cc;
+    text-decoration: underline;
+}
+
+.truncatable-string:hover {
+    color: #0052a3;
+}
+
+/* Truncatable URLs in history panel */
+.truncatable-url {
+    cursor: pointer;
+    color: inherit;
+    text-decoration: underline;
+}
+
+.truncatable-url:hover {
+    background-color: #f0f0f0;
+}
