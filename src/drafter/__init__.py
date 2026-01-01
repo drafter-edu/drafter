@@ -28,6 +28,8 @@ from drafter.components import (
     Image,
     Download,
     FileUpload,
+    Audio,
+    Video,
     MatPlotLibPlot,
 )
 from drafter.launch import start_server
@@ -110,6 +112,8 @@ __all__ = [
     "Image",
     "Download",
     "FileUpload",
+    "Audio",
+    "Video",
     "MatPlotLibPlot",
     "hide_debug_information",
     "show_debug_information",

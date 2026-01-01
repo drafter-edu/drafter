@@ -19,6 +19,7 @@ from drafter.components.links import Link, Button, Argument
 
 from drafter.components.images import Image
 from drafter.components.files import Download, FileUpload
+from drafter.components.media import Audio, Video
 
 from drafter.components.plotting import MatPlotLibPlot
 
@@ -58,5 +59,7 @@ __all__ = [
     "Image",
     "Download",
     "FileUpload",
+    "Audio",
+    "Video",
     "MatPlotLibPlot",
 ]
