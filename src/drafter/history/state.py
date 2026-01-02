@@ -1,5 +1,6 @@
 from typing import Any
 from dataclasses import dataclass, field
+from copy import deepcopy
 
 from drafter.monitor.audit import log_warning
 
@@ -26,7 +27,7 @@ class SiteState:
         :param new_state: The new state to set as current.
         """
         if not self.initialized:
-            self.initial = new_state
+            self.initial = deepcopy(new_state)
             self.initialized = True
         elif self.history:
             last_state = self.history[-1]
@@ -40,6 +41,7 @@ class SiteState:
                     "site_state.update",
                     f"SiteState type changed from {old_type_name} to {new_type_name}.",
                 )
+        # TODO: Should these be deep copies?
         self.current = new_state
         self.history.append(new_state)
 
@@ -48,6 +50,5 @@ class SiteState:
         Resets the site state to its initial configuration.
         """
         # TODO: Should this be a deep copy?
-        self.current = self.initial
+        self.current = deepcopy(self.initial)
         self.history.clear()
-        self.initialized = False

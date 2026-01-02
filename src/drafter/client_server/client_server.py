@@ -75,6 +75,12 @@ class ClientServer:
         self.monitor.reset()
         self.response_count = 0
         self.requests.reset()
+        log_info(
+            "server.reset",
+            "Resetting ClientServer to initial state",
+            "client_server.reset",
+            f"Server name: {self.custom_name}",
+        )
 
     def process_configuration(self):
         self.site.title = self.configuration.site_title
@@ -119,7 +125,8 @@ class ClientServer:
                     exception=e,
                 )
         # Register any default routes, if needed
-        self.router.register_default_routes()
+        self.router.register_default_routes(lambda state: self.default_reset_function(state), 
+                                            lambda state: self.default_about_function(state))
         # All done!
         log_info(
             "server.started",
@@ -127,6 +134,23 @@ class ClientServer:
             "client_server.start",
             f"Server name: {self.custom_name}",
         )
+        
+    def default_reset_function(self, state):
+        from drafter.payloads.kinds.redirect import Redirect
+        self.state.reset()
+        return Redirect("index")
+    
+    def default_about_function(self, state):
+        from drafter.payloads.kinds.page import Page
+        # TODO: Move this elsewhere
+        # TODO: Should use the student's site information if available
+        about_content = """
+        <h1>About Drafter</h1>
+        <p>Drafter is an educational library for building simple web applications using Python.</p>
+        <p>Version: 2.0.0</p>
+        <p>For more information, visit our <a href="https://drafter-edu.github.io/drafter/" target="_blank">website</a>.</p>
+        """
+        return Page(state, [about_content])
 
     def get_route(self, request: Request):
         route_func = self.router.get_route(request.url)

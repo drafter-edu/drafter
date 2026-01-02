@@ -11,12 +11,22 @@ class Redirect(ResponsePayload):
     Often, it is simpler to simply call a different route function inline.
     However, that will not change the back/forward history of the browser.
     A Redirect payload will cause the browser to navigate to a new route,
-    updating the history as appropriate.
+    updating the history as appropriate. In other words, this is like a proper
+    version of a function call that the client is aware of.
 
     :param target_route: The route to redirect to.
-    :param next_payload: An optional payload to send after the redirect.
-        Usually a Page payload.
+    :param arguments: Optional arguments to pass to the target route.
     """
 
     target_route: str
-    next_payload: Optional[ResponsePayload] = None
+    arguments: Optional[dict] = None
+    
+    def __init__(self, target_route: str, **kwargs):
+        self.target_route = target_route
+        self.arguments = kwargs if kwargs else None
+        
+    def is_redirect(self) -> bool:
+        return True
+    
+    def get_redirect(self) -> tuple[str, Optional[dict]]:
+        return self.target_route, self.arguments

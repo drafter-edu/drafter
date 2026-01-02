@@ -97,6 +97,20 @@ class Client:
             print(f"[Drafter Client] No debug panel to handle event {event}")
             raise RuntimeError("No debug panel to handle event.")
         
+    def make_redirect_request_from_response(self, response: Response) -> Request:
+        debug_log("client.make_redirect_request_from_response", response)
+        target_route, arguments = response.payload.get_redirect()
+        
+        new_request = Request(
+            self.request_count,
+            "redirect",
+            target_route,
+            arguments if arguments else {},
+            {}
+        )
+        self.request_count += 1
+        return new_request
+        
     def make_request(self, url: str, form_data: Any = None, action: str = "submit") -> Request:
         data = {}
         if is_pyodide():
@@ -393,12 +407,12 @@ def console_log(event) -> None:
 
 def setup_navigation(handle_visit: Callable) -> None:  # type: ignore
     client = get_client()
-    client.setup_navigation(handle_visit)
+    return client.setup_navigation(handle_visit)
 
 
 def set_site_title(title: str) -> None:  # type: ignore
     client = get_client()
-    client.set_site_title(title)
+    return client.set_site_title(title)
 
 
 def register_hotkey(keyCombo: str, callback: Callable[[], None]) -> None:  # type: ignore
@@ -409,7 +423,7 @@ def register_hotkey(keyCombo: str, callback: Callable[[], None]) -> None:  # typ
     :param callback: The function to call when the hotkey is pressed.
     """
     client = get_client()
-    client.register_hotkey(keyCombo, callback)
+    return client.register_hotkey(keyCombo, callback)
 
 
 def setup_debug_menu(client_bridge) -> None:  # type: ignore
@@ -419,7 +433,7 @@ def setup_debug_menu(client_bridge) -> None:  # type: ignore
     :param client_bridge: The ClientBridge instance to set up the debug menu for.
     """
     client = get_client()
-    client.setup_debug_menu(client_bridge)
+    return client.setup_debug_menu(client_bridge)
 
 
 def handle_event(event_json: dict) -> None:  # type: ignore
@@ -429,4 +443,14 @@ def handle_event(event_json: dict) -> None:  # type: ignore
     :param event_json: The telemetry event data as a JSON-serializable dictionary.
     """
     client = get_client()
-    client.handle_event(event_json)
+    return client.handle_event(event_json)
+
+def make_redirect_request_from_response(response: Response) -> Request:
+    """
+    Creates a Request object for a redirect based on the given Response.
+
+    :param response: The Response object containing redirect information.
+    :return: A Request object for the redirect.
+    """
+    client = get_client()
+    return client.make_redirect_request_from_response(response)

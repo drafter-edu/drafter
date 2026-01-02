@@ -59,3 +59,15 @@ class ResponsePayload:
         Gets any state updates that should be applied to the SiteState as part of this payload.
         """
         return False, None
+
+    def is_redirect(self) -> bool:
+        """
+        Returns whether this payload is a redirect.
+        """
+        return False
+    
+    def get_redirect(self) -> tuple[str, Optional[dict]]:
+        """
+        Gets the redirect target and arguments if this payload is a redirect.
+        """
+        return "", None

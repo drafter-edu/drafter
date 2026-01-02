@@ -61,7 +61,7 @@ class Router:
         self.routes[url] = func
         self.signatures[url] = get_signature(func)
         
-    def register_default_routes(self) -> None:
+    def register_default_routes(self, reset_function, about_function) -> None:
         """
         Registers default routes for the router.
 
@@ -69,10 +69,20 @@ class Router:
         """
         if not self.has_route("index"):
             self.add_route("index", default_index)
-
+        if not self.has_route("--reset"):
+            self.add_route("--reset", reset_function)
+        if not self.has_route("--about"):
+            self.add_route("--about", about_function)
+            
     def reset(self) -> None:
         """
-        Resets the router by clearing all routes and signatures.
+        Allows the router to reset itself. Does not remove routes
+        or signatures.
+        """
+
+    def clear(self) -> None:
+        """
+        Clears the router by removing all routes and signatures.
         """
         self.routes.clear()
         self.signatures.clear()

@@ -15,6 +15,7 @@ from drafter.bridge.client import (
     register_hotkey,
     setup_debug_menu,
     handle_event,
+    make_redirect_request_from_response
 )
 from drafter.bridge.helpers import (
     add_script,
@@ -36,6 +37,7 @@ document = js.document# type: ignore
 @dataclass
 class ClientBridge:
     channel_history: dict[str, set[str]] = field(default_factory=dict)
+    redirect_loop_stack: list[str] = field(default_factory=list)
 
     def remove_page_specific_content(self) -> None:
         """
@@ -83,7 +85,25 @@ class ClientBridge:
         self.add_channel_content(
             response.channels.get(DEFAULT_CHANNEL_AFTER), is_page_specific=True
         )
+        if response.payload.is_redirect():
+            self.handle_redirect(response, callback)
         return outcome
+    
+    def clear_redirect_stack(self) -> None:
+        """
+        Clears the redirect loop stack to prevent false positives on future redirects.
+        """
+        self.redirect_loop_stack.clear()
+    
+    def handle_redirect(self, response: Response, callback: Callable[[Request], None]) -> None:
+        if repr(response.payload) in self.redirect_loop_stack:
+            # TODO: Raise an error here instead of just logging
+            console_log("Redirect loop detected: " + " -> ".join(self.redirect_loop_stack))
+            return
+        self.redirect_loop_stack.append(repr(response.payload))
+        new_request = make_redirect_request_from_response(response)
+        callback(new_request)
+        self.redirect_loop_stack.pop()
 
     def make_initial_request(self) -> Request:
         return Request(0, "page_load", "index", {}, {})

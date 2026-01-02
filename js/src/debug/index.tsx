@@ -211,15 +211,20 @@ export class DebugPanel {
     }
 
     private attachEventHandlers(): void {
-        const homeButtons = document.querySelectorAll(".drafter-home-button");
-        homeButtons.forEach((button) => {
-            button.addEventListener("click", (event) => {
-                event.preventDefault();
-                console.log(this);
-                //this.clientBridge.goto("index");
-                window.dispatchEvent(
-                    new CustomEvent("drafter-navigate", { detail: "index" })
-                );
+        const NAVIGATION_BUTTONS = [
+            [".drafter-home-button", "index"],
+            [".drafter-reset-button", "--reset"],
+            [".drafter-about-button", "--about"],
+        ];
+        NAVIGATION_BUTTONS.forEach(([selector, detail]) => {
+            const buttons = document.querySelectorAll(selector);
+            buttons.forEach((button) => {
+                button.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    window.dispatchEvent(
+                        new CustomEvent("drafter-navigate", { detail })
+                    );
+                });
             });
         });
     }
