@@ -11,6 +11,12 @@ globalThis.console = {
 
 const noop = () => {};
 Object.defineProperty(window, "scrollTo", { value: noop, writable: true });
+Object.defineProperty(window.URL, "createObjectURL", {
+    value: noop,
+    writable: true,
+});
+
+// Mock DecompressionStream if needed
 
 // globalThis.DecompressionStream = class {
 //     constructor() {

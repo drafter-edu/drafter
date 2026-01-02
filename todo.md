@@ -5,28 +5,29 @@
 -   [ ] Delete old files and old_history
 -   [ ] Debug panel: registered routes: make them links, allow the user to input text
 -   [ ] Debug panel: Disable state representation option (for performance)
--   [ ] Debug panel: hot bar: button to hide/show the frame
+-   [x] Debug panel: hot bar: button to hide/show the frame
 -   [ ] Debug panel: current state: show types, in nice table
-    -   [ ] Finish implementing other types
-    -   [ ] Use better color options for background and text
-    -   [ ] Render strings with quotes
-    -   [ ] Truncate long strings with "..." in the middle, click to expand
-    -   [ ] Show total number of keys/fields/items at the top
+    -   [x] Finish implementing other types
+    -   [x] Use better color options for background and text
+    -   [x] Render strings with quotes
+    -   [-] Truncate long strings with "..." in the middle, click to expand
+    -   [-] Show total number of keys/fields/items at the top
 -   [ ] Debug panel: page history:
     -   [ ] change 200 to "Success"
     -   [ ] Make very long URLs get truncated with "..." in the middle, click to expand
     -   [ ] link to recreate the request
     -   [ ] show parameters
-    -   [ ] lighten font for "via"
+    -   [x] lighten font for "via"
     -   [ ] Handle files, images, other media types better
     -   [ ] Show in reverse order (newest at top)
--   [ ] Debug panel: History: Clear old history button
+-   [x] Debug panel: History: Clear old history button
 -   [ ] Debug panel: Console: REPL
 -   [ ] Debug panel: Download regression tests
 -   [ ] Debug panel: Interactive form to help create unit tests
     -   [ ] "What text/component do you expect to see on the page?"
     -   [ ] "What should the state's fields be?"
 -   [ ] Clicking on a button should make it have a spinner by default, but easily turned off
+    -   [ ] Also allow them to change what the spinner looks like
 -   [ ] Route function for custom error pages
 -   [ ] Convert existing unit tests to Jest approach
 -   [ ] Shareable links
@@ -35,17 +36,19 @@
     -   [ ] Store in memory, localstorage, etc. as needed to allow restoration on back/forward navigation
 -   [ ] Default parameters
     -   [ ] Allow urls to be re-entrant with default parameters
+    -   [ ] Parse query strings for parameters
 -   [ ] Type change warnings
 -   [ ] Warnings for parameters that were never matched to arguments
 -   [ ] Error screens need to have better styling
 -   [ ] Links for error screen to help them navigate out of the error
 -   [ ] Deep copy strategy for state
 -   [ ] Fetch support for opening files in Skulpt
--   [ ] Convert skulpt bridge to be handled via Python code rather than JS code, with a proper js bridge library
+-   [x] Convert skulpt bridge to be handled via Python code rather than JS code, with a proper js bridge library
+-   [ ] Make sure that Pyodide works with the new Client Bridge system
 -   [ ] Properly recursively render components
 -   [ ] Fragment support
 -   [ ] Progress support
--   [ ] State support
+-   [ ] Update state support
 -   [ ] New elements and features:
     -   [ ] Audio element
     -   [ ] Lat/Long
@@ -55,25 +58,25 @@
     -   [ ] Canvas element
     -   [ ] SVG element
 -   [ ] Timer route
--   [ ] Remove logic for "Outcome" since we have better ways to handle it now
--   [ ] Attributes for events should allow both "on_click" and "onclick"
+-   [x] Remove logic for "Outcome" since we have better ways to handle it now
+-   [x] Attributes for events should allow both "on_click" and "onclick"
 -   [ ] Better testing features
     -   [ ] `assert_has` and `assert_in` for checking page contents
     -   [ ] `assert_state` for checking state contents
 -   [ ] Allow the route to explicitly ignore certain parameters
 -   [ ] Components:
-    -   [ ] Label Component, with optional `for_id` attribute
-    -   [ ] Boolean attributes handling (e.g., disabled, checked, readonly)
-    -   [ ] Handle datetime inputs and types
+    -   [x] Label Component, with optional `for_id` attribute
+    -   [x] Boolean attributes handling (e.g., disabled, checked, readonly)
+    -   [x] Handle datetime inputs and types
     -   [ ] RawHTML component
-    -   [ ] Rendering components should accept None as a valid input and render to nothing
+    -   [-] Rendering components should accept None as a valid input and render to nothing
     -   [ ] Hooks for Component class (pre_render, post_render)
     -   [ ] Path to failing node (breadcrumbs) for debugging when rendering/formatting/verifying components
-    -   [ ] Support data-\* attributes
-    -   [ ] Components should have a stable unique ID
+    -   [x] Support data-\* attributes
+    -   [x] Components should have a stable unique ID
     -   [ ] Include sufficient whitespace and formatting in rendered HTML for easier debugging
     -   [ ] Functions for testing if a component has certain attributes, styles, children, etc.
--   [ ] Route for "--reset" automatically added
+-   [x] Route for "--reset" automatically added
 -   [ ] Route for "--about" automatically added
 
 Pie in the sky:
