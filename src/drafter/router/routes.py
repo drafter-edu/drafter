@@ -88,6 +88,9 @@ class Router:
         """
         args, kwargs = [], request.kwargs.copy()
         
+        # Track original parameters from the request (before applying defaults or transformations)
+        original_parameters = set(request.kwargs.keys())
+        
         # Apply default parameters for this route
         defaults = self.default_parameters.get(request.url, {})
         for key, value in defaults.items():
@@ -107,6 +110,10 @@ class Router:
         self.trim_excess_arguments(request, signature, args, kwargs)
         args, kwargs = self.convert_argument_types(signature, args, kwargs)
         self.verify_expected_parameters(request, signature, kwargs)
+        
+        # Warn about original parameters that were not matched
+        self.warn_unused_parameters(request, signature, original_parameters, kwargs, ignored)
+        
         representation = self.build_argument_representation(signature, args, kwargs)
         representation = f"{signature.function_name}({representation})"
         return args, kwargs, representation
@@ -129,6 +136,38 @@ class Router:
                 )
             ]
         )
+
+    def warn_unused_parameters(
+        self,
+        request: Request,
+        signature: RouteIntrospection,
+        original_parameters: set,
+        final_kwargs: Dict[str, Any],
+        ignored_parameters: List[str],
+    ) -> None:
+        """
+        Warns about parameters from the original request that were not matched to function arguments.
+
+        :param request: The incoming request object.
+        :param signature: The introspection data of the function.
+        :param original_parameters: Set of parameter names from the original request.
+        :param final_kwargs: The final keyword arguments after all transformations.
+        :param ignored_parameters: List of parameters that were explicitly ignored.
+        """
+        # Parameters that were in the original request but not in the final kwargs
+        # and were not explicitly ignored
+        unused = original_parameters - set(final_kwargs.keys()) - set(ignored_parameters)
+        
+        if unused:
+            unused_list = sorted(unused)
+            log_warning(
+                "request.unused_parameters",
+                f"Parameters not matched to arguments in {signature.function_name}",
+                "router.warn_unused_parameters",
+                f"The following parameters were provided but not used: {', '.join(unused_list)}\n"
+                f"Expected parameters: {', '.join(signature.expected_parameters)}",
+                route=request.url,
+            )
 
     def verify_expected_parameters(
         self,
