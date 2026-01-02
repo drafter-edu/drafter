@@ -1,6 +1,7 @@
 /**
- * Request/Response/Outcome event types for tracking page visits.
+ * Request/Response event types for tracking page visits.
  */
+import type { BaseEvent } from "./base";
 
 export interface RequestEvent extends BaseEvent {
     event_type: "RequestEvent";
@@ -28,14 +29,6 @@ export interface ResponseEvent extends BaseEvent {
     response_id: number;
     request_id: number;
     formatted_page_content: string;
-}
-
-export interface OutcomeEvent extends BaseEvent {
-    event_type: "OutcomeEvent";
-    message: string;
-    success: boolean;
-    outcome_id: number;
-    response_id: number;
 }
 
 export interface PageVisitEvent extends BaseEvent {

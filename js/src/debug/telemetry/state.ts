@@ -1,3 +1,5 @@
+import type { BaseEvent } from "./base";
+
 export interface Representation {
     kind: string;
     type: string;

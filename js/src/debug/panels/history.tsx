@@ -1,8 +1,10 @@
+import { clear } from "console";
 import type {
     RequestEvent,
     RequestParseEvent,
     ResponseEvent,
 } from "../telemetry/requests";
+import { createTruncatableUrl } from "../components/urls";
 
 type HistoryEvent = RequestEvent | ResponseEvent;
 
@@ -23,21 +25,55 @@ export class HistoryPanel {
 
         this.contentElement = content;
 
-        const initialContent = (
-            <div
-                id="drafter-debug-page-history-list"
-                class="drafter-debug-page-history-list"
-            ></div>
-        );
+        const initialContent = this.createInitialContent();
         content?.appendChild(initialContent);
         this.listElement = document.getElementById(
             "drafter-debug-page-history-list"
         )!;
     }
 
+    private createInitialContent() {
+        const clearButton = (
+            <button class="drafter-debug-clear-history-btn drafter-debug-button--">
+                Clear History
+            </button>
+        );
+        clearButton.addEventListener("click", () => {
+            if (confirm("Are you sure you want to clear the history?")) {
+                this.clearHistory();
+            }
+        });
+        return (
+            <div>
+                <div class="drafter-debug-history-actions">{clearButton}</div>
+                <div
+                    id="drafter-debug-page-history-list"
+                    class="drafter-debug-page-history-list"
+                ></div>
+            </div>
+        );
+    }
+
+    public clearHistory(): void {
+        if (this.listElement) {
+            this.listElement.innerHTML = "";
+        }
+    }
+
     public addRequest(request: RequestEvent): void {
         const now = new Date();
         const prettyTime = now.toLocaleTimeString();
+
+        const urlElement = createTruncatableUrl(request.url);
+        // TODO: Ability to debug the sent parameters
+        const recreateLink = (
+            <button
+                class="request-recreate-link drafter-debug-button--"
+                title="Click to recreate this request"
+            >
+                Revisit
+            </button>
+        );
 
         const requestElement = (
             <div class="history-event" data-request-id={request.request_id}>
@@ -46,12 +82,12 @@ export class HistoryPanel {
                     <span class="drafter-history-request-time">
                         {prettyTime}
                     </span>
-                    <code class="drafter-history-request-url truncate">
-                        {request.url}
-                    </code>{" "}
+                    {urlElement}
                     <span class="drafter-history-request-meta">
+                        <span class="drafter-history-via">via</span>{" "}
                         {request.action} (ID: {request.request_id})
                     </span>
+                    {recreateLink}
                 </div>
             </div>
         );

@@ -1,6 +1,7 @@
 /**
  * Test status event types for tracking student test results.
  */
+import type { BaseEvent } from "./base";
 
 export interface TestCaseEvent extends BaseEvent {
     event_type: "TestCaseEvent";

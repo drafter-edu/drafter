@@ -118,7 +118,10 @@ export class DebugPanel {
                         <div class="drafter-debug-section-header">
                             <h4>Registered Routes</h4>
                         </div>
-                        <div id="drafter-routes-list"></div>
+                        <div
+                            id="drafter-debug-routes-list"
+                            class="drafter-debug-routes-list"
+                        ></div>
                     </div>
                     <div
                         class="drafter-debug-section"
@@ -159,6 +162,18 @@ export class DebugPanel {
     }
 
     private createActionButtons() {
+        const toggleFrame = (
+            <button
+                id="drafter-toggle-frame-btn"
+                title="Show/Hide Frame"
+                class="drafter-toggle-frame-button"
+            >
+                👁️ Toggle Frame
+            </button>
+        );
+        toggleFrame.addEventListener("click", () => {
+            this.toggleFrame();
+        });
         return (
             <div class="drafter-debug-actions">
                 <button
@@ -175,8 +190,24 @@ export class DebugPanel {
                 >
                     {t("icon.reset")} {t("button.reset")}
                 </button>
+                {toggleFrame}
             </div>
         );
+    }
+
+    private toggleFrame(): void {
+        const frames = document.querySelectorAll(
+            ".drafter-padding-h--,.drafter-padding-v--,.drafter-header--,.drafter-footer--"
+        );
+        if (frames) {
+            frames.forEach((frame) =>
+                frame.classList.toggle("drafter-hidden--")
+            );
+        }
+        const body = document.querySelector(".drafter-body--");
+        if (body) {
+            body.classList.toggle("drafter-body-frame-hidden--");
+        }
     }
 
     private attachEventHandlers(): void {
