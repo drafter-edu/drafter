@@ -1,5 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Any, List
+import json
+import html as html_module
 from drafter.components.layout import _HtmlGroup
 from drafter.components.page_content import Component
 
@@ -129,21 +131,16 @@ class State(Component):
     indent: int
     
     def __init__(self, state_obj: Any, title: str = "Current State", indent: int = 2, **kwargs):
-        import json
         self.state_obj = state_obj
         self.title = title
         self.indent = indent
         self.extra_settings = kwargs
     
     def __str__(self) -> str:
-        import json
-        import html
-        
         # Try to convert state to JSON, fallback to repr if not serializable
         try:
             # Handle dataclass instances
             if hasattr(self.state_obj, '__dataclass_fields__'):
-                from dataclasses import asdict
                 state_dict = asdict(self.state_obj)
                 state_json = json.dumps(state_dict, indent=self.indent, default=str)
             else:
@@ -155,8 +152,8 @@ class State(Component):
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         
         # Return formatted HTML with title and state display
-        escaped_title = html.escape(self.title)
-        escaped_state = html.escape(state_json)
+        escaped_title = html_module.escape(self.title)
+        escaped_state = html_module.escape(state_json)
         
         return f"""<div class='drafter-state' {parsed_settings}>
   <h4>{escaped_title}</h4>

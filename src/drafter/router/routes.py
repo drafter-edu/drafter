@@ -156,10 +156,10 @@ class Router:
         """
         # Parameters that were in the original request but not in the final kwargs
         # and were not explicitly ignored
-        unused = original_parameters - set(final_kwargs.keys()) - set(ignored_parameters)
+        unused_parameters = original_parameters - set(final_kwargs.keys()) - set(ignored_parameters)
         
-        if unused:
-            unused_list = sorted(unused)
+        if unused_parameters:
+            unused_list = sorted(unused_parameters)
             log_warning(
                 "request.unused_parameters",
                 f"Parameters not matched to arguments in {signature.function_name}",
