@@ -159,9 +159,10 @@ class RecursiveTypeDescriber:
         }
         
     def _visit_primitive(self, value: str | int | float | bool | None):
+        display_value = repr(value) if isinstance(value, str) else value
         return {
             "kind": "primitive",
-            "value": value,
+            "value": display_value,
             "type": type(value).__name__,
             "id": id(value),
             "complexity": 1,
