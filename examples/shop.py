@@ -74,6 +74,20 @@ def purchase(state: State, name: str) -> Page:
         ])
 
 
+assert_equal(
+    index(State([], [], 0, [])),
+    Page(
+        State([], [], 0, []),
+        [
+            "Welcome to the store!",
+            "You have: 0 coins",
+            "You own: ",
+            "Select an item to purchase:",
+            BulletedList([]),
+        ],
+    ),
+)
+
 
 start_server(State([
     Item("Sword of Hope", 100, 3),
