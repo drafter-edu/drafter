@@ -1,4 +1,5 @@
 from drafter import *
+from typing import Optional
 
 
 @dataclass
@@ -34,7 +35,7 @@ def index(state: State) -> Page:
     ])
 
 
-def find_item(items2: list[Item], name: str) -> Item:
+def find_item(items2: list[Item], name: str) -> Optional[Item]:
     for item in items2:
         if item.name == name:
             return item

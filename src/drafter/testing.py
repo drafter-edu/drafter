@@ -7,7 +7,7 @@ import difflib
 from drafter.monitor.audit import log_data
 from drafter.monitor.events.tests import TestCaseEvent
 from drafter.history.formatting import format_page_content
-from drafter.ast_tools import get_all_relevant_lines
+from drafter.helpers.ast_tools import get_all_relevant_lines
 
 try:
     import bakery

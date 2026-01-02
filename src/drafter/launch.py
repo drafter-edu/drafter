@@ -1,4 +1,4 @@
-from drafter.utils import is_web, seek_file_by_line
+from drafter.helpers.utils import is_web, seek_file_by_line
 from drafter.client_server.commands import get_main_server
 
 

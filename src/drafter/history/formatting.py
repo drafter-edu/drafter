@@ -7,7 +7,7 @@ Patching this is tricky in Skulpt, so we have some curious fallbacks.
 
 from dataclasses import fields, is_dataclass
 from drafter.components.images import HAS_PILLOW, PILImage
-from drafter.diffing import get_indent_width
+from drafter.helpers.diffing import get_indent_width
 from drafter.history.utils import repr_pil_image, safe_repr
 import pprint
 

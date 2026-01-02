@@ -9,7 +9,7 @@ from drafter.data.request import Request
 from drafter.site.site import DRAFTER_TAG_IDS, DRAFTER_TAG_CLASSES
 from drafter.monitor.telemetry import TelemetryEvent, TelemetryCorrelation
 from drafter.monitor.bus import get_main_event_bus
-from drafter.utils import is_skulpt, is_pyodide
+from drafter.helpers.utils import is_skulpt, is_pyodide
 from typing import Callable, Optional, Any
 from dataclasses import dataclass, field
 import time

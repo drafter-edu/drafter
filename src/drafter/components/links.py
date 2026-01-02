@@ -7,7 +7,7 @@ from drafter.components.utilities.escaping import (
     make_safe_json_argument,
 )
 from drafter.constants import JSON_DECODE_SYMBOL, LABEL_SEPARATOR, SUBMIT_BUTTON_KEY
-from drafter.urls import (
+from drafter.helpers.urls import (
     friendly_urls,
     check_invalid_external_url,
 )

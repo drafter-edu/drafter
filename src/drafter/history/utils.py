@@ -10,7 +10,7 @@ from dataclasses import fields, is_dataclass
 from typing import Any
 
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
-from drafter.utils import is_pyodide, is_skulpt
+from drafter.helpers.utils import is_pyodide, is_skulpt
 
 
 TOO_LONG_VALUE_THRESHOLD = 256
