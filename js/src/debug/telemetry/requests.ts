@@ -2,6 +2,8 @@
  * Request/Response event types for tracking page visits.
  */
 
+import type { BaseEvent } from './base';
+
 export interface RequestEvent extends BaseEvent {
     event_type: "RequestEvent";
     url: string;

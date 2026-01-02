@@ -114,7 +114,6 @@ class RawHTML(Component):
         return f"RawHTML({', '.join(pieces)})"
 
 
-@dataclass
 class State(Component):
     """
     A component that displays the current application state in a structured format.
@@ -126,9 +125,6 @@ class State(Component):
     :param title: Optional title to display above the state (default: "Current State")
     :param indent: Number of spaces to use for JSON indentation (default: 2)
     """
-    state_obj: Any
-    title: str
-    indent: int
     
     def __init__(self, state_obj: Any, title: str = "Current State", indent: int = 2, **kwargs):
         self.state_obj = state_obj
