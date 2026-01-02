@@ -8,10 +8,8 @@ from drafter.components.utilities.escaping import (
 )
 from drafter.constants import JSON_DECODE_SYMBOL, LABEL_SEPARATOR, SUBMIT_BUTTON_KEY
 from drafter.urls import (
-    remap_attr_styles,
     friendly_urls,
     check_invalid_external_url,
-    merge_url_query_params,
 )
 from drafter.components.page_content import Component
 from drafter.components.utilities.validation import validate_parameter_name

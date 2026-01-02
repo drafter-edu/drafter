@@ -37,32 +37,7 @@ def remove_url_query_params(url: str, params_to_remove: set) -> str:
     return url_components._replace(query=updated_query).geturl()
 
 
-def remap_attr_styles(attributes: dict) -> Tuple[dict, dict]:
-    """
-    Remaps attributes into styles and attributes dictionaries. This is useful for handling style and class attributes.
-    The 'classes' key's vales will be moved to 'class' and joined with a space. Any key prefixed with 'style_' will be
-    moved to the styles dictionary. All other keys will be moved to the attributes dictionary.
 
-    :param attributes: The attributes to remap
-    :return: A tuple of the styles and attributes dictionaries
-    """
-    styles: Dict[str, Any] = {}
-    attrs: Dict[str, Any] = {}
-    # Handle classes keyword
-    if "classes" in attributes:
-        attributes["class"] = attributes.pop("classes")
-        if isinstance(attributes["class"], list):
-            attributes["class"] = " ".join(attributes["class"])
-    # Handle styles_ prefixed keyword
-    for key, value in attributes.items():
-        target = attrs
-        if key.startswith("style_"):
-            key = key[len("style_") :]
-            target = styles
-        key = key.replace("_", "-")
-        target[key] = value
-    # All done
-    return styles, attrs
 
 
 def friendly_urls(url: str) -> str:

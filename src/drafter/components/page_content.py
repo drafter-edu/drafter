@@ -28,8 +28,7 @@ Technically, we need the component to return not just its HTML, but also its CSS
 from typing import List, Optional, Union
 import html
 
-from drafter.components.utilities.attributes import BASELINE_ATTRS
-from drafter.urls import remap_attr_styles
+from drafter.components.utilities.attributes import BASELINE_ATTRS, remap_attr_styles
 
 class Component:
     """
