@@ -22,7 +22,6 @@ class TelemetryCorrelation:
     :ivar route: The route name/url associated with the event
     :ivar request_id: The ID of the associated request
     :ivar response_id: The ID of the associated response
-    :ivar outcome_id: The ID of the associated outcome
     :ivar dom_id: The ID of the associated DOM element if this came from the Bridge Client.
     """
 
@@ -30,7 +29,6 @@ class TelemetryCorrelation:
     route: Optional[str] = None
     request_id: Optional[int] = None
     response_id: Optional[int] = None
-    outcome_id: Optional[int] = None
     dom_id: Optional[str] = None
 
     def to_json(self) -> Dict[str, Any]:
@@ -44,7 +42,6 @@ class TelemetryCorrelation:
             "route": self.route,
             "request_id": self.request_id,
             "response_id": self.response_id,
-            "outcome_id": self.outcome_id,
             "dom_id": self.dom_id,
         }
 
@@ -56,7 +53,7 @@ class TelemetryEvent:
 
     :ivar event_type: The type of telemetry event. This is a dot-separated string indicating
         the category and subcategory of the event. Major categories include "logger", "request",
-        "response", "outcome", "state", "config", "dom".
+        "response", "state", "config", "dom".
     :ivar correlation: Correlation information for the event. This helps track where the event
         originated and its context.
     :ivar source: The source of the event, typically the component/module and the function/method name.

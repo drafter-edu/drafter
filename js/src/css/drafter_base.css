@@ -37,6 +37,7 @@
     border-radius: 6px;
     font-weight: 600;
     transition: background-color 0.2s;
+    font-size: .75em;
 }
 
 .drafter-body-- .error-page .error-home-link:hover {

@@ -1,5 +1,5 @@
 """
-Request/Response/Outcome events for tracking page visits and server interactions.
+Request/Response events for tracking page visits and server interactions.
 """
 
 from dataclasses import dataclass

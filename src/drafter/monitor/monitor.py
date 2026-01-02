@@ -30,7 +30,7 @@ class Monitor:
     All operations are wrapped in try-except blocks to ensure maximum information
     is preserved even if parts of the monitor fail.
 
-    :ivar page_visits: History of all page visits (request/response/outcome cycles)
+    :ivar page_visits: History of all page visits (request/response cycles)
     :ivar current_visit: The currently active page visit being tracked
     :ivar errors: All errors that have been logged
     :ivar warnings: All warnings that have been logged
@@ -185,7 +185,7 @@ class Monitor:
     #         # Current state section
     #         parts.extend(self._render_state_section(snapshot.current_state))
 
-    #         # Request/Response/Outcome history
+    #         # Request/Response history
     #         parts.extend(self._render_history_section(snapshot.page_visits))
 
     #         # Routes section
@@ -293,7 +293,7 @@ class Monitor:
     #         return parts
 
     #     def _render_history_section(self, visits: List[PageVisitTelemetry]) -> List[str]:
-    #         """Render the request/response/outcome history section."""
+    #         """Render the request/response history section."""
     #         parts = [
     #             "<details class='debug-section debug-history' open>",
     #             f"<summary><h4>📜 Page Visit History ({len(visits)})</h4></summary>",
@@ -366,14 +366,6 @@ class Monitor:
     #                 ]
     #             )
 
-    #         # Outcome details
-    #         if visit.outcome:
-    #             parts.extend(
-    #                 [
-    #                     "<h5>Outcome</h5>",
-    #                     f"<p>Status: {html.escape(visit.outcome.message)}</p>",
-    #                 ]
-    #             )
 
     #         parts.extend(
     #             [

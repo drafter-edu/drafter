@@ -1,4 +1,4 @@
-# TODO: All of these should track request_id, response_id, and outcome_id
+# TODO: All of these should track request_id, response_id
 # TODO: All of these should have a timestamp
 
 from dataclasses import dataclass

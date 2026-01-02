@@ -73,6 +73,8 @@
     -   [ ] Components should have a stable unique ID
     -   [ ] Include sufficient whitespace and formatting in rendered HTML for easier debugging
     -   [ ] Functions for testing if a component has certain attributes, styles, children, etc.
+-   [ ] Route for "--reset" automatically added
+-   [ ] Route for "--about" automatically added
 
 Pie in the sky:
 

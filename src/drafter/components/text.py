@@ -85,3 +85,29 @@ class Text(Component):
         if not parsed_settings:
             return self.body
         return f"<span {parsed_settings}>{self.body}</span>"
+
+
+@dataclass
+class RawHTML(Component):
+    """
+    A component that renders raw HTML without escaping. 
+    
+    WARNING: Only use with trusted HTML content to avoid XSS vulnerabilities.
+    This component bypasses HTML escaping and renders content as-is.
+    
+    :param html: The raw HTML string to render
+    """
+    html: str
+    
+    def __init__(self, html: str, **kwargs):
+        self.html = html
+        self.extra_settings = kwargs
+    
+    def __str__(self) -> str:
+        return self.html
+    
+    def __repr__(self) -> str:
+        pieces = [repr(self.html)]
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"RawHTML({', '.join(pieces)})"

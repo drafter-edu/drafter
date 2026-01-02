@@ -5,6 +5,7 @@ import json
 from typing import Union, Callable, Optional, Tuple, List, Dict, Any
 from dataclasses import dataclass
 from drafter.data.files import DrafterBinaryFile, DrafterTextFile
+from drafter.helpers.dates import try_convert_datetime
 from drafter.monitor.audit import log_error, log_warning
 from drafter.client_server.errors import VisitError
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
@@ -161,13 +162,18 @@ class Router:
 
         # Check if this is a file upload and try file-specific conversions first
         # (before checking if it's already the right type, since file uploads come as dicts)
-        file_result = self.try_file_upload_conversion(value, expected_type)
-        if file_result is not None:
+        success, file_result = self.try_file_upload_conversion(value, expected_type)
+        if success:
             return file_result
 
         # If already correct type, return as-is
         if isinstance(value, expected_type):
             return value
+        
+        # Let our custom handlers have a try
+        success, potential_conversion = self.try_special_conversion(value, expected_type)
+        if success:
+            return potential_conversion
 
         # Try to convert
         try:
@@ -183,7 +189,7 @@ class Router:
                 f"Could not convert {parameter} ({value!r}) from {from_name} to {to_name}"
             ) from e
 
-    def try_file_upload_conversion(self, value: Any, target_type: Any) -> Any:
+    def try_file_upload_conversion(self, value: Any, target_type: Any) -> tuple[bool, Any]:
         """
         Attempts to convert file upload data to the specified target type.
         File uploads come from the client as dicts with filename, content, type, size.
@@ -194,7 +200,7 @@ class Router:
         """
         # print("Trying file upload conversion.", value, target_type)
         if not isinstance(value, dict) or not value.get("__file_upload__"):
-            return None
+            return False, None
 
         # Decode the base64 content
         content = value.get("content", b"")
@@ -202,25 +208,25 @@ class Router:
         
         # Convert based on target type
         if target_type is bytes:
-            return content
+            return True, content
         elif target_type is str:
             if not content:
-                return ""
+                return True, ""
             try:
-                return content.decode("utf-8")
+                return True, content.decode("utf-8")
             except UnicodeDecodeError as e:
                 raise ValueError(
                     f"Could not decode file {filename} as a string of unicode text (utf-8). Perhaps the file is not the type that you expected, or the parameter type is inappropriate?"
                 ) from e
         elif target_type is dict:
-            return {
+            return True, {
                 "filename": filename,
                 "content": content,
                 "type": value.get("type"),
                 "size": value.get("size"),
             }
         elif target_type is DrafterBinaryFile:
-            return DrafterBinaryFile(
+            return True, DrafterBinaryFile(
                 filename=filename,
                 content=content,
                 content_type=value.get("type", "application/octet-stream"),
@@ -236,7 +242,7 @@ class Router:
                     raise ValueError(
                         f"Could not decode file {filename} as a string of unicode text (utf-8). Perhaps the file is not the type that you expected, or the parameter type is inappropriate?"
                     ) from e
-            return DrafterTextFile(
+            return True, DrafterTextFile(
                 filename=filename,
                 content=text_content,
                 content_type=value.get("type", "text/plain"),
@@ -249,18 +255,31 @@ class Router:
             )
         ):
             if not content:
-                return None
+                return True, None
             try:
                 image = PILImage.open(io.BytesIO(content))
                 image.filename = filename
-                return image
+                return True, image
             except Exception as e:
                 raise ValueError(
                     f"Could not open image file {filename} as a PIL.Image. Perhaps the file is not an image, or the parameter type is inappropriate?"
                 ) from e
 
         # If no special conversion, return the dict
-        return value
+        return False, value
+    
+    def try_special_conversion(self, value: Any, target_type: Any) -> tuple[bool, Any]:
+        """
+        Attempts special conversions for certain target types.
+
+        :param value: The current value.
+        :param target_type: The desired type to convert to.
+        :return: A tuple (success: bool, converted_value: Any).
+        """
+        outcome, result = try_convert_datetime(value, target_type)
+        if outcome:
+            return True, result
+        return False, None
 
     def convert_argument_types(
         self,

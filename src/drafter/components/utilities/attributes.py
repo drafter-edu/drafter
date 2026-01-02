@@ -54,8 +54,26 @@ BASELINE_ATTRS = [
     "aria-modal",
 ]
 
-ALTERNATIVE_FOR_ATTRIBUTE_NAMES = [
-    "for_", "_for", "for_name", "for_element"
+BOOLEAN_ATTRS = [
+    "disabled",
+    "checked",
+    "readonly",
+    "multiple",
+    "required",
+    "autofocus",
+    "autoplay",
+    "controls",
+    "loop",
+    "muted",
+    "novalidate",
+    "formnovalidate",
+    "open",
+    "reversed",
+    "async",
+    "defer",
+    "hidden",
+    "selected",
+    "autocomplete",
 ]
 
 def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
@@ -75,11 +93,6 @@ def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
         attributes["class"] = attributes.pop("classes")
         if isinstance(attributes["class"], list):
             attributes["class"] = " ".join(attributes["class"])
-    # Handle `for` attribute
-    for alt_name in ALTERNATIVE_FOR_ATTRIBUTE_NAMES:
-        if alt_name in attributes:
-            attributes["for"] = attributes.pop(alt_name)
-            break
     # Handle styles_ prefixed keyword
     for key, value in attributes.items():
         target = attrs

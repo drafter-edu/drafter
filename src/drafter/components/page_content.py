@@ -28,7 +28,7 @@ Technically, we need the component to return not just its HTML, but also its CSS
 from typing import List, Optional, Union
 import html
 
-from drafter.components.utilities.attributes import BASELINE_ATTRS, remap_attr_styles
+from drafter.components.utilities.attributes import BASELINE_ATTRS, BOOLEAN_ATTRS, remap_attr_styles
 
 class Component:
     """
@@ -86,15 +86,32 @@ class Component:
         extra_settings.update(kwargs)
         raw_styles, raw_attrs = remap_attr_styles(extra_settings)
         styles, attrs = [], []
+        seen_attrs = set()
+        # Preprocess attributes and styles
         for key, value in raw_attrs.items():
-            if key not in self.EXTRA_ATTRS and key not in BASELINE_ATTRS:
+            # Check for data-* attributes
+            is_data_attr = key.startswith("data-")
+            # Check if known attribute
+            is_known_attr = key in self.EXTRA_ATTRS or key in BASELINE_ATTRS
+            
+            if not is_data_attr and not is_known_attr:
+                # If not a data-* or known attribute, assume it is a style
                 styles.append(f"{key}: {value}")
             else:
-                # TODO: Is this safe enough?
-                escaped_value = html.escape(str(value), quote=True)
-                attrs.append(f'{key}="{escaped_value}"')
+                # Handle boolean attributes
+                if key in BOOLEAN_ATTRS:
+                    if value:
+                        attrs.append(f"{key}")
+                else:
+                    # Otherwise handle regular attribute
+                    escaped_value = html.escape(str(value), quote=True)
+                    attrs.append(f'{key}="{escaped_value}"')
+                seen_attrs.add(key)
+        # Now handle styles
         for key, value in raw_styles.items():
             styles.append(f"{key}: {value}")
+        if "id" not in seen_attrs:
+            attrs.append(f'id="{self.get_id()}"')
         result = " ".join(attrs)
         if styles:
             result += f" style='{'; '.join(styles)}'"
@@ -191,6 +208,15 @@ class Component:
         :type configuration: Configuration
         """
         pass
+    
+    def get_id(self) -> str:
+        """
+        Gets the ID of the component if it has one.
+
+        :return: The ID of the component, or an auto-generated one if none is set.
+        :rtype: str
+        """
+        return self.extra_settings.get("id", f"drafter-component-{id(self)}")
 
 
 Content = Union[Component, str]

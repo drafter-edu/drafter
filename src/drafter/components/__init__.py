@@ -11,8 +11,10 @@ from drafter.components.layout import (
     Division,
     Box,
 )
-from drafter.components.text import Text, PreformattedText, Header, Pre
-from drafter.components.forms import TextBox, TextArea, SelectBox, CheckBox
+from drafter.components.text import Text, PreformattedText, Header, Pre, RawHTML
+from drafter.components.output import Output, Progress
+from drafter.components.forms import TextBox, TextArea, SelectBox, CheckBox, Label, DateTimeInput, DateInput, TimeInput
+# TODO: Sliders, Autocomplete, RadioButtons
 from drafter.components.tables import Table
 from drafter.components.links import Link, Button, Argument
 
@@ -20,6 +22,8 @@ from drafter.components.images import Image
 from drafter.components.files import Download, FileUpload
 
 from drafter.components.plotting import MatPlotLibPlot
+
+from drafter.components.media import Audio, Video, Canvas, SVG
 
 
 __all__ = [
@@ -37,11 +41,19 @@ __all__ = [
     "Division",
     "Box",
     "Text",
+    "RawHTML",
     "PreformattedText",
     "Header",
     "TextBox",
     "TextArea",
     "SelectBox",
+    "CheckBox",
+    "Label",
+    "DateTimeInput",
+    "DateInput",
+    "TimeInput",
+    "Progress",
+    "Output",
     "Table",
     "Link",
     "Button",
@@ -50,4 +62,8 @@ __all__ = [
     "Download",
     "FileUpload",
     "MatPlotLibPlot",
+    "Audio",
+    "Video",
+    "Canvas",
+    "SVG",
 ]

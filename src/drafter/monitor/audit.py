@@ -16,7 +16,6 @@ def log_error(
     causation_id: Optional[int] = None,
     request_id: Optional[int] = None,
     response_id: Optional[int] = None,
-    outcome_id: Optional[int] = None,
     dom_id: Optional[str] = None,
     route: Optional[str] = None,
 ) -> DrafterError:
@@ -35,7 +34,6 @@ def log_error(
                 route=route,
                 request_id=request_id,
                 response_id=response_id,
-                outcome_id=outcome_id,
                 dom_id=dom_id,
             ),
             source=source,
@@ -55,7 +53,6 @@ def log_warning(
     causation_id: Optional[int] = None,
     request_id: Optional[int] = None,
     response_id: Optional[int] = None,
-    outcome_id: Optional[int] = None,
     dom_id: Optional[str] = None,
     route: Optional[str] = None,
 ) -> DrafterWarning:
@@ -74,7 +71,6 @@ def log_warning(
                 route=route,
                 request_id=request_id,
                 response_id=response_id,
-                outcome_id=outcome_id,
                 dom_id=dom_id,
             ),
             source=source,
@@ -94,7 +90,6 @@ def log_info(
     causation_id: Optional[int] = None,
     request_id: Optional[int] = None,
     response_id: Optional[int] = None,
-    outcome_id: Optional[int] = None,
     dom_id: Optional[str] = None,
     route: Optional[str] = None,
 ) -> DrafterInfo:
@@ -107,7 +102,6 @@ def log_info(
                 route=route,
                 request_id=request_id,
                 response_id=response_id,
-                outcome_id=outcome_id,
                 dom_id=dom_id,
             ),
             source=source,
@@ -124,7 +118,6 @@ def log_data(
     causation_id: Optional[int] = None,
     request_id: Optional[int] = None,
     response_id: Optional[int] = None,
-    outcome_id: Optional[int] = None,
     dom_id: Optional[str] = None,
     route: Optional[str] = None,
 ) -> None:
@@ -136,7 +129,6 @@ def log_data(
                 route=route,
                 request_id=request_id,
                 response_id=response_id,
-                outcome_id=outcome_id,
                 dom_id=dom_id,
             ),
             source=source,
