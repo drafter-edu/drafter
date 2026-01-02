@@ -34,7 +34,7 @@ class TextBox(FormComponent):
     def __str__(self) -> str:
         extra_settings = dict(self.extra_settings)
         if self.default_value is not None:
-            extra_settings["value"] = html.escape(self.default_value)
+            extra_settings["value"] = self.default_value
         self.handle_aria(extra_settings)
         parsed_settings = self.parse_extra_settings(**extra_settings)
         # TODO: investigate whether we need to make the name safer

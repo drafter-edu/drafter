@@ -24,6 +24,8 @@ class Header(Component):
     def __init__(self, body: str, level: int = 1, **kwargs):
         self.body = body
         self.level = level
+        if level < 1 or level > 6:
+            raise ValueError("Header level must be between 1 and 6")
         if "extra_settings" in kwargs:
             self.extra_settings = kwargs.pop("extra_settings")
             self.extra_settings.update(kwargs)

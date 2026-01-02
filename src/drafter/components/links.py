@@ -1,5 +1,6 @@
 from typing import Any, List, Optional, Callable, Union
 from dataclasses import dataclass
+import html
 
 from drafter.components.utilities.escaping import (
     make_safe_argument,
@@ -185,7 +186,8 @@ class Button(Component, LinkContent):
         # Include the button ID in the button value so we know which specific button was clicked
         parsed_settings = self.parse_extra_settings(**self.extra_settings)
         value = make_safe_argument(button_namespace)
-        return f"{precode}<button data-nav='{self.url}' type='submit' name='{SUBMIT_BUTTON_KEY}' value='{value}' formaction='#' {parsed_settings}>{self.text}</button>"
+        text = html.escape(self.text)
+        return f"{precode}<button data-nav='{self.url}' type='submit' name='{SUBMIT_BUTTON_KEY}' value='{value}' formaction='#' {parsed_settings}>{text}</button>"
 
 
 SubmitButton = Button

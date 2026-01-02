@@ -51,6 +51,8 @@ class Router:
     def add_route(self, url: str, func: Callable) -> None:
         """
         Adds a new route to the server.
+        
+        TODO: Handle ignored parameters
 
         :param url: The URL to add the route to.
         :param func: The function to call when the route is accessed.

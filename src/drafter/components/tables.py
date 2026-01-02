@@ -1,18 +1,25 @@
 from dataclasses import dataclass, fields, is_dataclass
 import html
 from typing import List, Union, Any
-from drafter.components.page_content import Component
+from drafter.components.page_content import Component, Content
 from drafter.history.utils import safe_repr
+from copy import deepcopy
 
 
 @dataclass
 class Table(Component):
-    rows: Union[List[List[str]], List[Any]]
+    """
+    TODO: Handle 2d list, 1d list of dataclasses, 1d list of primitives,
+    TODO: Handle single dataclass instance, dictionaries
+    """
+    rows: List[List[Content]]
 
-    def __init__(self, rows: List[List[str]], header=None, **kwargs):
+    def __init__(self, rows: List[List[Content]], header=None, **kwargs):
         self.rows = rows
         self.header = header
         self.extra_settings = kwargs
+        self._original_rows = deepcopy(rows)
+        self._original_header = deepcopy(header)
         self.reformat_as_tabular()
 
     def reformat_as_single(self):
@@ -64,3 +71,19 @@ class Table(Component):
             else f"<thead><tr>{''.join(f'<th>{cell}</th>' for cell in self.header)}</tr></thead>"
         )
         return f"<table {parsed_settings}>{header}{rows}</table>"
+
+    def __repr__(self):
+        pieces = [repr(self._original_rows)]
+        if self._original_header:
+            pieces.append(f"header={repr(self._original_header)}")
+        if self.extra_settings:
+            for key, value in self.extra_settings.items():
+                pieces.append(f"{key}={repr(value)}")
+        return f"Table({', '.join(pieces)})"
+
+    def __eq__(self, other):
+        if isinstance(other, Table):
+            return (self._original_rows == other._original_rows and
+                    self._original_header == other._original_header and
+                    self.extra_settings == other.extra_settings)
+        return NotImplemented
