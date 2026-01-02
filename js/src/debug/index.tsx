@@ -182,6 +182,13 @@ export class DebugPanel {
                 >
                     👁️ Toggle Frame
                 </button>
+                <button
+                    id="drafter-share-link-btn"
+                    title="Generate shareable link with current state"
+                    class="drafter-share-link-button"
+                >
+                    🔗 Share Link
+                </button>
             </div>
         );
     }
@@ -205,6 +212,13 @@ export class DebugPanel {
                 this.toggleFrame();
             });
         }
+
+        const shareLinkButton = document.getElementById("drafter-share-link-btn");
+        if (shareLinkButton) {
+            shareLinkButton.addEventListener("click", () => {
+                this.generateShareableLink();
+            });
+        }
     }
 
     private toggleFrame(): void {
@@ -217,6 +231,92 @@ export class DebugPanel {
                 (frameElement as HTMLElement).style.display = "none";
             }
         }
+    }
+
+    private async generateShareableLink(): Promise<void> {
+        try {
+            // Get current state from the most recent UpdatedState event
+            const stateEvent = this.events
+                .slice()
+                .reverse()
+                .find((event) => event.data?.event_type === "UpdatedState");
+            
+            if (!stateEvent || !stateEvent.data?.representation) {
+                alert("No state available to share. Navigate to a page with state first.");
+                return;
+            }
+
+            // Extract the state representation
+            const stateData = stateEvent.data.representation;
+            
+            // Create a shareable link by sending state to Python backend
+            // The backend will encode it and return the shareable URL
+            const response = await fetch("/drafter/api/create_shareable_link", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    state: stateData,
+                    current_url: window.location.href,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const shareableLink = data.shareable_link;
+                
+                // Copy to clipboard
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(shareableLink);
+                    alert("Shareable link copied to clipboard!\n\n" + shareableLink);
+                } else {
+                    // Fallback for older browsers
+                    this.copyToClipboardFallback(shareableLink);
+                    alert("Shareable link:\n\n" + shareableLink);
+                }
+            } else {
+                // Fallback: create a simple URL with state parameter
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set("shared_state", btoa(JSON.stringify(stateData)));
+                const shareableLink = currentUrl.toString();
+                
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(shareableLink);
+                    alert("Shareable link copied to clipboard!\n\n" + shareableLink);
+                } else {
+                    this.copyToClipboardFallback(shareableLink);
+                    alert("Shareable link:\n\n" + shareableLink);
+                }
+            }
+        } catch (error) {
+            console.error("Error generating shareable link:", error);
+            
+            // Fallback: just copy current URL
+            const fallbackLink = window.location.href;
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(fallbackLink);
+                alert("Current URL copied to clipboard:\n\n" + fallbackLink);
+            } else {
+                alert("Current URL:\n\n" + fallbackLink);
+            }
+        }
+    }
+
+    private copyToClipboardFallback(text: string): void {
+        // Create a temporary textarea element
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand("copy");
+        } catch (err) {
+            console.error("Failed to copy:", err);
+        }
+        document.body.removeChild(textarea);
     }
 
     public handleEvent(event: TelemetryEvent): void {

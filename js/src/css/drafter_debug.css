@@ -273,6 +273,15 @@ body {
     background-color: #DDD;
 }
 
+.drafter-debug-- .drafter-share-link-button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.drafter-debug-- .drafter-share-link-button:hover {
+    background-color: #45a049;
+}
+
 
 div.btlw-debug .copy-button {
     float: right;

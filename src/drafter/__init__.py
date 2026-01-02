@@ -78,6 +78,13 @@ from drafter.deploy import (
 
 from drafter.testing import assert_equal, assert_has, assert_in, assert_state
 from drafter.components.page_content import get_component_breadcrumbs, clear_component_breadcrumbs
+from drafter.sharing import (
+    encode_state_to_url_param,
+    decode_state_from_url_param,
+    create_shareable_link,
+    extract_shared_state_from_params,
+    get_current_shareable_link,
+)
 
 __all__ = [
     "dataclass",
@@ -138,6 +145,11 @@ __all__ = [
     "assert_has",
     "assert_in",
     "assert_state",
+    "encode_state_to_url_param",
+    "decode_state_from_url_param",
+    "create_shareable_link",
+    "extract_shared_state_from_params",
+    "get_current_shareable_link",
     "update_style",
     "update_attr",
     "float_right",
