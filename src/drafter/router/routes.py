@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from drafter.data.files import DrafterBinaryFile, DrafterTextFile
 from drafter.helpers.dates import try_convert_datetime
 from drafter.monitor.audit import log_error, log_warning
-from drafter.client_server.errors import VisitError
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 from drafter.constants import PREVIOUSLY_PRESSED_BUTTON, SUBMIT_BUTTON_KEY
 from drafter.monitor.events.errors import DrafterError
@@ -16,6 +15,7 @@ from drafter.data.request import Request
 from drafter.history.state import SiteState
 from drafter.history.utils import safe_repr
 from drafter.router.introspect import get_signature, RouteIntrospection
+from drafter.router.special_routes import default_index
 
 
 @dataclass
@@ -60,6 +60,15 @@ class Router:
         """
         self.routes[url] = func
         self.signatures[url] = get_signature(func)
+        
+    def register_default_routes(self) -> None:
+        """
+        Registers default routes for the router.
+
+        :param configuration: The server configuration.
+        """
+        if not self.has_route("index"):
+            self.add_route("index", default_index)
 
     def reset(self) -> None:
         """

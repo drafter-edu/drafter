@@ -118,6 +118,9 @@ class ClientServer:
                     f"Initial state: {repr(initial_state)}",
                     exception=e,
                 )
+        # Register any default routes, if needed
+        self.router.register_default_routes()
+        # All done!
         log_info(
             "server.started",
             "Starting ClientServer",
