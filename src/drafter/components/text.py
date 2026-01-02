@@ -110,3 +110,65 @@ class RawHTML(Component):
         for key, value in self.extra_settings.items():
             pieces.append(f"{key}={repr(value)}")
         return f"RawHTML({', '.join(pieces)})"
+
+
+@dataclass
+class State(Component):
+    """
+    A component that displays the current application state in a structured format.
+    
+    This component is useful for debugging or displaying state information to users.
+    The state will be rendered as formatted JSON in a preformatted text block.
+    
+    :param state_obj: The state object to display (will be converted to JSON)
+    :param title: Optional title to display above the state (default: "Current State")
+    :param indent: Number of spaces to use for JSON indentation (default: 2)
+    """
+    state_obj: Any
+    title: str
+    indent: int
+    
+    def __init__(self, state_obj: Any, title: str = "Current State", indent: int = 2, **kwargs):
+        import json
+        self.state_obj = state_obj
+        self.title = title
+        self.indent = indent
+        self.extra_settings = kwargs
+    
+    def __str__(self) -> str:
+        import json
+        import html
+        
+        # Try to convert state to JSON, fallback to repr if not serializable
+        try:
+            # Handle dataclass instances
+            if hasattr(self.state_obj, '__dataclass_fields__'):
+                from dataclasses import asdict
+                state_dict = asdict(self.state_obj)
+                state_json = json.dumps(state_dict, indent=self.indent, default=str)
+            else:
+                state_json = json.dumps(self.state_obj, indent=self.indent, default=str)
+        except (TypeError, ValueError):
+            # If JSON serialization fails, use repr
+            state_json = repr(self.state_obj)
+        
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        
+        # Return formatted HTML with title and state display
+        escaped_title = html.escape(self.title)
+        escaped_state = html.escape(state_json)
+        
+        return f"""<div class='drafter-state' {parsed_settings}>
+  <h4>{escaped_title}</h4>
+  <pre>{escaped_state}</pre>
+</div>"""
+    
+    def __repr__(self) -> str:
+        pieces = [repr(self.state_obj)]
+        if self.title != "Current State":
+            pieces.append(f"title={repr(self.title)}")
+        if self.indent != 2:
+            pieces.append(f"indent={repr(self.indent)}")
+        for key, value in self.extra_settings.items():
+            pieces.append(f"{key}={repr(value)}")
+        return f"State({', '.join(pieces)})"
