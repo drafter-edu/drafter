@@ -6,7 +6,7 @@ Download/upload state button
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List, Dict, Optional
 import os
 
 
@@ -116,3 +116,82 @@ class ServerConfiguration:
         "DRAFTER_CDN_SETUP",
         "https://drafter-edu.github.io/drafter-cdn/skulpt/drafter-setup.js",
     )
+
+    @classmethod
+    def development(cls, **kwargs) -> "ServerConfiguration":
+        """
+        Create a development configuration with sensible defaults.
+        
+        Sets debug=True, reloader=True, and uses localhost:8080.
+        
+        :param kwargs: Additional configuration overrides.
+        :return: A ServerConfiguration instance for development.
+        """
+        defaults = {
+            "debug": True,
+            "reloader": True,
+            "host": "localhost",
+            "port": 8080,
+            "title": "Development Server",
+        }
+        defaults.update(kwargs)
+        return cls(**defaults)
+
+    @classmethod
+    def production(cls, **kwargs) -> "ServerConfiguration":
+        """
+        Create a production configuration with sensible defaults.
+        
+        Sets debug=False, reloader=False, and uses 0.0.0.0:8080.
+        
+        :param kwargs: Additional configuration overrides.
+        :return: A ServerConfiguration instance for production.
+        """
+        defaults = {
+            "debug": False,
+            "reloader": False,
+            "host": "0.0.0.0",
+            "port": 8080,
+            "title": "Production Server",
+        }
+        defaults.update(kwargs)
+        return cls(**defaults)
+
+    @classmethod
+    def testing(cls, **kwargs) -> "ServerConfiguration":
+        """
+        Create a testing configuration with sensible defaults.
+        
+        Sets skip=True to not actually run the server, useful for unit tests.
+        
+        :param kwargs: Additional configuration overrides.
+        :return: A ServerConfiguration instance for testing.
+        """
+        defaults = {
+            "skip": True,
+            "debug": True,
+            "host": "localhost",
+            "port": 8080,
+            "title": "Test Server",
+        }
+        defaults.update(kwargs)
+        return cls(**defaults)
+
+    @classmethod
+    def skulpt_mode(cls, **kwargs) -> "ServerConfiguration":
+        """
+        Create a Skulpt-enabled configuration with sensible defaults.
+        
+        Sets skulpt=True and configures appropriate CDN and deployment settings.
+        
+        :param kwargs: Additional configuration overrides.
+        :return: A ServerConfiguration instance for Skulpt applications.
+        """
+        defaults = {
+            "skulpt": True,
+            "save_uploaded_files": False,
+            "deploy_image_path": "website",
+            "title": "Skulpt Application",
+        }
+        defaults.update(kwargs)
+        return cls(**defaults)

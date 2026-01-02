@@ -889,3 +889,48 @@ div.btlw-container img {
     background-color: #b3d9ff;
     transform: scale(0.98);
 }
+
+/* Route testing controls */
+.route-test-controls {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    align-items: center;
+}
+
+.route-param-input {
+    flex: 1;
+    padding: 4px 8px;
+    font-size: 0.85em;
+    font-family: 'Courier New', monospace;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: #fff;
+}
+
+.route-param-input:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+}
+
+.route-test-btn {
+    padding: 4px 10px;
+    font-size: 0.85em;
+    color: #fff;
+    background-color: #28a745;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+}
+
+.route-test-btn:hover {
+    background-color: #218838;
+}
+
+.route-test-btn:active {
+    background-color: #1e7e34;
+    transform: scale(0.98);
+}
