@@ -7,7 +7,6 @@ import type {
     RequestEvent,
     RequestParseEvent,
     ResponseEvent,
-    OutcomeEvent,
     PageVisitEvent,
 } from "./telemetry/requests";
 import type { UpdatedStateEvent } from "./telemetry/state";
@@ -19,7 +18,6 @@ export type TypedEvent =
     | RequestEvent
     | RequestParseEvent
     | ResponseEvent
-    | OutcomeEvent
     | PageVisitEvent
     | DrafterError
     | DrafterWarning
@@ -33,7 +31,6 @@ export interface TelemetryEvent {
         route?: string;
         request_id?: number;
         response_id?: number;
-        outcome_id?: number;
         dom_id?: string;
     };
     source: string;

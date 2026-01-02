@@ -185,7 +185,7 @@ class Monitor:
     #         # Current state section
     #         parts.extend(self._render_state_section(snapshot.current_state))
 
-    #         # Request/Response/Outcome history
+    #         # Request/Response history
     #         parts.extend(self._render_history_section(snapshot.page_visits))
 
     #         # Routes section
@@ -363,15 +363,6 @@ class Monitor:
     #                     f"<p>Body Length: {body_length} chars</p>",
     #                     f"<p>Errors: {has_errors}</p>",
     #                     f"<p>Warnings: {has_warnings}</p>",
-    #                 ]
-    #             )
-
-    #         # Outcome details
-    #         if visit.outcome:
-    #             parts.extend(
-    #                 [
-    #                     "<h5>Outcome</h5>",
-    #                     f"<p>Status: {html.escape(visit.outcome.message)}</p>",
     #                 ]
     #             )
 
