@@ -7,6 +7,44 @@ import type {
 // Need to track unique types seen so far, so promote to class later if needed
 
 /**
+ * Helper function to extract type information from a representation.
+ */
+function getTypeFromRepresentation(rep: SpecificRepresentation): string {
+    if ('type' in rep) {
+        return rep.type as string;
+    }
+    switch (rep.kind) {
+        case "primitive":
+            return rep.type || "unknown";
+        case "dataclass":
+            return rep.type || "dataclass";
+        case "empty_linear_collection":
+        case "homogenous_linear_collection":
+        case "linear_collection":
+            return rep.type || "list";
+        case "tuple":
+        case "empty_tuple":
+            return "tuple";
+        case "dict":
+        case "empty_dict":
+            return "dict";
+        case "homogenous_grid":
+            return rep.type || "grid";
+        case "cycle_reference":
+            return "circular ref";
+        case "max_depth_reached":
+            return "...";
+        case "unknown":
+            return rep.type || "unknown";
+        case "error":
+        case "complete_failure":
+            return "error";
+        default:
+            return "unknown";
+    }
+}
+
+/**
  * Truncates a string value by showing start and end with "..." in the middle.
  * Makes the truncated text clickable to expand/collapse.
  */
@@ -89,18 +127,30 @@ function renderRepresentation(rep: SpecificRepresentation) {
                     <div class="drafter-debug-rep-dataclass-type drafter-debug-rep-cell">
                         {rep.type} <span class="drafter-debug-count">({rep.fields.length} fields)</span>
                     </div>
-                    <div class="drafter-debug-rep-dataclass-fields drafter-debug-rep-cell">
-                        {rep.fields.map((field) => (
-                            <>
-                                <div class="drafter-debug-rep-dataclass-field-name  drafter-debug-rep-cell">
-                                    {field.name}:
-                                </div>
-                                <div class="drafter-debug-rep-dataclass-field-value  drafter-debug-rep-cell">
-                                    {renderRepresentation(field.value)}
-                                </div>
-                            </>
-                        ))}
-                    </div>
+                    <table class="drafter-debug-rep-dataclass-table">
+                        <thead>
+                            <tr>
+                                <th class="drafter-debug-rep-field-name-header">Field</th>
+                                <th class="drafter-debug-rep-field-value-header">Value</th>
+                                <th class="drafter-debug-rep-field-type-header">Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {rep.fields.map((field) => (
+                                <tr class="drafter-debug-rep-dataclass-field-row">
+                                    <td class="drafter-debug-rep-dataclass-field-name">
+                                        {field.name}
+                                    </td>
+                                    <td class="drafter-debug-rep-dataclass-field-value">
+                                        {renderRepresentation(field.value)}
+                                    </td>
+                                    <td class="drafter-debug-rep-dataclass-field-type">
+                                        {field.value.type || getTypeFromRepresentation(field.value)}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             );
         case "homogenous_grid":

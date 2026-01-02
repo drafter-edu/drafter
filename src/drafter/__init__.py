@@ -30,6 +30,8 @@ from drafter.components import (
     FileUpload,
     Audio,
     Video,
+    Canvas,
+    SVG,
     MatPlotLibPlot,
 )
 from drafter.launch import start_server
@@ -114,6 +116,8 @@ __all__ = [
     "FileUpload",
     "Audio",
     "Video",
+    "Canvas",
+    "SVG",
     "MatPlotLibPlot",
     "hide_debug_information",
     "show_debug_information",

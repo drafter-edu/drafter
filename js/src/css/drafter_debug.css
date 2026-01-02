@@ -523,6 +523,41 @@ div.btlw-container img {
     gap: 0px;
 }
 
+/* Dataclass table styling for better type display */
+.drafter-debug-rep-dataclass-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    background-color: white;
+}
+
+.drafter-debug-rep-dataclass-table thead {
+    background-color: #ffecd9;
+    font-weight: bold;
+}
+
+.drafter-debug-rep-dataclass-table th {
+    padding: 6px 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+    color: #cc6600;
+}
+
+.drafter-debug-rep-dataclass-table td {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+}
+
+.drafter-debug-rep-dataclass-field-row:hover {
+    background-color: #fffaf5;
+}
+
+.drafter-debug-rep-dataclass-field-type {
+    font-family: monospace;
+    color: #666;
+    font-size: 0.9em;
+}
+
 /* This should be a two column wide grid */
 .drafter-debug-rep-dataclass-fields {
     display: grid;
