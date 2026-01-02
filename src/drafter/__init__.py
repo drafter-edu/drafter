@@ -61,7 +61,7 @@ from drafter.styling.styling import (
     change_padding,
 )
 from drafter.client_server.commands import get_main_server, set_main_server
-from drafter.router.commands import route
+from drafter.router.commands import route, timer, error_handler
 from drafter.payloads.kinds.page import Page
 from drafter.deploy import (
     hide_debug_information,
@@ -77,6 +77,7 @@ from drafter.deploy import (
 )
 
 from drafter.testing import assert_equal, assert_has, assert_in, assert_state
+from drafter.components.page_content import get_component_breadcrumbs, clear_component_breadcrumbs
 
 __all__ = [
     "dataclass",
@@ -87,6 +88,10 @@ __all__ = [
     "get_main_server",
     "set_main_server",
     "route",
+    "timer",
+    "error_handler",
+    "get_component_breadcrumbs",
+    "clear_component_breadcrumbs",
     "start_server",
     "PageContent",
     "Div",

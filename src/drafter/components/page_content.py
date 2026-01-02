@@ -26,6 +26,7 @@ Technically, we need the component to return not just its HTML, but also its CSS
 
 '''
 from typing import List, Optional, Union, Any
+import threading
 
 from drafter.components.utilities.attributes import BASELINE_ATTRS
 from drafter.urls import remap_attr_styles
@@ -33,11 +34,54 @@ from drafter.urls import remap_attr_styles
 # Global counter for generating stable component IDs
 _component_id_counter = 0
 
+# Thread-local storage for component rendering breadcrumbs
+# This prevents breadcrumbs from different concurrent requests from interfering
+_thread_local = threading.local()
+
 def _generate_component_id() -> str:
     """Generates a stable unique ID for a component instance."""
     global _component_id_counter
     _component_id_counter += 1
     return f"drafter-component-{_component_id_counter}"
+
+def _get_breadcrumbs() -> List[str]:
+    """Get the thread-local breadcrumb list, creating it if necessary."""
+    if not hasattr(_thread_local, 'breadcrumbs'):
+        _thread_local.breadcrumbs = []
+    return _thread_local.breadcrumbs
+
+def get_component_breadcrumbs() -> List[str]:
+    """
+    Returns the current component rendering breadcrumbs for this thread.
+    
+    This shows the path of components being rendered, useful for debugging
+    when an error occurs during rendering or verification.
+    
+    Example output: ['Page', 'Div.container', 'Text.title']
+    
+    :return: List of component names in rendering order
+    """
+    return _get_breadcrumbs().copy()
+
+def _push_breadcrumb(component_name: str):
+    """Adds a component to the rendering breadcrumb trail."""
+    _get_breadcrumbs().append(component_name)
+
+def _pop_breadcrumb():
+    """Removes the most recent component from the breadcrumb trail."""
+    breadcrumbs = _get_breadcrumbs()
+    if breadcrumbs:
+        breadcrumbs.pop()
+
+def clear_component_breadcrumbs():
+    """
+    Clears all breadcrumbs for the current thread.
+    
+    This should be called at the start of rendering a new page to ensure
+    breadcrumbs don't carry over from previous renders.
+    """
+    if hasattr(_thread_local, 'breadcrumbs'):
+        _thread_local.breadcrumbs.clear()
 
 class Component:
     """
@@ -201,6 +245,8 @@ class Component:
         determine the final output. The fall back for every component is to simply convert it to a string using str().
         
         Parents are responsible for calling the render method of their children as needed!
+        
+        Breadcrumb tracking is automatically enabled to help debug rendering errors.
 
         :param current_state: The current state of the component
         :type current_state: Any
@@ -208,10 +254,24 @@ class Component:
         :type configuration: Configuration
         :return: The HTML representation of the component
         """
-        self.pre_render(current_state, configuration)
-        result = str(self)
-        self.post_render(current_state, configuration)
-        return result
+        # Track this component in breadcrumbs for debugging
+        component_name = self.__class__.__name__
+        if hasattr(self, 'component_id'):
+            component_name = f"{component_name}#{self.component_id}"
+        
+        _push_breadcrumb(component_name)
+        try:
+            self.pre_render(current_state, configuration)
+            result = str(self)
+            self.post_render(current_state, configuration)
+            return result
+        except Exception as e:
+            # Add breadcrumb information to the exception
+            breadcrumb_path = ' → '.join(get_component_breadcrumbs())
+            error_msg = f"Error rendering component at path: {breadcrumb_path}\nOriginal error: {str(e)}"
+            raise type(e)(error_msg) from e
+        finally:
+            _pop_breadcrumb()
     
     def pre_render(self, current_state, configuration):
         """

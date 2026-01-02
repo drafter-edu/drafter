@@ -87,6 +87,10 @@ class Page(ResponsePayload):
         :param configuration: The configuration of the server. This will be used to determine how the page is rendered.
         :return: A string of HTML representing the content of the page.
         """
+        # Clear breadcrumbs at the start of each page render to ensure clean state
+        from drafter.components.page_content import clear_component_breadcrumbs
+        clear_component_breadcrumbs()
+        
         # TODO: Decide if we want to dump state on the page
         chunked: list[str] = []
         for chunk in self.content:
