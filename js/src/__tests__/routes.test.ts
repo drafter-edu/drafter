@@ -8,7 +8,7 @@ import "../../../src/drafter/assets/js/skulpt-stdlib.js";
 import "../../../src/drafter/assets/js/skulpt-drafter.js";
 import "../../../src/drafter/assets/js/drafter.js";
 import { builtinRead, setupSkulpt } from "../skulpt-tools.js";
-import { runStudentCode } from "../skulpt.index";
+import { runStudentCode, clearDrafterSiteRoot } from "../skulpt.index";
 import * as fs from "fs";
 import * as path from "path";
 import { screen, waitFor, within } from "@testing-library/dom";
@@ -41,7 +41,7 @@ from drafter import *
 def index(state: int):
     return Page(state, [
         "This button should not work!",
-        Button("Second", second)
+        Button("Second", "second")
     ])
 
 start_server(0)
@@ -101,6 +101,7 @@ describe(`Simple Drafter Application`, () => {
         await app.findByText(/the next page/i);
 
         // Now run the second application
+        clearDrafterSiteRoot();
         await runStudentCode({
             code: SECOND_CODE,
             presentErrors: false,
@@ -108,10 +109,16 @@ describe(`Simple Drafter Application`, () => {
         let drafterBody2 = await document.querySelector("#drafter-body--");
         expect(drafterBody2).not.toBeNull();
         let app2 = within(drafterBody2 as HTMLElement);
+        // Simulate clicking the "Second" button
+        const button2 = await app2.findByRole("button", { name: /second/i });
+
+        await userEvent.click(button2);
 
         // Should now get an error message
         await app2.findByText(/no route found for URL: second/i);
 
+        // Now run the third application
+        clearDrafterSiteRoot();
         const module = await runStudentCode({
             code: THIRD_CODE,
             presentErrors: false,
@@ -120,8 +127,14 @@ describe(`Simple Drafter Application`, () => {
         expect(drafterBody2).not.toBeNull();
         app2 = within(drafterBody2 as HTMLElement);
 
+        await app2.findByText(/third app here!/i);
+
+        // Simulate clicking the "Second" button
+        const button3 = await app2.findByRole("button", { name: /second/i });
+
+        await userEvent.click(button3);
+
         // Check that now we are on the second page of the third app
-        // TODO: Should probably be back on index instead
         await app2.findByText(/did we overwrite the original\?/i);
     });
 });

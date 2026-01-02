@@ -8,6 +8,17 @@ export interface DrafterInitOptions {
 
 const x: pyStr = new Sk.builtin.str("hello");
 
+export function clearDrafterSiteRoot() {
+    const rootElement = document.getElementById(
+        "drafter-root--"
+    ) as HTMLElement;
+    if (rootElement) {
+        rootElement.innerHTML = "";
+    } else {
+        throw new Error(`Element with ID drafter-root-- not found`);
+    }
+}
+
 export function runStudentCode(options: DrafterInitOptions) {
     setupSkulpt();
 
