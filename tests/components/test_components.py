@@ -7,9 +7,9 @@ snippets = {
         "regular": "Button('Hello World', 'index')",
         "external_link": "Button('External Link', 'http://example.com')",
         "with_arguments": """Button('With Args', 'next_page', arguments=[
-    Argument('first', 'first_value'),
-    Argument('second', 'second_value'),
-])""",
+            Argument('first', 'first_value'),
+            Argument('second', 'second_value'),
+        ])""",
         "with_style": """Button("Red", "next", style_font_color="red")""",
         "with_attributes": """Button("Attrs", "next", id="mybutton", style_background_color="#00FF00")""",
         "with_mystery_attr": """Button("Mystery Attr", "next", mystery_attr="mystery_value")""",
@@ -26,7 +26,6 @@ snippets = {
         "simple": """Span('Hello world!')""",
         "with_style": """Span('Styled text', style_font_size="20px", style_color="#333333")""",
         "with_attributes": """Span('Attributed text', id="myspan", style_text_decoration="underline")""",
-
     },
     "ol": {
         "simple": """NumberedList(['First item', 'Second item', 'Third item'])""",
@@ -42,7 +41,6 @@ snippets = {
         "h3": """Header('This is a level 3 header', level=3)""",
         "with_style": """Header('Styled Header', level=2, style_text_align="center", style_color="#0000FF")""",
     },
-
     "text": {
         "simple": """Text('This is a simple text component.')""",
         "with_style": """Text('Styled text component.', style_font_family='Arial', style_font_size='16px')""",
@@ -51,6 +49,15 @@ snippets = {
     "row": {
         "simple": """Row(['Hello world!', 'This is a row.'])""",
         "with_style": """Row(['Styled row'], style_background_color="#DDDDDD", style_padding="10px")""",
+        "with_id": """Row(['Row with ID'], id="row1", style_border="1px solid #000000")""",
+    },
+    
+    "TextArea": {
+        "simple": """TextArea('comments')""",
+        "default_value": """TextArea('comments', 'Enter your comments here...')""",
+        "boolean_flag": """TextArea('comments', 'Enter your comments here...', required=True)""",
+        "with_style": """TextArea('feedback', style_width='300px', style_height='150px')""",
+        
     }
 }
 
