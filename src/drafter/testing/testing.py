@@ -11,7 +11,7 @@ from drafter.helpers.ast_tools import get_all_relevant_lines
 
 try:
     import bakery
-except:
+except:  # noqa: E722
     bakery = None
 
 

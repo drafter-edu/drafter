@@ -31,7 +31,7 @@ class SiteState:
             self.initialized = True
         elif self.history:
             last_state = self.history[-1]
-            if type(last_state) != type(new_state):
+            if type(last_state) is not type(new_state):
                 old_type_name = type(last_state).__name__
                 new_type_name = type(new_state).__name__
                 # TODO: Log additional information about the route
