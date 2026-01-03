@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Callable, Union
+from typing import List, Callable, Union
 from dataclasses import dataclass
 import html
 

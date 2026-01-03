@@ -1,6 +1,6 @@
 from dataclasses import dataclass, fields, is_dataclass
 import html
-from typing import List, Union, Any
+from typing import List
 from drafter.components.page_content import Component, Content
 from drafter.history.utils import safe_repr
 from copy import deepcopy
@@ -12,6 +12,7 @@ class Table(Component):
     TODO: Handle 2d list, 1d list of dataclasses, 1d list of primitives,
     TODO: Handle single dataclass instance, dictionaries
     """
+
     rows: List[List[Content]]
 
     def __init__(self, rows: List[List[Content]], header=None, **kwargs):
@@ -83,7 +84,9 @@ class Table(Component):
 
     def __eq__(self, other):
         if isinstance(other, Table):
-            return (self._original_rows == other._original_rows and
-                    self._original_header == other._original_header and
-                    self.extra_settings == other.extra_settings)
+            return (
+                self._original_rows == other._original_rows
+                and self._original_header == other._original_header
+                and self.extra_settings == other.extra_settings
+            )
         return NotImplemented

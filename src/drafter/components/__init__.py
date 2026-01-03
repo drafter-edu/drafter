@@ -7,13 +7,22 @@ from drafter.components.layout import (
     Row,
     BulletedList,
     NumberedList,
-    List,
     Division,
     Box,
 )
 from drafter.components.text import Text, PreformattedText, Header, Pre, RawHTML
 from drafter.components.output import Output, Progress
-from drafter.components.forms import TextBox, TextArea, SelectBox, CheckBox, Label, DateTimeInput, DateInput, TimeInput
+from drafter.components.forms import (
+    TextBox,
+    TextArea,
+    SelectBox,
+    CheckBox,
+    Label,
+    DateTimeInput,
+    DateInput,
+    TimeInput,
+)
+
 # TODO: Sliders, Autocomplete, RadioButtons
 from drafter.components.tables import Table
 from drafter.components.links import Link, Button, Argument
@@ -37,11 +46,11 @@ __all__ = [
     "Row",
     "BulletedList",
     "NumberedList",
-    "List",
     "Division",
     "Box",
     "Text",
     "RawHTML",
+    "Pre",
     "PreformattedText",
     "Header",
     "TextBox",

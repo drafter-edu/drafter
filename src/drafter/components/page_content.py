@@ -1,4 +1,4 @@
-'''
+"""
 
 There are three main types defined here:
 - `Component`: The base class for all content that can be added to a page. It provides methods for verifying the component's state, parsing extra settings into HTML attributes and styles, updating styles and attributes, and rendering the component to HTML.
@@ -24,11 +24,17 @@ A Component should always:
 
 Technically, we need the component to return not just its HTML, but also its CSS and JS additions. It might also want to add other messages to the page, such as an instruction to start a timer or something. So our render should really return a more complex structure.
 
-'''
-from typing import List, Optional, Union
+"""
+
+from typing import List, Union
 import html
 
-from drafter.components.utilities.attributes import BASELINE_ATTRS, BOOLEAN_ATTRS, remap_attr_styles
+from drafter.components.utilities.attributes import (
+    BASELINE_ATTRS,
+    BOOLEAN_ATTRS,
+    remap_attr_styles,
+)
+
 
 class Component:
     """
@@ -42,10 +48,10 @@ class Component:
     allows for more customization and control over the content.
 
     Ultimately, the `Component` object is converted to a string when it is rendered.
-    
+
     This class also has some helpful methods for verifying URLs and handling attributes/styles.
     """
-    
+
     extra_settings: dict
     EXTRA_ATTRS: List[str] = []
 
@@ -93,7 +99,7 @@ class Component:
             is_data_attr = key.startswith("data-")
             # Check if known attribute
             is_known_attr = key in self.EXTRA_ATTRS or key in BASELINE_ATTRS
-            
+
             if not is_data_attr and not is_known_attr:
                 # If not a data-* or known attribute, assume it is a style
                 styles.append(f"{key}: {value}")
@@ -116,8 +122,10 @@ class Component:
         if styles:
             result += f" style='{'; '.join(styles)}'"
         return result
-    
-    def _render_tag(self, tag_name: str, content: str = "", self_closing: bool = False, **kwargs) -> str:
+
+    def _render_tag(
+        self, tag_name: str, content: str = "", self_closing: bool = False, **kwargs
+    ) -> str:
         """
         Renders an HTML tag with the given name and attributes.
 
@@ -171,7 +179,7 @@ class Component:
         This method is called when the component is being rendered to a string. It should return
         the HTML representation of the component, using the current State and configuration to
         determine the final output. The fall back for every component is to simply convert it to a string using str().
-        
+
         Parents are responsible for calling the render method of their children as needed!
 
         :param current_state: The current state of the component
@@ -184,7 +192,7 @@ class Component:
         result = str(self)
         self.post_render(current_state, configuration)
         return result
-    
+
     def pre_render(self, current_state, configuration):
         """
         This method is called before the component is rendered. It can be used to perform any
@@ -196,7 +204,7 @@ class Component:
         :type configuration: Configuration
         """
         pass
-    
+
     def post_render(self, current_state, configuration):
         """
         This method is called after the component is rendered. It can be used to perform any
@@ -208,7 +216,7 @@ class Component:
         :type configuration: Configuration
         """
         pass
-    
+
     def get_id(self) -> str:
         """
         Gets the ID of the component if it has one.
