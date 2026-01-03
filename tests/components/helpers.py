@@ -1,9 +1,11 @@
 import linecache
 import uuid
 import drafter
+import datetime
 
 def eval_drafter_with_source(
     snippet: str,
+    approach: str,
     category: str,
     name: str,
     *,
@@ -45,6 +47,14 @@ def eval_drafter_with_source(
     drafter_eval_globals = {
         "__builtins__": __builtins__,
         **vars(drafter),
+        # Hardcode common imports for convenience
+        "datetime": datetime,
+        # Make some test data available
+        # @acbart: Repr of datetime objects introduces datetime.datetime
+        #          which prevents round-tripping otherwise.
+        "date1": datetime.date(2024, 1, 1),
+        "datetime1": datetime.datetime(2024, 1, 1, 12, 0, 0),
+        "time1": datetime.time(12, 0, 0),
     }
     if globals is not None:
         drafter_eval_globals.update(globals)
@@ -54,7 +64,7 @@ def eval_drafter_with_source(
         return eval(code, drafter_eval_globals, locals)
     except Exception as e:
         raise AssertionError(
-            f"{category} / {name}: evaluating the repr() of the object raised an exception:\n\n"
+            f"{approach} / {category} / {name}: evaluating the repr() of the object raised an exception:\n\n"
             f"Snippet:\n{snippet}\n\nException:\n{e}"
         ) from e
     finally:
