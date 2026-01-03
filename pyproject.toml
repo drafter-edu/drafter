@@ -4,9 +4,30 @@ build-backend = "hatchling.build"
 
 [project]
 name = "drafter"
+authors = [{ name = "Austin Cory Bart", email = "acbart@udel.edu" }]
 version = "2.0.0"
-description = "Drafter: Python-driven interactive pages via Skulpt + TS"
+description = "Student-friendly full stack web development library."
 readme = "README.md"
+urls = { "github" = "https://github.com/drafter-edu/drafter", "homepage" = "https://drafter-edu.github.io/drafter/" }
+license = { file = "LICENSE.txt" }
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Education",
+
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+
+  "Topic :: Education",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+
+]
 requires-python = ">=3.8"
 dependencies = [
   # Server

@@ -1,6 +1,7 @@
 -   [ ] Compilation pipeline
     -   [ ] Compile initial page for faster load times
     -   [ ] `launch.py` doesn't use the compilation pipeline correctly
+-   [ ] Convert to CHANGELOG.md format and adopt python-semantic-release (or github-changelog-md)
 -   [ ] Configuration should be smoother
 -   [ ] Delete old files and old_history
 -   [ ] Debug panel: registered routes: make them links, allow the user to input text

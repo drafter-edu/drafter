@@ -2,6 +2,92 @@
 
 A simple Python library for making websites
 
+git checkout v2-pyodide
+
+## Development
+
+### Setup (Python via uv)
+
+1. **Prereqs**: Python 3.8+ (recommended 3.11+), Node.js 18+ with npm, and [uv](https://github.com/astral-sh/uv). On Windows PowerShell:
+
+```powershell
+winget install astral-sh.uv
+```
+
+2. **Clone**:
+
+```powershell
+git clone https://github.com/drafter-edu/drafter.git
+cd drafter
+```
+
+3. **Create the Python environment and install deps** (reads pyproject/uv.lock):
+
+```powershell
+uv sync
+```
+
+4. **Install JS deps once** (for builds/watchers):
+
+```powershell
+cd js
+npm install
+cd ..
+```
+
+5. **Run an example** (uses uv’s virtual env automatically):
+
+```powershell
+uv run examples\shop.py
+```
+
+If you need the Skulpt engine explicitly, pass `--engine skulpt`.
+
+### watch JS assets
+
+To iterate on the JS client and have changes flow into the Python package automatically:
+
+1. In one terminal, run the JS watcher. This rebuilds the TypeScript bridge on every save and copies the output into `src/drafter/assets`:
+
+```powershell
+cd js
+npm install
+npm run dev
+```
+
+2. In another terminal, run the JS precompiler. This builds the Skulpt version of the Python Drafter library on every save and copies the output into `src/drafter/assets`:
+
+````powershell
+cd js
+npm run precompile:watch
+```
+
+3. In another terminal, run a local Drafter app so you can see live reloads. For example, using one of the examples:
+
+```powershell
+uv run examples\simplest.py
+````
+
+Notes:
+
+-   The watcher writes bundles to `src/drafter/assets` which the dev server serves from `/assets` and is already included in the server's file-watcher, so connected browsers will auto-reload.
+-   If you maintain a local Skulpt build, set `SKULPT_DIR` in a top-level `.env` to copy `skulpt.js` and `skulpt-stdlib.js` directly into `src/drafter/assets` on startup (`npm run dev` calls this automatically).
+
+### run tests
+
+-   JS tests:
+
+```powershell
+cd js
+npm run test
+```
+
+-   Python tests (uses uv env):
+
+```powershell
+uv run pytest --verbose --color=yes -vv
+```
+
 ## Organization
 
 When you run a Drafter program that has a `start_server` call, then it will actually trigger the `launch.py` script's logic that will either run the application differently depending on whether it is in Skulpt (skulpt) mode or normal Python (app) mode.
@@ -180,33 +266,3 @@ Reentrant pages: If a route function has default parameters, then the URL can be
 File handling: When a file gets uploaded to the server, it will get stored in memory (or IndexedDB/localStorage if needed) and associated with the current state. When navigating back and forth, the file will be restored as needed. Note that files past a certain size may not be storable in localStorage, so we may need to have a strategy for handling large files (e.g., using IndexedDB, prompting the user to re-upload, substituting a smaller file).
 
 `PersistentStore` is a class that lives in the BridgeClient which abstracts away the details of where data is stored (in-memory, localStorage, IndexedDB, etc.). It provides a simple interface for saving and loading data, and can be configured to use different storage backends as needed. The server can send commands to the BridgeClient to store or retrieve data using this `PersistentStore`.
-
-## Development: watch JS assets
-
-To iterate on the JS client and have changes flow into the Python package automatically:
-
-1. In one terminal, run the JS watcher. This rebuilds the TypeScript bridge on every save and copies the output into `src/drafter/assets`:
-
-```powershell
-cd js
-npm install
-npm run dev
-```
-
-2. In another terminal, run the JS precompiler. This builds the Skulpt version of the Python Drafter library on every save and copies the output into `src/drafter/assets`:
-
-````powershell
-cd js
-npm run precompile:watch
-```
-
-3. In another terminal, run a local Drafter app so you can see live reloads. For example, using one of the examples:
-
-```powershell
-python examples\simplest.py
-````
-
-Notes:
-
--   The watcher writes bundles to `src/drafter/assets` which the dev server serves from `/assets` and is already included in the server's file-watcher, so connected browsers will auto-reload.
--   If you maintain a local Skulpt build, set `SKULPT_DIR` in a top-level `.env` to copy `skulpt.js` and `skulpt-stdlib.js` directly into `src/drafter/assets` on startup (`npm run dev` calls this automatically).
