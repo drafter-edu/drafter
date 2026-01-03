@@ -11,16 +11,28 @@ class LineBreak(Component):
         self.extra_settings = kwargs
         
     def render(self, current_state, configuration):
-        return str(self)
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        return self.TEMPLATE.format(parsed_settings=parsed_settings)
     
     def __str__(self) -> str:
-        return "<br />"
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        return f"<br {parsed_settings}/>"
 
 
 @dataclass
 class HorizontalRule(Component):
+    TEMPLATE: str = "<hr {parsed_settings}/>"
+    
+    def __init__(self, **kwargs):
+        self.extra_settings = kwargs
+        
+    def render(self, current_state, configuration):
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        return self.TEMPLATE.format(parsed_settings=parsed_settings)
+    
     def __str__(self) -> str:
-        return "<hr />"
+        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        return f"<hr {parsed_settings}/>"
 
 
 @dataclass(repr=False)

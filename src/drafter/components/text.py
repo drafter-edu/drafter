@@ -33,6 +33,9 @@ class Header(Component):
             self.extra_settings = kwargs
 
     def __str__(self):
+        extra_settings = self.parse_extra_settings(**self.extra_settings)
+        if extra_settings:
+            return f"<h{self.level} {extra_settings}>{self.body}</h{self.level}>"
         return f"<h{self.level}>{self.body}</h{self.level}>"
 
     def __repr__(self):
