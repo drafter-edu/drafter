@@ -80,7 +80,7 @@ class Text(Component):
 
     def __repr__(self):
         if self.extra_settings:
-            return f"Text({self.body!r}, {self.extra_settings})"
+            return f"Text({self.body!r}, extra_settings={self.extra_settings})"
         return f"Text({self.body!r})"
 
     def __str__(self):
