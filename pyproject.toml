@@ -45,10 +45,7 @@ dependencies = [
   "pillow",
   "matplotlib",
 ]
-[project.scripts]
-drafter = "drafter.cli:app"
-
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
   # Building
   "hatchling",
@@ -84,6 +81,9 @@ dev = [
   "coverage",
   "tox",
 ]
+
+[project.scripts]
+drafter = "drafter.cli:app"
 
 [tool.hatch.build]
 include = ["src/drafter/**"]
