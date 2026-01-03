@@ -117,7 +117,9 @@ class TextArea(FormComponent):
         self.extra_settings = kwargs
 
     def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
+        extra_settings = dict(self.extra_settings)
+        self.handle_aria(extra_settings)
+        parsed_settings = self.parse_extra_settings(**extra_settings)
         return f"<textarea name='{self.name}' {parsed_settings}>{html.escape(self.default_value)}</textarea>"
 
     def __repr__(self) -> str:
@@ -156,6 +158,7 @@ class SelectBox(FormComponent):
         extra_settings = {}
         if self.default_value is not None:
             extra_settings["value"] = html.escape(self.default_value)
+        self.handle_aria(extra_settings)
         parsed_settings = self.parse_extra_settings(**extra_settings)
         options = "\n".join(
             f"<option {'selected' if option == self.default_value else ''} "
