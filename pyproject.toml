@@ -80,6 +80,8 @@ dev = [
   "pytest-mock",
   "coverage",
   "tox",
+  "lxml",
+  "html5lib",
 ]
 
 [project.scripts]

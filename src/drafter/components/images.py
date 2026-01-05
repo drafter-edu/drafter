@@ -10,7 +10,7 @@ BASE_IMAGE_FOLDER = "/__images"
 
 
 @dataclass
-class Image(Component, LinkContent):
+class Image(LinkContent):
     url: str
     width: Optional[int]
     height: Optional[int]

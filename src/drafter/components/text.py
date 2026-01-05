@@ -1,16 +1,21 @@
 from dataclasses import dataclass
+import html
 from typing import Any, List
-from drafter.components.layout import _HtmlGroup
-from drafter.components.page_content import Component
+from drafter.components.layout import handle_arguments_compatibility
+from drafter.components.page_content import Component, PageContent
+from drafter.components.planning.render_plan import RenderPlan
 
 
 @dataclass(repr=False)
-class Pre(_HtmlGroup):
-    content: List[Any]
-    kind = "pre"
+class Pre(Component):
+    tag = "pre"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    COLLAPSE_WHITESPACE = True
+
+    def __init__(self, *content: PageContent, **extra_settings):
+        self.children, self.extra_settings = handle_arguments_compatibility(
+            list(content), extra_settings
+        )
 
 
 PreformattedText = Pre
@@ -18,33 +23,24 @@ PreformattedText = Pre
 
 @dataclass
 class Header(Component):
-    body: str
+    body: PageContent
     level: int = 1
 
-    def __init__(self, body: str, level: int = 1, **kwargs):
+    POSITIONAL_ARGS = ["level"]
+    DEFAULT_ARGS = {"level": 1}
+
+    def __init__(self, body: PageContent, level: int = 1, **extra_settings):
         self.body = body
         self.level = level
         if level < 1 or level > 6:
             raise ValueError("Header level must be between 1 and 6")
-        if "extra_settings" in kwargs:
-            self.extra_settings = kwargs.pop("extra_settings")
-            self.extra_settings.update(kwargs)
-        else:
-            self.extra_settings = kwargs
+        self.extra_settings = extra_settings
 
-    def __str__(self):
-        extra_settings = self.parse_extra_settings(**self.extra_settings)
-        if extra_settings:
-            return f"<h{self.level} {extra_settings}>{self.body}</h{self.level}>"
-        return f"<h{self.level}>{self.body}</h{self.level}>"
+    def get_children(self) -> list[PageContent]:
+        return [self.body]
 
-    def __repr__(self):
-        pieces = [repr(self.body)]
-        if self.level != 1:
-            pieces.append(f"{repr(self.level)}")
-        for key, value in self.extra_settings.items():
-            pieces.append(f"{key}={repr(value)}")
-        return f"Header({', '.join(pieces)})"
+    def get_tag(self) -> str:
+        return f"h{self.level}"
 
 
 @dataclass
@@ -52,15 +48,11 @@ class Text(Component):
     body: str
     extra_settings: dict
 
-    def __init__(self, body: str, **kwargs):
+    def __init__(self, body: str, **extra_settings):
         self.body = body
-        if "body" in kwargs:
-            self.body = kwargs.pop("content")
-        if "extra_settings" in kwargs:
-            self.extra_settings = kwargs.pop("extra_settings")
-            self.extra_settings.update(kwargs)
-        else:
-            self.extra_settings = kwargs
+        if "body" in extra_settings:
+            self.body = extra_settings.pop("body")
+        self.extra_settings = extra_settings
 
     def __eq__(self, other):
         if isinstance(other, Text):
@@ -78,39 +70,45 @@ class Text(Component):
         else:
             return hash(self.body)
 
-    def __repr__(self):
-        if self.extra_settings:
-            return f"Text({self.body!r}, extra_settings={self.extra_settings})"
-        return f"Text({self.body!r})"
-
-    def __str__(self):
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        if not parsed_settings:
-            return self.body
-        return f"<span {parsed_settings}>{self.body}</span>"
+    def plan(self, context) -> RenderPlan:
+        if not self.extra_settings:
+            return RenderPlan(
+                kind="raw",
+                raw_html=html.escape(self.body),
+            )
+        return RenderPlan(
+            kind="tag",
+            tag_name="span",
+            attributes=self.extra_settings,
+            children=[html.escape(self.body)],
+        )
 
 
 @dataclass
-class RawHTML(Component):
+class RawHTML(Text):
     """
-    A component that renders raw HTML without escaping. 
-    
+    A component that renders raw HTML without escaping.
+
     WARNING: Only use with trusted HTML content to avoid XSS vulnerabilities.
     This component bypasses HTML escaping and renders content as-is.
-    
+
     :param html: The raw HTML string to render
     """
-    html: str
-    
-    def __init__(self, html: str, **kwargs):
-        self.html = html
-        self.extra_settings = kwargs
-    
-    def __str__(self) -> str:
-        return self.html
-    
-    def __repr__(self) -> str:
-        pieces = [repr(self.html)]
-        for key, value in self.extra_settings.items():
-            pieces.append(f"{key}={repr(value)}")
-        return f"RawHTML({', '.join(pieces)})"
+
+    def __init__(self, html: str, **extra_settings):
+        super().__init__(html, **extra_settings)
+
+    def plan(self, context) -> RenderPlan:
+        if not self.extra_settings:
+            return RenderPlan(
+                kind="raw",
+                raw_html=self.body,
+            )
+        return RenderPlan(
+            kind="tag",
+            tag_name="span",
+            attributes=self.extra_settings,
+            children=[self.body],
+        )
+
+    # TODO: Are we escaping HTML correctly in Text component?

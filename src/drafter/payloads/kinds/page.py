@@ -10,6 +10,7 @@ from drafter.components import Component, PageContent, Link
 from drafter.data.request import Request
 from drafter.history.formatting import format_page_content
 from drafter.history.state import SiteState
+from drafter.payloads.renderer import render, Renderer
 from drafter.payloads.payloads import ResponsePayload
 from drafter.payloads.failure import VerificationFailure
 from drafter.router.routes import Router
@@ -73,7 +74,7 @@ class Page(ResponsePayload):
         self, state: SiteState, configuration: ClientServerConfiguration
     ) -> Optional[str]:
         """
-        Renders the content of the page to HTML. This will include the state of the page, if it is restorable.
+        Renders the content of the page to HTML.
         Users should not call this method directly; it will be called on their behalf by the server.
 
         :param current_state: The current state of the server. This will be used to restore the page if needed.
@@ -81,14 +82,18 @@ class Page(ResponsePayload):
         :return: A string of HTML representing the content of the page.
         """
         # TODO: Decide if we want to dump state on the page
-        chunked: list[str] = []
-        for chunk in self.content:
-            if isinstance(chunk, str):
-                chunked.append(f"<p>{chunk}</p>")
-            else:
-                chunked.append(chunk.render(state, configuration))
-        content = "\n".join(chunked)
-        return content
+        content = render(
+            self.content,
+            state,
+            configuration,
+        )
+        if self.js is None:
+            self.js = []
+        if self.css is None:
+            self.css = []
+        self.js.extend(content.assets["js"])
+        self.css.extend(content.assets["css"])
+        return content.flatten()
 
     def format(
         self,

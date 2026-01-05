@@ -1,88 +1,83 @@
 from dataclasses import dataclass
 from typing import Any, List, Dict
-from drafter.components.page_content import Component
+from drafter.components.page_content import Component, PageContent
+from drafter.components.planning.render_plan import RenderPlan
 
 
 @dataclass
 class LineBreak(Component):
-    TEMPLATE: str = "<br {parsed_settings}/>"
-    
+    tag = "br"
+    SELF_CLOSING_TAG = True
+
     def __init__(self, **kwargs):
         self.extra_settings = kwargs
-        
-    def render(self, current_state, configuration):
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return self.TEMPLATE.format(parsed_settings=parsed_settings)
-    
-    def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<br {parsed_settings}/>"
 
 
 @dataclass
 class HorizontalRule(Component):
-    TEMPLATE: str = "<hr {parsed_settings}/>"
-    
+    tag = "hr"
+    SELF_CLOSING_TAG = True
+
     def __init__(self, **kwargs):
         self.extra_settings = kwargs
-        
-    def render(self, current_state, configuration):
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return self.TEMPLATE.format(parsed_settings=parsed_settings)
-    
-    def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<hr {parsed_settings}/>"
+
+
+def handle_arguments_compatibility(args, kwargs):
+    """
+    A function that handles classic Drafter functionality for
+    previously incorrectly rendered components that used the explicit
+    content and extra_settings kwargs. We should actively consider
+    whether we want to retain this functionality long-term.
+
+    Args:
+        args (list): Positional arguments
+        kwargs (kwargs): Keyword arguments
+
+    Returns:
+        tuple: Updated args and kwargs
+    """
+    if "content" in kwargs:
+        args.extend(kwargs.pop("content"))
+    if "extra_settings" in kwargs:
+        kwargs = kwargs.pop("extra_settings")
+        kwargs.update(kwargs)
+    return args, kwargs
 
 
 @dataclass(repr=False)
-class _HtmlGroup(Component):
-    content: List[Any]
-    extra_settings: Dict
-    kind: str
-    class_name: str = ""
+class Span(Component):
+    """
+    A span element for inline grouping of content.
 
-    def __init__(self, *args, **kwargs):
-        self.content = list(args)
-        if "content" in kwargs:
-            self.content.extend(kwargs.pop("content"))
-        if "kind" in kwargs:
-            self.kind = kwargs.pop("kind")
-        if "extra_settings" in kwargs:
-            self.extra_settings = kwargs.pop("extra_settings")
-            self.extra_settings.update(kwargs)
-        else:
-            self.extra_settings = kwargs
+    Args:
+        *content: The content to be wrapped in the span.
+        **extra_settings: Additional HTML attributes and style properties for the span.
+    """
 
-    def __repr__(self):
-        if not self.class_name:
-            class_name = self.kind.capitalize()
-        else:
-            class_name = self.class_name
-        if self.extra_settings:
-            kwargs = ", ".join(f"{key}={repr(value)}" for key, value in self.extra_settings.items())
-            return f"{class_name}({', '.join(repr(item) for item in self.content)}, {kwargs})"
-        return f"{class_name}({', '.join(repr(item) for item in self.content)})"
+    tag = "span"
 
-    def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<{self.kind} {parsed_settings}>{''.join(str(item) for item in self.content)}</{self.kind}>"
+    def __init__(self, *content: PageContent, **extra_settings):
+        self.children, self.extra_settings = handle_arguments_compatibility(
+            list(content), extra_settings
+        )
 
 
 @dataclass(repr=False)
-class Span(_HtmlGroup):
-    kind = "span"
+class Div(Component):
+    """
+    A div element for block-level grouping of content.
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    Args:
+        *content: The content to be wrapped in the div.
+        **extra_settings: Additional HTML attributes and style properties for the div.
+    """
 
+    tag = "div"
 
-@dataclass(repr=False)
-class Div(_HtmlGroup):
-    kind = "div"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *content: PageContent, **extra_settings):
+        self.children, self.extra_settings = handle_arguments_compatibility(
+            list(content), extra_settings
+        )
 
 
 Division = Div
@@ -90,43 +85,56 @@ Box = Div
 
 
 @dataclass(repr=False)
-class Row(Div):
-    class_name = "Row"
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.extra_settings["style_display"] = "flex"
-        self.extra_settings["style_flex_direction"] = "row"
-        self.extra_settings["style_align_items"] = "center"
-        
+class Row(Component):
+    tag = "div"
+
+    def __init__(self, *content: PageContent, **extra_settings):
+        self.children, self.extra_settings = handle_arguments_compatibility(
+            list(content), extra_settings
+        )
+        self.extra_settings.setdefault("style_display", "flex")
+        self.extra_settings.setdefault("style_flex_direction", "row")
+        self.extra_settings.setdefault("style_align_items", "center")
+
     def __eq__(self, other):
         if isinstance(other, Row):
-            return (self.content == other.content and
-                    self.extra_settings == other.extra_settings)
+            return (
+                self.children == other.children
+                and self.extra_settings == other.extra_settings
+            )
         elif isinstance(other, Div):
-            return (self.content == other.content and
-                    self.extra_settings == other.extra_settings)
+            return (
+                self.children == other.children
+                and self.extra_settings == other.extra_settings
+            )
         return NotImplemented
 
 
-@dataclass
 class _HtmlList(Component):
-    items: List[Any]
-    kind: str = ""
+    items: List[PageContent]
+    POSITIONAL_ARGS = []
 
-    def __init__(self, items: List[Any], **kwargs):
-        self.items = items
-        self.extra_settings = kwargs
-
-    def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        items = "\n".join(f"<li>{item}</li>" for item in self.items)
-        return f"<{self.kind} {parsed_settings}>{items}</{self.kind}>"
+    def get_children(self) -> List[PageContent | RenderPlan]:
+        return [
+            RenderPlan(kind="tag", tag_name="li", children=[item])
+            for item in self.items
+        ]
 
 
+@dataclass(repr=False)
 class NumberedList(_HtmlList):
-    kind = "ol"
+    tag = "ol"
+
+    def __init__(self, items: list[PageContent], **extra_settings):
+        # TODO: Check that the items are a list
+        self.items = items
+        self.extra_settings = extra_settings
 
 
+@dataclass(repr=False)
 class BulletedList(_HtmlList):
-    kind = "ul"
+    tag = "ul"
+
+    def __init__(self, items: list[PageContent], **extra_settings):
+        self.items = items
+        self.extra_settings = extra_settings

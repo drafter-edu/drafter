@@ -79,6 +79,8 @@
     -   [ ] Functions for testing if a component has certain attributes, styles, children, etc.
 -   [x] Route for "--reset" automatically added
 -   [ ] Route for "--about" automatically added
+-   [ ] Port over documentation to mkdocs
+    -   [ ] Generate reference images for components
 
 Pie in the sky:
 

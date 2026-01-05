@@ -1,7 +1,8 @@
-from typing import List, Callable, Union
+from typing import List, Callable, Union, Optional
 from dataclasses import dataclass
 import html
 
+from drafter.components.planning.render_plan import RenderPlan
 from drafter.components.utilities.escaping import (
     make_safe_argument,
     make_safe_json_argument,
@@ -11,14 +12,44 @@ from drafter.helpers.urls import (
     friendly_urls,
     check_invalid_external_url,
 )
-from drafter.components.page_content import Component
+from drafter.components.page_content import Component, PageContent
 from drafter.components.utilities.validation import validate_parameter_name
 
 
+RouteSafeValue = Union[str, int, float, bool]
 UrlOrFunction = Union[str, Callable]
 
 
-class LinkContent:
+@dataclass
+class Argument(Component):
+    name: str
+    value: RouteSafeValue
+    tag = "input"
+
+    POSITIONAL_ARGS = ["name", "value"]
+    EXTRA_ATTRS = ["type", "value"]
+
+    def __init__(self, name: str, value: RouteSafeValue, **extra_settings):
+        validate_parameter_name(name, "Argument")
+        self.name = name
+        if not isinstance(value, (str, int, float, bool)):
+            raise ValueError(
+                f"Argument values must be strings, integers, floats, or booleans. Found {type(value)}"
+            )
+        self.value = value
+        self.extra_settings = extra_settings
+
+    def get_attributes(self, context) -> dict:
+        attrs = {
+            "type": "hidden",
+            "name": f"{JSON_DECODE_SYMBOL}{self.name}",
+            "value": make_safe_json_argument(self.value),
+        }
+        attrs.update(self.extra_settings)
+        return attrs
+
+
+class LinkContent(Component):
     """
     Represents content for a hyperlink.
 
@@ -34,6 +65,7 @@ class LinkContent:
 
     url: str
     text: str
+    arguments: Optional[List[Argument]] = None
 
     EXTRA_ATTRS = ["disabled"]
 
@@ -44,6 +76,21 @@ class LinkContent:
             external = check_invalid_external_url(url) != ""
         url = url if external else friendly_urls(url)
         return url, external
+
+    def get_link_namespace(self):
+        return f"{self.text}#{self.get_id()}"
+
+    def get_children(self) -> list[PageContent]:
+        return [html.escape(self.text)]
+
+    def plan(self, context) -> RenderPlan:
+        button_plan = super().plan(context)
+        if not self.arguments:
+            return button_plan
+        # Create a unique namespace using both button text and instance ID
+        button_namespace = self.get_link_namespace()
+        argument_plans = self.plan_arguments(self.arguments, button_namespace)
+        return RenderPlan(kind="fragment", items=[button_plan, *argument_plans])
 
     def verify(self, router, state, configuration, request):
         if not router.has_route(self.url):
@@ -59,14 +106,23 @@ class LinkContent:
             )
         return None
 
-    def create_arguments(self, arguments, label_namespace):
+    def plan_arguments(self, arguments, label_namespace):
         parameters = self.parse_arguments(arguments, label_namespace)
         if parameters:
-            return "\n".join(
-                f"<input type='hidden' name='{name}' value='{make_safe_json_argument(value)}' />"
+            return [
+                RenderPlan(
+                    kind="tag",
+                    tag_name="input",
+                    attributes={
+                        "type": "hidden",
+                        "name": name,
+                        "value": make_safe_json_argument(value),
+                    },
+                    known_attributes=["type", "name", "value"],
+                )
                 for name, value in parameters.items()
-            )
-        return ""
+            ]
+        return []
 
     def parse_arguments(self, arguments, label_namespace):
         if arguments is None:
@@ -93,99 +149,78 @@ class LinkContent:
         )
 
 
-RouteSafeValue = Union[str, int, float, bool]
-
-
 @dataclass
-class Argument(Component):
-    name: str
-    value: RouteSafeValue
-
-    def __init__(self, name: str, value: RouteSafeValue, **kwargs):
-        validate_parameter_name(name, "Argument")
-        self.name = name
-        if not isinstance(value, (str, int, float, bool)):
-            raise ValueError(
-                f"Argument values must be strings, integers, floats, or booleans. Found {type(value)}"
-            )
-        self.value = value
-        self.extra_settings = kwargs
-
-    def __str__(self) -> str:
-        value = make_safe_json_argument(self.value)
-        return f"<input type='hidden' name='{JSON_DECODE_SYMBOL}{self.name}' value='{value}' {self.parse_extra_settings()} />"
-
-    def __repr__(self) -> str:
-        pieces = [repr(self.name), repr(self.value)]
-        if self.extra_settings:
-            for key, value in self.extra_settings.items():
-                pieces.append(f"{key}={repr(value)}")
-        return f"Argument({', '.join(pieces)})"
-
-
-@dataclass
-class Link(Component, LinkContent):
+class Link(LinkContent):
     text: str
     url: str
+    tag = "a"
+    arguments: Optional[List[Argument]] = None
+    external: bool = False
+
+    EXTRA_ATTRS = ["href", "target", "rel", "download"]
+    POSITIONAL_ARGS = ["url", "arguments"]
+    RENAME_ARGS = {"url": "data-nav"}
+    DEFAULT_ARGS = {"arguments": None}
+    DEFAULT_EXTRA_SETTINGS = {
+        "href": "#",
+    }
 
     def __init__(self, text: str, url: UrlOrFunction, arguments=None, **kwargs):
         self.text = text
         self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
         self.arguments = arguments
-        # Generate a unique ID for this link instance to avoid namespace collisions
-        self._link_id = id(self)
 
-    def __str__(self) -> str:
-        if self.external:
-            return f"<a href='{self.url}' {self.parse_extra_settings()}>{self.text}</a>"
-        # Create a unique namespace using both link text and instance ID
-        link_namespace = f"{self.text}#{self._link_id}"
-        precode = self.create_arguments(self.arguments, link_namespace)
-        value = make_safe_argument(link_namespace)
-        return f"{precode}<a data-nav='{self.url}' data-submit-button='{value}' href='#' {self.parse_extra_settings()}>{self.text}</a>"
+    def get_children(self) -> list[PageContent]:
+        return [html.escape(self.text)]
 
-    def __repr__(self) -> str:
-        pieces = [repr(self.text), repr(self.url)]
-        if self.arguments:
-            pieces.append(repr(self.arguments))
-        for key, value in self.extra_settings.items():
-            pieces.append(f"{key}={repr(value)}")
-        return f"Link({', '.join(pieces)})"
+    def get_attributes(self, context) -> dict:
+        attrs = {
+            "data-nav": self.url,
+            "name": SUBMIT_BUTTON_KEY,
+            "formaction": "#",
+            "data-submit-button": make_safe_argument(self.get_link_namespace()),
+        }
+        attrs.update(self.extra_settings)
+        return attrs
 
 
 @dataclass
-class Button(Component, LinkContent):
+class Button(LinkContent):
     text: str
     url: str
-    arguments: List[Argument]
+    tag = "button"
+    arguments: Optional[List[Argument]] = None
     external: bool = False
+
+    POSITIONAL_ARGS = ["url", "arguments"]
+    RENAME_ARGS = {"url": "data-nav"}
+    DEFAULT_ARGS = {"arguments": None}
+    DEFAULT_EXTRA_SETTINGS = {
+        "type": "submit",
+        "name": SUBMIT_BUTTON_KEY,
+        "formaction": "#",
+    }
 
     def __init__(self, text: str, url: UrlOrFunction, arguments=None, **kwargs):
         self.text = text
         self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
-        self.arguments = arguments or []
-        # Generate a unique ID for this button instance to avoid namespace collisions
-        self._button_id = id(self)
+        self.arguments = arguments
 
-    def __repr__(self):
-        pieces = [repr(self.text), repr(self.url)]
-        if self.arguments:
-            pieces.append(repr(self.arguments))
-        for key, value in self.extra_settings.items():
-            pieces.append(f"{key}={repr(value)}")
-        return f"Button({', '.join(pieces)})"
+    def get_children(self) -> list[PageContent]:
+        return [html.escape(self.text)]
 
-    def __str__(self) -> str:
-        # Create a unique namespace using both button text and instance ID
-        button_namespace = f"{self.text}#{self._button_id}"
-        precode = self.create_arguments(self.arguments, button_namespace)
-        # Include the button ID in the button value so we know which specific button was clicked
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        value = make_safe_argument(button_namespace)
-        text = html.escape(self.text)
-        return f"{precode}<button data-nav='{self.url}' type='submit' name='{SUBMIT_BUTTON_KEY}' value='{value}' formaction='#' {parsed_settings}>{text}</button>"
+    def get_attributes(self, context) -> dict:
+        attrs = {
+            "data-nav": self.url,
+            "type": "submit",
+            "name": SUBMIT_BUTTON_KEY,
+            "formaction": "#",
+            "value": make_safe_argument(self.get_link_namespace()),
+        }
+        attrs.update(self.extra_settings)
+        return attrs
 
 
 SubmitButton = Button

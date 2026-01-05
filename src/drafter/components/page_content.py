@@ -26,9 +26,10 @@ Technically, we need the component to return not just its HTML, but also its CSS
 
 """
 
-from typing import List, Union
+from typing import List, Union, Any, Optional
 import html
 
+from drafter.components.planning.render_plan import RenderPlan
 from drafter.components.utilities.attributes import (
     BASELINE_ATTRS,
     BOOLEAN_ATTRS,
@@ -52,8 +53,78 @@ class Component:
     This class also has some helpful methods for verifying URLs and handling attributes/styles.
     """
 
+    tag: str
     extra_settings: dict
-    EXTRA_ATTRS: List[str] = []
+    children: "Optional[list[PageContent]]" = None
+    DEFAULT_EXTRA_SETTINGS: Optional[dict] = None
+    EXTRA_ATTRS: list[str] = []
+
+    POSITIONAL_ARGS: list[str] = []
+    DEFAULT_ARGS: dict[str, Any] = {}
+    RENAME_ARGS: dict[str, str] = {}
+
+    COLLAPSE_WHITESPACE = False
+    SELF_CLOSING_TAG = False
+
+    def plan(self, context) -> RenderPlan:
+        return RenderPlan(
+            kind="tag",
+            tag_name=self.get_tag(),
+            attributes=self.get_attributes(context),
+            children=self.get_children(),
+            assets=self.get_assets(),
+            known_attributes=self.EXTRA_ATTRS,
+            id=self.get_id(),
+            self_closing=self.SELF_CLOSING_TAG,
+        )
+
+    def get_attributes(self, context) -> dict:
+        attributes = {}
+        for key in self.POSITIONAL_ARGS:
+            value = getattr(self, key)
+            if key in self.RENAME_ARGS:
+                key = self.RENAME_ARGS[key]
+            attributes[key] = value
+        if self.DEFAULT_EXTRA_SETTINGS:
+            attributes.update(self.DEFAULT_EXTRA_SETTINGS)
+        attributes.update(self.extra_settings)
+        return attributes
+
+    def get_tag(self) -> str:
+        return self.tag
+
+    def get_children(self) -> List[Any]:
+        return list(self.children) if self.children is not None else []
+
+    def get_arguments(self) -> List[str]:
+        return [repr(c) for c in self.get_children()] + [
+            repr(getattr(self, key))
+            for key in self.POSITIONAL_ARGS
+            if (
+                key not in self.DEFAULT_ARGS
+                or getattr(self, key) != self.DEFAULT_ARGS.get(key)
+            )
+        ]
+
+    def get_assets(self):
+        return None
+
+    def __repr__(self):
+        class_name = self.__class__.__name__
+        parts = self.get_arguments()
+        if self.extra_settings:
+            for key, value in sorted(self.extra_settings.items()):
+                parts.append(f"{key}={repr(value)}")
+        return f"{class_name}({', '.join(parts)})"
+
+    def get_id(self) -> str:
+        """
+        Gets the ID of the component if it has one.
+
+        :return: The ID of the component, or an auto-generated one if none is set.
+        :rtype: str
+        """
+        return self.extra_settings.get("id", f"drafter-component-{id(self)}")
 
     def verify(self, router, state, configuration, request):
         """
@@ -70,6 +141,42 @@ class Component:
         :return: True if the component is valid, False otherwise
         """
         return None
+
+    def update_style(self, style, value):
+        """
+        Updates the style of a specific setting and stores it in the
+        extra_settings dictionary with a key formatted as "style_{style}".
+
+        :param style: The key representing the style to be updated
+        :type style: str
+        :param value: The value to associate with the given style key
+        :type value: Any
+        :return: Returns the instance of the object after updating the style
+        :rtype: self
+        """
+        self.extra_settings[f"style_{style}"] = value
+        return self
+
+    def update_attr(self, attr, value):
+        """
+        Updates a specific attribute with the given value in the extra_settings dictionary.
+
+        This method modifies the `extra_settings` dictionary by setting the specified
+        attribute to the given value. It returns the instance of the object, allowing
+        for method chaining. No validation is performed on the input values, so they
+        should conform to the expected structure or constraints of the `extra_settings`.
+
+        :param attr: The key of the attribute to be updated in the dictionary.
+        :type attr: str
+        :param value: The value to set for the specified key in the dictionary.
+        :type value: Any
+        :return: The instance of the object after the update.
+        :rtype: Self
+        """
+        self.extra_settings[attr] = value
+        return self
+
+    # DEPRECATED OLD APPROACH BELOW
 
     def parse_extra_settings(self, **kwargs):
         """
@@ -118,9 +225,9 @@ class Component:
             styles.append(f"{key}: {value}")
         if "id" not in seen_attrs:
             attrs.append(f'id="{self.get_id()}"')
-        result = " ".join(attrs)
+        result = " ".join(sorted(attrs))
         if styles:
-            result += f" style='{'; '.join(styles)}'"
+            result += f" style='{'; '.join(sorted(styles))}'"
         return result
 
     def _render_tag(
@@ -139,40 +246,6 @@ class Component:
             return f"<{tag_name} {parsed_settings}/>"
         else:
             return f"<{tag_name} {parsed_settings}>{content}</{tag_name}>"
-
-    def update_style(self, style, value):
-        """
-        Updates the style of a specific setting and stores it in the
-        extra_settings dictionary with a key formatted as "style_{style}".
-
-        :param style: The key representing the style to be updated
-        :type style: str
-        :param value: The value to associate with the given style key
-        :type value: Any
-        :return: Returns the instance of the object after updating the style
-        :rtype: self
-        """
-        self.extra_settings[f"style_{style}"] = value
-        return self
-
-    def update_attr(self, attr, value):
-        """
-        Updates a specific attribute with the given value in the extra_settings dictionary.
-
-        This method modifies the `extra_settings` dictionary by setting the specified
-        attribute to the given value. It returns the instance of the object, allowing
-        for method chaining. No validation is performed on the input values, so they
-        should conform to the expected structure or constraints of the `extra_settings`.
-
-        :param attr: The key of the attribute to be updated in the dictionary.
-        :type attr: str
-        :param value: The value to set for the specified key in the dictionary.
-        :type value: Any
-        :return: The instance of the object after the update.
-        :rtype: Self
-        """
-        self.extra_settings[attr] = value
-        return self
 
     def render(self, current_state, configuration):
         """
@@ -217,39 +290,6 @@ class Component:
         """
         pass
 
-    def get_id(self) -> str:
-        """
-        Gets the ID of the component if it has one.
-
-        :return: The ID of the component, or an auto-generated one if none is set.
-        :rtype: str
-        """
-        return self.extra_settings.get("id", f"drafter-component-{id(self)}")
-
 
 Content = Union[Component, str]
 PageContent = Union[Content, List[Content]]
-
-"""
-@dataclass
-class RenderedContent:
-    html: list[str]
-    css: list[str]
-    js: list[str]
-    messages: list[Message] = None
-    
-    def __init__(self):
-        self.html = []
-        self.css = []
-        self.js = []
-        self.messages = []
-
-    def render(self, component: PageContent, state: SiteState, configuration: ClientServerConfiguration):
-        if isinstance(component, str):
-            self.html.append(component)
-        elif isinstance(component, Component):
-            should_stop = component.pre_render(state, configuration)
-            if not should_stop:
-                rendered_content = component.render(state, configuration)
-                component.post_render(state, configuration)
-"""
