@@ -12,7 +12,7 @@ from drafter.helpers.urls import (
     friendly_urls,
     check_invalid_external_url,
 )
-from drafter.components.page_content import Component, PageContent
+from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.utilities.validation import validate_parameter_name
 
 
@@ -20,14 +20,19 @@ RouteSafeValue = Union[str, int, float, bool]
 UrlOrFunction = Union[str, Callable]
 
 
-@dataclass
+@dataclass(repr=False)
 class Argument(Component):
     name: str
     value: RouteSafeValue
+
     tag = "input"
 
-    POSITIONAL_ARGS = ["name", "value"]
-    EXTRA_ATTRS = ["type", "value"]
+    DEFAULT_ATTRS = {"type": "hidden"}
+    KNOWN_ATTRS = ["type", "name", "value"]
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("value"),
+    ]
 
     def __init__(self, name: str, value: RouteSafeValue, **extra_settings):
         validate_parameter_name(name, "Argument")
@@ -40,13 +45,10 @@ class Argument(Component):
         self.extra_settings = extra_settings
 
     def get_attributes(self, context) -> dict:
-        attrs = {
-            "type": "hidden",
-            "name": f"{JSON_DECODE_SYMBOL}{self.name}",
-            "value": make_safe_json_argument(self.value),
-        }
-        attrs.update(self.extra_settings)
-        return attrs
+        attributes = super().get_attributes(context)
+        attributes["name"] = f"{JSON_DECODE_SYMBOL}{self.name}"
+        attributes["value"] = make_safe_json_argument(self.value)
+        return attributes
 
 
 class LinkContent(Component):
@@ -67,7 +69,8 @@ class LinkContent(Component):
     text: str
     arguments: Optional[List[Argument]] = None
 
-    EXTRA_ATTRS = ["disabled"]
+    KNOWN_ATTRS = ["disabled"]
+    RENAME_ATTRS = {"arguments": "data--drafter-arguments"}
 
     def _handle_url(self, url: UrlOrFunction, external=None) -> tuple[str, bool]:
         if callable(url):
@@ -80,8 +83,14 @@ class LinkContent(Component):
     def get_link_namespace(self):
         return f"{self.text}#{self.get_id()}"
 
-    def get_children(self) -> list[PageContent]:
-        return [html.escape(self.text)]
+    def get_attributes(self, context) -> dict:
+        attributes = super().get_attributes(context)
+        attributes["data-nav"] = self.url
+        if self.arguments:
+            attributes["data--drafter-arguments"] = make_safe_json_argument(
+                {arg.name: arg.value for arg in self.arguments}
+            )
+        return attributes
 
     def plan(self, context) -> RenderPlan:
         button_plan = super().plan(context)
@@ -149,21 +158,24 @@ class LinkContent(Component):
         )
 
 
-@dataclass
+@dataclass(repr=False)
 class Link(LinkContent):
     text: str
     url: str
-    tag = "a"
     arguments: Optional[List[Argument]] = None
     external: bool = False
 
-    EXTRA_ATTRS = ["href", "target", "rel", "download"]
-    POSITIONAL_ARGS = ["url", "arguments"]
-    RENAME_ARGS = {"url": "data-nav"}
-    DEFAULT_ARGS = {"arguments": None}
-    DEFAULT_EXTRA_SETTINGS = {
-        "href": "#",
-    }
+    tag = "a"
+
+    KNOWN_ATTRS = ["href", "target", "rel", "download", "formaction", "disabled"]
+    DEFAULT_ATTRS = {"href": "#", "formaction": "#"}
+    RENAME_ATTRS = {"url": "href", "arguments": "data--drafter-arguments"}
+
+    ARGUMENTS = [
+        ComponentArgument("text"),
+        ComponentArgument("url"),
+        ComponentArgument("arguments", kind="keyword", default_value=None),
+    ]
 
     def __init__(self, text: str, url: UrlOrFunction, arguments=None, **kwargs):
         self.text = text
@@ -171,36 +183,33 @@ class Link(LinkContent):
         self.extra_settings = kwargs
         self.arguments = arguments
 
-    def get_children(self) -> list[PageContent]:
-        return [html.escape(self.text)]
-
     def get_attributes(self, context) -> dict:
-        attrs = {
-            "data-nav": self.url,
-            "name": SUBMIT_BUTTON_KEY,
-            "formaction": "#",
-            "data-submit-button": make_safe_argument(self.get_link_namespace()),
-        }
-        attrs.update(self.extra_settings)
-        return attrs
+        attributes = super().get_attributes(context)
+        # TODO: Change to using data--drafter-arguments and handle in the frontend
+        attributes["name"] = SUBMIT_BUTTON_KEY
+        attributes["data-submit-button"] = make_safe_argument(self.get_link_namespace())
+        return attributes
 
 
-@dataclass
+@dataclass(repr=False)
 class Button(LinkContent):
     text: str
     url: str
-    tag = "button"
     arguments: Optional[List[Argument]] = None
     external: bool = False
 
-    POSITIONAL_ARGS = ["url", "arguments"]
-    RENAME_ARGS = {"url": "data-nav"}
-    DEFAULT_ARGS = {"arguments": None}
-    DEFAULT_EXTRA_SETTINGS = {
-        "type": "submit",
-        "name": SUBMIT_BUTTON_KEY,
-        "formaction": "#",
-    }
+    tag = "button"
+
+    KNOWN_ATTRS = ["type", "name", "formaction", "disabled"]
+    DEFAULT_ATTRS = {"formaction": "#", "type": "submit"}
+    RENAME_ATTRS = {"url": "data-nav", "arguments": "data--drafter-arguments"}
+    ARGUMENTS = [
+        ComponentArgument("text"),
+        ComponentArgument("url"),
+        ComponentArgument("arguments", kind="keyword", default_value=None),
+    ]
+
+    # TODO: Verify that the button does not have any interactive content as children
 
     def __init__(self, text: str, url: UrlOrFunction, arguments=None, **kwargs):
         self.text = text
@@ -208,19 +217,11 @@ class Button(LinkContent):
         self.extra_settings = kwargs
         self.arguments = arguments
 
-    def get_children(self) -> list[PageContent]:
-        return [html.escape(self.text)]
-
     def get_attributes(self, context) -> dict:
-        attrs = {
-            "data-nav": self.url,
-            "type": "submit",
-            "name": SUBMIT_BUTTON_KEY,
-            "formaction": "#",
-            "value": make_safe_argument(self.get_link_namespace()),
-        }
-        attrs.update(self.extra_settings)
-        return attrs
+        attributes = super().get_attributes(context)
+        attributes["name"] = SUBMIT_BUTTON_KEY
+        attributes["value"] = make_safe_argument(self.get_link_namespace())
+        return attributes
 
 
 SubmitButton = Button

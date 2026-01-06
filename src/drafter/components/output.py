@@ -1,73 +1,93 @@
 from dataclasses import dataclass
-from drafter.components.page_content import Component
+import html
+from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.forms import FormComponent
+from drafter.components.planning.render_plan import RenderPlan
 from typing import Union
 
-@dataclass
+from drafter.components.utilities.validation import validate_parameter_name
+
+
+@dataclass(repr=False)
 class Output(FormComponent):
     """
     A component to display output content, typically used for showing results or responses.
-    
+
     Args:
         content: The content to be displayed as output.
         **kwargs: Additional HTML attributes.
     """
+
+    name: str
     content: str
     for_id: Union[None, str, FormComponent] = None
-    EXTRA_ATTRS = ["for"]
+    tag = "output"
+    KNOWN_ATTRS = ["for", "name"]
+    RENAME_ATTRS = {"for_id": "for"}
 
-    def __init__(self, content: str, for_id: Union[None, str, FormComponent] = None, **kwargs):
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("content", is_content=True),
+        ComponentArgument("for_id", kind="keyword", default_value=None),
+    ]
+
+    def __init__(
+        self,
+        name: str,
+        content: str,
+        for_id: Union[None, str, FormComponent] = None,
+        **kwargs,
+    ):
+        validate_parameter_name(name, "Output")
+        self.name = name
         self.content = content
         if isinstance(for_id, FormComponent):
             for_id = for_id.get_id()
         self.for_id = for_id
         self.extra_settings = kwargs
 
-    def __str__(self) -> str:
-        extra_settings = dict(self.extra_settings)
-        if self.for_id:
-            extra_settings["for"] = self.for_id
-        parsed_settings = self.parse_extra_settings(**extra_settings)
-        return f"<output {parsed_settings}>{self.content}</output>"
 
-    def __repr__(self) -> str:
-        pieces = [repr(self.content)]
-        if self.for_id:
-            pieces.append(f"for_id={repr(self.for_id)}")
-        for key, value in self.extra_settings.items():
-            pieces.append(f"{key}={repr(value)}")
-        return f"Output({', '.join(pieces)})"
+def format_number(num):
+    if num == int(num):
+        return str(int(num))
+    return str(num)
 
-@dataclass
+
+@dataclass(repr=False)
 class Progress(Component):
     """
     HTML5 progress bar element for showing task completion.
-    
+
     Args:
         value: Current progress value (typically 0-max)
         max: Maximum value (default: 1)
         **kwargs: Additional HTML attributes
-        
+
     Example:
         Progress(0.5, max=1)  # 50% progress bar
         Progress(0.6, max=1, style_width="200px")  # 60% progress, custom width
     """
+
     value: float
     max: float
-    
+
+    tag = "progress"
+    KNOWN_ATTRS = ["value", "max"]
+
+    ARGUMENTS = [
+        ComponentArgument("value"),
+        ComponentArgument("max", kind="keyword", default_value=1.0),
+    ]
+    DEFAULT_ATTRS = {"max": 1}
+
     def __init__(self, value: float, max: float = 1.0, **kwargs):
         self.value = float(value)
         self.max = float(max)
         self.extra_settings = kwargs
-    
-    def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings(**self.extra_settings)
-        return f"<progress value='{self.value}' max='{self.max}' {parsed_settings}></progress>"
-    
-    def __repr__(self) -> str:
-        pieces = [repr(self.value)]
-        if self.max != 1.0:
-            pieces.append(f"max={repr(self.max)}")
-        for key, value in self.extra_settings.items():
-            pieces.append(f"{key}={repr(value)}")
-        return f"Progress({', '.join(pieces)})"
+
+    def attributes(self, context) -> dict:
+        attributes = super().get_attributes(context)
+        attributes["value"] = format_number(self.value)
+        if "max" in attributes:
+            attributes["max"] = format_number(self.max)
+        return attributes

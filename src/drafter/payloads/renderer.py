@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
+import html
 from drafter.components import Component
 from drafter.components.planning.render_plan import RenderPlan
 from drafter.components.utilities.attributes import parse_extra_settings
@@ -46,7 +47,7 @@ class Renderer:
         # TODO: Handle errors gracefully and log them
         # print(self.component_stack, component)
         if isinstance(component, str):
-            self.write(component)
+            self.write(html.escape(component))
         elif isinstance(component, list):
             for child_index, child in enumerate(component):
                 self.component_stack.append(f"[{child_index}]")

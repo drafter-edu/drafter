@@ -10,7 +10,8 @@ tests.br = """
 
 tests.textarea = TextArea("comments", rows=5, cols=40)
 tests.textarea = """
-<textarea aria-label="comments" cols="40" id="comments" rows="5">
+<textarea aria-label="comments" cols="40" id="comments" name="comments" rows="5">
+  
 </textarea>
 """
 
@@ -58,5 +59,20 @@ tests.boolean_attributes_in_span = Span(
 tests.boolean_attributes_in_span = """
 <span draggable="true" hidden id="test-span">
   Can you see me?
+</span>
+"""
+
+tests.escaping = Span("This & that < those > these")
+tests.escaping = """<span>
+  This &amp; that &lt; those &gt; these
+</span>
+"""
+
+tests.escaping_textbox = TextBox("name", default_value="This & that < those > these")
+tests.escaping_textbox = """<input aria-label="name" id="name" name="name" type="text" value="This &amp; that &lt; those &gt; these">"""
+
+tests.string_escaping = Span("Hello' and \" Goodbye.")
+tests.string_escaping = """<span>
+  Hello&#x27; and &quot; Goodbye.
 </span>
 """

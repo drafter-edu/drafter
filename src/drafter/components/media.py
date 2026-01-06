@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from typing import Optional
-from drafter.components.page_content import Component
+from drafter.components.page_content import Component, ComponentArgument
+from drafter.components.planning.render_plan import RenderPlan
 
 
-@dataclass
+@dataclass(repr=False)
 class Audio(Component):
     """
     HTML5 audio element for embedding sound content.
@@ -31,6 +32,18 @@ class Audio(Component):
     loop: bool
     muted: bool
 
+    tag = "audio"
+    KNOWN_ATTRS = ["src", "controls", "autoplay", "loop", "muted"]
+    ARGUMENTS = [
+        ComponentArgument("src"),
+        ComponentArgument("controls", kind="keyword", default_value=True),
+        ComponentArgument("autoplay", kind="keyword", default_value=False),
+        ComponentArgument("loop", kind="keyword", default_value=False),
+        ComponentArgument("muted", kind="keyword", default_value=False),
+    ]
+
+    DEFAULT_ATTRS = {"controls": True}
+
     def __init__(
         self,
         src: str,
@@ -47,30 +60,8 @@ class Audio(Component):
         self.muted = muted
         self.extra_settings = kwargs
 
-    def __str__(self) -> str:
-        # Build attribute string for boolean attributes
-        attrs = []
-        if self.controls:
-            attrs.append("controls")
-        if self.autoplay:
-            attrs.append("autoplay")
-        if self.loop:
-            attrs.append("loop")
-        if self.muted:
-            attrs.append("muted")
 
-        attrs_str = " ".join(attrs)
-        parsed_settings = self.parse_extra_settings()
-
-        # Combine all attributes
-        all_attrs = " ".join(filter(None, [attrs_str, parsed_settings]))
-        if all_attrs:
-            all_attrs = " " + all_attrs
-
-        return f"<audio src='{self.src}'{all_attrs}></audio>"
-
-
-@dataclass
+@dataclass(repr=False)
 class Video(Component):
     """
     HTML5 Video element for playing video files.
@@ -90,6 +81,7 @@ class Video(Component):
         Video("video/demo.mp4", width=640, height=480, autoplay=True)
     """
 
+    tag = "video"
     src: str
     width: Optional[int]
     height: Optional[int]
@@ -97,6 +89,18 @@ class Video(Component):
     autoplay: bool
     loop: bool
     muted: bool
+    KNOWN_ATTRS = ["src", "width", "height", "controls", "autoplay", "loop", "muted"]
+    ARGUMENTS = [
+        ComponentArgument("src"),
+        ComponentArgument("width", kind="keyword", default_value=None),
+        ComponentArgument("height", kind="keyword", default_value=None),
+        ComponentArgument("controls", kind="keyword", default_value=True),
+        ComponentArgument("autoplay", kind="keyword", default_value=False),
+        ComponentArgument("loop", kind="keyword", default_value=False),
+        ComponentArgument("muted", kind="keyword", default_value=False),
+    ]
+
+    DEFAULT_ATTRS = {"controls": True}
 
     def __init__(
         self,
@@ -118,40 +122,8 @@ class Video(Component):
         self.muted = muted
         self.extra_settings = kwargs
 
-    def __str__(self) -> str:
-        # Build attribute string for size attributes
-        size_attrs = []
-        if self.width is not None:
-            size_attrs.append(f'width="{self.width}"')
-        if self.height is not None:
-            size_attrs.append(f'height="{self.height}"')
 
-        # Build attribute string for boolean attributes
-        bool_attrs = []
-        if self.controls:
-            bool_attrs.append("controls")
-        if self.autoplay:
-            bool_attrs.append("autoplay")
-        if self.loop:
-            bool_attrs.append("loop")
-        if self.muted:
-            bool_attrs.append("muted")
-
-        size_attrs_str = " ".join(size_attrs)
-        bool_attrs_str = " ".join(bool_attrs)
-        parsed_settings = self.parse_extra_settings()
-
-        # Combine all attributes
-        all_attrs = " ".join(
-            filter(None, [size_attrs_str, bool_attrs_str, parsed_settings])
-        )
-        if all_attrs:
-            all_attrs = " " + all_attrs
-
-        return f"<video src='{self.src}'{all_attrs}></video>"
-
-
-@dataclass
+@dataclass(repr=False)
 class Canvas(Component):
     """
     HTML5 Canvas element for drawing graphics via JavaScript.
@@ -170,6 +142,16 @@ class Canvas(Component):
     canvas_id: str
     width: int
     height: int
+    tag = "canvas"
+    KNOWN_ATTRS = ["id", "width", "height"]
+    RENAME_ATTRS = {"canvas_id": "id"}
+    DEFAULT_ATTRS = {"width": 300, "height": 150}
+
+    ARGUMENTS = [
+        ComponentArgument("canvas_id"),
+        ComponentArgument("width", kind="keyword", default_value=300),
+        ComponentArgument("height", kind="keyword", default_value=150),
+    ]
 
     def __init__(self, canvas_id: str, width: int = 300, height: int = 150, **kwargs):
         self.canvas_id = canvas_id
@@ -177,18 +159,8 @@ class Canvas(Component):
         self.height = height
         self.extra_settings = kwargs
 
-    def __str__(self) -> str:
-        parsed_settings = self.parse_extra_settings()
 
-        # Combine all attributes
-        all_attrs = f'id="{self.canvas_id}" width="{self.width}" height="{self.height}"'
-        if parsed_settings:
-            all_attrs += " " + parsed_settings
-
-        return f"<canvas {all_attrs}></canvas>"
-
-
-@dataclass
+@dataclass(repr=False)
 class SVG(Component):
     """
     SVG element wrapper for embedding SVG graphics.
@@ -209,6 +181,15 @@ class SVG(Component):
     width: Optional[int]
     height: Optional[int]
     viewBox: Optional[str]
+    tag = "svg"
+    KNOWN_ATTRS = ["width", "height", "viewBox"]
+
+    ARGUMENTS = [
+        ComponentArgument("content", is_content=True),
+        ComponentArgument("width", kind="keyword", default_value=None),
+        ComponentArgument("height", kind="keyword", default_value=None),
+        ComponentArgument("viewBox", kind="keyword", default_value=None),
+    ]
 
     def __init__(
         self,
@@ -224,22 +205,7 @@ class SVG(Component):
         self.viewBox = viewBox
         self.extra_settings = kwargs
 
-    def __str__(self) -> str:
-        # Build attribute string
-        attrs = []
-        if self.width is not None:
-            attrs.append(f'width="{self.width}"')
-        if self.height is not None:
-            attrs.append(f'height="{self.height}"')
-        if self.viewBox is not None:
-            attrs.append(f'viewBox="{self.viewBox}"')
-
-        attrs_str = " ".join(attrs)
-        parsed_settings = self.parse_extra_settings()
-
-        # Combine all attributes
-        all_attrs = " ".join(filter(None, [attrs_str, parsed_settings]))
-        if all_attrs:
-            all_attrs = " " + all_attrs
-
-        return f"<svg{all_attrs}>{self.content}</svg>"
+    def get_children(self, context) -> list:
+        if isinstance(self.content, str):
+            return [RenderPlan(kind="raw", raw_html=self.content)]
+        return self.content

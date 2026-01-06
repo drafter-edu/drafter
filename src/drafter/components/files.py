@@ -2,14 +2,14 @@ from dataclasses import dataclass
 import base64
 import io
 from typing import Union, List
-from drafter.components.page_content import Component, PageContent
+from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.utilities.validation import validate_parameter_name
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 
 # TODO: Properly handle type hints for PILImage, DrafterFile, etc.
 
 
-@dataclass
+@dataclass(repr=False)
 class Download(Component):
     tag = "a"
     text: PageContent
@@ -17,8 +17,14 @@ class Download(Component):
     content: str
     content_type: str = "text/plain"
 
-    POSITIONAL_ARGS = ["text", "filename", "content", "content_type"]
-    RENAME_ARGS = {"filename": "download"}
+    ARGUMENTS = [
+        ComponentArgument("text", is_content=True),
+        ComponentArgument("filename"),
+        ComponentArgument("content"),
+        ComponentArgument("content_type", kind="keyword", default_value="text/plain"),
+    ]
+
+    RENAME_ATTRS = {"filename": "download"}
 
     def __init__(
         self,
@@ -34,9 +40,6 @@ class Download(Component):
         self.content_type = content_type
         self.extra_settings = kwargs
 
-    def get_children(self):
-        return [self.text]
-
     def _handle_pil_image(self, image):
         if not HAS_PILLOW or isinstance(image, str):
             return False, image
@@ -48,20 +51,17 @@ class Download(Component):
         figure = f"data:image/png;base64,{figure}"
         return True, figure
 
-    def render(self, current_state, configuration):
-        return str(self)
-
     def get_attributes(self, context) -> dict:
-        extra_settings = super().get_attributes(context)
+        attributes = super().get_attributes(context)
         was_pil, url = self._handle_pil_image(self.content)
         if was_pil:
-            extra_settings["href"] = url
+            attributes["href"] = url
         else:
-            extra_settings["href"] = f"data:{self.content_type},{self.content}"
-        return extra_settings
+            attributes["href"] = f"data:{self.content_type},{self.content}"
+        return attributes
 
 
-@dataclass
+@dataclass(repr=False)
 class FileUpload(Component):
     """
     A file upload component that allows users to upload files to the server.
@@ -76,9 +76,14 @@ class FileUpload(Component):
 
     tag = "input"
     name: str
-    EXTRA_ATTRS = ["accept", "capture", "multiple", "required"]
-    POSITIONAL_ARGS = ["name", "accept"]
-    DEFAULT_EXTRA_SETTINGS = {"type": "file"}
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("accept", kind="keyword", default_value=None),
+    ]
+
+    DEFAULT_ATTRS = {"type": "file"}
+    KNOWN_ATTRS = ["accept", "capture", "multiple", "required"]
 
     def __init__(
         self, name: str, accept: Union[str, List[str], None] = None, **extra_settings

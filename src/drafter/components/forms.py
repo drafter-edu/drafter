@@ -1,17 +1,18 @@
 from dataclasses import dataclass
 from datetime import datetime, date, time
 import html
-from typing import List, Optional, Union
-from drafter.components.page_content import Component
+from typing import List, Optional, Union, Any
+from drafter.components.page_content import Component, ComponentArgument, PageContent
+from drafter.components.planning.render_plan import RenderPlan
 from drafter.components.utilities.validation import validate_parameter_name
 
 
 class FormComponent(Component):
     name: str
 
-    def handle_aria(self, extra_settings: dict) -> None:
-        if "aria-label" not in extra_settings:
-            extra_settings["aria-label"] = self.name
+    def handle_aria(self, attributes: dict) -> None:
+        if "aria-label" not in attributes:
+            attributes["aria-label"] = self.name
 
     def get_attributes(self, context) -> dict:
         attrs = super().get_attributes(context)
@@ -22,7 +23,7 @@ class FormComponent(Component):
         return self.extra_settings.get("id", self.name)
 
 
-@dataclass
+@dataclass(repr=False)
 class Label(Component):
     """
     A label component for form fields.
@@ -34,38 +35,48 @@ class Label(Component):
 
     text: str
     for_id: Union[None, str, FormComponent] = None
-    EXTRA_ATTRS = ["for"]
-    POSITIONAL_ARGS = ["text", "for_id"]
-    DEFAULT_ARGS = {"for_id": None}
-    RENAME_ARGS = {"for_id": "for"}
+    tag = "label"
+
+    ARGUMENTS = [
+        ComponentArgument("text", is_content=True),
+        ComponentArgument("for_id", kind="keyword", default_value=None),
+    ]
+
+    KNOWN_ATTRS = ["for"]
+    RENAME_ATTRS = {"for_id": "for"}
 
     def __init__(
-        self, text: str, for_id: Union[None, str, FormComponent] = None, **kwargs
+        self,
+        text: str,
+        for_id: Union[None, str, FormComponent] = None,
+        **extra_settings,
     ):
         self.text = text
         if isinstance(for_id, FormComponent):
             for_id = for_id.get_id()
         self.for_id = for_id
-        self.extra_settings = kwargs
-
-    def __str__(self) -> str:
-        extra_settings = dict(self.extra_settings)
-        if self.for_id:
-            extra_settings["for"] = self.for_id
-        parsed_settings = self.parse_extra_settings(**extra_settings)
-        return f"<label {parsed_settings}>{self.text}</label>"
+        self.extra_settings = extra_settings
 
 
-@dataclass
+@dataclass(repr=False)
 class TextBox(FormComponent):
-    tag = "input"
     default_value: Optional[str]
     kind: str
 
-    POSITIONAL_ARGS = ["name", "default_value", "kind"]
-    DEFAULT_ARGS = {"default_value": None, "kind": "text"}
-    RENAME_ARGS = {"kind": "type"}
-    EXTRA_ATTRS = ["name", "type", "value"]
+    tag = "input"
+    SELF_CLOSING_TAG = True
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+        ComponentArgument("kind", kind="keyword", default_value="text"),
+    ]
+
+    RENAME_ATTRS = {"kind": "type", "default_value": "value"}
+    # TODO: There are many more of these to add in, see URL below
+    # https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#attributes
+    KNOWN_ATTRS = ["type", "name", "value", "alt"]
+    DEFAULT_ATTRS = {"type": "text"}
 
     def __init__(
         self,
@@ -77,21 +88,25 @@ class TextBox(FormComponent):
         validate_parameter_name(name, "TextBox")
         self.name = name
         self.kind = kind
+        # TODO: Can validate for supported types (text, password, email, search, number, etc.)
         self.default_value = default_value
         self.extra_settings = extra_settings
 
-    def get_attributes(self, context) -> dict:
-        extra_settings = super().get_attributes(context)
-        if self.default_value is not None and self.default_value != "":
-            extra_settings["value"] = str(self.default_value)
-        return extra_settings
 
-
-@dataclass
+@dataclass(repr=False)
 class TextArea(FormComponent):
     tag = "textarea"
     default_value: str
-    EXTRA_ATTRS = [
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument(
+            "default_value", kind="keyword", is_content=True, default_value=None
+        ),
+    ]
+
+    KNOWN_ATTRS = [
+        "name",
         "rows",
         "cols",
         "autocomplete",
@@ -108,30 +123,21 @@ class TextArea(FormComponent):
         self.default_value = str(default_value) if default_value is not None else ""
         self.extra_settings = kwargs
 
-    def __str__(self) -> str:
-        extra_settings = dict(self.extra_settings)
-        self.handle_aria(extra_settings)
-        parsed_settings = self.parse_extra_settings(**extra_settings)
-        return f"<textarea name='{self.name}' {parsed_settings}>{html.escape(self.default_value)}</textarea>"
 
-    def __repr__(self) -> str:
-        """
-        name: str,
-        default_value: Optional[str] = None,
-        kind: str = "text",
-        """
-        pieces = [repr(self.name)]
-        if self.default_value != "":
-            pieces.append(repr(self.default_value))
-        for key, value in self.extra_settings.items():
-            pieces.append(f"{key}={repr(value)}")
-        return f"TextArea({', '.join(pieces)})"
-
-
-@dataclass
+@dataclass(repr=False)
 class SelectBox(FormComponent):
+    tag = "select"
     options: List[str]
     default_value: Optional[str]
+
+    KNOWN_ATTRS = ["name"]
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("options"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+    ]
+
+    RENAME_ATTRS = {"default_value": "", "options": ""}
 
     def __init__(
         self,
@@ -146,37 +152,38 @@ class SelectBox(FormComponent):
         self.default_value = str(default_value) if default_value is not None else ""
         self.extra_settings = kwargs
 
-    def __str__(self) -> str:
-        extra_settings = {}
-        if self.default_value is not None:
-            extra_settings["value"] = html.escape(self.default_value)
-        self.handle_aria(extra_settings)
-        parsed_settings = self.parse_extra_settings(**extra_settings)
-        options = "\n".join(
-            f"<option {'selected' if option == self.default_value else ''} "
-            f"value='{html.escape(option)}'>{option}</option>"
-            for option in self.options
-        )
-        return f"<select name='{self.name}' {parsed_settings}>{options}</select>"
+    def get_children(self, context) -> list[PageContent | RenderPlan]:
+        children = []
+        for option in self.options:
+            option_attrs: dict[str, Any] = {"value": option}
+            if option == self.default_value:
+                option_attrs["selected"] = True
+            children.append(
+                RenderPlan(
+                    kind="tag",
+                    tag_name="option",
+                    attributes=option_attrs,
+                    children=[option],
+                    known_attributes=["value", "selected"],
+                )
+            )
 
-    def __repr__(self) -> str:
-        """
-        name: str,
-        options: List[str],
-        default_value: Optional[str] = None,
-        """
-        pieces = [repr(self.name), repr(self.options)]
-        if self.default_value != "":
-            pieces.append(repr(self.default_value))
-        for key, value in self.extra_settings.items():
-            pieces.append(f"{key}={repr(value)}")
-        return f"SelectBox({', '.join(pieces)})"
+        return children
 
 
-@dataclass
+@dataclass(repr=False)
 class CheckBox(FormComponent):
-    EXTRA_ATTRS = ["checked"]
     default_value: bool
+
+    tag = "input"
+    KNOWN_ATTRS = ["type", "name", "checked"]
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("default_value", kind="keyword", default_value=False),
+    ]
+    RENAME_ATTRS = {"default_value": "checked"}
+    DEFAULT_ATTRS = {"type": "checkbox"}
 
     def __init__(self, name: str, default_value: bool = False, **kwargs):
         validate_parameter_name(name, "CheckBox")
@@ -184,31 +191,28 @@ class CheckBox(FormComponent):
         self.default_value = bool(default_value)
         self.extra_settings = kwargs
 
-    def __str__(self) -> str:
-        extra_settings = dict(self.extra_settings)
-        self.handle_aria(extra_settings)
-        parsed_settings = self.parse_extra_settings(**extra_settings)
-        # Have to change the ID for the hidden input to avoid duplicates
-        hidden_extra_settings = dict(extra_settings)
-        hidden_extra_settings["id"] = f"--drafter-hidden-{self.get_id()}"
-        hidden_parsed_settings = self.parse_extra_settings(**hidden_extra_settings)
-        # Determine if checkbox is checked
-        checked = "checked" if self.default_value else ""
-        return (
-            f"<input type='hidden' name='{self.name}' value='' {hidden_parsed_settings}>"
-            f"<input type='checkbox' name='{self.name}' {checked} value='checked' {parsed_settings}>"
+    def plan(self, context) -> RenderPlan:
+        # Hidden input for unchecked state
+        hidden_plan = RenderPlan(
+            kind="tag",
+            tag_name="input",
+            attributes={
+                "type": "hidden",
+                "name": self.name,
+                "value": "",
+                "id": f"--drafter-hidden-{self.get_id()}",
+            },
+            self_closing=True,
+            known_attributes=["type", "name", "value", "id"],
         )
 
-    def __repr__(self) -> str:
-        pieces = [repr(self.name)]
-        if self.default_value:
-            pieces.append(f"default_value={repr(self.default_value)}")
-        for key, value in self.extra_settings.items():
-            pieces.append(f"{key}={repr(value)}")
-        return f"CheckBox({', '.join(pieces)})"
+        # Checkbox input
+        checkbox_plan = self._plan_tag(context)
+
+        return RenderPlan(kind="fragment", items=[hidden_plan, checkbox_plan])
 
 
-@dataclass
+@dataclass(repr=False)
 class DateTimeInput(FormComponent):
     """
     A datetime-local input component for selecting both date and time.
@@ -220,38 +224,35 @@ class DateTimeInput(FormComponent):
     :param kwargs: Additional HTML attributes
     """
 
-    default_value: Union[str, None, datetime]
+    default_value: Union[str, None]
+
+    tag = "input"
+    SELF_CLOSING_TAG = True
+    KNOWN_ATTRS = ["type", "name", "value"]
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+    ]
+    DEFAULT_ATTRS = {"type": "datetime-local"}
+    RENAME_ATTRS = {"default_value": "value"}
 
     def __init__(
         self, name: str, default_value: Union[str, None, datetime] = None, **kwargs
     ):
         validate_parameter_name(name, "DateTimeInput")
         self.name = name
-        self.default_value = default_value
+        self.default_value = (
+            default_value.isoformat(timespec="minutes")
+            if isinstance(default_value, datetime)
+            else str(default_value)
+            if default_value is not None
+            else None
+        )
         self.extra_settings = kwargs
 
-    def __str__(self) -> str:
-        extra_settings = dict(self.extra_settings)
-        if self.default_value is not None and self.default_value != "":
-            extra_settings["value"] = (
-                self.default_value.isoformat(timespec="minutes")
-                if isinstance(self.default_value, datetime)
-                else str(self.default_value)
-            )
-        self.handle_aria(extra_settings)
-        parsed_settings = self.parse_extra_settings(**extra_settings)
-        return f"<input type='datetime-local' name='{self.name}' {parsed_settings}>"
 
-    def __repr__(self) -> str:
-        pieces = [repr(self.name)]
-        if self.default_value:
-            pieces.append(repr(self.default_value))
-        for key, value in self.extra_settings.items():
-            pieces.append(f"{key}={repr(value)}")
-        return f"DateTimeInput({', '.join(pieces)})"
-
-
-@dataclass
+@dataclass(repr=False)
 class DateInput(FormComponent):
     """
     A date input component for selecting dates.
@@ -261,7 +262,18 @@ class DateInput(FormComponent):
     :param kwargs: Additional HTML attributes
     """
 
-    default_value: Union[str, None, datetime, date]
+    default_value: Union[str, None]
+
+    tag = "input"
+    SELF_CLOSING_TAG = True
+    KNOWN_ATTRS = ["type", "name", "value"]
+    DEFAULT_ATTRS = {"type": "date"}
+    RENAME_ATTRS = {"default_value": "value"}
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+    ]
 
     def __init__(
         self,
@@ -271,31 +283,17 @@ class DateInput(FormComponent):
     ):
         validate_parameter_name(name, "DateInput")
         self.name = name
-        self.default_value = default_value
+        self.default_value = (
+            default_value.isoformat()
+            if isinstance(default_value, (datetime, date))
+            else str(default_value)
+            if default_value is not None
+            else None
+        )
         self.extra_settings = kwargs
 
-    def __str__(self) -> str:
-        extra_settings = dict(self.extra_settings)
-        if self.default_value is not None and self.default_value != "":
-            extra_settings["value"] = (
-                self.default_value.isoformat()
-                if isinstance(self.default_value, (datetime, date))
-                else str(self.default_value)
-            )
-        self.handle_aria(extra_settings)
-        parsed_settings = self.parse_extra_settings(**extra_settings)
-        return f"<input type='date' name='{self.name}' {parsed_settings}>"
 
-    def __repr__(self) -> str:
-        pieces = [repr(self.name)]
-        if self.default_value:
-            pieces.append(repr(self.default_value))
-        for key, value in self.extra_settings.items():
-            pieces.append(f"{key}={repr(value)}")
-        return f"DateInput({', '.join(pieces)})"
-
-
-@dataclass
+@dataclass(repr=False)
 class TimeInput(FormComponent):
     """
     A time input component for selecting times.
@@ -305,32 +303,30 @@ class TimeInput(FormComponent):
     :param kwargs: Additional HTML attributes
     """
 
-    default_value: Union[str, None, time]
+    default_value: Union[str, None]
+
+    tag = "input"
+    SELF_CLOSING_TAG = True
+    KNOWN_ATTRS = ["type", "name", "value"]
+    RENAME_ATTRS = {"default_value": "value"}
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+    ]
+
+    DEFAULT_ATTRS = {"type": "time"}
 
     def __init__(
         self, name: str, default_value: Union[str, None, time] = None, **kwargs
     ):
         validate_parameter_name(name, "TimeInput")
         self.name = name
-        self.default_value = default_value
+        self.default_value = (
+            default_value.isoformat()
+            if isinstance(default_value, time)
+            else str(default_value)
+            if default_value is not None
+            else None
+        )
         self.extra_settings = kwargs
-
-    def __str__(self) -> str:
-        extra_settings = dict(self.extra_settings)
-        if self.default_value is not None:
-            extra_settings["value"] = (
-                self.default_value.isoformat()
-                if isinstance(self.default_value, time)
-                else str(self.default_value)
-            )
-        self.handle_aria(extra_settings)
-        parsed_settings = self.parse_extra_settings(**extra_settings)
-        return f"<input type='time' name='{self.name}' {parsed_settings}>"
-
-    def __repr__(self) -> str:
-        pieces = [repr(self.name)]
-        if self.default_value:
-            pieces.append(repr(self.default_value))
-        for key, value in self.extra_settings.items():
-            pieces.append(f"{key}={repr(value)}")
-        return f"TimeInput({', '.join(pieces)})"

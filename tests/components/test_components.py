@@ -21,7 +21,6 @@ snippets = {
         "with_style": """Argument('styled_param', 'styled_value', style_font_weight="bold")""",
         "with_attributes": """Argument('attr_param', 'attr_value', id="arg1", style_font_style="italic")""",
     },
-
     "span": {
         "simple": """Span('Hello world!')""",
         "with_style": """Span('Styled text', style_font_size="20px", style_color="#333333")""",
@@ -45,13 +44,11 @@ snippets = {
         "simple": """Text('This is a simple text component.')""",
         "with_style": """Text('Styled text component.', style_font_family='Arial', style_font_size='16px')""",
     },
-
     "row": {
         "simple": """Row(['Hello world!', 'This is a row.'])""",
         "with_style": """Row(['Styled row'], style_background_color="#DDDDDD", style_padding="10px")""",
         "with_id": """Row(['Row with ID'], id="row1", style_border="1px solid #000000")""",
     },
-    
     "TextArea": {
         "simple": """TextArea('comments')""",
         "default_value": """TextArea('comments', 'Enter your comments here...')""",
@@ -154,9 +151,9 @@ snippets = {
         "with_style": """Table([['X', 'Y']], style_border='1px solid black', style_width='100%')""",
     },
     "output": {
-        "simple": """Output('Result: 42')""",
-        "with_for": """Output('100%', for_id='progress1')""",
-        "with_style": """Output('Success!', style_color='green', style_font_weight='bold')""",
+        "simple": """Output('test', 'Result: 42')""",
+        "with_for": """Output('named', '100%', for_id='progress1')""",
+        "with_style": """Output('another', 'Success!', style_color='green', style_font_weight='bold')""",
     },
     "progress": {
         "simple": """Progress(0.5)""",
@@ -203,7 +200,6 @@ snippets = {
 }
 
 
-
 @pytest.mark.parametrize(
     "category,name,snippet",
     [
@@ -223,6 +219,7 @@ def test_snippet_consistent(category, name, snippet):
         f"should produce equal objects.\nSnippet:\n{snippet}"
     )
 
+
 @pytest.mark.parametrize(
     "category,name,snippet",
     [
@@ -234,7 +231,6 @@ def test_snippet_consistent(category, name, snippet):
 def test_snippet_repr(category, name, snippet):
     obj1 = eval_drafter_with_source(snippet, "repr", category, name)
     obj2 = eval_drafter_with_source(repr(obj1), "repr", category, name)
-    
 
     assert obj1 == obj2, (
         f"{category} / {name}: repr(obj) did not match the snippet.\n\n"

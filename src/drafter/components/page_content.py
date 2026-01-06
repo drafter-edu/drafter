@@ -26,10 +26,11 @@ Technically, we need the component to return not just its HTML, but also its CSS
 
 """
 
-from typing import List, Union, Any, Optional
+from dataclasses import dataclass
+from typing import List, Union, Any, Optional, ClassVar
 import html
 
-from drafter.components.planning.render_plan import RenderPlan
+from drafter.components.planning.render_plan import AssetBundle, RenderPlan
 from drafter.components.utilities.attributes import (
     BASELINE_ATTRS,
     BOOLEAN_ATTRS,
@@ -37,85 +38,202 @@ from drafter.components.utilities.attributes import (
 )
 
 
+@dataclass
+class ComponentArgument:
+    name: str
+    kind: str = "positional"  # "positional", "var", "keyword"
+    default_value: Any = None
+    is_content: bool = False
+
+
 class Component:
     """
     Base class for all content that can be added to a page.
     This class is not meant to be used directly, but rather to be subclassed by other classes.
-    Critically, each subclass must implement a `__str__` method that returns the HTML representation.
-    Note that generally, we prefer to try to `render` the component rather than directly converting it to a string.
+
+    Components can be turned into HTML by first calling the `plan` method, which
+    returns a `RenderPlan` object. The `RenderPlan` object contains all the information
+    needed to render the component, including its tag name, attributes, children,
+    and any associated assets.
+
+    Components can be rendered as a string using __repr__, which should
+    be able to roundtrip back to the same component using eval.
+
+    Conceptually, there are three "versions" of the data for the Component:
+    - The "arguments" which are essentially defined by the __init__ method and include both
+        the positional and keyword arguments. These are stored as fields on the Component instance
+        as "internals".
+        The arguments can be either positional, variable, keyword, or extra (kwargs).
+        Every component must have extra_settings, and that ends up as a field as well.
+        When the __repr__ is called, it should generate these arguments to create a string that can be
+        eval'd back into the same component.
+    - The "fields" which are the actual fields contained inside of the Component as an instance.
+        These vary completely by the type of component, but can be used to derive both the arguments
+        and the externals. They should roughly align to the arguments, so that the users can
+        modify them after the fact and have the changes be reflected in the arguments and the externals.
+    - The "externals" which are the HTML attributes, children, assets, and other information
+        needed to render the component. These are derived from the internals, but are not stored that
+        way. Instead, they are generated on the fly when the `plan` method is called, using the
+        `get_attributes`, `get_children`, and `get_assets` methods.
+
+    Args that are marked as "Content" get turned into Children, other args get turned into attributes.
+
+    So basically the canonical data is the fields, and then some of those fields are identified
+    to create the HTML attributes, children, and assets.
+
+    The default for an argument is to be turned into an attribute of the same name, unless
+    it is in the RENAME_ATTRS dict. The KNOWN_ATTRS list is used to force certain arguments
+    to be turned into attributes, even though the default is to turn them into style properties.
+    The DEFAULT_ATTRS dict is used to provide default values for attributes, which can be overridden
+    by the extra_settings.
+
+    Types of args:
+    - Positional regular arg: POSITIONAL_ARGS
+    - Variable regular arg: VAR_ARGS
+    - Keyword regular arg (default value): DEFAULT_ARGS
+    - Positional content arg: CONTENT_ARGS
+    - Variable content arg: VAR_CONTENT_ARGS
+    - Keyword content arg (default value): DEFAULT_CONTENT_ARGS
+    - Extra settings (kwargs that get turned into attributes)
 
     Under any student-facing circumstances, a string value can be used in place of a `Component` object
     (in which case we say it is a `Content` type). However, the `Component` object
-    allows for more customization and control over the content.
-
-    Ultimately, the `Component` object is converted to a string when it is rendered.
-
-    This class also has some helpful methods for verifying URLs and handling attributes/styles.
+    allows for more customization and control over the content. Most situations also
+    allow for a list of `Content` objects (which we call `PageContent`), which can be
+    used to group multiple pieces of content together.
     """
 
     tag: str
     extra_settings: dict
-    children: "Optional[list[PageContent]]" = None
-    DEFAULT_EXTRA_SETTINGS: Optional[dict] = None
-    EXTRA_ATTRS: list[str] = []
 
-    POSITIONAL_ARGS: list[str] = []
-    DEFAULT_ARGS: dict[str, Any] = {}
-    RENAME_ARGS: dict[str, str] = {}
+    ARGUMENTS: ClassVar[list[ComponentArgument]] = []
 
-    COLLAPSE_WHITESPACE = False
-    SELF_CLOSING_TAG = False
+    DEFAULT_ATTRS: ClassVar[dict] = {}
+    KNOWN_ATTRS: ClassVar[list[str]] = []
+    RENAME_ATTRS: ClassVar[dict[str, str]] = {}
+
+    # Formatting settings
+    COLLAPSE_WHITESPACE: ClassVar[bool] = False
+    SELF_CLOSING_TAG: ClassVar[bool] = False
 
     def plan(self, context) -> RenderPlan:
+        return self._plan_tag(context)
+
+    def _plan_tag(
+        self,
+        context,
+        tag_name=None,
+        attributes=None,
+        children=None,
+        assets=None,
+        known_attributes=None,
+        id=None,
+        self_closing=None,
+    ) -> RenderPlan:
         return RenderPlan(
             kind="tag",
-            tag_name=self.get_tag(),
-            attributes=self.get_attributes(context),
-            children=self.get_children(),
-            assets=self.get_assets(),
-            known_attributes=self.EXTRA_ATTRS,
-            id=self.get_id(),
-            self_closing=self.SELF_CLOSING_TAG,
+            tag_name=tag_name or self.get_tag(context),
+            attributes=attributes or self.get_attributes(context),
+            children=children or self.get_children(context),
+            assets=assets or self.get_assets(context),
+            known_attributes=known_attributes or self.KNOWN_ATTRS,
+            id=id or self.get_id(),
+            self_closing=self_closing
+            if self_closing is not None
+            else self.SELF_CLOSING_TAG,
         )
 
     def get_attributes(self, context) -> dict:
         attributes = {}
-        for key in self.POSITIONAL_ARGS:
-            value = getattr(self, key)
-            if key in self.RENAME_ARGS:
-                key = self.RENAME_ARGS[key]
+        # Default attributes that should always be included, unless overridden by extra_settings
+        if self.DEFAULT_ATTRS:
+            attributes.update(self.DEFAULT_ATTRS)
+        for argument in self.ARGUMENTS:
+            if argument.is_content:
+                continue
+            key = argument.name
+            value = getattr(self, key, argument.default_value)
+            if argument.kind == "keyword" and value == argument.default_value:
+                continue
+            key = self.RENAME_ATTRS.get(key, key)
+            if not key:
+                continue
             attributes[key] = value
-        if self.DEFAULT_EXTRA_SETTINGS:
-            attributes.update(self.DEFAULT_EXTRA_SETTINGS)
+        # Handle extra settings
         attributes.update(self.extra_settings)
         return attributes
 
-    def get_tag(self) -> str:
+    def get_tag(self, context) -> str:
         return self.tag
 
-    def get_children(self) -> List[Any]:
-        return list(self.children) if self.children is not None else []
+    def get_children(self, context) -> List[Any]:
+        children = []
+        for argument in self.ARGUMENTS:
+            if not argument.is_content:
+                continue
+            if argument.kind == "var":
+                value = getattr(self, argument.name)
+                if value is not None:
+                    for child in value:
+                        children.append(child)
+                continue
+            else:
+                key = argument.name
+                value = getattr(self, key, argument.default_value)
+                if value is not None:
+                    children.append(value)
+        return children
 
     def get_arguments(self) -> List[str]:
-        return [repr(c) for c in self.get_children()] + [
-            repr(getattr(self, key))
-            for key in self.POSITIONAL_ARGS
-            if (
-                key not in self.DEFAULT_ARGS
-                or getattr(self, key) != self.DEFAULT_ARGS.get(key)
-            )
-        ]
+        """
+        Create the list of arguments to be used in the __repr__ method, which
+        should be able to roundtrip back to the same component using eval.
 
-    def get_assets(self):
+        Returns:
+            List[str]: The list of values to be used in the __repr__ method.
+        """
+        arguments = []
+        handled_arguments = set()
+        for argument in self.ARGUMENTS:
+            parameter_name = argument.name
+            # Don't double-render any keyword arguments that will also be in extra_settings
+            if argument.kind == "keyword" and parameter_name in self.extra_settings:
+                continue
+            handled_arguments.add(parameter_name)
+            value = getattr(self, parameter_name, argument.default_value)
+            if argument.is_content:
+                if argument.kind == "positional":
+                    arguments.append(repr(value))
+                elif argument.kind == "var":
+                    for item in value:
+                        arguments.append(repr(item))
+                elif argument.kind == "keyword":
+                    if value != argument.default_value:
+                        arguments.append(f"{parameter_name}={repr(value)}")
+            else:
+                if argument.kind == "positional":
+                    arguments.append(repr(value))
+                elif argument.kind == "var":
+                    for item in value:
+                        arguments.append(repr(item))
+                elif argument.kind == "keyword":
+                    if value != argument.default_value:
+                        arguments.append(f"{parameter_name}={repr(value)}")
+
+        if self.extra_settings:
+            for key, value in sorted(self.extra_settings.items()):
+                if key in handled_arguments:
+                    continue
+                arguments.append(f"{key}={repr(value)}")
+        return arguments
+
+    def get_assets(self, context) -> Optional[AssetBundle]:
         return None
 
     def __repr__(self):
         class_name = self.__class__.__name__
-        parts = self.get_arguments()
-        if self.extra_settings:
-            for key, value in sorted(self.extra_settings.items()):
-                parts.append(f"{key}={repr(value)}")
-        return f"{class_name}({', '.join(parts)})"
+        arguments = self.get_arguments()
+        return f"{class_name}({', '.join(arguments)})"
 
     def get_id(self) -> str:
         """
@@ -175,120 +293,6 @@ class Component:
         """
         self.extra_settings[attr] = value
         return self
-
-    # DEPRECATED OLD APPROACH BELOW
-
-    def parse_extra_settings(self, **kwargs):
-        """
-        Parses and combines extra settings into valid attribute and style formats.
-
-        This method processes additional configuration settings provided via arguments or stored
-        in the `extra_settings` property, converts them into valid HTML attributes and styles,
-        and then consolidates the processed values into the appropriate output format. Attributes
-        not explicitly defined in the baseline or extra attribute lists are converted into inline
-        style declarations.
-
-        :param kwargs: Arbitrary keyword arguments containing extra configuration settings to be
-            applied or overridden. The keys represent attribute or style names, and the values
-            represent their corresponding values.
-        :return: A string containing formatted HTML attributes along with an inline style block
-            if any styles are provided.
-        :rtype: str
-        """
-        extra_settings = self.extra_settings.copy()
-        extra_settings.update(kwargs)
-        raw_styles, raw_attrs = remap_attr_styles(extra_settings)
-        styles, attrs = [], []
-        seen_attrs = set()
-        # Preprocess attributes and styles
-        for key, value in raw_attrs.items():
-            # Check for data-* attributes
-            is_data_attr = key.startswith("data-")
-            # Check if known attribute
-            is_known_attr = key in self.EXTRA_ATTRS or key in BASELINE_ATTRS
-
-            if not is_data_attr and not is_known_attr:
-                # If not a data-* or known attribute, assume it is a style
-                styles.append(f"{key}: {value}")
-            else:
-                # Handle boolean attributes
-                if key in BOOLEAN_ATTRS:
-                    if value:
-                        attrs.append(f"{key}")
-                else:
-                    # Otherwise handle regular attribute
-                    escaped_value = html.escape(str(value), quote=True)
-                    attrs.append(f'{key}="{escaped_value}"')
-                seen_attrs.add(key)
-        # Now handle styles
-        for key, value in raw_styles.items():
-            styles.append(f"{key}: {value}")
-        if "id" not in seen_attrs:
-            attrs.append(f'id="{self.get_id()}"')
-        result = " ".join(sorted(attrs))
-        if styles:
-            result += f" style='{'; '.join(sorted(styles))}'"
-        return result
-
-    def _render_tag(
-        self, tag_name: str, content: str = "", self_closing: bool = False, **kwargs
-    ) -> str:
-        """
-        Renders an HTML tag with the given name and attributes.
-
-        :param tag_name: The name of the HTML tag to render
-        :param self_closing: Whether the tag is self-closing (e.g., <br />)
-        :param kwargs: Additional attributes to include in the tag
-        :return: The rendered HTML tag as a string
-        """
-        parsed_settings = self.parse_extra_settings(**kwargs)
-        if self_closing:
-            return f"<{tag_name} {parsed_settings}/>"
-        else:
-            return f"<{tag_name} {parsed_settings}>{content}</{tag_name}>"
-
-    def render(self, current_state, configuration):
-        """
-        This method is called when the component is being rendered to a string. It should return
-        the HTML representation of the component, using the current State and configuration to
-        determine the final output. The fall back for every component is to simply convert it to a string using str().
-
-        Parents are responsible for calling the render method of their children as needed!
-
-        :param current_state: The current state of the component
-        :type current_state: Any
-        :param configuration: The configuration settings for the component
-        :type configuration: Configuration
-        :return: The HTML representation of the component
-        """
-        self.pre_render(current_state, configuration)
-        result = str(self)
-        self.post_render(current_state, configuration)
-        return result
-
-    def pre_render(self, current_state, configuration):
-        """
-        This method is called before the component is rendered. It can be used to perform any
-        necessary setup or initialization before the component is converted to a string.
-
-        :param current_state: The current state of the component
-        :type current_state: Any
-        :param configuration: The configuration settings for the component
-        :type configuration: Configuration
-        """
-        pass
-
-    def post_render(self, current_state, configuration):
-        """
-        This method is called after the component is rendered. It can be used to perform any
-        necessary cleanup or finalization after the component has been converted to a string.
-
-        :param current_state: The current state of the component
-        :type current_state: Any
-        :param configuration: The configuration settings for the component
-        :type configuration: Configuration
-        """
-        pass
 
 
 Content = Union[Component, str]

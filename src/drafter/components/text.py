@@ -2,31 +2,38 @@ from dataclasses import dataclass
 import html
 from typing import Any, List
 from drafter.components.layout import handle_arguments_compatibility
-from drafter.components.page_content import Component, PageContent
+from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import RenderPlan
 
 
 @dataclass(repr=False)
 class Pre(Component):
+    content: list[PageContent]
     tag = "pre"
+
+    ARGUMENTS = [ComponentArgument("content", kind="var", is_content=True)]
 
     COLLAPSE_WHITESPACE = True
 
     def __init__(self, *content: PageContent, **extra_settings):
-        self.children, self.extra_settings = handle_arguments_compatibility(
-            list(content), extra_settings
-        )
+        self.content = list(content)
+        self.extra_settings = extra_settings
 
 
 PreformattedText = Pre
 
 
-@dataclass
+@dataclass(repr=False)
 class Header(Component):
     body: PageContent
     level: int = 1
 
-    POSITIONAL_ARGS = ["level"]
+    ARGUMENTS = [
+        ComponentArgument("body", is_content=True),
+        ComponentArgument("level", kind="keyword", default_value=1),
+    ]
+
+    CONTENT_ARGS = ["body"]
     DEFAULT_ARGS = {"level": 1}
 
     def __init__(self, body: PageContent, level: int = 1, **extra_settings):
@@ -36,17 +43,19 @@ class Header(Component):
             raise ValueError("Header level must be between 1 and 6")
         self.extra_settings = extra_settings
 
-    def get_children(self) -> list[PageContent]:
-        return [self.body]
-
-    def get_tag(self) -> str:
+    def get_tag(self, context) -> str:
         return f"h{self.level}"
 
 
-@dataclass
+@dataclass(repr=False)
 class Text(Component):
+    tag = "span"
     body: str
     extra_settings: dict
+
+    ARGUMENTS = [
+        ComponentArgument("body", is_content=True),
+    ]
 
     def __init__(self, body: str, **extra_settings):
         self.body = body
@@ -76,16 +85,11 @@ class Text(Component):
                 kind="raw",
                 raw_html=html.escape(self.body),
             )
-        return RenderPlan(
-            kind="tag",
-            tag_name="span",
-            attributes=self.extra_settings,
-            children=[html.escape(self.body)],
-        )
+        return self._plan_tag(context=context)
 
 
-@dataclass
-class RawHTML(Text):
+@dataclass(repr=False)
+class RawHTML(Component):
     """
     A component that renders raw HTML without escaping.
 
@@ -95,20 +99,40 @@ class RawHTML(Text):
     :param html: The raw HTML string to render
     """
 
+    html: str
+    tag = "div"
+    ARGUMENTS = [
+        ComponentArgument("html", is_content=True),
+    ]
+
     def __init__(self, html: str, **extra_settings):
-        super().__init__(html, **extra_settings)
+        self.html = html
+        if "html" in extra_settings:
+            self.html = extra_settings.pop("html")
+        self.extra_settings = extra_settings
+
+    def __eq__(self, other):
+        if isinstance(other, RawHTML):
+            return (
+                self.html == other.html and self.extra_settings == other.extra_settings
+            )
+        elif isinstance(other, str):
+            return self.extra_settings == {} and self.html == other
+        return NotImplemented
+
+    def __hash__(self):
+        if self.extra_settings:
+            items = tuple(sorted(self.extra_settings.items()))
+            return hash((self.html, items))
+        else:
+            return hash(self.html)
 
     def plan(self, context) -> RenderPlan:
         if not self.extra_settings:
             return RenderPlan(
                 kind="raw",
-                raw_html=self.body,
+                raw_html=self.html,
             )
-        return RenderPlan(
-            kind="tag",
-            tag_name="span",
-            attributes=self.extra_settings,
-            children=[self.body],
-        )
+        return self._plan_tag(context=context)
 
     # TODO: Are we escaping HTML correctly in Text component?

@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from typing import Any, List, Dict
-from drafter.components.page_content import Component, PageContent
+from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import RenderPlan
 
 
-@dataclass
+@dataclass(repr=False)
 class LineBreak(Component):
     tag = "br"
     SELF_CLOSING_TAG = True
@@ -13,7 +13,7 @@ class LineBreak(Component):
         self.extra_settings = kwargs
 
 
-@dataclass
+@dataclass(repr=False)
 class HorizontalRule(Component):
     tag = "hr"
     SELF_CLOSING_TAG = True
@@ -54,10 +54,15 @@ class Span(Component):
         **extra_settings: Additional HTML attributes and style properties for the span.
     """
 
+    content: List[PageContent]
+
     tag = "span"
+    ARGUMENTS = [
+        ComponentArgument("content", kind="var", is_content=True),
+    ]
 
     def __init__(self, *content: PageContent, **extra_settings):
-        self.children, self.extra_settings = handle_arguments_compatibility(
+        self.content, self.extra_settings = handle_arguments_compatibility(
             list(content), extra_settings
         )
 
@@ -72,10 +77,15 @@ class Div(Component):
         **extra_settings: Additional HTML attributes and style properties for the div.
     """
 
+    content: List[PageContent]
+
     tag = "div"
+    ARGUMENTS = [
+        ComponentArgument("content", kind="var", is_content=True),
+    ]
 
     def __init__(self, *content: PageContent, **extra_settings):
-        self.children, self.extra_settings = handle_arguments_compatibility(
+        self.content, self.extra_settings = handle_arguments_compatibility(
             list(content), extra_settings
         )
 
@@ -86,35 +96,45 @@ Box = Div
 
 @dataclass(repr=False)
 class Row(Component):
+    content: List[PageContent]
+
     tag = "div"
 
+    DEFAULT_ATTRS = {
+        "style_display": "flex",
+        "style_flex_direction": "row",
+        "style_align_items": "center",
+    }
+    ARGUMENTS = [
+        ComponentArgument("content", kind="var", is_content=True),
+    ]
+
     def __init__(self, *content: PageContent, **extra_settings):
-        self.children, self.extra_settings = handle_arguments_compatibility(
+        self.content, self.extra_settings = handle_arguments_compatibility(
             list(content), extra_settings
         )
-        self.extra_settings.setdefault("style_display", "flex")
-        self.extra_settings.setdefault("style_flex_direction", "row")
-        self.extra_settings.setdefault("style_align_items", "center")
 
     def __eq__(self, other):
         if isinstance(other, Row):
             return (
-                self.children == other.children
+                self.content == other.content
                 and self.extra_settings == other.extra_settings
             )
         elif isinstance(other, Div):
             return (
-                self.children == other.children
+                self.content == other.content
                 and self.extra_settings == other.extra_settings
             )
         return NotImplemented
 
 
 class _HtmlList(Component):
-    items: List[PageContent]
+    items: list[PageContent]
     POSITIONAL_ARGS = []
 
-    def get_children(self) -> List[PageContent | RenderPlan]:
+    ARGUMENTS = [ComponentArgument("items", is_content=True)]
+
+    def get_children(self, context) -> list[PageContent | RenderPlan]:
         return [
             RenderPlan(kind="tag", tag_name="li", children=[item])
             for item in self.items

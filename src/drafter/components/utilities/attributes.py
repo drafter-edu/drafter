@@ -209,7 +209,7 @@ def parse_extra_settings(extra_settings, known_attrs, component_id):
                 if value:
                     attrs.append(f"{key}")
                     seen_attrs.add(key)
-                    continue
+                continue
             # Handle specially enumerated attributes
             elif key in ATTRIBUTE_ENUMERATIONS:
                 enum_map = ATTRIBUTE_ENUMERATIONS[key]
