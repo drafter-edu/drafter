@@ -14,6 +14,7 @@ from drafter.helpers.urls import (
 )
 from drafter.components.page_content import (
     Arguable,
+    ArgumentList,
     Component,
     ComponentArgument,
     JsonSafeValue,
@@ -121,14 +122,21 @@ class Link(LinkContent):
         ComponentArgument("arguments", kind="keyword", default_value=None),
     ]
 
-    def __init__(self, text: str, url: UrlOrFunction, **kwargs):
+    def __init__(
+        self,
+        text: str,
+        url: UrlOrFunction,
+        arguments: ArgumentList = None,
+        **extra_settings,
+    ):
         self.text = text
         self.url, self.external = self._handle_url(url)
-        self.extra_settings = kwargs
+        self.extra_settings = extra_settings
+        if arguments is not None:
+            self.extra_settings["arguments"] = arguments
 
     def get_attributes(self, context) -> dict:
         attributes = super().get_attributes(context)
-        # TODO: Change to using data--drafter-arguments and handle in the frontend
         attributes["name"] = SUBMIT_BUTTON_KEY
         attributes["data-submit-button"] = make_safe_argument(self.get_link_namespace())
         return attributes
@@ -145,18 +153,27 @@ class Button(LinkContent):
 
     KNOWN_ATTRS = ["type", "name", "formaction", "disabled"]
     DEFAULT_ATTRS = {"formaction": "#", "type": "submit"}
-    RENAME_ATTRS = {"url": "data-nav"}
+    RENAME_ATTRS = {"url": "data-nav", "arguments": ""}
     ARGUMENTS = [
         ComponentArgument("text", is_content=True),
         ComponentArgument("url"),
+        ComponentArgument("arguments", kind="keyword", default_value=None),
     ]
 
     # TODO: Verify that the button does not have any interactive content as children
 
-    def __init__(self, text: str, url: UrlOrFunction, **kwargs):
+    def __init__(
+        self,
+        text: str,
+        url: UrlOrFunction,
+        arguments: ArgumentList = None,
+        **extra_settings,
+    ):
         self.text = text
         self.url, self.external = self._handle_url(url)
-        self.extra_settings = kwargs
+        self.extra_settings = extra_settings
+        if arguments is not None:
+            self.extra_settings["arguments"] = arguments
 
     def get_attributes(self, context) -> dict:
         attributes = super().get_attributes(context)

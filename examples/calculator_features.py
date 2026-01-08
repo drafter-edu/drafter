@@ -12,17 +12,20 @@ class State:
 
 @route
 def index(state: State) -> Page:
-    return Page(state, [
-        "What is the first number?",
-        TextBox("first", state.first_number, "number"),
-        "What is the second number?",
-        TextBox("second", state.second_number, "number"),
-        LineBreak(),
-        Button("Add", add_page),
-        Button("Subtract", subtract_page),
-        "The result is",
-        state.result
-    ])
+    return Page(
+        state,
+        [
+            "What is the first number?",
+            TextBox("first", state.first_number, "number"),
+            "What is the second number?",
+            TextBox("second", state.second_number, "number"),
+            LineBreak(),
+            Button("Add", add_page),
+            Button("Subtract", subtract_page),
+            "The result is",
+            state.result,
+        ],
+    )
 
 
 @route
@@ -34,6 +37,7 @@ def add_page(state: State, first: str, second: str) -> Page:
     state.result = str(int(first) + int(second))
     return index(state)
 
+
 @route
 def subtract_page(state: State, first: str, second: str) -> Page:
     if not first.isdigit() or not second.isdigit():
@@ -44,26 +48,38 @@ def subtract_page(state: State, first: str, second: str) -> Page:
     return index(state)
 
 
-assert_equal(index(State(0, 0, "")), Page(State(0, 0, ""), [
-    "What is the first number?",
-    TextBox("first", "", "number"),
-    "What is the second number?",
-    TextBox("second", "", "number"),
-    Button("Add", "", "add_page"),
-    LineBreak(),
-    "The result is",
-    ""
-]))
+assert_equal(
+    index(State(0, 0, "")),
+    Page(
+        State(0, 0, ""),
+        [
+            "What is the first number?",
+            TextBox("first", "", "number"),
+            "What is the second number?",
+            TextBox("second", "", "number"),
+            Button("Add", "add_page"),
+            LineBreak(),
+            "The result is",
+            "",
+        ],
+    ),
+)
 
-assert_equal(add_page(State(0, 0, ""), "5", "3"), Page(State(5, 3, "8"), [
-    "What is the first number?",
-    TextBox("first", "5", "number"),
-    "What is the second number?",
-    TextBox("second", "3", "number"),
-    Button("Add", "add_page"),
-    LineBreak(),
-    "The result is",
-    "8",
-]))
+assert_equal(
+    add_page(State(0, 0, ""), "5", "3"),
+    Page(
+        State(5, 3, "8"),
+        [
+            "What is the first number?",
+            TextBox("first", "5", "number"),
+            "What is the second number?",
+            TextBox("second", "3", "number"),
+            Button("Add", "add_page"),
+            LineBreak(),
+            "The result is",
+            "8",
+        ],
+    ),
+)
 
 start_server(State(0, 0, ""), reloader=True)

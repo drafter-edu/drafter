@@ -38,10 +38,13 @@ class Renderer:
         self.indentation = 2
 
     def flatten(self) -> str:
-        return "\n".join(self.parts)
+        return "".join(self.parts)
 
     def write(self, part: str):
         self.parts.append((self.depth) * (" " * self.indentation) + part)
+
+    def new_line(self):
+        self.parts.append("\n")
 
     def render(self, component):
         # TODO: Handle errors gracefully and log them
@@ -52,6 +55,7 @@ class Renderer:
             for child_index, child in enumerate(component):
                 self.component_stack.append(f"[{child_index}]")
                 self.render(child)
+                self.new_line()
                 self.component_stack.pop()
         elif isinstance(component, (Component, RenderPlan)):
             if isinstance(component, Component):
@@ -84,12 +88,23 @@ class Renderer:
                         attrs = f" {parsed_attrs}"
                 closed = "/" if plan.self_closing else ""
                 self.write(f"<{plan.tag_name}{attrs}{closed}>")
+                if not plan.collapse_whitespace and not plan.self_closing:
+                    self.new_line()
                 # TODO: Handle COLLAPSE_WHITESPACE if needed
                 self.depth += 1
+                old_depth = 0
                 if plan.children:
                     for child_index, child in enumerate(plan.children):
                         self.component_stack.append(f"[{child_index}]")
+                        if plan.collapse_whitespace:
+                            old_depth = self.depth
+                            self.depth = 0
                         self.render(child)
+                        if not plan.collapse_whitespace:
+                            print("Printing a new line")
+                            self.new_line()
+                        else:
+                            self.depth = old_depth
                         self.component_stack.pop()
                 self.depth -= 1
                 if not plan.self_closing:

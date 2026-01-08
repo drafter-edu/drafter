@@ -23,7 +23,7 @@ Technically, we need the component to return not just its HTML, but also its CSS
 """
 
 from dataclasses import dataclass
-from typing import List, Union, Any, Optional, ClassVar, Callable
+from typing import List, Union, Any, Optional, ClassVar, Callable, Sequence
 import json
 import html
 
@@ -55,6 +55,16 @@ class ComponentArgument:
 class Arguable:
     name: str
     value: JsonSafeValue
+
+
+ArgumentList = Optional[
+    Union[
+        Arguable,
+        list[Arguable],
+        list[tuple[str, JsonSafeValue]],
+        dict[str, JsonSafeValue],
+    ]
+]
 
 
 def convert_arguments_to_json(arguments, only_validate=False) -> Optional[str]:
@@ -201,6 +211,7 @@ class Component:
         known_attributes=None,
         id=None,
         self_closing=None,
+        collapse_whitespace=None,
     ) -> RenderPlan:
         return RenderPlan(
             kind="tag",
@@ -213,6 +224,9 @@ class Component:
             self_closing=self_closing
             if self_closing is not None
             else self.SELF_CLOSING_TAG,
+            collapse_whitespace=collapse_whitespace
+            if collapse_whitespace is not None
+            else self.COLLAPSE_WHITESPACE,
         )
 
     def _handle_extra_settings(self, attributes, context) -> dict:

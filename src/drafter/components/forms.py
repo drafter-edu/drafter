@@ -68,7 +68,7 @@ class TextBox(FormComponent):
 
     ARGUMENTS = [
         ComponentArgument("name"),
-        ComponentArgument("default_value", kind="keyword", default_value=None),
+        ComponentArgument("default_value", kind="keyword", default_value=""),
         ComponentArgument("kind", kind="keyword", default_value="text"),
     ]
 
@@ -81,7 +81,7 @@ class TextBox(FormComponent):
     def __init__(
         self,
         name: str,
-        default_value: Optional[str] = None,
+        default_value: Optional[Union[str, int, float]] = "",
         kind: str = "text",
         **extra_settings,
     ):
@@ -89,7 +89,7 @@ class TextBox(FormComponent):
         self.name = name
         self.kind = kind
         # TODO: Can validate for supported types (text, password, email, search, number, etc.)
-        self.default_value = default_value
+        self.default_value = str(default_value) if default_value is not None else ""
         self.extra_settings = extra_settings
 
 
@@ -97,6 +97,8 @@ class TextBox(FormComponent):
 class TextArea(FormComponent):
     tag = "textarea"
     default_value: str
+
+    COLLAPSE_WHITESPACE = True
 
     ARGUMENTS = [
         ComponentArgument("name"),
@@ -117,7 +119,12 @@ class TextArea(FormComponent):
         "required",
     ]
 
-    def __init__(self, name: str, default_value: Optional[str] = None, **kwargs):
+    def __init__(
+        self,
+        name: str,
+        default_value: Optional[Union[str, int, float]] = None,
+        **kwargs,
+    ):
         validate_parameter_name(name, "TextArea")
         self.name = name
         self.default_value = str(default_value) if default_value is not None else ""
@@ -143,7 +150,7 @@ class SelectBox(FormComponent):
         self,
         name: str,
         options: List[str],
-        default_value: Optional[str] = None,
+        default_value: Optional[Union[str, int, float]] = None,
         **kwargs,
     ):
         validate_parameter_name(name, "SelectBox")

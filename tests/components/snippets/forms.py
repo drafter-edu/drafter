@@ -44,23 +44,17 @@ tests.textbox_email = """
 # TextArea tests
 tests.textarea_simple = TextArea("comments")
 tests.textarea_simple = """
-<textarea aria-label="comments" id="comments" name="comments">
-  
-</textarea>
+<textarea aria-label="comments" id="comments" name="comments"></textarea>
 """
 
 tests.textarea_with_default = TextArea("bio", default_value="Tell us about yourself")
 tests.textarea_with_default = """
-<textarea aria-label="bio" id="bio" name="bio">
-  Tell us about yourself
-</textarea>
+<textarea aria-label="bio" id="bio" name="bio">Tell us about yourself</textarea>
 """
 
 tests.textarea_with_rows_cols = TextArea("feedback", rows=5, cols=40)
 tests.textarea_with_rows_cols = """
-<textarea aria-label="feedback" cols="40" id="feedback" name="feedback" rows="5">
-  
-</textarea>
+<textarea aria-label="feedback" cols="40" id="feedback" name="feedback" rows="5"></textarea>
 """
 
 # SelectBox tests
@@ -99,15 +93,13 @@ tests.selectbox_with_default = """
 # CheckBox tests
 tests.checkbox_simple = CheckBox("agree")
 tests.checkbox_simple = """
-<span><input id="--drafter-hidden-agree" name="agree" type="hidden" value="">
-<input aria-label="agree" id="agree" name="agree" type="checkbox">
+<span><input id="--drafter-hidden-agree" name="agree" type="hidden" value=""><input aria-label="agree" id="agree" name="agree" type="checkbox">
 </span>
 """
 
 tests.checkbox_checked = CheckBox("subscribe", default_value=True)
 tests.checkbox_checked = """
-<span><input id="--drafter-hidden-subscribe" name="subscribe" type="hidden" value="">
-<input aria-label="subscribe" checked id="subscribe" name="subscribe" type="checkbox">
+<span><input id="--drafter-hidden-subscribe" name="subscribe" type="hidden" value=""><input aria-label="subscribe" checked id="subscribe" name="subscribe" type="checkbox">
 </span>
 """
 

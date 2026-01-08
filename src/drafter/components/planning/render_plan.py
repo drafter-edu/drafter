@@ -19,6 +19,7 @@ class RenderPlan:
     attributes: Optional[dict[str, Any]] = None
     children: Any = None  #  PageContent | None
     self_closing: bool = False
+    collapse_whitespace: bool = False
     # Attributes that might be on this tag, but are not explicitly handled
     known_attributes: Optional[list[str]] = None
     id: Optional[str] = None

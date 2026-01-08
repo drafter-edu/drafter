@@ -10,9 +10,7 @@ tests.br = """
 
 tests.textarea = TextArea("comments", rows=5, cols=40)
 tests.textarea = """
-<textarea aria-label="comments" cols="40" id="comments" name="comments" rows="5">
-  
-</textarea>
+<textarea aria-label="comments" cols="40" id="comments" name="comments" rows="5"></textarea>
 """
 
 tests.span = Span("highlight")
@@ -31,6 +29,33 @@ tests.nested_span = """
 </span>
 """
 
+tests.nested_span_with_text = Span("Outer text", Span("Inner text"), "More outer text")
+tests.nested_span_with_text = """
+<span>
+  Outer text
+  <span>
+    Inner text
+  </span>
+  More outer text
+</span>
+"""
+
+tests.nested_span_times_two = Span(
+    "First level", Span("Second level"), Span("Another second level"), "Ending Text"
+)
+tests.nested_span_times_two = """
+<span>
+  First level
+  <span>
+    Second level
+  </span>
+  <span>
+    Another second level
+  </span>
+  Ending Text
+</span>
+"""
+
 tests.multi_item_span = Span("Item 1", "Item 2", "Item 3")
 tests.multi_item_span = """
 <span>
@@ -39,6 +64,9 @@ tests.multi_item_span = """
   Item 3
 </span>
 """
+
+tests.line_break = LineBreak()
+tests.line_break = """<br>"""
 
 tests.multiple_line_breaks_in_span = Span(
     "Line 1", LineBreak(), "Line 2", LineBreak(), "Line 3"
@@ -99,6 +127,12 @@ tests.div_with_headers = """<div>
     Subsection
   </h2>
 </div>
+"""
+
+tests.pre_collapse = Pre("Line 1\n  Line 2\n    Line 3")
+tests.pre_collapse = """<pre>Line 1
+  Line 2
+    Line 3</pre>
 """
 
 tests.empty_text = Text("Hello world!")

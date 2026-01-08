@@ -848,7 +848,7 @@ describe("Drafter Form Components Tests", () => {
             const button = await app.findByRole("button", { name: /update/i });
             await userEvent.click(button);
 
-            await app.findByText(/^Name:\s*:\)$/);
+            await app.findByText(/^Name:\s*:\)/);
         });
     });
 });
