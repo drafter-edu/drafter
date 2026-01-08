@@ -1,8 +1,11 @@
+import json
+
 BASE_PARAMETER_ERROR = (
     """The {component_type} name must be a valid Python identifier name. A string is considered """
     """a valid identifier if it only contains alphanumeric letters (a-z) and (0-9), or """
     """underscores (_). A valid identifier cannot start with a number, or contain any spaces."""
 )
+BASE_PARAMETER_ERROR = """The {component_type} value must be a JSON-serializable value (str, int, float, bool, None, list, or dict). """
 
 
 def validate_parameter_name(name: str, component_type: str):
@@ -13,12 +16,11 @@ def validate_parameter_name(name: str, component_type: str):
     the name starts with a letter or an underscore. Raises a `ValueError` with a detailed
     error message if validation fails.
 
-    :param name: The name to validate.
-    :type name: str
-    :param component_type: Describes the type of component associated with the parameter.
-    :type component_type: str
-    :raises ValueError: If `name` is not a string, is empty, contains spaces, starts with a
-        digit, does not start with a letter or underscore, or is not a valid identifier.
+    Args:
+        name (str): The parameter name to validate.
+        component_type (str): The type of component for error message context.
+    Raises:
+        ValueError: If the name is not a valid Python identifier.
     """
     base_error = BASE_PARAMETER_ERROR.format(component_type=component_type)
     if not isinstance(name, str):
@@ -45,4 +47,35 @@ def validate_parameter_name(name: str, component_type: str):
             )
         raise ValueError(
             base_error + f" The name `{name}` is not a valid Python identifier name."
+        )
+
+
+def validate_json_value(value, component_type: str):
+    """
+    Recursively validates that a value is JSON-serializable and does not contain any unsupported types.
+
+    Args:
+        value: The value to validate.
+        component_type: A string describing the type of component for error messages.
+    Raises:
+        ValueError: If the value is not JSON-serializable or contains unsupported types.
+    """
+    base_error = BASE_PARAMETER_ERROR.format(component_type=component_type)
+    if isinstance(value, (str, int, float, bool)) or value is None:
+        return
+    elif isinstance(value, (list, tuple)):
+        for item in value:
+            validate_json_value(item, component_type)
+    elif isinstance(value, dict):
+        for key, val in value.items():
+            if not isinstance(key, str):
+                raise ValueError(
+                    base_error
+                    + f"\n\nReason: The dictionary key `{key!r}` is not a string, which is not allowed."
+                )
+            validate_json_value(val, component_type)
+    else:
+        raise ValueError(
+            base_error
+            + f"\n\nReason: Found value of type {type(value)}: {value!r}, which is not JSON-serializable."
         )

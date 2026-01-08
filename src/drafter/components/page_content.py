@@ -15,11 +15,7 @@ To create custom components, you can subclass the `Component` class.
 Attribute order should always be consistent, with styles at the end. Generally, this means that they should be alphabetized.
 
 A Component should always:
-- Have a **kwargs** parameter in its constructor to accept extra settings.
-- Store those extra settings in the `extra_settings` property.
-- Use the `parse_extra_settings` method to convert those settings into valid HTML attributes and styles.
-- Implement a `render` method that returns the HTML representation of the component.
-- Avoid mutating any fields in the `pre_render`, `render`, or `post_render` methods.
+- Have a **extra_settings** kwargs parameter in its constructor to accept extra settings that are stored in `extra_settings` dict
 
 
 Technically, we need the component to return not just its HTML, but also its CSS and JS additions. It might also want to add other messages to the page, such as an instruction to start a timer or something. So our render should really return a more complex structure.
@@ -27,7 +23,8 @@ Technically, we need the component to return not just its HTML, but also its CSS
 """
 
 from dataclasses import dataclass
-from typing import List, Union, Any, Optional, ClassVar
+from typing import List, Union, Any, Optional, ClassVar, Callable
+import json
 import html
 
 from drafter.components.planning.render_plan import AssetBundle, RenderPlan
@@ -36,6 +33,14 @@ from drafter.components.utilities.attributes import (
     BOOLEAN_ATTRS,
     remap_attr_styles,
 )
+from drafter.components.utilities.validation import (
+    validate_json_value,
+    validate_parameter_name,
+)
+
+RouteSafeValue = Union[str, int, float, bool]
+JsonSafeValue = Union[str, int, float, bool, None, list, dict]
+UrlOrFunction = Union[str, Callable]
 
 
 @dataclass
@@ -44,6 +49,59 @@ class ComponentArgument:
     kind: str = "positional"  # "positional", "var", "keyword"
     default_value: Any = None
     is_content: bool = False
+
+
+@dataclass
+class Arguable:
+    name: str
+    value: JsonSafeValue
+
+
+def convert_arguments_to_json(arguments, only_validate=False) -> Optional[str]:
+    if isinstance(arguments, dict):
+        for key, value in arguments.items():
+            validate_parameter_name(key, "Argument")
+            validate_json_value(value, "Argument")
+        return json.dumps(arguments) if not only_validate else None
+
+    elif isinstance(arguments, Arguable):
+        validate_parameter_name(arguments.name, "Argument")
+        validate_json_value(arguments.value, "Argument")
+        return (
+            json.dumps({arguments.name: arguments.value}) if not only_validate else None
+        )
+
+    elif isinstance(arguments, (list, set, tuple)):
+        argument_dict = {}
+        for index, item in enumerate(arguments):
+            if isinstance(item, Arguable):
+                validate_parameter_name(item.name, "Argument")
+                validate_json_value(item.value, "Argument")
+                argument_dict[item.name] = item.value
+            elif isinstance(item, (list, tuple)) and len(item) == 2:
+                key, value = item
+                validate_parameter_name(key, "Argument")
+                validate_json_value(value, "Argument")
+                argument_dict[key] = value
+            elif isinstance(item, dict) and len(item) == 1:
+                key, value = next(iter(item.items()))
+                validate_parameter_name(key, "Argument")
+                validate_json_value(value, "Argument")
+                argument_dict[key] = value
+            else:
+                raise ValueError(
+                    f"Invalid argument format at index {index}: {item}.\nMust be an Arguable, a (name, value) pair, or a dict with a single key-value pair."
+                )
+        return json.dumps(argument_dict) if not only_validate else None
+    elif isinstance(arguments, dict):
+        for key, value in arguments.items():
+            validate_parameter_name(key, "Argument")
+            validate_json_value(value, "Argument")
+        return json.dumps(arguments) if not only_validate else None
+    else:
+        raise ValueError(
+            "The arguments must be an Argument, a list of Argument objects, a list of (name, value) pairs, or a dict of name to value."
+        )
 
 
 class Component:
@@ -56,7 +114,7 @@ class Component:
     needed to render the component, including its tag name, attributes, children,
     and any associated assets.
 
-    Components can be rendered as a string using __repr__, which should
+    Components can be converted to a string using __repr__, which should
     be able to roundtrip back to the same component using eval.
 
     Conceptually, there are three "versions" of the data for the Component:
@@ -76,7 +134,7 @@ class Component:
         way. Instead, they are generated on the fly when the `plan` method is called, using the
         `get_attributes`, `get_children`, and `get_assets` methods.
 
-    Args that are marked as "Content" get turned into Children, other args get turned into attributes.
+    Args that are marked as "Content" get turned into Children (child content), other args get turned into attributes.
 
     So basically the canonical data is the fields, and then some of those fields are identified
     to create the HTML attributes, children, and assets.
@@ -95,6 +153,17 @@ class Component:
     - Variable content arg: VAR_CONTENT_ARGS
     - Keyword content arg (default value): DEFAULT_CONTENT_ARGS
     - Extra settings (kwargs that get turned into attributes)
+
+    A special extra case is the `arguments` parameter, primarily for Link and Button components, but actually
+    usable by any component. This will be a list of Argument objects that will represent be turned into a special
+    `data--drafter-arguments` attribute that will have arguments embedded directly on the element, which will
+    then be passed to any events emanating from that element. The obvious use case is for links and buttons, where
+    you want arguments to be passed when the link or button is clicked, but it could also be used for other events.
+    - The `arguments` parameter can be either an Argument, a sequence of Argument, a sequence of (name, value) pairs, or a dict of name to value.
+    - The names MUST be valid Python identifiers, and the values can be any JSON-serializable value (but not dataclasses).
+    - The `arguments` parameter will be turned into a `data--drafter-arguments` attribute.
+    - The value of the `data--drafter-arguments` attribute will be a JSON string.
+    - The `arguments` parameter will usually be stored in the `extra_settings` dict, but it can also be stored as a field on the component if desired.
 
     Under any student-facing circumstances, a string value can be used in place of a `Component` object
     (in which case we say it is a `Content` type). However, the `Component` object
@@ -115,6 +184,9 @@ class Component:
     # Formatting settings
     COLLAPSE_WHITESPACE: ClassVar[bool] = False
     SELF_CLOSING_TAG: ClassVar[bool] = False
+
+    # Constants
+    DRAFTER_DATA_ARGUMENT_NAME: ClassVar[str] = "data--drafter-arguments"
 
     def plan(self, context) -> RenderPlan:
         return self._plan_tag(context)
@@ -143,6 +215,16 @@ class Component:
             else self.SELF_CLOSING_TAG,
         )
 
+    def _handle_extra_settings(self, attributes, context) -> dict:
+        for key, value in self.extra_settings.items():
+            if key == "arguments":
+                attributes[self.DRAFTER_DATA_ARGUMENT_NAME] = convert_arguments_to_json(
+                    value
+                )
+            else:
+                attributes[key] = value
+        return attributes
+
     def get_attributes(self, context) -> dict:
         attributes = {}
         # Default attributes that should always be included, unless overridden by extra_settings
@@ -160,7 +242,7 @@ class Component:
                 continue
             attributes[key] = value
         # Handle extra settings
-        attributes.update(self.extra_settings)
+        attributes = self._handle_extra_settings(attributes, context)
         return attributes
 
     def get_tag(self, context) -> str:

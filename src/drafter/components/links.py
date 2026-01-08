@@ -12,19 +12,21 @@ from drafter.helpers.urls import (
     friendly_urls,
     check_invalid_external_url,
 )
-from drafter.components.page_content import Component, ComponentArgument, PageContent
-from drafter.components.utilities.validation import validate_parameter_name
-
-
-RouteSafeValue = Union[str, int, float, bool]
-UrlOrFunction = Union[str, Callable]
+from drafter.components.page_content import (
+    Arguable,
+    Component,
+    ComponentArgument,
+    JsonSafeValue,
+    UrlOrFunction,
+)
+from drafter.components.utilities.validation import (
+    validate_json_value,
+    validate_parameter_name,
+)
 
 
 @dataclass(repr=False)
-class Argument(Component):
-    name: str
-    value: RouteSafeValue
-
+class Argument(Component, Arguable):
     tag = "input"
 
     DEFAULT_ATTRS = {"type": "hidden"}
@@ -34,13 +36,10 @@ class Argument(Component):
         ComponentArgument("value"),
     ]
 
-    def __init__(self, name: str, value: RouteSafeValue, **extra_settings):
+    def __init__(self, name: str, value: JsonSafeValue, **extra_settings):
         validate_parameter_name(name, "Argument")
+        validate_json_value(value, "Argument")
         self.name = name
-        if not isinstance(value, (str, int, float, bool)):
-            raise ValueError(
-                f"Argument values must be strings, integers, floats, or booleans. Found {type(value)}"
-            )
         self.value = value
         self.extra_settings = extra_settings
 
@@ -70,10 +69,8 @@ class LinkContent(Component):
 
     url: str
     text: str
-    arguments: Optional[List[Argument]] = None
 
     KNOWN_ATTRS = ["disabled"]
-    RENAME_ATTRS = {"arguments": "data--drafter-arguments"}
 
     def _handle_url(self, url: UrlOrFunction, external=None) -> tuple[str, bool]:
         if callable(url):
@@ -89,20 +86,7 @@ class LinkContent(Component):
     def get_attributes(self, context) -> dict:
         attributes = super().get_attributes(context)
         attributes["data-nav"] = self.url
-        if self.arguments:
-            attributes["data--drafter-arguments"] = make_safe_json_argument(
-                {arg.name: arg.value for arg in self.arguments}
-            )
         return attributes
-
-    def plan(self, context) -> RenderPlan:
-        button_plan = super().plan(context)
-        if not self.arguments:
-            return button_plan
-        # Create a unique namespace using both button text and instance ID
-        button_namespace = self.get_link_namespace()
-        argument_plans = self.plan_arguments(self.arguments, button_namespace)
-        return RenderPlan(kind="fragment", items=[button_plan, *argument_plans])
 
     def verify(self, router, state, configuration, request):
         if not router.has_route(self.url):
@@ -118,61 +102,18 @@ class LinkContent(Component):
             )
         return None
 
-    def plan_arguments(self, arguments, label_namespace):
-        parameters = self.parse_arguments(arguments, label_namespace)
-        if parameters:
-            return [
-                RenderPlan(
-                    kind="tag",
-                    tag_name="input",
-                    attributes={
-                        "type": "hidden",
-                        "name": name,
-                        "value": make_safe_json_argument(value),
-                    },
-                    known_attributes=["type", "name", "value"],
-                )
-                for name, value in parameters.items()
-            ]
-        return []
-
-    def parse_arguments(self, arguments, label_namespace):
-        if arguments is None:
-            return {}
-        if isinstance(arguments, dict):
-            return arguments
-        if isinstance(arguments, Argument):
-            escaped_label_namespace = make_safe_argument(label_namespace)
-            return {
-                f"{escaped_label_namespace}{LABEL_SEPARATOR}{arguments.name}": arguments.value
-            }
-        if isinstance(arguments, list):
-            result = {}
-            escaped_label_namespace = make_safe_argument(label_namespace)
-            for arg in arguments:
-                if isinstance(arg, Argument):
-                    arg, value = arg.name, arg.value
-                else:
-                    arg, value = arg
-                result[f"{escaped_label_namespace}{LABEL_SEPARATOR}{arg}"] = value
-            return result
-        raise ValueError(
-            f"Could not create arguments from the provided value: {arguments}"
-        )
-
 
 @dataclass(repr=False)
 class Link(LinkContent):
     text: str
     url: str
-    arguments: Optional[List[Argument]] = None
     external: bool = False
 
     tag = "a"
 
     KNOWN_ATTRS = ["href", "target", "rel", "download", "formaction", "disabled"]
     DEFAULT_ATTRS = {"href": "#", "formaction": "#"}
-    RENAME_ATTRS = {"url": "href", "arguments": "data--drafter-arguments"}
+    RENAME_ATTRS = {"url": "href"}
 
     ARGUMENTS = [
         ComponentArgument("text"),
@@ -180,11 +121,10 @@ class Link(LinkContent):
         ComponentArgument("arguments", kind="keyword", default_value=None),
     ]
 
-    def __init__(self, text: str, url: UrlOrFunction, arguments=None, **kwargs):
+    def __init__(self, text: str, url: UrlOrFunction, **kwargs):
         self.text = text
         self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
-        self.arguments = arguments
 
     def get_attributes(self, context) -> dict:
         attributes = super().get_attributes(context)
@@ -205,20 +145,18 @@ class Button(LinkContent):
 
     KNOWN_ATTRS = ["type", "name", "formaction", "disabled"]
     DEFAULT_ATTRS = {"formaction": "#", "type": "submit"}
-    RENAME_ATTRS = {"url": "data-nav", "arguments": "data--drafter-arguments"}
+    RENAME_ATTRS = {"url": "data-nav"}
     ARGUMENTS = [
         ComponentArgument("text", is_content=True),
         ComponentArgument("url"),
-        ComponentArgument("arguments", kind="keyword", default_value=None),
     ]
 
     # TODO: Verify that the button does not have any interactive content as children
 
-    def __init__(self, text: str, url: UrlOrFunction, arguments=None, **kwargs):
+    def __init__(self, text: str, url: UrlOrFunction, **kwargs):
         self.text = text
         self.url, self.external = self._handle_url(url)
         self.extra_settings = kwargs
-        self.arguments = arguments
 
     def get_attributes(self, context) -> dict:
         attributes = super().get_attributes(context)

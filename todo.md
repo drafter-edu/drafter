@@ -81,6 +81,7 @@
 -   [ ] Route for "--about" automatically added
 -   [ ] Port over documentation to mkdocs
     -   [ ] Generate reference images for components
+-   [ ] Matching a dictionary to a dataclass should allow us to convert the dictionary to the dataclass, and raise an error if there are missing or extra keys, or if the types don't match
 
 Pie in the sky:
 
