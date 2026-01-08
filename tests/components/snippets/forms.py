@@ -145,3 +145,9 @@ tests.datetimeinput_with_default = DateTimeInput(
 tests.datetimeinput_with_default = """
 <input aria-label="event" id="event" name="event" type="datetime-local" value="2024-01-15T14:30">
 """
+
+
+tests.arguments_outside = Argument("secret_message", "It's a secret to everybody!")
+tests.arguments_outside = """
+<input id="secret_message" name="$@JSON~@$secret_message" type="hidden" value="&amp;quot;It&amp;#x27;s a secret to everybody!&amp;quot;">
+"""

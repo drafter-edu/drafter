@@ -101,7 +101,7 @@ class TextArea(FormComponent):
     ARGUMENTS = [
         ComponentArgument("name"),
         ComponentArgument(
-            "default_value", kind="keyword", is_content=True, default_value=None
+            "default_value", kind="keyword", is_content=True, default_value=""
         ),
     ]
 

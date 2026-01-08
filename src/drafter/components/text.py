@@ -35,6 +35,7 @@ class Header(Component):
 
     CONTENT_ARGS = ["body"]
     DEFAULT_ARGS = {"level": 1}
+    RENAME_ATTRS = {"level": ""}
 
     def __init__(self, body: PageContent, level: int = 1, **extra_settings):
         self.body = body
@@ -133,6 +134,8 @@ class RawHTML(Component):
                 kind="raw",
                 raw_html=self.html,
             )
-        return self._plan_tag(context=context)
+        return self._plan_tag(
+            context=context, children=[RenderPlan(kind="raw", raw_html=self.html)]
+        )
 
     # TODO: Are we escaping HTML correctly in Text component?

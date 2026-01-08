@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Sequence
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import RenderPlan
 
@@ -145,9 +145,9 @@ class _HtmlList(Component):
 class NumberedList(_HtmlList):
     tag = "ol"
 
-    def __init__(self, items: list[PageContent], **extra_settings):
+    def __init__(self, items: Sequence[PageContent], **extra_settings):
         # TODO: Check that the items are a list
-        self.items = items
+        self.items = list(items)
         self.extra_settings = extra_settings
 
 
@@ -155,6 +155,6 @@ class NumberedList(_HtmlList):
 class BulletedList(_HtmlList):
     tag = "ul"
 
-    def __init__(self, items: list[PageContent], **extra_settings):
-        self.items = items
+    def __init__(self, items: Sequence[PageContent], **extra_settings):
+        self.items = list(items)
         self.extra_settings = extra_settings

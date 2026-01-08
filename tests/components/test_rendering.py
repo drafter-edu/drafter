@@ -15,6 +15,7 @@ from tests.components.snippets.media import tests as media_tests
 from tests.components.snippets.images import tests as images_tests
 from tests.components.snippets.output import tests as output_tests
 from tests.components.snippets.tables import tests as tables_tests
+from tests.components.snippets.links import tests as links_tests
 
 
 SNIPPETS = {}
@@ -24,6 +25,7 @@ SNIPPETS["media"] = media_tests.get_tests()
 SNIPPETS["images"] = images_tests.get_tests()
 SNIPPETS["output"] = output_tests.get_tests()
 SNIPPETS["tables"] = tables_tests.get_tests()
+SNIPPETS["links"] = links_tests.get_tests()
 
 
 def normalize_html(html: str):

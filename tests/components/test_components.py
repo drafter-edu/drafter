@@ -212,8 +212,6 @@ def test_snippet_consistent(category, name, snippet):
     obj1 = eval_drafter_with_source(snippet, "consistent", category, name)
     obj2 = eval_drafter_with_source(snippet, "consistent", category, name)
 
-    # These assertion messages will show up in test failures and
-    # make it obvious *which* snippet failed and why.
     assert obj1 == obj2, (
         f"{category} / {name}: evaluating the snippet twice "
         f"should produce equal objects.\nSnippet:\n{snippet}"

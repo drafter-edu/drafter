@@ -76,3 +76,59 @@ tests.string_escaping = """<span>
   Hello&#x27; and &quot; Goodbye.
 </span>
 """
+
+tests.header_1 = Header("Welcome to My Page", level=1, id="main-header")
+tests.header_1 = """<h1 id="main-header">
+  Welcome to My Page
+</h1>"""
+
+tests.header_2 = Header("Section Title", level=2, id="section-title")
+tests.header_2 = """<h2 id="section-title">
+  Section Title
+</h2>"""
+
+tests.div_with_headers = Div(
+    Header("Main Title", level=1, id="main-title"),
+    Header("Subsection", level=2, id="subsection"),
+)
+tests.div_with_headers = """<div>
+  <h1 id="main-title">
+    Main Title
+  </h1>
+  <h2 id="subsection">
+    Subsection
+  </h2>
+</div>
+"""
+
+tests.empty_text = Text("Hello world!")
+tests.empty_text = """Hello world!"""
+
+tests.styled_text = Text(
+    "Styled Text", style_color="red", style_font_size="20px", id="styled-text"
+)
+tests.styled_text = """<span id="styled-text" style="color: red; font-size: 20px">
+  Styled Text
+</span>"""
+
+tests.non_empty_raw_html = RawHTML("<div><p>This is raw HTML content.</p></div>")
+tests.non_empty_raw_html = """<div><p>This is raw HTML content.</p></div>"""
+
+tests.nested_raw_html = Div(
+    RawHTML("<p>Paragraph 1</p>"), RawHTML("<p>Paragraph 2</p>")
+)
+tests.nested_raw_html = """<div>
+  <p>Paragraph 1</p>
+  <p>Paragraph 2</p>
+</div>
+"""
+
+tests.styled_raw_html = RawHTML(
+    "<p>Styled Raw HTML</p>",
+    style_color="blue",
+    style_font_size="18px",
+    id="styled-raw-html",
+)
+tests.styled_raw_html = """<div id="styled-raw-html" style="color: blue; font-size: 18px">
+  <p>Styled Raw HTML</p>
+</div>"""

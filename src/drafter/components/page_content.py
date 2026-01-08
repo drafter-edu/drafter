@@ -194,6 +194,7 @@ class Component:
         """
         arguments = []
         handled_arguments = set()
+        still_positional = True
         for argument in self.ARGUMENTS:
             parameter_name = argument.name
             # Don't double-render any keyword arguments that will also be in extra_settings
@@ -207,18 +208,30 @@ class Component:
                 elif argument.kind == "var":
                     for item in value:
                         arguments.append(repr(item))
+                    still_positional = False
                 elif argument.kind == "keyword":
                     if value != argument.default_value:
-                        arguments.append(f"{parameter_name}={repr(value)}")
+                        if still_positional:
+                            arguments.append(repr(value))
+                        else:
+                            arguments.append(f"{parameter_name}={repr(value)}")
+                    else:
+                        still_positional = False
             else:
                 if argument.kind == "positional":
                     arguments.append(repr(value))
                 elif argument.kind == "var":
                     for item in value:
                         arguments.append(repr(item))
+                    still_positional = False
                 elif argument.kind == "keyword":
                     if value != argument.default_value:
-                        arguments.append(f"{parameter_name}={repr(value)}")
+                        if still_positional:
+                            arguments.append(repr(value))
+                        else:
+                            arguments.append(f"{parameter_name}={repr(value)}")
+                    else:
+                        still_positional = False
 
         if self.extra_settings:
             for key, value in sorted(self.extra_settings.items()):
@@ -283,6 +296,8 @@ class Component:
         attribute to the given value. It returns the instance of the object, allowing
         for method chaining. No validation is performed on the input values, so they
         should conform to the expected structure or constraints of the `extra_settings`.
+
+        TODO: Should this update the fields of the component as well, if the attr corresponds to a field?
 
         :param attr: The key of the attribute to be updated in the dictionary.
         :type attr: str

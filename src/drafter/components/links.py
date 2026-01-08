@@ -50,6 +50,9 @@ class Argument(Component):
         attributes["value"] = make_safe_json_argument(self.value)
         return attributes
 
+    def get_id(self) -> str:
+        return self.extra_settings.get("id", self.name)
+
 
 class LinkContent(Component):
     """
@@ -204,7 +207,7 @@ class Button(LinkContent):
     DEFAULT_ATTRS = {"formaction": "#", "type": "submit"}
     RENAME_ATTRS = {"url": "data-nav", "arguments": "data--drafter-arguments"}
     ARGUMENTS = [
-        ComponentArgument("text"),
+        ComponentArgument("text", is_content=True),
         ComponentArgument("url"),
         ComponentArgument("arguments", kind="keyword", default_value=None),
     ]
