@@ -131,6 +131,9 @@ class Client:
         self.request_count += 1
         return new_request
 
+    def make_initial_request(self) -> Request:
+        return Request(0, "page_load", "index", {}, {})
+
     def make_request(
         self,
         url: str,
@@ -467,76 +470,9 @@ def debug_log(event_name: str, *args: Any) -> None:
     print(f"[Drafter Client] {event_name}: ", *args)
 
 
-_CLIENT = None
-
-
-def get_client() -> Client:
-    global _CLIENT
-    if _CLIENT is None:
-        _CLIENT = Client()
-    return _CLIENT
-
-
-def update_site(response: Response, callback: Callable) -> bool:  # type: ignore
-    client = get_client()
-    return client.update_site(response, callback)
-
-
 def console_log(event) -> None:
     try:
         repr_str = repr(event)
         print(f"[Drafter] {repr_str}")
     except Exception as e:
         print(f"[Drafter] Failed to log event because of {e}\nOriginal Event:", event)
-
-
-def setup_navigation(handle_visit: Callable) -> None:  # type: ignore
-    client = get_client()
-    return client.setup_navigation(handle_visit)
-
-
-def set_site_title(title: str) -> None:  # type: ignore
-    client = get_client()
-    return client.set_site_title(title)
-
-
-def register_hotkey(keyCombo: str, callback: Callable[[], None]) -> None:  # type: ignore
-    """
-    Registers a hotkey combination to trigger a callback function when pressed.
-
-    :param keyCombo: The key combination string (e.g., "Ctrl+K").
-    :param callback: The function to call when the hotkey is pressed.
-    """
-    client = get_client()
-    return client.register_hotkey(keyCombo, callback)
-
-
-def setup_debug_menu(client_bridge) -> None:  # type: ignore
-    """
-    Sets up the debug menu in the client bridge.
-
-    :param client_bridge: The ClientBridge instance to set up the debug menu for.
-    """
-    client = get_client()
-    return client.setup_debug_menu(client_bridge)
-
-
-def handle_event(event_json: dict) -> None:  # type: ignore
-    """
-    Handles a telemetry event in the client bridge.
-
-    :param event_json: The telemetry event data as a JSON-serializable dictionary.
-    """
-    client = get_client()
-    return client.handle_event(event_json)
-
-
-def make_redirect_request_from_response(response: Response) -> Request:
-    """
-    Creates a Request object for a redirect based on the given Response.
-
-    :param response: The Response object containing redirect information.
-    :return: A Request object for the redirect.
-    """
-    client = get_client()
-    return client.make_redirect_request_from_response(response)

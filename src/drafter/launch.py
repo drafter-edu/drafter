@@ -34,6 +34,7 @@ def start_server(initial_state=None, main_user_path=None, **kwargs) -> None:
         def handle_visit(request):
             response = server.visit(request)
             client_bridge.handle_response(response, handle_visit)
+            return response
 
         handle_visit(initial_request)
         client_bridge.setup_navigation(handle_visit)
@@ -53,5 +54,6 @@ def start_server(initial_state=None, main_user_path=None, **kwargs) -> None:
             main_user_path = seek_file_by_line("start_server", "main.py")
         print("Starting local Drafter server...")
         # TODO: Title should come from configuration
-        serve_app_once(user_file=main_user_path, title="Local Drafter App",
-                       engine="skulpt")
+        serve_app_once(
+            user_file=main_user_path, title="Local Drafter App", engine="skulpt"
+        )
