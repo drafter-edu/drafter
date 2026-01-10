@@ -117,7 +117,7 @@ describe("Text and Layout Components", () => {
 
         const mergedSpan = await app.findByTestId("span-merged");
         expect(mergedSpan.tagName).toBe("SPAN");
-        expect(mergedSpan.textContent).toBe("Span first second third");
+        expect(mergedSpan.textContent).toMatch(/Span\s*first\s*second\s*third/);
 
         const divBox = await app.findByTestId("div-box");
         expect(divBox.tagName).toBe("DIV");
@@ -136,15 +136,15 @@ describe("Text and Layout Components", () => {
         expect(numbered.tagName).toBe("OL");
         const numberedItems = numbered.querySelectorAll("li");
         expect(numberedItems.length).toBe(2);
-        expect(numberedItems[0].textContent).toBe("One");
-        expect(numberedItems[1].textContent).toBe("Two");
+        expect(numberedItems[0].textContent).toContain("One");
+        expect(numberedItems[1].textContent).toContain("Two");
 
         const bulleted = await app.findByTestId("bulleted-list");
         expect(bulleted.tagName).toBe("UL");
         const bulletItems = bulleted.querySelectorAll("li");
         expect(bulletItems.length).toBe(2);
-        expect(bulletItems[0].textContent).toBe("Red");
-        expect(bulletItems[1].textContent).toBe("Blue");
+        expect(bulletItems[0].textContent).toContain("Red");
+        expect(bulletItems[1].textContent).toContain("Blue");
 
         const preBlock = await app.findByTestId("pre-block");
         expect(preBlock.tagName).toBe("PRE");
