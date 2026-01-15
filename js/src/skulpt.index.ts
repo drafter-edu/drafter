@@ -1,26 +1,20 @@
-import { getSkulptFile, setupSkulpt, startServer } from "./skulpt-tools";
+import { handleSystemError, type DrafterInitOptions } from "./bridge/engine";
+import {
+    getSkulptFile,
+    setupSkulpt,
+    startServer,
+} from "./skulpt_bridge/skulpt-tools";
 
-export interface DrafterInitOptions {
-    code?: string;
-    url?: string;
-    presentErrors?: boolean;
-}
+export { clearDrafterSiteRoot, handleSystemError } from "./bridge/engine";
 
 const x: pyStr = new Sk.builtin.str("hello");
 
-export function clearDrafterSiteRoot() {
-    const rootElement = document.getElementById(
-        "drafter-root--"
-    ) as HTMLElement;
-    if (rootElement) {
-        rootElement.innerHTML = "";
-    } else {
-        throw new Error(`Element with ID drafter-root-- not found`);
-    }
-}
-
 export function runStudentCode(options: DrafterInitOptions) {
-    setupSkulpt();
+    try {
+        setupSkulpt();
+    } catch (error) {
+        throw handleSystemError("Failed to set up Skulpt", error);
+    }
 
     if (options.code) {
         return startServer(options.code, "main", options.presentErrors);

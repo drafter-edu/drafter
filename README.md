@@ -90,30 +90,29 @@ uv run pytest --verbose --color=yes -vv
 
 ## Organization
 
-When you run a Drafter program that has a `start_server` call, then it will actually trigger the `launch.py` script's logic that will either run the application differently depending on whether it is in Skulpt (skulpt) mode or normal Python (app) mode.
+When you run a Drafter program that has a `start_server` call, then it will actually trigger the `launch.py` script's logic that will either run the application differently depending on whether it is in Skulpt/Pyodide (web) mode or normal Python (app) mode.
 
 If a user runs the program directly, then when it reaches `start_server`, it will start a local development server (the `AppServer`) using Starlette.
 This server will serve a single page with a div that contains the DRAFTER_ROOT.
-The page will sets up Skulpt and a hot-reload connection to the server.
-That page will also load the Drafter library in Skulpt, which includes a specialized version of the client library (which adds new functionality to `ClientBridge`).
-Finally, the page will also load the user's code into Skulpt and run it, which should rerun this process from the beginning, but instead triggering the alternative path where we run in Skulpt mode (see below). Effectively, this is running the program twice. The first time is "server side" with no real implications (other than starting the server, unit tests, print statements, etc.). The second time is "client side" in Skulpt, where the user's code is actually run.
+The page will sets up Skulpt/Pyodide and a hot-reload connection to the server.
+Finally, the page will also load the user's code into Skulpt/Pyodide and run it, which should rerun this process from the beginning, but instead triggering the alternative path where we run in `web` mode (see below). Effectively, this is running the program twice. The first time is "server side" with no real implications (other than starting the server, unit tests, print statements, etc.). The second time is "client side" in Skulpt/Pyodide, where the user's code is actually run.
 
 If the `build` command is used from the command line script, then the `AppBuilder` will instead generate static HTML, CSS, and JS files that can be deployed to any static hosting service.
-The main `index.html` file will create the DRAFTER_ROOT div, set up Skulpt and load the user's code into it, as well as load the Skulpt version of the Drafter client library to set up the page content.
+The main `index.html` file will create the DRAFTER_ROOT div, set up Skulpt/Pyodide and load the user's code into it.
 It will try to render the student's initial page to prepopulate as much meta information as it can, as well as an HTML preview that can be shown for SEO contexts.
 The `AppBuilder` and `AppServer` are together both referred to as `AppBackend`.
 
-If the user is running the program directly in Skulpt, then when it reaches the `start_server` call, it will instead trigger the `launch.py` script's logic to setup the `ClientBridge` and get the main `ClientServer`. Note that the `ClientServer` is not a real server; it is just a class that handles requests from the `BridgeClient` and generates responses.
-The `BridgeClient` is responsible for populating the DOM, tracking user interactions, and sending requests from the client side, while the `ClientServer` is responsible for processing requests, managing state, and generating responses on the server side.
+If the user is running the program directly in Skulpt/Pyodide, then when it reaches the `start_server` call, it will instead trigger the `launch.py` script's logic to setup the `ClientBridge`, `Client`, and get the main `ClientServer`. Note that the `ClientServer` is not a real server; it is just a class that handles requests from the `Client` and generates responses.
+The `ClientBridge` is responsible for populating the DOM, tracking user interactions, and sending requests from the client side, while the `ClientServer` is responsible for processing requests, managing state, and generating responses on the server side.
 
-The area that the user sees is the `Site`, which is a frame encapsulating the `Form`, the `PageContent`, the `DebugInfo`, and additional elements that are needed (e.g., audio players).
-The `Site` is a container that holds all the elements of the user interface and is populated by the `BridgeClient` based on the responses it gets from the `ClientServer`.
-The `BridgeClient` is stupid when it comes to the site, and doesn't really understand what it has; as much of that logic as possible is pushed into the `ClientServer`.
-Different parts of the `Site` are updated from different parts of the `ClientServer`: the `Monitor` has control over the `DebugInfo`, while the `Route` handlers have control over the `PageContent`.
+The area that the user sees is the `Site`, which is a frame encapsulating the `Form`, the `Body` (composed of `PageContent`), the `DebugInfo`, and additional elements that are needed (e.g., audio players).
+The `Site` is a container that holds all the elements of the user interface and is populated by the `ClientBridge` based on the responses it gets from the `ClientServer`.
+The `ClientBridge` is stupid when it comes to the site, and doesn't really understand what it has; as much of that logic as possible is pushed into the `ClientServer`.
+The `ClientServer` generally sends information to the `ClientBridge`, which then performs updates on the page (e.g., sending info to the `DebugInfo` panel, updating the `PageContent`, adding new JS/CSS, etc.).
 
 The DOM structure of the site is as follows:
 
--   There's a top-level div tag with id `drafter-root--` that contains the entire site.
+-   There's a top-level div tag with id `drafter-root--` that contains ALL content (except for top-level script tags needed for loading the actual true initial page).
 -   There's a div tag with id `drafter-site--` that contains the entire site.
 -   Inside that is a `drafter-frame--` div that contains the main app, followed by the `drafter-debug-info--` div.
     -   The frame makes the app look like it is in a browser window.
@@ -124,7 +123,7 @@ The DOM structure of the site is as follows:
     -   The footer has quick information like the current route, status, etc.
 -   The first child of the `drafter-body--` is a `form` tag with id `drafter-form--`.
 -   Subsequent children of the body can be additional tags that are outside the form (e.g., modals, audio players, etc.).
--   When the page content is rendered, it goes inside the `form` tag.
+-   When the page content is rendered, it replaces content within the header/body/footer that is inside of the Form (without replacing the form itself).
 
 The structure can be summarized as:
 
@@ -133,8 +132,43 @@ The structure can be summarized as:
 -   Root > Site > Form > Frame > Footer
 -   Root > Site > DebugInfo
 
+```
+┌─True─Site─────────────────────────────────────────────┐
+│ ┌True─Head──────────────────────────────────────────┐ │
+│ └───────────────────────────────────────────────────┘ │
+│ ┌True─Body──────────────────────────────────────────┐ │
+│ │┌─Root────────────────────────────────────────────┐│ │
+│ ││┌─Site──────────────────────────────────────────┐││ │
+│ │││ ┌─Padding-h─────────────────────────────────┐ │││ │
+│ │││ └───────────────────────────────────────────┘ │││ │
+│ │││ ┌─Form──────────────────────────────────────┐ │││ │
+│ │││ │ ┌─Padding-v─────────────────────────────┐ │ │││ │
+│ │││ │ └───────────────────────────────────────┘ │ │││ │
+│ │││ │ ┌─Frame─────────────────────────────────┐ │ │││ │
+│ │││ │ │ ┌─Header───────────────────────────┐  │ │ │││ │
+│ │││ │ │ └──────────────────────────────────┘  │ │ │││ │
+│ │││ │ │ ┌─Body─────────────────────────────┐  │ │ │││ │
+│ │││ │ │ └──────────────────────────────────┘  │ │ │││ │
+│ │││ │ │ ┌─Footer───────────────────────────┐  │ │ │││ │
+│ │││ │ │ └──────────────────────────────────┘  │ │ │││ │
+│ │││ │ └───────────────────────────────────────┘ │ │││ │
+│ │││ │ ┌─Padding-v─────────────────────────────┐ │ │││ │
+│ │││ │ └───────────────────────────────────────┘ │ │││ │
+│ │││ └───────────────────────────────────────────┘ │││ │
+│ │││ ┌─Padding-h─────────────────────────────────┐ │││ │
+│ │││ └───────────────────────────────────────────┘ │││ │
+│ │││ ┌─Debug─Panel───────────────────────────────┐ │││ │
+│ │││ └───────────────────────────────────────────┘ │││ │
+│ ││└───────────────────────────────────────────────┘││ │
+│ │└─────────────────────────────────────────────────┘│ │
+│ │┌─True─Scripts─Footer─────────────────────────────┐│ │
+│ │└─────────────────────────────────────────────────┘│ │
+│ └───────────────────────────────────────────────────┘ │
+└───────────────────────────────────────────────────────┘
+```
+
 We'll use a request/response model to update the page content, based around events.
-When the user interacts with the page (clicks a link, submits a form, etc.), the `BridgeClient` will send a request to the `ClientServer` with the relevant information:
+When the user interacts with the page (clicks a link, submits a form, etc.), the `ClientBridge` will send a request to the `ClientServer` with the relevant information:
 
 -   The action that led to the request (e.g., "click", "back", "forward", "reset button")
 -   The URL path being requested (which will match to a route function)
@@ -150,7 +184,7 @@ When the user interacts with the page (clicks a link, submits a form, etc.), the
 
 The `ClientServer` will process the request and choose an appropriate route handler by using the `visit` method.
 The provided function will be called, providing the current State and the request information (via named parameters).
-That function is expected to return a `ResponsePayload`, which can be any of various subclasses: `Page` (the most common), `Fragment`, `Update`, `Redirect`, `Download`, `Progress`, `ErrorPage`. That Page gets post-processed and wrapped in a `Response` along with metadata (e.g., status code, errors, headers, etc.) and sent to the `BridgeClient`. The `Response` is always sent back to the `BridgeClient`, even in error cases. Think of the Payload as being "the thing we will show the user", while the Response is "the meta information for the system." So most error metadata will be in the Response, while the Payload might still be a Page that shows a friendly error message.
+That function is expected to return a `ResponsePayload`, which can be any of various subclasses: `Page` (the most common), `Fragment`, `Update`, `Redirect`, `Download`, `Progress`, `ErrorPage`. That Page gets post-processed and wrapped in a `Response` along with metadata (e.g., status code, errors, headers, etc.) and sent to the `ClientBridge`. The `Response` is always sent back to the `ClientBridge`, even in error cases. Think of the Payload as being "the thing we will show the user", while the Response is "the meta information for the system." So most error metadata will be in the Response, while the Payload might still be a Page that shows a friendly error message.
 
 Note that route functions usually expect `state: State` as their first parameter, but you can also do `page: Page` instead if you want to get the current state of the Page object (which includes the State). The `ClientServer` will automatically provide the appropriate object based on the function signature. So the complete list of "special" route parameter names:
 
@@ -160,28 +194,28 @@ Note that route functions usually expect `state: State` as their first parameter
 -   `kwargs: dict`: Any other form fields that were not matched to named parameters will be provided as a dictionary in this parameter.
 -   `request: Request`: The full raw Request object, if desired.
 
-The `BridgeClient` will then unwrap the page contents and update the DOM faithfully according to whatever it got from the `Response`, changing the contents of the `form` and replacing the click handler. It should update the browser history as appropriate, and run any scripts that were included in the response. If it had any errors or warnings, it should display those in the debug panel.
+The `ClientBridge` will then unwrap the page contents and update the DOM faithfully according to whatever it got from the `Response`, changing the contents of the `form` and replacing the click handler. It should update the browser history as appropriate, and run any scripts that were included in the response. If it had any errors or warnings, it should display those in the debug panel.
 
 A `ResponsePayload` has a few key methods that should be implemented to fit into the lifecycle:
 
 -   `verify`: Before being sent to the client, the `ResponsePayload` is verified to ensure it is valid and can be rendered properly. This might include checking for required fields, ensuring that links are valid, etc.
 -   `render`: The payload is rendered in the `ClientServer` by calling its `render` method, which produces HTML. Typically, for a `Page`, this involves rendering all of its components and assembling them into a complete HTML document fragment. Note that this must be done recursively, so that each component renders its children, and so on.
--   `get_messages`: The payload can also generate any additional scripts that need to be run before or after the main content is inserted; these are sent along as part of the `Response` and executed by the `BridgeClient`. This is all facilitated by the `channels` of the `BridgeClient` and `ClientServer`, which allow sending messages back and forth; this is also useful for things like controlling page-level audio. So a `ResponsePayload` generates its messages, and these messages are sent to the `BridgeClient` to be executed at the appropriate time.
+-   `get_messages`: The payload can also generate any additional scripts that need to be run before or after the main content is inserted; these are sent along as part of the `Response` and executed by the `ClientBridge`. This is all facilitated by the `channels` of the `ClientBridge` and `ClientServer`, which allow sending messages back and forth; this is also useful for things like controlling page-level audio. So a `ResponsePayload` generates its messages, and these messages are sent to the `ClientBridge` to be executed at the appropriate time.
 -   `format`: The payload is turned into a string that can be used to recreate the payload, essentially the same as `repr`. This is useful for debugging and logging purposes.
 -   `get_state_updates`: If the payload needs to make any changes to the `State` (e.g., updating fields, adding history entries, etc.), it can provide those updates via this method. The `ClientServer` will apply these updates to the current `State` after processing the request but before sending the response back to the client.
 
-After the response is successfully (or unsuccessfully) processed, the `BridgeClient` sends notifications to the Audit system.
+After the response is successfully (or unsuccessfully) processed, the `ClientBridge` sends notifications to the Audit system.
 
 How is the first page handled? When the server starts up, it will create an initial State object. While Starlette or the compiler is going through its initial setup run of the code, it will find the `index` route and execute it to generate initial page content (this can be disabled if needed). This information is provided in the generated template that the server serves to the client, so that SEO crawlers can see the initial content.
-When the `BridgeClient` connects, it will immediately request the index page (unless a specific other page was requested first, via query arguments), which will be run on the `ClientServer` side to generate the actual page content for the user.
+When the `ClientBridge` connects, it will immediately request the index page (unless a specific other page was requested first, via query arguments), which will be run on the `ClientServer` side to generate the actual page content for the user.
 
 How are errors and warnings handled? At any point during the process, we can generate either errors or warnings, and they get attached to the eventual `Response` AND also sent out through Telemetry. In some cases, we may want to short-circuit the normal flow and return an error response immediately (e.g., if a route handler raises an exception). In other cases, we may want to accumulate warnings and send them along with a successful response. There are many kinds of errors, all of which are documented in the `drafter.data.error` module.
 
 How is History handled? Whenever a Request/Response completes, the Bridge notifies the `PersistentStorage` to store relevant data. That system uses the current Session ID in order to persist data that can then be restored if the page is reloaded or navigated back to. It has to keep track of everything in such a way that it can play it back later. This includes the State, the accessed pages, the arguments used, and any files that were uploaded. These updates should happen asynchronously wherever possible.
 
-When the user navigates back or forward without leaving the site (e.g., since we hijacked the back button), the `BridgeClient` sends a request with the appropriate State ID, and the `ClientServer` retrieves that State and generates the corresponding page content. This allows for seamless navigation through the user's history of interactions with the site. When a tab gets opened, we check to see if the sessionStorage has a session ID for this tab. This can happen when the user navigates away to a different server and then comes back (e.g., via the back button). If there is no session ID, we generate a new one and store it in sessionStorage. This allows us to maintain continuity across page reloads and navigations within the same tab.
+When the user navigates back or forward without leaving the site (e.g., since we hijacked the back button), the `ClientBridge` sends a request with the appropriate State ID, and the `ClientServer` retrieves that State and generates the corresponding page content. This allows for seamless navigation through the user's history of interactions with the site. When a tab gets opened, we check to see if the sessionStorage has a session ID for this tab. This can happen when the user navigates away to a different server and then comes back (e.g., via the back button). If there is no session ID, we generate a new one and store it in sessionStorage. This allows us to maintain continuity across page reloads and navigations within the same tab.
 
-How are streaming responses handled? How are long-running tasks handled? In both cases, we can yield `Progress` payloads from route handlers, which will be sent to the `BridgeClient` as they are generated. The `BridgeClient` can then update the page to show progress indicators or partial results as they come in. This means that a single request can actually result in multiple responses being sent to the client over time.
+How are streaming responses handled? How are long-running tasks handled? In both cases, we can yield `Progress` payloads from route handlers, which will be sent to the `ClientBridge` as they are generated. The `ClientBridge` can then update the page to show progress indicators or partial results as they come in. This means that a single request can actually result in multiple responses being sent to the client over time.
 
 From the student developer's perspective, they are building a `Site`, which can have multiple `Route`s. A `Route` is a decorated function that takes in the current `State` and any relevant parameters, and returns a `Page` (or other `ResponsePayload`). A `Site` also has metadata like title, description, favicon, language, etc.
 
@@ -251,10 +285,10 @@ The `Audit` module has a bunch of helper functions for publishing `TelemetryEven
 
 Essentially:
 
--   The `BridgeClient` handles all DOM manipulation and user interaction on the client side.
+-   The `ClientBridge` handles all DOM manipulation and user interaction on the client side.
 -   The `ClientServer` processes requests, manages state, and generates responses on the server side
 -   The `Page` (and other `ResponsePayload`s) represent the content and structure of the pages being served, and are created by the user-developer.
--   The `Request` wraps user interaction data for transmission from client to server, and is created by the `BridgeClient`.
+-   The `Request` wraps user interaction data for transmission from client to server, and is created by the `ClientBridge`.
 -   The `Response` wraps the `ResponsePayload` with metadata for transmission between client and server, and is created by the `ClientServer`.
 
 How is `open` and `read` handled? Skulpt should first check builtinFiles, then localStorage (or IndexedDB if configured), and then ask its server using fetch. If its server (Starlette or Github Pages) can't find it, it should 404. If it's using write mode, then it should try to write to localStorage first, and then ask its server to write it (which will cause an error unless we're on a real server that supports it).
@@ -265,4 +299,40 @@ Reentrant pages: If a route function has default parameters, then the URL can be
 
 File handling: When a file gets uploaded to the server, it will get stored in memory (or IndexedDB/localStorage if needed) and associated with the current state. When navigating back and forth, the file will be restored as needed. Note that files past a certain size may not be storable in localStorage, so we may need to have a strategy for handling large files (e.g., using IndexedDB, prompting the user to re-upload, substituting a smaller file).
 
-`PersistentStore` is a class that lives in the BridgeClient which abstracts away the details of where data is stored (in-memory, localStorage, IndexedDB, etc.). It provides a simple interface for saving and loading data, and can be configured to use different storage backends as needed. The server can send commands to the BridgeClient to store or retrieve data using this `PersistentStore`.
+`PersistentStore` is a class that lives in the ClientBridge which abstracts away the details of where data is stored (in-memory, localStorage, IndexedDB, etc.). It provides a simple interface for saving and loading data, and can be configured to use different storage backends as needed. The server can send commands to the ClientBridge to store or retrieve data using this `PersistentStore`.
+
+### Summary of Execution Timeline
+
+1.  User runs a Drafter program that has a `start_server` call.
+2.  The `launch.py` script compiles a simple HTML version of the initial page for pre-rendering
+3.  The `launch.py` script starts up the Starlette server
+4.  The initial True Page gets served to the browser
+5.  The True Page sets up the WebSocket connection back to the App Server
+6.  The True Page sets up the Skulpt/Pyodide environment
+7.  The True Page executes the student's code
+8.  Drafter is imported; the `MAIN_SERVER` and `MAIN_EVENT_BUS` are created.
+9.  The `launch.py` script creates the `ClientBridge`
+10. The Server renders the `Site`, creating the True page structure
+11. The ClientBridge loads the rendered site and sets up the rest of its content
+12. The ClientBridge sets up the Debug Menu.
+13. The ClientBridge registers itself with the monitor to handle telemetry
+14. The Server's monitor starts listening for events
+15. The server is started
+16. The ClientBridge sends an initial request for the `index` page (or whatever page is specified in the URL query parameters)
+17. The `index` route is executed to generate the initial page content
+
+### Error Handling
+
+Here's how each kind of error is handled:
+
+-   Core infrastructure during initial entire page load (e.g., Skulpt setup)
+-   Route resolution errors (e.g., no matching route, argument parsing errors)
+-   Errors during route execution (e.g., exceptions raised in route handlers) in student code
+
+Here are the places that we can show errors to the user:
+
+-   The drafter page content area, where we can show friendly error messages that are styled to fit the site. This is the most common place for errors to be shown, and is where we would show things like "404: Page not found" or "500: Internal server error", as well as any custom error pages that the user might create.
+-   The entire page, if Drafter's infrastructure fails to load at all.
+-   The debug panel, where we can show error events.
+-   The browser console, where we can log errors for debugging purposes. This is generally for error details that are more serious and might indicate a bug in the framework itself, rather than just an error in the user's code.
+-   An `alert` popup, which can be used for critical errors that require immediate attention. This should be used sparingly, as it can be disruptive to the user experience.

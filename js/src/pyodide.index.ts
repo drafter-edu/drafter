@@ -1,14 +1,10 @@
 import { loadPyodide } from "pyodide";
 import { mountDirectory } from "./pyodide_bridge/directories";
 import { DebugPanel } from "./debug";
+import type { DrafterInitOptions } from "./bridge/engine";
+export { clearDrafterSiteRoot, handleSystemError } from "./bridge/engine";
 
 window.DebugPanel = DebugPanel;
-
-export interface PyodideInitOptions {
-    code?: string;
-    url?: string;
-    presentErrors?: boolean;
-}
 
 export async function mountDrafterDirectory() {
     await mountDirectory("./drafter", "reuse-drafter-directory");
@@ -28,7 +24,7 @@ export async function setupPyodide() {
 }
 
 export async function runStudentCode(
-    options: PyodideInitOptions
+    options: DrafterInitOptions
 ): Promise<any> {
     if ((window as any).pyodide === undefined) {
         throw new Error(

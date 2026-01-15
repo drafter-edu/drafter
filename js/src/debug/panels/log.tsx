@@ -1,15 +1,14 @@
+import { Panel } from "./panel";
 import type { TelemetryEvent } from "../telemetry";
 import type { DrafterWarning } from "../telemetry/errors";
 
-export class LogPanel {
-    private getContentElement(): HTMLElement {
-        const content = document.getElementsByClassName(
-            "drafter-debug-log-content"
-        )[0];
-        if (!content) {
-            throw new Error("DebugPanel: Log section not found.");
-        }
-        return content as HTMLElement;
+export class LogPanel extends Panel {
+    constructor(containerId: string, instanceId: number) {
+        super(containerId, instanceId, "drafter-debug-log", "Event Log");
+    }
+
+    protected get initialContent() {
+        return <div></div>;
     }
 
     public renderEvent(event: TelemetryEvent): void {

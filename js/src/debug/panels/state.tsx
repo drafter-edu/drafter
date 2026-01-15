@@ -1,7 +1,5 @@
-import type {
-    SpecificRepresentation,
-    UpdatedStateEvent,
-} from "../telemetry/state";
+import { Panel } from "./panel";
+import type { SpecificRepresentation } from "../telemetry/state";
 
 // TODO: Cycle background colors for instances of the same type for easier distinction
 // Need to track unique types seen so far, so promote to class later if needed
@@ -236,26 +234,26 @@ function renderRepresentation(rep: SpecificRepresentation) {
     }
 }
 
-export class StatePanel {
+export class StatePanel extends Panel {
     private currentState: SpecificRepresentation | null = null;
 
-    public renderState(
-        state: SpecificRepresentation | null,
-        html?: string
-    ): void {
-        this.currentState = state ?? null;
-
-        const section = document.getElementById(
-            "drafter-debug-current-state-content"
+    constructor(containerId: string, instanceId: number) {
+        super(
+            containerId,
+            instanceId,
+            "drafter-debug-current-state",
+            "Current State"
         );
-        if (!section) {
-            throw new Error("DebugPanel: State section not found.");
-        }
+    }
 
+    protected get initialContent() {
+        return <div></div>;
+    }
+
+    public renderState(state: SpecificRepresentation): void {
         console.log(state);
 
         const result = renderRepresentation(state!);
-
-        section.replaceChildren(result);
+        this.getContentElement().replaceChildren(result);
     }
 }

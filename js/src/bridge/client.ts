@@ -1,3 +1,8 @@
+/**
+ * Deprecated now that we've successfully ported
+ * all functionality over to the `client.py` module!
+ */
+
 import type { Suspension } from "../types/skulpt";
 import type { DebugPanel } from "../debug";
 import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrapper";

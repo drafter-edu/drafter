@@ -4,14 +4,20 @@ import { DebugHeaderBar } from "./header";
 import { DebugFooterBar } from "./footer";
 import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrapper";
 import type { TestCaseEvent } from "./telemetry/tests";
-import { decodeHtmlEntities } from "./utils";
 import { TestPanel } from "./panels/testing";
 import { StatePanel } from "./panels/state";
 import { RoutesPanel } from "./panels/routes";
 import { HistoryPanel } from "./panels/history";
 import { LogPanel } from "./panels/log";
+import { DebugPanelError } from "./utils/errors";
+import type { ReactElement } from "jsx-dom";
+import type { Panel } from "./panels/panel";
+import { intersperse } from "./utils/lists";
 
 export class DebugPanel {
+    private static instanceCounter = 0;
+    private instanceId: number;
+
     private panelElement: HTMLElement | null = null;
     private contentElement: HTMLElement | null = null;
     private events: TelemetryEvent[] = [];
@@ -19,43 +25,61 @@ export class DebugPanel {
     private errors: any[] = [];
     private warnings: any[] = [];
     private isVisible: boolean = true;
-    private headerBar: DebugHeaderBar | null = null;
-    private footerBar: DebugFooterBar | null = null;
-    private testingPanel: TestPanel | null = null;
-    private statePanel: StatePanel | null = null;
-    private routesPanel: RoutesPanel | null = null;
-    private historyPanel: HistoryPanel | null = null;
-    private logPanel: LogPanel | null = null;
+    private headerBar: DebugHeaderBar;
+    private footerBar: DebugFooterBar;
+    private testingPanel: TestPanel;
+    private statePanel: StatePanel;
+    private routesPanel: RoutesPanel;
+    private historyPanel: HistoryPanel;
+    private logPanel: LogPanel;
+    private panels: Panel[];
 
     constructor(
         private containerId: string,
         private clientBridge: ClientBridgeWrapperInterface
     ) {
-        this.initialize();
-    }
+        this.instanceId = DebugPanel.instanceCounter++;
 
-    private initialize() {
-        const container = document.getElementById(this.containerId);
-        if (!container) {
-            console.error(
-                `DebugPanel: Container with id '${this.containerId}' not found.`
-            );
-            return;
-        }
+        this.headerBar = new DebugHeaderBar("");
+        this.footerBar = new DebugFooterBar();
+        this.testingPanel = new TestPanel(this.containerId, this.instanceId);
+        this.statePanel = new StatePanel(this.containerId, this.instanceId);
+        this.routesPanel = new RoutesPanel(this.containerId, this.instanceId);
+        this.historyPanel = new HistoryPanel(this.containerId, this.instanceId);
+        this.logPanel = new LogPanel(this.containerId, this.instanceId);
+        this.panels = [
+            this.statePanel,
+            this.routesPanel,
+            this.historyPanel,
+            this.testingPanel,
+            this.logPanel,
+        ];
 
+        const container = this.getContainerElement();
         this.panelElement = this.createPanelStructure();
         container.appendChild(this.panelElement);
         this.contentElement = this.panelElement.querySelector(
             ".drafter-debug-content"
         );
-        this.headerBar = new DebugHeaderBar("");
-        this.footerBar = new DebugFooterBar();
-        this.testingPanel = new TestPanel();
-        this.statePanel = new StatePanel();
-        this.routesPanel = new RoutesPanel();
-        this.historyPanel = new HistoryPanel();
-        this.logPanel = new LogPanel();
+
+        this.panels.forEach((p) => p.initialize());
         this.attachEventHandlers();
+    }
+
+    private reportError(message: string) {
+        console.error("[DebugPanel] Error:", message);
+        this.errors.push(message);
+        return new DebugPanelError(message);
+    }
+
+    private getContainerElement(): HTMLElement {
+        const container = document.getElementById(this.containerId);
+        if (!container) {
+            throw this.reportError(
+                `DebugPanel: Container with id '${this.containerId}' not found.`
+            );
+        }
+        return container;
     }
 
     public setHeaderTitle(title: string) {
@@ -72,7 +96,15 @@ export class DebugPanel {
     private createPanelStructure(): HTMLElement {
         const panel = document.createElement("div");
         panel.className = "drafter-debug-panel";
-        panel.id = "drafter-debug-panel";
+        panel.id = `drafter-debug-panel-${this.instanceId}`;
+
+        const links = intersperse<ReactElement | string>(
+            this.panels.map((panel) => panel?.getAnchor()),
+            "|"
+        );
+        const panelComponents = this.panels.map((panel) =>
+            panel?.createStructure()
+        );
 
         const ui = (
             <div class="drafter-debug-panel">
@@ -83,77 +115,10 @@ export class DebugPanel {
                         </div>
                         <div class="drafter-debug-header-subtitle"></div>
                     </div>
-                    <div class="drafter-debug-header-buttons">
-                        <a href="#drafter-debug-log">Event Log</a> |
-                        <a href="#drafter-debug-state">State</a> |
-                        <a href="#drafter-debug-current-route">Routes</a> |
-                        <a href="#drafter-debug-history">History</a> |
-                        <a href="#drafter-debug-routes">Routes</a>
-                    </div>
+                    <div class="drafter-debug-header-buttons">{links}</div>
                 </div>
                 {this.createActionButtons()}
-                <div class="drafter-debug-content">
-                    <div
-                        class="drafter-debug-section"
-                        id="drafter-debug-current-route"
-                    >
-                        <div class="drafter-debug-section-header">
-                            <h4>Current Route</h4>
-                        </div>
-                        <div id="drafter-debug-current-route-content"></div>
-                    </div>
-                    <div class="drafter-debug-section" id="drafter-debug-state">
-                        <div class="drafter-debug-section-header">
-                            <h4>Current State</h4>
-                        </div>
-                        <div
-                            id="drafter-debug-current-state-content"
-                            class="drafter-debug-current-state-content"
-                        ></div>
-                    </div>
-                    <div
-                        class="drafter-debug-section"
-                        id="drafter-debug-routes"
-                    >
-                        <div class="drafter-debug-section-header">
-                            <h4>Registered Routes</h4>
-                        </div>
-                        <div
-                            id="drafter-debug-routes-list"
-                            class="drafter-debug-routes-list"
-                        ></div>
-                    </div>
-                    <div
-                        class="drafter-debug-section"
-                        id="drafter-debug-history"
-                    >
-                        <div class="drafter-debug-section-header">
-                            <h4>Page History</h4>
-                        </div>
-                        <div id="drafter-debug-page-history-content"></div>
-                    </div>
-                    <div class="drafter-debug-section" id="drafter-debug-tests">
-                        <div class="drafter-debug-section-header">
-                            <h4>Your Tests</h4>
-                        </div>
-                        <div id="drafter-debug-current-tests-content">
-                            <div id="drafter-debug-current-tests-summary"></div>
-                            <br></br>
-                            <strong>Details: </strong>
-                            <div id="drafter-debug-current-tests-content-list"></div>
-                        </div>
-                    </div>
-                    <div class="drafter-debug-section" id="drafter-debug-log">
-                        <div class="drafter-debug-section-header">
-                            <h4>Event Log</h4>
-                        </div>
-                        <div class="drafter-debug-log-content"></div>
-                    </div>
-                    <div
-                        class="drafter-debug-section"
-                        id="drafter-debug-events"
-                    ></div>
-                </div>
+                <div class="drafter-debug-content">{panelComponents}</div>
             </div>
         );
         panel.appendChild(ui);
@@ -163,11 +128,7 @@ export class DebugPanel {
 
     private createActionButtons() {
         const toggleFrame = (
-            <button
-                id="drafter-toggle-frame-btn"
-                title="Show/Hide Frame"
-                class="drafter-toggle-frame-button"
-            >
+            <button title="Show/Hide Frame" class="drafter-toggle-frame-button">
                 👁️ Toggle Frame
             </button>
         );
@@ -177,14 +138,12 @@ export class DebugPanel {
         return (
             <div class="drafter-debug-actions">
                 <button
-                    id="drafter-home-btn"
                     title={t("button.home.tooltip")}
                     class="drafter-home-button"
                 >
                     {t("icon.home")} {t("button.home")}
                 </button>
                 <button
-                    id="debug-reset-btn"
                     title={t("button.reset.tooltip")}
                     class="drafter-reset-button"
                 >

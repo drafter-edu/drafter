@@ -1,19 +1,36 @@
 import * as Diff2Html from "diff2html";
+import { Panel } from "./panel";
 import type { TestCaseEvent } from "../telemetry/tests";
-import { decodeHtmlEntities } from "../utils";
 import type { ReactElement } from "jsx-dom";
 
-export class TestPanel {
+export class TestPanel extends Panel {
     private tests: TestCaseEvent[] = [];
+
+    constructor(containerId: string, instanceId: number) {
+        super(containerId, instanceId, "drafter-debug-tests", "Your Tests");
+    }
+
+    protected get initialContent() {
+        return (
+            <>
+                <div
+                    class={`drafter-debug-current-tests-summary drafter-debug-current-tests-summary-${this.instanceId}`}
+                ></div>
+                <br></br>
+                <strong>Details: </strong>
+                <div
+                    class={`drafter-debug-current-tests-content-list drafter-debug-current-tests-content-list-${this.instanceId}`}
+                ></div>
+            </>
+        );
+    }
 
     public renderTest(testCase: TestCaseEvent): void {
         this.tests.push(testCase);
-        const testList = document.getElementById(
-            "drafter-debug-current-tests-content-list"
+        const testList = this.queryWithin(
+            this.scopedSelector("drafter-debug-current-tests-content-list"),
+            "DebugPanel: Tests section not found."
         );
-        if (!testList) {
-            throw new Error("DebugPanel: Tests section not found.");
-        }
 
         const statusIcon = testCase.passed ? "✅" : "❌";
         const statusClass = testCase.passed ? "test-passed" : "test-failed";
@@ -59,12 +76,10 @@ export class TestPanel {
     }
 
     public updateTestSummary(): void {
-        const summaryElement = document.getElementById(
-            "drafter-debug-current-tests-summary"
+        const summaryElement = this.queryWithin(
+            this.scopedSelector("drafter-debug-current-tests-summary"),
+            "DebugPanel: Test summary section not found."
         );
-        if (!summaryElement) {
-            throw new Error("DebugPanel: Test summary section not found.");
-        }
 
         const totalTests = this.tests.length;
         const passedTests = this.tests.filter((t) => t.passed).length;

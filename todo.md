@@ -3,7 +3,7 @@
     -   [ ] `launch.py` doesn't use the compilation pipeline correctly
 -   [ ] Convert to CHANGELOG.md format and adopt python-semantic-release (or github-changelog-md)
 -   [ ] Configuration should be smoother
--   [ ] Delete old files and old_history
+-   [x] Delete old files and old_history
 -   [ ] Debug panel: registered routes: make them links, allow the user to input text
 -   [ ] Debug panel: Disable state representation option (for performance)
 -   [x] Debug panel: hot bar: button to hide/show the frame
@@ -46,7 +46,7 @@
 -   [ ] Fetch support for opening files in Skulpt
 -   [x] Convert skulpt bridge to be handled via Python code rather than JS code, with a proper js bridge library
 -   [ ] Make sure that Pyodide works with the new Client Bridge system
--   [ ] Properly recursively render components
+-   [x] Properly recursively render components
 -   [ ] Fragment support
 -   [ ] Progress support
 -   [ ] Update state support
@@ -69,9 +69,9 @@
     -   [x] Label Component, with optional `for_id` attribute
     -   [x] Boolean attributes handling (e.g., disabled, checked, readonly)
     -   [x] Handle datetime inputs and types
-    -   [ ] RawHTML component
+    -   [x] RawHTML component
     -   [-] Rendering components should accept None as a valid input and render to nothing
-    -   [ ] Hooks for Component class (pre_render, post_render)
+    -   [x] Hooks for Component class (pre_render, post_render)
     -   [ ] Path to failing node (breadcrumbs) for debugging when rendering/formatting/verifying components
     -   [x] Support data-\* attributes
     -   [x] Components should have a stable unique ID
@@ -82,6 +82,9 @@
 -   [ ] Port over documentation to mkdocs
     -   [ ] Generate reference images for components
 -   [ ] Matching a dictionary to a dataclass should allow us to convert the dictionary to the dataclass, and raise an error if there are missing or extra keys, or if the types don't match
+-   [ ] Properly handle back/forward arguments in the URL, and make sure that the state is correctly restored when navigating back and forward
+-   [ ] Debug menu: pagination of page history, for when it gets very long.
+-   [ ] Can we scope out the MAIN_SERVER and MAIN_EVENT_BUS to be instance-level instead of global? That way we could support multiple independent Drafter instances on the same page, and it would be easier to reason about the state and events for each instance. The EventBus could simply be tied to a specific ClientServer+ClientBridge pair.
 
 Pie in the sky:
 

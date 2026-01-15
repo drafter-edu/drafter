@@ -7,7 +7,6 @@ from drafter.client_server.errors import VisitError
 from drafter.data.channel import Message
 from drafter.history.state import SiteState
 from drafter.monitor.events.errors import DrafterError
-from drafter.monitor.bus import EventBus
 from drafter.monitor.events.request import (
     RequestEvent,
     RequestParseEvent,
@@ -16,7 +15,6 @@ from drafter.monitor.events.request import (
 from drafter.monitor.events.routes import RouteAddedEvent
 from drafter.monitor.events.state import UpdatedStateEvent
 from drafter.monitor.monitor import Monitor
-from drafter.payloads import Page
 from drafter.payloads.kinds.error_page import ErrorPage, SimpleErrorPage
 from drafter.payloads.payloads import ResponsePayload
 from drafter.data.request import Request
@@ -125,8 +123,10 @@ class ClientServer:
                     exception=e,
                 )
         # Register any default routes, if needed
-        self.router.register_default_routes(lambda state: self.default_reset_function(state), 
-                                            lambda state: self.default_about_function(state))
+        self.router.register_default_routes(
+            lambda state: self.default_reset_function(state),
+            lambda state: self.default_about_function(state),
+        )
         # All done!
         log_info(
             "server.started",
@@ -134,14 +134,16 @@ class ClientServer:
             "client_server.start",
             f"Server name: {self.custom_name}",
         )
-        
+
     def default_reset_function(self, state):
         from drafter.payloads.kinds.redirect import Redirect
+
         self.state.reset()
         return Redirect("index")
-    
+
     def default_about_function(self, state):
         from drafter.payloads.kinds.page import Page
+
         # TODO: Move this elsewhere
         # TODO: Should use the student's site information if available
         about_content = """
@@ -316,10 +318,10 @@ class ClientServer:
                     ),
                     403,
                 )
-                
+
     def start_timer(self):
         self.start_time = time.time()
-        
+
     def check_timer(self) -> float:
         return (time.time() - self.start_time) * 1000  # in milliseconds
 

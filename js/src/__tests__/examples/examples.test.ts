@@ -8,7 +8,7 @@ import "../../../../src/drafter/assets/js/skulpt-stdlib.js";
 import "../../../../src/drafter/assets/js/skulpt-drafter.js";
 import "../../../../src/drafter/assets/js/drafter.js";
 import "./d3.6.3.1.min.js";
-import { builtinRead, setupSkulpt } from "../../skulpt-tools.js";
+import { builtinRead, setupSkulpt } from "../../skulpt_bridge/skulpt-tools.js";
 import { runStudentCode } from "../../skulpt.index.js";
 import * as fs from "fs";
 import * as path from "path";

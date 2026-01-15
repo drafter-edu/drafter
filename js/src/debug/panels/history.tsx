@@ -1,4 +1,4 @@
-import { clear } from "console";
+import { Panel } from "./panel";
 import type {
     RequestEvent,
     RequestParseEvent,
@@ -6,58 +6,49 @@ import type {
 } from "../telemetry/requests";
 import { createTruncatableUrl } from "../components/urls";
 
-type HistoryEvent = RequestEvent | ResponseEvent;
-
-export class HistoryPanel {
-    private contentElement: HTMLElement;
-    private listElement: HTMLElement;
-
-    private MAX_URL_LENGTH = 42;
-
-    constructor() {
-        const content = document.getElementById(
-            "drafter-debug-page-history-content"
-        );
-
-        if (!content) {
-            throw new Error("DebugPanel: History section not found.");
-        }
-
-        this.contentElement = content;
-
-        const initialContent = this.createInitialContent();
-        content?.appendChild(initialContent);
-        this.listElement = document.getElementById(
-            "drafter-debug-page-history-list"
-        )!;
+export class HistoryPanel extends Panel {
+    constructor(containerId: string, instanceId: number) {
+        super(containerId, instanceId, "drafter-debug-history", "Page History");
     }
 
-    private createInitialContent() {
-        const clearButton = (
-            <button class="drafter-debug-clear-history-btn drafter-debug-button--">
-                Clear History
-            </button>
+    protected getListElement(): HTMLElement {
+        return this.queryWithin(
+            this.scopedSelector("drafter-debug-page-history-list"),
+            "DebugPanel: History section not found."
         );
-        clearButton.addEventListener("click", () => {
-            if (confirm("Are you sure you want to clear the history?")) {
-                this.clearHistory();
-            }
-        });
+    }
+
+    public override initialize() {
+        // Setup event handlers after structure is created
+        const clearButton = this.getContentElement().querySelector(
+            ".drafter-debug-clear-history-btn"
+        );
+        if (clearButton) {
+            clearButton.addEventListener("click", () => {
+                if (confirm("Are you sure you want to clear the history?")) {
+                    this.clearHistory();
+                }
+            });
+        }
+    }
+
+    protected get initialContent() {
         return (
             <div>
-                <div class="drafter-debug-history-actions">{clearButton}</div>
+                <div class="drafter-debug-history-actions">
+                    <button class="drafter-debug-clear-history-btn drafter-debug-button--">
+                        Clear History
+                    </button>
+                </div>
                 <div
-                    id="drafter-debug-page-history-list"
-                    class="drafter-debug-page-history-list"
+                    class={`drafter-debug-page-history-list drafter-debug-page-history-list-${this.instanceId}`}
                 ></div>
             </div>
         );
     }
 
     public clearHistory(): void {
-        if (this.listElement) {
-            this.listElement.innerHTML = "";
-        }
+        this.getListElement().innerHTML = "";
     }
 
     public addRequest(request: RequestEvent): void {
@@ -92,7 +83,7 @@ export class HistoryPanel {
             </div>
         );
 
-        this.listElement.prepend(requestElement);
+        this.getListElement().prepend(requestElement);
         requestElement
             .querySelector(".drafter-history-request-url")
             ?.addEventListener("click", (d) => {
@@ -101,7 +92,7 @@ export class HistoryPanel {
     }
 
     public addRequestParse(parseEvent: RequestParseEvent): void {
-        const requestEventElement = this.contentElement.querySelector(
+        const requestEventElement = this.getContentElement().querySelector(
             `.history-event[data-request-id="${parseEvent.request_id}"]`
         );
 
@@ -122,7 +113,7 @@ export class HistoryPanel {
     }
 
     public addResponse(response: ResponseEvent): void {
-        const requestEventElement = this.contentElement.querySelector(
+        const requestEventElement = this.getContentElement().querySelector(
             `.history-event[data-request-id="${response.request_id}"]`
         );
 
