@@ -18,7 +18,6 @@ from drafter.bridge.helpers import (
     remove_page_content,
     remove_existing_theme,
 )
-from drafter.monitor.bus import get_main_event_bus
 from drafter.monitor.telemetry import TelemetryEvent
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import DRAFTER_TAG_IDS, DRAFTER_TAG_CLASSES
@@ -30,12 +29,12 @@ document = js.document  # type: ignore
 
 @dataclass
 class ClientBridge:
-    client_bridge: Client
+    client: Client
     channel_history: dict[str, set[str]] = field(default_factory=dict)
     redirect_loop_stack: list[str] = field(default_factory=list)
 
     def __init__(self):
-        self.client_bridge = Client()
+        self.client = Client()
         self.channel_history = {}
         self.redirect_loop_stack = []
 
@@ -81,7 +80,7 @@ class ClientBridge:
         self.add_channel_content(
             response.channels.get(DEFAULT_CHANNEL_BEFORE), is_page_specific=True
         )
-        outcome = self.client_bridge.update_site(response, callback)
+        outcome = self.client.update_site(response, callback)
         self.add_channel_content(
             response.channels.get(DEFAULT_CHANNEL_AFTER), is_page_specific=True
         )
@@ -105,15 +104,15 @@ class ClientBridge:
             )
             return
         self.redirect_loop_stack.append(repr(response.payload))
-        new_request = self.client_bridge.make_redirect_request_from_response(response)
+        new_request = self.client.make_redirect_request_from_response(response)
         callback(new_request)
         self.redirect_loop_stack.pop()
 
     def make_initial_request(self) -> Request:
-        return self.client_bridge.make_initial_request()
+        return self.client.make_initial_request()
 
     def handle_telemetry_event(self, event: TelemetryEvent) -> None:
-        self.client_bridge.handle_event(event.to_json())
+        self.client.handle_event(event.to_json())
         # print("Telemetry Event:", event.event_type, event.data)
         # debug_info = document.getElementById(DRAFTER_TAG_IDS["DEBUG"])
         # if debug_info:
@@ -125,7 +124,7 @@ class ClientBridge:
     def setup_site(self, initial_site_data: InitialSiteData) -> None:
         root_tag = document.getElementById(DRAFTER_TAG_IDS["ROOT"])
         root_tag.innerHTML = initial_site_data.site_html
-        self.client_bridge.set_site_title(initial_site_data.site_title)
+        self.client.set_site_title(initial_site_data.site_title)
         remove_existing_theme(DRAFTER_TAG_CLASSES["THEME"])
         for css in initial_site_data.additional_css:
             add_link(css, with_class=DRAFTER_TAG_CLASSES["THEME"])
@@ -137,14 +136,10 @@ class ClientBridge:
             add_header(header)
 
     def setup_debug_menu(self) -> None:
-        self.client_bridge.setup_debug_menu(self)
-
-    def connect_to_event_bus(self) -> None:
-        event_bus = get_main_event_bus()
-        event_bus.subscribe("*", self.console_log_events)
+        self.client.setup_debug_menu(self)
 
     def setup_navigation(self, handle_visit: Callable[[Request], Response]) -> None:
-        self.client_bridge.setup_navigation(handle_visit)
+        self.client.setup_navigation(handle_visit)
 
     def register_hotkey(self, keyCombo: str, callback: Callable[[], None]) -> None:
-        self.client_bridge.register_hotkey(keyCombo, callback)
+        self.client.register_hotkey(keyCombo, callback)

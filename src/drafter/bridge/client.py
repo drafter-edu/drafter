@@ -9,7 +9,6 @@ from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.site.site import DRAFTER_TAG_IDS, DRAFTER_TAG_CLASSES
 from drafter.monitor.telemetry import TelemetryEvent, TelemetryCorrelation
-from drafter.monitor.bus import get_main_event_bus
 from drafter.helpers.utils import is_skulpt, is_pyodide
 from drafter.components.page_content import Component
 from typing import Callable, Optional, Any
@@ -107,7 +106,7 @@ class Client:
     def handle_event(self, event: dict):
         debug_log("client.handle_event", event)
         if self.debug_panel:
-            print("Attempting to handle event in debug panel:", event)
+            # print("Attempting to handle event in debug panel:", event)
             try:
                 self.debug_panel.handleEvent(event)
             except Exception as e:
@@ -473,6 +472,9 @@ def debug_log(event_name: str, *args: Any) -> None:
 def console_log(event) -> None:
     try:
         repr_str = repr(event)
-        print(f"[Drafter] {repr_str}")
+        print(f"[Drafter/Internal] {repr_str}")
     except Exception as e:
-        print(f"[Drafter] Failed to log event because of {e}\nOriginal Event:", event)
+        print(
+            f"[Drafter/Internal] Failed to log event because of {e}\nOriginal Event:",
+            event,
+        )

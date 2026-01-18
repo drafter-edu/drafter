@@ -16,9 +16,10 @@ def start_server(
         from drafter.bridge import ClientBridge
 
         client_bridge = ClientBridge()
-        client_bridge.connect_to_event_bus()
 
         server = server or get_main_server()
+        # Log *all* events to the console for debugging purposes
+        # client_bridge.connect_to_event_bus(server.event_bus)
 
         def rerender_site():
             initial_site_data = server.render_site()
@@ -27,8 +28,11 @@ def start_server(
 
         rerender_site()
 
+        # TODO: Instead of always logging, only log if we didn't process it in the handle_telemetry_event.
+        server.register_monitor_listener(client_bridge.console_log_events)
         server.register_monitor_listener(client_bridge.handle_telemetry_event)
-        server.monitor.listen_for_events()
+        server.event_bus.process_unprocessed_events()
+        # server.monitor.listen_for_events()
 
         server.start(initial_state=initial_state)
         initial_request = client_bridge.make_initial_request()

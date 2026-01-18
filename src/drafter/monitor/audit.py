@@ -3,7 +3,6 @@ import traceback
 from typing import Optional, Any
 from drafter.monitor.events.base import BaseEvent
 from drafter.monitor.events.errors import DrafterError, DrafterInfo, DrafterWarning
-from drafter.monitor.bus import get_main_event_bus
 from drafter.monitor.telemetry import TelemetryCorrelation, TelemetryEvent
 
 
@@ -19,6 +18,8 @@ def log_error(
     dom_id: Optional[str] = None,
     route: Optional[str] = None,
 ) -> DrafterError:
+    from drafter.client_server.commands import get_main_event_bus
+
     print("Logging error:", message, source, details, route, exception)
     error = DrafterError(
         message=message,
@@ -56,6 +57,8 @@ def log_warning(
     dom_id: Optional[str] = None,
     route: Optional[str] = None,
 ) -> DrafterWarning:
+    from drafter.client_server.commands import get_main_event_bus
+
     warning = DrafterWarning(
         message=message,
         where=source,
@@ -93,6 +96,8 @@ def log_info(
     dom_id: Optional[str] = None,
     route: Optional[str] = None,
 ) -> DrafterInfo:
+    from drafter.client_server.commands import get_main_event_bus
+
     info = DrafterInfo(message=message, where=source, details=details)
     get_main_event_bus().publish(
         TelemetryEvent(
@@ -121,6 +126,8 @@ def log_data(
     dom_id: Optional[str] = None,
     route: Optional[str] = None,
 ) -> None:
+    from drafter.client_server.commands import get_main_event_bus
+
     get_main_event_bus().publish(
         TelemetryEvent(
             event_type=data.event_type,

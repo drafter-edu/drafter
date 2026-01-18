@@ -1,3 +1,4 @@
+from drafter.monitor.bus import EventBus
 from drafter.client_server.client_server import ClientServer
 
 MAIN_SERVER = ClientServer(custom_name="MAIN_SERVER")
@@ -21,3 +22,12 @@ def get_main_server() -> ClientServer:
     :return: The main server
     """
     return MAIN_SERVER
+
+
+def get_main_event_bus() -> EventBus:
+    """
+    Get the main event bus.
+
+    :return: The main event bus.
+    """
+    return get_main_server().event_bus

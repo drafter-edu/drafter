@@ -89,6 +89,7 @@
     -   [ ] Increasingly feels like the EventBus should just be part of the ClientServer.
     -   [ ] When you import drafter, a default MAIN_SERVER is still created (unless an environment variable is set to disable it). But you could also create additional ClientServer instances if you want, and adjust the "default" MAIN_SERVER.
 -   [ ] ShadowDom for the entire page content, to prevent CSS conflicts when embedding Drafter into an existing page
+-   [ ] Test that we can create multiple servers on the same page without conflicts, and that they maintain separate state and event buses
 
 Pie in the sky:
 

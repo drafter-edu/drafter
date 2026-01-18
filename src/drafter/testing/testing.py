@@ -91,6 +91,7 @@ class BakeryTests:
             try:
                 self._emit_test_event(BakeryTestCase(args, kwargs, result, line, code))
             except Exception as e:
+                # TODO: Do something better here
                 print(f"Error emitting test event: {e}")
             return result
 

@@ -6,6 +6,7 @@ from drafter.client_server.context import Scope
 from drafter.client_server.errors import VisitError
 from drafter.data.channel import Message
 from drafter.history.state import SiteState
+from drafter.monitor.bus import EventBus
 from drafter.monitor.events.config import ResetServerEvent, UpdatedConfigurationEvent
 from drafter.monitor.events.errors import DrafterError
 from drafter.monitor.events.request import (
@@ -15,7 +16,6 @@ from drafter.monitor.events.request import (
 )
 from drafter.monitor.events.routes import RouteAddedEvent
 from drafter.monitor.events.state import UpdatedStateEvent
-from drafter.monitor.monitor import Monitor
 from drafter.payloads.kinds.error_page import ErrorPage, SimpleErrorPage
 from drafter.payloads.payloads import ResponsePayload
 from drafter.data.request import Request
@@ -75,10 +75,10 @@ class ClientServer:
 
     def __init__(self, custom_name: str) -> None:
         self.custom_name = custom_name
+        self.event_bus = EventBus()
         self.site = Site()
         self.router = Router()
         self.state = SiteState()
-        self.monitor = Monitor()
         self._default_configuration = ClientServerConfiguration()
         self.response_count = 0
 
@@ -94,7 +94,7 @@ class ClientServer:
         self.router.reset()
         # TODO: Should this also copy the default -> current configurations?
         self.site.reset()
-        self.monitor.reset()
+        # self.monitor.reset()
         self.response_count = 0
         self.requests.reset()
         log_data(
@@ -652,7 +652,8 @@ class ClientServer:
         :param handler: The handler function to register.
         :return: None
         """
-        self.monitor.register_listener(handler)
+        # self.monitor.register_listener(handler)
+        self.event_bus.subscribe("*", handler)
 
     def get_default_configuration(self) -> ClientServerConfiguration:
         """

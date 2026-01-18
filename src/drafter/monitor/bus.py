@@ -78,9 +78,12 @@ class EventBus:
         """
         subscription = Subscription(topic, handler, filter, once)
         self.subscribers.append(subscription)
-        for event in self.unprocessed_events:
-            self.process_event(event, subscription)
         return subscription
+
+    def process_unprocessed_events(self):
+        for subscription in self.subscribers:
+            for event in self.unprocessed_events:
+                self.process_event(event, subscription)
 
     def unsubscribe(self, subscription: Subscription) -> None:
         """
@@ -90,33 +93,3 @@ class EventBus:
         """
         if subscription in self.subscribers:
             self.subscribers.remove(subscription)
-
-
-MAIN_EVENT_BUS = EventBus()
-
-
-def get_main_event_bus() -> EventBus:
-    """
-    Get the main event bus.
-
-    :return: The main event bus.
-    """
-    return MAIN_EVENT_BUS
-
-
-def reset_main_event_bus() -> None:
-    """
-    Reset the main event bus.
-    """
-    global MAIN_EVENT_BUS
-    MAIN_EVENT_BUS = EventBus()
-
-
-def set_main_event_bus(bus: EventBus) -> None:
-    """
-    Set the main event bus.
-
-    :param bus: The event bus to set as the main event bus.
-    """
-    global MAIN_EVENT_BUS
-    MAIN_EVENT_BUS = bus
