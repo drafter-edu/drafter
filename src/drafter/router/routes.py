@@ -4,6 +4,7 @@ import io
 import json
 from typing import Union, Callable, Optional, Tuple, List, Dict, Any
 from dataclasses import dataclass
+from drafter.config.client_server import ClientServerConfiguration
 from drafter.data.files import DrafterBinaryFile, DrafterTextFile
 from drafter.helpers.dates import try_convert_datetime
 from drafter.monitor.audit import log_error, log_warning
@@ -91,6 +92,7 @@ class Router:
         self,
         request: Request,
         current_state: SiteState,
+        configuration: ClientServerConfiguration,
     ) -> Tuple[List[Any], Dict[str, Any], str]:
         """
         Prepares the arguments and keyword arguments for the route function based on the request.

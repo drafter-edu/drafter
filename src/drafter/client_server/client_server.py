@@ -1,11 +1,12 @@
 from dataclasses import dataclass
-from typing import Any, Optional, List, Tuple, Union, Dict
+from typing import Any, Literal, Optional, List, Tuple, Union, Dict
 import time
 
 from drafter.client_server.context import Scope
 from drafter.client_server.errors import VisitError
 from drafter.data.channel import Message
 from drafter.history.state import SiteState
+from drafter.monitor.events.config import ResetServerEvent, UpdatedConfigurationEvent
 from drafter.monitor.events.errors import DrafterError
 from drafter.monitor.events.request import (
     RequestEvent,
@@ -30,11 +31,30 @@ from drafter.site.site import Site
 from drafter.config.client_server import ClientServerConfiguration
 
 
+ServerPhases = Union[
+    Literal["initialization"],
+    Literal["initialized"],
+    Literal["starting"],
+    Literal["rendering"],
+    Literal["started"],
+    Literal["running"],
+    Literal["idle"],
+]
+
+
 @dataclass
 class ClientServer:
     """
     The ClientServer is responsible for handling requests from the BridgeClient,
     routing them to the appropriate functions, and returning responses.
+
+    The Server can be in one of the following phases:
+    - Initialization: During the initial ClientServer constructor call
+    - Initalized: After the constructor has completed, but before the `start` method is called
+    - Starting: During the execution of the `start` method
+    - Started: After the `start` method has completed, but before the first request is processed
+    - Running: After the first request is processed, and the server is fully operational
+    - Idle: When the server is not processing a request, but is still running and can receive requests. This is the default state of the server after it has started and is waiting for requests.
 
     TODO: Ability to override ErrorPage rendering with custom error pages.
 
@@ -49,7 +69,9 @@ class ClientServer:
 
     custom_name: str
     state: SiteState
-    configuration: ClientServerConfiguration
+    _default_configuration: ClientServerConfiguration
+    phase: ServerPhases = "initialization"
+    started: bool = False
 
     def __init__(self, custom_name: str) -> None:
         self.custom_name = custom_name
@@ -57,11 +79,12 @@ class ClientServer:
         self.router = Router()
         self.state = SiteState()
         self.monitor = Monitor()
-        self.configuration = ClientServerConfiguration()
+        self._default_configuration = ClientServerConfiguration()
         self.response_count = 0
 
         self.requests = Scope()
         self.start_time = 0.0
+        self.phase = "initialized"
 
     def reset(self) -> None:
         """
@@ -69,35 +92,81 @@ class ClientServer:
         """
         self.state.reset()
         self.router.reset()
+        # TODO: Should this also copy the default -> current configurations?
         self.site.reset()
         self.monitor.reset()
         self.response_count = 0
         self.requests.reset()
-        log_info(
-            "server.reset",
-            "Resetting ClientServer to initial state",
+        log_data(
+            ResetServerEvent(),
             "client_server.reset",
-            f"Server name: {self.custom_name}",
         )
+        # log_info(
+        #     "server.reset",
+        #     "Resetting ClientServer to initial state",
+        #     "client_server.reset",
+        #     f"Server name: {self.custom_name}",
+        # )
 
-    def process_configuration(self):
-        self.site.title = self.configuration.site_title
-        self.site.additional_css = self.configuration.additional_css_content
-        self.site.additional_style = self.configuration.additional_style_content
-        self.site.additional_header = self.configuration.additional_header_content
-        self.site.in_debug_mode = self.configuration.in_debug_mode
+    def process_static_configuration(self, command_line_arguments=None):
+        """
+        Processes static configuration from various sources and merges them together.
+
+        The configuration is determined by merging the following sources together, in order of precedence (later items override earlier ones):
+        1. Defaults defined in the code
+        2. Environment variables
+        3. Command line arguments
+        4. A configuration file (provided by either 1. the environment variables, or 2. command line arguments)
+
+        The resulting merged configuration becomes the default configuration for the server.
+
+        :param command_line_arguments: The command line arguments to process for configuration.
+        """
+        # TODO: Finish this
+
+    def process_dynamic_configuration(self):
+        """
+        Copies the default configuration to the site's current configuration.
+        These will be separate objects, so that changes to the current configuration during runtime
+        do not affect the default configuration.
+
+        Note that this should only be called during server startup. Calling
+        this subsequently will not modify the actively running site in any immediately visible way.
+        """
+        self.site.set_configuration(self.get_default_configuration())
+
+    def reconfigure(self, update_default: bool = False, **kwargs):
+        """
+        Updates the server configuration with new values.
+
+        :param update_default: If True, also updates the default configuration with the new value.
+        :param kwargs: The configuration keys and their new values to update.
+        """
+        for key, value in kwargs.items():
+            self.site.update_configuration(key, value)
+            if update_default:
+                self._default_configuration.update_configuration(key, value)
+            log_data(
+                UpdatedConfigurationEvent(
+                    key=key, value=value, update_default=update_default
+                ),
+                "client_server.reconfigure",
+                request_id=self.get_current_request_id(),
+            )
+
+    def get_config_setting(self, key: str):
+        # TODO: Check for non-existent keys and raise an error
+        if self.started:
+            return getattr(self.site._configuration, key)
+        else:
+            return getattr(self._default_configuration, key)
 
     def change_debug_mode(self):
         """
         Toggles the debug mode of the website.
         """
-        self.configuration.in_debug_mode = not self.configuration.in_debug_mode
-        log_info(
-            "site.debug_mode_changed",
-            "Toggled debug mode",
-            "client_server.change_debug_mode",
-            f"New debug mode: {self.configuration.in_debug_mode}",
-        )
+        in_debug_mode = self.get_config_setting("in_debug_mode")
+        self.reconfigure(in_debug_mode=not in_debug_mode)
 
     def start(self, initial_state: Any = None) -> None:
         """
@@ -105,6 +174,7 @@ class ClientServer:
 
         :param initial_state: The initial state to set for the server.
         """
+        self.phase = "starting"
         if initial_state is not None:
             try:
                 self.state.update(initial_state)
@@ -128,9 +198,11 @@ class ClientServer:
             lambda state: self.default_about_function(state),
         )
         # All done!
+        self.phase = "started"
+        self.started = True
         log_info(
             "server.started",
-            "Starting ClientServer",
+            "Started ClientServer",
             "client_server.start",
             f"Server name: {self.custom_name}",
         )
@@ -170,11 +242,13 @@ class ClientServer:
             )
         return route_func
 
-    def execute_route(self, route_func, request: Request) -> tuple[Any, str]:
+    def execute_route(
+        self, route_func, request: Request, configuration: ClientServerConfiguration
+    ) -> tuple[Any, str]:
         # Call the route function to get the payload
         try:
             args, kwargs, representation = self.router.prepare_arguments(
-                request, self.state.current
+                request, self.state.current, configuration
             )
             log_data(
                 RequestParseEvent(
@@ -213,7 +287,9 @@ class ClientServer:
                 500,
             )
 
-    def verify_payload(self, request: Request, payload: Any):
+    def verify_payload(
+        self, request: Request, payload: Any, configuration: ClientServerConfiguration
+    ):
         # Check that it's a valid payload type
         possible_incorrect_type = verify_response_payload_type(request, payload)
         if possible_incorrect_type is not None:
@@ -229,7 +305,7 @@ class ClientServer:
             )
         # Payload specific verification
         try:
-            payload.verify(self.router, self.state, self.configuration, request)
+            payload.verify(self.router, self.state, configuration, request)
         except Exception as e:
             raise VisitError(
                 log_error(
@@ -244,11 +320,14 @@ class ClientServer:
             )
 
     def render_payload(
-        self, request: Request, payload: ResponsePayload
+        self,
+        request: Request,
+        payload: ResponsePayload,
+        configuration: ClientServerConfiguration,
     ) -> Optional[str]:
         # Render the payload
         try:
-            return payload.render(self.state, self.configuration)
+            return payload.render(self.state, configuration)
         except Exception as e:
             raise VisitError(
                 log_error(
@@ -263,11 +342,15 @@ class ClientServer:
             )
 
     def format_payload(
-        self, request: Request, representation: str, payload: ResponsePayload
+        self,
+        request: Request,
+        representation: str,
+        payload: ResponsePayload,
+        configuration: ClientServerConfiguration,
     ) -> str:
         # Format the payload for display in the history panel
         try:
-            return payload.format(self.state, representation, self.configuration)
+            return payload.format(self.state, representation, configuration)
         except Exception as e:
             raise VisitError(
                 log_error(
@@ -281,7 +364,12 @@ class ClientServer:
                 509,
             )
 
-    def handle_state_updates(self, request: Request, payload: ResponsePayload) -> None:
+    def handle_state_updates(
+        self,
+        request: Request,
+        payload: ResponsePayload,
+        configuration: ClientServerConfiguration,
+    ) -> None:
         is_updated, updated_state = payload.get_state_updates()
         if is_updated:
             # Check that the state update will be valid
@@ -333,6 +421,7 @@ class ClientServer:
         :return: The result of the route function.
         """
         self.start_timer()
+        self.phase = "running"
         log_data(
             RequestEvent.from_request(request),
             "client_server.visit",
@@ -341,44 +430,52 @@ class ClientServer:
         )
         with self.requests.push(request):
             try:
+                configuration = self.get_current_configuration()
                 route_func = self.get_route(request)
-                payload, representation = self.execute_route(route_func, request)
-                self.verify_payload(request, payload)
-                body = self.render_payload(request, payload)
-                formatted_body = self.format_payload(request, representation, payload)
-                self.handle_state_updates(request, payload)
-                messages = self.get_messages(request, payload)
+                payload, representation = self.execute_route(
+                    route_func, request, configuration
+                )
+                self.verify_payload(request, payload, configuration)
+                body = self.render_payload(request, payload, configuration)
+                formatted_body = self.format_payload(
+                    request, representation, payload, configuration
+                )
+                self.handle_state_updates(request, payload, configuration)
+                messages = self.get_messages(request, payload, configuration)
             except VisitError as ve:
                 return self.make_error_response(
                     request, ve.error, status_code=ve.status_code
                 )
 
-        # Return successfully
-        try:
-            response = self.make_success_response(
-                request.id, request.url, body, payload, messages
-            )
-        except Exception as e:
-            return self.make_error_response(
-                request,
-                log_error(
-                    "response.creation_failed",
-                    f"Failed to create success response for URL {request.url}: {e}",
-                    "client_server.visit",
-                    f"Request: {repr(request)}",
-                    route=request.url,
-                    exception=e,
+            # Return successfully
+            try:
+                response = self.make_success_response(
+                    request.id, request.url, body, payload, messages
+                )
+            except Exception as e:
+                return self.make_error_response(
+                    request,
+                    log_error(
+                        "response.creation_failed",
+                        f"Failed to create success response for URL {request.url}: {e}",
+                        "client_server.visit",
+                        f"Request: {repr(request)}",
+                        route=request.url,
+                        exception=e,
+                    ),
+                    504,
+                )
+            log_data(
+                ResponseEvent.from_response(
+                    response, formatted_body, self.check_timer()
                 ),
-                504,
+                "client_server.visit",
+                route=request.url,
+                request_id=request.id,
+                response_id=response.id,
             )
-        log_data(
-            ResponseEvent.from_response(response, formatted_body, self.check_timer()),
-            "client_server.visit",
-            route=request.url,
-            request_id=request.id,
-            response_id=response.id,
-        )
-        return response
+            self.phase = "idle"
+            return response
 
     def make_success_response(
         self,
@@ -409,9 +506,14 @@ class ClientServer:
 
         return response
 
-    def get_messages(self, request: Request, payload: ResponsePayload) -> list[Message]:
+    def get_messages(
+        self,
+        request: Request,
+        payload: ResponsePayload,
+        configuration: ClientServerConfiguration,
+    ) -> list[Message]:
         try:
-            messages = payload.get_messages(self.state, self.configuration)
+            messages = payload.get_messages(self.state, configuration)
             if messages is None:
                 messages = []
         except Exception as e:
@@ -430,7 +532,10 @@ class ClientServer:
         return messages
 
     def make_error_response(
-        self, request: Request, error: DrafterError, status_code: int = 500
+        self,
+        request: Request,
+        error: DrafterError,
+        status_code: int = 500,
     ) -> Response:
         """
         Makes an error response for the server with the given message and status code.
@@ -440,8 +545,9 @@ class ClientServer:
         :return: The error response from the server.
         """
         try:
+            configuration = self.get_current_configuration()
             error_payload = ErrorPage(error)
-            body = error_payload.render(self.state, self.configuration)
+            body = error_payload.render(self.state, configuration)
         except Exception as e:
             error_page_error = log_error(
                 "error_page.creation_failed",
@@ -458,7 +564,7 @@ class ClientServer:
                 payload=simpler_error_payload,
                 url=request.url,
                 status_code=500,
-                body=simpler_error_payload.render(self.state, self.configuration),
+                body=simpler_error_payload.render(self.state, None),
                 message=error_page_error.message,
                 errors=[error, error_page_error],
             )
@@ -506,12 +612,13 @@ class ClientServer:
 
         :return: The rendered HTML of the initial site.
         """
+        self.phase = "rendering"
         try:
-            self.process_configuration()
+            self.process_dynamic_configuration()
         except Exception as e:
             error = log_error(
                 "site.processing_failed",
-                "Failed to process site configuration",
+                "Failed to process default site configuration",
                 "client_server.render_site",
                 f"Original exception: {e}",
                 exception=e,
@@ -546,3 +653,28 @@ class ClientServer:
         :return: None
         """
         self.monitor.register_listener(handler)
+
+    def get_default_configuration(self) -> ClientServerConfiguration:
+        """
+        Returns the default configuration for the client server.
+
+        :return: The default ClientServerConfiguration instance.
+        """
+        return self._default_configuration.copy()
+
+    def get_current_configuration(self) -> ClientServerConfiguration:
+        """
+        Returns the current configuration for the client server.
+
+        :return: The current ClientServerConfiguration instance.
+        """
+        return self.site.get_configuration()
+
+    def get_current_request_id(self) -> Optional[int]:
+        """
+        Returns the ID of the current request being processed, if any.
+
+        :return: The current request ID, or None if no request is being processed.
+        """
+        current_request = self.requests.get_current()
+        return current_request.id if current_request is not None else None

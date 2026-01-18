@@ -6,6 +6,7 @@ class InitialSiteData:
     site_html: str
     site_title: str
     additional_js: list[str] = field(default_factory=list)
+    additional_scripts: list[str] = field(default_factory=list)
     additional_css: list[str] = field(default_factory=list)
     additional_style: list[str] = field(default_factory=list)
     additional_header: list[str] = field(default_factory=list)

@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+from drafter.config.client_server import ClientServerConfiguration
 from drafter.styling.themes import get_theme_system
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site_information import SiteInformation
@@ -51,31 +52,31 @@ SITE_HTML_TEMPLATE = f"""
 
 @dataclass
 class Site:
-    title: str = "Drafter Application"
-    information: Optional[SiteInformation] = None
-    theme: str = "default"
-    in_debug_mode: bool = True
-    # Additional linked CSS
-    additional_css: List[str] = field(default_factory=list)
-    # Additional raw style content
-    additional_style: List[str] = field(default_factory=list)
-    # Additional linked JavaScript
-    additional_js: List[str] = field(default_factory=list)
-    # Additional raw header content
-    additional_header: List[str] = field(default_factory=list)
+    _configuration: Optional[ClientServerConfiguration] = None
+
+    def set_configuration(self, configuration: ClientServerConfiguration):
+        self._configuration = configuration
+
+    def get_configuration(self) -> ClientServerConfiguration:
+        if self._configuration is None:
+            # TODO: SiteNotConfiguredError
+            raise ValueError("Site configuration has not been set.")
+        return self._configuration.copy()
+
+    def update_configuration(self, key: str, value):
+        if self._configuration is None:
+            # TODO: SiteNotConfiguredError
+            raise ValueError("Site configuration has not been set.")
+        self._configuration.update_configuration(key, value)
 
     def reset(self):
-        self.information = None
-        self.additional_css.clear()
-        self.additional_style.clear()
-        self.additional_js.clear()
-        self.additional_header.clear()
+        self._configuration = None
 
-    def _get_theme_headers(self) -> tuple[list[str], list[str]]:
+    def _get_theme_headers(self, configuration) -> tuple[list[str], list[str]]:
         theme_system = get_theme_system()
-        if not theme_system.is_valid_theme(self.theme):
-            raise ValueError(theme_system.suggest_mistake(self.theme))
-        theme = theme_system.get_theme(self.theme)
+        if not theme_system.is_valid_theme(configuration.theme):
+            raise ValueError(theme_system.suggest_mistake(configuration.theme))
+        theme = theme_system.get_theme(configuration.theme)
         return list(theme.css_paths), list(theme.js_paths)
 
     def render(self) -> InitialSiteData:
@@ -83,56 +84,37 @@ class Site:
         Renders the site HTML structure.
         """
         site_html = SITE_HTML_TEMPLATE
+        configuration = self.get_configuration()
 
-        additional_css, additional_js = self._get_theme_headers()
-        additional_css.insert(0, GLOBAL_DRAFTER_CSS_PATHS[self.in_debug_mode])
+        additional_css, additional_js = self._get_theme_headers(configuration)
+        additional_css.insert(0, GLOBAL_DRAFTER_CSS_PATHS[configuration.in_debug_mode])
         additional_css.extend(BUILT_IN_ADDITIONAL_CSS_PATHS)
-        additional_headers, additional_styles = [], []
+        additional_headers, additional_styles, additional_scripts = [], [], []
 
         # Add CSS if present
-        if self.additional_css:
-            additional_css.extend(self.additional_css)
-
+        if configuration.additional_css_content:
+            additional_css.extend(configuration.additional_css_content)
         # Add raw style content if present
-        if self.additional_style:
-            additional_styles.extend(self.additional_style)
+        if configuration.additional_style_content:
+            additional_styles.extend(configuration.additional_style_content)
 
         # Add header content if present
-        if self.additional_header:
-            additional_headers.extend(self.additional_header)
+        if configuration.additional_header_content:
+            additional_headers.extend(configuration.additional_header_content)
 
         # Add JavaScript if present
-        if self.additional_js:
-            additional_js.extend(self.additional_js)
+        if configuration.additional_js_content:
+            additional_js.extend(configuration.additional_js_content)
+
+        if configuration.additional_script_content:
+            additional_scripts.extend(configuration.additional_script_content)
 
         return InitialSiteData(
             site_html=site_html,
-            site_title=self.title,
+            site_title=configuration.site_title,
             additional_css=additional_css,
             additional_js=additional_js,
             additional_header=additional_headers,
             additional_style=additional_styles,
+            additional_scripts=additional_scripts,
         )
-
-    def update_information(
-        self,
-        author: str,
-        description: str,
-        sources: List[str],
-        planning: List[str],
-        links: List[str],
-    ):
-        if self.information is None:
-            self.information = SiteInformation(
-                author=author,
-                description=description,
-                sources=sources,
-                planning=planning,
-                links=links,
-            )
-        else:
-            self.information.author = author
-            self.information.description = description
-            self.information.sources = sources
-            self.information.planning = planning
-            self.information.links = links

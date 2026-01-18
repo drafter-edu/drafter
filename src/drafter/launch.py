@@ -42,7 +42,7 @@ def start_server(
         client_bridge.setup_navigation(handle_visit)
 
         def change_debug_mode():
-            server.configuration.in_debug_mode = not server.configuration.in_debug_mode
+            server.change_debug_mode()
             rerender_site()
             handle_visit(initial_request)
 

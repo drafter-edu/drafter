@@ -14,7 +14,7 @@ def hide_debug_information(server: Optional[ClientServer] = None):
     """
     if server is None:
         server = get_main_server()
-    server.configuration.in_debug_mode = False
+    server.reconfigure(in_debug_mode=False)
 
 
 def show_debug_information(server: Optional[ClientServer] = None):
@@ -25,7 +25,7 @@ def show_debug_information(server: Optional[ClientServer] = None):
     """
     if server is None:
         server = get_main_server()
-    server.configuration.in_debug_mode = True
+    server.reconfigure(in_debug_mode=True)
 
 
 def set_website_title(title: str, server: Optional[ClientServer] = None):
@@ -37,7 +37,7 @@ def set_website_title(title: str, server: Optional[ClientServer] = None):
     """
     if server is None:
         server = get_main_server()
-    server.configuration.site_title = title
+    server.reconfigure(site_title=title)
 
 
 def set_website_framed(framed: bool, server: Optional[ClientServer] = None):
@@ -50,7 +50,7 @@ def set_website_framed(framed: bool, server: Optional[ClientServer] = None):
     """
     if server is None:
         server = get_main_server()
-    server.configuration.framed = framed
+    server.reconfigure(framed=framed)
 
 
 def set_site_information(
@@ -72,7 +72,13 @@ def set_site_information(
     """
     if server is None:
         server = get_main_server()
-    server.site.update_information(author, description, sources, planning, links)
+    server.reconfigure(
+        author=author,
+        description=description,
+        sources=sources,
+        planning=planning,
+        links=links,
+    )
 
 
 def get_site_information(server: Optional[ClientServer] = None):
@@ -82,7 +88,7 @@ def get_site_information(server: Optional[ClientServer] = None):
     """
     if server is None:
         server = get_main_server()
-    return server.site.information
+    return server.get_config_setting("information")
 
 
 def set_website_style(style: Optional[str], server: Optional[ClientServer] = None):
@@ -96,7 +102,7 @@ def set_website_style(style: Optional[str], server: Optional[ClientServer] = Non
         server = get_main_server()
     if style is None:
         style = "none"
-    server.configuration.theme = style
+    server.reconfigure(theme=style)
 
 
 def set_website_theme(theme: Optional[str], server: Optional[ClientServer] = None):
@@ -110,7 +116,7 @@ def set_website_theme(theme: Optional[str], server: Optional[ClientServer] = Non
         server = get_main_server()
     if theme is None:
         theme = "none"
-    server.configuration.theme = theme
+    server.reconfigure(theme=theme)
 
 
 def add_website_header(header: str, server: Optional[ClientServer] = None):
@@ -123,7 +129,7 @@ def add_website_header(header: str, server: Optional[ClientServer] = None):
     """
     if server is None:
         server = get_main_server()
-    server.configuration.additional_header_content.append(header)
+    server.reconfigure(additional_header_content=header)
 
 
 def add_website_css(
@@ -144,10 +150,10 @@ def add_website_css(
         server = get_main_server()
     if css is None:
         # Treat selector as raw CSS content
-        server.configuration.additional_style_content.append(selector)
+        server.reconfigure(additional_style_content=selector)
     else:
         # Create a CSS rule from selector and content
-        server.configuration.additional_style_content.append(f"{selector} {{{css}}}\n")
+        server.reconfigure(additional_style_content=f"{selector} {{{css}}}\n")
 
 
 def deploy_site(image_folder="images", server: Optional[ClientServer] = None):
@@ -161,6 +167,3 @@ def deploy_site(image_folder="images", server: Optional[ClientServer] = None):
     hide_debug_information(server=server)
     # TODO: Implement production mode and image folder in V2
     pass
-
-
-

@@ -31,7 +31,9 @@ class ErrorPage(ResponsePayload):
         content = f"<div class='error-page'>\n"
         content += f"<pre>{body}</pre>\n"
         content += f"<div class='error-navigation'>"
-        content += f"<a data-nav='index' class='error-home-link'>Return to Index Page</a>"
+        content += (
+            f"<a data-nav='index' class='error-home-link'>Return to Index Page</a>"
+        )
         content += f"<a data-nav='--reset' class='error-home-link'>Reset State and Return to Index</a>"
         content += "</div>\n"
         content += "</div>\n"
@@ -45,5 +47,7 @@ class ErrorPage(ResponsePayload):
 class SimpleErrorPage(ResponsePayload):
     message: str
 
-    def render(self, state: SiteState, configuration: ClientServerConfiguration) -> str:
+    def render(
+        self, state: SiteState, configuration: Optional[ClientServerConfiguration]
+    ) -> str:
         return f"Error: {self.message}"

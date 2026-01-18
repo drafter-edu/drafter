@@ -385,3 +385,39 @@ Here are the places that we can show errors to the user:
 -   The debug panel, where we can show error events.
 -   The browser console, where we can log errors for debugging purposes. This is generally for error details that are more serious and might indicate a bug in the framework itself, rather than just an error in the user's code.
 -   An `alert` popup, which can be used for critical errors that require immediate attention. This should be used sparingly, as it can be disruptive to the user experience.
+
+### Configuration
+
+The configuration settings can come from a few different places; here they are in order of precedence (dynamic will override static, and highest will override lower):
+
+-   "Static" configs:
+    1.  Defaults defined in the code
+    2.  Environment variables
+    3.  Command line arguments
+    4.  A configuration file (provided by either 1. the environment variables, or 2. command line arguments)
+-   "Dynamic" configs:
+    1.  Imperative configuration functions in the code (e.g., `set_site_title()`)
+    2.  Arguments passed to the `start_server` function
+
+At runtime, there are two main sources of configuration information:
+
+-   The "current" configuration, which is stored in the `Site`
+-   The "default" configuration, which is stored in the `ClientServer`'s `configuration` field.
+
+Here's the configuration timeline:
+
+1. When the Drafter module first boots up, its static configuration is determined by merging those config sources together. This becomes the **default configuration** and is stored in the `ClientServer`'s `configuration` field. The **current configuration** will be `None` for now.
+2. Further dynamic configs before the server starts will modify the default configuration.
+3. When the `ClientServer` is rendered, the default configuration is copied to become the **current configuration** and stored in the `Site`, which is what is actually used to render the page and control the behavior of the site.
+4. While the `ClientServer` is running, any dynamic configs will modify the current configuration. A boolean keyword parameter `update_default` can be provided to also update the default configuration at the same time if desired.
+5. The user can `reset` the site, which will copy the default configuration back to the current configuration, resetting dynamic changes made AFTER the server started.
+
+The `ClientServerConfiguration` dataclass is meant to be isomorphic between the **default** and **current** configurations, so that they can be easily copied back and forth.
+
+Separate from this are the interfaces for the various configuration systems, which must map to the `ClientServerConfiguration` in order to actually affect the behavior of the system. For example, environment variables and command line arguments might be very different from the arguments provided to the `start_server` function, but they all need to be translated into the appropriate fields in the `ClientServerConfiguration` dataclass.
+
+The `server.default_configuration` and `server.site.configuration` are not meant to be accessed directly.
+In particular, this is because simply modifying their fields' contents will NOT trigger changes in the
+deployed site.
+You have to call the `reconfigure` method on the `ClientServer` in order to actually trigger any changes.
+Interested parts of the `ClientBridge` can subscribe to configuration change events on the `EventBus` in order to know when to update things like the page title, favicon, etc. whenever the configuration changes.
