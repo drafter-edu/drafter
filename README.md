@@ -310,16 +310,65 @@ File handling: When a file gets uploaded to the server, it will get stored in me
 5.  The True Page sets up the WebSocket connection back to the App Server
 6.  The True Page sets up the Skulpt/Pyodide environment
 7.  The True Page executes the student's code
-8.  Drafter is imported; the `MAIN_SERVER` and `MAIN_EVENT_BUS` are created.
-9.  The `launch.py` script creates the `ClientBridge`
-10. The Server renders the `Site`, creating the True page structure
-11. The ClientBridge loads the rendered site and sets up the rest of its content
-12. The ClientBridge sets up the Debug Menu.
-13. The ClientBridge registers itself with the monitor to handle telemetry
-14. The Server's monitor starts listening for events
-15. The server is started
-16. The ClientBridge sends an initial request for the `index` page (or whatever page is specified in the URL query parameters)
-17. The `index` route is executed to generate the initial page content
+8.  Drafter is imported; the `MAIN_SERVER` (`ClientServer`) and `MAIN_EVENT_BUS` (`EventBus`)are created.
+9.  The rest of the students' code is executed, adding routes to the `MAIN_SERVER` as it goes, until it reaches the `start_server` call.
+10. The `launch.py` script creates the `ClientBridge`
+11. The Site is (re-)rendered:
+    1.  The ClientServer creates the True page structure
+    2.  The ClientBridge loads the rendered site with interactivity
+    3.  The ClientBridge sets up the Debug Menu.
+12. The ClientBridge registers itself with the monitor to handle telemetry
+13. The ClientServer's monitor starts listening for events
+14. The ClientServer is started
+    1.  The state is updated based on the initial state.
+    2.  The router is registered with default routes
+15. The ClientServer starts handling events, starting with the initial route (defaults to `index`)
+    1.  The ClientServer is `visit`ed with the Request, and returns a `Response`
+    2.  The ClientBridge handles the response, updating the page content and attaching the new handlers.
+16. The ClientBridge sets up page-wide navigation handlers (e.g., `popstate`, `drafter-navigate`)
+17. The ClientBridge sets up a hotkey binding for the Debug Menu to be toggled on/off.
+    1.  If clicked, then the site is re-rendered (see above) and the initial route is re-visited.
+
+At that point in time, the site is considered launched. Now, whenever a navigation event occurs (e.g., via a click), the following happens:
+
+2. The `Client` prepare a new `Request` object with the relevant information (e.g., route, args, event data)
+3. The `Client` sends the `Request` to the `ClientServer` via the connection established by the `ClientBridge` (a "Visit")
+    1. The `ClientServer` gets the route function based on the request
+    2. The `ClientServer` executes the route function and generates a a `Payload`
+        1. The `ClientServer` delegates argument preparation to its `Router`
+        2. Then the `ClientServer` safely executes the route function, catching any exceptions and converting them into `ErrorPage` payloads as needed.
+    3. The `ClientServer` verifies the `Payload`
+    4. The `ClientServer` renders the `Payload` to generate the new HTML body
+    5. The `ClientSerer` formats the `Payload` to generate a string representation for logging/debugging purposes
+    6. The `ClientServer` updates its state based on the `Payload`
+    7. The `ClientServer` generates any messages that need to be sent to the `ClientBridge`
+    8. The `ClientServer` returns a successful response with the information above.
+4. The `ClientBridge` receives the `Response` from the `ClientServer`, and handles it:
+    1. The `ClientBridge` removes all the page-specific content currently in place.
+    2. The `ClientBridge` injects "Before" channel content (e.g., styles, scripts) that came with the `Response`.
+    3. The `ClientBridge` asks the `Client` to update the page
+        1. The `Client` notifies te debug panel of the new route
+        2. The `Client` updates the body content if any is given
+        3. The `Client` mounts the navigation handlers
+    4. The `ClientBridge` injects "After" channel content (e.g., styles, scripts) that came with the `Response`.
+    5. If it was a redirect route, then we handle the redirect now.
+        1. We first check to make sure we are not in a loop
+        2. We make a new request from the response
+        3. We send the request, and start over from the top, as we did before.
+
+A complicated substep is the argument preparation:
+
+1. The `Router` makes a fresh version of the arguments
+2. The `Router` preprocesses the buttons, which are labeled in a special way.
+    1. TODO: Check if this is actually still necessary?
+3. The `Router` inspects the signature of the route function
+4. The `Router` converts hidden form parameters
+5. The `Router` flattens any keyword arguments that are lists
+6. The `Router` injects the current state into the arguments if there is a `state` parameter
+7. The `Router` removes excess arguments
+8. The `Router` converts arguments to their destination types
+9. The `Router` verifies that all expected parameters are present
+10. The `Router` builds a string representation of the arguments for logging/debugging purposes
 
 ### Error Handling
 

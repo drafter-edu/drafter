@@ -2,7 +2,9 @@ from drafter.helpers.utils import is_web, seek_file_by_line
 from drafter.client_server.commands import get_main_server
 
 
-def start_server(initial_state=None, main_user_path=None, **kwargs) -> None:
+def start_server(
+    initial_state=None, main_user_path=None, server=None, **kwargs
+) -> None:
     """
     Starts the Drafter server with the given initial state.
 
@@ -16,7 +18,7 @@ def start_server(initial_state=None, main_user_path=None, **kwargs) -> None:
         client_bridge = ClientBridge()
         client_bridge.connect_to_event_bus()
 
-        server = get_main_server()
+        server = server or get_main_server()
 
         def rerender_site():
             initial_site_data = server.render_site()

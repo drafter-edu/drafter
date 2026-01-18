@@ -85,6 +85,9 @@
 -   [ ] Properly handle back/forward arguments in the URL, and make sure that the state is correctly restored when navigating back and forward
 -   [ ] Debug menu: pagination of page history, for when it gets very long.
 -   [ ] Can we scope out the MAIN_SERVER and MAIN_EVENT_BUS to be instance-level instead of global? That way we could support multiple independent Drafter instances on the same page, and it would be easier to reason about the state and events for each instance. The EventBus could simply be tied to a specific ClientServer+ClientBridge pair.
+    -   [ ] Increasingly feels like the EventBus should just be part of the ClientServer.
+    -   [ ] When you import drafter, a default MAIN_SERVER is still created (unless an environment variable is set to disable it). But you could also create additional ClientServer instances if you want, and adjust the "default" MAIN_SERVER.
+-   [ ] ShadowDom for the entire page content, to prevent CSS conflicts when embedding Drafter into an existing page
 
 Pie in the sky:
 

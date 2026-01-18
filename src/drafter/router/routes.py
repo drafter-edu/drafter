@@ -52,7 +52,7 @@ class Router:
     def add_route(self, url: str, func: Callable) -> None:
         """
         Adds a new route to the server.
-        
+
         TODO: Handle ignored parameters
 
         :param url: The URL to add the route to.
@@ -60,7 +60,7 @@ class Router:
         """
         self.routes[url] = func
         self.signatures[url] = get_signature(func)
-        
+
     def register_default_routes(self, reset_function, about_function) -> None:
         """
         Registers default routes for the router.
@@ -73,7 +73,7 @@ class Router:
             self.add_route("--reset", reset_function)
         if not self.has_route("--about"):
             self.add_route("--about", about_function)
-            
+
     def reset(self) -> None:
         """
         Allows the router to reset itself. Does not remove routes
@@ -108,7 +108,6 @@ class Router:
         args, kwargs = self.convert_argument_types(signature, args, kwargs)
         self.verify_expected_parameters(request, signature, kwargs)
         representation = self.build_argument_representation(signature, args, kwargs)
-        representation = f"{signature.function_name}({representation})"
         return args, kwargs, representation
 
     def build_argument_representation(
@@ -117,7 +116,7 @@ class Router:
         args: List[Any],
         kwargs: Dict[str, Any],
     ) -> str:
-        return ", ".join(
+        arguments = ", ".join(
             [safe_repr(arg, escape=False) for arg in args]
             + [
                 f"{key}={safe_repr(value, escape=False)}"
@@ -129,6 +128,7 @@ class Router:
                 )
             ]
         )
+        return f"{signature.function_name}({arguments})"
 
     def verify_expected_parameters(
         self,
@@ -188,9 +188,11 @@ class Router:
         # If already correct type, return as-is
         if isinstance(value, expected_type):
             return value
-        
+
         # Let our custom handlers have a try
-        success, potential_conversion = self.try_special_conversion(value, expected_type)
+        success, potential_conversion = self.try_special_conversion(
+            value, expected_type
+        )
         if success:
             return potential_conversion
 
@@ -208,7 +210,9 @@ class Router:
                 f"Could not convert {parameter} ({value!r}) from {from_name} to {to_name}"
             ) from e
 
-    def try_file_upload_conversion(self, value: Any, target_type: Any) -> tuple[bool, Any]:
+    def try_file_upload_conversion(
+        self, value: Any, target_type: Any
+    ) -> tuple[bool, Any]:
         """
         Attempts to convert file upload data to the specified target type.
         File uploads come from the client as dicts with filename, content, type, size.
@@ -224,7 +228,7 @@ class Router:
         # Decode the base64 content
         content = value.get("content", b"")
         filename = value.get("filename", "unknown")
-        
+
         # Convert based on target type
         if target_type is bytes:
             return True, content
@@ -286,7 +290,7 @@ class Router:
 
         # If no special conversion, return the dict
         return False, value
-    
+
     def try_special_conversion(self, value: Any, target_type: Any) -> tuple[bool, Any]:
         """
         Attempts special conversions for certain target types.
@@ -325,6 +329,7 @@ class Router:
         kwargs: Dict[str, Any],
     ) -> None:
         """Trims excess arguments from the args and kwargs lists based on the function signature."""
+        # TODO: Allow the target route function to quiet this warning
         # Check if there are too many arguments
         if len(signature.expected_parameters) < len(args) + len(kwargs):
             log_warning(
@@ -361,6 +366,7 @@ class Router:
         kwargs: Dict[str, Any],
         current_state: SiteState,
     ) -> None:
+        # TODO: Should this look for state elsewhere in the argument list?
         if (
             signature.expected_parameters
             and signature.expected_parameters[0] == "state"

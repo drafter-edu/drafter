@@ -101,7 +101,6 @@ class Renderer:
                             self.depth = 0
                         self.render(child)
                         if not plan.collapse_whitespace:
-                            print("Printing a new line")
                             self.new_line()
                         else:
                             self.depth = old_depth
