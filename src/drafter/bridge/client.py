@@ -103,18 +103,21 @@ class Client:
             print(f"[Drafter Client] Failed to set up debug menu because of {e}")
             raise e
 
-    def handle_event(self, event: dict):
+    def handle_event(self, event: dict) -> bool:
         debug_log("client.handle_event", event)
         if self.debug_panel:
             # print("Attempting to handle event in debug panel:", event)
             try:
-                self.debug_panel.handleEvent(event)
+                handled = self.debug_panel.handleEvent(event)
+                return handled
             except Exception as e:
                 print(f"[Drafter Client] Failed to handle event {event} because of {e}")
                 raise e
         else:
             print(f"[Drafter Client] No debug panel to handle event {event}")
             raise RuntimeError("No debug panel to handle event.")
+        # TODO: Return false instead of raising error
+        return False
 
     def make_redirect_request_from_response(self, response: Response) -> Request:
         debug_log("client.make_redirect_request_from_response", response)
@@ -472,7 +475,7 @@ def debug_log(event_name: str, *args: Any) -> None:
 def console_log(event) -> None:
     try:
         repr_str = repr(event)
-        print(f"[Drafter/Internal] {repr_str}")
+        print(f"[Drafter (Unhandled)] {repr_str}")
     except Exception as e:
         print(
             f"[Drafter/Internal] Failed to log event because of {e}\nOriginal Event:",

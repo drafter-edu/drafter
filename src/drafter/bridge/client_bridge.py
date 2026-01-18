@@ -112,7 +112,9 @@ class ClientBridge:
         return self.client.make_initial_request()
 
     def handle_telemetry_event(self, event: TelemetryEvent) -> None:
-        self.client.handle_event(event.to_json())
+        handled = self.client.handle_event(event.to_json())
+        if not handled:
+            console_log(event)
         # print("Telemetry Event:", event.event_type, event.data)
         # debug_info = document.getElementById(DRAFTER_TAG_IDS["DEBUG"])
         # if debug_info:

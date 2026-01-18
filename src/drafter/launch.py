@@ -29,7 +29,7 @@ def start_server(
         rerender_site()
 
         # TODO: Instead of always logging, only log if we didn't process it in the handle_telemetry_event.
-        server.register_monitor_listener(client_bridge.console_log_events)
+        # server.register_monitor_listener(client_bridge.console_log_events)
         server.register_monitor_listener(client_bridge.handle_telemetry_event)
         server.event_bus.process_unprocessed_events()
         # server.monitor.listen_for_events()

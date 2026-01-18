@@ -188,8 +188,9 @@ export class DebugPanel {
         });
     }
 
-    public handleEvent(event: TelemetryEvent): void {
+    public handleEvent(event: TelemetryEvent): boolean {
         this.events.push(event);
+        let handled = true;
         switch (event.data?.event_type) {
             case "RouteAdded":
                 this.routesPanel?.renderRoute(
@@ -213,7 +214,11 @@ export class DebugPanel {
                 this.testingPanel?.renderTest(event.data);
                 this.testingPanel?.updateTestSummary();
                 break;
+            default:
+                handled = false;
+                break;
         }
         this.logPanel?.renderEvent(event);
+        return handled;
     }
 }
