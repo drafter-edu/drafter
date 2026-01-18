@@ -5,6 +5,7 @@
 -   [ ] Configuration should be smoother
 -   [x] Delete old files and old_history
 -   [ ] Debug panel: registered routes: make them links, allow the user to input text
+-   [ ] Debug panel Show current configuration
 -   [ ] Debug panel: Disable state representation option (for performance)
 -   [x] Debug panel: hot bar: button to hide/show the frame
 -   [ ] Debug panel: current state: show types, in nice table
