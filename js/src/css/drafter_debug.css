@@ -743,3 +743,9 @@ div.btlw-container img {
     color: #990000;
     font-weight: 700;
 }
+
+
+.drafter-debug-config-item-updated {
+    font-weight: bold;
+    color: #cc6600;
+}

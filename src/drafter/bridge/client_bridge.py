@@ -177,9 +177,12 @@ class ClientBridge:
             raise e
 
     def setup_events(
-        self, handle_visit: Callable[[Request], Response], handle_toggle_frame: Callable
+        self,
+        handle_visit: Callable[[Request], Response],
+        handle_toggle_frame: Callable,
+        handle_debug_mode: Callable,
     ) -> None:
-        self.client.setup_events(handle_visit, handle_toggle_frame)
+        self.client.setup_events(handle_visit, handle_toggle_frame, handle_debug_mode)
 
     def register_hotkey(self, keyCombo: str, callback: Callable[[], None]) -> None:
         self.client.register_hotkey(keyCombo, callback)

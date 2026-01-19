@@ -3,11 +3,8 @@
     - [ ] `launch.py` doesn't use the compilation pipeline correctly
 - [ ] Convert to CHANGELOG.md format and adopt python-semantic-release (or github-changelog-md)
 - [ ] Configuration should be smoother
-- [x] Delete old files and old_history
 - [ ] Debug panel: registered routes: make them links, allow the user to input text
-- [ ] Debug panel: Show current configuration
-- [ ] Debug panel: Disable state representation option (for performance)
-- [x] Debug panel: hot bar: button to hide/show the frame
+- [ ] Debug panel: Disable state representation option (for performance), especially when we're not in debug mode
 - [ ] Debug panel: current state: show types, in nice table
     - [x] Finish implementing other types
     - [x] Use better color options for background and text
@@ -22,7 +19,6 @@
     - [x] lighten font for "via"
     - [ ] Handle files, images, other media types better
     - [ ] Show in reverse order (newest at top)
-- [x] Debug panel: History: Clear old history button
 - [ ] Debug panel: Console: REPL
 - [ ] Debug panel: Download regression tests
 - [ ] Debug panel: Interactive form to help create unit tests
@@ -45,9 +41,7 @@
 - [ ] Links for error screen to help them navigate out of the error
 - [ ] Deep copy strategy for state
 - [ ] Fetch support for opening files in Skulpt
-- [x] Convert skulpt bridge to be handled via Python code rather than JS code, with a proper js bridge library
 - [ ] Make sure that Pyodide works with the new Client Bridge system
-- [x] Properly recursively render components
 - [ ] Fragment support
 - [ ] Progress support
 - [ ] Update state support
@@ -61,8 +55,6 @@
     - [ ] SVG element
     - [ ] Other sensor APIs
 - [ ] Timer route
-- [x] Remove logic for "Outcome" since we have better ways to handle it now
-- [x] Attributes for events should allow both "on_click" and "onclick"
 - [ ] Better testing features
     - [ ] `assert_has` and `assert_in` for checking page contents
     - [ ] `assert_state` for checking state contents
@@ -103,3 +95,15 @@ Pie in the sky:
 - [ ] Database integration
 - [ ] Real-time collaboration
 - [ ] Pyodide + Skulpt backends
+
+Completed
+
+- [x] Delete old files and old_history
+- [x] Debug panel: Show current configuration
+- [x] Debug panel: Turning off the debug panel should not erase all existing data. We need a way to "freeze" the initial data, I guess?
+- [x] Debug panel: hot bar: button to hide/show the frame
+- [x] Debug panel: History: Clear old history button
+- [x] Convert skulpt bridge to be handled via Python code rather than JS code, with a proper js bridge library
+- [x] Properly recursively render components
+- [x] Remove logic for "Outcome" since we have better ways to handle it now
+- [x] Attributes for events should allow both "on_click" and "onclick"

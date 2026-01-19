@@ -1,3 +1,4 @@
+from drafter.site.site import GLOBAL_DRAFTER_CSS_PATHS
 import js
 
 document = js.document  # type: ignore
@@ -43,6 +44,18 @@ def add_style(
     head = root.getElementsByTagName("head")[0]
     head.appendChild(style)
     return style
+
+
+def swap_debug_mode(root):
+    # If href=GLOBAL_DRAFTER_CSS_PATHS[True] exists, then we're in debug mode, so switch to the non-debug CSS. Otherwise, switch to the debug CSS.
+    debug_css = GLOBAL_DRAFTER_CSS_PATHS[True]
+    non_debug_css = GLOBAL_DRAFTER_CSS_PATHS[False]
+    existing_debug_link = root.querySelector(f'link[href="{debug_css}"]')
+    existing_non_debug_link = root.querySelector(f'link[href="{non_debug_css}"]')
+    if existing_debug_link:
+        existing_debug_link.setAttribute("href", non_debug_css)
+    elif existing_non_debug_link:
+        existing_non_debug_link.setAttribute("href", debug_css)
 
 
 def add_link(

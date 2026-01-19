@@ -25,10 +25,21 @@ export class ConfigPanel extends Panel {
         });
     }
 
+    private newItemContents(key: string, value: any) {
+        return (
+            <>
+                <strong>
+                    <code>{key}</code>
+                </strong>
+                : <code>{JSON.stringify(value)}</code>
+            </>
+        );
+    }
+
     private newItemElement(key: string, value: any) {
         return (
             <div class="drafter-debug-config-item" data-key={key}>
-                <strong>{key}</strong>:<pre>{JSON.stringify(value)}</pre>
+                {this.newItemContents(key, value)}
             </div>
         );
     }
@@ -44,7 +55,10 @@ export class ConfigPanel extends Panel {
             `.drafter-debug-config-item[data-key="${key}"]`,
         );
         if (existingItem) {
-            existingItem.innerHTML = `<strong>${key}</strong>:<pre>${JSON.stringify(value)}</pre>`;
+            const newContents = this.newItemContents(key, value);
+            existingItem.innerHTML = "";
+            existingItem.appendChild(newContents);
+            existingItem.classList.add("drafter-debug-config-item-updated");
         } else {
             const configItem = this.newItemElement(key, value);
             section.appendChild(configItem);

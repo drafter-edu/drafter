@@ -39,17 +39,11 @@ def start_server(
         def handle_toggle_frame():
             server.reconfigure_flip("framed")
 
-        client_bridge.setup_events(handle_visit, handle_toggle_frame)
-        handle_visit(initial_request)
-
-        def change_debug_mode():
+        def handle_debug_mode():
             server.reconfigure_flip("in_debug_mode")
-            client_bridge.setup_site(server.do_render())
-            handle_visit(initial_request)
 
-        # def change_framed():
-
-        client_bridge.register_hotkey("Q", change_debug_mode)
+        client_bridge.setup_events(handle_visit, handle_toggle_frame, handle_debug_mode)
+        handle_visit(initial_request)
 
     else:
         from drafter.app.app_server import serve_app_once

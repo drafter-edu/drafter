@@ -5,6 +5,7 @@ This module works with both Skulpt and Pyodide by using the unified `js` module 
 """
 
 import json
+from drafter.bridge.helpers import swap_debug_mode
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.data.response import Response
 from drafter.data.request import Request
@@ -112,6 +113,8 @@ class Client:
         if event["event_type"] == UpdatedConfigurationEvent.event_type:
             if event.get("data", {}).get("key") == "framed":
                 self.toggle_frame()
+            elif event.get("data", {}).get("key") == "in_debug_mode":
+                swap_debug_mode(js.document)
             else:
                 print("NEED TO HANDLE CONFIG UPDATE EVENT IN CLIENT", event)
         if self.debug_panel:
@@ -355,7 +358,10 @@ class Client:
         return True
 
     def setup_events(
-        self, handle_visit: Callable[[Request], Response], handle_toggle_frame: Callable
+        self,
+        handle_visit: Callable[[Request], Response],
+        handle_toggle_frame: Callable,
+        handle_debug_mode: Callable,
     ) -> None:
         debug_log("client.setup_events")
         self.navigation_func = handle_visit
@@ -366,9 +372,11 @@ class Client:
 
         self.popstate_listener = self.handle_popstate
         js.addEventListener("popstate", self.handle_popstate)
-
+        # Specialized Drafter events
         js.addEventListener("drafter-navigate", lambda event: self.goto(event.detail))
         js.addEventListener("drafter-toggle-frame", lambda event: handle_toggle_frame())
+        # Keyboard events
+        self.register_hotkey("Q", handle_debug_mode)
 
     def toggle_frame(self) -> None:
         FRAME_PIECES = ",".join(
@@ -423,7 +431,9 @@ class Client:
                     debug_log("client.hotkey_triggered", event_key)
                     event.preventDefault()
                     self.hotkey_events[event_key]()
-                self.last_press_time = current_time
+                    self.last_press_time = 0  # Reset to avoid triple presses being treated as double presses
+                else:
+                    self.last_press_time = current_time
 
         self.hotkey_events[key] = callback
         if not self.hotkey_listener_ready:
