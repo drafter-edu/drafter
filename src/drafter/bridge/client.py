@@ -5,6 +5,7 @@ This module works with both Skulpt and Pyodide by using the unified `js` module 
 """
 
 import json
+from drafter.config.client_server import ClientServerConfiguration
 from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.monitor.events.config import UpdatedConfigurationEvent
@@ -56,6 +57,8 @@ def get_attribute_recursively(element: Any, attribute_name: str) -> list[str]:
 
 @dataclass
 class Client:
+    root_id: str
+    _true_root_id: str
     navigation_func: Optional[Callable[[Request], Response]] = None
     request_count: int = 1
     site_title: str = "Default Title"

@@ -5,7 +5,7 @@
 - [ ] Configuration should be smoother
 - [x] Delete old files and old_history
 - [ ] Debug panel: registered routes: make them links, allow the user to input text
-- [ ] Debug panel Show current configuration
+- [ ] Debug panel: Show current configuration
 - [ ] Debug panel: Disable state representation option (for performance)
 - [x] Debug panel: hot bar: button to hide/show the frame
 - [ ] Debug panel: current state: show types, in nice table
@@ -59,6 +59,7 @@
     - [ ] Video element
     - [ ] Canvas element
     - [ ] SVG element
+    - [ ] Other sensor APIs
 - [ ] Timer route
 - [x] Remove logic for "Outcome" since we have better ways to handle it now
 - [x] Attributes for events should allow both "on_click" and "onclick"
@@ -78,8 +79,9 @@
     - [x] Components should have a stable unique ID
     - [ ] Include sufficient whitespace and formatting in rendered HTML for easier debugging
     - [ ] Functions for testing if a component has certain attributes, styles, children, etc.
-- [x] Route for "--reset" automatically added
-- [ ] Route for "--about" automatically added
+- [ ] Default system routes
+    - [x] Route for "--reset" automatically added
+    - [ ] Route for "--about" automatically added
 - [ ] Port over documentation to mkdocs
     - [ ] Generate reference images for components
 - [ ] Matching a dictionary to a dataclass should allow us to convert the dictionary to the dataclass, and raise an error if there are missing or extra keys, or if the types don't match
@@ -91,6 +93,9 @@
 - [ ] ShadowDom for the entire page content, to prevent CSS conflicts when embedding Drafter into an existing page
     - [ ] Need to scope out all selectors to correctly target only the `ClientBridge.root` element, and to also namespace that root element with a specific ID.
 - [ ] Test that we can create multiple servers on the same page without conflicts, and that they maintain separate state and event buses
+- [ ] Setting to disable certain features
+    - [ ] Disable external links
+    - [ ] Disable ability to set custom JS/CSS/Headers
 
 Pie in the sky:
 

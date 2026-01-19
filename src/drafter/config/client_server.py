@@ -16,6 +16,7 @@ class ClientServerConfiguration:
                        which may cause conflicts with the host page's styles.
     """
 
+    server_name: str = "MAIN_SERVER"
     in_debug_mode: bool = True
     enable_audit_logging: bool = True
     site_title: str = "Drafter Application"
@@ -35,6 +36,8 @@ class ClientServerConfiguration:
     additional_script_content: list[str] = field(default_factory=list)
     # Shadow DOM CSS
     use_shadow_dom: bool = False
+    # Root element id, if None then will become
+    root_element_id: str = "drafter-root--"
     # System Routes
     system_routes: dict[str, Optional[Callable]] = field(default_factory=dict)
     # TODO: Handle the system routes as configuration settings

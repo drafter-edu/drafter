@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Literal, Optional, List, Tuple, Union, Dict
+from typing import Any, Callable, Literal, Optional, List, Tuple, Union, Dict
 import time
 
 from drafter.client_server.context import Scope
@@ -210,6 +210,10 @@ class ClientServer:
             "client_server.start",
             f"Server name: {self.custom_name}",
         )
+
+    def register_system_routes(self, routes: dict[str, Optional[Callable]]):
+        # TODO: Finish this
+        pass
 
     def default_reset_function(self, state):
         from drafter.payloads.kinds.redirect import Redirect

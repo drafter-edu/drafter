@@ -20,10 +20,10 @@ def start_server(
         from drafter.client_server.commands import get_main_server
 
         server = server or get_main_server()
-        client_bridge = ClientBridge()
-
         server.do_configuration(extra_configuration)
+        configuration = server.get_current_configuration()
 
+        client_bridge = ClientBridge(configuration)
         client_bridge.setup_site(server.do_render())
 
         server.do_listen_for_events(client_bridge.handle_telemetry_event)
