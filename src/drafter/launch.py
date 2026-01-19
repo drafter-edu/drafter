@@ -36,13 +36,18 @@ def start_server(
             client_bridge.handle_response(response, handle_visit)
             return response
 
-        client_bridge.setup_navigation(handle_visit)
+        def handle_toggle_frame():
+            server.reconfigure_flip("framed")
+
+        client_bridge.setup_events(handle_visit, handle_toggle_frame)
         handle_visit(initial_request)
 
         def change_debug_mode():
-            server.do_change_debug_mode()
+            server.reconfigure_flip("in_debug_mode")
             client_bridge.setup_site(server.do_render())
             handle_visit(initial_request)
+
+        # def change_framed():
 
         client_bridge.register_hotkey("Q", change_debug_mode)
 

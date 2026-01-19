@@ -5,8 +5,20 @@ from drafter.monitor.events.base import BaseEvent
 
 
 @dataclass
+class InitialConfigurationEvent(BaseEvent):
+    event_type: str = "InitialConfiguration"
+    config: Optional[dict[str, Any]] = None
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            **super().to_json(),
+            "config": self.config,
+        }
+
+
+@dataclass
 class UpdatedConfigurationEvent(BaseEvent):
-    event_type: str = "ConfigurationUpdated"
+    event_type: str = "UpdatedConfiguration"
     key: Optional[str] = None
     value: Optional[Any] = None
     update_default: bool = False

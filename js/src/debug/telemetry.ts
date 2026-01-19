@@ -1,4 +1,8 @@
 import type {
+    InitialConfigurationEvent,
+    UpdatedConfigurationEvent,
+} from "./telemetry/config";
+import type {
     DrafterError,
     DrafterWarning,
     DrafterInfo,
@@ -23,7 +27,9 @@ export type TypedEvent =
     | DrafterError
     | DrafterWarning
     | DrafterInfo
-    | TestCaseEvent;
+    | TestCaseEvent
+    | InitialConfigurationEvent
+    | UpdatedConfigurationEvent;
 
 export interface TelemetryEvent {
     event_type: string;

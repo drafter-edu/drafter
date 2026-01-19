@@ -45,6 +45,26 @@ class ClientServerConfiguration:
     # TODO: Config setting to add spinner to buttons
     # TODO: Config setting to forbid external links
 
+    def to_json(self) -> dict:
+        return {
+            "server_name": self.server_name,
+            "in_debug_mode": self.in_debug_mode,
+            "enable_audit_logging": self.enable_audit_logging,
+            "site_title": self.site_title,
+            "information": self.information.to_json() if self.information else None,
+            "framed": self.framed,
+            "theme": self.theme,
+            "deploy_image_path": self.deploy_image_path,
+            "additional_header_content": self.additional_header_content,
+            "additional_style_content": self.additional_style_content,
+            "additional_css_content": self.additional_css_content,
+            "additional_js_content": self.additional_js_content,
+            "additional_script_content": self.additional_script_content,
+            "use_shadow_dom": self.use_shadow_dom,
+            "root_element_id": self.root_element_id,
+            "system_routes": list(self.system_routes.keys()),
+        }
+
     def copy(self) -> "ClientServerConfiguration":
         """
         Creates a copy of the current configuration instance.

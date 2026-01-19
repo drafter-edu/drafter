@@ -176,8 +176,10 @@ class ClientBridge:
             console_log(f"Error setting up site: {e}")
             raise e
 
-    def setup_navigation(self, handle_visit: Callable[[Request], Response]) -> None:
-        self.client.setup_navigation(handle_visit)
+    def setup_events(
+        self, handle_visit: Callable[[Request], Response], handle_toggle_frame: Callable
+    ) -> None:
+        self.client.setup_events(handle_visit, handle_toggle_frame)
 
     def register_hotkey(self, keyCombo: str, callback: Callable[[], None]) -> None:
         self.client.register_hotkey(keyCombo, callback)

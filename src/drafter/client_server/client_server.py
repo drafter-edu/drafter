@@ -7,7 +7,11 @@ from drafter.client_server.errors import VisitError
 from drafter.data.channel import Message
 from drafter.history.state import SiteState
 from drafter.monitor.bus import EventBus
-from drafter.monitor.events.config import ResetServerEvent, UpdatedConfigurationEvent
+from drafter.monitor.events.config import (
+    InitialConfigurationEvent,
+    ResetServerEvent,
+    UpdatedConfigurationEvent,
+)
 from drafter.monitor.events.errors import DrafterError
 from drafter.monitor.events.request import (
     RequestEvent,
@@ -137,7 +141,9 @@ class ClientServer:
         this subsequently will not modify the actively running site in any immediately visible way.
         """
         self._default_configuration.update_multiple_configuration(**extra_configuration)
-        self.site.set_configuration(self.get_default_configuration())
+        configuration = self.get_default_configuration()
+        self.site.set_configuration(configuration)
+        return configuration
 
     def reconfigure(self, update_default: bool = False, **kwargs):
         """
@@ -165,12 +171,9 @@ class ClientServer:
         else:
             return getattr(self._default_configuration, key)
 
-    def do_change_debug_mode(self):
-        """
-        Toggles the debug mode of the website.
-        """
-        in_debug_mode = self.get_config_setting("in_debug_mode")
-        self.reconfigure(in_debug_mode=not in_debug_mode)
+    def reconfigure_flip(self, key: str):
+        current_value = self.get_config_setting(key)
+        self.reconfigure(**{key: not current_value})
 
     def do_start(self, initial_state: Any = None) -> None:
         """
@@ -615,7 +618,7 @@ class ClientServer:
     def do_configuration(self, extra_configuration) -> Optional[InitialSiteData]:
         self.phase = "configuring"
         try:
-            self.process_dynamic_configuration(extra_configuration)
+            configuration = self.process_dynamic_configuration(extra_configuration)
         except Exception as e:
             error = log_error(
                 "site.processing_failed",
@@ -626,6 +629,10 @@ class ClientServer:
             )
             site = f"<div><h1>Error processing site configuration</h1><p>{error.message}</p></div>"
             return InitialSiteData(site_html=site, site_title="Error", error=True)
+        log_data(
+            InitialConfigurationEvent(config=configuration.to_json()),
+            "client_server.do_configuration",
+        )
         print(
             "Site configuration processed successfully", self.site.get_configuration()
         )

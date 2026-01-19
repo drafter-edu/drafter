@@ -13,6 +13,7 @@ import { DebugPanelError } from "./utils/errors";
 import type { ReactElement } from "jsx-dom";
 import type { Panel } from "./panels/panel";
 import { intersperse } from "./utils/lists";
+import { ConfigPanel } from "./panels/config";
 
 export class DebugPanel {
     private static instanceCounter = 0;
@@ -31,12 +32,13 @@ export class DebugPanel {
     private statePanel: StatePanel;
     private routesPanel: RoutesPanel;
     private historyPanel: HistoryPanel;
+    private configPanel: ConfigPanel;
     private logPanel: LogPanel;
     private panels: Panel[];
 
     constructor(
         private containerId: string,
-        private clientBridge: ClientBridgeWrapperInterface
+        private clientBridge: ClientBridgeWrapperInterface,
     ) {
         this.instanceId = DebugPanel.instanceCounter++;
 
@@ -47,19 +49,21 @@ export class DebugPanel {
         this.routesPanel = new RoutesPanel(this.containerId, this.instanceId);
         this.historyPanel = new HistoryPanel(this.containerId, this.instanceId);
         this.logPanel = new LogPanel(this.containerId, this.instanceId);
+        this.configPanel = new ConfigPanel(this.containerId, this.instanceId);
         this.panels = [
             this.statePanel,
             this.routesPanel,
             this.historyPanel,
             this.testingPanel,
             this.logPanel,
+            this.configPanel,
         ];
 
         const container = this.getContainerElement();
         this.panelElement = this.createPanelStructure();
         container.appendChild(this.panelElement);
         this.contentElement = this.panelElement.querySelector(
-            ".drafter-debug-content"
+            ".drafter-debug-content",
         );
 
         this.panels.forEach((p) => p.initialize());
@@ -76,7 +80,7 @@ export class DebugPanel {
         const container = document.getElementById(this.containerId);
         if (!container) {
             throw this.reportError(
-                `DebugPanel: Container with id '${this.containerId}' not found.`
+                `DebugPanel: Container with id '${this.containerId}' not found.`,
             );
         }
         return container;
@@ -100,10 +104,10 @@ export class DebugPanel {
 
         const links = intersperse<ReactElement | string>(
             this.panels.map((panel) => panel?.getAnchor()),
-            "|"
+            "|",
         );
         const panelComponents = this.panels.map((panel) =>
-            panel?.createStructure()
+            panel?.createStructure(),
         );
 
         const ui = (
@@ -155,18 +159,19 @@ export class DebugPanel {
     }
 
     private toggleFrame(): void {
-        const frames = document.querySelectorAll(
-            ".drafter-padding-h--,.drafter-padding-v--,.drafter-header--,.drafter-footer--"
-        );
-        if (frames) {
-            frames.forEach((frame) =>
-                frame.classList.toggle("drafter-hidden--")
-            );
-        }
-        const body = document.querySelector(".drafter-body--");
-        if (body) {
-            body.classList.toggle("drafter-body-frame-hidden--");
-        }
+        window.dispatchEvent(new CustomEvent("drafter-toggle-frame"));
+        // const frames = document.querySelectorAll(
+        //     ".drafter-padding-h--,.drafter-padding-v--,.drafter-header--,.drafter-footer--",
+        // );
+        // if (frames) {
+        //     frames.forEach((frame) =>
+        //         frame.classList.toggle("drafter-hidden--"),
+        //     );
+        // }
+        // const body = document.querySelector(".drafter-body--");
+        // if (body) {
+        //     body.classList.toggle("drafter-body-frame-hidden--");
+        // }
     }
 
     private attachEventHandlers(): void {
@@ -181,7 +186,7 @@ export class DebugPanel {
                 button.addEventListener("click", (event) => {
                     event.preventDefault();
                     window.dispatchEvent(
-                        new CustomEvent("drafter-navigate", { detail })
+                        new CustomEvent("drafter-navigate", { detail }),
                     );
                 });
             });
@@ -195,7 +200,7 @@ export class DebugPanel {
             case "RouteAdded":
                 this.routesPanel?.renderRoute(
                     event.data.url,
-                    event.data.signature
+                    event.data.signature,
                 );
                 break;
             case "RequestEvent":
@@ -213,6 +218,15 @@ export class DebugPanel {
             case "TestCaseEvent":
                 this.testingPanel?.renderTest(event.data);
                 this.testingPanel?.updateTestSummary();
+                break;
+            case "InitialConfiguration":
+                this.configPanel?.renderInitialConfig(event.data.config);
+                break;
+            case "UpdatedConfiguration":
+                this.configPanel?.renderConfigUpdate(
+                    event.data.key,
+                    event.data.value,
+                );
                 break;
             default:
                 handled = false;

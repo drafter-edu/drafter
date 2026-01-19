@@ -110,7 +110,10 @@ class Client:
     def handle_event(self, event: dict) -> bool:
         debug_log("client.handle_event", event)
         if event["event_type"] == UpdatedConfigurationEvent.event_type:
-            print("NEED TO HANDLE CONFIG UPDATE EVENT IN CLIENT")
+            if event.get("data", {}).get("key") == "framed":
+                self.toggle_frame()
+            else:
+                print("NEED TO HANDLE CONFIG UPDATE EVENT IN CLIENT", event)
         if self.debug_panel:
             # print("Attempting to handle event in debug panel:", event)
             try:
@@ -351,8 +354,10 @@ class Client:
 
         return True
 
-    def setup_navigation(self, handle_visit: Callable[[Request], Response]) -> None:
-        debug_log("client.setup_navigation")
+    def setup_events(
+        self, handle_visit: Callable[[Request], Response], handle_toggle_frame: Callable
+    ) -> None:
+        debug_log("client.setup_events")
         self.navigation_func = handle_visit
 
         if self.popstate_listener is not None:
@@ -363,6 +368,20 @@ class Client:
         js.addEventListener("popstate", self.handle_popstate)
 
         js.addEventListener("drafter-navigate", lambda event: self.goto(event.detail))
+        js.addEventListener("drafter-toggle-frame", lambda event: handle_toggle_frame())
+
+    def toggle_frame(self) -> None:
+        FRAME_PIECES = ",".join(
+            f".{DRAFTER_TAG_IDS[key]}"
+            for key in ["PADDING_V", "PADDING_H", "HEADER", "FOOTER"]
+        )
+        frames = js.document.querySelectorAll(FRAME_PIECES)
+        if frames:
+            for frame in frames:
+                frame.classList.toggle("drafter-hidden--")
+        body = js.document.querySelector("." + DRAFTER_TAG_IDS["BODY"])
+        if body:
+            body.classList.toggle("drafter-body-frame-hidden--")
 
     def handle_popstate(self, event: Any) -> None:
         debug_log("client.handle_popstate", event)
