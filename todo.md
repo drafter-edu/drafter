@@ -1,99 +1,100 @@
--   [ ] Compilation pipeline
-    -   [ ] Compile initial page for faster load times
-    -   [ ] `launch.py` doesn't use the compilation pipeline correctly
--   [ ] Convert to CHANGELOG.md format and adopt python-semantic-release (or github-changelog-md)
--   [ ] Configuration should be smoother
--   [x] Delete old files and old_history
--   [ ] Debug panel: registered routes: make them links, allow the user to input text
--   [ ] Debug panel Show current configuration
--   [ ] Debug panel: Disable state representation option (for performance)
--   [x] Debug panel: hot bar: button to hide/show the frame
--   [ ] Debug panel: current state: show types, in nice table
-    -   [x] Finish implementing other types
-    -   [x] Use better color options for background and text
-    -   [x] Render strings with quotes
-    -   [-] Truncate long strings with "..." in the middle, click to expand
-    -   [-] Show total number of keys/fields/items at the top
--   [ ] Debug panel: page history:
-    -   [ ] change 200 to "Success"
-    -   [ ] Make very long URLs get truncated with "..." in the middle, click to expand
-    -   [ ] link to recreate the request
-    -   [ ] show parameters
-    -   [x] lighten font for "via"
-    -   [ ] Handle files, images, other media types better
-    -   [ ] Show in reverse order (newest at top)
--   [x] Debug panel: History: Clear old history button
--   [ ] Debug panel: Console: REPL
--   [ ] Debug panel: Download regression tests
--   [ ] Debug panel: Interactive form to help create unit tests
-    -   [ ] "What text/component do you expect to see on the page?"
-    -   [ ] "What should the state's fields be?"
--   [ ] Clicking on a button should make it have a spinner by default, but easily turned off
-    -   [ ] Also allow them to change what the spinner looks like
--   [ ] Route function for custom error pages
--   [ ] Convert existing unit tests to Jest approach
--   [ ] Shareable links
--   [ ] State download/upload
--   [ ] File upload handling
-    -   [ ] Store in memory, localstorage, etc. as needed to allow restoration on back/forward navigation
--   [ ] Default parameters
-    -   [ ] Allow urls to be re-entrant with default parameters
-    -   [ ] Parse query strings for parameters
--   [ ] Type change warnings
--   [ ] Warnings for parameters that were never matched to arguments
--   [ ] Error screens need to have better styling
--   [ ] Links for error screen to help them navigate out of the error
--   [ ] Deep copy strategy for state
--   [ ] Fetch support for opening files in Skulpt
--   [x] Convert skulpt bridge to be handled via Python code rather than JS code, with a proper js bridge library
--   [ ] Make sure that Pyodide works with the new Client Bridge system
--   [x] Properly recursively render components
--   [ ] Fragment support
--   [ ] Progress support
--   [ ] Update state support
--   [ ] New elements and features:
-    -   [ ] Audio element
-    -   [ ] Lat/Long
-    -   [ ] PDF processing
-    -   [ ] Image capture
-    -   [ ] Video element
-    -   [ ] Canvas element
-    -   [ ] SVG element
--   [ ] Timer route
--   [x] Remove logic for "Outcome" since we have better ways to handle it now
--   [x] Attributes for events should allow both "on_click" and "onclick"
--   [ ] Better testing features
-    -   [ ] `assert_has` and `assert_in` for checking page contents
-    -   [ ] `assert_state` for checking state contents
--   [ ] Allow the route to explicitly ignore certain parameters
--   [ ] Components:
-    -   [x] Label Component, with optional `for_id` attribute
-    -   [x] Boolean attributes handling (e.g., disabled, checked, readonly)
-    -   [x] Handle datetime inputs and types
-    -   [x] RawHTML component
-    -   [-] Rendering components should accept None as a valid input and render to nothing
-    -   [x] Hooks for Component class (pre_render, post_render)
-    -   [ ] Path to failing node (breadcrumbs) for debugging when rendering/formatting/verifying components
-    -   [x] Support data-\* attributes
-    -   [x] Components should have a stable unique ID
-    -   [ ] Include sufficient whitespace and formatting in rendered HTML for easier debugging
-    -   [ ] Functions for testing if a component has certain attributes, styles, children, etc.
--   [x] Route for "--reset" automatically added
--   [ ] Route for "--about" automatically added
--   [ ] Port over documentation to mkdocs
-    -   [ ] Generate reference images for components
--   [ ] Matching a dictionary to a dataclass should allow us to convert the dictionary to the dataclass, and raise an error if there are missing or extra keys, or if the types don't match
--   [ ] Properly handle back/forward arguments in the URL, and make sure that the state is correctly restored when navigating back and forward
--   [ ] Debug menu: pagination of page history, for when it gets very long.
--   [ ] Can we scope out the MAIN_SERVER and MAIN_EVENT_BUS to be instance-level instead of global? That way we could support multiple independent Drafter instances on the same page, and it would be easier to reason about the state and events for each instance. The EventBus could simply be tied to a specific ClientServer+ClientBridge pair.
-    -   [ ] Increasingly feels like the EventBus should just be part of the ClientServer.
-    -   [ ] When you import drafter, a default MAIN_SERVER is still created (unless an environment variable is set to disable it). But you could also create additional ClientServer instances if you want, and adjust the "default" MAIN_SERVER.
--   [ ] ShadowDom for the entire page content, to prevent CSS conflicts when embedding Drafter into an existing page
--   [ ] Test that we can create multiple servers on the same page without conflicts, and that they maintain separate state and event buses
+- [ ] Compilation pipeline
+    - [ ] Compile initial page for faster load times
+    - [ ] `launch.py` doesn't use the compilation pipeline correctly
+- [ ] Convert to CHANGELOG.md format and adopt python-semantic-release (or github-changelog-md)
+- [ ] Configuration should be smoother
+- [x] Delete old files and old_history
+- [ ] Debug panel: registered routes: make them links, allow the user to input text
+- [ ] Debug panel Show current configuration
+- [ ] Debug panel: Disable state representation option (for performance)
+- [x] Debug panel: hot bar: button to hide/show the frame
+- [ ] Debug panel: current state: show types, in nice table
+    - [x] Finish implementing other types
+    - [x] Use better color options for background and text
+    - [x] Render strings with quotes
+    - [-] Truncate long strings with "..." in the middle, click to expand
+    - [-] Show total number of keys/fields/items at the top
+- [ ] Debug panel: page history:
+    - [ ] change 200 to "Success"
+    - [ ] Make very long URLs get truncated with "..." in the middle, click to expand
+    - [ ] link to recreate the request
+    - [ ] show parameters
+    - [x] lighten font for "via"
+    - [ ] Handle files, images, other media types better
+    - [ ] Show in reverse order (newest at top)
+- [x] Debug panel: History: Clear old history button
+- [ ] Debug panel: Console: REPL
+- [ ] Debug panel: Download regression tests
+- [ ] Debug panel: Interactive form to help create unit tests
+    - [ ] "What text/component do you expect to see on the page?"
+    - [ ] "What should the state's fields be?"
+- [ ] Clicking on a button should make it have a spinner by default, but easily turned off
+    - [ ] Also allow them to change what the spinner looks like
+- [ ] Route function for custom error pages
+- [ ] Convert existing unit tests to Jest approach
+- [ ] Shareable links
+- [ ] State download/upload
+- [ ] File upload handling
+    - [ ] Store in memory, localstorage, etc. as needed to allow restoration on back/forward navigation
+- [ ] Default parameters
+    - [ ] Allow urls to be re-entrant with default parameters
+    - [ ] Parse query strings for parameters
+- [ ] Type change warnings
+- [ ] Warnings for parameters that were never matched to arguments
+- [ ] Error screens need to have better styling
+- [ ] Links for error screen to help them navigate out of the error
+- [ ] Deep copy strategy for state
+- [ ] Fetch support for opening files in Skulpt
+- [x] Convert skulpt bridge to be handled via Python code rather than JS code, with a proper js bridge library
+- [ ] Make sure that Pyodide works with the new Client Bridge system
+- [x] Properly recursively render components
+- [ ] Fragment support
+- [ ] Progress support
+- [ ] Update state support
+- [ ] New elements and features:
+    - [ ] Audio element
+    - [ ] Lat/Long
+    - [ ] PDF processing
+    - [ ] Image capture
+    - [ ] Video element
+    - [ ] Canvas element
+    - [ ] SVG element
+- [ ] Timer route
+- [x] Remove logic for "Outcome" since we have better ways to handle it now
+- [x] Attributes for events should allow both "on_click" and "onclick"
+- [ ] Better testing features
+    - [ ] `assert_has` and `assert_in` for checking page contents
+    - [ ] `assert_state` for checking state contents
+- [ ] Allow the route to explicitly ignore certain parameters
+- [ ] Components:
+    - [x] Label Component, with optional `for_id` attribute
+    - [x] Boolean attributes handling (e.g., disabled, checked, readonly)
+    - [x] Handle datetime inputs and types
+    - [x] RawHTML component
+    - [-] Rendering components should accept None as a valid input and render to nothing
+    - [x] Hooks for Component class (pre_render, post_render)
+    - [ ] Path to failing node (breadcrumbs) for debugging when rendering/formatting/verifying components
+    - [x] Support data-\* attributes
+    - [x] Components should have a stable unique ID
+    - [ ] Include sufficient whitespace and formatting in rendered HTML for easier debugging
+    - [ ] Functions for testing if a component has certain attributes, styles, children, etc.
+- [x] Route for "--reset" automatically added
+- [ ] Route for "--about" automatically added
+- [ ] Port over documentation to mkdocs
+    - [ ] Generate reference images for components
+- [ ] Matching a dictionary to a dataclass should allow us to convert the dictionary to the dataclass, and raise an error if there are missing or extra keys, or if the types don't match
+- [ ] Properly handle back/forward arguments in the URL, and make sure that the state is correctly restored when navigating back and forward
+- [ ] Debug menu: pagination of page history, for when it gets very long.
+- [x] Can we scope out the MAIN_SERVER and MAIN_EVENT_BUS to be instance-level instead of global? That way we could support multiple independent Drafter instances on the same page, and it would be easier to reason about the state and events for each instance. The EventBus could simply be tied to a specific ClientServer+ClientBridge pair.
+    - [x] Increasingly feels like the EventBus should just be part of the ClientServer.
+    - [ ] When you import drafter, a default MAIN_SERVER is always created. But you could also create additional ClientServer instances if you want, and adjust the "default" MAIN_SERVER.
+- [ ] ShadowDom for the entire page content, to prevent CSS conflicts when embedding Drafter into an existing page
+    - [ ] Need to scope out all selectors to correctly target only the `ClientBridge.root` element, and to also namespace that root element with a specific ID.
+- [ ] Test that we can create multiple servers on the same page without conflicts, and that they maintain separate state and event buses
 
 Pie in the sky:
 
--   [ ] Authentication system
--   [ ] Database integration
--   [ ] Real-time collaboration
--   [ ] Pyodide + Skulpt backends
+- [ ] Authentication system
+- [ ] Database integration
+- [ ] Real-time collaboration
+- [ ] Pyodide + Skulpt backends

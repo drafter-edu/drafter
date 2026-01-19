@@ -311,8 +311,8 @@ File handling: When a file gets uploaded to the server, it will get stored in me
 8.  Drafter is imported; the `MAIN_SERVER` (`ClientServer`) and `MAIN_EVENT_BUS` (`EventBus`)are created.
 9.  The rest of the students' code is executed, adding routes to the `MAIN_SERVER` as it goes, until it reaches the `start_server` call.
 10. The `launch.py` script creates the `ClientBridge`
-11. The `ClientServer` is configured, processing its static and dynamic configuration (see below).
-12. The Site is (re-)rendered:
+11. The `ClientServer` is configured (`ClientServer.do_configuration`), processing its static and dynamic configuration (see below).
+12. The Site is (re-)rendered (`ClientServer.do_render`):
     1.  The `ClientServer` creates the True page structure
     2.  The `ClientBridge` loads the rendered site with interactivity
     3.  The `ClientBridge` sets up the Debug Menu.
@@ -393,9 +393,10 @@ The configuration settings can come from a few different places; here they are i
     2.  Environment variables
     3.  Command line arguments
     4.  A configuration file (provided by either 1. the environment variables, or 2. command line arguments)
+    5.  Imperative configuration functions in the code that are called before the server starts (e.g., `set_site_title()`)
+    6.  Arguments passed to the `start_server` function
 - "Dynamic" configs:
     1.  Imperative configuration functions in the code (e.g., `set_site_title()`)
-    2.  Arguments passed to the `start_server` function
 
 At runtime, there are two main sources of configuration information:
 
@@ -405,7 +406,7 @@ At runtime, there are two main sources of configuration information:
 Here's the configuration timeline:
 
 1. When the Drafter module first boots up, its static configuration is determined by merging those config sources together. This becomes the **default configuration** and is stored in the `ClientServer`'s `configuration` field. The **current configuration** will be `None` for now.
-2. Further dynamic configs before the server starts will modify the default configuration.
+2. Further configs before the server starts will modify the default configuration.
 3. When the `ClientServer` is rendered, the default configuration is copied to become the **current configuration** and stored in the `Site`, which is what is actually used to render the page and control the behavior of the site.
 4. While the `ClientServer` is running, any dynamic configs will modify the current configuration. A boolean keyword parameter `update_default` can be provided to also update the default configuration at the same time if desired.
 5. The user can `reset` the site, which will copy the default configuration back to the current configuration, resetting dynamic changes made AFTER the server started.

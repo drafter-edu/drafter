@@ -10,4 +10,5 @@ class InitialSiteData:
     additional_css: list[str] = field(default_factory=list)
     additional_style: list[str] = field(default_factory=list)
     additional_header: list[str] = field(default_factory=list)
+    use_shadow_dom: bool = True
     error: bool = False

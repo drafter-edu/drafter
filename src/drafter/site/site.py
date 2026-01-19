@@ -15,6 +15,7 @@ BUILT_IN_ADDITIONAL_CSS_PATHS = ["assets/css/diff2html.min.css"]
 
 DRAFTER_TAG_IDS = {
     "ROOT": "drafter-root--",
+    "SHADOW_HOST": "drafter-shadow-host--",
     "SITE": "drafter-site--",
     "FRAME": "drafter-frame--",
     "HEADER": "drafter-header--",
@@ -48,6 +49,8 @@ SITE_HTML_TEMPLATE = f"""
   <div id="{DRAFTER_TAG_IDS["DEBUG"]}" class="{DRAFTER_TAG_IDS["DEBUG"]}"></div>
 </div>
 """
+
+SITE_HTML_SHADOW_DOM_TEMPLATE = f'<div id="{DRAFTER_TAG_IDS["SHADOW_HOST"]}"></div>'
 
 
 @dataclass
@@ -83,8 +86,9 @@ class Site:
         """
         Renders the site HTML structure.
         """
-        site_html = SITE_HTML_TEMPLATE
         configuration = self.get_configuration()
+
+        site_html = SITE_HTML_TEMPLATE
 
         additional_css, additional_js = self._get_theme_headers(configuration)
         additional_css.insert(0, GLOBAL_DRAFTER_CSS_PATHS[configuration.in_debug_mode])
@@ -117,4 +121,5 @@ class Site:
             additional_header=additional_headers,
             additional_style=additional_styles,
             additional_scripts=additional_scripts,
+            use_shadow_dom=configuration.use_shadow_dom,
         )

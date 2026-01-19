@@ -34,7 +34,7 @@ class ClientServerConfiguration:
     # Linked JavaScript Content
     additional_script_content: list[str] = field(default_factory=list)
     # Shadow DOM CSS
-    use_shadow_dom: bool = True
+    use_shadow_dom: bool = False
     # System Routes
     system_routes: dict[str, Optional[Callable]] = field(default_factory=dict)
     # TODO: Handle the system routes as configuration settings
@@ -64,6 +64,22 @@ class ClientServerConfiguration:
             additional_script_content=list(self.additional_script_content),
             use_shadow_dom=self.use_shadow_dom,
         )
+
+    def update_multiple_configuration(self, **kwargs):
+        """
+        Updates multiple configuration settings at once using keyword arguments.
+
+        Example usage:
+            config.update_multiple_configuration(
+                theme="dark",
+                in_debug_mode=False,
+                additional_header_content="<meta name='viewport' content='width=device-width, initial-scale=1'>"
+            )
+
+        This will update the theme to "dark", set debug mode to False, and add a viewport meta tag to the header content.
+        """
+        for key, value in kwargs.items():
+            self.update_configuration(key, value)
 
     def update_configuration(self, key: str, value):
         """

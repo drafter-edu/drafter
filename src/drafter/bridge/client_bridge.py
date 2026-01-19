@@ -20,7 +20,11 @@ from drafter.bridge.helpers import (
 )
 from drafter.monitor.telemetry import TelemetryEvent
 from drafter.site.initial_site_data import InitialSiteData
-from drafter.site.site import DRAFTER_TAG_IDS, DRAFTER_TAG_CLASSES
+from drafter.site.site import (
+    DRAFTER_TAG_IDS,
+    DRAFTER_TAG_CLASSES,
+    SITE_HTML_SHADOW_DOM_TEMPLATE,
+)
 from typing import Callable, Optional
 import js
 
@@ -37,6 +41,9 @@ class ClientBridge:
         self.client = Client()
         self.channel_history = {}
         self.redirect_loop_stack = []
+
+        self.root = None
+        self._true_root = None
 
     def remove_page_specific_content(self) -> None:
         """
@@ -124,16 +131,40 @@ class ClientBridge:
         console_log(event)
 
     def setup_site(self, initial_site_data: InitialSiteData) -> None:
-        root_tag = document.getElementById(DRAFTER_TAG_IDS["ROOT"])
-        root_tag.innerHTML = initial_site_data.site_html
+        self._true_root = document.getElementById(DRAFTER_TAG_IDS["ROOT"])
         self.client.set_site_title(initial_site_data.site_title)
         remove_existing_theme(DRAFTER_TAG_CLASSES["THEME"])
-        for css in initial_site_data.additional_css:
-            add_link(css, with_class=DRAFTER_TAG_CLASSES["THEME"])
+
+        # Set up shadow DOM if enabled
+        if initial_site_data.use_shadow_dom:
+            self._true_root.innerHTML = SITE_HTML_SHADOW_DOM_TEMPLATE
+            shadow_host = document.getElementById(DRAFTER_TAG_IDS["SHADOW_HOST"])
+            if not shadow_host:
+                raise ValueError("Shadow host element not found in the document.")
+            shadow_root = shadow_host.attachShadow({"mode": "open"})
+            shadow_root.innerHTML = initial_site_data.site_html
+            self.root = shadow_root
+
+            # Move styles into shadow DOM
+            for css in initial_site_data.additional_css:
+                self._add_link_to_shadow(
+                    shadow_root, css, with_class=DRAFTER_TAG_CLASSES["THEME"]
+                )
+            for style in initial_site_data.additional_style:
+                self._add_style_to_shadow(
+                    shadow_root, style, with_class=DRAFTER_TAG_CLASSES["THEME"]
+                )
+        else:
+            self._true_root.innerHTML = initial_site_data.site_html
+            self.root = self._true_root
+
+            # Normal mode without shadow DOM
+            for css in initial_site_data.additional_css:
+                add_link(css, with_class=DRAFTER_TAG_CLASSES["THEME"])
+            for style in initial_site_data.additional_style:
+                add_style(style, with_class=DRAFTER_TAG_CLASSES["THEME"])
         for js_code in initial_site_data.additional_js:
             add_script(js_code, with_class=DRAFTER_TAG_CLASSES["THEME"])
-        for style in initial_site_data.additional_style:
-            add_style(style, with_class=DRAFTER_TAG_CLASSES["THEME"])
         for header in initial_site_data.additional_header:
             add_header(header)
 
@@ -144,3 +175,35 @@ class ClientBridge:
 
     def register_hotkey(self, keyCombo: str, callback: Callable[[], None]) -> None:
         self.client.register_hotkey(keyCombo, callback)
+
+    def _add_style_to_shadow(self, shadow_root, css: str, with_class: str = "") -> None:
+        """
+        Adds CSS content to the shadow DOM by creating a style element.
+
+        :param shadow_root: The shadow root to append the style to.
+        :param css: CSS content to add.
+        :param with_class: Optional class name to add to the style element.
+        """
+        style = document.createElement("style")
+        style.innerHTML = css
+        if with_class:
+            style.setAttribute("class", with_class)
+        shadow_root.appendChild(style)
+
+    def _add_link_to_shadow(
+        self, shadow_root, css_link: str, with_class: str = ""
+    ) -> None:
+        """
+        Adds a link element to the shadow DOM for CSS files.
+
+        :param shadow_root: The shadow root to append the link to.
+        :param css_link: The href of the CSS file to add.
+        :param with_class: Optional class name to add to the link element.
+        """
+        link = document.createElement("link")
+        link.setAttribute("type", "text/css")
+        link.setAttribute("rel", "stylesheet")
+        link.setAttribute("href", css_link)
+        if with_class:
+            link.setAttribute("class", with_class)
+        shadow_root.appendChild(link)

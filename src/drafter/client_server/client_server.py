@@ -127,7 +127,7 @@ class ClientServer:
         """
         # TODO: Finish this
 
-    def process_dynamic_configuration(self):
+    def process_dynamic_configuration(self, extra_configuration):
         """
         Copies the default configuration to the site's current configuration.
         These will be separate objects, so that changes to the current configuration during runtime
@@ -136,6 +136,7 @@ class ClientServer:
         Note that this should only be called during server startup. Calling
         this subsequently will not modify the actively running site in any immediately visible way.
         """
+        self._default_configuration.update_multiple_configuration(**extra_configuration)
         self.site.set_configuration(self.get_default_configuration())
 
     def reconfigure(self, update_default: bool = False, **kwargs):
@@ -164,14 +165,14 @@ class ClientServer:
         else:
             return getattr(self._default_configuration, key)
 
-    def change_debug_mode(self):
+    def do_change_debug_mode(self):
         """
         Toggles the debug mode of the website.
         """
         in_debug_mode = self.get_config_setting("in_debug_mode")
         self.reconfigure(in_debug_mode=not in_debug_mode)
 
-    def start(self, initial_state: Any = None) -> None:
+    def do_start(self, initial_state: Any = None) -> None:
         """
         Starts the server with the given initial state.
 
@@ -416,7 +417,7 @@ class ClientServer:
     def check_timer(self) -> float:
         return (time.time() - self.start_time) * 1000  # in milliseconds
 
-    def visit(self, request: Request) -> Any:
+    def do_visit(self, request: Request) -> Any:
         """
         Uses the information in the request to find and call the appropriate route function.
 
@@ -607,10 +608,10 @@ class ClientServer:
             "client_server.add_route",
         )
 
-    def do_configuration(self) -> Optional[InitialSiteData]:
+    def do_configuration(self, extra_configuration) -> Optional[InitialSiteData]:
         self.phase = "configuring"
         try:
-            self.process_dynamic_configuration()
+            self.process_dynamic_configuration(extra_configuration)
         except Exception as e:
             error = log_error(
                 "site.processing_failed",
@@ -625,7 +626,7 @@ class ClientServer:
             "Site configuration processed successfully", self.site.get_configuration()
         )
 
-    def render_site(self) -> InitialSiteData:
+    def do_render(self) -> InitialSiteData:
         """
         Renders the initial site HTML. This is called to create the site
         framing structure that includes the frame, header, body, footer, form, and
@@ -654,7 +655,7 @@ class ClientServer:
             return InitialSiteData(site_html=site, site_title="Error", error=True)
         return site
 
-    def register_event_listener(self, handler: Any) -> None:
+    def do_listen_for_events(self, handler: Any) -> None:
         """
         Registers a listener to the monitor.
 

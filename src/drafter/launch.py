@@ -1,47 +1,47 @@
 from drafter.helpers.utils import is_web, seek_file_by_line
-from drafter.client_server.commands import get_main_server
 
 
 def start_server(
-    initial_state=None, main_user_path=None, server=None, **kwargs
+    initial_state=None,
+    main_user_path=None,
+    server=None,
+    **extra_configuration,
 ) -> None:
     """
     Starts the Drafter server with the given initial state.
 
     :param initial_state: The initial state to set for the server.
     :param main_user_path: The path to the main user file (optional).
-    :param kwargs: Additional keyword arguments (for backward compatibility, currently ignored).
+    :param extra_configuration: Additional keyword arguments (for backward compatibility, currently ignored).
     """
     if is_web():
+        # TODO: This logic should really be encoded in a function somewhere
         from drafter.bridge import ClientBridge
-
-        client_bridge = ClientBridge()
+        from drafter.client_server.commands import get_main_server
 
         server = server or get_main_server()
-        server.do_configuration()
+        client_bridge = ClientBridge()
 
-        def rerender_site():
-            initial_site_data = server.render_site()
-            client_bridge.setup_site(initial_site_data)
+        server.do_configuration(extra_configuration)
 
-        rerender_site()
+        client_bridge.setup_site(server.do_render())
 
-        server.register_event_listener(client_bridge.handle_telemetry_event)
+        server.do_listen_for_events(client_bridge.handle_telemetry_event)
 
-        server.start(initial_state=initial_state)
+        server.do_start(initial_state=initial_state)
         initial_request = client_bridge.make_initial_request()
 
         def handle_visit(request):
-            response = server.visit(request)
+            response = server.do_visit(request)
             client_bridge.handle_response(response, handle_visit)
             return response
 
-        handle_visit(initial_request)
         client_bridge.setup_navigation(handle_visit)
+        handle_visit(initial_request)
 
         def change_debug_mode():
-            server.change_debug_mode()
-            rerender_site()
+            server.do_change_debug_mode()
+            client_bridge.setup_site(server.do_render())
             handle_visit(initial_request)
 
         client_bridge.register_hotkey("Q", change_debug_mode)

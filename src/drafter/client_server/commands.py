@@ -1,7 +1,8 @@
+from typing import Optional
 from drafter.monitor.bus import EventBus
 from drafter.client_server.client_server import ClientServer
 
-MAIN_SERVER = ClientServer(custom_name="MAIN_SERVER")
+MAIN_SERVER: Optional[ClientServer] = None
 
 
 def set_main_server(server: ClientServer):
@@ -19,8 +20,17 @@ def get_main_server() -> ClientServer:
     """
     Gets the main server. This is useful for testing purposes.
 
-    :return: The main server
+    Args:
+        server_name: If the server does not yet exist, then this
+                     name will be used to create the server. It will
+                     NOT get the server with this name if it already exists, but instead
+                     will just return the existing main server.
+    Returns:
+        The main server.
     """
+    global MAIN_SERVER
+    if MAIN_SERVER is None:
+        MAIN_SERVER = ClientServer("MAIN_SERVER")
     return MAIN_SERVER
 
 
