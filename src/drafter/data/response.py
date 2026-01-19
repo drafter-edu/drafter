@@ -17,6 +17,7 @@ class Response:
     :ivar message: A human-readable message associated with the response.
     :ivar url: The URL associated with the response. Could technically be different from the request URL.
     :ivar body: The full HTML body of the response, which will be injected directly into the site's frame.
+    :ivar target: An optional target element ID that the body should be injected into. If None, defaults to the body element.
     :ivar channels: A dictionary of channels for additional communication. Common
         channels include "audio", "before", and "after". The latter two are used to
         send script tags to be executed before and after the main content is rendered.
@@ -32,6 +33,7 @@ class Response:
     status_code: int = 200
     message: str = "OK"
     body: Optional[str] = None
+    target: Optional[str] = None
     channels: Dict[str, Channel] = field(default_factory=dict)
     errors: list[DrafterError] = field(default_factory=list)
     warnings: list[DrafterWarning] = field(default_factory=list)

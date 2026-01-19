@@ -55,7 +55,7 @@ class Page(ResponsePayload):
         elif not isinstance(content, list):
             incorrect_type = type(content).__name__
             raise ValueError(
-                "The content of a page must be a list of strings or components."
+                "The content of a Page must be a list of strings or components."
                 f" Found {incorrect_type} instead."
             )
         else:
@@ -63,7 +63,7 @@ class Page(ResponsePayload):
                 if not isinstance(chunk, (str, Component)):
                     incorrect_type = type(chunk).__name__
                     raise ValueError(
-                        "The content of a page must be a list of strings or components."
+                        "The content of a Page must be a list of strings or components."
                         f" Found {incorrect_type} at index {index} instead."
                     )
 

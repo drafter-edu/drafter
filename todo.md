@@ -27,7 +27,7 @@
 - [ ] Clicking on a button should make it have a spinner by default, but easily turned off
     - [ ] Also allow them to change what the spinner looks like
 - [ ] Route function for custom error pages
-- [ ] Convert existing unit tests to Jest approach
+- [x] Convert existing unit tests to Jest approach
 - [ ] Shareable links
 - [ ] State download/upload
 - [ ] File upload handling

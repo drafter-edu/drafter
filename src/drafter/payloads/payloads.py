@@ -65,9 +65,15 @@ class ResponsePayload:
         Returns whether this payload is a redirect.
         """
         return False
-    
+
     def get_redirect(self) -> tuple[str, Optional[dict]]:
         """
         Gets the redirect target and arguments if this payload is a redirect.
         """
         return "", None
+
+    def get_target(self, request: Request) -> Optional[str]:
+        """
+        Gets the target element id for this payload, if applicable.
+        """
+        return None

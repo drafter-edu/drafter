@@ -31,19 +31,50 @@ class NavEvent:
         str
     ]  # The JSON blobs of data stored in the data--drafter-arguments attribute of the element and any parents.
     submitter: Optional[Any] = None
+    dom_id: Optional[str] = None
 
 
-def replaceHTML(tag: Any, html: str):
+def replace_html(tag: Any, html: str, is_fragment: bool = False) -> None:
     # Save current scroll position
     scroll_top = js.scrollY
     scroll_left = js.scrollX
-    # Replace content
-    r = js.document.createRange()
-    r.selectNode(tag)
-    fragment = r.createContextualFragment(html)
-    tag.replaceChildren(fragment)
-    # Restore scroll position
-    js.scrollTo(scroll_left, scroll_top)
+
+    try:
+        r = js.document.createRange()
+        r.selectNode(tag)
+        fragment = r.createContextualFragment(html)
+
+        if not is_fragment:
+            # Existing behavior: replace children only
+            tag.replaceChildren(fragment)
+            return
+
+        # is_fragment=True: replace the tag itself
+        parent = tag.parentNode
+        if parent is None:
+            # Detached node; best effort fallback: replace children
+            tag.replaceChildren(fragment)
+            return
+
+        # Snapshot fragment children because moving nodes mutates the fragment
+        new_nodes = list(fragment.childNodes)
+
+        if len(new_nodes) == 0:
+            # Nothing to insert; remove the tag
+            parent.removeChild(tag)
+        elif len(new_nodes) == 1:
+            # Simple node-for-node replacement
+            parent.replaceChild(new_nodes[0], tag)
+        else:
+            # Replace tag with multiple nodes:
+            # insert each before tag, then remove tag
+            for node in new_nodes:
+                parent.insertBefore(node, tag)
+            parent.removeChild(tag)
+
+    finally:
+        # Restore scroll position
+        js.scrollTo(scroll_left, scroll_top)
 
 
 def get_attribute_recursively(element: Any, attribute_name: str) -> list[str]:
@@ -90,14 +121,26 @@ class Client:
         if self.debug_panel:
             self.debug_panel.setHeaderTitle(title)
 
-    def goto(self, url: str, form_data: Any = None, action="system", arguments=None):
+    def goto(
+        self,
+        url: str,
+        form_data: Any = None,
+        action="system",
+        arguments=None,
+        dom_id=None,
+    ):
         if self.navigation_func is None:
             raise RuntimeError("Navigation function not set in Client.")
-        return self.initiate_request(url, form_data, True, action, arguments)
+        return self.initiate_request(url, form_data, True, action, arguments, dom_id)
 
     def navigate(self, nav_event: NavEvent):
         return self.initiate_request(
-            nav_event.url, nav_event.data, True, nav_event.kind, nav_event.arguments
+            nav_event.url,
+            nav_event.data,
+            True,
+            nav_event.kind,
+            nav_event.arguments,
+            nav_event.dom_id,
         )
 
     def setup_debug_menu(self, client_bridge):
@@ -141,12 +184,13 @@ class Client:
             target_route,
             arguments if arguments else {},
             {},
+            response.target or "",
         )
         self.request_count += 1
         return new_request
 
     def make_initial_request(self) -> Request:
-        return Request(0, "page_load", "index", {}, {})
+        return Request(0, "page_load", "index", {}, {}, "")
 
     def make_request(
         self,
@@ -154,6 +198,7 @@ class Client:
         form_data: Any = None,
         action: str = "submit",
         arguments: Optional[list[str]] = None,
+        dom_id: Optional[str] = None,
     ) -> Request:
         data = {}
         if is_pyodide():
@@ -193,7 +238,9 @@ class Client:
                 "Async request handling in Pyodide not implemented yet."
             )
         elif is_skulpt():
-            new_request = Request(self.request_count, action, url, data, {})
+            new_request = Request(
+                self.request_count, action, url, data, {}, dom_id or ""
+            )
             self.request_count += 1
             return new_request
         else:
@@ -220,11 +267,12 @@ class Client:
         remember=True,
         action="submit",
         arguments: Optional[list[str]] = None,
+        dom_id: Optional[str] = None,
     ):
         if self.navigation_func is None:
             raise RuntimeError("Navigation function not set in Client.")
         debug_log("client.initiate_request", url, form_data, remember, action)
-        request = self.make_request(url, form_data, action, arguments)
+        request = self.make_request(url, form_data, action, arguments, dom_id)
         if remember:
             self.add_to_history(request)
         next_visit = self.navigation_func(request)
@@ -253,6 +301,8 @@ class Client:
                 if not name:
                     return
 
+                dom_id = nearest_nav_link.id if "id" in nearest_nav_link else None
+
                 # Get the arguments from the clicked element and its parents
                 arguments = get_attribute_recursively(
                     target, Component.DRAFTER_DATA_ARGUMENT_NAME
@@ -278,6 +328,7 @@ class Client:
                         data=form_data,
                         submitter=nearest_nav_link,
                         arguments=arguments,
+                        dom_id=dom_id,
                     )
                     return on_navigation(nav_event)
                 else:
@@ -289,8 +340,10 @@ class Client:
             # Figure out submitter
             if "submitter" in event:
                 submitter = event.submitter
+                dom_id = submitter.id if submitter and "id" in submitter else None
             else:
                 submitter = None
+                dom_id = None
             # Get the form data
             if is_pyodide():
                 form_data = js.FormData.new(event.target, submitter)
@@ -317,6 +370,7 @@ class Client:
                 data=form_data,
                 submitter=submitter,
                 arguments=arguments,
+                dom_id=dom_id,
             )
             return on_navigation(nav_event)
 
@@ -347,10 +401,13 @@ class Client:
         body = response.body
         if body is not None:
             # Get the body element
-            element = js.document.getElementById(DRAFTER_TAG_IDS["BODY"])
+            element = js.document.getElementById(
+                response.target or DRAFTER_TAG_IDS["BODY"]
+            )
             if not element:
                 raise RuntimeError("Body element not found in document.")
-            replaceHTML(element, body)
+            print(response.target, element)
+            replace_html(element, body, bool(response.target))
 
             debug_log("client.update_site_complete", response)
             self.mount_navigation(element, self.navigate)
@@ -406,14 +463,14 @@ class Client:
             full_url = get_full_url()
             full_url.searchParams.set("route", url)
             js.history.replaceState(event.state, "", full_url.toString())
-            self.initiate_request(url, None, False, "back", None)
+            self.initiate_request(url, None, False, "back", None, None)
         else:
             debug_log("client.handle_popstate_no_state_or_request_id", event)
             js.document.title = self.site_title
             full_url = get_full_url()
             full_url.searchParams.delete("route")
             js.history.replaceState({}, "", full_url.toString())
-            self.initiate_request("index", None, False, "back", None)
+            self.initiate_request("index", None, False, "back", None, None)
 
     def register_hotkey(self, key_combo: str, callback: Callable[[], None]) -> None:
         debug_log("client.register_hotkey", key_combo)

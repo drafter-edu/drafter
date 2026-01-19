@@ -68,7 +68,7 @@ from drafter.styling.styling import (
 )
 from drafter.client_server.commands import get_main_server, set_main_server
 from drafter.router.commands import route
-from drafter.payloads.kinds.page import Page
+from drafter.payloads import Page, Fragment, Redirect
 from drafter.deploy import (
     hide_debug_information,
     show_debug_information,
@@ -87,6 +87,8 @@ from drafter.testing import assert_equal
 __all__ = [
     "dataclass",
     "Page",
+    "Fragment",
+    "Redirect",
     "Content",
     "PageContent",
     "Component",

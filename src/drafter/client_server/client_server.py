@@ -216,6 +216,11 @@ class ClientServer:
 
     def register_system_routes(self, routes: dict[str, Optional[Callable]]):
         # TODO: Finish this
+        """
+        --error
+        --about
+        --reset
+        """
         pass
 
     def default_reset_function(self, state):
@@ -453,6 +458,7 @@ class ClientServer:
                 )
                 self.handle_state_updates(request, payload, configuration)
                 messages = self.get_messages(request, payload, configuration)
+                target = self.get_target(request, payload, configuration)
             except VisitError as ve:
                 return self.make_error_response(
                     request, ve.error, status_code=ve.status_code
@@ -461,7 +467,7 @@ class ClientServer:
             # Return successfully
             try:
                 response = self.make_success_response(
-                    request.id, request.url, body, payload, messages
+                    request.id, request.url, body, payload, messages, target
                 )
             except Exception as e:
                 return self.make_error_response(
@@ -495,6 +501,7 @@ class ClientServer:
         body: Optional[str],
         payload: ResponsePayload,
         messages: List[Message],
+        target: Optional[str],
     ) -> Response:
         """
         Makes a successful response for the server with the given page.
@@ -511,11 +518,34 @@ class ClientServer:
             payload=payload,
             body=body,
             url=url,
+            target=target,
         )
         response.send_messages(messages)
         self.response_count += 1
 
         return response
+
+    def get_target(
+        self,
+        request: Request,
+        payload: ResponsePayload,
+        configuration: ClientServerConfiguration,
+    ) -> Optional[str]:
+        try:
+            return payload.get_target(request)
+        except Exception as e:
+            raise VisitError(
+                log_error(
+                    "request.payload_target_retrieval_failed",
+                    f"Error while retrieving target from payload for URL {request.url}: {e}",
+                    "client_server.visit",
+                    f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                    route=request.url,
+                    exception=e,
+                ),
+                505,
+            )
+        return None
 
     def get_messages(
         self,

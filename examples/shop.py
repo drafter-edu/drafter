@@ -7,6 +7,7 @@ class Item:
     name: str
     price: int
     stock: int
+    description: str
 
 
 @dataclass
@@ -30,6 +31,7 @@ def index(state: State) -> Page:
                 + " coins ("
                 + str(item.stock)
                 + " left in stock)",
+                Button("?", "get_help", arguments=Argument("name", item.name)),
             )
             for_sale.append(content)
     return Page(
@@ -49,6 +51,34 @@ def find_item(items2: list[Item], name: str) -> Optional[Item]:
         if item.name == name:
             return item
     return None
+
+
+@route
+def get_help(state: State, name: str) -> Fragment:
+    item = find_item(state.items2, name)
+    if item is None:
+        message = "Unknown item!"
+    else:
+        message = item.description
+    return Fragment(
+        state,
+        [
+            Span(
+                message,
+                Button("Hide", hide_help, arguments=Argument("name", name)),
+                id="help-" + name,
+            )
+        ],
+    )
+
+
+@route
+def hide_help(state: State, name: str) -> Fragment:
+    return Fragment(
+        state,
+        [Button("?", "get_help", arguments=Argument("name", name))],
+        target="help-" + name,
+    )
 
 
 @route
@@ -114,10 +144,12 @@ assert_equal(
 start_server(
     State(
         [
-            Item("Sword of Hope", 100, 3),
-            Item("John's Shield", 50, 5),
-            Item("Potion", 25, 10),
-            Item("!@#$%^&*\"')()<>", 100, 47),
+            Item(
+                "Sword of Hope", 100, 3, "A sword that gives you hope in tough times."
+            ),
+            Item("John's Shield", 50, 5, "A sturdy shield named after John."),
+            Item("Potion", 25, 10, "A magical potion that restores health."),
+            Item("!@#$%^&*\"')()<>", 100, 47, "A mysterious item with a strange name."),
         ],
         ["Potion", "Vulnery"],
         200,
