@@ -7,6 +7,7 @@ This module works with both Skulpt and Pyodide by using the unified `js` module 
 import json
 from drafter.data.response import Response
 from drafter.data.request import Request
+from drafter.monitor.events.config import UpdatedConfigurationEvent
 from drafter.site.site import DRAFTER_TAG_IDS, DRAFTER_TAG_CLASSES
 from drafter.monitor.telemetry import TelemetryEvent, TelemetryCorrelation
 from drafter.helpers.utils import is_skulpt, is_pyodide
@@ -105,6 +106,8 @@ class Client:
 
     def handle_event(self, event: dict) -> bool:
         debug_log("client.handle_event", event)
+        if event["event_type"] == UpdatedConfigurationEvent.event_type:
+            print("NEED TO HANDLE CONFIG UPDATE EVENT IN CLIENT")
         if self.debug_panel:
             # print("Attempting to handle event in debug panel:", event)
             try:

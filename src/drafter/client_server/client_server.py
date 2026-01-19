@@ -32,9 +32,10 @@ from drafter.config.client_server import ClientServerConfiguration
 
 
 ServerPhases = Union[
-    Literal["initialization"],
+    Literal["initializing"],
     Literal["initialized"],
     Literal["starting"],
+    Literal["configuring"],
     Literal["rendering"],
     Literal["started"],
     Literal["running"],
@@ -49,12 +50,14 @@ class ClientServer:
     routing them to the appropriate functions, and returning responses.
 
     The Server can be in one of the following phases:
-    - Initialization: During the initial ClientServer constructor call
-    - Initalized: After the constructor has completed, but before the `start` method is called
-    - Starting: During the execution of the `start` method
-    - Started: After the `start` method has completed, but before the first request is processed
-    - Running: After the first request is processed, and the server is fully operational
-    - Idle: When the server is not processing a request, but is still running and can receive requests. This is the default state of the server after it has started and is waiting for requests.
+    - initializing: During the initial ClientServer constructor call
+    - initialized: After the constructor has completed, but before the `start` method is called
+    - starting: During the execution of the `start` method
+    - configuring: During the processing of static and dynamic configuration
+    - rendering: During the rendering of the initial site into its HTML meta-structure (NOT the student's page content)
+    - started: After the `start` method has completed, but before the first request is processed
+    - running: After the first request is processed, and the server is fully operational
+    - idle: When the server is not processing a request, but is still running and can receive requests. This is the default state of the server after it has started and is waiting for requests.
 
     TODO: Ability to override ErrorPage rendering with custom error pages.
 
@@ -70,7 +73,7 @@ class ClientServer:
     custom_name: str
     state: SiteState
     _default_configuration: ClientServerConfiguration
-    phase: ServerPhases = "initialization"
+    phase: ServerPhases = "initializing"
     started: bool = False
 
     def __init__(self, custom_name: str) -> None:
@@ -604,15 +607,8 @@ class ClientServer:
             "client_server.add_route",
         )
 
-    def render_site(self) -> InitialSiteData:
-        """
-        Renders the initial site HTML. This is called to create the site
-        framing structure that includes the frame, header, body, footer, form, and
-        debug info.
-
-        :return: The rendered HTML of the initial site.
-        """
-        self.phase = "rendering"
+    def do_configuration(self) -> Optional[InitialSiteData]:
+        self.phase = "configuring"
         try:
             self.process_dynamic_configuration()
         except Exception as e:
@@ -625,6 +621,19 @@ class ClientServer:
             )
             site = f"<div><h1>Error processing site configuration</h1><p>{error.message}</p></div>"
             return InitialSiteData(site_html=site, site_title="Error", error=True)
+        print(
+            "Site configuration processed successfully", self.site.get_configuration()
+        )
+
+    def render_site(self) -> InitialSiteData:
+        """
+        Renders the initial site HTML. This is called to create the site
+        framing structure that includes the frame, header, body, footer, form, and
+        debug info.
+
+        :return: The rendered HTML of the initial site.
+        """
+        self.phase = "rendering"
         try:
             site = self.site.render()
             log_info(
@@ -645,7 +654,7 @@ class ClientServer:
             return InitialSiteData(site_html=site, site_title="Error", error=True)
         return site
 
-    def register_monitor_listener(self, handler: Any) -> None:
+    def register_event_listener(self, handler: Any) -> None:
         """
         Registers a listener to the monitor.
 
@@ -654,6 +663,7 @@ class ClientServer:
         """
         # self.monitor.register_listener(handler)
         self.event_bus.subscribe("*", handler)
+        self.event_bus.process_unprocessed_events()
 
     def get_default_configuration(self) -> ClientServerConfiguration:
         """

@@ -137,7 +137,6 @@ class ClientBridge:
         for header in initial_site_data.additional_header:
             add_header(header)
 
-    def setup_debug_menu(self) -> None:
         self.client.setup_debug_menu(self)
 
     def setup_navigation(self, handle_visit: Callable[[Request], Response]) -> None:
