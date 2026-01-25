@@ -2,11 +2,12 @@ export interface DrafterInitOptions {
     code?: string;
     url?: string;
     presentErrors?: boolean;
+    assetsUrl?: string;
 }
 
 export function clearDrafterSiteRoot() {
     const rootElement = document.getElementById(
-        "drafter-root--"
+        "drafter-root--",
     ) as HTMLElement;
     if (rootElement) {
         rootElement.innerHTML = "";
@@ -18,7 +19,7 @@ export function clearDrafterSiteRoot() {
 export function handleSystemError(
     message: string,
     error: any,
-    suggestion: string = "Please show this to your instructor for more help."
+    suggestion: string = "Please show this to your instructor for more help.",
 ) {
     console.error("[Drafter System Error]", message, error);
     alert(`Drafter System Error: ${message}\n${suggestion}\n${error}`);

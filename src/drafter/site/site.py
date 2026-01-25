@@ -2,17 +2,17 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 from drafter.config.client_server import ClientServerConfiguration
+from drafter.config.urls import determine_assets_url
 from drafter.styling.themes import get_theme_system
 from drafter.site.initial_site_data import InitialSiteData
-from drafter.site.site_information import SiteInformation
+from drafter.config.site_information import SiteInformation
 
 GLOBAL_DRAFTER_CSS_PATHS = {
-    True: "assets/css/drafter_debug.css",
-    False: "assets/css/drafter_deploy.css",
+    True: "css/drafter_debug.css",
+    False: "css/drafter_deploy.css",
 }
 
-BUILT_IN_ADDITIONAL_CSS_PATHS = ["assets/css/diff2html.min.css"]
-
+BUILT_IN_ADDITIONAL_CSS_PATHS = ["css/diff2html.min.css"]
 DRAFTER_TAG_IDS = {
     "ROOT": "drafter-root--",
     "SHADOW_HOST": "drafter-shadow-host--",
@@ -82,6 +82,12 @@ class Site:
         theme = theme_system.get_theme(configuration.theme)
         return list(theme.css_paths), list(theme.js_paths)
 
+    def remap_urls_to_assets(self, *urls, configuration):
+        return [
+            f"{determine_assets_url(configuration.override_asset_url)}/{url}"
+            for url in urls
+        ]
+
     def render(self) -> InitialSiteData:
         """
         Renders the site HTML structure.
@@ -93,6 +99,13 @@ class Site:
         additional_css, additional_js = self._get_theme_headers(configuration)
         additional_css.insert(0, GLOBAL_DRAFTER_CSS_PATHS[configuration.in_debug_mode])
         additional_css.extend(BUILT_IN_ADDITIONAL_CSS_PATHS)
+        additional_css = self.remap_urls_to_assets(
+            *additional_css, configuration=configuration
+        )
+        additional_js = self.remap_urls_to_assets(
+            *additional_js, configuration=configuration
+        )
+
         additional_headers, additional_styles, additional_scripts = [], [], []
 
         # Add CSS if present

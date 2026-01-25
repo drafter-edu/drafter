@@ -9,6 +9,7 @@ WEB_RUNTIMES = ("skulpt", "emscripten")
 def is_pyodide():
     return sys.platform == "emscripten"
 
+
 def is_web():
     return sys.platform in WEB_RUNTIMES
 
@@ -59,7 +60,7 @@ def not_in_skulpt(callable: Callable) -> Callable:
     return wrapper
 
 
-def seek_file_by_line(line, missing_value=None):
+def seek_filename_by_line(line, missing_value=None):
     """
     Seeks and returns the filename of a source file by examining the stack trace for a line
     matching the given string. This function allows looking into the recent call stack to
@@ -85,5 +86,4 @@ def seek_file_by_line(line, missing_value=None):
                 return data[0]
         return missing_value
     except Exception as e:
-        print(f"Error seeking file by line: {e}")
-        return missing_value
+        raise Exception(f"Error seeking filename by line: {e}")

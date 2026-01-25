@@ -40,17 +40,18 @@ theme_system = ThemeSystem()
 theme_system.register_theme(
     Theme(
         name="default",
-        css_paths=["assets/css/default.css"],
+        css_paths=["css/default.css"],
         js_paths=[],
     )
 )
 theme_system.register_theme(
     Theme(
         name="none",
-        css_paths=["assets/css/none.css"],
+        css_paths=["css/none.css"],
         js_paths=[],
     ),
 )
+# TODO: Classic Drafter theme
 
 
 def get_theme_system() -> ThemeSystem:

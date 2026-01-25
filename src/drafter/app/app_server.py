@@ -1,158 +1,114 @@
 import asyncio
-import json
-import os
 import webbrowser
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional, Set
 
+from drafter.config.urls import determine_assets_url
 from starlette.applications import Starlette
 from starlette.responses import HTMLResponse, Response
 from starlette.routing import Route, WebSocketRoute, Mount
 from starlette.staticfiles import StaticFiles
-from starlette.websockets import WebSocket
 import uvicorn
-from watchfiles import awatch, Change
 
 from drafter.app.templating import render_index_html
-from drafter.app.utils import pkg_assets_dir, pkg_scaffold_dir
-
-
-@dataclass
-class DevConfig:
-    title: str
-    user_path: Path
-    inline_py: bool
-    host: str
-    port: int
-    engine: str
-
-    @property
-    def ws_url(self) -> str:
-        return f"ws://{self.host}:{self.port}/ws"
-
-
-class ReloadHub:
-    """Tracks live WS connections; broadcasts reload on file changes."""
-
-    def __init__(self) -> None:
-        self._clients: Set[WebSocket] = set()
-        self._lock = asyncio.Lock()
-
-    async def register(self, ws: WebSocket) -> None:
-        await ws.accept()
-        async with self._lock:
-            self._clients.add(ws)
-
-    async def unregister(self, ws: WebSocket) -> None:
-        async with self._lock:
-            self._clients.discard(ws)
-
-    async def broadcast_reload(self) -> None:
-        payload = json.dumps({"type": "reload"})
-        async with self._lock:
-            dead: List[WebSocket] = []
-            for ws in self._clients:
-                try:
-                    await ws.send_text(payload)
-                except Exception:
-                    dead.append(ws)
-            for ws in dead:
-                self._clients.discard(ws)
+from drafter.app.utils import pkg_assets_dir
+from drafter.config.app_server import AppServerConfiguration, INTERNAL_ROUTES
+from drafter.app.watcher import ReloadHub, ws_endpoint, _watch_and_reload
 
 
 async def index(req) -> Response:
     app: Starlette = req.app  # type: ignore
-    cfg: DevConfig = app.state.cfg
-    user_code = cfg.user_path.read_text(encoding="utf-8")
+    config: AppServerConfiguration = app.state.config
+    user_code = app.state.user_path.read_text(encoding="utf-8")
     html = render_index_html(
-        title=cfg.title,
-        inline_py=cfg.inline_py,
-        user_code=user_code if cfg.inline_py else None,
-        python_url=str(cfg.user_path) if not cfg.inline_py else None,
-        dev_ws_url=cfg.ws_url,
-        assets_url_override="assets",  # we mount package assets under /assets
-        engine=cfg.engine,
+        title=config.site_title,
+        inline_py=config.inline_py,
+        user_code=user_code if config.inline_py else None,
+        python_url=str(app.state.user_path) if not config.inline_py else None,
+        dev_ws_url=config.ws_url,
+        assets_url=determine_assets_url(config.override_asset_url),
+        engine=config.engine,
     )
     return HTMLResponse(html)
 
 
-async def ws_endpoint(websocket: WebSocket):
-    hub: ReloadHub = websocket.app.state.hub  # type: ignore
-    await hub.register(websocket)
-    try:
-        while True:
-            # Keep the connection alive; client doesn't need to send messages
-            await websocket.receive_text()
-    except Exception:
-        pass
-    finally:
-        await hub.unregister(websocket)
+def make_app(config: AppServerConfiguration) -> Starlette:
+    # Determine paths
+    user_directory = (
+        Path(config.user_directory).resolve()
+        if isinstance(config.user_directory, str)
+        else Path.cwd()
+    )
+    user_path = user_directory / (
+        config.main_filename if isinstance(config.main_filename, str) else "main.py"
+    )
 
-
-def _watch_paths(cfg: DevConfig) -> Iterable[Path]:
-    yield cfg.user_path
-    # Optionally watch template & assets for live dev on your lib:
-    yield pkg_scaffold_dir() / "index.template.html"
-    assets = pkg_assets_dir()
-    if assets.exists():
-        yield assets
-
-
-async def _watch_and_reload(hub: ReloadHub, cfg: DevConfig):
-    # watchfiles supports multiple roots
-    roots = list(_watch_paths(cfg))
-    async for changes in awatch(*roots, stop_event=None):
-        # Debounce simple bursts by scheduling a single broadcast per tick
-        await hub.broadcast_reload()
-
-
-def make_app(cfg: DevConfig) -> Starlette:
-    assets_dir = pkg_assets_dir()
+    # Determine watches and routes
+    watch_paths = [
+        user_path,
+    ]
     routes = [
         Route("/", index),
-        WebSocketRoute("/ws", ws_endpoint),
-        Mount("/assets", app=StaticFiles(directory=str(assets_dir)), name="assets"),
+        WebSocketRoute(INTERNAL_ROUTES["WS"], ws_endpoint),
     ]
+    # Handle default assets
+    if not config.override_asset_url:
+        assets_dir = (
+            Path(config.asset_directory)
+            if isinstance(config.asset_directory, str)
+            else pkg_assets_dir()
+        )
+        if assets_dir.exists():
+            watch_paths.append(assets_dir)
+        routes.append(
+            Mount(
+                INTERNAL_ROUTES["ASSETS"],
+                app=StaticFiles(directory=str(assets_dir)),
+                name="assets",
+            )
+        )
+    # Serve user files if enabled
+    if config.serve_adjacent_files:
+        watch_paths.append(user_directory)
+        routes.append(
+            Mount(
+                "/",
+                app=StaticFiles(directory=str(user_directory)),
+                name="user_files",
+            ),
+        )
+    # Create app and assign state
     app = Starlette(routes=routes)
-    app.state.cfg = cfg
+    app.state.config = config
+    app.state.user_directory = user_directory
+    app.state.user_path = user_path
     app.state.hub = ReloadHub()
+    app.state.watch_paths = watch_paths
     return app
 
 
 def serve_app_once(
-    user_file: str,
-    title: str,
-    host: str = "localhost",
-    port: int = 8080,
-    inline_py: bool = True,
-    open_browser: bool = True,
-    engine: str = "skulpt",
+    config: AppServerConfiguration,
 ):
-    cfg = DevConfig(
-        title=title,
-        user_path=Path(user_file).resolve(),
-        inline_py=inline_py,
-        host=host,
-        port=port,
-        engine=engine,
-    )
-    app = make_app(cfg)
+    app = make_app(config)
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
     # Background watcher task
     async def supervisor():
-        watcher = asyncio.create_task(_watch_and_reload(app.state.hub, cfg))
+        watcher = asyncio.create_task(
+            _watch_and_reload(app.state.hub, app.state.watch_paths, config)
+        )
         try:
-            config = uvicorn.Config(
-                app, host=host, port=port, log_level="info", reload=False
+            uvicorn_config = uvicorn.Config(
+                app, host=config.host, port=config.port, log_level="info", reload=False
             )
-            server = uvicorn.Server(config)
-            if open_browser:
+            server = uvicorn.Server(uvicorn_config)
+            if config.open_browser:
                 # Delay a touch to let server bind
-                loop.call_later(0.8, lambda: webbrowser.open(f"http://{host}:{port}/"))
+                loop.call_later(
+                    0.8, lambda: webbrowser.open(f"http://{config.host}:{config.port}/")
+                )
             await server.serve()
         finally:
             watcher.cancel()

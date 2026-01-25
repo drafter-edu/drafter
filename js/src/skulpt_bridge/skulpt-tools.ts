@@ -19,7 +19,7 @@ const preStyle = `background-color: #f0f0f0; padding: 4px; border: 1px solid lig
 export function setupSkulpt() {
     if (typeof Sk === "undefined") {
         console.error(
-            "Skulpt (global `Sk`) not found. Ensure skulpt.js and skulpt-stdlib.js are loaded before drafter.js (served from your Python assets or a CDN)."
+            "Skulpt (global `Sk`) not found. Ensure skulpt.js and skulpt-stdlib.js are loaded before drafter.js (served from your Python assets or a CDN).",
         );
         throw new Error("Skulpt not found");
     }
@@ -29,7 +29,7 @@ export function setupSkulpt() {
     }
     Sk.environ.set$item(
         new Sk.builtin.str("DRAFTER_SKULPT"),
-        Sk.builtin.bool.true$
+        Sk.builtin.bool.true$,
     );
 
     Sk.configure({
@@ -78,7 +78,7 @@ export function saveSkulptFile(path: string, contents: string) {
 export async function startServer(
     pythonCode: string,
     mainFilename = "main",
-    presentErrors = true
+    presentErrors = true,
 ): Promise<void> {
     saveSkulptFile(mainFilename + ".py", pythonCode);
     try {
@@ -88,7 +88,7 @@ export async function startServer(
                     mainFilename,
                     false,
                     pythonCode,
-                    true
+                    true,
                 );
             })
             .then((result) => {
@@ -102,7 +102,7 @@ export async function startServer(
                         error as pyBaseException,
                         mainFilename + ".py",
                         pythonCode,
-                        false
+                        false,
                     );
                     throw errorMessage;
                 }
@@ -115,7 +115,7 @@ export async function startServer(
                 error as pyBaseException,
                 mainFilename + ".py",
                 pythonCode,
-                false
+                false,
             );
             throw errorMessage;
         }
@@ -126,7 +126,7 @@ export async function startServer(
 function showError(
     err: pyBaseException,
     filenameExecuted: string,
-    code: string
+    code: string,
 ) {
     try {
         console.error(err, err.args.v[0].v);
@@ -139,7 +139,7 @@ function showError(
         throw handleSystemError(
             "An error occurred while processing a Skulpt error. This likely means the original error was not a standard Python exception or had an unexpected format.",
             error,
-            "Original Skulpt error: " + JSON.stringify(err)
+            "Original Skulpt error: " + JSON.stringify(err),
         );
     }
 }
@@ -147,7 +147,7 @@ function showError(
 function presentRunError(
     error: pyBaseException,
     filenameExecuted: string,
-    code: string
+    code: string,
 ) {
     let label = error.tp$name;
     let category = "runtime";
@@ -159,7 +159,7 @@ function presentRunError(
 function buildTraceback(
     error: pyBaseException,
     filenameExecuted: string,
-    code: string
+    code: string,
 ) {
     return error.traceback.reverse().map((frame) => {
         if (!frame) {
@@ -189,7 +189,7 @@ function buildTraceback(
 function buildTracebackNoHTML(
     error: pyBaseException,
     filenameExecuted: string,
-    code: string
+    code: string,
 ) {
     return error.traceback.reverse().map((frame) => {
         if (!frame) {
@@ -220,7 +220,7 @@ function convertSkulptError(
     error: pyBaseException,
     filenameExecuted: string,
     code: string,
-    withFrame: boolean = true
+    withFrame: boolean = true,
 ) {
     let name = error.tp$name;
     let args = Sk.ffi.remapToJs(error.args);
@@ -238,7 +238,7 @@ function convertSkulptError(
                     `... Hiding ${
                         allFrames.length - 3
                     } other stack frames ...,`,
-                    ...allFrames.slice(-3, -2)
+                    ...allFrames.slice(-3, -2),
                 );
             } else {
                 result.push(...allFrames);
@@ -251,7 +251,7 @@ function convertSkulptError(
             (withFrame ? buildTraceback : buildTracebackNoHTML)(
                 error,
                 filenameExecuted,
-                code
+                code,
             ).join("\n<br>");
     }
     if (!withFrame) {
@@ -271,7 +271,7 @@ function convertSkulptError(
 
 export function getSkulptFile(
     path: string,
-    okayIfNotFound = true
+    okayIfNotFound = true,
 ): string | undefined {
     if (
         Sk.builtinFiles !== undefined &&

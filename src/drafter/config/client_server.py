@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Optional, Callable, Union, Literal
 
-from drafter.site.site_information import SiteInformation
+from drafter.config.site_information import SiteInformation
 
 
 @dataclass
@@ -24,6 +24,8 @@ class ClientServerConfiguration:
     framed: bool = True
     theme: str = "default"
     deploy_image_path: str = ""
+
+    override_asset_url: Union[bool, str] = False
     # Literal HTML content
     additional_header_content: list[str] = field(default_factory=list)
     # Raw literal CSS
@@ -54,6 +56,7 @@ class ClientServerConfiguration:
             "information": self.information.to_json() if self.information else None,
             "framed": self.framed,
             "theme": self.theme,
+            "override_asset_url": self.override_asset_url,
             "deploy_image_path": self.deploy_image_path,
             "additional_header_content": self.additional_header_content,
             "additional_style_content": self.additional_style_content,
@@ -86,6 +89,10 @@ class ClientServerConfiguration:
             additional_js_content=list(self.additional_js_content),
             additional_script_content=list(self.additional_script_content),
             use_shadow_dom=self.use_shadow_dom,
+            server_name=self.server_name,
+            root_element_id=self.root_element_id,
+            system_routes=dict(self.system_routes),
+            override_asset_url=self.override_asset_url,
         )
 
     def update_multiple_configuration(self, **kwargs):

@@ -1,7 +1,5 @@
-from importlib.resources import files
 from typing import Optional
 from jinja2 import Environment, BaseLoader
-from pathlib import Path
 
 from drafter.app.utils import pkg_scaffold_dir
 from drafter.site.site import DRAFTER_TAG_IDS
@@ -21,7 +19,7 @@ def render_index_html(
     user_code: Optional[str],
     python_url: Optional[str],
     dev_ws_url: Optional[str],
-    assets_url_override: Optional[str] = None,
+    assets_url: Optional[str] = None,
     engine: str = "skulpt",
 ) -> str:
     """
@@ -33,9 +31,7 @@ def render_index_html(
 
     def static(asset_name: str) -> str:
         # In dev we mount /assets → package dir, and in build we copy to ./assets
-        if assets_url_override:
-            return f"{assets_url_override}/{asset_name}"
-        return f"assets/{asset_name}"
+        return f"{assets_url}/{asset_name}"
 
     return template.render(
         title=title,
@@ -44,5 +40,6 @@ def render_index_html(
         python_url=python_url or "",
         dev_ws_url=dev_ws_url,
         drafter_root=DRAFTER_TAG_IDS["ROOT"],
+        assets_url=assets_url or "",
         static=static,
     )

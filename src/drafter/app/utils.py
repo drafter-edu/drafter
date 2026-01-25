@@ -1,9 +1,9 @@
 import shutil
-from importlib.resources import files
 from pathlib import Path
 
 
 def pkg_root() -> Path:
+    # src/drafter/app/utils.py -> src/drafter/
     return Path(__file__).resolve().parent.parent
 
 

@@ -1,14 +1,45 @@
-from drafter.helpers.utils import is_web, seek_file_by_line
+import os
+from typing import Optional, Union
+from drafter.helpers.utils import is_web, seek_filename_by_line
+from drafter.config.engines import EngineType
+from drafter.config.app_server import AppServerConfiguration
+
+
+MaybeBoolStr = Optional[Union[bool, str]]
 
 
 def start_server(
+    # ClientServer-specific parameters
     initial_state=None,
-    main_user_path=None,
     server=None,
+    server_name: Optional[str] = None,
+    in_debug_mode: Optional[bool] = None,
+    framed: Optional[bool] = None,
+    theme: Optional[str] = None,
+    site_title: Optional[str] = None,
+    information: Optional[dict] = None,
+    # AppServer-specific parameters
+    verbose: Optional[bool] = None,
+    user_directory: MaybeBoolStr = None,
+    main_filename: MaybeBoolStr = None,
+    asset_directory: MaybeBoolStr = None,
+    show_filename_as: MaybeBoolStr = None,
+    engine: Optional[EngineType] = None,
+    port: Optional[int] = None,
+    host: Optional[str] = None,
+    prerender_initial_page: Optional[bool] = None,
+    open_browser: Optional[bool] = None,
+    inline_py: Optional[bool] = None,
+    use_reloader: Optional[bool] = None,
     **extra_configuration,
 ) -> None:
     """
     Starts the Drafter server with the given initial state.
+
+    This function is the entry-point for both the AppServer and the ClientServer, which means
+    that it has two distinct modes of operation: one for web (ClientServer) and one for local
+    (AppServer). Therefore, its parameters are actually a superset of the parameters needed
+    for either mode.
 
     :param initial_state: The initial state to set for the server.
     :param main_user_path: The path to the main user file (optional).
@@ -48,11 +79,38 @@ def start_server(
     else:
         from drafter.app.app_server import serve_app_once
 
-        if main_user_path is None:
-            # TODO: Provide more ways to specify the main file
-            main_user_path = seek_file_by_line("start_server", "main.py")
-        print("Starting local Drafter server...")
-        # TODO: Title should come from configuration
-        serve_app_once(
-            user_file=main_user_path, title="Local Drafter App", engine="skulpt"
-        )
+        config = AppServerConfiguration()
+        # TODO: Handle environment variables
+        # TODO: Handle extra command line arguments
+        config.extract_from_args(locals())
+
+        # TODO: Move this logic into AppServerConfiguration?
+        if config.user_directory is False:
+            found_path = seek_filename_by_line("start_server", config.main_filename)
+            config.user_directory = (
+                os.path.dirname(found_path) if found_path else os.getcwd()
+            )
+            config.main_filename = (
+                os.path.basename(found_path)
+                if found_path
+                else (config.main_filename or "main.py")
+            )
+
+        elif not os.path.isdir(config.user_directory):
+            if os.path.isfile(config.user_directory):
+                config.main_filename = os.path.basename(config.user_directory)
+                config.user_directory = os.path.dirname(config.user_directory)
+
+        else:
+            # TODO: Logic seems redundant, maybe only do it in app_server?
+            config.main_filename = (
+                config.main_filename if config.main_filename is not False else "main.py"
+            )
+
+        if config.show_filename_as is False:
+            config.show_filename_as = config.main_filename
+
+        if config.verbose:
+            print("Starting local Drafter server...")
+
+        serve_app_once(config)
