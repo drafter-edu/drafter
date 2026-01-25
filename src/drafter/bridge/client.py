@@ -146,7 +146,14 @@ class Client:
     def setup_debug_menu(self, client_bridge):
         debug_log("client.setup_debug_menu")
         try:
-            self.debug_panel = js.DebugPanel(DRAFTER_TAG_IDS["DEBUG"], client_bridge)
+            if is_pyodide():
+                self.debug_panel = js.DebugPanel.new(
+                    DRAFTER_TAG_IDS["DEBUG"], client_bridge
+                )
+            else:
+                self.debug_panel = js.DebugPanel(
+                    DRAFTER_TAG_IDS["DEBUG"], client_bridge
+                )
         except Exception as e:
             print(f"[Drafter Client] Failed to set up debug menu because of {e}")
             raise e

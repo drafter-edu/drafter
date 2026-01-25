@@ -1,17 +1,19 @@
+import sys
 import os
 from typing import Optional, Union
 from drafter.helpers.utils import is_web, seek_filename_by_line
 from drafter.config.engines import EngineType
 from drafter.config.app_server import AppServerConfiguration
+from drafter.client_server.commands import get_main_server
 
 
 MaybeBoolStr = Optional[Union[bool, str]]
 
 
 def start_server(
-    # ClientServer-specific parameters
     initial_state=None,
     server=None,
+    # ClientServer-specific parameters
     server_name: Optional[str] = None,
     in_debug_mode: Optional[bool] = None,
     framed: Optional[bool] = None,
@@ -45,12 +47,11 @@ def start_server(
     :param main_user_path: The path to the main user file (optional).
     :param extra_configuration: Additional keyword arguments (for backward compatibility, currently ignored).
     """
+    server = server or get_main_server()
     if is_web():
         # TODO: This logic should really be encoded in a function somewhere
         from drafter.bridge import ClientBridge
-        from drafter.client_server.commands import get_main_server
 
-        server = server or get_main_server()
         server.do_configuration(extra_configuration)
         configuration = server.get_current_configuration()
 
@@ -77,12 +78,19 @@ def start_server(
         handle_visit(initial_request)
 
     else:
+        from drafter.config.cli import parse_command_line_args
         from drafter.app.app_server import serve_app_once
+
+        command_line_args = parse_command_line_args(sys.argv)
+        # TODO: Any command_line args must be converted into something the engine can understand
 
         config = AppServerConfiguration()
         # TODO: Handle environment variables
         # TODO: Handle extra command line arguments
+        config.merge_in_args(vars(command_line_args))
         config.extract_from_args(locals())
+
+        print("Final server configuration:", config)
 
         # TODO: Move this logic into AppServerConfiguration?
         if config.user_directory is False:
@@ -113,4 +121,7 @@ def start_server(
         if config.verbose:
             print("Starting local Drafter server...")
 
-        serve_app_once(config)
+        if config.prerender_initial_page:
+            server.do_configuration(extra_configuration)
+
+        serve_app_once(server, config, initial_state)

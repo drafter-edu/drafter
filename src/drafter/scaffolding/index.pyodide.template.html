@@ -1,55 +1,35 @@
-<!DOCTYPE html>
-<html lang="{{ meta_lang }}">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="keywords" content="{{ meta_keywords }}" />
-    <meta name="description" content="{{ meta_description }}" />
-    <meta name="author" content="{{ meta_author }}" />
-    <title>{{ title or "Drafter App" }}</title>
-    {% if additional_css %}
-      <!-- Additional CSS from user configuration (trusted input) -->
-      <style>{{ additional_css }}</style>
-    {% endif %}
-    {% if additional_header %}
-      <!-- Additional header content from user configuration (trusted input) -->
-      {{ additional_header }}
-    {% endif %}
-  </head>
-  <body>
-    <div id="loading-message">
-    Loading Pyodide, please wait...
-    </div>
-    <div id="{{ drafter_root }}"></div>
-    {% if inline_py %}<script type="text/python" id="user-code">{{ user_code }}</script>{% endif %}
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js"></script>
-    <script src="{{ static('js/drafter.pyodide.js') }}"></script>
-    <script>
-            (async () => {
-              {% if dev_ws_url %}
-              const ws = new WebSocket('{{ dev_ws_url }}');
-              ws.onmessage = (e) => {
-                const msg = JSON.parse(e.data);
-                if (msg.type === 'reload') location.reload();
-              };
-              {% endif %}
-              
-              const pyodide = await window.Drafter.setupPyodide();
-              await window.Drafter.mountDrafterDirectory();
-              document.getElementById('loading-message').remove();
-
-              await window.Drafter.runStudentCode({code: "import os; print(os.listdir('./drafter/'))"});
-
-              const app = await window.Drafter.runStudentCode({ 
-                {% if inline_py %}
-                code: document.getElementById('user-code').textContent
-                {% else %}
-                url: '{{ python_url }}'
-                {% endif %}
-              });
-              console.log("[Drafter AppServer Scaffolding] Student Code Initialized:");
-              
-            })();
-    </script>
-  </body>
-</html>
+{% extends "index.base.template.html" %}
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js"></script>
+  <script src="{{ static('js/drafter.pyodide.js') }}"></script>
+{% endblock scripts %}
+{% block initialization %}
+  (async () => {
+  try {
+  {% if dev_ws_url %}
+    const ws = new WebSocket('{{ dev_ws_url }}');
+    ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'reload') location.reload();
+    };
+  {% endif %}
+  const pyodide = await window.Drafter.setupPyodide();
+  {% if mount_drafter_locally %}
+    await window.Drafter.mountDrafterDirectory();
+  {% else %}
+    await window.Drafter.mountDrafterRemote();
+  {% endif %}
+  await window.Drafter.runStudentCode({code: "import os; print(os.listdir('./drafter/'))"});
+  const app = await window.Drafter.runStudentCode({
+  {% if inline_py %}
+    code: document.getElementById('user-code').textContent
+  {% else %}
+    url: '{{ python_url }}'
+  {% endif %}
+  });
+  console.log("[Drafter AppServer Scaffolding] Student Code Initialized:");
+  } finally {
+  document.getElementById('--drafter-initial-loading-white-screen').remove();
+  }
+  })();
+{% endblock initialization %}

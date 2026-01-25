@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="{{ meta_lang }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="keywords" content="{{ meta_keywords }}" />
+    <meta name="description" content="{{ meta_description }}" />
+    <meta name="author" content="{{ meta_author }}" />
+    <title>{{ title or "Drafter App" }}</title>
+    {% if compiled_headers %}
+      <!-- Additional header content from precompilation -->
+      {{ compiled_headers }}
+    {% endif %}
+    <style>
+      #--drafter-initial-loading-white-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        opacity: .5;
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="--drafter-initial-loading-white-screen">Loading, please wait...</div>
+    <div id="{{ drafter_root }}">
+      {% if compiled_body %}
+        <!-- Precompiled body content -->
+        {{ compiled_body }}
+      {% else %}
+        <!-- Drafter App will initialize here -->
+      {% endif %}
+    </div>
+    {% if inline_py %}<script type="text/python" id="user-code">{{ user_code }}</script>{% endif %}
+    {% block scripts %}<!-- Engine-specific scripts -->{% endblock %}
+    <script>
+      {% block initialization %}
+        // Engine-specific initialization logic
+      {% endblock %}
+    </script>
+  </body>
+</html>

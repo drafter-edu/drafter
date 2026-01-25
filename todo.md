@@ -88,6 +88,7 @@
 - [ ] Setting to disable certain features
     - [ ] Disable external links
     - [ ] Disable ability to set custom JS/CSS/Headers
+- [ ] Interface option to reload the current window without the framed/debug mode, using LocalStorage
 
 Pie in the sky:
 

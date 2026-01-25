@@ -45,6 +45,7 @@ class AppServerConfiguration:
     asset_directory: Union[bool, str] = False
     show_filename_as: Union[bool, str] = False
     serve_adjacent_files: bool = True
+    mount_drafter_locally: bool = False
 
     override_asset_url: Union[bool, str] = False
 

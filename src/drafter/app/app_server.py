@@ -2,17 +2,21 @@ import asyncio
 import webbrowser
 from pathlib import Path
 
-from drafter.config.urls import determine_assets_url
+from drafter.data.request import Request
 from starlette.applications import Starlette
 from starlette.responses import HTMLResponse, Response
 from starlette.routing import Route, WebSocketRoute, Mount
 from starlette.staticfiles import StaticFiles
 import uvicorn
 
+from drafter import get_main_server
+from drafter.client_server.client_server import ClientServer
+from drafter.config.urls import determine_assets_url
 from drafter.app.templating import render_index_html
 from drafter.app.utils import pkg_assets_dir
 from drafter.config.app_server import AppServerConfiguration, INTERNAL_ROUTES
 from drafter.app.watcher import ReloadHub, ws_endpoint, _watch_and_reload
+from drafter.data.response import Response as DrafterResponse
 
 
 async def index(req) -> Response:
@@ -27,11 +31,28 @@ async def index(req) -> Response:
         dev_ws_url=config.ws_url,
         assets_url=determine_assets_url(config.override_asset_url),
         engine=config.engine,
+        compiled_body=app.state.compiled_body,
+        compiled_headers=app.state.compiled_headers,
+        mount_drafter_locally=config.mount_drafter_locally,
     )
     return HTMLResponse(html)
 
 
-def make_app(config: AppServerConfiguration) -> Starlette:
+def compile_server(
+    server: ClientServer, config: AppServerConfiguration, initial_state
+) -> tuple[str, str]:
+    server.do_start(initial_state=initial_state)
+    initial_request = Request(-1, "precompilation", "index", {}, {}, "")
+    response: DrafterResponse = server.do_visit(initial_request)
+    # TODO: Extract compiled body and headers
+    body = response.body or "Error during precompilation."
+
+    return body, ""
+
+
+def make_app(
+    server: ClientServer, config: AppServerConfiguration, initial_state
+) -> Starlette:
     # Determine paths
     user_directory = (
         Path(config.user_directory).resolve()
@@ -76,6 +97,11 @@ def make_app(config: AppServerConfiguration) -> Starlette:
                 name="user_files",
             ),
         )
+    # Precompile if needed
+    if config.prerender_initial_page:
+        compiled_body, compiled_headers = compile_server(server, config, initial_state)
+    else:
+        compiled_body, compiled_headers = "", ""
     # Create app and assign state
     app = Starlette(routes=routes)
     app.state.config = config
@@ -83,13 +109,17 @@ def make_app(config: AppServerConfiguration) -> Starlette:
     app.state.user_path = user_path
     app.state.hub = ReloadHub()
     app.state.watch_paths = watch_paths
+    app.state.compiled_body = compiled_body
+    app.state.compiled_headers = compiled_headers
     return app
 
 
 def serve_app_once(
+    server: ClientServer,
     config: AppServerConfiguration,
+    initial_state,
 ):
-    app = make_app(config)
+    app = make_app(server, config, initial_state)
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
