@@ -8,9 +8,12 @@ class RouteIntrospection:
     """
     Holds introspection information about a route function.
 
-    :ivar expected_parameters: A list of parameter names that the function expects.
-    :ivar show_names: A dictionary mapping parameter names to a boolean indicating
-        whether they should be shown as keyword arguments.
+    Attributes:
+        expected_parameters: A list of parameter names that the function expects.
+        show_names: A dictionary mapping parameter names to a boolean indicating
+            whether they should be shown as keyword arguments.
+        expected_types: A dictionary mapping parameter names to their expected types.
+        function_name: The name of the function.
     """
 
     expected_parameters: List[str]
@@ -22,7 +25,8 @@ class RouteIntrospection:
         """
         Generate a string representation of the function signature.
 
-        :return: A string representing the function signature.
+        Returns:
+            A string representing the function signature.
         """
         parts = []
         for param in self.expected_parameters:
@@ -41,8 +45,11 @@ def get_signature(func):
     """
     Get the signature of a function.
 
-    :param func: The function to get the signature of.
-    :return: The signature of the function.
+    Args:
+        func: The function to get the signature of.
+
+    Returns:
+        The signature of the function.
     """
     # Get function signature
     signature_parameters = inspect.signature(func).parameters

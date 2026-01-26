@@ -20,8 +20,11 @@ def make_value_expandable(value):
     """
     Wraps long string values in an expandable span for better display.
 
-    :param value: The value to potentially make expandable
-    :return: HTML string with expandable wrapper if needed
+    Args:
+        value: The value to potentially make expandable
+
+    Returns:
+        HTML string with expandable wrapper if needed
     """
     if isinstance(value, str) and len(value) > TOO_LONG_VALUE_THRESHOLD:
         return f"<span class='expandable'>{value}</span>"
@@ -32,8 +35,11 @@ def value_to_html(value):
     """
     Converts a value to an HTML-safe representation.
 
-    :param value: The value to convert
-    :return: HTML-escaped string representation
+    Args:
+        value: The value to convert
+
+    Returns:
+        HTML-escaped string representation
     """
     return make_value_expandable(html.escape(repr(value)))
 
@@ -42,8 +48,11 @@ def is_generator(iterable):
     """
     Checks if an object is a generator (has __iter__ but not __len__).
 
-    :param iterable: The object to check
-    :return: True if it's a generator, False otherwise
+    Args:
+        iterable: The object to check
+
+    Returns:
+        True if it's a generator, False otherwise
     """
     return hasattr(iterable, "__iter__") and not hasattr(iterable, "__len__")
 
@@ -51,11 +60,11 @@ def is_generator(iterable):
 def image_to_bytes(value):
     if is_skulpt():
         with io.BytesIO() as output:
-            value.save(output, format='PNG')
+            value.save(output, format="PNG")
             return output.getvalue()
     elif is_pyodide():
         with io.BytesIO() as output:
-            value.save(output, format='PNG')
+            value.save(output, format="PNG")
             return output.getvalue()
     else:
         raise RuntimeError("Unsupported environment for image_to_bytes")
@@ -65,8 +74,11 @@ def repr_pil_image(value):
     """
     Creates an HTML representation of a PIL Image.
 
-    :param value: A PIL Image object
-    :return: HTML img tag string
+    Args:
+        value: A PIL Image object
+
+    Returns:
+        HTML img tag string
     """
     filename = value.filename if hasattr(value, "filename") else None
     if not filename:
@@ -79,10 +91,10 @@ def repr_pil_image(value):
         if not value:
             return "<strong>Empty Image</strong>"
         try:
-            image_data = base64.b64encode(image_to_bytes(value)).decode('latin1')
+            image_data = base64.b64encode(image_to_bytes(value)).decode("latin1")
             image_src = f"data:image/png;base64,{image_data}"
             escaped_data = json.dumps(image_data)
-            full_call = f"Image.open(io.BytesIO(base64.b64decode({escaped_data}.encode(\"latin1\"))))"
+            full_call = f'Image.open(io.BytesIO(base64.b64decode({escaped_data}.encode("latin1"))))'
             return f"<img src='{image_src}' alt='PIL Image' />"
         except Exception as e:
             return f"<strong>Error displaying image: {e}</strong>"
@@ -95,9 +107,13 @@ def safe_repr(value: Any, handled=None, escape=True):
     """
     Creates a safe HTML representation of a value, handling circular references.
 
-    :param value: The value to represent
-    :param handled: Set of already-handled object IDs (for circular reference detection)
-    :return: HTML-safe string representation
+    Args:
+        value: The value to represent
+        handled: Set of already-handled object IDs (for circular reference detection)
+        escape: Whether to HTML-escape the representation
+
+    Returns:
+        HTML-safe string representation
     """
     obj_id = id(value)
     if handled is None:

@@ -12,8 +12,9 @@ def add_script(
     """
     Adds a script to the page.
 
-    :param src: The script source URL or content.
-    :param is_page_specific: If True, marks the script as page-specific (will be removed on navigation).
+    Args:
+        src: The script source URL or content.
+        is_page_specific: If True, marks the script as page-specific (will be removed on navigation).
     """
     script = document.createElement("script")
     script.src = src
@@ -32,8 +33,9 @@ def add_style(
     """
     Adds CSS content to the page by creating a style element.
 
-    :param css: CSS content to add to the page.
-    :param is_page_specific: If True, marks the style as page-specific (will be removed on navigation).
+    Args:
+        css: CSS content to add to the page.
+        is_page_specific: If True, marks the style as page-specific (will be removed on navigation).
     """
     style = document.createElement("style")
     style.innerHTML = css
@@ -64,8 +66,9 @@ def add_link(
     """
     Adds a link element to the page for CSS files.
 
-    :param css_link: The href of the CSS file to add.
-    :param is_page_specific: If True, marks the link as page-specific (will be removed on navigation).
+    Args:
+        css_link: The href of the CSS file to add.
+        is_page_specific: If True, marks the link as page-specific (will be removed on navigation).
     """
     link = document.createElement("link")
     link.setAttribute("type", "text/css")
@@ -85,7 +88,8 @@ def add_header(root, header_content: str) -> None:
     """
     Adds content to the document head.
 
-    :param header_content: HTML content to add to the head.
+    Args:
+        header_content: HTML content to add to the head.
     """
     # TODO: For shadow DOM need to find the pseudo-head and append to that instead of the real head
     head = document.getElementsByTagName("head")[0]
@@ -117,7 +121,8 @@ def remove_existing_theme(root, theme_class: str) -> None:
     """
     Removes existing theme-related link and style elements from the document head.
 
-    :param theme_class: The CSS class used to identify theme-related elements.
+    Args:
+        theme_class: The CSS class used to identify theme-related elements.
     """
     elements = list(document.querySelectorAll(f"link.{theme_class}"))
     elements.extend(document.querySelectorAll(f"script.{theme_class}"))

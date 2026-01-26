@@ -9,8 +9,11 @@ def set_main_server(server: ClientServer):
     """
     Sets the main server to the given server. This is useful for testing purposes.
 
-    :param server: The server to set as the main server
-    :return: None
+    Args:
+        server: The server to set as the main server
+
+    Returns:
+        None
     """
     global MAIN_SERVER
     MAIN_SERVER = server
@@ -38,6 +41,7 @@ def get_main_event_bus() -> EventBus:
     """
     Get the main event bus.
 
-    :return: The main event bus.
+    Returns:
+        The main event bus.
     """
     return get_main_server().event_bus

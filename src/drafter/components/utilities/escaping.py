@@ -7,9 +7,12 @@ def make_safe_json_argument(value):
     Converts the given value to a JSON-compatible string and escapes special
     HTML characters, making it safe for inclusion in HTML contexts.
 
-    :param value: The input value to be converted and escaped. The value can
-        be of any type that is serializable to JSON.
-    :return: An HTML-safe JSON string representation of the input value.
+    Args:
+        value: The input value to be converted and escaped. The value can
+            be of any type that is serializable to JSON.
+
+    Returns:
+        An HTML-safe JSON string representation of the input value.
     """
     return html.escape(json.dumps(value), True)
 
@@ -24,12 +27,13 @@ def make_safe_argument(value):
     output is safe to insert into an HTML document, protecting against
     potential HTML injection attacks.
 
-    :param value: Any Python object that needs to be converted to a
-        JSON string and HTML escaped.
-    :type value: Any
-    :return: A string containing the HTML-escaped and JSON-encoded
+    Args:
+        value: Any Python object that needs to be converted to a
+            JSON string and HTML escaped.
+
+    Returns:
+        A string containing the HTML-escaped and JSON-encoded
         representation of the input value.
-    :rtype: str
     """
     return html.escape(json.dumps(value), True)
 
@@ -40,9 +44,10 @@ def make_safe_name(value):
     special characters to prevent injection attacks or unintended HTML rendering. It ensures that
     the provided input is safely transformed into an escaped HTML string.
 
-    :param value: The input value to be escaped. It is converted to a string if it is not already.
-    :type value: Any
-    :return: The escaped HTML version of the input value as a string.
-    :rtype: str
+    Args:
+        value: The input value to be escaped. It is converted to a string if it is not already.
+
+    Returns:
+        The escaped HTML version of the input value as a string.
     """
     return html.escape(str(value))

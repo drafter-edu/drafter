@@ -65,13 +65,14 @@ class ClientServer:
 
     TODO: Ability to override ErrorPage rendering with custom error pages.
 
-    :ivar custom_name: A custom name for the server, useful for debugging.
-    :ivar router: The Router instance that handles URL routing.
-    :ivar state: The state information about the student's site.
-    :ivar response_count: A counter for the number of responses made, used to assign unique IDs.
-    :ivar logger: An AuditLogger instance for logging errors, warnings, and info.
-    :ivar monitor: A Monitor instance for tracking telemetry data.
-    :ivar configuration: The ClientServerConfiguration instance for server settings.
+    Attributes:
+        custom_name: A custom name for the server, useful for debugging.
+        router: The Router instance that handles URL routing.
+        state: The state information about the student's site.
+        response_count: A counter for the number of responses made, used to assign unique IDs.
+        logger: An AuditLogger instance for logging errors, warnings, and info.
+        monitor: A Monitor instance for tracking telemetry data.
+        configuration: The ClientServerConfiguration instance for server settings.
     """
 
     custom_name: str
@@ -127,7 +128,8 @@ class ClientServer:
 
         The resulting merged configuration becomes the default configuration for the server.
 
-        :param command_line_arguments: The command line arguments to process for configuration.
+        Args:
+            command_line_arguments: The command line arguments to process for configuration.
         """
         # TODO: Finish this
 
@@ -149,8 +151,9 @@ class ClientServer:
         """
         Updates the server configuration with new values.
 
-        :param update_default: If True, also updates the default configuration with the new value.
-        :param kwargs: The configuration keys and their new values to update.
+        Args:
+            update_default: If True, also updates the default configuration with the new value.
+            kwargs: The configuration keys and their new values to update.
         """
         for key, value in kwargs.items():
             self.site.update_configuration(key, value)
@@ -179,7 +182,8 @@ class ClientServer:
         """
         Starts the server with the given initial state.
 
-        :param initial_state: The initial state to set for the server.
+        Args:
+            initial_state: The initial state to set for the server.
         """
         self.phase = "starting"
         if initial_state is not None:
@@ -433,8 +437,11 @@ class ClientServer:
         """
         Uses the information in the request to find and call the appropriate route function.
 
-        :param request: The request to process.
-        :return: The result of the route function.
+        Args:
+            request: The request to process.
+
+        Returns:
+            The result of the route function.
         """
         self.start_timer()
         self.phase = "running"
@@ -506,11 +513,14 @@ class ClientServer:
         """
         Makes a successful response for the server with the given page.
 
-        :param request_id: The ID of the request.
-        :param body: The rendered body content.
-        :param payload: The payload to include in the response.
-        :param messages: A list of messages to include in the response.
-        :return: The response from the server.
+        Args:
+            request_id: The ID of the request.
+            body: The rendered body content.
+            payload: The payload to include in the response.
+            messages: A list of messages to include in the response.
+
+        Returns:
+            The response from the server.
         """
         response = Response(
             id=self.response_count,
@@ -581,9 +591,12 @@ class ClientServer:
         """
         Makes an error response for the server with the given message and status code.
 
-        :param message: The error message to include in the response.
-        :param status_code: The HTTP status code for the error.
-        :return: The error response from the server.
+        Args:
+            message: The error message to include in the response.
+            status_code: The HTTP status code for the error.
+
+        Returns:
+            The error response from the server.
         """
         try:
             configuration = self.get_current_configuration()
@@ -636,8 +649,9 @@ class ClientServer:
 
         TODO: Inspect that the route has a valid route signature.
 
-        :param url: The URL to add the route to.
-        :param func: The function to call when the route is accessed.
+        Args:
+            url: The URL to add the route to.
+            func: The function to call when the route is accessed.
         """
         self.router.add_route(url, func)
         log_data(
@@ -673,7 +687,8 @@ class ClientServer:
         framing structure that includes the frame, header, body, footer, form, and
         debug info.
 
-        :return: The rendered HTML of the initial site.
+        Returns:
+            The rendered HTML of the initial site.
         """
         self.phase = "rendering"
         try:
@@ -700,8 +715,11 @@ class ClientServer:
         """
         Registers a listener to the monitor.
 
-        :param handler: The handler function to register.
-        :return: None
+        Args:
+            handler: The handler function to register.
+
+        Returns:
+            None
         """
         # self.monitor.register_listener(handler)
         self.event_bus.subscribe("*", handler)
@@ -711,7 +729,8 @@ class ClientServer:
         """
         Returns the default configuration for the client server.
 
-        :return: The default ClientServerConfiguration instance.
+        Returns:
+            The default ClientServerConfiguration instance.
         """
         return self._default_configuration.copy()
 
@@ -719,7 +738,8 @@ class ClientServer:
         """
         Returns the current configuration for the client server.
 
-        :return: The current ClientServerConfiguration instance.
+        Returns:
+            The current ClientServerConfiguration instance.
         """
         return self.site.get_configuration()
 
@@ -727,7 +747,8 @@ class ClientServer:
         """
         Returns the ID of the current request being processed, if any.
 
-        :return: The current request ID, or None if no request is being processed.
+        Returns:
+            The current request ID, or None if no request is being processed.
         """
         current_request = self.requests.get_current()
         return current_request.id if current_request is not None else None

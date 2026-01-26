@@ -29,47 +29,26 @@ class ServerConfiguration:
     - Test deployment parameters facilitate url-based
       customization for specific development or testing environments.
 
-    :ivar host: The server's host address.
-    :type host: str
-    :ivar port: The port on which the server runs.
-    :type port: int
-    :ivar debug: Whether to enable debug mode for the server.
-    :type debug: bool
-    :ivar backend: The backend system used (e.g., "none", "flask").
-    :type backend: str
-    :ivar reloader: Whether to use the reloader (typically for development purposes).
-    :type reloader: bool
-    :ivar skip: Whether to skip running the server, often used for testing purposes.
-    :type skip: bool
-
-    :ivar title: Title for the website server.
-    :type title: str
-    :ivar framed: Whether the website should operate in a framed mode.
-    :type framed: bool
-    :ivar skulpt: Whether the Skulpt environment is enabled for the server.
-    :type skulpt: bool
-
-    :ivar style: The page styling framework or theme.
-    :type style: str
-    :ivar additional_header_content: A list of additional header content for the page.
-    :type additional_header_content: List[str]
-    :ivar additional_css_content: A list of additional CSS content for the page.
-    :type additional_css_content: List[str]
-    :ivar src_image_folder: Source folder for server-stored images.
-    :type src_image_folder: str
-    :ivar save_uploaded_files: Whether uploaded files should be saved to storage.
-    :type save_uploaded_files: bool
-    :ivar deploy_image_path: Path for deploying images (defaults vary based on Skulpt usage).
-    :type deploy_image_path: str
-
-    :ivar cdn_skulpt: CDN URL for accessing Skulpt library files.
-    :type cdn_skulpt: str
-    :ivar cdn_skulpt_std: CDN URL for accessing the Skulpt standard library.
-    :type cdn_skulpt_std: str
-    :ivar cdn_skulpt_drafter: CDN URL for accessing Skulpt-related Drafter files.
-    :type cdn_skulpt_drafter: str
-    :ivar cdn_drafter_setup: CDN URL for accessing Skulpt Drafter setup files.
-    :type cdn_drafter_setup: str
+    Attributes:
+        host: The server's host address.
+        port: The port on which the server runs.
+        debug: Whether to enable debug mode for the server.
+        backend: The backend system used (e.g., "none", "flask").
+        reloader: Whether to use the reloader (typically for development purposes).
+        skip: Whether to skip running the server, often used for testing purposes.
+        title: Title for the website server.
+        framed: Whether the website should operate in a framed mode.
+        skulpt: Whether the Skulpt environment is enabled for the server.
+        style: The page styling framework or theme.
+        additional_header_content: A list of additional header content for the page.
+        additional_css_content: A list of additional CSS content for the page.
+        src_image_folder: Source folder for server-stored images.
+        save_uploaded_files: Whether uploaded files should be saved to storage.
+        deploy_image_path: Path for deploying images (defaults vary based on Skulpt usage).
+        cdn_skulpt: CDN URL for accessing Skulpt library files.
+        cdn_skulpt_std: CDN URL for accessing the Skulpt standard library.
+        cdn_skulpt_drafter: CDN URL for accessing Skulpt-related Drafter files.
+        cdn_drafter_setup: CDN URL for accessing Skulpt Drafter setup files.
     """
 
     # Launch parameters

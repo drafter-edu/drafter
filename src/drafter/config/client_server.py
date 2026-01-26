@@ -115,7 +115,8 @@ class ClientServerConfiguration:
         """
         Updates a specific configuration key with a new value.
 
-        :param key: The configuration key to update (e.g., 'theme', 'in_debug_mode').
+        Args:
+            key: The configuration key to update (e.g., 'theme', 'in_debug_mode').
         """
         if not hasattr(self, key):
             # TODO: InvalidConfigurationKeyError

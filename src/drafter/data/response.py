@@ -10,20 +10,21 @@ class Response:
     """
     Represents a response sent from the server to the client.
 
-    :ivar id: The unique identifier for this response.
-    :ivar request_id: The identifier of the request this response corresponds to.
-    :ivar payload: The payload content to send to the client (usually a Page).
-    :ivar status_code: The status code of the response.
-    :ivar message: A human-readable message associated with the response.
-    :ivar url: The URL associated with the response. Could technically be different from the request URL.
-    :ivar body: The full HTML body of the response, which will be injected directly into the site's frame.
-    :ivar target: An optional target element ID that the body should be injected into. If None, defaults to the body element.
-    :ivar channels: A dictionary of channels for additional communication. Common
-        channels include "audio", "before", and "after". The latter two are used to
-        send script tags to be executed before and after the main content is rendered.
-    :ivar errors: A list of DrafterError instances representing errors that occurred.
-    :ivar warnings: A list of DrafterWarning instances representing warnings that occurred.
-    :ivar metadata: A dictionary of additional metadata associated with the response.
+    Attributes:
+        id: The unique identifier for this response.
+        request_id: The identifier of the request this response corresponds to.
+        payload: The payload content to send to the client (usually a Page).
+        status_code: The status code of the response.
+        message: A human-readable message associated with the response.
+        url: The URL associated with the response. Could technically be different from the request URL.
+        body: The full HTML body of the response, which will be injected directly into the site's frame.
+        target: An optional target element ID that the body should be injected into. If None, defaults to the body element.
+        channels: A dictionary of channels for additional communication. Common
+            channels include "audio", "before", and "after". The latter two are used to
+            send script tags to be executed before and after the main content is rendered.
+        errors: A list of DrafterError instances representing errors that occurred.
+        warnings: A list of DrafterWarning instances representing warnings that occurred.
+        metadata: A dictionary of additional metadata associated with the response.
     """
 
     id: int
@@ -43,7 +44,8 @@ class Response:
         """
         Sends multiple messages through their specified channels.
 
-        :param messages: A list of Message instances to send.
+        Args:
+            messages: A list of Message instances to send.
         """
         for message in messages:
             self.send(message)
@@ -52,10 +54,11 @@ class Response:
         """
         Sends a message through the specified channel.
 
-        :param channel_name: The name of the channel to send the message through.
-        :param message: The content of the message to send.
-        :param kind: The kind of message (default is "script").
-        :param sigil: An optional sigil for special processing.
+        Args:
+            channel_name: The name of the channel to send the message through.
+            message: The content of the message to send.
+            kind: The kind of message (default is "script").
+            sigil: An optional sigil for special processing.
         """
         channel_name = message.channel_name
         if channel_name not in self.channels:

@@ -348,8 +348,8 @@ class Component:
         """
         Gets the ID of the component if it has one.
 
-        :return: The ID of the component, or an auto-generated one if none is set.
-        :rtype: str
+        Returns:
+            The ID of the component, or an auto-generated one if none is set.
         """
         return self.extra_settings.get("id", f"drafter-component-{id(self)}")
 
@@ -361,11 +361,14 @@ class Component:
 
         Default implementation returns True.
 
-        :param router: The router used to resolve URLs
-        :param state: The current state of the server
-        :param configuration: The configuration of the server
-        :param request: The request being processed
-        :return: True if the component is valid, False otherwise
+        Args:
+            router: The router used to resolve URLs
+            state: The current state of the server
+            configuration: The configuration of the server
+            request: The request being processed
+
+        Returns:
+            True if the component is valid, False otherwise
         """
         return None
 
@@ -374,12 +377,12 @@ class Component:
         Updates the style of a specific setting and stores it in the
         extra_settings dictionary with a key formatted as "style_{style}".
 
-        :param style: The key representing the style to be updated
-        :type style: str
-        :param value: The value to associate with the given style key
-        :type value: Any
-        :return: Returns the instance of the object after updating the style
-        :rtype: self
+        Args:
+            style: The key representing the style to be updated
+            value: The value to associate with the given style key
+
+        Returns:
+            Returns the instance of the object after updating the style
         """
         self.extra_settings[f"style_{style}"] = value
         return self
@@ -395,12 +398,12 @@ class Component:
 
         TODO: Should this update the fields of the component as well, if the attr corresponds to a field?
 
-        :param attr: The key of the attribute to be updated in the dictionary.
-        :type attr: str
-        :param value: The value to set for the specified key in the dictionary.
-        :type value: Any
-        :return: The instance of the object after the update.
-        :rtype: Self
+        Args:
+            attr: The key of the attribute to be updated in the dictionary.
+            value: The value to set for the specified key in the dictionary.
+
+        Returns:
+            The instance of the object after the update.
         """
         self.extra_settings[attr] = value
         return self

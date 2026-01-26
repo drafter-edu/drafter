@@ -14,8 +14,9 @@ class Redirect(ResponsePayload):
     updating the history as appropriate. In other words, this is like a proper
     version of a function call that the client is aware of.
 
-    :param target_route: The route to redirect to.
-    :param arguments: Optional arguments to pass to the target route.
+    Args:
+        target_route: The route to redirect to.
+        arguments: Optional arguments to pass to the target route.
     """
 
     target_route: str

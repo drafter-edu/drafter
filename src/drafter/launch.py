@@ -43,9 +43,28 @@ def start_server(
     (AppServer). Therefore, its parameters are actually a superset of the parameters needed
     for either mode.
 
-    :param initial_state: The initial state to set for the server.
-    :param main_user_path: The path to the main user file (optional).
-    :param extra_configuration: Additional keyword arguments (for backward compatibility, currently ignored).
+    Args:
+        initial_state: The initial state to set for the server.
+        server: The server instance to use (optional).
+        server_name: The name of the server.
+        in_debug_mode: Whether to enable debug mode.
+        framed: Whether to frame the content.
+        theme: The theme to use.
+        site_title: The title of the site.
+        information: Additional site information.
+        verbose: Whether to enable verbose output.
+        user_directory: The user directory path.
+        main_filename: The main file name.
+        asset_directory: The asset directory path.
+        show_filename_as: How to display the filename.
+        engine: The rendering engine to use.
+        port: The port to run on.
+        host: The host to run on.
+        prerender_initial_page: Whether to prerender the initial page.
+        open_browser: Whether to open a browser.
+        inline_py: Whether to use inline Python.
+        use_reloader: Whether to use a reloader.
+        extra_configuration: Additional keyword arguments (for backward compatibility, currently ignored).
     """
     server = server or get_main_server()
     if is_web():

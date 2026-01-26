@@ -29,8 +29,11 @@ def only_skulpt(callable: Callable) -> Callable:
     Decorator to make a function only run in Skulpt (web) environments.
     If not in Skulpt, the function will return None.
 
-    :param callable: The function to decorate.
-    :return: The decorated function.
+    Args:
+        callable: The function to decorate.
+
+    Returns:
+        The decorated function.
     """
 
     @wraps(callable)
@@ -47,8 +50,11 @@ def not_in_skulpt(callable: Callable) -> Callable:
     Decorator to make a function only run outside of Skulpt (web) environments.
     If in Skulpt, the function will return None.
 
-    :param callable: The function to decorate.
-    :return: The decorated function.
+    Args:
+        callable: The function to decorate.
+
+    Returns:
+        The decorated function.
     """
 
     @wraps(callable)
@@ -67,15 +73,15 @@ def seek_filename_by_line(line, missing_value=None):
     find where a specific line of code was executed. If no match is found, an optional
     missing value can be returned.
 
-    :param line: The string to search for in the stack trace. It is compared with the
-        stripped contents of each entry in the stack trace.
-    :type line: str
-    :param missing_value: An optional value to return if no match is found in the stack
-        trace. Defaults to None.
-    :type missing_value: Any
-    :return: The filename associated with the supplied line in the stack trace if found,
+    Args:
+        line: The string to search for in the stack trace. It is compared with the
+            stripped contents of each entry in the stack trace.
+        missing_value: An optional value to return if no match is found in the stack
+            trace. Defaults to None.
+
+    Returns:
+        The filename associated with the supplied line in the stack trace if found,
         or the missing_value if no match is located.
-    :rtype: str | None
     """
     try:
         from traceback import extract_stack

@@ -18,11 +18,12 @@ class TelemetryCorrelation:
     """
     Correlation information for telemetry events.
 
-    :ivar causation_id: The ID of the causation event; if this event was caused by another event.
-    :ivar route: The route name/url associated with the event
-    :ivar request_id: The ID of the associated request
-    :ivar response_id: The ID of the associated response
-    :ivar dom_id: The ID of the associated DOM element if this came from the Bridge Client.
+    Attributes:
+        causation_id: The ID of the causation event; if this event was caused by another event.
+        route: The route name/url associated with the event
+        request_id: The ID of the associated request
+        response_id: The ID of the associated response
+        dom_id: The ID of the associated DOM element if this came from the Bridge Client.
     """
 
     causation_id: Optional[int] = None
@@ -35,7 +36,8 @@ class TelemetryCorrelation:
         """
         Converts the TelemetryCorrelation instance to a JSON-serializable dictionary.
 
-        :return: A dictionary representation of the TelemetryCorrelation.
+        Returns:
+            A dictionary representation of the TelemetryCorrelation.
         """
         return {
             "causation_id": self.causation_id,
@@ -51,20 +53,21 @@ class TelemetryEvent:
     """
     A telemetry event that should be published for anyone listening.
 
-    :ivar event_type: The type of telemetry event. This is a dot-separated string indicating
-        the category and subcategory of the event. Major categories include "logger", "request",
-        "response", "state", "config", "dom".
-    :ivar correlation: Correlation information for the event. This helps track where the event
-        originated and its context.
-    :ivar source: The source of the event, typically the component/module and the function/method name.
-        For example, "client_server.handle_request".
-    :ivar id: A unique identifier for the telemetry event.
-    :ivar version: The version of the telemetry event structure.
-    :ivar level: The severity level of the event (e.g., "info", "warning", "error").
-    :ivar timestamp: The timestamp when the event was created.
-    :ivar data: Additional data associated with the event. This can be any relevant information
-        that provides context about the event. Must be JSON-serializable. The exact
-        structure should be defined based on the event_type.
+    Attributes:
+        event_type: The type of telemetry event. This is a dot-separated string indicating
+            the category and subcategory of the event. Major categories include "logger", "request",
+            "response", "state", "config", "dom".
+        correlation: Correlation information for the event. This helps track where the event
+            originated and its context.
+        source: The source of the event, typically the component/module and the function/method name.
+            For example, "client_server.handle_request".
+        id: A unique identifier for the telemetry event.
+        version: The version of the telemetry event structure.
+        level: The severity level of the event (e.g., "info", "warning", "error").
+        timestamp: The timestamp when the event was created.
+        data: Additional data associated with the event. This can be any relevant information
+            that provides context about the event. Must be JSON-serializable. The exact
+            structure should be defined based on the event_type.
     """
 
     event_type: str
@@ -86,7 +89,8 @@ class TelemetryEvent:
         """
         Converts the TelemetryEvent instance to a JSON-serializable dictionary.
 
-        :return: A dictionary representation of the TelemetryEvent.
+        Returns:
+            A dictionary representation of the TelemetryEvent.
         """
         return {
             "event_type": self.event_type,

@@ -21,9 +21,12 @@ def route(
     Once added, the route will be available at the given URL; the function name will be used if no URL is provided.
     When you go to the URL, the function will be called and its return value will be displayed.
 
-    :param url: The URL to add the route to. If None, the function name will be used.
-    :param server: The server to add the route to. Defaults to the main server.
-    :return: The modified route function.
+    Args:
+        url: The URL to add the route to. If None, the function name will be used.
+        server: The server to add the route to. Defaults to the main server.
+
+    Returns:
+        The modified route function.
     """
 
     server = server or get_main_server()

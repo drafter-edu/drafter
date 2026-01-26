@@ -9,9 +9,12 @@ def try_convert_datetime(value, target_type) -> tuple[bool, Any]:
           return None, or use current date/time. Currently just uses the current date/time 
           for missing parts.
 
-    :param value: The value to convert.
-    :param target_type: The target type (datetime, date, or time).
-    :return: A tuple (success: bool, converted_value: Any).
+    Args:
+        value: The value to convert.
+        target_type: The target type (datetime, date, or time).
+
+    Returns:
+        A tuple (success: bool, converted_value: Any).
     """
     if target_type not in {datetime, date, time}:
         return False, value

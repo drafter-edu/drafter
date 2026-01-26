@@ -31,8 +31,9 @@ def register_hotkey(keyCombo: str, callback: Callable[[], None]) -> None:  # typ
     """
     Registers a hotkey combination to trigger a callback function when pressed.
 
-    :param keyCombo: The key combination string (e.g., "Ctrl+K").
-    :param callback: The function to call when the hotkey is pressed.
+    Args:
+        keyCombo: The key combination string (e.g., "Ctrl+K").
+        callback: The function to call when the hotkey is pressed.
     """
     pass
 
@@ -41,7 +42,8 @@ def setup_debug_menu(client_bridge) -> None:  # type: ignore
     """
     Sets up the debug menu in the client bridge.
 
-    :param client_bridge: The ClientBridge instance to set up the debug menu for.
+    Args:
+        client_bridge: The ClientBridge instance to set up the debug menu for.
     """
     pass
 
@@ -50,6 +52,7 @@ def handle_event(event_json: dict) -> None:  # type: ignore
     """
     Handles a telemetry event in the client bridge.
 
-    :param event_json: The telemetry event data as a JSON-serializable dictionary.
+    Args:
+        event_json: The telemetry event data as a JSON-serializable dictionary.
     """
     pass

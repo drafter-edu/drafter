@@ -62,10 +62,9 @@ class LinkContent(Component):
     It provides utility methods for verifying the URL, handling its structure,
     and processing associated arguments.
 
-    :ivar url: The URL of the link.
-    :type url: str
-    :ivar text: The display text of the link.
-    :type text: str
+    Attributes:
+        url: The URL of the link.
+        text: The display text of the link.
     """
 
     url: str

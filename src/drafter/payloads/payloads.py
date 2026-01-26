@@ -27,7 +27,8 @@ class ResponsePayload:
         """
         Verifies that the payload is valid given the current state and configuration.
 
-        :return: A VerificationFailure if the payload is invalid, otherwise None.
+        Returns:
+            A VerificationFailure if the payload is invalid, otherwise None.
         """
         return None
 

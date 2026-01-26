@@ -29,8 +29,9 @@ class Label(Component):
     A label component for form fields.
     Can be associated with a form element using the for_id parameter.
 
-    :param text: The text content of the label
-    :param for_id: Optional ID of the form element this label is for
+    Args:
+        text: The text content of the label
+        for_id: Optional ID of the form element this label is for
     """
 
     text: str
@@ -226,9 +227,10 @@ class DateTimeInput(FormComponent):
 
     TODO: Handle __eq__ and __hash__
 
-    :param name: The name of the form field
-    :param default_value: Optional default value in ISO 8601 format (YYYY-MM-DDTHH:MM) or python datetime
-    :param kwargs: Additional HTML attributes
+    Args:
+        name: The name of the form field
+        default_value: Optional default value in ISO 8601 format (YYYY-MM-DDTHH:MM) or python datetime
+        kwargs: Additional HTML attributes
     """
 
     default_value: Union[str, None]
@@ -264,9 +266,10 @@ class DateInput(FormComponent):
     """
     A date input component for selecting dates.
 
-    :param name: The name of the form field
-    :param default_value: Optional default value in ISO 8601 format (YYYY-MM-DD)
-    :param kwargs: Additional HTML attributes
+    Args:
+        name: The name of the form field
+        default_value: Optional default value in ISO 8601 format (YYYY-MM-DD)
+        kwargs: Additional HTML attributes
     """
 
     default_value: Union[str, None]
@@ -305,9 +308,10 @@ class TimeInput(FormComponent):
     """
     A time input component for selecting times.
 
-    :param name: The name of the form field
-    :param default_value: Optional default value in ISO 8601 format (HH:MM or HH:MM:SS)
-    :param kwargs: Additional HTML attributes
+    Args:
+        name: The name of the form field
+        default_value: Optional default value in ISO 8601 format (HH:MM or HH:MM:SS)
+        kwargs: Additional HTML attributes
     """
 
     default_value: Union[str, None]

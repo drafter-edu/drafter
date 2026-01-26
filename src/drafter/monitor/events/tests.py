@@ -12,14 +12,16 @@ from drafter.monitor.events.base import BaseEvent
 class TestCaseEvent(BaseEvent):
     """
     Event emitted for a single test case result.
-    :ivar line: Line number where the test is located
-    :ivar caller: The code that called the test
-    :ivar passed: Whether the test passed
-    :ivar given: String representation of what was given
-    :ivar expected: String representation of what was expected
-    :ivar given_formatted: Formatted version of the given value
-    :ivar expected_formatted: Formatted version of the expected value
-    :ivar diff_html: HTML diff showing the differences (if test failed)
+
+    Attributes:
+        line: Line number where the test is located
+        caller: The code that called the test
+        passed: Whether the test passed
+        given: String representation of what was given
+        expected: String representation of what was expected
+        given_formatted: Formatted version of the given value
+        expected_formatted: Formatted version of the expected value
+        diff_html: HTML diff showing the differences (if test failed)
     """
 
     line: int = -1

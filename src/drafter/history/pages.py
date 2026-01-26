@@ -13,15 +13,16 @@ class VisitedPage:
     """
     Records information about a page visit during request processing.
 
-    :ivar url: The URL of the page being visited
-    :ivar function: The route function being called
-    :ivar arguments: String representation of the function arguments
-    :ivar status: Current status of the page processing
-    :ivar button_pressed: The button namespace if a button was pressed
-    :ivar original_page_content: The original page content for debugging
-    :ivar old_state: The state before the page was processed
-    :ivar started: Timestamp when processing started
-    :ivar stopped: Timestamp when processing finished (None if still processing)
+    Attributes:
+        url: The URL of the page being visited
+        function: The route function being called
+        arguments: String representation of the function arguments
+        status: Current status of the page processing
+        button_pressed: The button namespace if a button was pressed
+        original_page_content: The original page content for debugging
+        old_state: The state before the page was processed
+        started: Timestamp when processing started
+        stopped: Timestamp when processing finished (None if still processing)
     """
 
     url: str
@@ -38,8 +39,9 @@ class VisitedPage:
         """
         Updates the status and optionally the page content.
 
-        :param new_status: The new status string
-        :param original_page_content: Optional page content to store
+        Args:
+            new_status: The new status string
+            original_page_content: Optional page content to store
         """
         self.status = new_status
         if original_page_content is not None:
@@ -51,7 +53,8 @@ class VisitedPage:
         """
         Marks the page processing as finished.
 
-        :param new_status: The final status string
+        Args:
+            new_status: The final status string
         """
         self.status = new_status
         self.stopped = datetime.now()
@@ -60,7 +63,8 @@ class VisitedPage:
         """
         Returns an HTML representation of the visited page.
 
-        :return: HTML string
+        Returns:
+            HTML string
         """
         function_name = self.function.__name__
         return (

@@ -22,10 +22,13 @@ def update_style(component: PageContent, style: str, value: str) -> PageContent:
     - background-color
     - font-size
 
-    :param component: The component to update
-    :param style: The name of the style property to change
-    :param value: The value to set the style property to (should be a string).
-    :return: Returns the original component (updates its values)
+    Args:
+        component: The component to update
+        style: The name of the style property to change
+        value: The value to set the style property to (should be a string).
+
+    Returns:
+        The original component (updates its values)
     """
     if isinstance(component, str):
         component = Text(component)
@@ -48,10 +51,13 @@ def update_attr(component: PageContent, attr: str, value: str) -> PageContent:
     - class
     - title
 
-    :param component: The component to update
-    :param attr: The name of the attribute to change
-    :param value: The value to set the attribute to (should be a string).
-    :return: Returns the original component (updates its values)
+    Args:
+        component: The component to update
+        attr: The name of the attribute to change
+        value: The value to set the attribute to (should be a string).
+
+    Returns:
+        The original component (updates its values)
     """
     if isinstance(component, str):
         component = Text(component)
@@ -67,8 +73,11 @@ def float_right(component: PageContent) -> PageContent:
     """
     Floats the component to the right.
 
-    :param component: The component to float right
-    :return: Returns the original component (updated)
+    Args:
+        component: The component to float right
+
+    Returns:
+        The original component (updated)
     """
     return update_style(component, "float", "right")
 
@@ -77,8 +86,11 @@ def float_left(component: PageContent) -> PageContent:
     """
     Floats the component to the left.
 
-    :param component: The component to float left
-    :return: Returns the original component (updated)
+    Args:
+        component: The component to float left
+
+    Returns:
+        The original component (updated)
     """
     return update_style(component, "float", "left")
 

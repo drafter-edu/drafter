@@ -71,8 +71,9 @@ class ClientBridge:
         Processes messages from a channel and adds them to the page.
         Supports 'script' and 'style' message kinds.
 
-        :param channel: The channel containing messages to process.
-        :param is_page_specific: If True, marks content as page-specific (will be removed on navigation).
+        Args:
+            channel: The channel containing messages to process.
+            is_page_specific: If True, marks content as page-specific (will be removed on navigation).
         """
         # console_log("Message Received:" + repr(channel))
         if channel:
@@ -199,9 +200,10 @@ class ClientBridge:
         """
         Adds CSS content to the shadow DOM by creating a style element.
 
-        :param shadow_root: The shadow root to append the style to.
-        :param css: CSS content to add.
-        :param with_class: Optional class name to add to the style element.
+        Args:
+            shadow_root: The shadow root to append the style to.
+            css: CSS content to add.
+            with_class: Optional class name to add to the style element.
         """
         style = document.createElement("style")
         style.innerHTML = css
@@ -215,9 +217,10 @@ class ClientBridge:
         """
         Adds a link element to the shadow DOM for CSS files.
 
-        :param shadow_root: The shadow root to append the link to.
-        :param css_link: The href of the CSS file to add.
-        :param with_class: Optional class name to add to the link element.
+        Args:
+            shadow_root: The shadow root to append the link to.
+            css_link: The href of the CSS file to add.
+            with_class: Optional class name to add to the link element.
         """
         link = document.createElement("link")
         link.setAttribute("type", "text/css")

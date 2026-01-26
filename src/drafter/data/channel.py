@@ -7,12 +7,13 @@ class Message:
     """
     Represents a message to be sent through a channel.
 
-    :ivar channel_name: The name of the channel through which the message will be sent.
-    :ivar content: The content of the message.
-    :ivar kind: The kind of message (e.g., "script", "style").
-    :ivar sigil: An optional sigil for special processing. A sigil is a marker that indicates
-        whether the message has been seen or processed before; it can be used to avoid duplicate
-        injections of the same content.
+    Attributes:
+        channel_name: The name of the channel through which the message will be sent.
+        content: The content of the message.
+        kind: The kind of message (e.g., "script", "style").
+        sigil: An optional sigil for special processing. A sigil is a marker that indicates
+            whether the message has been seen or processed before; it can be used to avoid duplicate
+            injections of the same content.
     """
 
     channel_name: str
@@ -26,8 +27,9 @@ class Channel:
     """
     Represents a communication channel for additional content.
 
-    :ivar name: The name of the channel.
-    :ivar messages: The messages to be sent through the channel.
+    Attributes:
+        name: The name of the channel.
+        messages: The messages to be sent through the channel.
     """
 
     name: str

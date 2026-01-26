@@ -8,10 +8,11 @@ class Subscription:
     """
     Represents a subscription to a topic on the bus.
 
-    :ivar topic: The topic to which the subscription is made.
-    :ivar handler: The handler function to be called when an event is published to the topic.
-    :ivar filter: An optional filter function to filter events.
-    :ivar once: Whether the subscription should be removed after the first event.
+    Attributes:
+        topic: The topic to which the subscription is made.
+        handler: The handler function to be called when an event is published to the topic.
+        filter: An optional filter function to filter events.
+        once: Whether the subscription should be removed after the first event.
     """
 
     topic: str
@@ -26,10 +27,11 @@ class EventBus:
     Represents an event bus for communication between
     different parts of the system.
 
-    :ivar subscribers: The list of subscribers to the bus.
-    :ivar unprocessed_events: The list of unprocessed events. When
-        there are no subscribers, events are queued here.
-    :ivar maximum_queue_size: The maximum size of the event queue.
+    Attributes:
+        subscribers: The list of subscribers to the bus.
+        unprocessed_events: The list of unprocessed events. When
+            there are no subscribers, events are queued here.
+        maximum_queue_size: The maximum size of the event queue.
     """
 
     maximum_queue_size: int = 500
@@ -40,7 +42,8 @@ class EventBus:
         """
         Publish an event to the bus.
 
-        :param event: The telemetry event to publish.
+        Args:
+            event: The telemetry event to publish.
         """
         if len(self.unprocessed_events) >= self.maximum_queue_size:
             self.unprocessed_events.pop(0)
@@ -54,8 +57,9 @@ class EventBus:
         """
         Process an event for a given subscription.
 
-        :param event: The telemetry event to process.
-        :param subscription: The subscription to process the event for.
+        Args:
+            event: The telemetry event to process.
+            subscription: The subscription to process the event for.
         """
         if subscription.topic.startswith(event.event_type) or subscription.topic == "*":
             if subscription.filter is None or subscription.filter(event):
@@ -73,8 +77,14 @@ class EventBus:
         """
         Subscribe a handler to a topic.
 
-        :param topic: The topic to subscribe to.
-        :param handler: The handler to call when an event is published to the topic.
+        Args:
+            topic: The topic to subscribe to.
+            handler: The handler to call when an event is published to the topic.
+            filter: An optional filter function to filter events.
+            once: Whether to only handle one event.
+
+        Returns:
+            The subscription object.
         """
         subscription = Subscription(topic, handler, filter, once)
         self.subscribers.append(subscription)
@@ -89,7 +99,8 @@ class EventBus:
         """
         Unsubscribe a handler from the bus.
 
-        :param subscription: The subscription to remove.
+        Args:
+            subscription: The subscription to remove.
         """
         if subscription in self.subscribers:
             self.subscribers.remove(subscription)

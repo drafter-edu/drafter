@@ -30,10 +30,11 @@ class Page(ResponsePayload):
     while components will be rendered as their respective HTML. Components should be classes that inherit from
     ``drafter.components.PageContent``. If the content is not a list, a ValueError will be raised.
 
-    :param state: The state of the page. If only one argument is provided, this will default to be ``None``.
-    :param content: The content of the page. Must always be provided as a list of strings and components.
-    :param css: Optional CSS content to inject dynamically when this page is rendered.
-    :param js: Optional JavaScript content to inject dynamically when this page is rendered.
+    Args:
+        state: The state of the page. If only one argument is provided, this will default to be ``None``.
+        content: The content of the page. Must always be provided as a list of strings and components.
+        css: Optional CSS content to inject dynamically when this page is rendered.
+        js: Optional JavaScript content to inject dynamically when this page is rendered.
     """
 
     state: Any
@@ -77,9 +78,12 @@ class Page(ResponsePayload):
         Renders the content of the page to HTML.
         Users should not call this method directly; it will be called on their behalf by the server.
 
-        :param current_state: The current state of the server. This will be used to restore the page if needed.
-        :param configuration: The configuration of the server. This will be used to determine how the page is rendered.
-        :return: A string of HTML representing the content of the page.
+        Args:
+            state: The current state of the server. This will be used to restore the page if needed.
+            configuration: The configuration of the server. This will be used to determine how the page is rendered.
+
+        Returns:
+            A string of HTML representing the content of the page.
         """
         # TODO: Decide if we want to dump state on the page
         content = render(
@@ -170,7 +174,8 @@ class Page(ResponsePayload):
         Creates a reset button that has the "reset" icon and title text that says "Resets the page to its original state.".
         Simply links to the "--reset" URL.
 
-        :return: A string of HTML representing the reset button.
+        Returns:
+            A string of HTML representing the reset button.
         """
         return """<a href="--reset" class="btlw-reset" 
                     title="Resets the page to its original state. Any data entered will be lost."
@@ -182,7 +187,8 @@ class Page(ResponsePayload):
         Creates an about button that has the "info" icon and title text that says "About Drafter.".
         Simply links to the "--about" URL.
 
-        :return: A string of HTML representing the about button.
+        Returns:
+            A string of HTML representing the about button.
         """
         return """<a href="--about" class="btlw-about" 
                     title="More information about this website"
@@ -200,8 +206,14 @@ class Page(ResponsePayload):
         all components are valid.
         This is not meant to be called by the user; it will be called by the server.
 
-        :param server: The server to verify the content against.
-        :return: True if the content is valid, False otherwise.
+        Args:
+            router: The server to verify the content against.
+            state: The state of the server.
+            configuration: The configuration of the server.
+            request: The request being processed.
+
+        Returns:
+            None if the content is valid, a VerificationFailure otherwise.
         """
         original_function = request.url
         if isinstance(self.content, str):

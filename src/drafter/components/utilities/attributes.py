@@ -143,8 +143,11 @@ def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
     moved to the styles dictionary. All other keys will be moved to the attributes dictionary.
     Event handlers (keys starting with 'on_') will have their underscores removed to align with HTML attribute naming conventions.
 
-    :param attributes: The attributes to remap
-    :return: A tuple of the styles and attributes dictionaries
+    Args:
+        attributes: The attributes to remap
+
+    Returns:
+        A tuple of the styles and attributes dictionaries
     """
     styles: dict[str, Any] = {}
     attrs: dict[str, Any] = {}
@@ -181,12 +184,14 @@ def parse_extra_settings(extra_settings, known_attrs, component_id):
     not explicitly defined in the baseline or extra attribute lists are converted into inline
     style declarations.
 
-    :param kwargs: Arbitrary keyword arguments containing extra configuration settings to be
-        applied or overridden. The keys represent attribute or style names, and the values
-        represent their corresponding values.
-    :return: A string containing formatted HTML attributes along with an inline style block
+    Args:
+        kwargs: Arbitrary keyword arguments containing extra configuration settings to be
+            applied or overridden. The keys represent attribute or style names, and the values
+            represent their corresponding values.
+
+    Returns:
+        A string containing formatted HTML attributes along with an inline style block
         if any styles are provided.
-    :rtype: str
     """
     if known_attrs is None:
         known_attrs = []

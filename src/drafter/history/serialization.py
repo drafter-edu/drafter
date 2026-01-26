@@ -12,8 +12,11 @@ def image_to_bytes(value):
     """
     Converts a PIL Image to PNG bytes.
 
-    :param value: A PIL Image object
-    :return: Bytes representing the image in PNG format
+    Args:
+        value: A PIL Image object
+
+    Returns:
+        Bytes representing the image in PNG format
     """
     with io.BytesIO() as output:
         value.save(output, format="PNG")
@@ -24,8 +27,11 @@ def bytes_to_image(value):
     """
     Converts bytes to a PIL Image.
 
-    :param value: Bytes representing an image
-    :return: A PIL Image object
+    Args:
+        value: Bytes representing an image
+
+    Returns:
+        A PIL Image object
     """
     return PILImage.open(io.BytesIO(value))
 
@@ -35,10 +41,15 @@ def dehydrate_json(value, seen=None):
     Converts a Python value to a JSON-serializable format.
     Handles dataclasses, PIL Images, and detects circular references.
 
-    :param value: The value to serialize
-    :param seen: Set of already-seen object IDs (for circular reference detection)
-    :return: JSON-serializable value
-    :raises ValueError: If circular reference detected or unsupported type
+    Args:
+        value: The value to serialize
+        seen: Set of already-seen object IDs (for circular reference detection)
+
+    Returns:
+        JSON-serializable value
+
+    Raises:
+        ValueError: If circular reference detected or unsupported type
     """
     if seen is None:
         seen = set()
@@ -75,10 +86,15 @@ def rehydrate_json(value, new_type):
     Converts a JSON-serialized value back to its original Python type.
     Handles type annotations, dataclasses, and PIL Images.
 
-    :param value: The JSON value to deserialize
-    :param new_type: The target Python type
-    :return: Deserialized value of the target type
-    :raises ValueError: If the value cannot be converted to the target type
+    Args:
+        value: The JSON value to deserialize
+        new_type: The target Python type
+
+    Returns:
+        Deserialized value of the target type
+
+    Raises:
+        ValueError: If the value cannot be converted to the target type
     """
     if isinstance(value, list):
         if hasattr(new_type, "__args__"):

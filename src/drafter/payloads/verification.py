@@ -13,9 +13,12 @@ def verify_response_payload_type(request: Request, payload: ResponsePayload):
     a `Page`, it constructs an appropriate error message based on the type of the payload
     received and generates an error page.
 
-    :param request: The original request that led to the payload generation.
-    :param payload: The payload object to be verified.
-    :return: Returns an error page if the payload is invalid, otherwise none.
+    Args:
+        request: The original request that led to the payload generation.
+        payload: The payload object to be verified.
+
+    Returns:
+        An error page if the payload is invalid, otherwise none.
     """
     original_function = request.url
     message = None
@@ -56,9 +59,13 @@ def verify_page_state_history(
     discrepancy is found in the type of the state object, it constructs an error
     message highlighting the inconsistency and generates an error page.
 
-    :param request: The original request that led to the page generation.
-    :param page: The page object whose state is to be verified.
-    :return: Returns an error string if a validation issue arises, otherwise none.
+    Args:
+        request: The original request that led to the page generation.
+        updated_state: The new state value to verify.
+        state_history: The history of previous state values.
+
+    Returns:
+        An error string if a validation issue arises, otherwise none.
     """
     original_function = request.url
     if not state_history:

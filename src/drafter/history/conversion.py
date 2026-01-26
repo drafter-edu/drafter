@@ -14,10 +14,11 @@ class ConversionRecord:
     """
     Records a parameter that was converted from one type to another.
 
-    :ivar parameter: The name of the parameter
-    :ivar value: The original value before conversion
-    :ivar expected_type: The type the parameter was expected to be
-    :ivar converted_value: The value after conversion
+    Attributes:
+        parameter: The name of the parameter
+        value: The original value before conversion
+        expected_type: The type the parameter was expected to be
+        converted_value: The value after conversion
     """
 
     parameter: str
@@ -29,7 +30,8 @@ class ConversionRecord:
         """
         Returns an HTML representation of the conversion.
 
-        :return: HTML string showing the conversion
+        Returns:
+            HTML string showing the conversion
         """
         return (
             f"<li><code>{html.escape(self.parameter)}</code>: "
@@ -43,9 +45,10 @@ class UnchangedRecord:
     """
     Records a parameter that was not converted (already the correct type).
 
-    :ivar parameter: The name of the parameter
-    :ivar value: The value (unchanged)
-    :ivar expected_type: The expected type (optional)
+    Attributes:
+        parameter: The name of the parameter
+        value: The value (unchanged)
+        expected_type: The expected type (optional)
     """
 
     parameter: str
@@ -56,7 +59,8 @@ class UnchangedRecord:
         """
         Returns an HTML representation of the unchanged parameter.
 
-        :return: HTML string showing the parameter
+        Returns:
+            HTML string showing the parameter
         """
         return (
             f"<li><code>{html.escape(self.parameter)}</code>: "

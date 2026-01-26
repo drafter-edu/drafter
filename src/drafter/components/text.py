@@ -97,7 +97,8 @@ class RawHTML(Component):
     WARNING: Only use with trusted HTML content to avoid XSS vulnerabilities.
     This component bypasses HTML escaping and renders content as-is.
 
-    :param html: The raw HTML string to render
+    Args:
+        html: The raw HTML string to render
     """
 
     html: str

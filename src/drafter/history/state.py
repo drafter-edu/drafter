@@ -10,7 +10,8 @@ class SiteState:
     """
     Wrapper for the student's site state.
 
-    :ivar current: The current state of the site, which can be any type.
+    Attributes:
+        current: The current state of the site, which can be any type.
     """
 
     current: Any = None
@@ -24,7 +25,8 @@ class SiteState:
 
         TODO: Throw a warning if there's a type change.
 
-        :param new_state: The new state to set as current.
+        Args:
+            new_state: The new state to set as current.
         """
         if not self.initialized:
             self.initial = deepcopy(new_state)

@@ -32,7 +32,9 @@ def render_site_info(self, value: SiteInformationType) -> str:
 def about(self):
     """
     Generates the "About" page based on default information.
-    :return:
+
+    Returns:
+        The about page HTML content.
     """
     if not self._site_information:
         return "No site information has been set. Use the <code>set_site_information()</code> function to set the information about your site."

@@ -24,8 +24,9 @@ class Router:
     """
     Handles routing of URLs to functions within a server.
 
-    :ivar routes: A dictionary mapping URLs to their corresponding functions.
-    :ivar signatures: A dictionary mapping functions to their introspection data.
+    Attributes:
+        routes: A dictionary mapping URLs to their corresponding functions.
+        signatures: A dictionary mapping functions to their introspection data.
     """
 
     def __init__(self) -> None:
@@ -36,8 +37,11 @@ class Router:
         """
         Retrieves the function associated with a given URL.
 
-        :param url: The URL to look up.
-        :return: The function associated with the URL, or None if not found.
+        Args:
+            url: The URL to look up.
+
+        Returns:
+            The function associated with the URL, or None if not found.
         """
         return self.routes.get(url)
 
@@ -45,8 +49,11 @@ class Router:
         """
         Checks if a route exists for the given URL.
 
-        :param url: The URL to check.
-        :return: True if the route exists, False otherwise.
+        Args:
+            url: The URL to check.
+
+        Returns:
+            True if the route exists, False otherwise.
         """
         return url in self.routes
 
@@ -56,8 +63,9 @@ class Router:
 
         TODO: Handle ignored parameters
 
-        :param url: The URL to add the route to.
-        :param func: The function to call when the route is accessed.
+        Args:
+            url: The URL to add the route to.
+            func: The function to call when the route is accessed.
         """
         self.routes[url] = func
         self.signatures[url] = get_signature(func)
@@ -66,7 +74,8 @@ class Router:
         """
         Registers default routes for the router.
 
-        :param configuration: The server configuration.
+        Args:
+            configuration: The server configuration.
         """
         if not self.has_route("index"):
             self.add_route("index", default_index)
@@ -97,8 +106,11 @@ class Router:
         """
         Prepares the arguments and keyword arguments for the route function based on the request.
 
-        :param request: The incoming request object.
-        :return: A tuple containing a list of positional arguments, a dictionary of keyword arguments, and a string representation of the arguments.
+        Args:
+            request: The incoming request object.
+
+        Returns:
+            A tuple containing a list of positional arguments, a dictionary of keyword arguments, and a string representation of the arguments.
         """
         args, kwargs = [], request.kwargs.copy()
         button_pressed = self.preprocess_button_press(kwargs)
@@ -143,10 +155,13 @@ class Router:
 
         TODO: Enhance all of this functionality to allow default values from the function signature.
 
-        :param request: The incoming request object.
-        :param signature: The introspection data of the function.
-        :param kwargs: The keyword arguments to verify.
-        :raises ValueError: If an unexpected parameter is found.
+        Args:
+            request: The incoming request object.
+            signature: The introspection data of the function.
+            kwargs: The keyword arguments to verify.
+
+        Raises:
+            ValueError: If an unexpected parameter is found.
         """
         # Verify all arguments are in expected_parameters
         for key, value in kwargs.items():
@@ -165,10 +180,13 @@ class Router:
         """
         Converts a parameter value to the expected type if specified.
 
-        :param param: The parameter name.
-        :param val: The current value.
-        :param expected_types: Dictionary mapping parameter names to expected types.
-        :return: The converted value.
+        Args:
+            param: The parameter name.
+            val: The current value.
+            expected_types: Dictionary mapping parameter names to expected types.
+
+        Returns:
+            The converted value.
         """
         if parameter not in expected_types:
             return value
@@ -219,9 +237,12 @@ class Router:
         Attempts to convert file upload data to the specified target type.
         File uploads come from the client as dicts with filename, content, type, size.
 
-        :param value: The file upload data (dict with __file_upload__ marker).
-        :param target_type: The desired type to convert to.
-        :return: The converted value.
+        Args:
+            value: The file upload data (dict with __file_upload__ marker).
+            target_type: The desired type to convert to.
+
+        Returns:
+            The converted value.
         """
         # print("Trying file upload conversion.", value, target_type)
         if not isinstance(value, dict) or not value.get("__file_upload__"):
@@ -297,9 +318,12 @@ class Router:
         """
         Attempts special conversions for certain target types.
 
-        :param value: The current value.
-        :param target_type: The desired type to convert to.
-        :return: A tuple (success: bool, converted_value: Any).
+        Args:
+            value: The current value.
+            target_type: The desired type to convert to.
+
+        Returns:
+            A tuple (success: bool, converted_value: Any).
         """
         outcome, result = try_convert_datetime(value, target_type)
         if outcome:
@@ -353,8 +377,11 @@ class Router:
         """
         Retrieves the introspection data associated with a given function.
 
-        :param func: The function to look up.
-        :return: The introspection data associated with the function, or None if not found.
+        Args:
+            func: The function to look up.
+
+        Returns:
+            The introspection data associated with the function, or None if not found.
         """
         signature = self.signatures.get(request.url)
         if not signature:
@@ -387,8 +414,11 @@ class Router:
         """
         Preprocesses button press information from the request kwargs.
 
-        :param kwargs: The keyword arguments from the request.
-        :return: The button namespace if present, otherwise an empty string.
+        Args:
+            kwargs: The keyword arguments from the request.
+
+        Returns:
+            The button namespace if present, otherwise an empty string.
         """
         button_pressed = ""
         if SUBMIT_BUTTON_KEY in kwargs:

@@ -13,8 +13,11 @@ def extract_button_label(full_key: str):
     """
     Extracts the button namespace and parameter key from a namespaced form parameter.
 
-    :param full_key: The full parameter key that may contain a button namespace
-    :return: Tuple of (button_namespace, parameter_key) or (None, full_key) if no namespace
+    Args:
+        full_key: The full parameter key that may contain a button namespace
+
+    Returns:
+        Tuple of (button_namespace, parameter_key) or (None, full_key) if no namespace
     """
     if LABEL_SEPARATOR not in full_key:
         return None, full_key
@@ -30,11 +33,14 @@ def add_unless_present(a_dictionary, key, value, from_button=False):
     Adds a key-value pair to a dictionary if the key doesn't already exist.
     Raises an error if the key already exists to prevent parameter collision.
 
-    :param a_dictionary: The dictionary to add to
-    :param key: The key to add
-    :param value: The value to add
-    :param from_button: Whether this parameter came from a button
-    :return: The modified dictionary
+    Args:
+        a_dictionary: The dictionary to add to
+        key: The key to add
+        value: The value to add
+        from_button: Whether this parameter came from a button
+
+    Returns:
+        The modified dictionary
     """
     if key in a_dictionary:
         base_message = f"Parameter {key!r} with new value {value!r} already exists in {a_dictionary!r}"
@@ -54,9 +60,12 @@ def remap_hidden_form_parameters(kwargs: dict, button_pressed: str):
     """
     Remaps form parameters by extracting namespaced button arguments and JSON-decoded values.
 
-    :param kwargs: The raw form parameters dict
-    :param button_pressed: The namespace of the button that was pressed (e.g., "Button#12345")
-    :return: A new dict with remapped and decoded parameters
+    Args:
+        kwargs: The raw form parameters dict
+        button_pressed: The namespace of the button that was pressed (e.g., "Button#12345")
+
+    Returns:
+        A new dict with remapped and decoded parameters
     """
     renamed_kwargs: Dict[Any, Any] = {}
     for key, value in kwargs.items():
@@ -88,7 +97,8 @@ def get_params():
     Placeholder for getting request parameters from the bottle framework.
     In the new client-server architecture, this is handled differently.
 
-    :return: Empty dict (deprecated in client-server architecture)
+    Returns:
+        Empty dict (deprecated in client-server architecture)
     """
     # This is kept for backwards compatibility with old code
     # In the new client-server architecture, parameters come from the Request object

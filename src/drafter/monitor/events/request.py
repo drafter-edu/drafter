@@ -12,11 +12,13 @@ from drafter.monitor.events.base import BaseEvent
 class RequestEvent(BaseEvent):
     """
     Event emitted when a request is received.
-    :ivar url: The URL being requested
-    :ivar action: The action being performed
-    :ivar kwargs: Request keyword arguments
-    :ivar event: Additional event information
-    :ivar request_id: Unique identifier for this request
+
+    Attributes:
+        url: The URL being requested
+        action: The action being performed
+        kwargs: Request keyword arguments
+        event: Additional event information
+        request_id: Unique identifier for this request
     """
 
     url: str = ""
@@ -58,8 +60,9 @@ class RequestParseEvent(BaseEvent):
     Files and images get special handling so they can be
     rendered properly in the client, and also in the history.
 
-    :ivar request_id: Unique identifier for this request
-    :ivar representation: String representation of the parsed request
+    Attributes:
+        request_id: Unique identifier for this request
+        representation: String representation of the parsed request
     """
 
     request_id: int = -1
@@ -78,14 +81,16 @@ class RequestParseEvent(BaseEvent):
 class ResponseEvent(BaseEvent):
     """
     Event emitted when a response is sent.
-    :ivar status_code: HTTP status code
-    :ivar payload_type: Type of the response payload
-    :ivar body_length: Length of the response body
-    :ivar has_errors: Whether the response has errors
-    :ivar has_warnings: Whether the response has warnings
-    :ivar duration_ms: Time taken to process the request in milliseconds
-    :ivar response_id: Unique identifier for this response
-    :ivar request_id: ID of the associated request
+
+    Attributes:
+        status_code: HTTP status code
+        payload_type: Type of the response payload
+        body_length: Length of the response body
+        has_errors: Whether the response has errors
+        has_warnings: Whether the response has warnings
+        duration_ms: Time taken to process the request in milliseconds
+        response_id: Unique identifier for this response
+        request_id: ID of the associated request
     """
 
     status_code: int = 200
@@ -128,4 +133,3 @@ class ResponseEvent(BaseEvent):
             request_id=response.request_id,
             formatted_page_content=formatted_body or response.body or "",
         )
-

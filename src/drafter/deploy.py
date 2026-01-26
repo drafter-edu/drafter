@@ -10,7 +10,8 @@ def hide_debug_information(server: Optional[ClientServer] = None):
     Hides debug information from the website, so that it will not appear. Useful
     for deployed websites.
 
-    :param server: The server to configure. If None, uses the main server.
+    Args:
+        server: The server to configure. If None, uses the main server.
     """
     if server is None:
         server = get_main_server()
@@ -21,7 +22,8 @@ def show_debug_information(server: Optional[ClientServer] = None):
     """
     Shows debug information on the website. Useful for development.
 
-    :param server: The server to configure. If None, uses the main server.
+    Args:
+        server: The server to configure. If None, uses the main server.
     """
     if server is None:
         server = get_main_server()
@@ -32,8 +34,9 @@ def set_website_title(title: str, server: Optional[ClientServer] = None):
     """
     Sets the title of the website, as it appears in the browser tab.
 
-    :param title: The title of the website.
-    :param server: The server to configure. If None, uses the main server.
+    Args:
+        title: The title of the website.
+        server: The server to configure. If None, uses the main server.
     """
     if server is None:
         server = get_main_server()
@@ -45,8 +48,9 @@ def set_website_framed(framed: bool, server: Optional[ClientServer] = None):
     Sets whether the website should be framed or not. If you are deploying the website, then
     this would be a common thing to set to False.
 
-    :param framed: Whether the website should be framed or not.
-    :param server: The server to configure. If None, uses the main server.
+    Args:
+        framed: Whether the website should be framed or not.
+        server: The server to configure. If None, uses the main server.
     """
     if server is None:
         server = get_main_server()
@@ -63,12 +67,17 @@ def set_site_information(
 ):
     """
     Sets the information about the website, such as the author, description, sources,
-    :param author:
-    :param description:
-    :param sources:
-    :param planning:
-    :param links:
-    :return:
+
+    Args:
+        author: The author of the website.
+        description: Description of the website.
+        sources: Sources used in the website.
+        planning: Planning information.
+        links: Related links.
+        server: The server to configure. If None, uses the main server.
+
+    Returns:
+        None
     """
     if server is None:
         server = get_main_server()
@@ -83,8 +92,13 @@ def set_site_information(
 
 def get_site_information(server: Optional[ClientServer] = None):
     """
-    Gets the information about the website, such as the author, description, sources,
-    :return:
+    Gets the information about the website, such as the author, description, sources.
+
+    Args:
+        server: The server to query. If None, uses the main server.
+
+    Returns:
+        The site information configuration.
     """
     if server is None:
         server = get_main_server()
@@ -95,8 +109,9 @@ def set_website_style(style: Optional[str], server: Optional[ClientServer] = Non
     """
     Sets the style of the website. This must be the name of a valid theme.
 
-    :param style: The theme of the website.
-    :param server: The server to configure. If None, uses the main server.
+    Args:
+        style: The theme of the website.
+        server: The server to configure. If None, uses the main server.
     """
     if server is None:
         server = get_main_server()
@@ -109,8 +124,9 @@ def set_website_theme(theme: Optional[str], server: Optional[ClientServer] = Non
     """
     Sets the theme of the website. This must be the name of a valid theme.
 
-    :param theme: The theme of the website.
-    :param server: The server to configure. If None, uses the main server.
+    Args:
+        theme: The theme of the website.
+        server: The server to configure. If None, uses the main server.
     """
     if server is None:
         server = get_main_server()
@@ -124,8 +140,9 @@ def add_website_header(header: str, server: Optional[ClientServer] = None):
     Adds additional header content to the website. This is useful for adding custom
     CSS or JavaScript to the website, or other arbitrary header tags like meta tags.
 
-    :param header: The raw header content to add. This will not be wrapped in additional tags.
-    :param server: The server to configure. If None, uses the main server.
+    Args:
+        header: The raw header content to add. This will not be wrapped in additional tags.
+        server: The server to configure. If None, uses the main server.
     """
     if server is None:
         server = get_main_server()
@@ -142,9 +159,10 @@ def add_website_css(
     If you provide both parameters, they will be used to create a CSS rule; the first parameter
     is the CSS selector, and the second parameter is the CSS content that will be wrapped in {}.
 
-    :param selector: The CSS selector to apply the CSS to, or the CSS content if the second parameter is None.
-    :param css: The CSS content to apply to the selector.
-    :param server: The server to configure. If None, uses the main server.
+    Args:
+        selector: The CSS selector to apply the CSS to, or the CSS content if the second parameter is None.
+        css: The CSS content to apply to the selector.
+        server: The server to configure. If None, uses the main server.
     """
     if server is None:
         server = get_main_server()
@@ -161,8 +179,9 @@ def deploy_site(image_folder="images", server: Optional[ClientServer] = None):
     Deploys the website with the given image folder. This will set the production
     flag to True and turn off debug information, too.
 
-    :param image_folder: The folder where images are stored.
-    :param server: The server to configure. If None, uses the main server.
+    Args:
+        image_folder: The folder where images are stored.
+        server: The server to configure. If None, uses the main server.
     """
     hide_debug_information(server=server)
     # TODO: Implement production mode and image folder in V2
