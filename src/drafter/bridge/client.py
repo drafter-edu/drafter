@@ -146,17 +146,53 @@ class Client:
     def setup_debug_menu(self, client_bridge):
         debug_log("client.setup_debug_menu")
         try:
-            if is_pyodide():
-                self.debug_panel = js.DebugPanel.new(
-                    DRAFTER_TAG_IDS["DEBUG"], client_bridge
-                )
-            else:
-                self.debug_panel = js.DebugPanel(
-                    DRAFTER_TAG_IDS["DEBUG"], client_bridge
-                )
+            self.debug_panel = self._create_debug_panel(client_bridge)
         except Exception as e:
             print(f"[Drafter Client] Failed to set up debug menu because of {e}")
             raise e
+
+    def _create_debug_panel(self, client_bridge):
+        """Create a debug panel instance. Override in subclasses for runtime-specific construction."""
+        return js.DebugPanel(DRAFTER_TAG_IDS["DEBUG"], client_bridge)
+
+    def _create_url(self, href: str):
+        """Create a URL object. Override in subclasses for runtime-specific construction."""
+        return js.URL(href)
+
+    def _create_form_data(self, form: Any, submitter: Any = None):
+        """Create a FormData object. Override in subclasses for runtime-specific construction."""
+        return js.FormData(form, submitter)
+
+    def _wrap_event_handler(self, handler: Callable) -> Any:
+        """Wrap an event handler appropriately for the runtime. Override in subclasses if needed."""
+        return handler
+
+    def _handle_file_upload(self, file: Any, data: dict, key: str) -> None:
+        """Handle file upload from form data. Override in subclasses for async handling."""
+        buffer = file.arrayBuffer()
+        raw_bytes = js.Uint8Array(buffer)
+        content = bytes(raw_bytes)
+        file_data = {
+            "filename": file.name,
+            "content": content,
+            "type": file.type,
+            "size": file.size,
+            "__file_upload__": True,
+        }
+        if key not in data:
+            data[key] = file_data
+        else:
+            if not isinstance(data[key], list):
+                data[key] = [data[key]]
+            data[key].append(file_data)
+
+    def _finalize_request(
+        self, action: str, url: str, data: dict, dom_id: Optional[str]
+    ) -> Request:
+        """Finalize and return a request. Override in subclasses for async handling."""
+        new_request = Request(self.request_count, action, url, data, {}, dom_id or "")
+        self.request_count += 1
+        return new_request
 
     def handle_event(self, event: dict) -> bool:
         debug_log("client.handle_event", event)
@@ -208,10 +244,6 @@ class Client:
         dom_id: Optional[str] = None,
     ) -> Request:
         data = {}
-        if is_pyodide():
-            file_promise_chain = js.Promise.resolve()
-        else:
-            file_promise_chain = None
         # Convert form data to a regular dict, handling file uploads as well
         if form_data:
             for key, value in form_data.entries():
@@ -223,35 +255,14 @@ class Client:
                     else:
                         data[key] = value
                 else:
-                    if is_skulpt():
-                        get_file_skulpt(value, data, key)
-                    elif is_pyodide():
-                        # Note: This is async in Pyodide, so we need a callback to continue processing
-                        # TODO: Figure out what this logic should actually be
-                        def callback(file_data):
-                            if file_promise_chain is None:
-                                return
-                            file_promise_chain.then(lambda *args: file_data)
-
-                        get_file_pyodide(value, data, key, callback)
+                    self._handle_file_upload(value, data, key)
         # Add arguments to the data dict
         for i, arg in enumerate(reversed(arguments or [])):
             # TODO: Handle both of these more elegantly in case they are corrupted in some way
             parsed = json.loads(arg)
             data.update(parsed)
 
-        if is_pyodide():
-            raise NotImplementedError(
-                "Async request handling in Pyodide not implemented yet."
-            )
-        elif is_skulpt():
-            new_request = Request(
-                self.request_count, action, url, data, {}, dom_id or ""
-            )
-            self.request_count += 1
-            return new_request
-        else:
-            raise RuntimeError("Unknown web runtime.")
+        return self._finalize_request(action, url, data, dom_id)
 
     def add_to_history(self, request: Request):
         url = request.url
@@ -261,11 +272,15 @@ class Client:
             "url": url,
             # TODO: Track parameters as well
         }
-        full_url = get_full_url()
+        full_url = self._create_url(js.location.href)
         js.document.title = f"{self.site_title} - {url}"
         full_url.searchParams.set("route", url)
-        js.history.pushState(state, "", full_url.toString())
+        self._history_push_state(state, "", full_url.toString())
         debug_log("client.add_to_history", state, request)
+
+    def _history_push_state(self, state: dict, title: str, url: str) -> None:
+        """Push a new state to the browser history. Override in subclasses for runtime-specific handling."""
+        js.history.pushState(state, title, url)
 
     def initiate_request(
         self,
@@ -286,10 +301,11 @@ class Client:
         return next_visit
 
     def mount_navigation(self, root: Any, on_navigation: Callable):
-        debug_log("client.mount_navigation", root, on_navigation)
+        debug_log("client.mount_navigation")
         # Clean up old handlers if they exist
         if self.click_handler is not None:
             root.removeEventListener("click", self.click_handler)
+            self._cleanup_event_handler(self.click_handler)
 
         # Store the navigation callback
         def handle_click(event: Any):
@@ -308,7 +324,9 @@ class Client:
                 if not name:
                     return
 
-                dom_id = nearest_nav_link.id if "id" in nearest_nav_link else None
+                dom_id = (
+                    nearest_nav_link.id if hasattr(nearest_nav_link, "id") else None
+                )
 
                 # Get the arguments from the clicked element and its parents
                 arguments = get_attribute_recursively(
@@ -319,16 +337,9 @@ class Client:
                 form = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
                 if form:
                     is_anchor = nearest_nav_link.tagName.lower() == "a"
-                    if is_pyodide():
-                        form_data = js.FormData.new(
-                            form, None if is_anchor else nearest_nav_link
-                        )
-                    elif is_skulpt():
-                        form_data = js.FormData(
-                            form, None if is_anchor else nearest_nav_link
-                        )
-                    else:
-                        raise RuntimeError("Unknown web runtime.")
+                    form_data = self._create_form_data(
+                        form, None if is_anchor else nearest_nav_link
+                    )
                     nav_event = NavEvent(
                         kind="link",
                         url=name,
@@ -345,28 +356,25 @@ class Client:
             debug_log("client.form_submit_handler", event)
             event.preventDefault()
             # Figure out submitter
-            if "submitter" in event:
+            if hasattr(event, "submitter"):
                 submitter = event.submitter
-                dom_id = submitter.id if submitter and "id" in submitter else None
+                dom_id = (
+                    submitter.id if submitter and hasattr(submitter, "id") else None
+                )
             else:
                 submitter = None
                 dom_id = None
             # Get the form data
-            if is_pyodide():
-                form_data = js.FormData.new(event.target, submitter)
-            elif is_skulpt():
-                form_data = js.FormData(event.target, submitter)
-            else:
-                raise RuntimeError("Unknown web runtime.")
+            form_data = self._create_form_data(event.target, submitter)
             # Handle arguments
             # Get the arguments from the clicked element and its parents
             arguments = get_attribute_recursively(
                 event.target, Component.DRAFTER_DATA_ARGUMENT_NAME
             )
             # Figure out URL
-            if submitter is not None and "getAttribute" in submitter:
+            if submitter is not None and hasattr(submitter, "getAttribute"):
                 url = submitter.getAttribute("formaction")
-            elif "action" in form_root:
+            elif hasattr(form_root, "action"):
                 url = form_root.action
             else:
                 url = js.location.href
@@ -381,15 +389,13 @@ class Client:
             )
             return on_navigation(nav_event)
 
-        self.click_handler = handle_click
-        self.submit_handler = submit_handler
+        self.click_handler = self._wrap_event_handler(handle_click)
+        self.submit_handler = self._wrap_event_handler(submit_handler)
+
         root.addEventListener("click", self.click_handler)
 
         form_root = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
         if form_root:
-            # TODO: Check if this removal is necessary
-            # if self.submit_handler is not None:
-            #     form_root.removeEventListener("submit", self.submit_handler)
             form_root.addEventListener("submit", self.submit_handler)
         else:
             raise RuntimeError("Form root element not found for mounting navigation.")
@@ -431,16 +437,27 @@ class Client:
         self.navigation_func = handle_visit
 
         if self.popstate_listener is not None:
-            # TODO: Handle pyodide separately, if needed
             js.removeEventListener("popstate", self.popstate_listener)
+            self._cleanup_event_handler(self.popstate_listener)
 
-        self.popstate_listener = self.handle_popstate
-        js.addEventListener("popstate", self.handle_popstate)
+        self.popstate_listener = self._wrap_event_handler(self.handle_popstate)
+        js.addEventListener("popstate", self.popstate_listener)
+
         # Specialized Drafter events
-        js.addEventListener("drafter-navigate", lambda event: self.goto(event.detail))
-        js.addEventListener("drafter-toggle-frame", lambda event: handle_toggle_frame())
+        drafter_nav_handler = self._wrap_event_handler(
+            lambda event: self.goto(event.detail)
+        )
+        drafter_toggle_handler = self._wrap_event_handler(
+            lambda event: handle_toggle_frame()
+        )
+        js.addEventListener("drafter-navigate", drafter_nav_handler)
+        js.addEventListener("drafter-toggle-frame", drafter_toggle_handler)
         # Keyboard events
         self.register_hotkey("Q", handle_debug_mode)
+
+    def _cleanup_event_handler(self, handler: Any, proxy: Any = None) -> None:
+        """Clean up an event handler. Override in subclasses for runtime-specific cleanup."""
+        pass
 
     def toggle_frame(self) -> None:
         FRAME_PIECES = ",".join(
@@ -467,14 +484,14 @@ class Client:
             url = event.state.url
             debug_log("client.handle_popstate_with_state", request_id, url)
             js.document.title = f"{self.site_title} - {url}"
-            full_url = get_full_url()
+            full_url = self._create_url(js.location.href)
             full_url.searchParams.set("route", url)
             js.history.replaceState(event.state, "", full_url.toString())
             self.initiate_request(url, None, False, "back", None, None)
         else:
             debug_log("client.handle_popstate_no_state_or_request_id", event)
             js.document.title = self.site_title
-            full_url = get_full_url()
+            full_url = self._create_url(js.location.href)
             full_url.searchParams.delete("route")
             js.history.replaceState({}, "", full_url.toString())
             self.initiate_request("index", None, False, "back", None, None)
@@ -501,60 +518,167 @@ class Client:
 
         self.hotkey_events[key] = callback
         if not self.hotkey_listener_ready:
-            js.document.addEventListener("keydown", hotkey_handler)
+            wrapped_handler = self._wrap_event_handler(hotkey_handler)
+            js.document.addEventListener("keydown", wrapped_handler)
             self.hotkey_listener_ready = True
             debug_log("client.hotkey_listener_registered")
 
 
-def get_full_url():
-    if is_pyodide():
-        return js.URL.new(js.location.href)
-    elif is_skulpt():
-        return js.URL(js.location.href)
-    else:
-        raise RuntimeError("Unknown web runtime.")
+class PyodideClient(Client):
+    """Pyodide-specific client implementation with proper proxy management."""
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from pyodide.ffi import create_proxy, to_js
 
-def get_file_skulpt(file: Any, data: Any, key: str):
-    buffer = file.arrayBuffer()
-    raw_bytes = js.Uint8Array(buffer)
-    content = bytes(raw_bytes)
-    # TODO: Handle TypeError, RangeError, and any other errors thrown during this process
-    file_data = {
-        "filename": file.name,
-        "content": content,
-        "type": file.type,
-        "size": file.size,
-        "__file_upload__": True,
-    }
-    if key not in data:
-        data[key] = file_data
-    else:
-        if not isinstance(data[key], list):
-            data[key] = [data[key]]
-        data[key].append(file_data)
+        self._create_proxy = create_proxy
+        self._to_js = to_js
+        # Store proxies to prevent garbage collection
+        self._click_proxy: Any = None
+        self._submit_proxy: Any = None
+        self._popstate_proxy: Any = None
+        self._hotkey_proxy: Any = None
+        self._drafter_nav_proxy: Any = None
+        self._drafter_toggle_proxy: Any = None
 
+    def reset(self):
+        super().reset()
+        self._click_proxy = None
+        self._submit_proxy = None
+        self._popstate_proxy = None
+        self._hotkey_proxy = None
+        self._drafter_nav_proxy = None
+        self._drafter_toggle_proxy = None
 
-def get_file_pyodide(file: Any, data: Any, key: str, callback):
-    def handle_buffer(buffer: Any):
-        raw_bytes = js.Uint8Array.new(buffer)
-        content = bytes(raw_bytes)
-        file_data = {
-            "filename": file.name,
-            "content": content,
-            "type": file.type,
-            "size": file.size,
-            "__file_upload__": True,
-        }
-        if key not in data:
-            data[key] = file_data
-        else:
-            if not isinstance(data[key], list):
-                data[key] = [data[key]]
-            data[key].append(file_data)
-        callback()
+    def _create_debug_panel(self, client_bridge):
+        """Create a debug panel using Pyodide's .new() constructor."""
+        return js.DebugPanel.new(DRAFTER_TAG_IDS["DEBUG"], client_bridge)
 
-    file.arrayBuffer().then(handle_buffer)
+    def _create_url(self, href: str):
+        """Create a URL object using Pyodide's .new() constructor."""
+        return js.URL.new(href)
+
+    def _create_form_data(self, form: Any, submitter: Any = None):
+        """Create a FormData object using Pyodide's .new() constructor."""
+        return js.FormData.new(form, submitter)
+
+    def _wrap_event_handler(self, handler: Callable) -> Any:
+        """Wrap an event handler with create_proxy to prevent automatic destruction."""
+        return self._create_proxy(handler)
+
+    def _cleanup_event_handler(self, handler: Any, proxy: Any = None) -> None:
+        """Destroy a Pyodide proxy to prevent memory leaks."""
+        if handler is not None and hasattr(handler, "destroy"):
+            handler.destroy()
+
+    def _handle_file_upload(self, file: Any, data: dict, key: str) -> None:
+        """Handle file upload asynchronously in Pyodide (currently raises NotImplementedError)."""
+        # TODO: Implement async file handling for Pyodide
+        raise NotImplementedError(
+            "Async file upload handling in Pyodide not implemented yet."
+        )
+
+    def _finalize_request(
+        self, action: str, url: str, data: dict, dom_id: Optional[str]
+    ) -> Request:
+        return super()._finalize_request(action, url, data, dom_id)
+
+    def mount_navigation(self, root: Any, on_navigation: Callable):
+        """Override to properly store and clean up Pyodide proxies."""
+        debug_log("pyodide_client.mount_navigation")
+        # Clean up old proxies
+        if self._click_proxy is not None:
+            root.removeEventListener("click", self._click_proxy)
+            self._cleanup_event_handler(self._click_proxy)
+            self._click_proxy = None
+        if self._submit_proxy is not None:
+            form_root = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
+            if form_root:
+                form_root.removeEventListener("submit", self._submit_proxy)
+            self._cleanup_event_handler(self._submit_proxy)
+            self._submit_proxy = None
+
+        # Call parent implementation which will use our wrapped methods
+        super().mount_navigation(root, on_navigation)
+
+        # Store the wrapped proxies
+        self._click_proxy = self.click_handler
+        self._submit_proxy = self.submit_handler
+
+    def setup_events(
+        self,
+        handle_visit: Callable[[Request], Response],
+        handle_toggle_frame: Callable,
+        handle_debug_mode: Callable,
+    ) -> None:
+        """Override to properly store and clean up Pyodide proxies."""
+        debug_log("pyodide_client.setup_events")
+
+        # Clean up old proxies
+        if self._popstate_proxy is not None:
+            js.removeEventListener("popstate", self._popstate_proxy)
+            self._cleanup_event_handler(self._popstate_proxy)
+            self._popstate_proxy = None
+        if self._drafter_nav_proxy is not None:
+            js.removeEventListener("drafter-navigate", self._drafter_nav_proxy)
+            self._cleanup_event_handler(self._drafter_nav_proxy)
+            self._drafter_nav_proxy = None
+        if self._drafter_toggle_proxy is not None:
+            js.removeEventListener("drafter-toggle-frame", self._drafter_toggle_proxy)
+            self._cleanup_event_handler(self._drafter_toggle_proxy)
+            self._drafter_toggle_proxy = None
+
+        self.navigation_func = handle_visit
+
+        # Create and store popstate proxy
+        self.popstate_listener = self._wrap_event_handler(self.handle_popstate)
+        self._popstate_proxy = self.popstate_listener
+        js.addEventListener("popstate", self._popstate_proxy)
+
+        # Create and store Drafter event proxies
+        self._drafter_nav_proxy = self._wrap_event_handler(
+            lambda event: self.goto(event.detail)
+        )
+        self._drafter_toggle_proxy = self._wrap_event_handler(
+            lambda event: handle_toggle_frame()
+        )
+        js.addEventListener("drafter-navigate", self._drafter_nav_proxy)
+        js.addEventListener("drafter-toggle-frame", self._drafter_toggle_proxy)
+
+        # Keyboard events
+        self.register_hotkey("Q", handle_debug_mode)
+
+    def register_hotkey(self, key_combo: str, callback: Callable[[], None]) -> None:
+        """Override to properly store and clean up the hotkey proxy."""
+        debug_log("pyodide_client.register_hotkey", key_combo)
+        key = key_combo.lower().split("+")[-1].strip()
+
+        def hotkey_handler(event: Any):
+            event_key = event.key.lower() if hasattr(event, "key") else ""
+            ctrl = getattr(event, "ctrlKey", False) or getattr(event, "metaKey", False)
+
+            if ctrl and event_key in self.hotkey_events:
+                current_time = int(time.time() * 1000)
+                time_since_last = current_time - self.last_press_time
+
+                if time_since_last < DOUBLE_PRESS_THRESHOLD:
+                    debug_log("pyodide_client.hotkey_triggered", event_key)
+                    event.preventDefault()
+                    self.hotkey_events[event_key]()
+                    self.last_press_time = 0
+                else:
+                    self.last_press_time = current_time
+
+        self.hotkey_events[key] = callback
+        if not self.hotkey_listener_ready:
+            self._hotkey_proxy = self._wrap_event_handler(hotkey_handler)
+            js.document.addEventListener("keydown", self._hotkey_proxy)
+            self.hotkey_listener_ready = True
+            debug_log("pyodide_client.hotkey_listener_registered")
+
+    def _history_push_state(self, state: dict, title: str, url: str) -> None:
+        """Push a new state to the browser history. Override in subclasses for runtime-specific handling."""
+        js.history.pushState(self._to_js(state), title, url)
 
 
 def debug_log(event_name: str, *args: Any) -> None:
@@ -568,7 +692,17 @@ def debug_log(event_name: str, *args: Any) -> None:
     #     event_bus.publish(event)
     # except Exception as e:
     #     print(f"[Drafter Client] Failed to log event {event_name} with args {args}, because of {e}")
-    print(f"[Drafter Client] {event_name}: ", *args)
+    try:
+        # Convert args to safe strings to avoid issues with destroyed PyProxies
+        safe_args = []
+        for arg in args:
+            try:
+                safe_args.append(str(arg))
+            except:
+                safe_args.append("<unprintable>")
+        print(f"[Drafter Client] {event_name}: ", *safe_args)
+    except Exception as e:
+        print(f"[Drafter Client] {event_name} (failed to log args: {e})")
 
 
 def console_log(event) -> None:

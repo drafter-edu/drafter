@@ -50,6 +50,8 @@ dev = [
   # Building
   "hatchling",
   "hatch-nodejs-version",
+  # Client Server
+  "pyodide-py",
   # Documentation
   "Sphinx",
   "sphinx-rtd-theme",

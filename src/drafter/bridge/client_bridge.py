@@ -9,6 +9,7 @@ from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.bridge.client import (
     Client,
+    PyodideClient,
     console_log,
 )
 from drafter.bridge.helpers import (
@@ -26,6 +27,7 @@ from drafter.site.site import (
     DRAFTER_TAG_CLASSES,
     SITE_HTML_SHADOW_DOM_TEMPLATE,
 )
+from drafter.helpers.utils import is_pyodide
 from typing import Callable, Optional
 import js
 
@@ -39,9 +41,15 @@ class ClientBridge:
     redirect_loop_stack: list[str] = field(default_factory=list)
 
     def __init__(self, configuration: ClientServerConfiguration):
-        self.client = Client(
-            configuration.root_element_id, configuration.root_element_id
-        )
+        # Use PyodideClient for Pyodide runtime, otherwise use base Client (Skulpt)
+        if is_pyodide():
+            self.client = PyodideClient(
+                configuration.root_element_id, configuration.root_element_id
+            )
+        else:
+            self.client = Client(
+                configuration.root_element_id, configuration.root_element_id
+            )
         self.channel_history = {}
         self.redirect_loop_stack = []
 
