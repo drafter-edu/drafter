@@ -11,6 +11,19 @@ from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 
 @dataclass(repr=False)
 class Download(Component):
+    """Creates a downloadable link for file content.
+
+    Generates a data URL or base64-encoded content for download.
+    Supports both text and PIL Image content.
+
+    Attributes:
+        text: Display text for the download link.
+        filename: Filename for the downloaded file.
+        content: Content to download (string or PIL Image).
+        content_type: MIME type of the content.
+        tag: The HTML tag name, always 'a'.
+    """
+
     tag = "a"
     text: PageContent
     filename: str
@@ -34,6 +47,15 @@ class Download(Component):
         content_type: str = "text/plain",
         **kwargs,
     ):
+        """Initialize download link component.
+
+        Args:
+            text: Display text for the link.
+            filename: Filename for the downloaded file.
+            content: Content to download as string or PIL Image.
+            content_type: MIME type of the content. Defaults to 'text/plain'.
+            **kwargs: Additional HTML attributes.
+        """
         self.text = text
         self.filename = filename
         self.content = content
@@ -41,6 +63,14 @@ class Download(Component):
         self.extra_settings = kwargs
 
     def _handle_pil_image(self, image):
+        """Convert PIL Image to base64-encoded data URL.
+
+        Args:
+            image: PIL Image object or string.
+
+        Returns:
+            Tuple of (was_pil, processed_url).
+        """
         if not HAS_PILLOW or isinstance(image, str):
             return False, image
 
@@ -52,6 +82,14 @@ class Download(Component):
         return True, figure
 
     def get_attributes(self, context) -> dict:
+        """Get HTML attributes for the download link.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            Dictionary including href with data URL or PIL image data.
+        """
         attributes = super().get_attributes(context)
         was_pil, url = self._handle_pil_image(self.content)
         if was_pil:
@@ -63,15 +101,21 @@ class Download(Component):
 
 @dataclass(repr=False)
 class FileUpload(Component):
-    """
-    A file upload component that allows users to upload files to the server.
+    """File upload input for accepting user file submissions.
 
-    The accept field can be used to specify the types of files that can be uploaded.
-    It accepts either a literal string (e.g. "image/*") or a list of strings (e.g. ["image/png", "image/jpeg"]).
-    You can either provide MIME types, extensions, or extensions without a period (e.g., "png", ".jpg").
+    Supports filtering by file type using MIME types, extensions,
+    or extension without a period. Multiple files can be accepted
+    with the 'multiple' attribute.
 
-    To have multiple files uploaded, use the `multiple` attribute, which will cause
-    the corresponding parameter to be a list of files.
+    Attributes:
+        name: The form field name for the uploaded file(s).
+        tag: The HTML tag name, always 'input'.
+
+    Note:
+        The accept field specifies file types allowed for upload.
+        Accepts MIME types (e.g., 'image/*'), extensions (e.g., 'png'),
+        or extensions with period (e.g., '.jpg').
+        With 'multiple' attribute, corresponding parameter is a list of files.
     """
 
     tag = "input"
@@ -88,6 +132,16 @@ class FileUpload(Component):
     def __init__(
         self, name: str, accept: Union[str, List[str], None] = None, **extra_settings
     ):
+        """Initialize file upload component.
+
+        Args:
+            name: The form field name.
+            accept: Optional file type filters (string, list of strings, or None).
+            **extra_settings: Additional HTML attributes.
+
+        Raises:
+            ValueError: If name is not a valid parameter name.
+        """
         validate_parameter_name(name, "FileUpload")
         self.name = name
         self.extra_settings = extra_settings

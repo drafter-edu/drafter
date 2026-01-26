@@ -39,12 +39,30 @@ from drafter.components.utilities.validation import (
 )
 
 RouteSafeValue = Union[str, int, float, bool]
+"""Type alias for values that are safe to pass in routes (JSON serializable primitives)."""
+
 JsonSafeValue = Union[str, int, float, bool, None, list, dict]
+"""Type alias for JSON-safe values (primitives, lists, dicts, or None)."""
+
 UrlOrFunction = Union[str, Callable]
+"""Type alias for values that can be either URL strings or callable functions."""
 
 
 @dataclass
 class ComponentArgument:
+    """Describes an argument passed to a component's constructor.
+
+    Used by Component subclasses to declare their parameters and how they
+    should be rendered (positional, variadic, keyword) and whether they
+    represent content (child elements) or attributes.
+
+    Attributes:
+        name: The parameter name.
+        kind: The argument kind: "positional", "var", or "keyword".
+        default_value: Default value if not provided.
+        is_content: Whether this argument represents child content.
+    """
+
     name: str
     kind: str = "positional"  # "positional", "var", "keyword"
     default_value: Any = None
@@ -53,6 +71,13 @@ class ComponentArgument:
 
 @dataclass
 class Arguable:
+    """Represents a single named argument for component rendering.
+
+    Attributes:
+        name: The parameter name.
+        value: The JSON-safe value.
+    """
+
     name: str
     value: JsonSafeValue
 
@@ -65,9 +90,27 @@ ArgumentList = Optional[
         dict[str, JsonSafeValue],
     ]
 ]
+"""Type alias for flexible argument specification formats."""
 
 
 def convert_arguments_to_json(arguments, only_validate=False) -> Optional[str]:
+    """Convert flexible argument formats to JSON-serialized dict.
+
+    Accepts multiple formats for specifying arguments:
+    - dict: Directly serialized to JSON
+    - Arguable: Converted to single-key dict
+    - list/tuple/set: Elements can be Arguable, (name, value) pairs, or single-key dicts
+
+    Args:
+        arguments: Arguments in any supported format.
+        only_validate: If True, validate but don't return JSON string.
+
+    Returns:
+        JSON string representing arguments, or None if only_validate=True.
+
+    Raises:
+        ValueError: If arguments format is invalid or contains invalid parameter names/values.
+    """
     if isinstance(arguments, dict):
         for key, value in arguments.items():
             validate_parameter_name(key, "Argument")
@@ -281,12 +324,13 @@ class Component:
         return children
 
     def get_arguments(self) -> List[str]:
-        """
-        Create the list of arguments to be used in the __repr__ method, which
-        should be able to roundtrip back to the same component using eval.
+        """Generate arguments for __repr__ to enable round-trip serialization.
+
+        Returns arguments in proper order (positional then keyword) to recreate
+        the component via eval(repr(component)).
 
         Returns:
-            List[str]: The list of values to be used in the __repr__ method.
+            List of argument strings.
         """
         arguments = []
         handled_arguments = set()
@@ -354,60 +398,54 @@ class Component:
         return self.extra_settings.get("id", f"drafter-component-{id(self)}")
 
     def verify(self, router, state, configuration, request):
-        """
-        Verify the status of this component. This method is called before rendering the component
-        to ensure that the component is in a valid state. If the component is not valid, this method
-        should return False.
+        """Verify component validity before rendering.
 
-        Default implementation returns True.
+        This method is called during request processing to ensure the
+        component is in a valid state. Override to add custom validation.
 
         Args:
-            router: The router used to resolve URLs
-            state: The current state of the server
-            configuration: The configuration of the server
-            request: The request being processed
+            router: The route router instance.
+            state: The current page state.
+            configuration: The site configuration.
+            request: The current request object.
 
         Returns:
-            True if the component is valid, False otherwise
+            None if valid; raise ValueError or return error details if invalid.
         """
         return None
 
     def update_style(self, style, value):
-        """
-        Updates the style of a specific setting and stores it in the
-        extra_settings dictionary with a key formatted as "style_{style}".
+        """Update a CSS style property.
 
         Args:
-            style: The key representing the style to be updated
-            value: The value to associate with the given style key
+            style: The CSS property name (e.g., 'color').
+            value: The CSS value (e.g., 'red').
 
         Returns:
-            Returns the instance of the object after updating the style
+            Self for method chaining.
         """
         self.extra_settings[f"style_{style}"] = value
         return self
 
     def update_attr(self, attr, value):
-        """
-        Updates a specific attribute with the given value in the extra_settings dictionary.
-
-        This method modifies the `extra_settings` dictionary by setting the specified
-        attribute to the given value. It returns the instance of the object, allowing
-        for method chaining. No validation is performed on the input values, so they
-        should conform to the expected structure or constraints of the `extra_settings`.
-
-        TODO: Should this update the fields of the component as well, if the attr corresponds to a field?
+        """Update an HTML attribute.
 
         Args:
-            attr: The key of the attribute to be updated in the dictionary.
-            value: The value to set for the specified key in the dictionary.
+            attr: The HTML attribute name.
+            value: The attribute value.
 
         Returns:
-            The instance of the object after the update.
+            Self for method chaining.
+
+        TODO:
+            Should this update component fields if attr corresponds to one?
         """
         self.extra_settings[attr] = value
         return self
 
 
 Content = Union[Component, str]
+"""Type alias for page content: a component or string."""
+
 PageContent = Union[Content, list[Content]]
+"""Type alias for page content: a content item or list of content items."""

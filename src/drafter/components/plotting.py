@@ -14,6 +14,16 @@ except ImportError:
 
 @dataclass(repr=False)
 class MatPlotLibPlot(Component):
+    """Renders a Matplotlib figure as an image or SVG element.
+
+    Captures the current Matplotlib figure and embeds it as a base64-encoded
+    PNG or inline SVG. Can be used to display plots directly in Drafter pages.
+
+    Attributes:
+        extra_matplotlib_settings: Dict of Matplotlib savefig keyword arguments.
+        close_automatically: Whether to close the figure after rendering.
+        tag: The HTML tag name, always 'img'.
+    """
     extra_matplotlib_settings: dict
     close_automatically: bool
 
@@ -30,6 +40,18 @@ class MatPlotLibPlot(Component):
     def __init__(
         self, extra_matplotlib_settings=None, close_automatically=True, **kwargs
     ):
+        """Initialize Matplotlib plot component.
+
+        Args:
+            extra_matplotlib_settings: Optional dict of Matplotlib savefig kwargs.
+                Defaults to PNG format with tight bounding box.
+            close_automatically: Whether to close figure after rendering.
+                Defaults to True.
+            **kwargs: Additional HTML attributes and styles.
+
+        Raises:
+            ImportError: If Matplotlib is not installed.
+        """
         if not _has_matplotlib:
             raise ImportError(
                 "Matplotlib is not installed. Please install it to use this feature."
@@ -45,6 +67,17 @@ class MatPlotLibPlot(Component):
         self.close_automatically = close_automatically
 
     def plan(self, context) -> RenderPlan:
+        """Generate render plan for the Matplotlib figure.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            RenderPlan for img element (PNG) or raw SVG content.
+
+        Raises:
+            ValueError: If format is not 'png' or 'svg'.
+        """
         # Handle image processing
         image_data = io.BytesIO()
         plt.savefig(image_data, **self.extra_matplotlib_settings)  # type: ignore

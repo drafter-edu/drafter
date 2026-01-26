@@ -1,3 +1,9 @@
+"""Command-line interface for Drafter deployment and utilities.
+
+Provides CLI commands for deploying Drafter applications, managing assets,
+and building static deployments with various Python execution engines.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -21,8 +27,16 @@ console = Console()
 
 
 def protect_script_tags(content: str) -> str:
-    """
-    Protects `<script>` tags in the given HTML content by escaping them.
+    """Protect <script> tags in HTML by escaping them.
+
+    Converts <script and </script> tags to HTML entities to prevent
+    script injection and execution in HTML contexts.
+
+    Args:
+        content: HTML content containing script tags.
+
+    Returns:
+        Content with script tags escaped.
     """
     return content.replace("<script", "&lt;script").replace(
         "</script>", "&lt;/script&gt;"
@@ -30,6 +44,17 @@ def protect_script_tags(content: str) -> str:
 
 
 def _read_user_code(py_path: Path) -> str:
+    """Read user Python file with error handling.
+
+    Args:
+        py_path: Path to Python file to read.
+
+    Returns:
+        File contents as string.
+
+    Raises:
+        typer.Exit: If file not found.
+    """
     try:
         return py_path.read_text(encoding="utf-8")
     except FileNotFoundError:
@@ -38,7 +63,20 @@ def _read_user_code(py_path: Path) -> str:
 
 
 def _build_environment_js(variables: List[tuple[str, Any]]) -> str:
-    """Build Skulpt environment variable setup code."""
+    """Build Skulpt environment variable setup code.
+
+    Generates JavaScript code that sets Skulpt environment variables
+    for runtime configuration.
+
+    Args:
+        variables: List of (name, value) tuples for environment variables.
+
+    Returns:
+        JavaScript code as string.
+
+    Raises:
+        ValueError: If variable value type is not supported.
+    """
     SKULPT_ENV_VAR_TEMPLATE = (
         'Sk.environ.set$item(new Sk.builtin.str("{name}"), {value});'
     )
@@ -71,7 +109,24 @@ def _build_skulpt_deployment(
     cdn_skulpt_std: str,
     cdn_skulpt_drafter: str,
 ):
-    """Build a Skulpt-based deployment (old CLI behavior)."""
+    """Build a Skulpt-based static deployment.
+
+    Generates HTML file with Skulpt JavaScript engine for standalone deployment.
+    Packages user code and additional files into Skulpt's builtin files system.
+
+    Args:
+        file: Main Python file path.
+        user_code: User Python code content.
+        outdir: Output directory for deployment.
+        output_filename: Output HTML filename.
+        additional_files: List of additional Python files to include.
+        external_pages: List of external page URLs.
+        create_404: Whether to create 404 page.
+        warn_missing_info: Whether to warn about missing metadata.
+        cdn_skulpt: Skulpt CDN URL.
+        cdn_skulpt_std: Skulpt stdlib CDN URL.
+        cdn_skulpt_drafter: Drafter Skulpt package CDN URL.
+    """
     SK_TEMPLATE_LINE = "Sk.builtinFiles.files[{filename!r}] = {content!r};\n"
     js_lines = []
 

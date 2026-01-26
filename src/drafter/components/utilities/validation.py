@@ -1,3 +1,9 @@
+"""Validation utilities for component arguments.
+
+Provides functions to validate parameter names and JSON values used in
+component arguments and settings.
+"""
+
 import json
 
 BASE_PARAMETER_ERROR = (
@@ -9,18 +15,17 @@ BASE_PARAMETER_ERROR = """The {component_type} value must be a JSON-serializable
 
 
 def validate_parameter_name(name: str, component_type: str):
-    """
-    Validates a parameter name to ensure it adheres to Python's identifier naming rules.
-    The function verifies if the given name is a string, non-empty, does not contain spaces,
-    does not start with a digit, and is a valid Python identifier. Additionally, it ensures
-    the name starts with a letter or an underscore. Raises a `ValueError` with a detailed
-    error message if validation fails.
+    """Validate parameter name as Python identifier.
+
+    Ensures the name follows Python identifier rules: contains only alphanumeric
+    characters and underscores, doesn't start with a digit, has no spaces, etc.
 
     Args:
-        name (str): The parameter name to validate.
-        component_type (str): The type of component for error message context.
+        name: The parameter name to validate.
+        component_type: Component type for error message context.
+
     Raises:
-        ValueError: If the name is not a valid Python identifier.
+        ValueError: If name is not a valid Python identifier.
     """
     base_error = BASE_PARAMETER_ERROR.format(component_type=component_type)
     if not isinstance(name, str):
@@ -51,14 +56,17 @@ def validate_parameter_name(name: str, component_type: str):
 
 
 def validate_json_value(value, component_type: str):
-    """
-    Recursively validates that a value is JSON-serializable and does not contain any unsupported types.
+    """Recursively validate value is JSON-serializable.
+
+    Checks that value and all nested structures (lists, dicts) contain only
+    JSON-safe types: str, int, float, bool, None, list, dict.
 
     Args:
         value: The value to validate.
-        component_type: A string describing the type of component for error messages.
+        component_type: Component type for error message context.
+
     Raises:
-        ValueError: If the value is not JSON-serializable or contains unsupported types.
+        ValueError: If value contains non-JSON-serializable types.
     """
     base_error = BASE_PARAMETER_ERROR.format(component_type=component_type)
     if isinstance(value, (str, int, float, bool)) or value is None:

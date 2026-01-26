@@ -10,12 +10,15 @@ from drafter.components.utilities.validation import validate_parameter_name
 
 @dataclass(repr=False)
 class Output(FormComponent):
-    """
-    A component to display output content, typically used for showing results or responses.
+    """Output element for displaying computed or result content.
 
-    Args:
-        content: The content to be displayed as output.
-        **kwargs: Additional HTML attributes.
+    Typically used for showing results or responses without user input.
+
+    Attributes:
+        name: The output element name for form association.
+        content: The content to be displayed.
+        for_id: Optional ID of associated form elements.
+        tag: The HTML tag name, always 'output'.
     """
 
     name: str
@@ -38,6 +41,17 @@ class Output(FormComponent):
         for_id: Union[None, str, FormComponent] = None,
         **kwargs,
     ):
+        """Initialize output component.
+
+        Args:
+            name: The output element name for form association.
+            content: The content to display.
+            for_id: Optional ID or FormComponent to associate with.
+            **kwargs: Additional HTML attributes.
+
+        Raises:
+            ValueError: If name is not a valid parameter name.
+        """
         validate_parameter_name(name, "Output")
         self.name = name
         self.content = content
@@ -48,6 +62,14 @@ class Output(FormComponent):
 
 
 def format_number(num):
+    """Format a number, removing decimal point for integers.
+
+    Args:
+        num: The number to format.
+
+    Returns:
+        String representation of the number.
+    """
     if num == int(num):
         return str(int(num))
     return str(num)
@@ -55,17 +77,12 @@ def format_number(num):
 
 @dataclass(repr=False)
 class Progress(Component):
-    """
-    HTML5 progress bar element for showing task completion.
+    """HTML5 progress bar element for showing task completion.
 
-    Args:
-        value: Current progress value (typically 0-max)
-        max: Maximum value (default: 1)
-        **kwargs: Additional HTML attributes
-
-    Example:
-        Progress(0.5, max=1)  # 50% progress bar
-        Progress(0.6, max=1, style_width="200px")  # 60% progress, custom width
+    Attributes:
+        value: Current progress value (typically 0 to max).
+        max: Maximum value for the progress bar.
+        tag: The HTML tag name, always 'progress'.
     """
 
     value: float
@@ -78,6 +95,18 @@ class Progress(Component):
         ComponentArgument("value"),
         ComponentArgument("max", kind="keyword", default_value=1.0),
     ]
+
+    def __init__(self, value: float, max: float = 1.0, **kwargs):
+        """Initialize progress component.
+
+        Args:
+            value: Current progress value.
+            max: Maximum value. Defaults to 1.0.
+            **kwargs: Additional HTML attributes and styles.
+        """
+        self.value = value
+        self.max = max
+        self.extra_settings = kwargs
     DEFAULT_ATTRS = {"max": 1}
 
     def __init__(self, value: float, max: float = 1.0, **kwargs):

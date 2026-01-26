@@ -8,30 +8,56 @@ from drafter.components.utilities.validation import validate_parameter_name
 
 
 class FormComponent(Component):
+    """Base class for form input components.
+
+    Provides shared functionality for form fields including ARIA labels
+    and ID management.
+
+    Attributes:
+        name: The form field name for parameter submission.
+    """
+
     name: str
 
     def handle_aria(self, attributes: dict) -> None:
+        """Add ARIA label attribute if not already present.
+
+        Args:
+            attributes: Dictionary of HTML attributes to update.
+        """
         if "aria-label" not in attributes:
             attributes["aria-label"] = self.name
 
     def get_attributes(self, context) -> dict:
+        """Get HTML attributes for the form component.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            Dictionary of HTML attributes including ARIA label.
+        """
         attrs = super().get_attributes(context)
         self.handle_aria(attrs)
         return attrs
 
     def get_id(self) -> str:
+        """Get the identifier for this form field.
+
+        Returns:
+            The element ID or the field name.
+        """
         return self.extra_settings.get("id", self.name)
 
 
 @dataclass(repr=False)
 class Label(Component):
-    """
-    A label component for form fields.
-    Can be associated with a form element using the for_id parameter.
+    """A label element for form fields, optionally associated with an input.
 
-    Args:
-        text: The text content of the label
-        for_id: Optional ID of the form element this label is for
+    Attributes:
+        text: The label text content.
+        for_id: Optional ID or FormComponent to associate with this label.
+        tag: The HTML tag name, always 'label'.
     """
 
     text: str
@@ -52,6 +78,13 @@ class Label(Component):
         for_id: Union[None, str, FormComponent] = None,
         **extra_settings,
     ):
+        """Initialize label component.
+
+        Args:
+            text: The label text content.
+            for_id: Optional element ID or FormComponent to associate with.
+            **extra_settings: Additional HTML attributes.
+        """
         self.text = text
         if isinstance(for_id, FormComponent):
             for_id = for_id.get_id()
@@ -61,6 +94,14 @@ class Label(Component):
 
 @dataclass(repr=False)
 class TextBox(FormComponent):
+    """Text input field for single-line user input.
+
+    Attributes:
+        default_value: Optional initial value for the text box.
+        kind: The HTML input type (text, password, email, etc.).
+        tag: The HTML tag name, always 'input'.
+    """
+
     default_value: Optional[str]
     kind: str
 
@@ -154,6 +195,17 @@ class SelectBox(FormComponent):
         default_value: Optional[Union[str, int, float]] = None,
         **kwargs,
     ):
+        """Initialize select box component.
+
+        Args:
+            name: The form field name.
+            options: List of option values to display.
+            default_value: Optional initially selected value.
+            **kwargs: Additional HTML attributes.
+
+        Raises:
+            ValueError: If name is not a valid parameter name.
+        """
         validate_parameter_name(name, "SelectBox")
         self.name = name
         self.options = [str(option) for option in options]
@@ -194,6 +246,16 @@ class CheckBox(FormComponent):
     DEFAULT_ATTRS = {"type": "checkbox"}
 
     def __init__(self, name: str, default_value: bool = False, **kwargs):
+        """Initialize checkbox component.
+
+        Args:
+            name: The form field name.
+            default_value: Whether initially checked. Defaults to False.
+            **kwargs: Additional HTML attributes.
+
+        Raises:
+            ValueError: If name is not a valid parameter name.
+        """
         validate_parameter_name(name, "CheckBox")
         self.name = name
         self.default_value = bool(default_value)
@@ -228,9 +290,11 @@ class DateTimeInput(FormComponent):
     TODO: Handle __eq__ and __hash__
 
     Args:
-        name: The name of the form field
-        default_value: Optional default value in ISO 8601 format (YYYY-MM-DDTHH:MM) or python datetime
-        kwargs: Additional HTML attributes
+       Input for selecting dates in YYYY-MM-DD format.
+
+    Attributes:
+        default_value: Optional default value in ISO 8601 format or date object.
+        tag: The HTML tag name, always 'input'.
     """
 
     default_value: Union[str, None]

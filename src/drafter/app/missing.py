@@ -1,15 +1,28 @@
-"""
-TODO: Handle when the requested URL does not exist.
+"""HTTP 404 error handling for the development server.
 
-Also serve any files that are available in the starting folder.
+Provides a custom 404 error handler that displays available routes.
+
+TODO:
+    Handle when the requested URL does not exist.
+    Also serve any files that are available in the starting folder.
 """
 
 
 def handle_404(error):
-    """
-    This is the default handler for HTTP 404 errors. It renders a custom error page
-    that displays a message indicating the requested page was not found, and provides
-    a link to return to the index page.
+    """Handle HTTP 404 errors with custom page.
+
+    Renders a custom 404 error page that displays the requested URL,
+    provides a link to the index page, and lists available routes.
+
+    Args:
+        error: The HTTP error object.
+
+    Returns:
+        Formatted error page HTML (format varies by template).
+
+    TODO:
+        This implementation appears incomplete; verify full implementation
+        and ensure integration with Drafter's error handling system.
     """
     message = "<p>The requested page <code>{url}</code> was not found.</p>".format(
         url=request.url

@@ -1,3 +1,9 @@
+"""Starlette-based development server for Drafter applications.
+
+Provides local development server functionality including live reloading,
+file watching, and pre-rendering of initial pages.
+"""
+
 import asyncio
 import webbrowser
 from pathlib import Path
@@ -20,6 +26,14 @@ from drafter.data.response import Response as DrafterResponse
 
 
 async def index(req) -> Response:
+    """Serve the index HTML page for the development server.
+
+    Args:
+        req: Starlette request object.
+
+    Returns:
+        HTMLResponse with rendered index page.
+    """
     app: Starlette = req.app  # type: ignore
     config: AppServerConfiguration = app.state.config
     user_code = app.state.user_path.read_text(encoding="utf-8")
@@ -41,6 +55,18 @@ async def index(req) -> Response:
 def compile_server(
     server: ClientServer, config: AppServerConfiguration, initial_state
 ) -> tuple[str, str]:
+    """Precompile initial page render for faster loading.
+
+    Executes the index route to generate precompiled HTML body and headers.
+
+    Args:
+        server: The ClientServer instance.
+        config: AppServer configuration.
+        initial_state: Initial application state.
+
+    Returns:
+        Tuple of (compiled_body, compiled_headers) as strings.
+    """
     server.do_start(initial_state=initial_state)
     initial_request = Request(-1, "precompilation", "index", {}, {}, "")
     response: DrafterResponse = server.do_visit(initial_request)

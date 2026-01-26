@@ -1,3 +1,9 @@
+"""Main entry point for starting Drafter servers.
+
+Provides the start_server() function which routes to either in-browser ClientServer
+or local development AppServer based on execution context.
+"""
+
 import sys
 import os
 from typing import Optional, Union
@@ -35,36 +41,41 @@ def start_server(
     use_reloader: Optional[bool] = None,
     **extra_configuration,
 ) -> None:
-    """
-    Starts the Drafter server with the given initial state.
+    """Start the Drafter server (web or local development mode).
 
-    This function is the entry-point for both the AppServer and the ClientServer, which means
-    that it has two distinct modes of operation: one for web (ClientServer) and one for local
-    (AppServer). Therefore, its parameters are actually a superset of the parameters needed
-    for either mode.
+    Routes to either ClientServer (web mode) or AppServer (local dev mode)
+    based on execution context. In web mode, initializes browser-side bridge;
+    in local mode, starts Starlette dev server with file watching.
+
+    This function is the primary entry point for users and accepts parameters
+    for both ClientServer and AppServer modes (the appropriate ones are used
+    depending on context).
 
     Args:
-        initial_state: The initial state to set for the server.
-        server: The server instance to use (optional).
-        server_name: The name of the server.
-        in_debug_mode: Whether to enable debug mode.
+        initial_state: Optional initial application state.
+        server: Optional pre-created server instance (defaults to main server).
+        server_name: Server identifier name.
+        in_debug_mode: Enable debug panel and logging.
         framed: Whether to frame the content.
-        theme: The theme to use.
-        site_title: The title of the site.
-        information: Additional site information.
-        verbose: Whether to enable verbose output.
-        user_directory: The user directory path.
-        main_filename: The main file name.
-        asset_directory: The asset directory path.
-        show_filename_as: How to display the filename.
-        engine: The rendering engine to use.
-        port: The port to run on.
-        host: The host to run on.
-        prerender_initial_page: Whether to prerender the initial page.
-        open_browser: Whether to open a browser.
-        inline_py: Whether to use inline Python.
-        use_reloader: Whether to use a reloader.
-        extra_configuration: Additional keyword arguments (for backward compatibility, currently ignored).
+        theme: Theme name (e.g., "default").
+        site_title: Title displayed in UI.
+        information: Dict of site information (author, description, etc.).
+        verbose: Enable verbose logging.
+        user_directory: User code directory (auto-detected if False).
+        main_filename: Main Python file name (auto-detected if False).
+        asset_directory: Assets directory (uses Drafter defaults if False).
+        show_filename_as: Display filename in UI (if different from actual).
+        engine: Python engine ("skulpt" or "pyodide").
+        port: Server port for dev mode.
+        host: Server host for dev mode.
+        prerender_initial_page: Prerender initial page on startup.
+        open_browser: Auto-open browser in dev mode.
+        inline_py: Inline code in HTML vs. load via HTTP.
+        use_reloader: Enable file watcher and auto-reload.
+        **extra_configuration: Additional configuration parameters.
+
+    Raises:
+        Various exceptions from ClientServer or AppServer initialization.
     """
     server = server or get_main_server()
     if is_web():

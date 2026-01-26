@@ -6,35 +6,59 @@ from drafter.components.planning.render_plan import RenderPlan
 
 @dataclass(repr=False)
 class LineBreak(Component):
+    """Renders a line break element (br).
+
+    Attributes:
+        tag: The HTML tag name, always 'br'.
+        SELF_CLOSING_TAG: Indicates this is a self-closing tag.
+    """
+
     tag = "br"
     SELF_CLOSING_TAG = True
 
     def __init__(self, **kwargs):
+        """Initialize line break component.
+
+        Args:
+            **kwargs: Additional HTML attributes.
+        """
         self.extra_settings = kwargs
 
 
 @dataclass(repr=False)
 class HorizontalRule(Component):
+    """Renders a horizontal rule element (hr).
+
+    Attributes:
+        tag: The HTML tag name, always 'hr'.
+        SELF_CLOSING_TAG: Indicates this is a self-closing tag.
+    """
+
     tag = "hr"
     SELF_CLOSING_TAG = True
 
     def __init__(self, **kwargs):
+        """Initialize horizontal rule component.
+
+        Args:
+            **kwargs: Additional HTML attributes.
+        """
         self.extra_settings = kwargs
 
 
 def handle_arguments_compatibility(args, kwargs):
-    """
-    A function that handles classic Drafter functionality for
-    previously incorrectly rendered components that used the explicit
-    content and extra_settings kwargs. We should actively consider
-    whether we want to retain this functionality long-term.
+    """Handle legacy Drafter functionality for backward compatibility.
+
+    Supports previously incorrectly rendered components that used explicit
+    'content' and 'extra_settings' kwargs. This functionality may be
+    deprecated in future versions.
 
     Args:
-        args (list): Positional arguments
-        kwargs (kwargs): Keyword arguments
+        args: List of positional arguments.
+        kwargs: Dictionary of keyword arguments.
 
     Returns:
-        tuple: Updated args and kwargs
+        Tuple of (updated_args, updated_kwargs).
     """
     if "content" in kwargs:
         args.extend(kwargs.pop("content"))
@@ -46,12 +70,11 @@ def handle_arguments_compatibility(args, kwargs):
 
 @dataclass(repr=False)
 class Span(Component):
-    """
-    A span element for inline grouping of content.
+    """Renders an inline span element for grouping content.
 
-    Args:
-        *content: The content to be wrapped in the span.
-        **extra_settings: Additional HTML attributes and style properties for the span.
+    Attributes:
+        content: List of page content items to wrap in the span.
+        tag: The HTML tag name, always 'span'.
     """
 
     content: List[PageContent]
@@ -62,6 +85,12 @@ class Span(Component):
     ]
 
     def __init__(self, *content: PageContent, **extra_settings):
+        """Initialize span component.
+
+        Args:
+            *content: Variable-length content to wrap in the span.
+            **extra_settings: Additional HTML attributes and styles.
+        """
         self.content, self.extra_settings = handle_arguments_compatibility(
             list(content), extra_settings
         )
@@ -72,9 +101,9 @@ class Div(Component):
     """
     A div element for block-level grouping of content.
 
-    Args:
-        *content: The content to be wrapped in the div.
-        **extra_settings: Additional HTML attributes and style properties for the div.
+    Attributes:
+        content: List of page content items to wrap in the div.
+        tag: The HTML tag name, always 'div'.
     """
 
     content: List[PageContent]
@@ -110,6 +139,12 @@ class Row(Component):
     ]
 
     def __init__(self, *content: PageContent, **extra_settings):
+        """Initialize row component.
+
+        Args:
+            *content: Variable-length content to display in the row.
+            **extra_settings: Additional HTML attributes and styles.
+        """
         self.content, self.extra_settings = handle_arguments_compatibility(
             list(content), extra_settings
         )

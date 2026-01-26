@@ -6,24 +6,19 @@ from drafter.components.planning.render_plan import RenderPlan
 
 @dataclass(repr=False)
 class Audio(Component):
-    """
-    HTML5 audio element for embedding sound content.
+    """Renders an HTML5 audio element for embedding sound content.
 
     Note that this renders an element in the page. For audio control
     that plays outside of the page context (e.g., background music),
     consider using the play_audio function from drafter.media.audio.
 
-    Args:
+    Attributes:
         src: Source URL of the audio file.
-        controls: Whether to display audio controls (default: True).
-        autoplay: Whether to autoplay the audio (default: False).
-        loop: Whether to loop the audio (default: False).
-        muted: Whether to mute the audio (default: False).
-        **kwargs: Additional HTML attributes.
-
-    Examples:
-        Audio("path/to/audio.mp3")
-        Audio("path/to/audio.ogg", controls=False, autoplay=True)
+        controls: Whether to display audio controls.
+        autoplay: Whether to autoplay the audio.
+        loop: Whether to loop the audio.
+        muted: Whether to mute the audio.
+        tag: The HTML tag name, always 'audio'.
     """
 
     src: str
@@ -53,6 +48,16 @@ class Audio(Component):
         muted: bool = False,
         **kwargs,
     ):
+        """Initialize audio component.
+
+        Args:
+            src: Source URL of the audio file.
+            controls: Whether to display audio controls. Defaults to True.
+            autoplay: Whether to autoplay the audio. Defaults to False.
+            loop: Whether to loop the audio. Defaults to False.
+            muted: Whether to mute the audio. Defaults to False.
+            **kwargs: Additional HTML attributes and styles.
+        """
         self.src = src
         self.controls = controls
         self.autoplay = autoplay
@@ -63,22 +68,17 @@ class Audio(Component):
 
 @dataclass(repr=False)
 class Video(Component):
-    """
-    HTML5 Video element for playing video files.
+    """Renders an HTML5 video element for playing video files.
 
-    Args:
-        src: URL or path to the video file
-        width: Optional width in pixels
-        height: Optional height in pixels
-        controls: Whether to show playback controls (default: True)
-        autoplay: Whether to autoplay the video (default: False)
-        loop: Whether to loop the video (default: False)
-        muted: Whether to mute the video (default: False)
-        **kwargs: Additional HTML attributes and styles
-
-    Example:
-        Video("video/tutorial.mp4")
-        Video("video/demo.mp4", width=640, height=480, autoplay=True)
+    Attributes:
+        src: URL or path to the video file.
+        width: Optional width in pixels.
+        height: Optional height in pixels.
+        controls: Whether to show playback controls.
+        autoplay: Whether to autoplay the video.
+        loop: Whether to loop the video.
+        muted: Whether to mute the video.
+        tag: The HTML tag name, always 'video'.
     """
 
     tag = "video"
@@ -113,6 +113,18 @@ class Video(Component):
         muted: bool = False,
         **kwargs,
     ):
+        """Initialize video component.
+
+        Args:
+            src: URL or path to the video file.
+            width: Optional width in pixels.
+            height: Optional height in pixels.
+            controls: Whether to show playback controls. Defaults to True.
+            autoplay: Whether to autoplay the video. Defaults to False.
+            loop: Whether to loop the video. Defaults to False.
+            muted: Whether to mute the video. Defaults to False.
+            **kwargs: Additional HTML attributes and styles.
+        """
         self.src = src
         self.width = width
         self.height = height
@@ -125,18 +137,13 @@ class Video(Component):
 
 @dataclass(repr=False)
 class Canvas(Component):
-    """
-    HTML5 Canvas element for drawing graphics via JavaScript.
+    """Renders an HTML5 canvas element for drawing graphics via JavaScript.
 
-    Args:
-        canvas_id: ID attribute for the canvas element
-        width: Width in pixels (default: 300)
-        height: Height in pixels (default: 150)
-        **kwargs: Additional HTML attributes and styles
-
-    Example:
-        Canvas("myCanvas", width=640, height=480)
-        Canvas("drawArea", width=800, height=600, style_border="1px solid black")
+    Attributes:
+        canvas_id: ID attribute for the canvas element.
+        width: Width in pixels.
+        height: Height in pixels.
+        tag: The HTML tag name, always 'canvas'.
     """
 
     canvas_id: str
@@ -154,6 +161,14 @@ class Canvas(Component):
     ]
 
     def __init__(self, canvas_id: str, width: int = 300, height: int = 150, **kwargs):
+        """Initialize canvas component.
+
+        Args:
+            canvas_id: ID attribute for the canvas element.
+            width: Width in pixels. Defaults to 300.
+            height: Height in pixels. Defaults to 150.
+            **kwargs: Additional HTML attributes and styles.
+        """
         self.canvas_id = canvas_id
         self.width = width
         self.height = height
@@ -165,16 +180,12 @@ class SVG(Component):
     """
     SVG element wrapper for embedding SVG graphics.
 
-    Args:
-        content: List of SVG child elements/components or raw SVG string
-        width: Optional width attribute
-        height: Optional height attribute
-        viewBox: Optional viewBox attribute (e.g., "0 0 100 100")
-        **kwargs: Additional HTML attributes and styles
-
-    Example:
-        SVG('<circle cx="50" cy="50" r="40" fill="red"/>', width=100, height=100)
-        SVG('<rect width="100" height="100" fill="blue"/>', viewBox="0 0 100 100")
+    Attributes:
+        content: SVG child elements or raw SVG string.
+        width: Optional width attribute.
+        height: Optional height attribute.
+        viewBox: Optional viewBox attribute (e.g., '0 0 100 100').
+        tag: The HTML tag name, always 'svg'.
     """
 
     content: str

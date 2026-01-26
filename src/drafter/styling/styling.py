@@ -96,14 +96,41 @@ def float_left(component: PageContent) -> PageContent:
 
 
 def bold(component: PageContent) -> PageContent:
+    """
+    Applies bold font weight to a component.
+
+    Args:
+        component: The component to make bold.
+
+    Returns:
+        The original component (updated).
+    """
     return update_style(component, "font-weight", "bold")
 
 
 def italic(component: PageContent) -> PageContent:
+    """
+    Applies italic font style to a component.
+
+    Args:
+        component: The component to italicize.
+
+    Returns:
+        The original component (updated).
+    """
     return update_style(component, "font-style", "italic")
 
 
 def underline(component: PageContent) -> PageContent:
+    """
+    Applies underline text decoration to a component.
+
+    Args:
+        component: The component to underline.
+
+    Returns:
+        The original component (updated).
+    """
     return update_style(component, "text-decoration", "underline")
 
 

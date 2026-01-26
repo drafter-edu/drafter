@@ -8,6 +8,14 @@ from drafter.components.planning.render_plan import RenderPlan
 
 @dataclass(repr=False)
 class Pre(Component):
+    """Renders preformatted text with preserved whitespace.
+
+    Attributes:
+        content: List of page content items to display with preserved formatting.
+        tag: The HTML tag name, always 'pre'.
+        COLLAPSE_WHITESPACE: Whether to collapse whitespace in output.
+    """
+
     content: list[PageContent]
     tag = "pre"
 
@@ -16,6 +24,12 @@ class Pre(Component):
     COLLAPSE_WHITESPACE = True
 
     def __init__(self, *content: PageContent, **extra_settings):
+        """Initialize preformatted text component.
+
+        Args:
+            *content: Variable-length content to display.
+            **extra_settings: Additional HTML attributes and styles.
+        """
         self.content = list(content)
         self.extra_settings = extra_settings
 
@@ -25,6 +39,13 @@ PreformattedText = Pre
 
 @dataclass(repr=False)
 class Header(Component):
+    """Renders a heading element (h1-h6).
+
+    Attributes:
+        body: The content of the heading.
+        level: The heading level (1-6), determines the HTML tag.
+    """
+
     body: PageContent
     level: int = 1
 
@@ -38,6 +59,16 @@ class Header(Component):
     RENAME_ATTRS = {"level": ""}
 
     def __init__(self, body: PageContent, level: int = 1, **extra_settings):
+        """Initialize heading component.
+
+        Args:
+            body: The heading content.
+            level: The heading level (1-6). Defaults to 1.
+            **extra_settings: Additional HTML attributes and styles.
+
+        Raises:
+            ValueError: If level is not between 1 and 6.
+        """
         self.body = body
         self.level = level
         if level < 1 or level > 6:
@@ -45,11 +76,27 @@ class Header(Component):
         self.extra_settings = extra_settings
 
     def get_tag(self, context) -> str:
+        """Get the HTML tag name based on heading level.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            The tag name (e.g., 'h1', 'h2').
+        """
         return f"h{self.level}"
 
 
 @dataclass(repr=False)
 class Text(Component):
+    """Renders simple text content wrapped in a span element.
+
+    Attributes:
+        tag: The HTML tag name, always 'span'.
+        body: The text content to display.
+        extra_settings: Additional HTML attributes and styles.
+    """
+
     tag = "span"
     body: str
     extra_settings: dict
@@ -59,12 +106,26 @@ class Text(Component):
     ]
 
     def __init__(self, body: str, **extra_settings):
+        """Initialize text component.
+
+        Args:
+            body: The text content to display.
+            **extra_settings: Additional HTML attributes and styles.
+        """
         self.body = body
         if "body" in extra_settings:
             self.body = extra_settings.pop("body")
         self.extra_settings = extra_settings
 
     def __eq__(self, other):
+        """Compare text components for equality.
+
+        Args:
+            other: The object to compare with.
+
+        Returns:
+            True if components have identical body and extra_settings.
+        """
         if isinstance(other, Text):
             return (
                 self.body == other.body and self.extra_settings == other.extra_settings
@@ -97,8 +158,9 @@ class RawHTML(Component):
     WARNING: Only use with trusted HTML content to avoid XSS vulnerabilities.
     This component bypasses HTML escaping and renders content as-is.
 
-    Args:
-        html: The raw HTML string to render
+    Attributes:
+        html: The raw HTML string to render.
+        tag: The HTML tag name, always 'div'.
     """
 
     html: str

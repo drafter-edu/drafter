@@ -14,9 +14,20 @@ from copy import deepcopy
 
 @dataclass(repr=False)
 class Table(Component):
-    """
-    TODO: Handle 2d list, 1d list of dataclasses, 1d list of primitives,
-    TODO: Handle single dataclass instance, dictionaries
+    """Renders an HTML table from row data and optional header.
+
+    Supports various data formats including lists of lists, dataclasses,
+    and mixed content types. Automatically generates header from dataclass
+    fields if not explicitly provided.
+
+    Attributes:
+        rows: List of table rows (each row is a list of cell content).
+        header: Optional list of header cell content.
+        tag: The HTML tag name, always 'table'.
+
+    TODO:
+        Handle 2d list, 1d list of dataclasses, 1d list of primitives.
+        Handle single dataclass instance, dictionaries.
     """
 
     rows: list[list[Content]]
@@ -31,18 +42,52 @@ class Table(Component):
     RENAME_ATTRS = {"header": ""}
 
     def __init__(self, rows: list[list[Content]], header=None, **kwargs):
+        """Initialize table component.
+
+        Args:
+            rows: List of table rows (each row is a list of cell content).
+            header: Optional list of header cell content.
+            **kwargs: Additional HTML attributes and styles.
+        """
         self.rows = rows
         self.header = header
         self.extra_settings = kwargs
         # self.reformat_as_tabular()
 
     def render_tr(self, row_content, context):
+        """Render a table row (tr) element.
+
+        Args:
+            row_content: Content for the row cells.
+            context: Rendering context.
+
+        Returns:
+            RenderPlan for the tr element.
+        """
         return RenderPlan(kind="tag", tag_name="tr", children=row_content)
 
     def render_td(self, cell_content, context):
+        """Render a table cell (td) element.
+
+        Args:
+            cell_content: Content for the cell.
+            context: Rendering context.
+
+        Returns:
+            RenderPlan for the td element.
+        """
         return RenderPlan(kind="tag", tag_name="td", children=[cell_content])
 
     def render_td_code(self, cell_content, context):
+        """Render a table cell with code formatting.
+
+        Args:
+            cell_content: Content for the cell.
+            context: Rendering context.
+
+        Returns:
+            RenderPlan for td element with code child.
+        """
         return self.render_td(
             RenderPlan(
                 kind="tag",
@@ -55,6 +100,14 @@ class Table(Component):
     def get_tbody_from_dataclass(
         self, context
     ) -> tuple[RenderPlan, Optional[RenderPlan]]:
+        """Generate table body from a dataclass instance.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            Tuple of (tbody_plan, thead_plan) showing dataclass fields.
+        """
         tbody_rows = []
         for field in fields(self.rows):  # type: ignore
             value = getattr(self.rows, field.name)
@@ -72,6 +125,14 @@ class Table(Component):
         return tbody, thead
 
     def get_tbody(self, context) -> tuple[RenderPlan, Optional[RenderPlan]]:
+        """Generate table body from row data.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            Tuple of (tbody_plan, thead_plan).
+        """
         if is_dataclass(self.rows):
             return self.get_tbody_from_dataclass(context)
         # Add rows
@@ -104,6 +165,14 @@ class Table(Component):
         return tbody, thead
 
     def make_head(self, header) -> RenderPlan:
+        """Create a table header (thead) element.
+
+        Args:
+            header: List of header cell content.
+
+        Returns:
+            RenderPlan for the thead element.
+        """
         return RenderPlan(
             kind="tag",
             tag_name="thead",
@@ -124,6 +193,14 @@ class Table(Component):
         )
 
     def get_children(self, context) -> list[PageContent | RenderPlan]:
+        """Get child elements (thead and tbody) for the table.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            List of RenderPlan objects for table structure.
+        """
         children = []
 
         tbody, thead = self.get_tbody(context)

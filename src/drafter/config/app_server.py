@@ -1,3 +1,9 @@
+"""Configuration for the Drafter development app server.
+
+Defines AppServerConfiguration dataclass for controlling server behavior,
+asset serving, file reloading, and UI options.
+"""
+
 from dataclasses import dataclass, fields
 from typing import Optional, Union
 from drafter.config.engines import EngineType
@@ -6,29 +12,28 @@ from drafter.config.urls import INTERNAL_ROUTES
 
 @dataclass
 class AppServerConfiguration:
-    """
-    Configuration options for the Drafter App Server.
+    """Configuration options for the Drafter development server.
+
+    Controls how the local development server runs, including port/host,
+    file watching, code inlining, asset serving, and browser integration.
 
     Attributes:
-        verbose: Whether to enable verbose logging on stdout.
-        prerender_initial_page: Whether to prerender the initial page on server start.
-        port: The port on which to run the server.
-        host: The host on which to run the server.
-        use_reloader: Whether to use the auto-reloader for development; any edits to the user code will
-                      restart the server and reload the page.
-        open_browser: Whether to automatically open the web browser when the server starts.
-        inline_py: Whether to inline the user Python code into the HTML page (for small scripts).
-                   If False, the user code is loaded via a separate HTTP request.
-        engine: The Python execution engine to use (e.g., "skulpt", "pyodide").
-        user_directory: The directory path to the main user folder to serve. If not specified,
-                        then it will detect the first file that called `start_server` in the current
-                        call stack, and use that file's directory (and also assign `main_filename`).
-        main_filename: The filename to use for the main user Python file. Will be auto-detected
-                       if not specified based on the `start_server`.
-        asset_directory: The directory path to serve static assets from. If not specified, it will
-                         use the default Drafter assets.
-        show_filename_as: The displayed filename of the main user file in the UI (if different from `main_filename`).
-        site_title: The title of the site to display in the browser tab.
+        verbose: Enable verbose logging to stdout.
+        prerender_initial_page: Prerender initial page on server start.
+        port: Server port number.
+        host: Server host address.
+        use_reloader: Enable auto-reloader for code changes.
+        open_browser: Automatically open web browser on start.
+        inline_py: Inline user code in HTML vs. load via HTTP request.
+        engine: Python execution engine ("skulpt" or "pyodide").
+        user_directory: Main user folder path (auto-detected if False).
+        main_filename: Main user Python file name (auto-detected if False).
+        asset_directory: Static assets directory (uses Drafter defaults if False).
+        show_filename_as: Display name for main file in UI (if different).
+        site_title: Browser tab title.
+        serve_adjacent_files: Serve files from user directory.
+        mount_drafter_locally: Mount Drafter locally vs. from package.
+        override_asset_url: Custom asset URL (False to use defaults).
     """
 
     verbose: bool = True
@@ -55,9 +60,22 @@ class AppServerConfiguration:
 
     @property
     def ws_url(self) -> str:
+        """Get WebSocket URL for live reload.
+
+        Returns:
+            WebSocket URL constructed from host, port, and internal route.
+        """
         return f"ws://{self.host}:{self.port}{INTERNAL_ROUTES['WS']}"
 
     def merge_in_args(self, new_args: dict) -> None:
+        """Merge new arguments into configuration.
+
+        Args:
+            new_args: Dict of argument names and values.
+
+        Raises:
+            AttributeError: If unknown configuration attribute provided.
+        """
         for key, value in new_args.items():
             if hasattr(self, key):
                 setattr(self, key, value)
@@ -65,6 +83,11 @@ class AppServerConfiguration:
                 raise AttributeError(f"Unknown configuration attribute: {key}")
 
     def extract_from_args(self, potential_args: dict):
+        """Extract configuration values from argument dict.
+
+        Args:
+            potential_args: Dict potentially containing configuration values.
+        """
         for field in fields(self):
             if field.name in potential_args:
                 value = potential_args[field.name]

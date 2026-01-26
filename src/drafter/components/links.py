@@ -28,6 +28,15 @@ from drafter.components.utilities.validation import (
 
 @dataclass(repr=False)
 class Argument(Component, Arguable):
+    """Hidden form input for passing arguments to route handlers.
+
+    Attributes:
+        tag: The HTML tag name, always 'input'.
+        DEFAULT_ATTRS: Default attributes {'type': 'hidden'}.
+        name: The name of the argument parameter.
+        value: The JSON-safe value of the argument.
+    """
+
     tag = "input"
 
     DEFAULT_ATTRS = {"type": "hidden"}
@@ -38,6 +47,16 @@ class Argument(Component, Arguable):
     ]
 
     def __init__(self, name: str, value: JsonSafeValue, **extra_settings):
+        """Initialize argument component.
+
+        Args:
+            name: The parameter name for the argument.
+            value: The JSON-safe value to pass.
+            **extra_settings: Additional HTML attributes.
+
+        Raises:
+            ValueError: If name or value are not valid.
+        """
         validate_parameter_name(name, "Argument")
         validate_json_value(value, "Argument")
         self.name = name
@@ -45,26 +64,37 @@ class Argument(Component, Arguable):
         self.extra_settings = extra_settings
 
     def get_attributes(self, context) -> dict:
+        """Get HTML attributes for the argument input.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            Dictionary of HTML attributes including encoded name and value.
+        """
         attributes = super().get_attributes(context)
         attributes["name"] = f"{JSON_DECODE_SYMBOL}{self.name}"
         attributes["value"] = make_safe_json_argument(self.value)
         return attributes
 
     def get_id(self) -> str:
+        """Get the identifier for this argument.
+
+        Returns:
+            The element ID or the argument name.
+        """
         return self.extra_settings.get("id", self.name)
 
 
 class LinkContent(Component):
-    """
-    Represents content for a hyperlink.
+    """Base class for link and button components with URL handling.
 
-    This class encapsulates the URL and display text of a link.
-    It provides utility methods for verifying the URL, handling its structure,
-    and processing associated arguments.
+    Provides shared functionality for verifying URLs, handling both
+    internal and external links, and managing associated arguments.
 
     Attributes:
-        url: The URL of the link.
-        text: The display text of the link.
+        url: The URL or route name for the link.
+        text: The display text for the link.
     """
 
     url: str
@@ -73,6 +103,15 @@ class LinkContent(Component):
     KNOWN_ATTRS = ["disabled"]
 
     def _handle_url(self, url: UrlOrFunction, external=None) -> tuple[str, bool]:
+        """Process URL, converting functions to names and handling internal routes.
+
+        Args:
+            url: The URL, route name, or callable.
+            external: Whether URL is external; auto-detected if None.
+
+        Returns:
+            Tuple of (processed_url, is_external).
+        """
         if callable(url):
             url = url.__name__
         if external is None:
@@ -81,9 +120,22 @@ class LinkContent(Component):
         return url, external
 
     def get_link_namespace(self):
+        """Generate a unique identifier for this link.
+
+        Returns:
+            String combining text and element ID for uniqueness.
+        """
         return f"{self.text}#{self.get_id()}"
 
     def get_attributes(self, context) -> dict:
+        """Get HTML attributes for the link.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            Dictionary including data-nav attribute with URL.
+        """
         attributes = super().get_attributes(context)
         attributes["data-nav"] = self.url
         return attributes
@@ -143,6 +195,16 @@ class Link(LinkContent):
 
 @dataclass(repr=False)
 class Button(LinkContent):
+    """Renders a clickable button that navigates to a route or URL.
+
+    Attributes:
+        text: The display text for the button.
+        url: The target URL or route name.
+        arguments: Optional list of Argument objects to pass to the route.
+        external: Whether the URL is external (auto-detected if not provided).
+        tag: The HTML tag name, always 'button'.
+    """
+
     text: str
     url: str
     arguments: Optional[List[Argument]] = None
@@ -168,6 +230,14 @@ class Button(LinkContent):
         arguments: ArgumentList = None,
         **extra_settings,
     ):
+        """Initialize button component.
+
+        Args:
+            text: The display text for the button.
+            url: The target route or URL (function names are converted to strings).
+            arguments: Optional arguments to pass to the target route.
+            **extra_settings: Additional HTML attributes and styles.
+        """
         self.text = text
         self.url, self.external = self._handle_url(url)
         self.extra_settings = extra_settings
@@ -175,6 +245,14 @@ class Button(LinkContent):
             self.extra_settings["arguments"] = arguments
 
     def get_attributes(self, context) -> dict:
+        """Get HTML attributes for the button.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            Dictionary including submit button data.
+        """
         attributes = super().get_attributes(context)
         attributes["name"] = SUBMIT_BUTTON_KEY
         attributes["value"] = make_safe_argument(self.get_link_namespace())

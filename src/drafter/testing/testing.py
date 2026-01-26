@@ -17,6 +17,16 @@ except:  # noqa: E722
 
 @dataclass
 class BakeryTestCase:
+    """Records a single test case execution result.
+
+    Attributes:
+        args: Positional arguments passed to the test function.
+        kwargs: Keyword arguments passed to the test function.
+        result: The result or return value from the test function.
+        line: The line number in the source file where the test was called.
+        caller: The name or description of the test function/assertion.
+    """
+
     args: tuple
     kwargs: dict
     result: Any
@@ -25,6 +35,15 @@ class BakeryTestCase:
 
 
 def try_getting_full_code(filename: str, lineno: int) -> Optional[str]:
+    """Retrieve the full multi-line code for a test from source file.
+
+    Args:
+        filename: The path to the source file.
+        lineno: The line number to extract code from.
+
+    Returns:
+        The full code snippet as a string, or None if retrieval fails.
+    """
     try:
         with open(filename, "r") as f:
             code = f.read()
@@ -37,6 +56,18 @@ DEFAULT_STACK_DEPTH = 7
 
 
 def get_line_code(target, depth=DEFAULT_STACK_DEPTH):
+    """Extract source code line and its context for a test assertion.
+
+    Searches the call stack for a line matching the target string and
+    retrieves the full multi-line code snippet.
+
+    Args:
+        target: The string to search for in the call stack (e.g., 'assert_').
+        depth: The stack depth to search; defaults to DEFAULT_STACK_DEPTH.
+
+    Returns:
+        A tuple of (line_number, code_string), or (None, None) if not found.
+    """
     # Load in extract_stack, or provide shim for environments without it.
     try:
         from traceback import extract_stack
@@ -52,6 +83,7 @@ def get_line_code(target, depth=DEFAULT_STACK_DEPTH):
                 if possible_full_line is not None:
                     code = possible_full_line
                 return line, code
+
         # If none found, just try jumping up there and see what we can find
         frame = trace[len(trace) - depth]
         line = frame[1]
@@ -64,6 +96,12 @@ def get_line_code(target, depth=DEFAULT_STACK_DEPTH):
 
 
 class BakeryTests:
+    """Tracks and emits test case events from Bakery test assertions.
+
+    This class wraps Bakery test functions to capture test results,
+    source code context, and emit telemetry events for test execution.
+    """
+
     def __init__(self):
         self.tests = []
 

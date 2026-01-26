@@ -1,3 +1,10 @@
+"""HTML attribute utilities and constants.
+
+Provides baseline HTML attributes, boolean attribute lists, attribute enumerations,
+and functions for remapping and parsing extra settings into valid HTML attributes
+and inline styles.
+"""
+
 import html
 from typing import Any
 
@@ -137,17 +144,19 @@ ATTRIBUTE_ENUMERATIONS = {
 
 
 def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
-    """
-    Remaps attributes into styles and attributes dictionaries. This is useful for handling style and class attributes.
-    The 'classes' key's vales will be moved to 'class' and joined with a space. Any key prefixed with 'style_' will be
-    moved to the styles dictionary. All other keys will be moved to the attributes dictionary.
-    Event handlers (keys starting with 'on_') will have their underscores removed to align with HTML attribute naming conventions.
+    """Remap attribute dict into separate styles and attributes dicts.
+
+    Processes special attribute keys:
+    - 'classes': Joined with spaces and mapped to 'class' attribute
+    - 'style_*' prefixed keys: Moved to styles dict (prefix removed)
+    - 'on_*' prefixed keys: Underscores removed for HTML event handlers
+    - Other keys: Underscores converted to hyphens for CSS properties
 
     Args:
-        attributes: The attributes to remap
+        attributes: The attributes dict to remap.
 
     Returns:
-        A tuple of the styles and attributes dictionaries
+        Tuple of (styles_dict, attributes_dict).
     """
     styles: dict[str, Any] = {}
     attrs: dict[str, Any] = {}
@@ -175,23 +184,21 @@ def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
 
 
 def parse_extra_settings(extra_settings, known_attrs, component_id):
-    """
-    Parses and combines extra settings into valid attribute and style formats.
+    """Parse and format extra settings into HTML attributes and inline styles.
 
-    This method processes additional configuration settings provided via arguments or stored
-    in the `extra_settings` property, converts them into valid HTML attributes and styles,
-    and then consolidates the processed values into the appropriate output format. Attributes
-    not explicitly defined in the baseline or extra attribute lists are converted into inline
-    style declarations.
+    Validates attribute names and types, handles boolean attributes, enumerations,
+    and converts unknown attributes to inline styles. Ensures component ID is included.
 
     Args:
-        kwargs: Arbitrary keyword arguments containing extra configuration settings to be
-            applied or overridden. The keys represent attribute or style names, and the values
-            represent their corresponding values.
+        extra_settings: Dict of attribute/style settings.
+        known_attrs: List of recognized attribute names.
+        component_id: Optional component ID to include.
 
     Returns:
-        A string containing formatted HTML attributes along with an inline style block
-        if any styles are provided.
+        Space-separated string of formatted HTML attributes and inline style.
+
+    Raises:
+        ValueError: If an enumerated attribute has an invalid value.
     """
     if known_attrs is None:
         known_attrs = []

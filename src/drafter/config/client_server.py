@@ -1,3 +1,9 @@
+"""Configuration for the Drafter ClientServer.
+
+Defines ClientServerConfiguration dataclass for controlling client-side
+rendering, UI theme, debugging, and asset serving.
+"""
+
 from dataclasses import dataclass, field
 from typing import Optional, Callable, Union, Literal
 
@@ -6,14 +12,29 @@ from drafter.config.site_information import SiteInformation
 
 @dataclass
 class ClientServerConfiguration:
-    """
-    Configuration options for the ClientServer.
+    """Configuration options for the ClientServer component.
+
+    Controls how the server renders pages to the client, including theming,
+    debugging, asset serving, and additional content/styling/scripts.
 
     Attributes:
-       use_shadow_dom: Whether to use Shadow DOM for the client-side rendering. Defaults to True. This
-                       wraps the entire Drafter application in a Shadow DOM to prevent CSS conflicts with
-                       the host page. If set to False, the CSS is loaded at the top-level `head` of the page,
-                       which may cause conflicts with the host page's styles.
+        server_name: Internal server identifier.
+        in_debug_mode: Enable debug mode with debug panel.
+        enable_audit_logging: Enable audit logging of requests/responses.
+        site_title: Title displayed in the UI.
+        information: Optional SiteInformation object with site metadata.
+        framed: Whether to frame the application.
+        theme: Theme name (e.g., "default").
+        deploy_image_path: Path for deployment images.
+        override_asset_url: Custom asset URL (False to use defaults).
+        additional_header_content: List of HTML strings for <head> section.
+        additional_style_content: List of inline CSS strings.
+        additional_css_content: List of external CSS URLs.
+        additional_js_content: List of inline JavaScript strings.
+        additional_script_content: List of external JS URLs.
+        use_shadow_dom: Wrap app in Shadow DOM to prevent CSS conflicts.
+        root_element_id: ID prefix for root element.
+        system_routes: Dict mapping route names to handler callables.
     """
 
     server_name: str = "MAIN_SERVER"
