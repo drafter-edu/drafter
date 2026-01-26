@@ -9,18 +9,26 @@ from drafter.history.state import SiteState
 
 
 class RenderError(Exception):
+    """Exception raised during component rendering."""
     pass
 
 
 @dataclass
 class Renderer:
-    """
-    A class responsible for rendering components into HTML strings.
-    Recursively processes components and their children.
-    Handles strings, lists, and nested components.
+    """Convert component hierarchies to HTML strings with asset tracking.
 
-    Attributes and properties are always in sorted order.
-    Whitespace is preserved within text nodes.
+    Recursively processes components, strings, and lists into HTML.
+    Handles attribute escaping, whitespace control, and collects CSS/JS assets.
+
+    Attributes:
+        state: Current application state for component context.
+        configuration: Server configuration for rendering context.
+        errors: Accumulated rendering errors.
+        component_stack: Path to current component for error reporting.
+        depth: Current indentation level.
+        parts: Accumulated HTML string fragments.
+        assets: Collected CSS and JS asset URLs.
+        indentation: Spaces per indentation level.
     """
 
     def __init__(
@@ -38,15 +46,41 @@ class Renderer:
         self.indentation = 2
 
     def flatten(self) -> str:
+        """Combine all accumulated HTML parts into a single string.
+
+        Returns:
+            str: Complete rendered HTML output.
+        """
         return "".join(self.parts)
 
     def write(self, part: str):
+        """Write an HTML string with current indentation.
+
+        Args:
+            part: HTML fragment to write.
+        """
         self.parts.append((self.depth) * (" " * self.indentation) + part)
 
     def new_line(self):
+        """Append a newline to the output."""
         self.parts.append("\n")
 
     def render(self, component):
+        """Recursively render a component to HTML.
+
+        Handles strings (escaped), lists (iterated), Components (planned),
+        and RenderPlans (direct output). Manages indentation and asset tracking.
+
+        Args:
+            component: String, list, Component, or RenderPlan to render.
+
+        Raises:
+            RenderError: If component rendering encounters an error.
+            TypeError: If component type is unsupported.
+
+        TODO:
+            Handle errors more gracefully with logging.
+        """
         # TODO: Handle errors gracefully and log them
         # print(self.component_stack, component)
         if isinstance(component, str):
@@ -132,6 +166,16 @@ def render(
     state: Optional[SiteState] = None,
     configuration: Optional[ClientServerConfiguration] = None,
 ) -> Renderer:
+    """Create a Renderer and render a component hierarchy to HTML.
+
+    Args:
+        component: Component/string/list to render.
+        state: Application state for component context.
+        configuration: Server configuration for rendering context.
+
+    Returns:
+        Renderer: Instance with completed rendering and accumulated assets.
+    """
     renderer = Renderer(state, configuration)
     renderer.render(component)
     return renderer

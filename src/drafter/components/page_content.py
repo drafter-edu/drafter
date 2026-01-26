@@ -410,4 +410,4 @@ class Component:
 
 
 Content = Union[Component, str]
-PageContent = Union[Content, List[Content]]
+PageContent = Union[Content, list[Content]]

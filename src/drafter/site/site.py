@@ -55,27 +55,67 @@ SITE_HTML_SHADOW_DOM_TEMPLATE = f'<div id="{DRAFTER_TAG_IDS["SHADOW_HOST"]}"></d
 
 @dataclass
 class Site:
+    """Manage the site HTML frame structure and configuration.
+
+    Attributes:
+        _configuration: Current server configuration instance.
+    """
+
     _configuration: Optional[ClientServerConfiguration] = None
 
     def set_configuration(self, configuration: ClientServerConfiguration):
+        """Set the site's active configuration.
+
+        Args:
+            configuration: ClientServerConfiguration to use.
+        """
         self._configuration = configuration
 
     def get_configuration(self) -> ClientServerConfiguration:
+        """Retrieve a copy of the current configuration.
+
+        Returns:
+            ClientServerConfiguration: Copy of the active configuration.
+
+        Raises:
+            ValueError: If configuration has not been set.
+        """
         if self._configuration is None:
             # TODO: SiteNotConfiguredError
             raise ValueError("Site configuration has not been set.")
         return self._configuration.copy()
 
     def update_configuration(self, key: str, value):
+        """Update a single configuration key.
+
+        Args:
+            key: Configuration property name.
+            value: New value for the property.
+
+        Raises:
+            ValueError: If configuration has not been set.
+        """
         if self._configuration is None:
             # TODO: SiteNotConfiguredError
             raise ValueError("Site configuration has not been set.")
         self._configuration.update_configuration(key, value)
 
     def reset(self):
+        """Clear the site configuration."""
         self._configuration = None
 
     def _get_theme_headers(self, configuration) -> tuple[list[str], list[str]]:
+        """Retrieve CSS and JS paths for the active theme.
+
+        Args:
+            configuration: Server configuration with theme setting.
+
+        Returns:
+            Tuple of (css_paths list, js_paths list).
+
+        Raises:
+            ValueError: If theme is not recognized.
+        """
         theme_system = get_theme_system()
         if not theme_system.is_valid_theme(configuration.theme):
             raise ValueError(theme_system.suggest_mistake(configuration.theme))
@@ -83,14 +123,26 @@ class Site:
         return list(theme.css_paths), list(theme.js_paths)
 
     def remap_urls_to_assets(self, *urls, configuration):
+        """Prefixes the individual asset URLs with the appropriate
+        path part.
+
+        Args:
+            urls: Individual asset URLs to remap.
+            configuration: The current ClientServerConfiguration.
+
+        Returns:
+            list[str]: List of remapped asset URLs.
+        """
         return [
             f"{determine_assets_url(configuration.override_asset_url)}/{url}"
             for url in urls
         ]
 
     def render(self) -> InitialSiteData:
-        """
-        Renders the site HTML structure.
+        """Render the site HTML structure with assets and configuration.
+
+        Returns:
+            InitialSiteData: HTML frame, title, and asset references.
         """
         configuration = self.get_configuration()
 

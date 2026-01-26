@@ -5,15 +5,13 @@ from typing import Any, Dict, List, Tuple
 
 @dataclass
 class RouteIntrospection:
-    """
-    Holds introspection information about a route function.
+    """Store introspection metadata for a route function signature.
 
     Attributes:
-        expected_parameters: A list of parameter names that the function expects.
-        show_names: A dictionary mapping parameter names to a boolean indicating
-            whether they should be shown as keyword arguments.
-        expected_types: A dictionary mapping parameter names to their expected types.
-        function_name: The name of the function.
+        expected_parameters: List of parameter names the function accepts.
+        show_names: Dict mapping parameter names to whether shown as kwargs.
+        expected_types: Dict mapping parameter names to their type hints.
+        function_name: Name of the route handler function.
     """
 
     expected_parameters: List[str]
@@ -22,11 +20,10 @@ class RouteIntrospection:
     function_name: str
 
     def to_string(self) -> str:
-        """
-        Generate a string representation of the function signature.
+        """Generate a string representation of the function signature.
 
         Returns:
-            A string representing the function signature.
+            str: Signature string in format "func_name(param: Type, ...)".
         """
         parts = []
         for param in self.expected_parameters:
@@ -42,14 +39,16 @@ class RouteIntrospection:
 
 
 def get_signature(func):
-    """
-    Get the signature of a function.
+    """Extract parameter metadata from a function signature.
+
+    Inspects the function using the inspect module to determine which
+    parameters it accepts, their names, types, and kinds.
 
     Args:
-        func: The function to get the signature of.
+        func: Function to introspect.
 
     Returns:
-        The signature of the function.
+        RouteIntrospection: Collected signature information.
     """
     # Get function signature
     signature_parameters = inspect.signature(func).parameters

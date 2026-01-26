@@ -21,12 +21,11 @@ from drafter.router.special_routes import default_index
 
 @dataclass
 class Router:
-    """
-    Handles routing of URLs to functions within a server.
+    """Map URL paths to route handler functions and prepare request arguments.
 
     Attributes:
-        routes: A dictionary mapping URLs to their corresponding functions.
-        signatures: A dictionary mapping functions to their introspection data.
+        routes: Dictionary mapping URL strings to callable handlers.
+        signatures: Dictionary mapping URL strings to RouteIntrospection data.
     """
 
     def __init__(self) -> None:
@@ -34,48 +33,46 @@ class Router:
         self.signatures = {}
 
     def get_route(self, url: str) -> Optional[Callable]:
-        """
-        Retrieves the function associated with a given URL.
+        """Retrieve the handler function for a given URL.
 
         Args:
-            url: The URL to look up.
+            url: Route URL path to look up.
 
         Returns:
-            The function associated with the URL, or None if not found.
+            Optional[Callable]: Handler function or None if not found.
         """
         return self.routes.get(url)
 
     def has_route(self, url: str) -> bool:
-        """
-        Checks if a route exists for the given URL.
+        """Check whether a route exists for the given URL.
 
         Args:
-            url: The URL to check.
+            url: Route URL path to check.
 
         Returns:
-            True if the route exists, False otherwise.
+            bool: True if route exists, False otherwise.
         """
         return url in self.routes
 
     def add_route(self, url: str, func: Callable) -> None:
-        """
-        Adds a new route to the server.
-
-        TODO: Handle ignored parameters
+        """Register a route handler for the given URL.
 
         Args:
-            url: The URL to add the route to.
-            func: The function to call when the route is accessed.
+            url: Route URL path.
+            func: Handler function to call for requests to this URL.
+
+        TODO:
+            Handle ignored parameters.
         """
         self.routes[url] = func
         self.signatures[url] = get_signature(func)
 
     def register_default_routes(self, reset_function, about_function) -> None:
-        """
-        Registers default routes for the router.
+        """Register built-in routes for index, reset, and about pages.
 
         Args:
-            configuration: The server configuration.
+            reset_function: Handler for --reset route.
+            about_function: Handler for --about route.
         """
         if not self.has_route("index"):
             self.add_route("index", default_index)
@@ -85,15 +82,13 @@ class Router:
             self.add_route("--about", about_function)
 
     def reset(self) -> None:
-        """
-        Allows the router to reset itself. Does not remove routes
-        or signatures.
+        """Reset router state (currently a no-op).
+
+        Does not remove routes or signatures.
         """
 
     def clear(self) -> None:
-        """
-        Clears the router by removing all routes and signatures.
-        """
+        """Remove all registered routes and signatures."""
         self.routes.clear()
         self.signatures.clear()
 
@@ -103,14 +98,21 @@ class Router:
         current_state: SiteState,
         configuration: ClientServerConfiguration,
     ) -> Tuple[List[Any], Dict[str, Any], str]:
-        """
-        Prepares the arguments and keyword arguments for the route function based on the request.
+        """Prepare positional and keyword arguments for route invocation.
+
+        Orchestrates parameter extraction, remapping, type conversion, and
+        validation to construct arguments matching the target function's signature.
 
         Args:
-            request: The incoming request object.
+            request: Incoming client request with form data.
+            current_state: Current application state (injected if expected).
+            configuration: Server configuration context.
 
         Returns:
-            A tuple containing a list of positional arguments, a dictionary of keyword arguments, and a string representation of the arguments.
+            Tuple of (args list, kwargs dict, representation string).
+
+        Raises:
+            ValueError: If parameters are invalid or unconvertible.
         """
         args, kwargs = [], request.kwargs.copy()
         button_pressed = self.preprocess_button_press(kwargs)
@@ -130,6 +132,16 @@ class Router:
         args: List[Any],
         kwargs: Dict[str, Any],
     ) -> str:
+        """Generate a string representation of function call arguments.
+
+        Args:
+            signature: Introspection data for the target function.
+            args: Positional arguments list.
+            kwargs: Keyword arguments dictionary.
+
+        Returns:
+            str: Function signature string like "func(arg1, kwarg=val2)".
+        """
         arguments = ", ".join(
             [safe_repr(arg, escape=False) for arg in args]
             + [
@@ -150,18 +162,18 @@ class Router:
         signature: RouteIntrospection,
         kwargs: Dict[str, Any],
     ) -> None:
-        """
-        Verifies that all provided keyword arguments are expected by the function signature.
-
-        TODO: Enhance all of this functionality to allow default values from the function signature.
+        """Ensure all provided kwargs match the function signature.
 
         Args:
-            request: The incoming request object.
-            signature: The introspection data of the function.
-            kwargs: The keyword arguments to verify.
+            request: Associated request for error context.
+            signature: Function signature introspection data.
+            kwargs: Keyword arguments provided by the request.
 
         Raises:
-            ValueError: If an unexpected parameter is found.
+            ValueError: If any kwargs don't match expected parameters.
+
+        TODO:
+            Enhance to allow default values from function signature.
         """
         # Verify all arguments are in expected_parameters
         for key, value in kwargs.items():
@@ -177,16 +189,21 @@ class Router:
         value: Any,
         expected_types: Dict[str, Any],
     ) -> Any:
-        """
-        Converts a parameter value to the expected type if specified.
+        """Convert a parameter value to its expected type.
+
+        Handles special cases like file uploads, datetime conversions, and
+        type-generic containers before attempting standard type conversion.
 
         Args:
-            param: The parameter name.
-            val: The current value.
-            expected_types: Dictionary mapping parameter names to expected types.
+            parameter: Parameter name (for error messages).
+            value: Current parameter value.
+            expected_types: Dict mapping parameter names to expected types.
 
         Returns:
-            The converted value.
+            Converted value, or original if no conversion needed.
+
+        Raises:
+            ValueError: If conversion fails or is not possible.
         """
         if parameter not in expected_types:
             return value
@@ -233,16 +250,20 @@ class Router:
     def try_file_upload_conversion(
         self, value: Any, target_type: Any
     ) -> tuple[bool, Any]:
-        """
-        Attempts to convert file upload data to the specified target type.
-        File uploads come from the client as dicts with filename, content, type, size.
+        """Convert file upload metadata to the target type.
+
+        File uploads are received from the client as dicts with keys:
+        __file_upload__, filename, content (base64), type, size.
 
         Args:
-            value: The file upload data (dict with __file_upload__ marker).
-            target_type: The desired type to convert to.
+            value: File upload dict or other value.
+            target_type: Desired type (bytes, str, dict, DrafterBinaryFile, etc).
 
         Returns:
-            The converted value.
+            Tuple of (success bool, converted value or None).
+
+        Raises:
+            ValueError: If file content cannot be decoded or opened (for images).
         """
         # print("Trying file upload conversion.", value, target_type)
         if not isinstance(value, dict) or not value.get("__file_upload__"):
@@ -315,15 +336,14 @@ class Router:
         return False, value
 
     def try_special_conversion(self, value: Any, target_type: Any) -> tuple[bool, Any]:
-        """
-        Attempts special conversions for certain target types.
+        """Attempt special type conversions like datetime parsing.
 
         Args:
-            value: The current value.
-            target_type: The desired type to convert to.
+            value: Current value to convert.
+            target_type: Desired target type.
 
         Returns:
-            A tuple (success: bool, converted_value: Any).
+            Tuple of (success bool, converted value or None).
         """
         outcome, result = try_convert_datetime(value, target_type)
         if outcome:
@@ -336,7 +356,16 @@ class Router:
         args: List[Any],
         kwargs: Dict[str, Any],
     ) -> Tuple[List[Any], Dict[str, Any]]:
-        """Converts argument types based on the expected types in the function signature."""
+        """Convert all arguments to types expected by the function signature.
+
+        Args:
+            signature: Function introspection with expected types.
+            args: Positional arguments to convert.
+            kwargs: Keyword arguments to convert.
+
+        Returns:
+            Tuple of (converted args list, converted kwargs dict).
+        """
         args = [
             self.convert_parameter(param, val, signature.expected_types)
             for param, val in zip(signature.expected_parameters, args)
@@ -354,7 +383,19 @@ class Router:
         args: List[Any],
         kwargs: Dict[str, Any],
     ) -> None:
-        """Trims excess arguments from the args and kwargs lists based on the function signature."""
+        """Remove excess arguments beyond what the function signature expects.
+
+        Logs a warning if extra arguments are present.
+
+        Args:
+            request: Associated request for context/error logging.
+            signature: Function signature introspection data.
+            args: Positional arguments list (modified in-place).
+            kwargs: Keyword arguments dict (modified in-place).
+
+        TODO:
+            Allow route functions to suppress unused argument warnings.
+        """
         # TODO: Allow the target route function to quiet this warning
         # Check if there are too many arguments
         if len(signature.expected_parameters) < len(args) + len(kwargs):
@@ -374,14 +415,16 @@ class Router:
                 kwargs.pop(list(kwargs.keys())[-1])
 
     def get_signature(self, request: Request) -> RouteIntrospection:
-        """
-        Retrieves the introspection data associated with a given function.
+        """Retrieve function signature metadata for a request URL.
 
         Args:
-            func: The function to look up.
+            request: Request with URL to look up.
 
         Returns:
-            The introspection data associated with the function, or None if not found.
+            RouteIntrospection: Signature metadata for the route.
+
+        Raises:
+            ValueError: If no signature is registered for the URL.
         """
         signature = self.signatures.get(request.url)
         if not signature:
@@ -395,7 +438,17 @@ class Router:
         kwargs: Dict[str, Any],
         current_state: SiteState,
     ) -> None:
-        # TODO: Should this look for state elsewhere in the argument list?
+        """Inject current state as first argument if function expects it.
+
+        Args:
+            signature: Function signature introspection.
+            args: Positional arguments list (modified in-place).
+            kwargs: Keyword arguments dict.
+            current_state: State object to inject.
+
+        TODO:
+            Look for state elsewhere in argument list.
+        """
         if (
             signature.expected_parameters
             and signature.expected_parameters[0] == "state"
@@ -404,6 +457,15 @@ class Router:
             args.insert(0, current_state)
 
     def flatten_kwargs(self, kwargs: Dict[str, Any]) -> None:
+        """Unwrap single-element lists in kwargs for cleaner parameter passing.
+
+        Args:
+            kwargs: Keyword arguments dict (modified in-place).
+
+        TODO:
+            Warn when data is lost in unwrapping.
+            Handle other cases appropriately.
+        """
         for key, value in kwargs.items():
             if isinstance(value, list) and len(value) == 1:
                 # TODO: Warn if this happens and data is being lost?
@@ -411,14 +473,16 @@ class Router:
             # TODO: What happens in the other cases?
 
     def preprocess_button_press(self, kwargs: Dict[str, Any]) -> str:
-        """
-        Preprocesses button press information from the request kwargs.
+        """Extract button metadata from form submission data.
+
+        Handles both the current button press and the previously-pressed
+        button namespace, extracting and JSON-decoding as needed.
 
         Args:
-            kwargs: The keyword arguments from the request.
+            kwargs: Form data dict (modified to remove button keys).
 
         Returns:
-            The button namespace if present, otherwise an empty string.
+            str: Button namespace/identifier, or empty string if no button.
         """
         button_pressed = ""
         if SUBMIT_BUTTON_KEY in kwargs:

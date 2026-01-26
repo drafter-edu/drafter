@@ -8,17 +8,17 @@ from drafter.payloads.failure import VerificationFailure
 
 
 def verify_response_payload_type(request: Request, payload: ResponsePayload):
-    """
-    Validates that the provided `payload` is a valid `Page` object. If the payload is not
-    a `Page`, it constructs an appropriate error message based on the type of the payload
-    received and generates an error page.
+    """Validate that a payload is a ResponsePayload instance.
+
+    If the payload is None, a string, list, or non-ResponsePayload type,
+    returns a descriptive error message. Otherwise returns None.
 
     Args:
-        request: The original request that led to the payload generation.
-        payload: The payload object to be verified.
+        request: Associated request providing context (URL).
+        payload: Object to validate as a ResponsePayload.
 
     Returns:
-        An error page if the payload is invalid, otherwise none.
+        str or None: Error message if invalid, None if valid.
     """
     original_function = request.url
     message = None
@@ -53,19 +53,18 @@ def verify_response_payload_type(request: Request, payload: ResponsePayload):
 def verify_page_state_history(
     request: Request, updated_state: Any, state_history: list
 ) -> Optional[str]:
-    """
-    Validates the consistency of the state object's type in the provided `page`
-    against the most recent state stored in the `self._state_history`. If any
-    discrepancy is found in the type of the state object, it constructs an error
-    message highlighting the inconsistency and generates an error page.
+    """Validate state type consistency with previous state history.
+
+    Ensures the new state object has the same type as the most recent
+    state in the history. Returns an error message if types don't match.
 
     Args:
-        request: The original request that led to the page generation.
-        updated_state: The new state value to verify.
-        state_history: The history of previous state values.
+        request: Associated request providing context (URL).
+        updated_state: New state value to verify.
+        state_history: List of previous state objects.
 
     Returns:
-        An error string if a validation issue arises, otherwise none.
+        str or None: Error message if type mismatch, None if valid.
     """
     original_function = request.url
     if not state_history:

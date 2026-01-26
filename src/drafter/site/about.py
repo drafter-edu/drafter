@@ -1,5 +1,23 @@
+from drafter.config.site_information import SiteInformationType
+from drafter.components import PageContent
+from drafter.config.client_server import ClientServerConfiguration
+
+
 # Helper function to render different SiteInformationType values
 def render_site_info(self, value: SiteInformationType) -> str:
+    """Convert site information values to HTML.
+
+    Handles PageContent objects, lists/tuples (rendered as lists),
+    and strings. Detects and converts URLs to clickable links.
+
+    Args:
+        value: Site information to render.
+
+    Returns:
+        str: HTML representation of the value.
+    """
+    # TODO: Need a "is_page_content" helper to properly typecheck
+    # TODO: This whole function seems broken
     if isinstance(value, PageContent):
         # If it's PageContent, render it using its render method
         return value.render(self._state, self.configuration)
@@ -30,11 +48,13 @@ def render_site_info(self, value: SiteInformationType) -> str:
 
 
 def about(self):
-    """
-    Generates the "About" page based on default information.
+    """Generate the About page from site information settings.
+
+    Displays author, description, sources, planning, and links sections.
+    Includes external pages if configured, and a back button.
 
     Returns:
-        The about page HTML content.
+        str: Complete HTML for the About page.
     """
     if not self._site_information:
         return "No site information has been set. Use the <code>set_site_information()</code> function to set the information about your site."

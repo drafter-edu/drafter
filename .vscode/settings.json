@@ -28,6 +28,7 @@
         "awatch",
         "builtinmodule",
         "callsim",
+        "doseq",
         "maxlevels",
         "misceval",
         "skulpt",

@@ -6,30 +6,21 @@ MAIN_SERVER: Optional[ClientServer] = None
 
 
 def set_main_server(server: ClientServer):
-    """
-    Sets the main server to the given server. This is useful for testing purposes.
+    """Set the global main server reference.
+    This is useful for testing purposes.
 
     Args:
-        server: The server to set as the main server
-
-    Returns:
-        None
+        server: Server instance to register globally.
     """
     global MAIN_SERVER
     MAIN_SERVER = server
 
 
 def get_main_server() -> ClientServer:
-    """
-    Gets the main server. This is useful for testing purposes.
+    """Return the global main server, creating it if missing.
 
-    Args:
-        server_name: If the server does not yet exist, then this
-                     name will be used to create the server. It will
-                     NOT get the server with this name if it already exists, but instead
-                     will just return the existing main server.
     Returns:
-        The main server.
+        ClientServer: Singleton main server instance.
     """
     global MAIN_SERVER
     if MAIN_SERVER is None:
@@ -38,10 +29,9 @@ def get_main_server() -> ClientServer:
 
 
 def get_main_event_bus() -> EventBus:
-    """
-    Get the main event bus.
+    """Return the event bus associated with the main server.
 
     Returns:
-        The main event bus.
+        EventBus: Global event bus instance.
     """
     return get_main_server().event_bus

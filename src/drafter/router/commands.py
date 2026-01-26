@@ -16,17 +16,26 @@ def route(
     url: Union[str, None, T] = None,
     server: Optional[ClientServer] = None,
 ) -> Union[T, Callable[[T], T]]:
-    """
-    Main function to add a new route to the server. Recommended to use as a decorator.
-    Once added, the route will be available at the given URL; the function name will be used if no URL is provided.
-    When you go to the URL, the function will be called and its return value will be displayed.
+    """Register a route handler with the server.
+
+    Can be used as a decorator with or without arguments. If url is not
+    provided, the function name is used as the route path.
 
     Args:
-        url: The URL to add the route to. If None, the function name will be used.
-        server: The server to add the route to. Defaults to the main server.
+        url: Route path, or the function itself if used without parentheses.
+        server: Server instance to register with (defaults to main server).
 
     Returns:
-        The modified route function.
+        Modified route function, or decorator if url was provided.
+
+    Example:
+        @route
+        def index(state):
+            return Page(state, [])
+
+        @route("/custom")
+        def custom(state):
+            return Page(state, [])
     """
 
     server = server or get_main_server()

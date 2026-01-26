@@ -1,7 +1,15 @@
 def default_index(state):
-    """
-    The default index page for the website. This will show a simple "Hello world!" message.
-    You should not modify or use this function; instead, create your own index page.
+    """Display the default welcome page.
+
+    This is the built-in index route shown when no user-provided index
+    exists. Users should create their own index page instead of modifying
+    this function.
+
+    Args:
+        state: Current application state.
+
+    Returns:
+        Page: Simple welcome message.
     """
     from drafter.payloads.kinds.page import Page
     

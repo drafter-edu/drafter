@@ -95,8 +95,9 @@ class ClientServer:
         self.phase = "initialized"
 
     def reset(self) -> None:
-        """
-        Resets the server to its initial state.
+        """Reset the server to its initial state.
+
+        Clears state, router, site, and counters.
         """
         self.state.reset()
         self.router.reset()
@@ -117,30 +118,35 @@ class ClientServer:
         # )
 
     def process_static_configuration(self, command_line_arguments=None):
-        """
-        Processes static configuration from various sources and merges them together.
+        """Process and merge static configuration from multiple sources.
 
-        The configuration is determined by merging the following sources together, in order of precedence (later items override earlier ones):
-        1. Defaults defined in the code
+        Configuration sources are merged in precedence order:
+        1. Code defaults
         2. Environment variables
         3. Command line arguments
-        4. A configuration file (provided by either 1. the environment variables, or 2. command line arguments)
+        4. Configuration file (if specified)
 
-        The resulting merged configuration becomes the default configuration for the server.
+        The result becomes the default configuration.
 
         Args:
-            command_line_arguments: The command line arguments to process for configuration.
+            command_line_arguments: Optional CLI arguments to process.
+
+        TODO:
+            Finish implementation.
         """
         # TODO: Finish this
 
     def process_dynamic_configuration(self, extra_configuration):
-        """
-        Copies the default configuration to the site's current configuration.
-        These will be separate objects, so that changes to the current configuration during runtime
-        do not affect the default configuration.
+        """Initialize runtime configuration from defaults with extra updates.
 
-        Note that this should only be called during server startup. Calling
-        this subsequently will not modify the actively running site in any immediately visible way.
+        Separates default and current configurations so runtime changes
+        don't affect defaults. Call only during server startup.
+
+        Args:
+            extra_configuration: Configuration overrides to apply.
+
+        Returns:
+            ClientServerConfiguration: The applied configuration.
         """
         self._default_configuration.update_multiple_configuration(**extra_configuration)
         configuration = self.get_default_configuration()
@@ -148,12 +154,11 @@ class ClientServer:
         return configuration
 
     def reconfigure(self, update_default: bool = False, **kwargs):
-        """
-        Updates the server configuration with new values.
+        """Update active server configuration and optionally the defaults.
 
         Args:
-            update_default: If True, also updates the default configuration with the new value.
-            kwargs: The configuration keys and their new values to update.
+            update_default: Whether to also update default configuration.
+            **kwargs: Configuration keys and values to update.
         """
         for key, value in kwargs.items():
             self.site.update_configuration(key, value)
@@ -168,6 +173,17 @@ class ClientServer:
             )
 
     def get_config_setting(self, key: str):
+        """Retrieve a configuration setting value.
+
+        Args:
+            key: Configuration key to retrieve.
+
+        Returns:
+            The configuration value associated with the key.
+
+        TODO:
+            Check for non-existent keys and raise an error.
+        """
         # TODO: Check for non-existent keys and raise an error
         if self.started:
             return getattr(self.site._configuration, key)
@@ -175,15 +191,19 @@ class ClientServer:
             return getattr(self._default_configuration, key)
 
     def reconfigure_flip(self, key: str):
+        """Toggle a boolean configuration setting.
+
+        Args:
+            key: Boolean configuration key to flip.
+        """
         current_value = self.get_config_setting(key)
         self.reconfigure(**{key: not current_value})
 
     def do_start(self, initial_state: Any = None) -> None:
-        """
-        Starts the server with the given initial state.
+        """Start the server and register default routes.
 
         Args:
-            initial_state: The initial state to set for the server.
+            initial_state: Optional initial state for the server.
         """
         self.phase = "starting"
         if initial_state is not None:
@@ -219,21 +239,44 @@ class ClientServer:
         )
 
     def register_system_routes(self, routes: dict[str, Optional[Callable]]):
+        """Register system routes like --error, --about, --reset.
+
+        Args:
+            routes: Mapping of route names to handler callables.
+
+        TODO:
+            Finish implementation.
+        """
         # TODO: Finish this
-        """
-        --error
-        --about
-        --reset
-        """
         pass
 
     def default_reset_function(self, state):
+        """Default reset route handler.
+
+        Args:
+            state: Current application state.
+
+        Returns:
+            Redirect: Redirect to the index page.
+        """
         from drafter.payloads.kinds.redirect import Redirect
 
         self.state.reset()
         return Redirect("index")
 
     def default_about_function(self, state):
+        """Default about route handler.
+
+        Args:
+            state: Current application state.
+
+        Returns:
+            Page: Page content with Drafter information.
+
+        TODO:
+            Move content to external source.
+            Integrate student's site information.
+        """
         from drafter.payloads.kinds.page import Page
 
         # TODO: Move this elsewhere
@@ -247,6 +290,17 @@ class ClientServer:
         return Page(state, [about_content])
 
     def get_route(self, request: Request):
+        """Resolve a request URL to a route handler function.
+
+        Args:
+            request: Request with URL to resolve.
+
+        Returns:
+            Callable: The route handler function.
+
+        Raises:
+            VisitError: If no route matches the URL (404).
+        """
         route_func = self.router.get_route(request.url)
         if route_func is None:
             raise VisitError(
@@ -265,6 +319,19 @@ class ClientServer:
     def execute_route(
         self, route_func, request: Request, configuration: ClientServerConfiguration
     ) -> tuple[Any, str]:
+        """Prepare arguments and invoke a route handler.
+
+        Args:
+            route_func: Handler function to invoke.
+            request: Request providing arguments.
+            configuration: Current server configuration.
+
+        Returns:
+            Tuple of (payload result, string representation of arguments).
+
+        Raises:
+            VisitError: On argument parsing or execution failures.
+        """
         # Call the route function to get the payload
         try:
             args, kwargs, representation = self.router.prepare_arguments(
@@ -310,6 +377,16 @@ class ClientServer:
     def verify_payload(
         self, request: Request, payload: Any, configuration: ClientServerConfiguration
     ):
+        """Validate payload type and payload-specific rules.
+
+        Args:
+            request: Associated request for error context.
+            payload: Payload to verify.
+            configuration: Current server configuration.
+
+        Raises:
+            VisitError: If payload verification fails.
+        """
         # Check that it's a valid payload type
         possible_incorrect_type = verify_response_payload_type(request, payload)
         if possible_incorrect_type is not None:
@@ -345,6 +422,19 @@ class ClientServer:
         payload: ResponsePayload,
         configuration: ClientServerConfiguration,
     ) -> Optional[str]:
+        """Render a payload to HTML string.
+
+        Args:
+            request: Associated request for error context.
+            payload: Payload to render.
+            configuration: Current server configuration.
+
+        Returns:
+            str or None: HTML output of the rendered payload.
+
+        Raises:
+            VisitError: If rendering fails.
+        """
         # Render the payload
         try:
             return payload.render(self.state, configuration)
@@ -368,6 +458,20 @@ class ClientServer:
         payload: ResponsePayload,
         configuration: ClientServerConfiguration,
     ) -> str:
+        """Format a payload for history panel display.
+
+        Args:
+            request: Associated request for error context.
+            representation: String representation of arguments.
+            payload: Payload to format.
+            configuration: Current server configuration.
+
+        Returns:
+            str: Formatted payload representation.
+
+        Raises:
+            VisitError: If formatting fails.
+        """
         # Format the payload for display in the history panel
         try:
             return payload.format(self.state, representation, configuration)
@@ -390,6 +494,16 @@ class ClientServer:
         payload: ResponsePayload,
         configuration: ClientServerConfiguration,
     ) -> None:
+        """Extract and apply state updates from a payload.
+
+        Args:
+            request: Associated request for error context.
+            payload: Payload containing state updates.
+            configuration: Current server configuration.
+
+        Raises:
+            VisitError: If state verification or update fails.
+        """
         is_updated, updated_state = payload.get_state_updates()
         if is_updated:
             # Check that the state update will be valid
@@ -428,20 +542,28 @@ class ClientServer:
                 )
 
     def start_timer(self):
+        """Record the current time as the start of a request."""
         self.start_time = time.time()
 
     def check_timer(self) -> float:
+        """Calculate elapsed time since start_timer() in milliseconds.
+
+        Returns:
+            float: Elapsed time in milliseconds.
+        """
         return (time.time() - self.start_time) * 1000  # in milliseconds
 
     def do_visit(self, request: Request) -> Any:
-        """
-        Uses the information in the request to find and call the appropriate route function.
+        """Process a request and return the appropriate response.
+
+        Orchestrates route resolution, execution, verification, rendering,
+        and state updates before returning a Response to the client.
 
         Args:
             request: The request to process.
 
         Returns:
-            The result of the route function.
+            Response: Success or error response to send to the client.
         """
         self.start_timer()
         self.phase = "running"
@@ -510,17 +632,18 @@ class ClientServer:
         messages: List[Message],
         target: Optional[str],
     ) -> Response:
-        """
-        Makes a successful response for the server with the given page.
+        """Construct a successful response from request processing results.
 
         Args:
-            request_id: The ID of the request.
-            body: The rendered body content.
-            payload: The payload to include in the response.
-            messages: A list of messages to include in the response.
+            request_id: ID of the associated request.
+            url: URL that was processed.
+            body: Rendered HTML body content.
+            payload: ResponsePayload that generated the body.
+            messages: Channel messages to execute on the client.
+            target: Optional target selector for fragment updates.
 
         Returns:
-            The response from the server.
+            Response: Success response ready to send to the client.
         """
         response = Response(
             id=self.response_count,
@@ -541,6 +664,19 @@ class ClientServer:
         payload: ResponsePayload,
         configuration: ClientServerConfiguration,
     ) -> Optional[str]:
+        """Extract the target selector from a payload.
+
+        Args:
+            request: Associated request for error context.
+            payload: Payload to extract target from.
+            configuration: Current server configuration.
+
+        Returns:
+            Optional[str]: Target selector (e.g., for Fragment updates).
+
+        Raises:
+            VisitError: If target retrieval fails.
+        """
         try:
             return payload.get_target(request)
         except Exception as e:
@@ -563,6 +699,19 @@ class ClientServer:
         payload: ResponsePayload,
         configuration: ClientServerConfiguration,
     ) -> list[Message]:
+        """Extract channel messages from a payload.
+
+        Args:
+            request: Associated request for error context.
+            payload: Payload to extract messages from.
+            configuration: Current server configuration.
+
+        Returns:
+            list[Message]: Messages to execute on the client.
+
+        Raises:
+            VisitError: If message retrieval fails.
+        """
         try:
             messages = payload.get_messages(self.state, configuration)
             if messages is None:
@@ -588,15 +737,18 @@ class ClientServer:
         error: DrafterError,
         status_code: int = 500,
     ) -> Response:
-        """
-        Makes an error response for the server with the given message and status code.
+        """Construct an error response with appropriate error payload.
+
+        Attempts to render a full ErrorPage; falls back to SimpleErrorPage
+        if that fails.
 
         Args:
-            message: The error message to include in the response.
-            status_code: The HTTP status code for the error.
+            request: Associated request for context and URL.
+            error: Domain error to report.
+            status_code: HTTP-like status code for the error.
 
         Returns:
-            The error response from the server.
+            Response: Error response ready to send to the client.
         """
         try:
             configuration = self.get_current_configuration()
@@ -644,14 +796,14 @@ class ClientServer:
         return response
 
     def add_route(self, url: str, func: Any) -> None:
-        """
-        Adds a new route to the server.
-
-        TODO: Inspect that the route has a valid route signature.
+        """Register a new route handler in the router.
 
         Args:
-            url: The URL to add the route to.
-            func: The function to call when the route is accessed.
+            url: Route URL path.
+            func: Handler function to call for this route.
+
+        TODO:
+            Inspect route function for valid signature.
         """
         self.router.add_route(url, func)
         log_data(
@@ -660,6 +812,14 @@ class ClientServer:
         )
 
     def do_configuration(self, extra_configuration) -> Optional[InitialSiteData]:
+        """Apply dynamic configuration and return initial site data.
+
+        Args:
+            extra_configuration: Configuration overrides to apply.
+
+        Returns:
+            Optional[InitialSiteData]: Site HTML and metadata, or error data if configuration fails.
+        """
         self.phase = "configuring"
         try:
             configuration = self.process_dynamic_configuration(extra_configuration)
@@ -682,13 +842,13 @@ class ClientServer:
         )
 
     def do_render(self) -> InitialSiteData:
-        """
-        Renders the initial site HTML. This is called to create the site
-        framing structure that includes the frame, header, body, footer, form, and
-        debug info.
+        """Render the initial site HTML framing structure.
+
+        Creates the DOM structure with frame, header, body, footer, form,
+        and debug panel layout.
 
         Returns:
-            The rendered HTML of the initial site.
+            InitialSiteData: Rendered HTML and metadata, or error data if rendering fails.
         """
         self.phase = "rendering"
         try:
@@ -712,43 +872,36 @@ class ClientServer:
         return site
 
     def do_listen_for_events(self, handler: Any) -> None:
-        """
-        Registers a listener to the monitor.
+        """Subscribe a handler to all events on the event bus.
 
         Args:
-            handler: The handler function to register.
-
-        Returns:
-            None
+            handler: Callable to invoke on any event.
         """
         # self.monitor.register_listener(handler)
         self.event_bus.subscribe("*", handler)
         self.event_bus.process_unprocessed_events()
 
     def get_default_configuration(self) -> ClientServerConfiguration:
-        """
-        Returns the default configuration for the client server.
+        """Return a copy of the default server configuration.
 
         Returns:
-            The default ClientServerConfiguration instance.
+            ClientServerConfiguration: Default configuration instance.
         """
         return self._default_configuration.copy()
 
     def get_current_configuration(self) -> ClientServerConfiguration:
-        """
-        Returns the current configuration for the client server.
+        """Return the current active server configuration.
 
         Returns:
-            The current ClientServerConfiguration instance.
+            ClientServerConfiguration: Current configuration instance from the site.
         """
         return self.site.get_configuration()
 
     def get_current_request_id(self) -> Optional[int]:
-        """
-        Returns the ID of the current request being processed, if any.
+        """Return the ID of the request currently being processed.
 
         Returns:
-            The current request ID, or None if no request is being processed.
+            Optional[int]: Current request ID, or None if not processing a request.
         """
         current_request = self.requests.get_current()
         return current_request.id if current_request is not None else None

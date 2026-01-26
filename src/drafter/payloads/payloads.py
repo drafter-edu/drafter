@@ -8,12 +8,24 @@ from drafter.router.routes import Router
 
 
 class ResponsePayload:
+    """Base class for all payload types sent from routes to the client.
+
+    Defines the interface for rendering, verifying, formatting, and extracting
+    state updates and client-side messages from payloads. Subclasses should
+    override methods as needed for their specific behavior.
+    """
+
     def render(
         self, state: SiteState, configuration: ClientServerConfiguration
     ) -> Optional[str]:
-        """
-        Renders the payload to an HTML string. This is meant to then be injected
-        into a page.
+        """Render the payload to HTML for browser display.
+
+        Args:
+            state: Current application state.
+            configuration: Server configuration.
+
+        Returns:
+            str or None: HTML string to inject into page, or None.
         """
         return None
 
@@ -24,11 +36,16 @@ class ResponsePayload:
         configuration: ClientServerConfiguration,
         request: Request,
     ) -> Optional[VerificationFailure]:
-        """
-        Verifies that the payload is valid given the current state and configuration.
+        """Verify payload validity before rendering.
+
+        Args:
+            router: Server router for validation context.
+            state: Current application state.
+            configuration: Server configuration.
+            request: Associated request for context.
 
         Returns:
-            A VerificationFailure if the payload is invalid, otherwise None.
+            VerificationFailure or None: Failure object if invalid, else None.
         """
         return None
 
@@ -38,10 +55,17 @@ class ResponsePayload:
         representation: str,
         configuration: ClientServerConfiguration,
     ) -> str:
-        """
-        Formats the payload for display in the history panel.
-        Essentially, the result should be a `repr` that could be used to recreate
-        the payload.
+        """Format payload for history panel display (debug output).
+
+        Should produce a repr-like string that could recreate the payload.
+
+        Args:
+            state: Current application state.
+            representation: String representation of route arguments.
+            configuration: Server configuration.
+
+        Returns:
+            str: Formatted representation of the payload.
         """
         return ""
 
@@ -50,31 +74,50 @@ class ResponsePayload:
         state: SiteState,
         configuration: ClientServerConfiguration,
     ) -> list[Message]:
-        """
-        Gets any messages that should be sent to the client as part of this payload.
+        """Extract channel messages to execute on the client.
+
+        Messages may contain CSS, JavaScript, or other client-side directives.
+
+        Args:
+            state: Current application state.
+            configuration: Server configuration.
+
+        Returns:
+            list[Message]: Messages to send to the client.
         """
         return []
 
     def get_state_updates(self) -> tuple[bool, Any]:
-        """
-        Gets any state updates that should be applied to the SiteState as part of this payload.
+        """Extract state updates to apply after rendering.
+
+        Args:
+            (None)
+
+        Returns:
+            Tuple of (has_updates: bool, updated_state: Any).
         """
         return False, None
 
     def is_redirect(self) -> bool:
-        """
-        Returns whether this payload is a redirect.
+        """Check if this payload triggers a redirect.
+
+        Returns:
+            bool: True if this is a redirect payload.
         """
         return False
 
     def get_redirect(self) -> tuple[str, Optional[dict]]:
-        """
-        Gets the redirect target and arguments if this payload is a redirect.
+        """Retrieve redirect target and optional query arguments.
+
+        Returns:
+            Tuple of (target_url: str, args_dict or None).
         """
         return "", None
 
     def get_target(self, request: Request) -> Optional[str]:
-        """
-        Gets the target element id for this payload, if applicable.
+        """Get the CSS selector for fragment updates.
+
+        Returns:
+            str or None: Query selector for fragment replacement, or None for full page.
         """
         return None

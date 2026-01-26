@@ -7,19 +7,28 @@ WEB_RUNTIMES = ("skulpt", "emscripten")
 
 
 def is_pyodide():
+    """Check whether runtime platform is Pyodide.
+
+    Returns:
+        bool: True when running under Pyodide, otherwise False.
+    """
     return sys.platform == "emscripten"
 
 
 def is_web():
+    """Check whether runtime platform is a web runtime.
+
+    Returns:
+        bool: True when running under Skulpt or Pyodide.
+    """
     return sys.platform in WEB_RUNTIMES
 
 
 def is_skulpt():
-    """
-    Detect if we're running inside Skulpt. Relies on the `sys.platform` setting to be "skulpt" or "emscripten".
+    """Detect if runtime platform is Skulpt.
 
     Returns:
-        bool: True if running inside Skulpt, False otherwise.
+        bool: True when running under Skulpt, otherwise False.
     """
     return sys.platform == "skulpt"
 

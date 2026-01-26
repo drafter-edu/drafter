@@ -2,19 +2,22 @@ from datetime import datetime, time, date
 from typing import Any, Union, Optional
 
 def try_convert_datetime(value, target_type) -> tuple[bool, Any]:
-    """
-    Tries to convert a value to a datetime, date, or time object.
-    
+    """Convert a value to datetime-like types if possible.
+
     TODO: Allow control over "default" behavior for blank fields. Could raise an error,
           return None, or use current date/time. Currently just uses the current date/time 
           for missing parts.
 
     Args:
-        value: The value to convert.
-        target_type: The target type (datetime, date, or time).
+        value: Arbitrary input to convert.
+        target_type: Desired type, one of datetime, date, or time.
 
     Returns:
-        A tuple (success: bool, converted_value: Any).
+        Tuple where the first element indicates success and the second is the converted
+        value or original input.
+
+    Raises:
+        ValueError: If a string value cannot be parsed as ISO for the target type.
     """
     if target_type not in {datetime, date, time}:
         return False, value
