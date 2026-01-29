@@ -9,8 +9,16 @@ from drafter.components.layout import (
     NumberedList,
     Division,
     Box,
+    Paragraph,
 )
-from drafter.components.text import Text, PreformattedText, Header, Pre, RawHTML
+from drafter.components.text import (
+    Text,
+    PreformattedText,
+    Header,
+    Pre,
+    RawHTML,
+    InlineCode,
+)
 from drafter.components.output import Output, Progress
 from drafter.components.forms import (
     TextBox,
@@ -49,6 +57,7 @@ __all__ = [
     "Division",
     "Box",
     "Text",
+    "InlineCode",
     "RawHTML",
     "Pre",
     "PreformattedText",
@@ -75,4 +84,5 @@ __all__ = [
     "Video",
     "Canvas",
     "SVG",
+    "Paragraph",
 ]

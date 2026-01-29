@@ -5,7 +5,7 @@ rendering, UI theme, debugging, and asset serving.
 """
 
 from dataclasses import dataclass, field
-from typing import Optional, Callable, Union, Literal
+from typing import Optional, Callable, Union
 
 from drafter.config.site_information import SiteInformation
 
@@ -35,6 +35,7 @@ class ClientServerConfiguration:
         use_shadow_dom: Wrap app in Shadow DOM to prevent CSS conflicts.
         root_element_id: ID prefix for root element.
         system_routes: Dict mapping route names to handler callables.
+        external_pages: List of external page links (URL or (URL, Text) tuples).
     """
 
     server_name: str = "MAIN_SERVER"
@@ -42,6 +43,8 @@ class ClientServerConfiguration:
     enable_audit_logging: bool = True
     site_title: str = "Drafter Application"
     information: Optional[SiteInformation] = None
+    # Parse semicolon-separated format: "URL Text;URL Text;URL;..."
+    external_pages: Optional[list[Union[str, tuple[str, str]]]] = None
     framed: bool = True
     theme: str = "default"
     deploy_image_path: str = ""
@@ -87,6 +90,7 @@ class ClientServerConfiguration:
             "use_shadow_dom": self.use_shadow_dom,
             "root_element_id": self.root_element_id,
             "system_routes": list(self.system_routes.keys()),
+            "external_pages": self.external_pages,
         }
 
     def copy(self) -> "ClientServerConfiguration":
@@ -100,7 +104,7 @@ class ClientServerConfiguration:
             in_debug_mode=self.in_debug_mode,
             enable_audit_logging=self.enable_audit_logging,
             site_title=self.site_title,
-            information=self.information,
+            information=self.information.copy() if self.information else None,
             framed=self.framed,
             theme=self.theme,
             deploy_image_path=self.deploy_image_path,
@@ -114,6 +118,7 @@ class ClientServerConfiguration:
             root_element_id=self.root_element_id,
             system_routes=dict(self.system_routes),
             override_asset_url=self.override_asset_url,
+            external_pages=list(self.external_pages) if self.external_pages else None,
         )
 
     def update_multiple_configuration(self, **kwargs):

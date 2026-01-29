@@ -224,10 +224,7 @@ class ClientServer:
                     exception=e,
                 )
         # Register any default routes, if needed
-        self.router.register_default_routes(
-            lambda state: self.default_reset_function(state),
-            lambda state: self.default_about_function(state),
-        )
+        self.register_system_routes()
         # All done!
         self.phase = "started"
         self.started = True
@@ -238,7 +235,7 @@ class ClientServer:
             f"Server name: {self.custom_name}",
         )
 
-    def register_system_routes(self, routes: dict[str, Optional[Callable]]):
+    def register_system_routes(self):
         """Register system routes like --error, --about, --reset.
 
         Args:
@@ -247,47 +244,13 @@ class ClientServer:
         TODO:
             Finish implementation.
         """
-        # TODO: Finish this
-        pass
+        from drafter.router.system_routes import _SYSTEM_ROUTES
 
-    def default_reset_function(self, state):
-        """Default reset route handler.
-
-        Args:
-            state: Current application state.
-
-        Returns:
-            Redirect: Redirect to the index page.
-        """
-        from drafter.payloads.kinds.redirect import Redirect
-
-        self.state.reset()
-        return Redirect("index")
-
-    def default_about_function(self, state):
-        """Default about route handler.
-
-        Args:
-            state: Current application state.
-
-        Returns:
-            Page: Page content with Drafter information.
-
-        TODO:
-            Move content to external source.
-            Integrate student's site information.
-        """
-        from drafter.payloads.kinds.page import Page
-
-        # TODO: Move this elsewhere
-        # TODO: Should use the student's site information if available
-        about_content = """
-        <h1>About Drafter</h1>
-        <p>Drafter is an educational library for building simple web applications using Python.</p>
-        <p>Version: 2.0.0</p>
-        <p>For more information, visit our <a href="https://drafter-edu.github.io/drafter/" target="_blank">website</a>.</p>
-        """
-        return Page(state, [about_content])
+        configuration = self.get_current_configuration()
+        for route, default_handler in _SYSTEM_ROUTES.items():
+            route_handler = configuration.system_routes.get(route) or default_handler
+            if not self.router.has_route(route):
+                self.add_route(route, route_handler, True)
 
     def get_route(self, request: Request):
         """Resolve a request URL to a route handler function.
@@ -316,8 +279,25 @@ class ClientServer:
             )
         return route_func
 
+    def _get_extra_dependencies(
+        self, request: Request, configuration: ClientServerConfiguration
+    ) -> dict[str, Any]:
+        """Get extra dependencies to inject into route handlers.
+
+        Returns:
+            dict: Mapping of dependency names to instances.
+        """
+        return {
+            "_server": self,
+            "_configuration": configuration,
+            "_request": request,
+        }
+
     def execute_route(
-        self, route_func, request: Request, configuration: ClientServerConfiguration
+        self,
+        route_func,
+        request: Request,
+        configuration: ClientServerConfiguration,
     ) -> tuple[Any, str]:
         """Prepare arguments and invoke a route handler.
 
@@ -335,7 +315,10 @@ class ClientServer:
         # Call the route function to get the payload
         try:
             args, kwargs, representation = self.router.prepare_arguments(
-                request, self.state.current, configuration
+                request,
+                self.state.current,
+                configuration,
+                self._get_extra_dependencies(request, configuration),
             )
             log_data(
                 RequestParseEvent(
@@ -358,7 +341,6 @@ class ClientServer:
                 ),
                 400,
             )
-        # print(args, kwargs, representation)
         try:
             return route_func(*args, **kwargs), representation
         except Exception as e:
@@ -575,6 +557,7 @@ class ClientServer:
         )
         with self.requests.push(request):
             try:
+                # TODO: Most of these should be private methods
                 configuration = self.get_current_configuration()
                 route_func = self.get_route(request)
                 payload, representation = self.execute_route(
@@ -750,10 +733,19 @@ class ClientServer:
         Returns:
             Response: Error response ready to send to the client.
         """
+        from drafter.router.system_routes import _SYSTEM_ERROR_ROUTE
+
         try:
             configuration = self.get_current_configuration()
-            error_payload = ErrorPage(error)
+            error_handler = self.router.get_route(_SYSTEM_ERROR_ROUTE)
+            if error_handler is None:
+                raise Exception(
+                    f"No error handler registered for {_SYSTEM_ERROR_ROUTE} route"
+                )
+            error_payload = error_handler(self.state, error, self)
             body = error_payload.render(self.state, configuration)
+            # error_payload = ErrorPage(error)
+            # body = error_payload.render(self.state, configuration)
         except Exception as e:
             error_page_error = log_error(
                 "error_page.creation_failed",
@@ -795,7 +787,7 @@ class ClientServer:
         self.response_count += 1
         return response
 
-    def add_route(self, url: str, func: Any) -> None:
+    def add_route(self, url: str, func: Any, is_system_route=False) -> None:
         """Register a new route handler in the router.
 
         Args:
@@ -807,7 +799,11 @@ class ClientServer:
         """
         self.router.add_route(url, func)
         log_data(
-            RouteAddedEvent(url=url, signature=self.router.signatures[url].to_string()),
+            RouteAddedEvent(
+                url=url,
+                signature=self.router.signatures[url].to_string(),
+                is_system_route=is_system_route,
+            ),
             "client_server.add_route",
         )
 
@@ -836,9 +832,6 @@ class ClientServer:
         log_data(
             InitialConfigurationEvent(config=configuration.to_json()),
             "client_server.do_configuration",
-        )
-        print(
-            "Site configuration processed successfully", self.site.get_configuration()
         )
 
     def do_render(self) -> InitialSiteData:

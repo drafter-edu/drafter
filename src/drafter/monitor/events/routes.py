@@ -8,6 +8,7 @@ from drafter.monitor.events.base import BaseEvent
 class RouteAddedEvent(BaseEvent):
     url: str = ""
     signature: str = ""
+    is_system_route: bool = False
     event_type: str = "RouteAdded"
 
     def to_json(self) -> dict[str, Any]:
@@ -15,4 +16,5 @@ class RouteAddedEvent(BaseEvent):
             **super().to_json(),
             "url": self.url,
             "signature": self.signature,
+            "is_system_route": self.is_system_route,
         }

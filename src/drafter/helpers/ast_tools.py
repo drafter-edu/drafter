@@ -37,7 +37,7 @@ class ExtentGetter(ast.NodeVisitor):
         for parent_node in self.node_stack:
             if parent_node in self.line_map:
                 original_lowest, original_highest = self.line_map[parent_node]
-                self.line_map[parent_node] = update = (
+                self.line_map[parent_node] = (
                     min(original_lowest, start),
                     max(original_highest, end),
                 )

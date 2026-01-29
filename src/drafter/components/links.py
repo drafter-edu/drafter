@@ -171,6 +171,7 @@ class Link(LinkContent):
         ComponentArgument("text"),
         ComponentArgument("url"),
         ComponentArgument("arguments", kind="keyword", default_value=None),
+        ComponentArgument("external", kind="keyword", default_value=False),
     ]
 
     def __init__(
@@ -178,15 +179,18 @@ class Link(LinkContent):
         text: str,
         url: UrlOrFunction,
         arguments: ArgumentList = None,
+        external: bool = False,
         **extra_settings,
     ):
         self.text = text
-        self.url, self.external = self._handle_url(url)
+        self.url, self.external = self._handle_url(url, external)
         self.extra_settings = extra_settings
         if arguments is not None:
             self.extra_settings["arguments"] = arguments
 
     def get_attributes(self, context) -> dict:
+        # TODO: Handle external links correctly
+        # TODO: Handle the configuration setting that blocks external links
         attributes = super().get_attributes(context)
         attributes["name"] = SUBMIT_BUTTON_KEY
         attributes["data-submit-button"] = make_safe_argument(self.get_link_namespace())

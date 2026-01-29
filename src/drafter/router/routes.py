@@ -1,4 +1,3 @@
-import base64
 import inspect
 import io
 import json
@@ -7,16 +6,14 @@ from dataclasses import dataclass
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.data.files import DrafterBinaryFile, DrafterTextFile
 from drafter.helpers.dates import try_convert_datetime
-from drafter.monitor.audit import log_error, log_warning
+from drafter.monitor.audit import log_warning
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 from drafter.constants import PREVIOUSLY_PRESSED_BUTTON, SUBMIT_BUTTON_KEY
-from drafter.monitor.events.errors import DrafterError
 from drafter.history.forms import remap_hidden_form_parameters
 from drafter.data.request import Request
 from drafter.history.state import SiteState
 from drafter.history.utils import safe_repr
 from drafter.router.introspect import get_signature, RouteIntrospection
-from drafter.router.special_routes import default_index
 
 
 @dataclass
@@ -67,20 +64,6 @@ class Router:
         self.routes[url] = func
         self.signatures[url] = get_signature(func)
 
-    def register_default_routes(self, reset_function, about_function) -> None:
-        """Register built-in routes for index, reset, and about pages.
-
-        Args:
-            reset_function: Handler for --reset route.
-            about_function: Handler for --about route.
-        """
-        if not self.has_route("index"):
-            self.add_route("index", default_index)
-        if not self.has_route("--reset"):
-            self.add_route("--reset", reset_function)
-        if not self.has_route("--about"):
-            self.add_route("--about", about_function)
-
     def reset(self) -> None:
         """Reset router state (currently a no-op).
 
@@ -97,7 +80,8 @@ class Router:
         request: Request,
         current_state: SiteState,
         configuration: ClientServerConfiguration,
-    ) -> Tuple[List[Any], Dict[str, Any], str]:
+        extra_dependencies: dict[str, Any],
+    ) -> tuple[list[Any], dict[str, Any], str]:
         """Prepare positional and keyword arguments for route invocation.
 
         Orchestrates parameter extraction, remapping, type conversion, and
@@ -120,6 +104,7 @@ class Router:
         kwargs = remap_hidden_form_parameters(kwargs, button_pressed)
         self.flatten_kwargs(kwargs)
         self.inject_state(signature, args, kwargs, current_state)
+        self.inject_other_dependencies(signature, args, kwargs, extra_dependencies)
         self.trim_excess_arguments(request, signature, args, kwargs)
         args, kwargs = self.convert_argument_types(signature, args, kwargs)
         self.verify_expected_parameters(request, signature, kwargs)
@@ -455,6 +440,25 @@ class Router:
         ) or (len(signature.expected_parameters) - 1 == len(args) + len(kwargs)):
             # TODO: Someone, somewhere needs to copy state, right?
             args.insert(0, current_state)
+
+    def inject_other_dependencies(
+        self,
+        signature: RouteIntrospection,
+        args: list[Any],
+        kwargs: dict[str, Any],
+        extra_dependencies: dict[str, Any],
+    ) -> None:
+        """Inject other dependencies like configuration if function expects them.
+
+        Args:
+            signature: Function signature introspection.
+            args: Positional arguments list (modified in-place).
+            kwargs: Keyword arguments dict.
+            current_state: State object to extract configuration from.
+        """
+        for dep_name, dep_value in extra_dependencies.items():
+            if dep_name in signature.expected_parameters:
+                kwargs[dep_name] = dep_value
 
     def flatten_kwargs(self, kwargs: Dict[str, Any]) -> None:
         """Unwrap single-element lists in kwargs for cleaner parameter passing.

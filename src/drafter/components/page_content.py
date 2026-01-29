@@ -449,3 +449,30 @@ Content = Union[Component, str]
 
 PageContent = Union[Content, list[Content]]
 """Type alias for page content: a content item or list of content items."""
+
+
+def validate_page_content(content: Any) -> tuple[bool, str]:
+    """Check if the given content is valid PageContent.
+
+    Args:
+        content: The content to check.
+
+    Returns:
+        A tuple (is_valid, error_message). is_valid is True if valid, False otherwise.
+        error_message is empty if valid, or contains details if invalid.
+    """
+    if isinstance(content, (Component, str)):
+        return True, ""
+    elif isinstance(content, list):
+        for index, item in enumerate(content):
+            if not isinstance(item, (Component, str)):
+                return (
+                    False,
+                    f"Invalid PageContent: item at index {index} is of type {type(item).__name__}, expected Component or string.",
+                )
+        return True, ""
+    else:
+        return (
+            False,
+            f"Invalid PageContent: expected Component, str, or list thereof, got {type(content).__name__}.",
+        )

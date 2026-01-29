@@ -14,9 +14,9 @@ class RouteIntrospection:
         function_name: Name of the route handler function.
     """
 
-    expected_parameters: List[str]
-    show_names: Dict[str, bool]
-    expected_types: Dict[str, Any]
+    expected_parameters: list[str]
+    show_names: dict[str, bool]
+    expected_types: dict[str, Any]
     function_name: str
 
     def to_string(self) -> str:
@@ -31,9 +31,16 @@ class RouteIntrospection:
             type_name = (
                 expected_type.__name__
                 if hasattr(expected_type, "__name__")
-                else str(expected_type)
+                else (
+                    str(expected_type)
+                    if expected_type is not inspect.Parameter.empty
+                    else None
+                )
             )
-            parts.append(f"{param}: {type_name}")
+            if type_name is None:
+                parts.append(f"{param}")
+            else:
+                parts.append(f"{param}: {type_name}")
         params_str = ", ".join(parts)
         return f"{self.function_name}({params_str})"
 

@@ -6,22 +6,37 @@ export class RoutesPanel extends Panel {
             containerId,
             instanceId,
             "drafter-debug-routes",
-            "Registered Routes"
+            "Registered Routes",
         );
     }
 
     protected get initialContent() {
         return (
-            <div
-                class={`drafter-debug-routes-list drafter-debug-routes-list-${this.instanceId}`}
-            ></div>
+            <div>
+                <div
+                    class={`drafter-debug-routes-list drafter-debug-regular-routes-list-${this.instanceId}`}
+                ></div>
+                <details
+                    class={`drafter-debug-routes-list drafter-debug-system-routes-list-${this.instanceId}`}
+                >
+                    <summary>System Routes</summary>
+                </details>
+            </div>
         );
     }
 
-    public renderRoute(route: string, signature: string): void {
+    public renderRoute(
+        route: string,
+        signature: string,
+        isSystemRoute: boolean = false,
+    ): void {
         const section = this.queryWithin(
-            this.scopedSelector("drafter-debug-routes-list"),
-            "DebugPanel: Routes section not found."
+            this.scopedSelector(
+                isSystemRoute && route != "index"
+                    ? "drafter-debug-system-routes-list"
+                    : "drafter-debug-regular-routes-list",
+            ),
+            "DebugPanel: Routes section not found.",
         );
 
         const newRouteItem = (

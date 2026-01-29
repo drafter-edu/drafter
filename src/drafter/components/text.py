@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import html
-from typing import Any, List
+from typing import List
 from drafter.components.layout import handle_arguments_compatibility
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import RenderPlan
@@ -148,6 +148,34 @@ class Text(Component):
                 raw_html=html.escape(self.body),
             )
         return self._plan_tag(context=context)
+
+
+@dataclass(repr=False)
+class InlineCode(Component):
+    """Renders an inline code element.
+
+    Attributes:
+        content: List of page content items to wrap in the code element.
+        tag: The HTML tag name, always 'code'.
+    """
+
+    content: List[PageContent]
+
+    tag = "code"
+    ARGUMENTS = [
+        ComponentArgument("content", kind="var", is_content=True),
+    ]
+
+    def __init__(self, *content: PageContent, **extra_settings):
+        """Initialize code component.
+
+        Args:
+            *content: Variable-length content to wrap in the code element.
+            **extra_settings: Additional HTML attributes and styles.
+        """
+        self.content, self.extra_settings = handle_arguments_compatibility(
+            list(content), extra_settings
+        )
 
 
 @dataclass(repr=False)

@@ -50,4 +50,4 @@ class SimpleErrorPage(ResponsePayload):
     def render(
         self, state: SiteState, configuration: Optional[ClientServerConfiguration]
     ) -> str:
-        return f"Error: {self.message}"
+        return f"System Error: {self.message}"

@@ -21,3 +21,25 @@ class SiteInformation:
             "planning": repr(self.planning),
             "links": repr(self.links),
         }
+
+    def copy(self) -> "SiteInformation":
+        return SiteInformation(
+            author=self.author,
+            description=self.description,
+            sources=list(self.sources)
+            if isinstance(self.sources, (list, tuple))
+            else self.sources,
+            planning=list(self.planning)
+            if isinstance(self.planning, (list, tuple))
+            else self.planning,
+            links=list(self.links)
+            if isinstance(self.links, (list, tuple))
+            else self.links,
+        )
+
+    def get_parts(self):
+        yield "Author", self.author
+        yield "Description", self.description
+        yield "Sources", self.sources
+        yield "Planning", self.planning
+        yield "Links", self.links

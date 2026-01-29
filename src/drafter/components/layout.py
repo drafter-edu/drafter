@@ -119,6 +119,34 @@ class Div(Component):
         )
 
 
+@dataclass(repr=False)
+class Paragraph(Component):
+    """Renders a paragraph element (p).
+
+    Attributes:
+        content: List of page content items to display in the paragraph.
+        tag: The HTML tag name, always 'p'.
+    """
+
+    content: List[PageContent]
+
+    tag = "p"
+    ARGUMENTS = [
+        ComponentArgument("content", kind="var", is_content=True),
+    ]
+
+    def __init__(self, *content: PageContent, **extra_settings):
+        """Initialize paragraph component.
+
+        Args:
+            *content: Variable-length content to display in the paragraph.
+            **extra_settings: Additional HTML attributes and styles.
+        """
+        self.content, self.extra_settings = handle_arguments_compatibility(
+            list(content), extra_settings
+        )
+
+
 Division = Div
 Box = Div
 

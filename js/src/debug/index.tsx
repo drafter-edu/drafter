@@ -201,6 +201,7 @@ export class DebugPanel {
                 this.routesPanel?.renderRoute(
                     event.data.url,
                     event.data.signature,
+                    event.data.is_system_route,
                 );
                 break;
             case "RequestEvent":
