@@ -13,7 +13,7 @@ from drafter.bridge.client import (
     console_log,
 )
 from drafter.bridge.helpers import (
-    add_script,
+    add_js,
     add_style,
     add_header,
     add_link,
@@ -87,9 +87,14 @@ class ClientBridge:
                     self.channel_history[channel.name].add(message.sigil)
                 if message.kind == "script":
                     # TODO: Handle errors while executing this script
-                    add_script(root, message.content, is_page_specific=is_page_specific)
+                    add_js(root, message.content, is_page_specific=is_page_specific)
                 elif message.kind == "style":
-                    add_style(root, message.content, is_page_specific=is_page_specific)
+                    # TODO: Need to look up whether we are using the shadow dom or not
+                    add_style(
+                        root,
+                        message.content,
+                        is_page_specific=is_page_specific,
+                    )
 
     def handle_response(
         self, response: Response, callback: Callable[[Request], Response]
@@ -176,7 +181,7 @@ class ClientBridge:
                 for style in initial_site_data.additional_style:
                     add_style(root, style, with_class=DRAFTER_TAG_CLASSES["THEME"])
             for js_code in initial_site_data.additional_js:
-                add_script(root, js_code, with_class=DRAFTER_TAG_CLASSES["THEME"])
+                add_js(root, js_code, with_class=DRAFTER_TAG_CLASSES["THEME"])
             for header in initial_site_data.additional_header:
                 add_header(root, header)
 

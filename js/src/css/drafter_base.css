@@ -11,6 +11,12 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.drafter-body-- .error-page h2 {
+    color: #c53030;
+    margin-top: 0;
+    font-size: 1.5em;
+}
+
 .drafter-body-- .error-page pre {
     white-space: pre-wrap;
     background-color: #fffaf0;

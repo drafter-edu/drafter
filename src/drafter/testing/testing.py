@@ -158,8 +158,8 @@ class BakeryTests:
                 difflib.unified_diff(
                     actual_formatted.splitlines(keepends=True),
                     expected_formatted.splitlines(keepends=True),
-                    "Actually Returned",
                     "Test Expected",
+                    "Actually Returned",
                 )
             )
             # print(diff_html)

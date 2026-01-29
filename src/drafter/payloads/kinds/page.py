@@ -93,8 +93,12 @@ class Page(ResponsePayload):
         )
         if self.js is None:
             self.js = []
+        elif isinstance(self.js, str):
+            self.js = [self.js]
         if self.css is None:
             self.css = []
+        elif isinstance(self.css, str):
+            self.css = [self.css]
         self.js.extend(content.assets["js"])
         self.css.extend(content.assets["css"])
         return content.flatten()

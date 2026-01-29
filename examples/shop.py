@@ -39,11 +39,18 @@ def index(state: State) -> Page:
         [
             "Welcome to the store!",
             "You have: " + str(state.money) + " coins",
-            "You own: " + ", ".join(state.bought),
+            "You own: ",
+            BulletedList(state.bought),
             "Select an item to purchase:",
             BulletedList(for_sale),
+            Button("break_things", "break_things"),
         ],
     )
+
+
+@route
+def break_things(state: State) -> Page:
+    raise RuntimeError("This is a broken route for testing purposes.")
 
 
 def find_item(items2: list[Item], name: str) -> Optional[Item]:

@@ -25,6 +25,8 @@ class Document(Protocol):
     ) -> None: ...
 
     title: str
+    head: Any
+    documentElement: Any
 
     @property
     def body(self) -> Any: ...
@@ -91,3 +93,8 @@ def removeEventListener(
     listener: Any,
     options: Any = ...,
 ) -> None: ...
+
+class CSSStyleSheet:
+    def replaceSync(self, css: str) -> None: ...
+    @staticmethod
+    def new() -> Any: ...

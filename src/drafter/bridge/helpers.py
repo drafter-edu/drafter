@@ -1,12 +1,13 @@
 from drafter.site.site import GLOBAL_DRAFTER_CSS_PATHS
 import js
+from drafter.helpers.utils import is_skulpt, is_pyodide
 
 document = js.document  # type: ignore
 
 ATTR_PAGE_SPECIFIC = "data-drafter-page-specific"
 
 
-def add_script(
+def add_js(
     root, src: str, is_page_specific: bool = False, with_class: str = ""
 ) -> None:
     """
@@ -16,36 +17,52 @@ def add_script(
         src: The script source URL or content.
         is_page_specific: If True, marks the script as page-specific (will be removed on navigation).
     """
+    # TODO: Investigate whether this has to be a blob for CSP compliance
     script = document.createElement("script")
-    script.src = src
+    script.type = "text/javascript"
+    script.textContent = f"{src}\n//# sourceURL=dynamic-user-code.js"
     if is_page_specific:
         script.setAttribute(ATTR_PAGE_SPECIFIC, "true")
     if with_class:
         script.setAttribute("class", with_class)
-    head = root.getElementsByTagName("head")[0]
+    head = document.head or document.documentElement
     head.appendChild(script)
+    script.remove()
     return script
 
 
 def add_style(
-    root, css: str, is_page_specific: bool = False, with_class: str = ""
+    root,
+    css: str,
+    is_page_specific: bool = False,
+    with_class: str = "",
+    using_shadow_dom: bool = False,
 ) -> None:
     """
-    Adds CSS content to the page by creating a style element.
+    Adds CSS content to the page by creating a style element if we're not
+    using shadow DOM, or using CSSStyleSheet if we are.
 
     Args:
         css: CSS content to add to the page.
         is_page_specific: If True, marks the style as page-specific (will be removed on navigation).
     """
-    style = document.createElement("style")
-    style.innerHTML = css
-    if is_page_specific:
-        style.setAttribute(ATTR_PAGE_SPECIFIC, "true")
-    if with_class:
-        style.setAttribute("class", with_class)
-    head = root.getElementsByTagName("head")[0]
-    head.appendChild(style)
-    return style
+    if using_shadow_dom:
+        if is_pyodide():
+            style_sheet = js.CSSStyleSheet.new()
+        else:
+            style_sheet = js.CSSStyleSheet()
+        style_sheet.replaceSync(css)
+        root.adoptedStyleSheets = root.adoptedStyleSheets.concat([style_sheet])
+    else:
+        style = document.createElement("style")
+        style.innerHTML = css
+        if is_page_specific:
+            style.setAttribute(ATTR_PAGE_SPECIFIC, "true")
+        if with_class:
+            style.setAttribute("class", with_class)
+        head = document.getElementsByTagName("head")[0]
+        head.appendChild(style)
+        return style
 
 
 def swap_debug_mode(root):

@@ -168,7 +168,7 @@ class Link(LinkContent):
     RENAME_ATTRS = {"url": "href"}
 
     ARGUMENTS = [
-        ComponentArgument("text"),
+        ComponentArgument("text", is_content=True),
         ComponentArgument("url"),
         ComponentArgument("arguments", kind="keyword", default_value=None),
         ComponentArgument("external", kind="keyword", default_value=False),
