@@ -1,25 +1,23 @@
-from dataclasses import dataclass, field
-from textwrap import indent
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, Optional
 
-from drafter.data.channel import Message
+from drafter.components import Component
 from drafter.config.client_server import ClientServerConfiguration
-from drafter.configuration import ServerConfiguration
-from drafter.constants import RESTORABLE_STATE_KEY
-from drafter.components import Component, PageContent, Link
-from drafter.data.request import Request
-from drafter.history.formatting import format_page_content
 from drafter.history.state import SiteState
-from drafter.payloads.renderer import render, Renderer
-from drafter.payloads.payloads import ResponsePayload
+from drafter.payloads.kinds.fragment import Fragment
+from drafter.payloads.target import DEFAULT_BODY_TARGET
 from drafter.payloads.failure import VerificationFailure
+from drafter.data.request import Request
 from drafter.router.routes import Router
 
 
 @dataclass
-class Page(ResponsePayload):
+class Page(Fragment):
     """
-    A page is a collection of content to be displayed to the user. This content has two critical parts:
+    A page is a full-page response that replaces the entire body content.
+    
+    Page is a specialized Fragment that uses a default target pointing to the body element.
+    This content has two critical parts:
 
     - The ``state``, which is the current value of the backend server for this user's session. This is used to
       restore the state of the page when the user navigates back to it. Typically, this will be a dataclass
@@ -37,166 +35,9 @@ class Page(ResponsePayload):
         js: Optional JavaScript content to inject dynamically when this page is rendered.
     """
 
-    state: Any
-    content: list
-    css: Optional[List[str]] = None
-    js: Optional[List[str]] = None
-
     def __init__(self, state, content=None, css=None, js=None):
-        if content is None:
-            state, content = None, state
-        self.state = state
-        self.content = content
-        self.css = css
-        self.js = js
-
-        if isinstance(content, (str, Component)):
-            # If the content is a single string, convert it to a list with that string as the only element.
-            self.content = [content]
-        elif not isinstance(content, list):
-            incorrect_type = type(content).__name__
-            raise ValueError(
-                "The content of a Page must be a list of strings or components."
-                f" Found {incorrect_type} instead."
-            )
-        else:
-            for index, chunk in enumerate(content):
-                if not isinstance(chunk, (str, Component)):
-                    incorrect_type = type(chunk).__name__
-                    raise ValueError(
-                        "The content of a Page must be a list of strings or components."
-                        f" Found {incorrect_type} at index {index} instead."
-                    )
-
-    def get_state_updates(self) -> tuple[bool, Any]:
-        return True, self.state
-
-    def render(
-        self, state: SiteState, configuration: ClientServerConfiguration
-    ) -> Optional[str]:
-        """
-        Renders the content of the page to HTML.
-        Users should not call this method directly; it will be called on their behalf by the server.
-
-        Args:
-            state: The current state of the server. This will be used to restore the page if needed.
-            configuration: The configuration of the server. This will be used to determine how the page is rendered.
-
-        Returns:
-            A string of HTML representing the content of the page.
-        """
-        # TODO: Decide if we want to dump state on the page
-        content = render(
-            self.content,
-            state,
-            configuration,
-        )
-        if self.js is None:
-            self.js = []
-        elif isinstance(self.js, str):
-            self.js = [self.js]
-        if self.css is None:
-            self.css = []
-        elif isinstance(self.css, str):
-            self.css = [self.css]
-        self.js.extend(content.assets["js"])
-        self.css.extend(content.assets["css"])
-        return content.flatten()
-
-    def format(
-        self,
-        state: SiteState,
-        representation: str,
-        configuration: ClientServerConfiguration,
-    ) -> str:
-        """
-        Formats the payload for display in the history panel.
-        Essentially, the result should be a `repr` that could be used to recreate
-        the payload.
-        """
-        pieces = [format_page_content(self.state)]
-        if isinstance(self.content, list):
-            pieces.append(", [\n")
-            for item in self.content:
-                pieces.append(indent(format_page_content(item), " " * 4) + ",\n")
-            pieces.append("]")
-        else:
-            pieces.append(f",\n")
-            pieces.append(indent(format_page_content(self.content), " " * 4))
-        if self.css:
-            pieces.append(f", css={format_page_content(self.css)}")
-        if self.js:
-            pieces.append(f", js={format_page_content(self.js)}")
-
-        return "".join(
-            [
-                "assert_equal(",
-                representation + ",\n",
-                indent(f"Page({''.join(pieces)})", " " * 4),
-                ")",
-            ]
-        )
-        return
-
-    def get_messages(
-        self,
-        state: SiteState,
-        configuration: ClientServerConfiguration,
-    ) -> list[Message]:
-        # Add CSS as style messages in the "before" channel
-        messages = []
-        if self.css:
-            if isinstance(self.css, str):
-                self.css = [self.css]
-            for css_content in self.css:
-                messages.append(
-                    Message(
-                        channel_name="before",
-                        kind="style",
-                        sigil=None,
-                        content=css_content,
-                    )
-                )
-
-        # Add JS as script messages in the "after" channel
-        if self.js:
-            if isinstance(self.js, str):
-                self.js = [self.js]
-            for js_content in self.js:
-                messages.append(
-                    Message(
-                        channel_name="after",
-                        kind="script",
-                        sigil=None,
-                        content=js_content,
-                    )
-                )
-        return messages
-
-    def make_reset_button(self) -> str:
-        """
-        Creates a reset button that has the "reset" icon and title text that says "Resets the page to its original state.".
-        Simply links to the "--reset" URL.
-
-        Returns:
-            A string of HTML representing the reset button.
-        """
-        return """<a href="--reset" class="btlw-reset" 
-                    title="Resets the page to its original state. Any data entered will be lost."
-                    onclick="return confirm('This will reset the page to its original state. Any data entered will be lost. Are you sure you want to continue?');"
-                    >⟳</a>"""
-
-    def make_about_button(self) -> str:
-        """
-        Creates an about button that has the "info" icon and title text that says "About Drafter.".
-        Simply links to the "--about" URL.
-
-        Returns:
-            A string of HTML representing the about button.
-        """
-        return """<a href="--about" class="btlw-about" 
-                    title="More information about this website"
-                    >?</a>"""
+        # Page always targets the body element
+        super().__init__(state, content, target=DEFAULT_BODY_TARGET, css=css, js=js)
 
     def verify(
         self,
@@ -235,6 +76,7 @@ class Page(ResponsePayload):
                 f"Make sure you return a Page object with the new state and the list of strings/content objects."
             )
         else:
+            from drafter.components import PageContent
             for item in self.content:
                 if not isinstance(item, (str, PageContent)):
                     return VerificationFailure(
@@ -249,7 +91,8 @@ class Page(ResponsePayload):
         # Recursively verify each content chunk
         try:
             for chunk in self.content:
-                chunk.verify(state, configuration, request)
+                if hasattr(chunk, 'verify'):
+                    chunk.verify(state, configuration, request)
         except Exception as e:
             return VerificationFailure(
                 f"While verifying the Page() object returned from {original_function}, an error was encountered:\n"

@@ -646,8 +646,8 @@ class ClientServer:
         request: Request,
         payload: ResponsePayload,
         configuration: ClientServerConfiguration,
-    ) -> Optional[str]:
-        """Extract the target selector from a payload.
+    ) -> Optional[object]:
+        """Extract the Target object from a payload.
 
         Args:
             request: Associated request for error context.
@@ -655,7 +655,7 @@ class ClientServer:
             configuration: Current server configuration.
 
         Returns:
-            Optional[str]: Target selector (e.g., for Fragment updates).
+            Optional[Target]: Target object (e.g., for Fragment updates).
 
         Raises:
             VisitError: If target retrieval fails.

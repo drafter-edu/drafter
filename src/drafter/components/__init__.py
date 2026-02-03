@@ -4,12 +4,12 @@ from drafter.components.layout import (
     Span,
     LineBreak,
     HorizontalRule,
+    Paragraph,
     Row,
     BulletedList,
     NumberedList,
     Division,
     Box,
-    Paragraph,
 )
 from drafter.components.text import (
     Text,

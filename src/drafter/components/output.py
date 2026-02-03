@@ -90,6 +90,7 @@ class Progress(Component):
 
     tag = "progress"
     KNOWN_ATTRS = ["value", "max"]
+    DEFAULT_ATTRS = {"max": 1}
 
     ARGUMENTS = [
         ComponentArgument("value"),
@@ -106,12 +107,6 @@ class Progress(Component):
         """
         self.value = value
         self.max = max
-        self.extra_settings = kwargs
-    DEFAULT_ATTRS = {"max": 1}
-
-    def __init__(self, value: float, max: float = 1.0, **kwargs):
-        self.value = float(value)
-        self.max = float(max)
         self.extra_settings = kwargs
 
     def attributes(self, context) -> dict:

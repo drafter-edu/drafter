@@ -1,10 +1,13 @@
-from typing import Any, Optional
+from typing import Any, Optional, Union, TYPE_CHECKING
 from drafter.data.channel import Message
 from drafter.data.request import Request
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.history.state import SiteState
 from drafter.payloads.failure import VerificationFailure
 from drafter.router.routes import Router
+
+if TYPE_CHECKING:
+    from drafter.payloads.target import Target
 
 
 class ResponsePayload:
@@ -114,10 +117,10 @@ class ResponsePayload:
         """
         return "", None
 
-    def get_target(self, request: Request) -> Optional[str]:
-        """Get the CSS selector for fragment updates.
+    def get_target(self, request: Request) -> "Optional[Target]":
+        """Get the Target for fragment updates.
 
         Returns:
-            str or None: Query selector for fragment replacement, or None for full page.
+            Target instance or None: Target object for fragment replacement, or None for full page.
         """
         return None

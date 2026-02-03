@@ -1,8 +1,11 @@
 from dataclasses import dataclass, field
-from typing import Dict, Optional
+from typing import Dict, Optional, TYPE_CHECKING
 from drafter.data.channel import Channel, Message
 from drafter.monitor.events.errors import DrafterError, DrafterWarning
 from drafter.payloads.payloads import ResponsePayload
+
+if TYPE_CHECKING:
+    from drafter.payloads.target import Target
 
 
 @dataclass
@@ -18,7 +21,7 @@ class Response:
         message: A human-readable message associated with the response.
         url: The URL associated with the response. Could technically be different from the request URL.
         body: The full HTML body of the response, which will be injected directly into the site's frame.
-        target: An optional target element ID that the body should be injected into. If None, defaults to the body element.
+        target: An optional Target object specifying the element that the body should be injected into. If None, defaults to the body element.
         channels: A dictionary of channels for additional communication. Common
             channels include "audio", "before", and "after". The latter two are used to
             send script tags to be executed before and after the main content is rendered.
@@ -34,7 +37,7 @@ class Response:
     status_code: int = 200
     message: str = "OK"
     body: Optional[str] = None
-    target: Optional[str] = None
+    target: "Optional[Target]" = None
     channels: Dict[str, Channel] = field(default_factory=dict)
     errors: list[DrafterError] = field(default_factory=list)
     warnings: list[DrafterWarning] = field(default_factory=list)

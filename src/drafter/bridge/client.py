@@ -14,10 +14,13 @@ from drafter.site.site import DRAFTER_TAG_IDS, DRAFTER_TAG_CLASSES
 from drafter.monitor.telemetry import TelemetryEvent, TelemetryCorrelation
 from drafter.helpers.utils import is_skulpt, is_pyodide
 from drafter.components.page_content import Component
-from typing import Callable, Optional, Any
+from typing import Callable, Optional, Any, TYPE_CHECKING
 from dataclasses import dataclass, field
 import time
 import js
+
+if TYPE_CHECKING:
+    from drafter.payloads.target import Target
 
 DOUBLE_PRESS_THRESHOLD = 600  # milliseconds
 
@@ -227,7 +230,7 @@ class Client:
             target_route,
             arguments if arguments else {},
             {},
-            response.target or "",
+            response.target.to_selector() if response.target else "",
         )
         self.request_count += 1
         return new_request
@@ -414,16 +417,31 @@ class Client:
         body = response.body
         if body is not None:
             # Get the body element
-            element = js.document.getElementById(
-                response.target or DRAFTER_TAG_IDS["BODY"]
+            root_body = js.document.getElementById(DRAFTER_TAG_IDS["BODY"])
+            
+            # Convert target to CSS selector
+            if response.target:
+                selector = response.target.to_selector()
+            else:
+                selector = f"#{DRAFTER_TAG_IDS['BODY']}"
+            
+            elements = js.document.querySelectorAll(selector)
+            
+            if not elements:
+                # TODO: Handle this more gracefully
+                raise RuntimeError("Target element not found in document.")
+
+            elements.forEach(
+                lambda element, index, array: replace_html(
+                    element, body, response.target.replace if response.target else False
+                )
             )
-            if not element:
-                raise RuntimeError("Body element not found in document.")
-            print(response.target, element)
-            replace_html(element, body, bool(response.target))
+            # for element in elements:
+            #    replace_html(element, body, bool(response.target))
 
             debug_log("client.update_site_complete", response)
-            self.mount_navigation(element, self.navigate)
+            if not response.target or response.target.id == DRAFTER_TAG_IDS["BODY"]:
+                self.mount_navigation(root_body, self.navigate)
 
         return True
 

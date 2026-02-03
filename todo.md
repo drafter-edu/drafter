@@ -1,3 +1,5 @@
+- [ ] Fragment handler is not being correctly de-registered, leading to repeated event firing
+- [ ] Should it be "SilentUpdate" or "QuietUpdate" perhaps?
 - [ ] Compilation pipeline
     - [ ] Compile initial page for faster load times
     - [ ] `launch.py` doesn't use the compilation pipeline correctly

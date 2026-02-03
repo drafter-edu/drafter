@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from drafter.components import (
     PageContent,
     Content,
+    Paragraph,
     Component,
     Div,
     Span,
@@ -68,7 +69,7 @@ from drafter.styling.styling import (
 )
 from drafter.client_server.commands import get_main_server, set_main_server
 from drafter.router.commands import route
-from drafter.payloads import Page, Fragment, Redirect
+from drafter.payloads import Page, Fragment, Redirect, Update
 from drafter.deploy import (
     hide_debug_information,
     show_debug_information,
@@ -88,6 +89,7 @@ __all__ = [
     "dataclass",
     "Page",
     "Fragment",
+    "Update",
     "Redirect",
     "Content",
     "PageContent",
@@ -102,6 +104,7 @@ __all__ = [
     "LineBreak",
     "HorizontalRule",
     "Row",
+    "Paragraph",
     "BulletedList",
     "NumberedList",
     "Division",
