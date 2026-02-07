@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 from dataclasses import dataclass
 from drafter.payloads.payloads import ResponsePayload
 
@@ -11,9 +11,9 @@ class Update(ResponsePayload):
     page dynamically.
     """
 
-    state_update: dict
+    state_update: Any
 
-    def get_state_updates(self) -> tuple[bool, dict]:
+    def get_state_updates(self) -> tuple[bool, Any]:
         return True, self.state_update
 
     def render(self, state, configuration) -> Optional[str]:

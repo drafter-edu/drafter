@@ -7,6 +7,7 @@ class State:
     page_count: int
     id_count: int
     class_count: int
+    secret_count: int
 
 
 @route
@@ -39,6 +40,10 @@ def index(state: State) -> Page:
                     ),
                 ),
             ),
+            Row(
+                Button("Update Secretly (No Visual Change)", update_secretly),
+                Span("Secret Count (Only in State):", Output("secret_count_output", str(state.secret_count))),
+            )
         ],
     )
 
@@ -78,8 +83,8 @@ def update_fragment_by_class(state: State) -> Fragment:
 
 @route
 def update_secretly(state: State) -> Update:
-    state.page_count += 1
+    state.secret_count += 1
     return Update(state)
 
 
-start_server(State(0, 0, 0))
+start_server(State(0, 0, 0, 0))
