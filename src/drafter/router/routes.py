@@ -8,6 +8,7 @@ from drafter.data.files import DrafterBinaryFile, DrafterTextFile
 from drafter.helpers.dates import try_convert_datetime
 from drafter.monitor.audit import log_warning
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
+from drafter.components.geolocation import Location
 from drafter.constants import PREVIOUSLY_PRESSED_BUTTON, SUBMIT_BUTTON_KEY
 from drafter.history.forms import remap_hidden_form_parameters
 from drafter.data.request import Request
@@ -321,7 +322,7 @@ class Router:
         return False, value
 
     def try_special_conversion(self, value: Any, target_type: Any) -> tuple[bool, Any]:
-        """Attempt special type conversions like datetime parsing.
+        """Attempt special type conversions like datetime parsing and Location data.
 
         Args:
             value: Current value to convert.
@@ -330,9 +331,32 @@ class Router:
         Returns:
             Tuple of (success bool, converted value or None).
         """
+        # Try datetime conversion
         outcome, result = try_convert_datetime(value, target_type)
         if outcome:
             return True, result
+        
+        # Try Location conversion
+        if target_type is Location:
+            if isinstance(value, str):
+                # Parse JSON string from hidden input
+                import json
+                try:
+                    data = json.loads(value)
+                    return True, Location(**data)
+                except (json.JSONDecodeError, TypeError) as e:
+                    # Return empty location with error status
+                    return True, Location(
+                        status="error",
+                        message=f"Failed to parse location data: {str(e)}"
+                    )
+            elif isinstance(value, dict):
+                # Direct dict, convert to Location
+                return True, Location(**value)
+            elif isinstance(value, Location):
+                # Already a Location object
+                return True, value
+        
         return False, None
 
     def convert_argument_types(

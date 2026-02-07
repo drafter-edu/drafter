@@ -31,6 +31,8 @@ from drafter.components.forms import (
     TimeInput,
 )
 
+from drafter.components.geolocation import CurrentLocation, Location
+
 # TODO: Sliders, Autocomplete, RadioButtons
 from drafter.components.tables import Table
 from drafter.components.links import Link, Button, Argument
@@ -70,6 +72,8 @@ __all__ = [
     "DateTimeInput",
     "DateInput",
     "TimeInput",
+    "CurrentLocation",
+    "Location",
     "Progress",
     "Output",
     "Table",
