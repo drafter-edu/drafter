@@ -33,6 +33,7 @@ from drafter.monitor.audit import log_error, log_warning, log_info, log_data
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import Site
 from drafter.config.client_server import ClientServerConfiguration
+from drafter.payloads.target import Target
 
 
 ServerPhases = Union[
@@ -613,7 +614,7 @@ class ClientServer:
         body: Optional[str],
         payload: ResponsePayload,
         messages: List[Message],
-        target: Optional[str],
+        target: Optional[Target],
     ) -> Response:
         """Construct a successful response from request processing results.
 
@@ -646,7 +647,7 @@ class ClientServer:
         request: Request,
         payload: ResponsePayload,
         configuration: ClientServerConfiguration,
-    ) -> Optional[object]:
+    ) -> "Optional[Target]":
         """Extract the Target object from a payload.
 
         Args:
