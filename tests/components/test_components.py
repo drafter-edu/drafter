@@ -5,6 +5,7 @@ from tests.components.helpers import eval_drafter_with_source
 snippets = {
     "button": {
         "regular": "Button('Hello World', 'index')",
+        "function_button": "Button('Button with function ref', Button)",
         "external_link": "Button('External Link', 'http://example.com')",
         "with_arguments": """Button('With Args', 'next_page', arguments=[
             Argument('first', 'first_value'),
@@ -63,6 +64,8 @@ snippets = {
         "all_args": """TextBox('phone', '555-1234', 'tel')""",
         "with_style": """TextBox('search', style_width='300px', placeholder='Search...')""",
         "with_attributes": """TextBox('age', 'number', min=0, max=120, required=True)""",
+        "with_event_handler": """TextBox('input1', on_input='handle_input')""",
+        "with_event_handler_function": """TextBox('input1', on_input=Button)""",
     },
     "selectbox": {
         "simple": """SelectBox('color', ['red', 'green', 'blue'])""",

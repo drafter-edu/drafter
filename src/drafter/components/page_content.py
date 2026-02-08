@@ -155,6 +155,12 @@ def convert_arguments_to_json(arguments, only_validate=False) -> Optional[str]:
         raise ValueError(
             "The arguments must be an Argument, a list of Argument objects, a list of (name, value) pairs, or a dict of name to value."
         )
+        
+def repr_arg(key: str, value: Any) -> str:
+    if key.startswith("on"):
+        if callable(value):
+            return value.__name__
+    return repr(value)
 
 
 class Component:
@@ -249,7 +255,7 @@ class Component:
 
     def plan(self, context) -> RenderPlan:
         return self._plan_tag(context)
-
+    
     def _plan_tag(
         self,
         context,
@@ -364,7 +370,7 @@ class Component:
             value = getattr(self, parameter_name, argument.default_value)
             if argument.is_content:
                 if argument.kind == "positional":
-                    arguments.append(repr(value))
+                    arguments.append(repr_arg(parameter_name, value))
                 elif argument.kind == "var":
                     for item in value:
                         arguments.append(repr(item))
@@ -372,24 +378,24 @@ class Component:
                 elif argument.kind == "keyword":
                     if value != argument.default_value:
                         if still_positional:
-                            arguments.append(repr(value))
+                            arguments.append(repr_arg(parameter_name, value))
                         else:
-                            arguments.append(f"{parameter_name}={repr(value)}")
+                            arguments.append(f"{parameter_name}={repr_arg(parameter_name, value)}")
                     else:
                         still_positional = False
             else:
                 if argument.kind == "positional":
-                    arguments.append(repr(value))
+                    arguments.append(repr_arg(parameter_name, value))
                 elif argument.kind == "var":
                     for item in value:
-                        arguments.append(repr(item))
+                        arguments.append(repr_arg(parameter_name, item))
                     still_positional = False
                 elif argument.kind == "keyword":
                     if value != argument.default_value:
                         if still_positional:
-                            arguments.append(repr(value))
+                            arguments.append(repr_arg(parameter_name, value))
                         else:
-                            arguments.append(f"{parameter_name}={repr(value)}")
+                            arguments.append(f"{parameter_name}={repr_arg(parameter_name, value)}")
                     else:
                         still_positional = False
 
@@ -397,7 +403,7 @@ class Component:
             for key, value in sorted(self.extra_settings.items()):
                 if key in handled_arguments:
                     continue
-                arguments.append(f"{key}={repr(value)}")
+                arguments.append(f"{key}={repr_arg(key, value)}")
         return arguments
 
     def get_assets(self, context) -> Optional[AssetBundle]:

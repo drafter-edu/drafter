@@ -101,7 +101,10 @@ class Fragment(ResponsePayload):
         self.js.extend(content.assets["js"])
         self.css.extend(content.assets["css"])
         return content.flatten()
-
+    
+    def format_target(self) -> str:
+        return f", target={format_page_content(self.target)}"
+    
     def format(
         self,
         state: SiteState,
@@ -125,17 +128,19 @@ class Fragment(ResponsePayload):
             pieces.append(indent(format_page_content(self.content), " " * 4))
 
         if self.target is not None:
-            pieces.append(f", target={format_page_content(self.target)}")
+            pieces.append(self.format_target())
         if self.css:
             pieces.append(f", css={format_page_content(self.css)}")
         if self.js:
             pieces.append(f", js={format_page_content(self.js)}")
+            
+        class_name = self.__class__.__name__
 
         return "".join(
             [
                 "assert_equal(",
                 representation + ",\n",
-                indent(f"Fragment({''.join(pieces)})", " " * 4),
+                indent(f"{class_name}({''.join(pieces)})", " " * 4),
                 ")",
             ]
         )

@@ -46,6 +46,53 @@ class Target:
 
     #: If this target fails to find any elements, use the fallback instead
     fallback: "Optional[Target]" = None
+    
+    def __repr__(self) -> str:
+        pieces = []
+        if self.id:
+            pieces.append(f"id='{self.id}'")
+        if self.tag:
+            pieces.append(f"tag='{self.tag}'")
+        if self.class_name:
+            pieces.append(f"class_name='{self.class_name}'")
+        if self.selector:
+            pieces.append(f"selector='{self.selector}'")
+        if self.data_attribute:
+            pieces.append(f"data_attribute='{self.data_attribute}'")
+        if self.attribute:
+            pieces.append(f"attribute={self.attribute}")
+        if self.nth_child is not None:
+            pieces.append(f"nth_child={self.nth_child}")
+        if self.closest:
+            pieces.append("closest=True")
+        if self.within:
+            pieces.append(f"within={self.within}")
+        if self.all:
+            pieces.append("all=True")
+        if self.replace:
+            pieces.append("replace=True")
+        if self.remove:
+            pieces.append("remove=True")
+        if self.html:
+            pieces.append("html=True")
+        if self.append:
+            pieces.append("append=True")
+        if self.prepend:
+            pieces.append("prepend=True")
+        if self.before:
+            pieces.append("before=True")
+        if self.after:
+            pieces.append("after=True")
+        if self.attributes_to_set:
+            pieces.append(f"attributes_to_set={self.attributes_to_set}")
+        if self.styles_to_set:
+            pieces.append(f"styles_to_set={self.styles_to_set}")
+        if self.class_toggles:
+            pieces.append(f"class_toggles={self.class_toggles}")
+        if self.fallback:
+            pieces.append(f"fallback={self.fallback}")
+
+        return f"Target({', '.join(pieces)})"
 
     def to_selector(self) -> str:
         """Convert this Target to a CSS selector string.

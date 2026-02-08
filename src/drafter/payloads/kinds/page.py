@@ -1,8 +1,10 @@
 from dataclasses import dataclass
+from textwrap import indent
 from typing import Any, Optional
 
 from drafter.components import Component
 from drafter.config.client_server import ClientServerConfiguration
+from drafter.history.formatting import format_page_content
 from drafter.history.state import SiteState
 from drafter.payloads.kinds.fragment import Fragment
 from drafter.payloads.target import DEFAULT_BODY_TARGET
@@ -99,3 +101,8 @@ class Page(Fragment):
                 f"{e}"
             )
         return None
+    
+    def format_target(self) -> str:
+        if self.target != DEFAULT_BODY_TARGET:
+            return f", target={format_page_content(self.target)}"
+        return ""
