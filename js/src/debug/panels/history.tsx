@@ -14,14 +14,14 @@ export class HistoryPanel extends Panel {
     protected getListElement(): HTMLElement {
         return this.queryWithin(
             this.scopedSelector("drafter-debug-page-history-list"),
-            "DebugPanel: History section not found."
+            "DebugPanel: History section not found.",
         );
     }
 
     public override initialize() {
         // Setup event handlers after structure is created
         const clearButton = this.getContentElement().querySelector(
-            ".drafter-debug-clear-history-btn"
+            ".drafter-debug-clear-history-btn",
         );
         if (clearButton) {
             clearButton.addEventListener("click", () => {
@@ -93,50 +93,51 @@ export class HistoryPanel extends Panel {
 
     public addRequestParse(parseEvent: RequestParseEvent): void {
         const requestEventElement = this.getContentElement().querySelector(
-            `.history-event[data-request-id="${parseEvent.request_id}"]`
+            `.history-event[data-request-id="${parseEvent.request_id}"] .drafter-history-request-url`,
         );
 
         if (requestEventElement) {
             const parseElement = (
-                <div class="request-parse-event">
-                    <strong>Called: </strong>
+                <span class="request-parse-event">
                     <code>{parseEvent.representation}</code>
-                </div>
+                </span>
             );
 
             requestEventElement.appendChild(parseElement);
         } else {
             throw new Error(
-                `DebugPanel: Corresponding request ${parseEvent.request_id} not found for parse event.`
+                `DebugPanel: Corresponding request ${parseEvent.request_id} not found for parse event.`,
             );
         }
     }
 
     public addResponse(response: ResponseEvent): void {
         const requestEventElement = this.getContentElement().querySelector(
-            `.history-event[data-request-id="${response.request_id}"]`
+            `.history-event[data-request-id="${response.request_id}"]`,
         );
 
         if (requestEventElement) {
             requestEventElement.classList.add("has-response");
         } else {
             throw new Error(
-                `DebugPanel: Corresponding request ${response.request_id} not found for response ID ${response.response_id}.`
+                `DebugPanel: Corresponding request ${response.request_id} not found for response ID ${response.response_id}.`,
             );
         }
         // Choose a red marker, green marker, or yellow marker based on errors/warnings
         const marker = response.has_errors
             ? "🔴"
             : response.has_warnings
-            ? "🟡"
-            : "🟢";
+              ? "🟡"
+              : "🟢";
         const responseElement = (
             <div class="response-event">
-                <strong>Response:</strong> {marker} {response.status_code} for
-                Request ID: {response.request_id} (Response ID:{" "}
-                {response.response_id})
                 <details>
-                    <summary>View Page Content</summary>
+                    <summary>
+                        <strong>Response:</strong> {marker}{" "}
+                        {response.status_code} for Request ID:{" "}
+                        {response.request_id} (Response ID:{" "}
+                        {response.response_id})
+                    </summary>
                     <pre>
                         {response.formatted_page_content ||
                             "No content available."}

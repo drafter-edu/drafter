@@ -507,6 +507,9 @@ div.btlw-container img {
 .drafter-debug-- .history-event .response-event {
     margin-left: 1em;
     padding: 2px 4px;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
 }
 
 .drafter-debug-- .history-event .response-event pre {

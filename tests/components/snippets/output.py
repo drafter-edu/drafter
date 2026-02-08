@@ -35,13 +35,13 @@ tests.progress_half = """
 
 tests.progress_full = Progress(100, max=100, id="progress2")
 tests.progress_full = """
-<progress id="progress2" max="100.0" value="100.0">
+<progress id="progress2" max="100" value="100">
 </progress>
 """
 
 tests.progress_partial = Progress(25, max=100, id="progress3")
 tests.progress_partial = """
-<progress id="progress3" max="100.0" value="25.0">
+<progress id="progress3" max="100" value="25">
 </progress>
 """
 
