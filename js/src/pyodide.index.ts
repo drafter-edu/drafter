@@ -49,20 +49,24 @@ export async function mountDrafterDirectory() {
     }
 }
 
-export async function mountDrafterRemote() {
-    console.log("mountDrafterRemote is not implemented yet.");
-    alert("mountDrafterRemote is not implemented yet.");
+export async function mountDrafterRemote(url: string) {
+    /*console.log("mountDrafterRemote is not implemented yet.");
+    alert("mountDrafterRemote is not implemented yet.");*/
+    let response = await fetch(url); // .zip, .whl, ...
+    let buffer = await response.arrayBuffer();
+    await pyodide.unpackArchive(buffer, "zip"); // by default, unpacks to the current dir
+    pyodide.pyimport("drafter");
 }
 
 export async function setupPyodide() {
     if ((window as any).pyodide === undefined) {
-        const pyodide = ((window as any).pyodide = await loadPyodide({
+        window.pyodide = (window as any).pyodide = await loadPyodide({
             packages: ["micropip"],
             indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/",
-        }));
-        await pyodide.loadPackage("micropip");
-        const micropip = pyodide.pyimport("micropip");
-        await micropip.install("bakery");
+        });
+        await window.pyodide.loadPackage("micropip");
+        window.micropip = window.pyodide.pyimport("micropip");
+        await window.micropip.install("bakery");
     }
     return (window as any).pyodide;
 }

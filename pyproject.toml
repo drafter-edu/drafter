@@ -87,7 +87,7 @@ dev = [
 ]
 
 [project.scripts]
-drafter = "drafter.cli:app"
+drafter = "drafter.cli:main"
 
 [tool.hatch.build]
 include = ["src/drafter/**"]

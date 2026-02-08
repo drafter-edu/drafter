@@ -13,6 +13,10 @@ declare global {
     var stopHotkeyListener: () => void;
     var hotkeyListenerReady: boolean;
     var DebugPanel: typeof import("../debug").DebugPanel;
+
+    // Pyodide globals:
+    var pyodide: any;
+    var micropip: any;
 }
 
 export {};

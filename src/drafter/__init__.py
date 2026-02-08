@@ -1,3 +1,4 @@
+from drafter.bootstrap.bootstrap import BOOTSTRAP_CONFIGURATION
 from dataclasses import dataclass
 from drafter.components import (
     PageContent,

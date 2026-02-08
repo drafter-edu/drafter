@@ -303,6 +303,68 @@ class Client:
         next_visit = self.navigation_func(request)
         return next_visit
 
+    def mount_event_handlers(self, root: Any, on_navigation: Callable):
+        """Mount event handlers for components with data--drafter-handlers attribute.
+        
+        This sets up delegation for events like blur, change, focus, input, etc.,
+        that should trigger route dispatches.
+        
+        Args:
+            root: The root element to attach listeners to.
+            on_navigation: Callback to handle navigation events.
+        """
+        debug_log("client.mount_event_handlers")
+        
+        # Get all elements with event handlers
+        elements_with_handlers = root.querySelectorAll("[data--drafter-handlers]")
+        
+        for element in elements_with_handlers:
+            handlers_json = element.getAttribute("data--drafter-handlers")
+            if not handlers_json:
+                continue
+                
+            try:
+                handlers = json.loads(handlers_json)
+            except:
+                console_log(f"Failed to parse event handlers: {handlers_json}")
+                continue
+            
+            # For each event type in the handlers
+            for event_type, route_name in handlers.items():
+                # Create a handler function for this event
+                def make_handler(event_name, route):
+                    def handler(event):
+                        debug_log(f"client.event_handler.{event_name}", event)
+                        # Don't prevent default for most events (except clicks handled elsewhere)
+                        
+                        target_element = event.target
+                        dom_id = target_element.id if hasattr(target_element, "id") else None
+                        
+                        # Get arguments from the element and its parents
+                        arguments = get_attribute_recursively(
+                            target_element, Component.DRAFTER_DATA_ARGUMENT_NAME
+                        )
+                        
+                        # Get the current form data
+                        form = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
+                        if form:
+                            form_data = self._create_form_data(form, None)
+                            nav_event = NavEvent(
+                                kind=event_name,
+                                url=route,
+                                data=form_data,
+                                submitter=target_element,
+                                arguments=arguments,
+                                dom_id=dom_id,
+                            )
+                            return on_navigation(nav_event)
+                        else:
+                            console_log(f"Form element not found for {event_name} event handler")
+                    return handler
+                
+                wrapped_handler = self._wrap_event_handler(make_handler(event_type, route_name))
+                element.addEventListener(event_type, wrapped_handler)
+
     def mount_navigation(self, root: Any, on_navigation: Callable):
         debug_log("client.mount_navigation")
         # Clean up old handlers if they exist
@@ -402,6 +464,10 @@ class Client:
             form_root.addEventListener("submit", self.submit_handler)
         else:
             raise RuntimeError("Form root element not found for mounting navigation.")
+        
+        # Mount event handlers for components
+        self.mount_event_handlers(root, on_navigation)
+        
         debug_log("client.mount_navigation_complete")
 
     def update_site(

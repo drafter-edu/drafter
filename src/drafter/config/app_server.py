@@ -6,12 +6,13 @@ asset serving, file reloading, and UI options.
 
 from dataclasses import dataclass, fields
 from typing import Optional, Union
+from drafter.config.app_backend import AppBackendConfig
 from drafter.config.engines import EngineType
 from drafter.config.urls import INTERNAL_ROUTES
 
 
 @dataclass
-class AppServerConfiguration:
+class AppServerConfiguration(AppBackendConfig):
     """Configuration options for the Drafter development server.
 
     Controls how the local development server runs, including port/host,
@@ -32,7 +33,7 @@ class AppServerConfiguration:
         show_filename_as: Display name for main file in UI (if different).
         site_title: Browser tab title.
         serve_adjacent_files: Serve files from user directory.
-        mount_drafter_locally: Mount Drafter locally vs. from package.
+        mount_drafter_locally: Mount Drafter locally vs. from package. Used for local dev.
         override_asset_url: Custom asset URL (False to use defaults).
     """
 
@@ -43,19 +44,8 @@ class AppServerConfiguration:
     use_reloader: bool = True
     open_browser: bool = True
     inline_py: bool = True
-    engine: EngineType = "skulpt"
-
-    user_directory: Union[bool, str] = False
-    main_filename: Union[bool, str] = False
-    asset_directory: Union[bool, str] = False
-    show_filename_as: Union[bool, str] = False
     serve_adjacent_files: bool = True
-    mount_drafter_locally: bool = False
-
-    override_asset_url: Union[bool, str] = False
-
-    site_title: str = "Drafter App Server"
-
+    
     # TODO: Additional configuration settings from `scaffolding/index.skulpt.template.html` go here
 
     @property
@@ -65,31 +55,6 @@ class AppServerConfiguration:
         Returns:
             WebSocket URL constructed from host, port, and internal route.
         """
-        return f"ws://{self.host}:{self.port}{INTERNAL_ROUTES['WS']}"
+        return f"ws://{self.host}:{self.port}/{INTERNAL_ROUTES['WS']}"
 
-    def merge_in_args(self, new_args: dict) -> None:
-        """Merge new arguments into configuration.
-
-        Args:
-            new_args: Dict of argument names and values.
-
-        Raises:
-            AttributeError: If unknown configuration attribute provided.
-        """
-        for key, value in new_args.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
-            else:
-                raise AttributeError(f"Unknown configuration attribute: {key}")
-
-    def extract_from_args(self, potential_args: dict):
-        """Extract configuration values from argument dict.
-
-        Args:
-            potential_args: Dict potentially containing configuration values.
-        """
-        for field in fields(self):
-            if field.name in potential_args:
-                value = potential_args[field.name]
-                if value is not None:
-                    setattr(self, field.name, value)
+    

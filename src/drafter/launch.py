@@ -15,7 +15,6 @@ from drafter.client_server.commands import get_main_server
 
 MaybeBoolStr = Optional[Union[bool, str]]
 
-
 def start_server(
     initial_state=None,
     server=None,
@@ -39,6 +38,8 @@ def start_server(
     open_browser: Optional[bool] = None,
     inline_py: Optional[bool] = None,
     use_reloader: Optional[bool] = None,
+    # Custom overrides
+    argv: Optional[list[str]] = None,
     **extra_configuration,
 ) -> None:
     """Start the Drafter server (web or local development mode).
@@ -82,20 +83,24 @@ def start_server(
         # TODO: This logic should really be encoded in a function somewhere
         from drafter.bridge import ClientBridge
 
+        # Configuration Phase
         server.do_configuration(extra_configuration)
         configuration = server.get_current_configuration()
 
+        # Rendering Phase
+        rendered_site = server.do_render()
         client_bridge = ClientBridge(configuration)
-        client_bridge.setup_site(server.do_render())
+        client_bridge.setup_site(rendered_site)
 
         server.do_listen_for_events(client_bridge.handle_telemetry_event)
-
-        server.do_start(initial_state=initial_state)
-        initial_request = client_bridge.make_initial_request()
-
+        
         def handle_visit(request):
+            # Visiting Phase
             response = server.do_visit(request)
+            # Committing Phase
             client_bridge.handle_response(response, handle_visit)
+            # Idle Phase
+            server.do_finish_visit()
             return response
 
         def handle_toggle_frame():
@@ -105,53 +110,26 @@ def start_server(
             server.reconfigure_flip("in_debug_mode")
 
         client_bridge.setup_events(handle_visit, handle_toggle_frame, handle_debug_mode)
+        # Starting Phase
+        server.do_start(initial_state=initial_state)
+        # Started Phase
+        initial_request = client_bridge.make_initial_request()
         handle_visit(initial_request)
 
     else:
-        from drafter.config.cli import parse_command_line_args
+        from drafter.app.configurer import process_app_server_configuration
         from drafter.app.app_server import serve_app_once
 
-        command_line_args = parse_command_line_args(sys.argv)
-        # TODO: Any command_line args must be converted into something the engine can understand
-
         config = AppServerConfiguration()
-        # TODO: Handle environment variables
-        # TODO: Handle extra command line arguments
-        config.merge_in_args(vars(command_line_args))
-        config.extract_from_args(locals())
-
+        config = process_app_server_configuration(config,
+                                                  sys.argv if argv is None else argv,
+                                                  locals())        
         print("Final server configuration:", config)
-
-        # TODO: Move this logic into AppServerConfiguration?
-        if config.user_directory is False:
-            found_path = seek_filename_by_line("start_server", config.main_filename)
-            config.user_directory = (
-                os.path.dirname(found_path) if found_path else os.getcwd()
-            )
-            config.main_filename = (
-                os.path.basename(found_path)
-                if found_path
-                else (config.main_filename or "main.py")
-            )
-
-        elif not os.path.isdir(config.user_directory):
-            if os.path.isfile(config.user_directory):
-                config.main_filename = os.path.basename(config.user_directory)
-                config.user_directory = os.path.dirname(config.user_directory)
-
-        else:
-            # TODO: Logic seems redundant, maybe only do it in app_server?
-            config.main_filename = (
-                config.main_filename if config.main_filename is not False else "main.py"
-            )
-
-        if config.show_filename_as is False:
-            config.show_filename_as = config.main_filename
-
-        if config.verbose:
-            print("Starting local Drafter server...")
 
         if config.prerender_initial_page:
             server.do_configuration(extra_configuration)
+        
+        if config.verbose:
+            print("Starting local Drafter server...")
 
         serve_app_once(server, config, initial_state)

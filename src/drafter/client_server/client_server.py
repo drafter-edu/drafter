@@ -10,6 +10,7 @@ from drafter.monitor.bus import EventBus
 from drafter.monitor.events.config import (
     InitialConfigurationEvent,
     ResetServerEvent,
+    ServerInitializedEvent,
     UpdatedConfigurationEvent,
 )
 from drafter.monitor.events.errors import DrafterError
@@ -20,6 +21,7 @@ from drafter.monitor.events.request import (
 )
 from drafter.monitor.events.routes import RouteAddedEvent
 from drafter.monitor.events.state import UpdatedStateEvent
+from drafter.monitor.telemetry import TelemetryCorrelation, TelemetryEvent
 from drafter.payloads.kinds.error_page import ErrorPage, SimpleErrorPage
 from drafter.payloads.payloads import ResponsePayload
 from drafter.data.request import Request
@@ -39,11 +41,12 @@ from drafter.payloads.target import Target
 ServerPhases = Union[
     Literal["initializing"],
     Literal["initialized"],
-    Literal["starting"],
     Literal["configuring"],
     Literal["rendering"],
+    Literal["starting"],
     Literal["started"],
-    Literal["running"],
+    Literal["visiting"],
+    Literal["committing"],
     Literal["idle"],
 ]
 
@@ -61,7 +64,8 @@ class ClientServer:
     - configuring: During the processing of static and dynamic configuration
     - rendering: During the rendering of the initial site into its HTML meta-structure (NOT the student's page content)
     - started: After the `start` method has completed, but before the first request is processed
-    - running: After the first request is processed, and the server is fully operational
+    - visiting: After the first request is processed, and the server is fully operational
+    - committing: During the process of committing changes or updates from the response.
     - idle: When the server is not processing a request, but is still running and can receive requests. This is the default state of the server after it has started and is waiting for requests.
 
     TODO: Ability to override ErrorPage rendering with custom error pages.
@@ -85,6 +89,16 @@ class ClientServer:
     def __init__(self, custom_name: str) -> None:
         self.custom_name = custom_name
         self.event_bus = EventBus()
+        
+        server_initialized_event = ServerInitializedEvent()
+        self.event_bus.publish(
+            TelemetryEvent(
+                event_type=server_initialized_event.event_type,
+                data=server_initialized_event,
+                correlation=TelemetryCorrelation(),
+                source="client_server.server_initialized",
+            )
+        )
         self.site = Site()
         self.router = Router()
         self.state = SiteState()
@@ -93,7 +107,7 @@ class ClientServer:
 
         self.requests = Scope()
         self.start_time = 0.0
-        self.phase = "initialized"
+        self.transition("initialized")
 
     def reset(self) -> None:
         """Reset the server to its initial state.
@@ -117,6 +131,14 @@ class ClientServer:
         #     "client_server.reset",
         #     f"Server name: {self.custom_name}",
         # )
+        
+    def transition(self, new_phase: ServerPhases):
+        """Transition the server to a new phase.
+
+        Args:
+            new_phase: The new phase to transition to.
+        """
+        self.phase = new_phase
 
     def process_static_configuration(self, command_line_arguments=None):
         """Process and merge static configuration from multiple sources.
@@ -206,7 +228,7 @@ class ClientServer:
         Args:
             initial_state: Optional initial state for the server.
         """
-        self.phase = "starting"
+        self.transition("starting")
         if initial_state is not None:
             try:
                 self.state.update(initial_state)
@@ -227,7 +249,7 @@ class ClientServer:
         # Register any default routes, if needed
         self.register_system_routes()
         # All done!
-        self.phase = "started"
+        self.transition("started")
         self.started = True
         log_info(
             "server.started",
@@ -549,7 +571,7 @@ class ClientServer:
             Response: Success or error response to send to the client.
         """
         self.start_timer()
-        self.phase = "running"
+        self.transition("visiting")
         log_data(
             RequestEvent.from_request(request),
             "client_server.visit",
@@ -604,7 +626,7 @@ class ClientServer:
                 request_id=request.id,
                 response_id=response.id,
             )
-            self.phase = "idle"
+            self.transition("committing")
             return response
 
     def make_success_response(
@@ -786,6 +808,7 @@ class ClientServer:
             response_id=response.id,
         )
         self.response_count += 1
+        self.transition("committing")
         return response
 
     def add_route(self, url: str, func: Any, is_system_route=False) -> None:
@@ -817,7 +840,7 @@ class ClientServer:
         Returns:
             Optional[InitialSiteData]: Site HTML and metadata, or error data if configuration fails.
         """
-        self.phase = "configuring"
+        self.transition("configuring")
         try:
             configuration = self.process_dynamic_configuration(extra_configuration)
         except Exception as e:
@@ -844,7 +867,7 @@ class ClientServer:
         Returns:
             InitialSiteData: Rendered HTML and metadata, or error data if rendering fails.
         """
-        self.phase = "rendering"
+        self.transition("rendering")
         try:
             site = self.site.render()
             log_info(
@@ -864,6 +887,11 @@ class ClientServer:
             site = f"<div><h1>Error rendering site</h1><p>{error.message}</p></div>"
             return InitialSiteData(site_html=site, site_title="Error", error=True)
         return site
+    
+    def do_finish_visit(self):
+        """Transition the server to the idle phase, allowing it to receive requests."""
+        self.transition("idle")
+    
 
     def do_listen_for_events(self, handler: Any) -> None:
         """Subscribe a handler to all events on the event bus.
@@ -899,3 +927,24 @@ class ClientServer:
         """
         current_request = self.requests.get_current()
         return current_request.id if current_request is not None else None
+    
+    def precompile_server(self, initial_state: Any) -> tuple[str, str]:
+        """Precompile initial page render for faster loading.
+
+        Executes the index route to generate precompiled HTML body and headers.
+
+        Args:
+            server: The ClientServer instance.
+            config: AppServer configuration.
+            initial_state: Initial application state.
+
+        Returns:
+            Tuple of (compiled_body, compiled_headers) as strings.
+        """
+        self.do_start(initial_state=initial_state)
+        initial_request = Request(-1, "precompilation", "index", {}, {}, "")
+        response = self.do_visit(initial_request)
+        # TODO: Extract compiled body and headers
+        body = response.body or "Error during precompilation."
+
+        return body, ""

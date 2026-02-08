@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.config.urls import determine_assets_url
@@ -7,12 +7,29 @@ from drafter.styling.themes import get_theme_system
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.config.site_information import SiteInformation
 
+
+@dataclass
+class CSSLink:
+    """Represents a CSS link with optional classes.
+
+    Attributes:
+        url: The URL or path to the CSS file.
+        classes: Optional list of CSS classes to attach to the link element.
+    """
+
+    url: str
+    classes: set[str] = field(default_factory=set)
+
+    def __repr__(self):
+        return f"CSSLink(url='{self.url}', classes={self.classes})"
+
+
 GLOBAL_DRAFTER_CSS_PATHS = {
-    True: "css/drafter_debug.css",
-    False: "css/drafter_deploy.css",
+    True: CSSLink(url="css/drafter_debug.css", classes={"drafter-debug-css--"}),
+    False: CSSLink(url="css/drafter_deploy.css", classes={"drafter-non-debug-css--"}),
 }
 
-BUILT_IN_ADDITIONAL_CSS_PATHS = ["css/diff2html.min.css"]
+BUILT_IN_ADDITIONAL_CSS_PATHS = [CSSLink(url="css/diff2html.min.css")]
 DRAFTER_TAG_IDS = {
     "ROOT": "drafter-root--",
     "SHADOW_HOST": "drafter-shadow-host--",
@@ -29,6 +46,8 @@ DRAFTER_TAG_IDS = {
 
 DRAFTER_TAG_CLASSES = {
     "THEME": "drafter-theme--",
+    "DEBUG_CSS": "drafter-debug-css--",
+    "NON_DEBUG_CSS": "drafter-non-debug-css--",
 }
 
 SITE_HTML_TEMPLATE = f"""
@@ -104,14 +123,14 @@ class Site:
         """Clear the site configuration."""
         self._configuration = None
 
-    def _get_theme_headers(self, configuration) -> tuple[list[str], list[str]]:
+    def _get_theme_headers(self, configuration) -> tuple[list[CSSLink], list[str]]:
         """Retrieve CSS and JS paths for the active theme.
 
         Args:
             configuration: Server configuration with theme setting.
 
         Returns:
-            Tuple of (css_paths list, js_paths list).
+            Tuple of (css_paths list of CSSLink, js_paths list of strings).
 
         Raises:
             ValueError: If theme is not recognized.
@@ -120,7 +139,8 @@ class Site:
         if not theme_system.is_valid_theme(configuration.theme):
             raise ValueError(theme_system.suggest_mistake(configuration.theme))
         theme = theme_system.get_theme(configuration.theme)
-        return list(theme.css_paths), list(theme.js_paths)
+        css_links = [CSSLink(url=path) for path in theme.css_paths]
+        return css_links, list(theme.js_paths)
 
     def remap_urls_to_assets(self, *urls, configuration):
         """Prefixes the individual asset URLs with the appropriate
@@ -149,20 +169,32 @@ class Site:
         site_html = SITE_HTML_TEMPLATE
 
         additional_css, additional_js = self._get_theme_headers(configuration)
-        additional_css.insert(0, GLOBAL_DRAFTER_CSS_PATHS[configuration.in_debug_mode])
+        
+        # Add global CSS with appropriate classes
+        global_css_link = GLOBAL_DRAFTER_CSS_PATHS[configuration.in_debug_mode]
+        additional_css.insert(0, global_css_link)
+        
+        # Add built-in CSS
         additional_css.extend(BUILT_IN_ADDITIONAL_CSS_PATHS)
-        additional_css = self.remap_urls_to_assets(
-            *additional_css, configuration=configuration
-        )
+        
+        # Remap URLs for CSS links
+        additional_css = [
+            CSSLink(url=self.remap_urls_to_assets(css.url, configuration=configuration)[0], classes=css.classes)
+            for css in additional_css
+        ]
+        
         additional_js = self.remap_urls_to_assets(
             *additional_js, configuration=configuration
         )
 
         additional_headers, additional_styles, additional_scripts = [], [], []
 
-        # Add CSS if present
+        # Add CSS if present (and remap URLs)
         if configuration.additional_css_content:
-            additional_css.extend(configuration.additional_css_content)
+            remapped_additional_css = self.remap_urls_to_assets(
+                *configuration.additional_css_content, configuration=configuration
+            )
+            additional_css.extend([CSSLink(url=url) for url in remapped_additional_css])
         # Add raw style content if present
         if configuration.additional_style_content:
             additional_styles.extend(configuration.additional_style_content)

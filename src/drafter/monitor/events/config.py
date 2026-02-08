@@ -40,3 +40,12 @@ class ResetServerEvent(BaseEvent):
         return {
             **super().to_json(),
         }
+
+@dataclass
+class ServerInitializedEvent(BaseEvent):
+    event_type: str = "ServerInitialized"
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            **super().to_json(),
+        }

@@ -240,6 +240,12 @@ class Component:
 
     # Constants
     DRAFTER_DATA_ARGUMENT_NAME: ClassVar[str] = "data--drafter-arguments"
+    DRAFTER_DATA_HANDLERS_NAME: ClassVar[str] = "data--drafter-handlers"
+    # Supported event types for route dispatching
+    SUPPORTED_EVENTS: ClassVar[list[str]] = [
+        "blur", "change", "focus", "input", "keydown", "keyup", "keypress",
+        "mouseenter", "mouseleave", "mouseover", "mouseout", "click", "dblclick"
+    ]
 
     def plan(self, context) -> RenderPlan:
         return self._plan_tag(context)
@@ -273,13 +279,27 @@ class Component:
         )
 
     def _handle_extra_settings(self, attributes, context) -> dict:
+        event_handlers = {}
         for key, value in self.extra_settings.items():
             if key == "arguments":
                 attributes[self.DRAFTER_DATA_ARGUMENT_NAME] = convert_arguments_to_json(
                     value
                 )
+            elif key.startswith("on_"):
+                # Extract event type (e.g., "on_blur" -> "blur")
+                event_type = key[3:]  # Remove "on_" prefix
+                if event_type in self.SUPPORTED_EVENTS:
+                    # Convert callable to function name
+                    route_name = value.__name__ if callable(value) else value
+                    event_handlers[event_type] = route_name
+                else:
+                    # Pass through unsupported events as regular attributes
+                    attributes[key] = value
             else:
                 attributes[key] = value
+        # Add event handlers as data attribute if any exist
+        if event_handlers:
+            attributes[self.DRAFTER_DATA_HANDLERS_NAME] = json.dumps(event_handlers)
         return attributes
 
     def get_attributes(self, context) -> dict:

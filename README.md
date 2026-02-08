@@ -237,9 +237,9 @@ From the student developer's perspective, they are building a `Site`, which can 
         ])
     ```
 
-TODO: Decision about the query selector. We could do something complicated where we try to detect what the user wants, just use regular query selectors, or have some custom functions (e.g., by_id, by_class, by_name, by_tag). Do we want to do this JQuery style where it selects all matching elements, or just the first one?
+The `target` parameter accepts `Target` classes that specify where and how the content should be injected. For a `Page`, the target is always the `drafter-body--` div, which is essentially the main content area of the page. For a `Fragment`, the target can be any CSS selector that identifies an element on the page; the content will be injected into that element. You can also control how many matches (one or all), whether the content replaces the children or the entire node, etc.
 
-How does updating the page content work? The `Page` payload has an HTML string that is going to be injected into the page at the `drafter-body--` div. The `Fragment` payload has an HTML string that is going to be injected into a specific component on the page, identified by the query selector provided. So essentially a Page is just a Fragment with a predefined target location.
+How does updating the page content work? The `Page` payload has an HTML string that is going to be injected into the page at the `drafter-body--` div. The `Fragment` payload has an HTML string that is going to be injected into a specific component on the page, identified by the `target` provided. So essentially a Page is just a Fragment with a predefined target location.
 
 A `URL` is a string that represents a unique `Route` function in the `Site`. It should follow the naming conventions of a Python function (e.g., lowercase letters, numbers, underscores, no spaces or special characters). Eventually, we might support slashes for things like classes or modules (which would probably translate to periods).
 
@@ -301,36 +301,61 @@ File handling: When a file gets uploaded to the server, it will get stored in me
 
 ### Summary of Execution Timeline
 
-1.  User runs a Drafter program that has a `start_server` call.
-2.  The `launch.py` script compiles a simple HTML version of the initial page for pre-rendering
-3.  The `launch.py` script starts up the Starlette server
-4.  The initial True Page gets served to the browser
-5.  The True Page sets up the WebSocket connection back to the App Server
-6.  The True Page sets up the Skulpt/Pyodide environment
-7.  The True Page executes the student's code
-8.  Drafter is imported; the `MAIN_SERVER` (`ClientServer`) and `MAIN_EVENT_BUS` (`EventBus`)are created.
-9.  The rest of the students' code is executed, adding routes to the `MAIN_SERVER` as it goes, until it reaches the `start_server` call.
-10. The `launch.py` script creates the `ClientBridge`
-11. The `ClientServer` is configured (`ClientServer.do_configuration`), processing its static and dynamic configuration (see below).
-12. The Site is (re-)rendered (`ClientServer.do_render`):
-    1.  The `ClientServer` creates the True page structure
-    2.  The `ClientBridge` loads the rendered site with interactivity
-    3.  The `ClientBridge` sets up the Debug Menu.
-13. The `ClientBridge` starts listening to the `ClientServer`'s event bus to handle telemetry
-14. The `ClientServer` is started
-    1.  The state is updated based on the initial state.
-    2.  The router is registered with default routes
-15. The `ClientServer` starts handling events, starting with the initial route (defaults to `index`)
-    1.  The `ClientServer` is `visit`ed with the Request, and returns a `Response`
-    2.  The `ClientBridge` handles the response, updating the page content and attaching the new handlers.
-16. The `ClientBridge` sets up page-wide navigation handlers (e.g., `popstate`, `drafter-navigate`)
-17. The `ClientBridge` sets up a hotkey binding for the Debug Menu to be toggled on/off.
-    1.  If clicked, then the site is re-rendered (see above) and the initial route is re-visited.
+Question: How does this change if the user runs `drafter build` instead of running the program directly? Is there any value in providing a pathway that doesn't actually require running the students' site locally at all?
 
-At that point in time, the site is considered launched. Now, whenever a navigation event occurs (e.g., via a click), the following happens:
-
-2. The `Client` prepare a new `Request` object with the relevant information (e.g., route, args, event data)
-3. The `Client` sends the `Request` to the `ClientServer` via the connection established by the `ClientBridge` (a "Visit")
+1. Bootstrap Phase
+    1. The Drafter library is imported
+    2. Bootstrap configuration is processed including environment variables, command line arguments, and config files. This configuration is used to determine how to proceed with the rest of the launch process, including whether we are in `start_server` mode or `compile_site` mode.
+2. Pre-initialization Phase
+    1. The default `ClientServer` is created and assigned to `MAIN_SERVER`
+    2. The default `ClientServer` processes its default configuration to get its static `ClientServerConfiguration`, also using the environment variables, CLI args, and config files.
+3. Pre-Initialized Phase
+    1. If a user runs a Drafter program that has a `start_server` call...
+        1. The user's code is executed.
+    2. If the user ran `drafter build` with the `--prerender` flag...
+        1. The user's code is executed
+    3. Otherwise...
+        1. The user's code is NOT executed. Nothing will happen unless we are in compile_site mode.
+4. Launch Phase
+    1. The static configuration is processed further to get the `AppServerConfiguration` or `AppBuilderConfiguration`, depending on the mode.
+    2. If needed, we do the `ClientServers` dynamic configuration.
+    3. The `launch.py` script compiles a simple HTML version of the initial page for pre-rendering
+    4. If we're in `start_server` mode...
+        1. The `launch.py` script starts up the Starlette server
+        2. The initial True Page gets served to the browser
+        3. The True Page sets up the WebSocket connection back to the App Server
+        4. The True Page sets up the Skulpt/Pyodide environment
+        5. The True Page sets up the RawConfigFileData based on ClientServerConfiguration
+        6. The True Page executes the student's code (go to Initialization).
+    5. If we're in `compile_site` mode...
+        1. The `AppBuilder` generates the static files for the site, including the initial page with pre-rendered content.
+        2. The generated files can then be deployed to any static hosting service.
+        3. When a user visits the site, the True Page sets up the Skulpt/Pyodide environment
+        4. The True Page sets up the RawConfigFileData based on ClientServerConfiguration
+        5. The True Page executes the student's code (go to Initialization).
+5. Initialization Phase
+    1. Drafter is imported; the `MAIN_SERVER` (`ClientServer`) is created.
+6. Initialized Phase
+    1. The rest of the students' code is executed, adding routes to the `MAIN_SERVER` as it goes, until it reaches the `start_server`/`compile_site` call.
+7. Configuring Phase
+    1. The `ClientServer` is configured (`ClientServer.do_configuration`), processing its dynamic configuration (see below).
+8. Rendering Phase
+    1. The `ClientServer` renders the Site (`ClientServer.do_render`):
+    2. The `launch.py` script creates the `ClientBridge`
+    3. The `ClientBridge` sets up the Debug Menu.
+    4. The `ClientBridge` loads the rendered site
+    5. The `ClientBridge` attaches an event handler to the `ClientServer`'s event bus
+    6. The `ClientBridge` attaches event handlers for page interactivity
+    7. The `ClientBridge` sets up page-wide navigation handlers (e.g., `popstate`, `drafter-navigate`)
+    8. The `ClientBridge` sets up a hotkey binding for the Debug Menu to be toggled on/off.
+9. Starting Phase
+    1. The `ClientServer` is started (`ClientServer.do_start`):
+    2. The state is updated based on the initial state.
+    3. The router is registered with system routes that are missing
+10. Started Phase
+    1. The `ClientBridge` creates the initial `Request`
+    2. The `ClientBridge` initiates a visit with the initial `Request` to the `ClientServer`
+11. Visiting Phase
     1. The `ClientServer` gets the route function based on the request
     2. The `ClientServer` executes the route function and generates a a `Payload`
         1. The `ClientServer` delegates argument preparation to its `Router`
@@ -341,18 +366,26 @@ At that point in time, the site is considered launched. Now, whenever a navigati
     6. The `ClientServer` updates its state based on the `Payload`
     7. The `ClientServer` generates any messages that need to be sent to the `ClientBridge`
     8. The `ClientServer` returns a successful response with the information above.
-4. The `ClientBridge` receives the `Response` from the `ClientServer`, and handles it:
-    1. The `ClientBridge` removes all the page-specific content currently in place.
-    2. The `ClientBridge` injects "Before" channel content (e.g., styles, scripts) that came with the `Response`.
-    3. The `ClientBridge` asks the `Client` to update the page
+12. Committing Phase
+    1. The `ClientBridge` receives the `Response` from the `ClientServer`
+    2. The `ClientBridge` removes all the page-specific content currently in place.
+    3. The `ClientBridge` injects "Before" channel content (e.g., styles, scripts) that came with the `Response`.
+    4. The `ClientBridge` asks the `Client` to update the page
         1. The `Client` notifies te debug panel of the new route
         2. The `Client` updates the body content if any is given
         3. The `Client` mounts the navigation handlers
-    4. The `ClientBridge` injects "After" channel content (e.g., styles, scripts) that came with the `Response`.
-    5. If it was a redirect route, then we handle the redirect now.
+    5. The `ClientBridge` injects "After" channel content (e.g., styles, scripts) that came with the `Response`.
+    6. If it was a redirect route, then we handle the redirect now.
         1. We first check to make sure we are not in a loop
         2. We make a new request from the response
         3. We send the request, and start over from the top, as we did before.
+13. Idle Phase
+    1. The page is now fully loaded, and we are waiting for user interaction.
+14. Navigating Phase
+    1. The user interacts with the page such that an event handler is triggered (e.g., clicks a button, presses the back button, triggers a special event handler for a component, etc.)
+    2. The `Client` prepare a new `Request` object with the relevant information (e.g., route, args, event data)
+    3. The `Client` sends the `Request` to the `ClientServer` via the connection established by the `ClientBridge` (a "Visit")
+    4. Go to (11) Visiting Phase.
 
 A complicated substep is the argument preparation:
 
@@ -386,17 +419,27 @@ Here are the places that we can show errors to the user:
 
 ### Configuration
 
+1. Bootstrap Phase: BootstrapConfiguration
+2. Pre-initialization Phase: Static ClientServerConfiguration
+3. Launch Phase:
+    1. AppServerConfiguration or AppBuilderConfiguration
+    2. Dynamic ClientServerConfiguration (if running student code)
+    3. Now can create the actual True Page contents as needed
+    4. Write RawConfigFileData for the True Page
+4. Initialization Phase: Static ClientServerConfiguration
+5. Configuring Phase: Dynamic ClientServerConfiguration
+
 The configuration settings can come from a few different places; here they are in order of precedence (dynamic will override static, and highest will override lower):
 
 - "Static" configs:
     1.  Defaults defined in the code
-    2.  Environment variables
+    2.  Environment variables (some of which might be query string parameters)
     3.  Command line arguments
     4.  A configuration file (provided by either 1. the environment variables, or 2. command line arguments)
-    5.  Imperative configuration functions in the code that are called before the server starts (e.g., `set_site_title()`)
-    6.  Arguments passed to the `start_server` function
+    5.  A raw string of RawConfigFileData provided to the True Page via the template context (essentially the determined configuration at the time of launch)
 - "Dynamic" configs:
     1.  Imperative configuration functions in the code (e.g., `set_site_title()`)
+    2.  Arguments passed to the `start_server` function
 
 At runtime, there are two main sources of configuration information:
 
@@ -420,3 +463,5 @@ In particular, this is because simply modifying their fields' contents will NOT 
 deployed site.
 You have to call the `reconfigure` method on the `ClientServer` in order to actually trigger any changes.
 Interested parts of the `ClientBridge` can subscribe to configuration change events on the `EventBus` in order to know when to update things like the page title, favicon, etc. whenever the configuration changes.
+
+The Compilation pipeline is used to build a static version of the site that can be deployed to any static hosting service. It takes the user's code and compiles it into a format that can be run in the browser (e.g., using Skulpt or Pyodide), and also generates the necessary HTML, CSS, and JS files to serve the site. The `AppBuilder` class is responsible for this process, and it uses the same underlying logic as the `AppServer` to ensure that the compiled version of the site behaves consistently with the development version.

@@ -1,4 +1,4 @@
-from drafter.site.site import GLOBAL_DRAFTER_CSS_PATHS
+from drafter.site.site import DRAFTER_TAG_CLASSES, GLOBAL_DRAFTER_CSS_PATHS
 import js
 from drafter.helpers.utils import is_skulpt, is_pyodide
 
@@ -65,16 +65,40 @@ def add_style(
         return style
 
 
+def _swap_asset_href(current_href: str, from_path: str, to_path: str) -> str:
+    if not current_href:
+        return to_path
+    if current_href.endswith(from_path):
+        return current_href[: -len(from_path)] + to_path
+    index = current_href.rfind(from_path)
+    if index != -1:
+        return current_href[:index] + to_path + current_href[index + len(from_path) :]
+    return to_path
+
+
 def swap_debug_mode(root):
-    # If href=GLOBAL_DRAFTER_CSS_PATHS[True] exists, then we're in debug mode, so switch to the non-debug CSS. Otherwise, switch to the debug CSS.
-    debug_css = GLOBAL_DRAFTER_CSS_PATHS[True]
-    non_debug_css = GLOBAL_DRAFTER_CSS_PATHS[False]
-    existing_debug_link = root.querySelector(f'link[href="{debug_css}"]')
-    existing_non_debug_link = root.querySelector(f'link[href="{non_debug_css}"]')
+    # If href=GLOBAL_DRAFTER_CSS_PATHS[True].url exists, then we're in debug mode, so switch to the non-debug CSS. Otherwise, switch to the debug CSS.
+    debug_css = GLOBAL_DRAFTER_CSS_PATHS[True].url
+    non_debug_css = GLOBAL_DRAFTER_CSS_PATHS[False].url
+    existing_debug_link = root.querySelector(f'link.{DRAFTER_TAG_CLASSES["DEBUG_CSS"]}')
+    existing_non_debug_link = root.querySelector(f'link.{DRAFTER_TAG_CLASSES["NON_DEBUG_CSS"]}')
     if existing_debug_link:
-        existing_debug_link.setAttribute("href", non_debug_css)
+        current_href = existing_debug_link.getAttribute("href")
+        existing_debug_link.setAttribute(
+            "href", _swap_asset_href(current_href, debug_css, non_debug_css)
+        )
+        # Update classes: remove DEBUG_CSS, add NON_DEBUG_CSS
+        existing_debug_link.classList.remove(DRAFTER_TAG_CLASSES["DEBUG_CSS"])
+        existing_debug_link.classList.add(DRAFTER_TAG_CLASSES["NON_DEBUG_CSS"])
     elif existing_non_debug_link:
-        existing_non_debug_link.setAttribute("href", debug_css)
+        current_href = existing_non_debug_link.getAttribute("href")
+        existing_non_debug_link.setAttribute(
+            "href", _swap_asset_href(current_href, non_debug_css, debug_css)
+        )
+        # Update classes: remove NON_DEBUG_CSS, add DEBUG_CSS
+        existing_non_debug_link.classList.remove(DRAFTER_TAG_CLASSES["NON_DEBUG_CSS"])
+        existing_non_debug_link.classList.add(DRAFTER_TAG_CLASSES["DEBUG_CSS"])
+    print(debug_css, non_debug_css, existing_debug_link, existing_non_debug_link)
 
 
 def add_link(

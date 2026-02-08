@@ -4,8 +4,8 @@ Defines reserved URL paths for WebSocket communication and asset serving.
 """
 
 INTERNAL_ROUTES = {
-    "WS": "/__drafter_ws",
-    "ASSETS": "/__drafter_assets",
+    "WS": "__drafter_ws",
+    "ASSETS": "__drafter_assets",
 }
 
 

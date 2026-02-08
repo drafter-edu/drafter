@@ -1,4 +1,5 @@
 - [ ] Fragment handler is not being correctly de-registered, leading to repeated event firing
+- [ ] The "phase" should be included in the TelemetryCorrelation
 - [ ] Should it be "SilentUpdate" or "QuietUpdate" perhaps?
 - [ ] Compilation pipeline
     - [ ] Compile initial page for faster load times

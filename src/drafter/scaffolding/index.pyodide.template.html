@@ -17,7 +17,9 @@
   {% if mount_drafter_locally %}
     await window.Drafter.mountDrafterDirectory();
   {% else %}
-    await window.Drafter.mountDrafterRemote();
+    await window.Drafter.mountDrafterRemote({{
+    pyodide_drafter_path | tojson
+    }});
   {% endif %}
   await window.Drafter.runStudentCode({code: "import os; print(os.listdir('./drafter/'))"});
   const app = await window.Drafter.runStudentCode({
@@ -27,7 +29,7 @@
     url: '{{ python_url }}'
   {% endif %}
   });
-  console.log("[Drafter AppServer Scaffolding] Student Code Initialized:");
+  console.log("[Drafter AppServer Scaffolding] Student Code Initialized with Pyodide:");
   } finally {
   document.getElementById('--drafter-initial-loading-white-screen').remove();
   }

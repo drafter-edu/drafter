@@ -25,14 +25,22 @@
         "editor.tabSize": 2
     },
     "cSpell.words": [
+        "argparser",
         "awatch",
         "builtinmodule",
         "callsim",
+        "configurer",
         "doseq",
+        "matplotlib",
         "maxlevels",
+        "micropip",
         "misceval",
+        "pyimport",
         "skulpt",
         "Starlette",
-        "stdlib"
+        "stdlib",
+        "typer",
+        "uvicorn",
+        "watchfiles"
     ]
 }

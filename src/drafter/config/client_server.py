@@ -92,6 +92,12 @@ class ClientServerConfiguration:
             "system_routes": list(self.system_routes.keys()),
             "external_pages": self.external_pages,
         }
+        
+    @staticmethod
+    def from_json(data: dict) -> "ClientServerConfiguration":
+        return ClientServerConfiguration(
+            **data
+        )
 
     def copy(self) -> "ClientServerConfiguration":
         """

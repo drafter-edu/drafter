@@ -18,9 +18,10 @@ import uvicorn
 from drafter import get_main_server
 from drafter.client_server.client_server import ClientServer
 from drafter.config.urls import determine_assets_url
-from drafter.app.templating import render_index_html
-from drafter.app.utils import pkg_assets_dir
-from drafter.config.app_server import AppServerConfiguration, INTERNAL_ROUTES
+from drafter.scaffolding.templating import render_index_html
+from drafter.scaffolding.utils import pkg_assets_dir
+from drafter.config.urls import INTERNAL_ROUTES
+from drafter.config.app_server import AppServerConfiguration
 from drafter.app.watcher import ReloadHub, ws_endpoint, _watch_and_reload
 from drafter.data.response import Response as DrafterResponse
 
@@ -43,37 +44,13 @@ async def index(req) -> Response:
         user_code=user_code if config.inline_py else None,
         python_url=str(app.state.user_path) if not config.inline_py else None,
         dev_ws_url=config.ws_url,
-        assets_url=determine_assets_url(config.override_asset_url),
+        assets_url="/"+determine_assets_url(config.override_asset_url),
         engine=config.engine,
         compiled_body=app.state.compiled_body,
         compiled_headers=app.state.compiled_headers,
         mount_drafter_locally=config.mount_drafter_locally,
     )
     return HTMLResponse(html)
-
-
-def compile_server(
-    server: ClientServer, config: AppServerConfiguration, initial_state
-) -> tuple[str, str]:
-    """Precompile initial page render for faster loading.
-
-    Executes the index route to generate precompiled HTML body and headers.
-
-    Args:
-        server: The ClientServer instance.
-        config: AppServer configuration.
-        initial_state: Initial application state.
-
-    Returns:
-        Tuple of (compiled_body, compiled_headers) as strings.
-    """
-    server.do_start(initial_state=initial_state)
-    initial_request = Request(-1, "precompilation", "index", {}, {}, "")
-    response: DrafterResponse = server.do_visit(initial_request)
-    # TODO: Extract compiled body and headers
-    body = response.body or "Error during precompilation."
-
-    return body, ""
 
 
 def make_app(
@@ -95,7 +72,7 @@ def make_app(
     ]
     routes = [
         Route("/", index),
-        WebSocketRoute(INTERNAL_ROUTES["WS"], ws_endpoint),
+        WebSocketRoute("/"+INTERNAL_ROUTES["WS"], ws_endpoint),
     ]
     # Handle default assets
     if not config.override_asset_url:
@@ -108,7 +85,7 @@ def make_app(
             watch_paths.append(assets_dir)
         routes.append(
             Mount(
-                INTERNAL_ROUTES["ASSETS"],
+                "/"+INTERNAL_ROUTES["ASSETS"],
                 app=StaticFiles(directory=str(assets_dir)),
                 name="assets",
             )
@@ -125,7 +102,7 @@ def make_app(
         )
     # Precompile if needed
     if config.prerender_initial_page:
-        compiled_body, compiled_headers = compile_server(server, config, initial_state)
+        compiled_body, compiled_headers = server.precompile_server(initial_state)
     else:
         compiled_body, compiled_headers = "", ""
     # Create app and assign state

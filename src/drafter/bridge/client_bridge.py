@@ -164,8 +164,12 @@ class ClientBridge:
 
                 # Move styles into shadow DOM
                 for css in initial_site_data.additional_css:
+                    # Extract URL and classes from CSSLink object
+                    css_url = css.url if hasattr(css, 'url') else css
+                    css_classes = " ".join(css.classes) if hasattr(css, 'classes') else ""
+                    classes = f"{DRAFTER_TAG_CLASSES['THEME']} {css_classes}".strip()
                     self._add_link_to_shadow(
-                        shadow_root, css, with_class=DRAFTER_TAG_CLASSES["THEME"]
+                        shadow_root, css_url, with_class=classes
                     )
                 for style in initial_site_data.additional_style:
                     self._add_style_to_shadow(
@@ -177,7 +181,11 @@ class ClientBridge:
 
                 # Normal mode without shadow DOM
                 for css in initial_site_data.additional_css:
-                    add_link(root, css, with_class=DRAFTER_TAG_CLASSES["THEME"])
+                    # Extract URL and classes from CSSLink object
+                    css_url = css.url if hasattr(css, 'url') else css
+                    css_classes = " ".join(css.classes) if hasattr(css, 'classes') else ""
+                    classes = f"{DRAFTER_TAG_CLASSES['THEME']} {css_classes}".strip()
+                    add_link(root, css_url, with_class=classes)
                 for style in initial_site_data.additional_style:
                     add_style(root, style, with_class=DRAFTER_TAG_CLASSES["THEME"])
             for js_code in initial_site_data.additional_js:
@@ -197,9 +205,6 @@ class ClientBridge:
         handle_debug_mode: Callable,
     ) -> None:
         self.client.setup_events(handle_visit, handle_toggle_frame, handle_debug_mode)
-
-    def register_hotkey(self, keyCombo: str, callback: Callable[[], None]) -> None:
-        self.client.register_hotkey(keyCombo, callback)
 
     def _add_style_to_shadow(self, shadow_root, css: str, with_class: str = "") -> None:
         """
