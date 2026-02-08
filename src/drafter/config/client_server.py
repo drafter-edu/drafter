@@ -142,6 +142,8 @@ class ClientServerConfiguration:
         """
         for key, value in kwargs.items():
             self.update_configuration(key, value)
+            
+    SITE_INFORMATION_KEYS = ("author", "description", "sources", "planning", "links")
 
     def update_configuration(self, key: str, value):
         """
@@ -150,7 +152,7 @@ class ClientServerConfiguration:
         Args:
             key: The configuration key to update (e.g., 'theme', 'in_debug_mode').
         """
-        if not hasattr(self, key):
+        if not hasattr(self, key) and key not in self.SITE_INFORMATION_KEYS:
             # TODO: InvalidConfigurationKeyError
             raise ValueError(f"Invalid configuration key: {key}")
         # TODO: Add validation for specific keys if necessary (e.g., theme should be a valid theme name)
@@ -168,7 +170,7 @@ class ClientServerConfiguration:
                 raise ValueError(
                     f"Configuration key {key} is not a list and cannot be appended to."
                 )
-        elif key in ("author", "description", "sources", "planning", "links"):
+        elif key in self.SITE_INFORMATION_KEYS:
             if self.information is None:
                 self.information = SiteInformation()
             setattr(self.information, key, value)

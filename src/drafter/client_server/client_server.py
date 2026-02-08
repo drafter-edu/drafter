@@ -175,6 +175,10 @@ class ClientServer:
         configuration = self.get_default_configuration()
         self.site.set_configuration(configuration)
         return configuration
+    
+    def is_configured(self) -> bool:
+        """Check if the server has been configured with a configuration instance."""
+        return self.site._configuration is not None
 
     def reconfigure(self, update_default: bool = False, **kwargs):
         """Update active server configuration and optionally the defaults.
@@ -184,8 +188,11 @@ class ClientServer:
             **kwargs: Configuration keys and values to update.
         """
         for key, value in kwargs.items():
-            self.site.update_configuration(key, value)
-            if update_default:
+            if self.is_configured():
+                self.site.update_configuration(key, value)
+                if update_default:
+                    self._default_configuration.update_configuration(key, value)
+            else:
                 self._default_configuration.update_configuration(key, value)
             log_data(
                 UpdatedConfigurationEvent(

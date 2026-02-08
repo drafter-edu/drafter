@@ -157,6 +157,7 @@ class Site:
             f"{determine_assets_url(configuration.override_asset_url)}/{url}"
             for url in urls
         ]
+        
 
     def render(self) -> InitialSiteData:
         """Render the site HTML structure with assets and configuration.

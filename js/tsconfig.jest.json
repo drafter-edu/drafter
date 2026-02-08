@@ -6,7 +6,7 @@
         "strict": true,
         "jsx": "react-jsx",
         "jsxImportSource": "jsx-dom",
-        "types": ["node", "jest"],
+        "types": ["node", "jest", "@testing-library/jest-dom"],
         "noEmit": true,
         "skipLibCheck": true,
         "resolveJsonModule": true,

@@ -146,6 +146,13 @@ class ClientBridge:
         console_log(event)
 
     def setup_site(self, initial_site_data: InitialSiteData) -> None:
+        if initial_site_data.error:
+            console_log("Error in initial site data: " + repr(initial_site_data))
+            true_root_id = self.client._true_root_id
+            true_root = document.getElementById(true_root_id)
+            true_root.innerHTML = initial_site_data.site_html
+            return None
+        
         try:
             true_root_id = self.client._true_root_id
             true_root = document.getElementById(true_root_id)

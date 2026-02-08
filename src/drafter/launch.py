@@ -7,6 +7,7 @@ or local development AppServer based on execution context.
 import sys
 import os
 from typing import Optional, Union
+from drafter.config.client_server import ClientServerConfiguration
 from drafter.helpers.utils import is_web, seek_filename_by_line
 from drafter.config.engines import EngineType
 from drafter.config.app_server import AppServerConfiguration
@@ -38,6 +39,12 @@ def start_server(
     open_browser: Optional[bool] = None,
     inline_py: Optional[bool] = None,
     use_reloader: Optional[bool] = None,
+    # Aliases for compatibility with older versions
+    reloader: Optional[bool] = None,
+    # Unused parameters that we want to keep for compatibility but not actually use
+    cdn_skulpt: Optional[str] = None,
+    cdn_skulpt_std: Optional[str] = None,
+    cdn_skulpt_drafter: Optional[str] = None,
     # Custom overrides
     argv: Optional[list[str]] = None,
     **extra_configuration,
@@ -78,19 +85,40 @@ def start_server(
     Raises:
         Various exceptions from ClientServer or AppServer initialization.
     """
+    # Handle compatibility for old parameters
+    if reloader is not None and use_reloader is None:
+        use_reloader = reloader
+    # Handle deprecated parameters that are no longer used but we want to keep for compatibility
+    if cdn_skulpt is not None:
+        print("Warning: 'cdn_skulpt' parameter is no longer used and will be ignored.")
+        del cdn_skulpt
+    if cdn_skulpt_std is not None:
+        print("Warning: 'cdn_skulpt_std' parameter is no longer used and will be ignored.")
+        del cdn_skulpt_std
+    if cdn_skulpt_drafter is not None:
+        print("Warning: 'cdn_skulpt_drafter' parameter is no longer used and will be ignored.")
+        del cdn_skulpt_drafter
+    
     server = server or get_main_server()
     if is_web():
         # TODO: This logic should really be encoded in a function somewhere
         from drafter.bridge import ClientBridge
 
         # Configuration Phase
-        server.do_configuration(extra_configuration)
-        configuration = server.get_current_configuration()
-
+        possible_error_data = server.do_configuration(extra_configuration)
         # Rendering Phase
-        rendered_site = server.do_render()
+        if possible_error_data:
+            # TODO: Need to handle the case where configuration failed and is None
+            rendered_site = possible_error_data
+            configuration = ClientServerConfiguration()
+        else:
+            configuration = server.get_current_configuration()
+            rendered_site = server.do_render()
         client_bridge = ClientBridge(configuration)
         client_bridge.setup_site(rendered_site)
+        
+        if rendered_site.error:
+            return
 
         server.do_listen_for_events(client_bridge.handle_telemetry_event)
         
@@ -127,7 +155,10 @@ def start_server(
         print("Final server configuration:", config)
 
         if config.prerender_initial_page:
-            server.do_configuration(extra_configuration)
+            possible_error = server.do_configuration(extra_configuration)
+            if possible_error:
+                print("Error during prerendering configuration:", possible_error)
+                return
         
         if config.verbose:
             print("Starting local Drafter server...")
