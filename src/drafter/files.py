@@ -1,5 +1,7 @@
 """
-Pretty sure this file is mostly deprecated now!
+This file is mostly deprecated now!
+We're still porting over a little bit of it, but
+the majority is now finished.
 
 We do not put the <script> and <style> tags directly in the code,
 so that we can rely on language injection to provide syntax highlighting.

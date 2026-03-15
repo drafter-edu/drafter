@@ -1,5 +1,8 @@
 """
 
+This file is mostly deprecated now!
+Refer to cli.py, launch.py, and configuration.py.
+
 You can run drafter in command line mode to build your site:
 
 ```
