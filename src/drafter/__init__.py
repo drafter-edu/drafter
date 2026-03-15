@@ -1,5 +1,8 @@
-from drafter.bootstrap.bootstrap import BOOTSTRAP_CONFIGURATION
+# Provide dataclass decorator for users' convenience
 from dataclasses import dataclass
+# Handle configuration if needed
+import drafter.configuration
+# Load all the Drafter components
 from drafter.components import (
     PageContent,
     Content,
@@ -44,7 +47,6 @@ from drafter.components import (
     FileUpload,
     MatPlotLibPlot,
 )
-from drafter.launch import start_server
 
 from drafter.styling.styling import (
     update_style,
@@ -70,7 +72,6 @@ from drafter.styling.styling import (
     change_margin,
     change_padding,
 )
-from drafter.client_server.commands import get_main_server, set_main_server
 from drafter.router.commands import route
 from drafter.payloads import Page, Fragment, Redirect, Update
 from drafter.deploy import (
@@ -85,8 +86,12 @@ from drafter.deploy import (
     get_site_information,
     deploy_site,
 )
-
 from drafter.testing import assert_equal
+from drafter.client_server.commands import get_main_server, set_main_server
+# Key starting point for Drafter applications, whether building or running
+from drafter.launch import start_server
+
+
 
 __all__ = [
     "dataclass",
@@ -179,8 +184,8 @@ __all__ = [
 __version__ = "2.0.0"
 
 if __name__ == "__main__":
-    import sys
-    from drafter.command_line import parse_args, build_site
-
-    options = parse_args(sys.argv[1:])
-    build_site(options)
+    # This drafter/__init__.py file was executed directly, unusual circumstance.
+    # Give a message to the user about running it normally.
+    print(
+        "This file is not meant to be executed directly. Please run your Drafter application script instead."
+    )

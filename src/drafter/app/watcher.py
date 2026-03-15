@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 from typing import List, Set
 
+from drafter.config.system import SystemConfiguration
 from starlette.websockets import WebSocket
 from watchfiles import awatch
 
@@ -88,7 +89,7 @@ async def ws_endpoint(websocket: WebSocket):
 
 
 async def _watch_and_reload(
-    hub: ReloadHub, watch_paths: list[Path], config: AppServerConfiguration
+    hub: ReloadHub, watch_paths: list[Path], system: SystemConfiguration
 ):
     """Monitor file changes and broadcast reload events.
 
@@ -98,7 +99,7 @@ async def _watch_and_reload(
     Args:
         hub: ReloadHub instance to broadcast through.
         watch_paths: List of file paths to monitor.
-        config: AppServer configuration (for future use).
+        system: System configuration (for future use).
     """
     # watchfiles supports multiple roots
     async for changes in awatch(*watch_paths, stop_event=None):

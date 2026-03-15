@@ -10,6 +10,7 @@
     {% if compiled_headers %}
       <!-- Additional header content from precompilation -->
       {{ compiled_headers }}
+      <!-- End of additional header content -->
     {% endif %}
     <style>
       #--drafter-initial-loading-white-screen {
@@ -24,6 +25,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        font-size: 2em;
       }
     </style>
   </head>
@@ -32,17 +34,13 @@
     <div id="{{ drafter_root }}">
       {% if compiled_body %}
         <!-- Precompiled body content -->
-        {{ compiled_body }}
+        <div class="drafter-body--">{{ compiled_body }}</div>
       {% else %}
         <!-- Drafter App will initialize here -->
       {% endif %}
     </div>
     {% if inline_py %}<script type="text/python" id="user-code">{{ user_code }}</script>{% endif %}
     {% block scripts %}<!-- Engine-specific scripts -->{% endblock %}
-    <script>
-      {% block initialization %}
-        // Engine-specific initialization logic
-      {% endblock %}
-    </script>
+    <script>{% block initialization %}// Engine-specific initialization logic{% endblock %}</script>
   </body>
 </html>

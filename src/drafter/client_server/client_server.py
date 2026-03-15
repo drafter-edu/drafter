@@ -4,6 +4,7 @@ import time
 
 from drafter.client_server.context import Scope
 from drafter.client_server.errors import VisitError
+from drafter.configuration import get_system_configuration
 from drafter.data.channel import Message
 from drafter.history.state import SiteState
 from drafter.monitor.bus import EventBus
@@ -33,7 +34,7 @@ from drafter.payloads.verification import (
 from drafter.router.routes import Router
 from drafter.monitor.audit import log_error, log_warning, log_info, log_data
 from drafter.site.initial_site_data import InitialSiteData
-from drafter.site.site import Site
+from drafter.site.site import DRAFTER_TAG_CLASSES, Site
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.payloads.target import Target
 
@@ -82,7 +83,6 @@ class ClientServer:
 
     custom_name: str
     state: SiteState
-    _default_configuration: ClientServerConfiguration
     phase: ServerPhases = "initializing"
     started: bool = False
 
@@ -102,7 +102,6 @@ class ClientServer:
         self.site = Site()
         self.router = Router()
         self.state = SiteState()
-        self._default_configuration = ClientServerConfiguration()
         self.response_count = 0
 
         self.requests = Scope()
@@ -140,26 +139,7 @@ class ClientServer:
         """
         self.phase = new_phase
 
-    def process_static_configuration(self, command_line_arguments=None):
-        """Process and merge static configuration from multiple sources.
-
-        Configuration sources are merged in precedence order:
-        1. Code defaults
-        2. Environment variables
-        3. Command line arguments
-        4. Configuration file (if specified)
-
-        The result becomes the default configuration.
-
-        Args:
-            command_line_arguments: Optional CLI arguments to process.
-
-        TODO:
-            Finish implementation.
-        """
-        # TODO: Finish this
-
-    def process_dynamic_configuration(self, extra_configuration):
+    def process_dynamic_configuration(self):
         """Initialize runtime configuration from defaults with extra updates.
 
         Separates default and current configurations so runtime changes
@@ -171,7 +151,6 @@ class ClientServer:
         Returns:
             ClientServerConfiguration: The applied configuration.
         """
-        self._default_configuration.update_multiple_configuration(**extra_configuration)
         configuration = self.get_default_configuration()
         self.site.set_configuration(configuration)
         return configuration
@@ -191,9 +170,9 @@ class ClientServer:
             if self.is_configured():
                 self.site.update_configuration(key, value)
                 if update_default:
-                    self._default_configuration.update_configuration(key, value)
+                    self.get_default_configuration().update_configuration(key, value)
             else:
-                self._default_configuration.update_configuration(key, value)
+                self.get_default_configuration().update_configuration(key, value)
             log_data(
                 UpdatedConfigurationEvent(
                     key=key, value=value, update_default=update_default
@@ -218,7 +197,7 @@ class ClientServer:
         if self.started:
             return getattr(self.site._configuration, key)
         else:
-            return getattr(self._default_configuration, key)
+            return getattr(self.get_default_configuration(), key)
 
     def reconfigure_flip(self, key: str):
         """Toggle a boolean configuration setting.
@@ -838,7 +817,7 @@ class ClientServer:
             "client_server.add_route",
         )
 
-    def do_configuration(self, extra_configuration) -> Optional[InitialSiteData]:
+    def do_configuration(self) -> Optional[InitialSiteData]:
         """Apply dynamic configuration and return initial site data.
 
         Args:
@@ -849,7 +828,7 @@ class ClientServer:
         """
         self.transition("configuring")
         try:
-            configuration = self.process_dynamic_configuration(extra_configuration)
+            configuration = self.process_dynamic_configuration()
         except Exception as e:
             error = log_error(
                 "site.processing_failed",
@@ -916,7 +895,8 @@ class ClientServer:
         Returns:
             ClientServerConfiguration: Default configuration instance.
         """
-        return self._default_configuration.copy()
+        system = get_system_configuration()
+        return system.client_server
 
     def get_current_configuration(self) -> ClientServerConfiguration:
         """Return the current active server configuration.
@@ -948,10 +928,15 @@ class ClientServer:
         Returns:
             Tuple of (compiled_body, compiled_headers) as strings.
         """
+        initial_site = self.do_render()
         self.do_start(initial_state=initial_state)
         initial_request = Request(-1, "precompilation", "index", {}, {}, "")
         response = self.do_visit(initial_request)
         # TODO: Extract compiled body and headers
         body = response.body or "Error during precompilation."
+        headers = initial_site.additional_css
+        headers = "\n".join([
+            header.precompile_to_html({DRAFTER_TAG_CLASSES["PRECOMPILE_HEADERS"]}) for header in headers
+        ])
 
-        return body, ""
+        return body, headers

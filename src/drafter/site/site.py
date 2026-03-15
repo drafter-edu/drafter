@@ -6,22 +6,9 @@ from drafter.config.urls import determine_assets_url
 from drafter.styling.themes import get_theme_system
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.config.site_information import SiteInformation
+from drafter.site.headers import CSSLink
 
 
-@dataclass
-class CSSLink:
-    """Represents a CSS link with optional classes.
-
-    Attributes:
-        url: The URL or path to the CSS file.
-        classes: Optional list of CSS classes to attach to the link element.
-    """
-
-    url: str
-    classes: set[str] = field(default_factory=set)
-
-    def __repr__(self):
-        return f"CSSLink(url='{self.url}', classes={self.classes})"
 
 
 GLOBAL_DRAFTER_CSS_PATHS = {
@@ -48,6 +35,7 @@ DRAFTER_TAG_CLASSES = {
     "THEME": "drafter-theme--",
     "DEBUG_CSS": "drafter-debug-css--",
     "NON_DEBUG_CSS": "drafter-non-debug-css--",
+    "PRECOMPILE_HEADERS": "drafter-precompiled-headers--"
 }
 
 SITE_HTML_TEMPLATE = f"""

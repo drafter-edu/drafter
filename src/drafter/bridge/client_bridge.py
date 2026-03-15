@@ -158,6 +158,7 @@ class ClientBridge:
             true_root = document.getElementById(true_root_id)
             self.client.set_site_title(initial_site_data.site_title)
             remove_existing_theme(true_root, DRAFTER_TAG_CLASSES["THEME"])
+            remove_existing_theme(true_root, DRAFTER_TAG_CLASSES["PRECOMPILE_HEADERS"])
 
             # Set up shadow DOM if enabled
             if initial_site_data.use_shadow_dom:
@@ -246,3 +247,5 @@ class ClientBridge:
         if with_class:
             link.setAttribute("class", with_class)
         shadow_root.appendChild(link)
+
+

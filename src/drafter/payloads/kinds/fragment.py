@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional, Union
 from drafter.components.links import LinkContent
 from drafter.data.channel import Message
 from drafter.config.client_server import ClientServerConfiguration
-from drafter.configuration import ServerConfiguration
 from drafter.constants import RESTORABLE_STATE_KEY
 from drafter.components import Component, PageContent, Link
 from drafter.data.request import Request

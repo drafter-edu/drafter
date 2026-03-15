@@ -301,47 +301,60 @@ File handling: When a file gets uploaded to the server, it will get stored in me
 
 ### Summary of Execution Timeline
 
-Question: How does this change if the user runs `drafter build` instead of running the program directly? Is there any value in providing a pathway that doesn't actually require running the students' site locally at all?
+Fundamentally, the user writes a python script that starts with `from drafter import *`, defines server in various ways, and then calls `start_server(initial_state)`. This user application can be run in three possible ways:
+
+1. From the command line like `python -m drafter user_script.py`
+2. From the command line like `drafter user_script.py`
+3. From the command line like `python user_script.py`
+
+All three work roughly the same: the package gets imported, configuration is processed (which comes from sys.args, os.environs, or a config file) into a singleton, the default web server object (not the starlette, but the framework's server) and other core pieces of infrastructure. Then, it starts (1/2) or resumes (3) executing the user's user_script.py; in the case of starting, that will also harmlessly from drafter import \*.
+
+If the `do_main` function is called by either `drafter __.py` or `python -m drafter __.py`, then the students' code is taken as an argument and executed, which will eventually reach the start_server call in the students' code.
+If the Drafter module is imported, then the students' code will naturally be executing after we're done importing. Eventually the start_server will be reached.
+
+Key insight from the above: instead of `do_main`, we should instead be doing all the configuration in a new `configuration.py` top-level module. That creates a Runtime that knows what we've decided to do. The `launch.py` handles the actual launching of the server or building of the site, and it will use the Runtime to determine what to do. Then `cli.py` basically just runs a students' code file.
 
 1. Bootstrap Phase
     1. The Drafter library is imported
-    2. Bootstrap configuration is processed including environment variables, command line arguments, and config files. This configuration is used to determine how to proceed with the rest of the launch process, including whether we are in `start_server` mode or `compile_site` mode.
+    2. The `SystemConfiguration` singleton will be initialized
+        1. Bootstrap configuration is processed including environment variables, command line arguments, and config files. This configuration is used to determine how to proceed with the rest of the launch process, including whether we are in `start_server` mode or `compile_site` mode.
+        2. The rest of the configuration fields (e.g., `ClientServerConfiguration`, `AppServerConfiguration`, `AppBuilderConfiguration`) are created and initialized
+        3. The \_SYSTEM singleton is provided to the rest of the system
 2. Pre-initialization Phase
     1. The default `ClientServer` is created and assigned to `MAIN_SERVER`
-    2. The default `ClientServer` processes its default configuration to get its static `ClientServerConfiguration`, also using the environment variables, CLI args, and config files.
 3. Pre-Initialized Phase
     1. If a user runs a Drafter program that has a `start_server` call...
-        1. The user's code is executed.
-    2. If the user ran `drafter build` with the `--prerender` flag...
-        1. The user's code is executed
-    3. Otherwise...
-        1. The user's code is NOT executed. Nothing will happen unless we are in compile_site mode.
+        1. The user's code is executed naturally
+    2. If the user ran `drafter ___` or `python -m drafter ___`:
+        1. The user's code is executed via `runpy`
 4. Launch Phase
-    1. The static configuration is processed further to get the `AppServerConfiguration` or `AppBuilderConfiguration`, depending on the mode.
-    2. If needed, we do the `ClientServers` dynamic configuration.
-    3. The `launch.py` script compiles a simple HTML version of the initial page for pre-rendering
-    4. If we're in `start_server` mode...
+    1. We update the system configuration using the arguments to `start_server`.
+    2. If we're in `start_server` mode...
         1. The `launch.py` script starts up the Starlette server
-        2. The initial True Page gets served to the browser
-        3. The True Page sets up the WebSocket connection back to the App Server
-        4. The True Page sets up the Skulpt/Pyodide environment
-        5. The True Page sets up the RawConfigFileData based on ClientServerConfiguration
-        6. The True Page executes the student's code (go to Initialization).
-    5. If we're in `compile_site` mode...
+        2. If the pre-render flag is set, then we pre-render the initial page.
+        3. The initial True Page gets served to the browser
+        4. The True Page sets up the WebSocket connection back to the App Server
+        5. The True Page sets up the Skulpt/Pyodide environment
+        6. The True Page sets up the RawConfigFileData based on ClientServerConfiguration
+        7. The True Page executes the student's code (go to Initialization).
+    3. If we're in `compile_site` mode...
         1. The `AppBuilder` generates the static files for the site, including the initial page with pre-rendered content.
         2. The generated files can then be deployed to any static hosting service.
         3. When a user visits the site, the True Page sets up the Skulpt/Pyodide environment
         4. The True Page sets up the RawConfigFileData based on ClientServerConfiguration
         5. The True Page executes the student's code (go to Initialization).
 5. Initialization Phase
-    1. Drafter is imported; the `MAIN_SERVER` (`ClientServer`) is created.
+    1. Drafter is imported
+    2. The `SystemConfiguration` singleton is initialized
+    3. The `MAIN_SERVER` (`ClientServer`) is created.
 6. Initialized Phase
-    1. The rest of the students' code is executed, adding routes to the `MAIN_SERVER` as it goes, until it reaches the `start_server`/`compile_site` call.
+    1. The rest of the students' code is executed, adding routes to the `MAIN_SERVER` as it goes, until it reaches the `start_server` call.
+    2. The `launch.py` script calls `run_client_bridge`
 7. Configuring Phase
     1. The `ClientServer` is configured (`ClientServer.do_configuration`), processing its dynamic configuration (see below).
 8. Rendering Phase
     1. The `ClientServer` renders the Site (`ClientServer.do_render`):
-    2. The `launch.py` script creates the `ClientBridge`
+    2. The `run_client_bridge` call creates the `ClientBridge`
     3. The `ClientBridge` sets up the Debug Menu.
     4. The `ClientBridge` loads the rendered site
     5. The `ClientBridge` attaches an event handler to the `ClientServer`'s event bus

@@ -7,11 +7,13 @@ rendering, UI theme, debugging, and asset serving.
 from dataclasses import dataclass, field
 from typing import Optional, Callable, Union
 
+from drafter.helpers.env_vars import EnvVars
+from drafter.config.base import BaseConfiguration
 from drafter.config.site_information import SiteInformation
 
 
 @dataclass
-class ClientServerConfiguration:
+class ClientServerConfiguration(BaseConfiguration):
     """Configuration options for the ClientServer component.
 
     Controls how the server renders pages to the client, including theming,
@@ -70,6 +72,150 @@ class ClientServerConfiguration:
     # TODO: Config setting to show white flash on navigation, also to control behavior
     # TODO: Config setting to add spinner to buttons
     # TODO: Config setting to forbid external links
+    
+    @staticmethod
+    def parse_env_variables(env_vars: dict) -> dict:
+        result = EnvVars(env_vars)
+        result.get_string_if_exists("DRAFTER_SERVER_NAME", "server_name")
+        result.get_bool_if_exists("DRAFTER_IN_DEBUG_MODE", "in_debug_mode")
+        result.get_bool_if_exists("DRAFTER_ENABLE_AUDIT_LOGGING", "enable_audit_logging")
+        result.get_string_if_exists("DRAFTER_SITE_TITLE", "site_title")
+        result.get_string_if_exists("DRAFTER_FRAMED", "framed")
+        result.get_string_if_exists("DRAFTER_THEME", "theme")
+        result.get_string_if_exists("DRAFTER_DEPLOY_IMAGE_PATH", "deploy_image_path")
+        result.get_string_list_if_exists("DRAFTER_EXTERNAL_PAGES", "external_pages", ";")
+        result.get_string_if_exists("DRAFTER_OVERRIDE_ASSET_URL", "override_asset_url")
+        result.get_string_list_if_exists("DRAFTER_ADDITIONAL_HEADER_CONTENT", "additional_header_content", ";")
+        result.get_string_list_if_exists("DRAFTER_ADDITIONAL_STYLE_CONTENT", "additional_style_content", ";")
+        result.get_string_list_if_exists("DRAFTER_ADDITIONAL_CSS_CONTENT", "additional_css_content", ";")
+        result.get_string_list_if_exists("DRAFTER_ADDITIONAL_JS_CONTENT", "additional_js_content", ";")
+        result.get_string_list_if_exists("DRAFTER_ADDITIONAL_SCRIPT_CONTENT", "additional_script_content", ";")
+        result.get_bool_if_exists("DRAFTER_USE_SHADOW_DOM", "use_shadow_dom")
+        result.get_string_if_exists("DRAFTER_ROOT_ELEMENT_ID", "root_element_id")
+        return result.as_dict()
+    
+    @staticmethod
+    def extend_parser(parser):
+        parser.add_argument(
+            "--server-name",
+            type=str,
+            help="Internal server identifier",
+        )
+        parser.add_argument(
+            "--debug",
+            action="store_true",
+            help="Enable debug mode with debug panel",
+        )
+        parser.add_argument(
+            "--audit-logging",
+            action="store_true",
+            help="Enable audit logging of requests/responses",
+        )
+        parser.add_argument(
+            "--framed",
+            action="store_true",
+            help="Whether to frame the application",
+        )
+        parser.add_argument(
+            "--theme",
+            type=str,
+            help="Theme name (e.g., 'default')",
+        )
+        parser.add_argument(
+            "--deploy-image-path",
+            type=str,
+            help="Path for deployment images",
+        )
+        parser.add_argument(
+            "--external-pages",
+            type=str,
+            help="Semicolon-separated list of external page links (URL or 'URL Text' tuples)",
+        )
+        parser.add_argument(
+            "--additional-header-content",
+            type=str,
+            help="Semicolon-separated list of HTML strings for <head> section",
+        )
+        parser.add_argument(
+            "--additional-style-content",
+            type=str,
+            help="Semicolon-separated list of inline CSS strings",
+        )
+        parser.add_argument(
+            "--additional-css-content",
+            type=str,
+            help="Semicolon-separated list of external CSS URLs",
+        )
+        parser.add_argument(
+            "--additional-js-content",
+            type=str,
+            help="Semicolon-separated list of inline JavaScript strings",
+        )
+        parser.add_argument(
+            "--additional-script-content",
+            type=str,
+            help="Semicolon-separated list of external JS URLs",
+        )
+        parser.add_argument(
+            "--use-shadow-dom",
+            action="store_true",
+            help="Wrap app in Shadow DOM to prevent CSS conflicts",
+        )
+        parser.add_argument(
+            "--root-element-id",
+            type=str,
+            help="ID prefix for root element",
+        )
+        return parser
+    
+    @staticmethod
+    def parse_args(parsed_args: dict) -> dict:
+        result = {}
+        if parsed_args.get("server_name"):
+            result["server_name"] = parsed_args["server_name"]
+        if parsed_args.get("debug"):
+            result["in_debug_mode"] = True
+        if parsed_args.get("audit_logging"):
+            result["enable_audit_logging"] = True
+        if parsed_args.get("site_title"):
+            result["site_title"] = parsed_args["site_title"]
+        if parsed_args.get("framed"):
+            result["framed"] = True
+        if parsed_args.get("theme"):
+            result["theme"] = parsed_args["theme"]
+        if parsed_args.get("deploy_image_path"):
+            result["deploy_image_path"] = parsed_args["deploy_image_path"]
+        if parsed_args.get("external_pages"):
+            result["external_pages"] = [
+                page.strip() for page in parsed_args["external_pages"].split(";")
+            ]
+        if parsed_args.get("override_asset_url"):
+            result["override_asset_url"] = parsed_args["override_asset_url"]
+        if parsed_args.get("additional_header_content"):
+            result["additional_header_content"] = [
+                content.strip() for content in parsed_args["additional_header_content"].split(";")
+            ]
+        if parsed_args.get("additional_style_content"):
+            result["additional_style_content"] = [
+                content.strip() for content in parsed_args["additional_style_content"].split(";")
+            ]
+        if parsed_args.get("additional_css_content"):
+            result["additional_css_content"] = [
+                content.strip() for content in parsed_args["additional_css_content"].split(";")
+            ]
+        if parsed_args.get("additional_js_content"):
+            result["additional_js_content"] = [
+                content.strip() for content in parsed_args["additional_js_content"].split(";")
+            ]
+        if parsed_args.get("additional_script_content"):
+            result["additional_script_content"] = [
+                content.strip() for content in parsed_args["additional_script_content"].split(";")
+            ]
+        if parsed_args.get("use_shadow_dom"):
+            result["use_shadow_dom"] = True
+        if parsed_args.get("root_element_id"):
+            result["root_element_id"] = parsed_args["root_element_id"]
+        return result
 
     def to_json(self) -> dict:
         return {
@@ -93,11 +239,6 @@ class ClientServerConfiguration:
             "external_pages": self.external_pages,
         }
         
-    @staticmethod
-    def from_json(data: dict) -> "ClientServerConfiguration":
-        return ClientServerConfiguration(
-            **data
-        )
 
     def copy(self) -> "ClientServerConfiguration":
         """

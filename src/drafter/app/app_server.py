@@ -16,6 +16,7 @@ from starlette.staticfiles import StaticFiles
 import uvicorn
 
 from drafter import get_main_server
+from drafter.config.system import SystemConfiguration
 from drafter.client_server.client_server import ClientServer
 from drafter.config.urls import determine_assets_url
 from drafter.scaffolding.templating import render_index_html
@@ -36,34 +37,36 @@ async def index(req) -> Response:
         HTMLResponse with rendered index page.
     """
     app: Starlette = req.app  # type: ignore
-    config: AppServerConfiguration = app.state.config
+    system: SystemConfiguration = app.state.system
     user_code = app.state.user_path.read_text(encoding="utf-8")
     html = render_index_html(
-        title=config.site_title,
-        inline_py=config.inline_py,
-        user_code=user_code if config.inline_py else None,
-        python_url=str(app.state.user_path) if not config.inline_py else None,
-        dev_ws_url=config.ws_url,
-        assets_url="/"+determine_assets_url(config.override_asset_url),
-        engine=config.engine,
+        title=system.app_common.site_title,
+        inline_py=system.app_server.inline_py,
+        user_code=user_code if system.app_server.inline_py else None,
+        python_url=str(app.state.user_path) if not system.app_server.inline_py else None,
+        dev_ws_url=system.app_server.ws_url,
+        assets_url="/"+determine_assets_url(system.app_common.override_asset_url),
+        engine=system.app_common.engine,
         compiled_body=app.state.compiled_body,
         compiled_headers=app.state.compiled_headers,
-        mount_drafter_locally=config.mount_drafter_locally,
+        mount_drafter_locally=system.app_common.mount_drafter_locally,
     )
     return HTMLResponse(html)
 
 
 def make_app(
-    server: ClientServer, config: AppServerConfiguration, initial_state
+    system: SystemConfiguration,
+    server: ClientServer, 
+    initial_state
 ) -> Starlette:
     # Determine paths
     user_directory = (
-        Path(config.user_directory).resolve()
-        if isinstance(config.user_directory, str)
+        Path(system.app_common.user_directory).resolve()
+        if isinstance(system.app_common.user_directory, str)
         else Path.cwd()
     )
     user_path = user_directory / (
-        config.main_filename if isinstance(config.main_filename, str) else "main.py"
+        system.app_common.main_filename if isinstance(system.app_common.main_filename, str) else "main.py"
     )
 
     # Determine watches and routes
@@ -75,10 +78,10 @@ def make_app(
         WebSocketRoute("/"+INTERNAL_ROUTES["WS"], ws_endpoint),
     ]
     # Handle default assets
-    if not config.override_asset_url:
+    if not system.app_common.override_asset_url:
         assets_dir = (
-            Path(config.asset_directory)
-            if isinstance(config.asset_directory, str)
+            Path(system.app_common.asset_directory)
+            if isinstance(system.app_common.asset_directory, str)
             else pkg_assets_dir()
         )
         if assets_dir.exists():
@@ -91,7 +94,7 @@ def make_app(
             )
         )
     # Serve user files if enabled
-    if config.serve_adjacent_files:
+    if system.app_server.serve_adjacent_files:
         watch_paths.append(user_directory)
         routes.append(
             Mount(
@@ -101,13 +104,13 @@ def make_app(
             ),
         )
     # Precompile if needed
-    if config.prerender_initial_page:
+    if system.app_common.prerender_initial_page:
         compiled_body, compiled_headers = server.precompile_server(initial_state)
     else:
         compiled_body, compiled_headers = "", ""
     # Create app and assign state
     app = Starlette(routes=routes)
-    app.state.config = config
+    app.state.system = system
     app.state.user_directory = user_directory
     app.state.user_path = user_path
     app.state.hub = ReloadHub()
@@ -118,11 +121,17 @@ def make_app(
 
 
 def serve_app_once(
+    system: SystemConfiguration,
     server: ClientServer,
-    config: AppServerConfiguration,
     initial_state,
 ):
-    app = make_app(server, config, initial_state)
+    # Configure the server if prerendering is needed
+    if system.app_common.prerender_initial_page:
+        possible_error = server.do_configuration()
+        if possible_error:
+            print("Error during prerendering configuration:", possible_error)
+            return
+    app = make_app(system, server, initial_state)
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -130,17 +139,17 @@ def serve_app_once(
     # Background watcher task
     async def supervisor():
         watcher = asyncio.create_task(
-            _watch_and_reload(app.state.hub, app.state.watch_paths, config)
+            _watch_and_reload(app.state.hub, app.state.watch_paths, system)
         )
         try:
             uvicorn_config = uvicorn.Config(
-                app, host=config.host, port=config.port, log_level="info", reload=False
+                app, host=system.app_server.host, port=system.app_server.port, log_level="info", reload=False
             )
             server = uvicorn.Server(uvicorn_config)
-            if config.open_browser:
+            if system.app_server.open_browser:
                 # Delay a touch to let server bind
                 loop.call_later(
-                    0.8, lambda: webbrowser.open(f"http://{config.host}:{config.port}/")
+                    0.8, lambda: webbrowser.open(f"http://{system.app_server.host}:{system.app_server.port}/")
                 )
             await server.serve()
         finally:

@@ -6,13 +6,14 @@ asset serving, file reloading, and UI options.
 
 from dataclasses import dataclass, fields
 from typing import Optional, Union
-from drafter.config.app_backend import AppBackendConfig
+from drafter.helpers.env_vars import EnvVars
 from drafter.config.engines import EngineType
 from drafter.config.urls import INTERNAL_ROUTES
+from drafter.config.base import BaseConfiguration
 
 
 @dataclass
-class AppServerConfiguration(AppBackendConfig):
+class AppServerConfiguration(BaseConfiguration):
     """Configuration options for the Drafter development server.
 
     Controls how the local development server runs, including port/host,
@@ -36,9 +37,6 @@ class AppServerConfiguration(AppBackendConfig):
         mount_drafter_locally: Mount Drafter locally vs. from package. Used for local dev.
         override_asset_url: Custom asset URL (False to use defaults).
     """
-
-    verbose: bool = True
-    prerender_initial_page: bool = True
     port: int = 8000
     host: str = "localhost"
     use_reloader: bool = True
@@ -47,6 +45,75 @@ class AppServerConfiguration(AppBackendConfig):
     serve_adjacent_files: bool = True
     
     # TODO: Additional configuration settings from `scaffolding/index.skulpt.template.html` go here
+    @staticmethod
+    def parse_env_variables(env_vars: dict) -> dict:
+        result = EnvVars(env_vars)
+        result.get_int_if_exists("DRAFTER_PORT", "port", raise_error=True)
+        result.get_string_if_exists("DRAFTER_HOST", "host")
+        result.get_bool_if_exists("DRAFTER_USE_RELOADER", "use_reloader")
+        result.get_bool_if_exists("DRAFTER_OPEN_BROWSER", "open_browser")
+        result.get_bool_if_exists("DRAFTER_INLINE_PY", "inline_py")
+        result.get_bool_if_exists("DRAFTER_SERVE_ADJACENT_FILES", "serve_adjacent_files")
+        return result.as_dict()
+    
+    @staticmethod
+    def extend_parser(parser):
+        parser.add_argument(
+            "--port",
+            type=int,
+            default=8000,
+            help="Port number for the server"
+        )
+        parser.add_argument(
+            "--host",
+            type=str,
+            default="localhost",
+            help="Host address for the server"
+        )
+        parser.add_argument(
+            "--no-reloader",
+            action="store_false",
+            dest="use_reloader",
+            help="Disable auto-reloader for code changes"
+        )
+        parser.add_argument(
+            "--no-open-browser",
+            action="store_false",
+            dest="open_browser",
+            help="Do not automatically open web browser on start"
+        )
+        parser.add_argument(
+            "--no-inline-py",
+            action="store_false",
+            dest="inline_py",
+            help="Do not inline user code in HTML; load via HTTP request instead"
+        )
+        parser.add_argument(
+            "--no-serve-adjacent-files",
+            action="store_false",
+            dest="serve_adjacent_files",
+            help="Do not serve files from user directory"
+        )
+        return parser
+    
+    @staticmethod
+    def parse_args(parsed_args: dict) -> dict:
+        result = {}
+        if parsed_args.get("prerender_initial_page") is not None:
+            result["prerender_initial_page"] = parsed_args["prerender_initial_page"]
+        if parsed_args.get("port") is not None:
+            result["port"] = parsed_args["port"]
+        if parsed_args.get("host") is not None:
+            result["host"] = parsed_args["host"]
+        if parsed_args.get("use_reloader") is not None:
+            result["use_reloader"] = parsed_args["use_reloader"]
+        if parsed_args.get("open_browser") is not None:
+            result["open_browser"] = parsed_args["open_browser"]
+        if parsed_args.get("inline_py") is not None:
+            result["inline_py"] = parsed_args["inline_py"]
+        if parsed_args.get("serve_adjacent_files") is not None:
+            result["serve_adjacent_files"] = parsed_args["serve_adjacent_files"]
+        return result
 
     @property
     def ws_url(self) -> str:

@@ -7,6 +7,8 @@ or local development AppServer based on execution context.
 import sys
 import os
 from typing import Optional, Union
+from drafter.configuration import get_system_configuration
+from drafter.config.app_builder import AppBuilderConfiguration
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.helpers.utils import is_web, seek_filename_by_line
 from drafter.config.engines import EngineType
@@ -86,81 +88,68 @@ def start_server(
         Various exceptions from ClientServer or AppServer initialization.
     """
     # Handle compatibility for old parameters
+    parameters = {}
+    if server_name is not None:
+        parameters['server_name'] = server_name
+    if in_debug_mode is not None:
+        parameters['in_debug_mode'] = in_debug_mode
+    if framed is not None:
+        parameters['framed'] = framed
+    if theme is not None:
+        parameters['theme'] = theme
+    if site_title is not None:
+        parameters['site_title'] = site_title
+    if information is not None:
+        parameters['information'] = information
+    if verbose is not None:
+        parameters['verbose'] = verbose
+    if user_directory is not None:
+        parameters['user_directory'] = user_directory
+    if main_filename is not None:
+        parameters['main_filename'] = main_filename
+    if asset_directory is not None:
+        parameters['asset_directory'] = asset_directory
+    if show_filename_as is not None:
+        parameters['show_filename_as'] = show_filename_as
+    if engine is not None:
+        parameters['engine'] = engine
+    if port is not None:
+        parameters['port'] = port
+    if host is not None:
+        parameters['host'] = host
+    if prerender_initial_page is not None:
+        parameters['prerender_initial_page'] = prerender_initial_page
+    if open_browser is not None:
+        parameters['open_browser'] = open_browser
+    if inline_py is not None:
+        parameters['inline_py'] = inline_py
     if reloader is not None and use_reloader is None:
-        use_reloader = reloader
+        parameters['user_reloader'] = reloader
+    elif use_reloader is not None:
+        parameters['user_reloader'] = use_reloader
     # Handle deprecated parameters that are no longer used but we want to keep for compatibility
     if cdn_skulpt is not None:
         print("Warning: 'cdn_skulpt' parameter is no longer used and will be ignored.")
-        del cdn_skulpt
     if cdn_skulpt_std is not None:
         print("Warning: 'cdn_skulpt_std' parameter is no longer used and will be ignored.")
-        del cdn_skulpt_std
     if cdn_skulpt_drafter is not None:
         print("Warning: 'cdn_skulpt_drafter' parameter is no longer used and will be ignored.")
-        del cdn_skulpt_drafter
+    # Custom overrides
+    if argv is not None:
+        parameters['argv'] = argv
+    parameters.update(extra_configuration)
     
+    system = get_system_configuration()
+    system.merge_in_args(parameters)
     server = server or get_main_server()
+    
+    # Primary dispatch based on execution context
     if is_web():
-        # TODO: This logic should really be encoded in a function somewhere
-        from drafter.bridge import ClientBridge
-
-        # Configuration Phase
-        possible_error_data = server.do_configuration(extra_configuration)
-        # Rendering Phase
-        if possible_error_data:
-            # TODO: Need to handle the case where configuration failed and is None
-            rendered_site = possible_error_data
-            configuration = ClientServerConfiguration()
-        else:
-            configuration = server.get_current_configuration()
-            rendered_site = server.do_render()
-        client_bridge = ClientBridge(configuration)
-        client_bridge.setup_site(rendered_site)
-        
-        if rendered_site.error:
-            return
-
-        server.do_listen_for_events(client_bridge.handle_telemetry_event)
-        
-        def handle_visit(request):
-            # Visiting Phase
-            response = server.do_visit(request)
-            # Committing Phase
-            client_bridge.handle_response(response, handle_visit)
-            # Idle Phase
-            server.do_finish_visit()
-            return response
-
-        def handle_toggle_frame():
-            server.reconfigure_flip("framed")
-
-        def handle_debug_mode():
-            server.reconfigure_flip("in_debug_mode")
-
-        client_bridge.setup_events(handle_visit, handle_toggle_frame, handle_debug_mode)
-        # Starting Phase
-        server.do_start(initial_state=initial_state)
-        # Started Phase
-        initial_request = client_bridge.make_initial_request()
-        handle_visit(initial_request)
-
+        from drafter.bridge import run_client_bridge
+        run_client_bridge(system, server, initial_state)
+    elif system.bootstrap.mode == "compile_site":
+        from drafter.builder.build import compile_site
+        compile_site(system, server, initial_state)
     else:
-        from drafter.app.configurer import process_app_server_configuration
         from drafter.app.app_server import serve_app_once
-
-        config = AppServerConfiguration()
-        config = process_app_server_configuration(config,
-                                                  sys.argv if argv is None else argv,
-                                                  locals())        
-        print("Final server configuration:", config)
-
-        if config.prerender_initial_page:
-            possible_error = server.do_configuration(extra_configuration)
-            if possible_error:
-                print("Error during prerendering configuration:", possible_error)
-                return
-        
-        if config.verbose:
-            print("Starting local Drafter server...")
-
-        serve_app_once(server, config, initial_state)
+        serve_app_once(system, server, initial_state)

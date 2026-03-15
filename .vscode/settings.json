@@ -35,6 +35,8 @@
         "maxlevels",
         "micropip",
         "misceval",
+        "Preparse",
+        "preparser",
         "pyimport",
         "skulpt",
         "Starlette",

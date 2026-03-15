@@ -7,3 +7,4 @@ processing responses from the server.
 """
 
 from drafter.bridge.client_bridge import ClientBridge
+from drafter.bridge.bridger import run_client_bridge

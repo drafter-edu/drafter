@@ -98,7 +98,6 @@ def swap_debug_mode(root):
         # Update classes: remove NON_DEBUG_CSS, add DEBUG_CSS
         existing_non_debug_link.classList.remove(DRAFTER_TAG_CLASSES["NON_DEBUG_CSS"])
         existing_non_debug_link.classList.add(DRAFTER_TAG_CLASSES["DEBUG_CSS"])
-    print(debug_css, non_debug_css, existing_debug_link, existing_non_debug_link)
 
 
 def add_link(

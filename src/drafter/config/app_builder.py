@@ -1,12 +1,12 @@
 from typing import Optional, Union
 from dataclasses import dataclass, field
 
-from drafter.config.app_backend import AppBackendConfig
+from drafter.helpers.env_vars import EnvVars
 from drafter.config.engines import EngineType
-
+from drafter.config.base import BaseConfiguration
 
 @dataclass
-class AppBuilderConfiguration(AppBackendConfig):
+class AppBuilderConfiguration(BaseConfiguration):
     """Configuration for the compilation process that builds a static version of the site.
     
     The compilation process will also have access to the current `ClientServerConfiguration` 
@@ -30,15 +30,11 @@ class AppBuilderConfiguration(AppBackendConfig):
         pyodide_drafter_path: Optional custom path to the Drafter Pyodide package (used if engine is "pyodide").
         pyodide_package_style: Optional custom style for the Pyodide package ("build", "cdn", or "pypi"). The "build" option means that the local version of Drafter will be built for pyodide.
     """
-    verbose: bool = False
     output_directory: str = "dist"
     output_filename: str = "index.html"
     create_404: str = "if_missing"  # Options: "always", "never", "if_missing"
     
     zip_output: bool = False
-    
-    prerender_initial_page: bool = True
-    engine: EngineType = "skulpt"
     
     warn_missing_info: bool = True
     
@@ -47,4 +43,83 @@ class AppBuilderConfiguration(AppBackendConfig):
     
     additional_paths: list[str] = field(default_factory=list)
     
+    @staticmethod
+    def parse_env_variables(env_vars: dict) -> dict:
+        result = EnvVars(env_vars)
+        result.get_string_if_exists("DRAFTER_OUTPUT_DIRECTORY", "output_directory")
+        result.get_string_if_exists("DRAFTER_OUTPUT_FILENAME", "output_filename")
+        result.get_string_if_exists("DRAFTER_CREATE_404", "create_404")
+        result.get_bool_if_exists("DRAFTER_ZIP_OUTPUT", "zip_output")
+        result.get_bool_if_exists("DRAFTER_WARN_MISSING_INFO", "warn_missing_info")
+        result.get_string_list_if_exists("DRAFTER_ADDITIONAL_PATHS", "additional_paths", ";")
+        result.get_string_if_exists("DRAFTER_PYODIDE_PACKAGE_STYLE", "pyodide_package_style")
+        result.get_string_if_exists("DRAFTER_PYODIDE_DRAFTER_PATH", "pyodide_drafter_path")
+        return result.as_dict()
+    
+    @staticmethod
+    def extend_parser(parser):
+        parser.add_argument(
+            "--output-directory",
+            type=str,
+            help="Directory to output the built site files",
+        )
+        parser.add_argument(
+            "--output-filename",
+            type=str,
+            help="Name of the main HTML file to generate",
+        )
+        parser.add_argument(
+            "--create-404",
+            type=str,
+            choices=["always", "never", "if_missing"],
+            help="Whether to create a 404.html file (options: 'always', 'never', 'if_missing')",
+        )
+        parser.add_argument(
+            "--zip-output",
+            action="store_true",
+            help="Whether to zip the output directory after building",
+        )
+        parser.add_argument(
+            "--warn-missing-info",
+            action="store_true",
+            help="Whether to echo a warning if set_site_information is missing",
+        )
+        parser.add_argument(
+            "--additional-paths",
+            type=str,
+            help="Semicolon-separated list of additional file paths to make available in the built site (e.g., for `open`)",
+        )
+        parser.add_argument(
+            "--pyodide-package-style",
+            type=str,
+            choices=["build", "cdn", "pypi"],
+            help="Optional custom style for the Pyodide package ('build', 'cdn', or 'pypi')",
+        )
+        parser.add_argument(
+            "--pyodide-drafter-path",
+            type=str,
+            help="Optional custom path to the Drafter Pyodide package (used if engine is 'pyodide')",
+        )
+        return parser
+    
+    @staticmethod
+    def parse_args(parsed_args: dict) -> dict:
+        result = {}
+        if parsed_args.get("output_directory"):
+            result["output_directory"] = parsed_args["output_directory"]
+        if parsed_args.get("output_filename"):
+            result["output_filename"] = parsed_args["output_filename"]
+        if parsed_args.get("create_404"):
+            result["create_404"] = parsed_args["create_404"]
+        if parsed_args.get("zip_output"):
+            result["zip_output"] = True
+        if parsed_args.get("warn_missing_info"):
+            result["warn_missing_info"] = True
+        if parsed_args.get("additional_paths"):
+            result["additional_paths"] = parsed_args["additional_paths"].split(";")
+        if parsed_args.get("pyodide_package_style"):
+            result["pyodide_package_style"] = parsed_args["pyodide_package_style"]
+        if parsed_args.get("pyodide_drafter_path"):
+            result["pyodide_drafter_path"] = parsed_args["pyodide_drafter_path"]
+        return result
     
