@@ -63,23 +63,25 @@ export async function setupPyodide() {
         window.pyodide = (window as any).pyodide = await loadPyodide({
             packages: ["micropip"],
             indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/",
+            env: {
+                DRAFTER_CONFIG_FILE: "/_drafter_config.json",
+            },
         });
         await window.pyodide.loadPackage("micropip");
         window.micropip = window.pyodide.pyimport("micropip");
         await window.micropip.install("bakery");
+        writeConfigFile(pyodide);
     }
     return (window as any).pyodide;
 }
 
 function writeConfigFile(pyodide: any) {
-    const file = pyodide.FS.open("/_drafter_config.json", "w");
     if ((window as any).DRAFTER_MODIFIED_CONFIGURATION) {
-        pyodide.FS.write(
-            file,
+        pyodide.FS.writeFile(
+            "/_drafter_config.json",
             JSON.stringify((window as any).DRAFTER_MODIFIED_CONFIGURATION),
         );
     }
-    pyodide.FS.close(file);
 }
 
 export async function runStudentCode(
@@ -91,7 +93,6 @@ export async function runStudentCode(
         );
     }
     const pyodide = (window as any).pyodide;
-    writeConfigFile(pyodide);
     try {
         const result = await pyodide.runPythonAsync(options.code);
         return result;
