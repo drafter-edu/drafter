@@ -40,7 +40,7 @@ def started_server():
     """Create and start a ClientServer instance."""
     server = ClientServer("test_server")
     # Configure the server before starting
-    server.do_configuration({})
+    server.do_configuration()
     server.do_start()
     return server
 
@@ -82,7 +82,7 @@ class TestInitialization:
 
     def test_default_configuration_created(self, server):
         """Test that default configuration is initialized."""
-        assert isinstance(server._default_configuration, ClientServerConfiguration)
+        assert isinstance(server.get_default_configuration(), ClientServerConfiguration)
 
     def test_phase_transitions(self, server):
         """Test that server phases transition correctly."""
@@ -108,8 +108,8 @@ class TestConfiguration:
 
     def test_process_dynamic_configuration(self, server):
         """Test processing dynamic configuration."""
-        extra_config = {"in_debug_mode": True}
-        config = server.process_dynamic_configuration(extra_config)
+        server.reconfigure(in_debug_mode=True)
+        config = server.process_dynamic_configuration()
         assert config.in_debug_mode is True
 
     def test_reconfigure_setting(self, started_server: ClientServer):
@@ -121,7 +121,7 @@ class TestConfiguration:
         """Test reconfiguring with update_default flag."""
         started_server.reconfigure(update_default=True, in_debug_mode=True)
         assert started_server.get_config_setting("in_debug_mode") is True
-        assert started_server._default_configuration.in_debug_mode is True
+        assert started_server.get_default_configuration().in_debug_mode is True
 
     def test_reconfigure_flip(self, started_server: ClientServer):
         """Test flipping a boolean configuration setting."""
@@ -136,7 +136,7 @@ class TestConfiguration:
 
     def test_do_configuration(self, server: ClientServer):
         """Test do_configuration method."""
-        result = server.do_configuration({"in_debug_mode": True})
+        result = server.do_configuration()
         assert server.phase == "configuring"
 
 
@@ -150,7 +150,7 @@ class TestServerLifecycle:
 
     def test_server_start(self, server: ClientServer):
         """Test starting the server."""
-        server.do_configuration({})
+        server.do_configuration()
         server.do_start()
         assert server.phase == "started"
         assert server.started is True
@@ -158,13 +158,13 @@ class TestServerLifecycle:
     def test_server_start_with_initial_state(self, server: ClientServer):
         """Test starting server with initial state."""
         initial_state = {"count": 0}
-        server.do_configuration({})
+        server.do_configuration()
         server.do_start(initial_state=initial_state)
         assert server.state.current == initial_state
 
     def test_system_routes_registered_on_start(self, server: ClientServer):
         """Test that system routes are registered when server starts."""
-        server.do_configuration({})
+        server.do_configuration()
         server.do_start()
         # System routes like --reset, --about should be registered
         assert server.router.has_route("--reset")
@@ -655,7 +655,7 @@ class TestRenderingAndSite:
         
         server.add_route("index", index)
         
-        server.do_configuration({})
+        server.do_configuration()
         
         body, headers = server.precompile_server(initial_state=None)
         
