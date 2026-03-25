@@ -10,7 +10,6 @@ from drafter.monitor.audit import log_warning
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 from drafter.components.geolocation import Location
 from drafter.constants import SUBMIT_BUTTON_KEY
-from drafter.history.forms import remap_hidden_form_parameters
 from drafter.data.request import Request
 from drafter.history.state import SiteState
 from drafter.history.utils import safe_repr
@@ -102,7 +101,6 @@ class Router:
         args, kwargs = [], request.kwargs.copy()
         button_pressed = self.preprocess_button_press(request, kwargs)
         signature = self.get_signature(request)
-        kwargs = remap_hidden_form_parameters(kwargs)
         self.flatten_kwargs(kwargs)
         self.inject_state(signature, args, kwargs, current_state)
         self.inject_other_dependencies(signature, args, kwargs, extra_dependencies)
