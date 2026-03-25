@@ -77,53 +77,54 @@ class AppCommonConfiguration(BaseConfiguration):
     
     @staticmethod
     def extend_parser(parser):
-        parser.add_argument(
+        group = parser.add_argument_group("App Common Configuration")
+        group.add_argument(
             "--engine",
             type=str,
             choices=["skulpt", "pyodide"],
             help="Python execution engine to compile for ('skulpt' or 'pyodide')",
         )
-        parser.add_argument(
+        group.add_argument(
             "--prerender-initial-page",
             action="store_true",
             help="Prerender the initial page on server start",
         )
-        parser.add_argument(
+        group.add_argument(
             "--user-directory",
             type=str,
             help="Directory containing user files (if not specified, will be inferred)",
         )
-        parser.add_argument(
+        group.add_argument(
             "--main-filename",
             type=str,
             help="Main user file to execute (if not specified, will be inferred)",
         )
-        parser.add_argument(
+        group.add_argument(
             "--asset-directory",
             type=str,
             help="Directory containing assets (if not specified, will be inferred)",
         )
-        parser.add_argument(
+        group.add_argument(
             "--show-filename-as",
             type=str,
             help="Display name for main file in UI (if different)",
         )
-        parser.add_argument(
+        group.add_argument(
             "--mount-drafter-locally",
             action="store_true",
             help="Mount Drafter locally vs. from package. Used for local dev.",
         )
-        parser.add_argument(
+        group.add_argument(
             "--override-asset-url",
             type=str,
             help="Custom asset URL (False to use defaults)",
         )
-        parser.add_argument(
+        group.add_argument(
             "--site-title",
             type=str,
             help="Browser tab title",
         )
-        return parser
+        return group
     
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:

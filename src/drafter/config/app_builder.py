@@ -58,49 +58,50 @@ class AppBuilderConfiguration(BaseConfiguration):
     
     @staticmethod
     def extend_parser(parser):
-        parser.add_argument(
+        group = parser.add_argument_group("App Builder Configuration")
+        group.add_argument(
             "--output-directory",
             type=str,
             help="Directory to output the built site files",
         )
-        parser.add_argument(
+        group.add_argument(
             "--output-filename",
             type=str,
             help="Name of the main HTML file to generate",
         )
-        parser.add_argument(
+        group.add_argument(
             "--create-404",
             type=str,
             choices=["always", "never", "if_missing"],
             help="Whether to create a 404.html file (options: 'always', 'never', 'if_missing')",
         )
-        parser.add_argument(
+        group.add_argument(
             "--zip-output",
             action="store_true",
             help="Whether to zip the output directory after building",
         )
-        parser.add_argument(
+        group.add_argument(
             "--warn-missing-info",
             action="store_true",
             help="Whether to echo a warning if set_site_information is missing",
         )
-        parser.add_argument(
+        group.add_argument(
             "--additional-paths",
             type=str,
             help="Semicolon-separated list of additional file paths to make available in the built site (e.g., for `open`)",
         )
-        parser.add_argument(
+        group.add_argument(
             "--pyodide-package-style",
             type=str,
             choices=["build", "cdn", "pypi"],
             help="Optional custom style for the Pyodide package ('build', 'cdn', or 'pypi')",
         )
-        parser.add_argument(
+        group.add_argument(
             "--pyodide-drafter-path",
             type=str,
             help="Optional custom path to the Drafter Pyodide package (used if engine is 'pyodide')",
         )
-        return parser
+        return group
     
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:

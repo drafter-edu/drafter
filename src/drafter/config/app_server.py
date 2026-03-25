@@ -58,43 +58,44 @@ class AppServerConfiguration(BaseConfiguration):
     
     @staticmethod
     def extend_parser(parser):
-        parser.add_argument(
+        group = parser.add_argument_group("App Server Configuration")
+        group.add_argument(
             "--port",
             type=int,
             default=8000,
             help="Port number for the server"
         )
-        parser.add_argument(
+        group.add_argument(
             "--host",
             type=str,
             default="localhost",
             help="Host address for the server"
         )
-        parser.add_argument(
+        group.add_argument(
             "--no-reloader",
             action="store_false",
             dest="use_reloader",
             help="Disable auto-reloader for code changes"
         )
-        parser.add_argument(
+        group.add_argument(
             "--no-open-browser",
             action="store_false",
             dest="open_browser",
             help="Do not automatically open web browser on start"
         )
-        parser.add_argument(
+        group.add_argument(
             "--no-inline-py",
             action="store_false",
             dest="inline_py",
             help="Do not inline user code in HTML; load via HTTP request instead"
         )
-        parser.add_argument(
+        group.add_argument(
             "--no-serve-adjacent-files",
             action="store_false",
             dest="serve_adjacent_files",
             help="Do not serve files from user directory"
         )
-        return parser
+        return group
     
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:

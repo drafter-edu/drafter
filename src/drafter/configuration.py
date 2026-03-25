@@ -9,7 +9,7 @@ import sys
 import os
 from typing import Optional, Any
 from drafter.helpers.args import get_argparser
-
+from drafter.helpers.utils import is_web
 from drafter.config.system import SystemConfiguration
 from drafter.config.bootstrap import BootstrapConfiguration
 from drafter.config.app_builder import AppBuilderConfiguration
@@ -27,7 +27,7 @@ def get_preparser():
     if preparser_maker is None:
         return None
     
-    preparser = preparser_maker()
+    preparser = preparser_maker(add_help=False)
     BootstrapConfiguration.extend_parser(preparser)
     return preparser
 
@@ -47,6 +47,8 @@ def get_parser(mode: Optional[str] = None):
         return None
     
     parser = parser_maker()
+    # Have to extend with the Bootstrap parser again to make sure the help text is included in the main CLI parser
+    BootstrapConfiguration.extend_parser(parser)
     ClientServerConfiguration.extend_parser(parser)
     AppCommonConfiguration.extend_parser(parser)
     # Only parse the relevant configuration based on the mode
@@ -116,7 +118,8 @@ def configure_system() -> SystemConfiguration:
                 config.merge_in_file(path, raise_errors=False)
     
         # Leverage filesystem for any additional configuration
-        config.leverage_filesystem()
+        if not is_web():
+            config.leverage_filesystem()
     
     #### Create SystemConfiguration
     # Merge all configurations into a single SystemConfiguration

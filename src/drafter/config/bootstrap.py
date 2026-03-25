@@ -19,23 +19,24 @@ class BootstrapConfiguration(BaseConfiguration):
     
     @staticmethod
     def extend_parser(parser):
-        parser.add_argument(
+        group = parser.add_argument_group("Bootstrap Configuration")
+        group.add_argument(
             "--compile",
             action="store_true",
             help="Compile the site to a file instead of starting the server"
         )
-        parser.add_argument(
+        group.add_argument(
             "--config-file",
             type=str,
             help="Path to a configuration file (can be specified multiple times for multiple files)",
             action="append"
         )
-        parser.add_argument(
+        group.add_argument(
             "--verbose",
             action="store_true",
             help="Enable verbose output"
         )
-        return parser
+        return group
         
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:

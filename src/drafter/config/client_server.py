@@ -96,77 +96,78 @@ class ClientServerConfiguration(BaseConfiguration):
     
     @staticmethod
     def extend_parser(parser):
-        parser.add_argument(
+        group = parser.add_argument_group("Client Server Configuration")
+        group.add_argument(
             "--server-name",
             type=str,
             help="Internal server identifier",
         )
-        parser.add_argument(
+        group.add_argument(
             "--debug",
             action="store_true",
             help="Enable debug mode with debug panel",
         )
-        parser.add_argument(
+        group.add_argument(
             "--audit-logging",
             action="store_true",
             help="Enable audit logging of requests/responses",
         )
-        parser.add_argument(
+        group.add_argument(
             "--framed",
             action="store_true",
             help="Whether to frame the application",
         )
-        parser.add_argument(
+        group.add_argument(
             "--theme",
             type=str,
             help="Theme name (e.g., 'default')",
         )
-        parser.add_argument(
+        group.add_argument(
             "--deploy-image-path",
             type=str,
             help="Path for deployment images",
         )
-        parser.add_argument(
+        group.add_argument(
             "--external-pages",
             type=str,
             help="Semicolon-separated list of external page links (URL or 'URL Text' tuples)",
         )
-        parser.add_argument(
+        group.add_argument(
             "--additional-header-content",
             type=str,
             help="Semicolon-separated list of HTML strings for <head> section",
         )
-        parser.add_argument(
+        group.add_argument(
             "--additional-style-content",
             type=str,
             help="Semicolon-separated list of inline CSS strings",
         )
-        parser.add_argument(
+        group.add_argument(
             "--additional-css-content",
             type=str,
             help="Semicolon-separated list of external CSS URLs",
         )
-        parser.add_argument(
+        group.add_argument(
             "--additional-js-content",
             type=str,
             help="Semicolon-separated list of inline JavaScript strings",
         )
-        parser.add_argument(
+        group.add_argument(
             "--additional-script-content",
             type=str,
             help="Semicolon-separated list of external JS URLs",
         )
-        parser.add_argument(
+        group.add_argument(
             "--use-shadow-dom",
             action="store_true",
             help="Wrap app in Shadow DOM to prevent CSS conflicts",
         )
-        parser.add_argument(
+        group.add_argument(
             "--root-element-id",
             type=str,
             help="ID prefix for root element",
         )
-        return parser
+        return group
     
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:
