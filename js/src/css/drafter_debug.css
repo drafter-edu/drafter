@@ -148,6 +148,7 @@ body {
 }*/
 
 .drafter-debug-- {
+    all: unset;
     flex-grow: 1;
     background-color: #cfe8ff;
     background-image:

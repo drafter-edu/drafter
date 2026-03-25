@@ -4,6 +4,8 @@
 
 body {
     margin: 0;
+    height: 100dvh;
+    box-sizing: border-box;
 }
 
 .drafter-body-- {

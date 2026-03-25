@@ -7,7 +7,7 @@ or local development AppServer based on execution context.
 import sys
 import os
 from typing import Optional, Union
-from drafter.configuration import get_system_configuration
+from drafter.configuration import get_system_configuration, finish_configuration
 from drafter.config.app_builder import AppBuilderConfiguration
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.helpers.utils import is_web, seek_filename_by_line
@@ -149,7 +149,9 @@ def start_server(
         run_client_bridge(system, server, initial_state)
     elif system.bootstrap.mode == "compile_site":
         from drafter.builder.build import compile_site
+        finish_configuration()
         compile_site(system, server, initial_state)
     else:
         from drafter.app.app_server import serve_app_once
+        finish_configuration()
         serve_app_once(system, server, initial_state)

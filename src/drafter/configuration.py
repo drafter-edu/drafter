@@ -110,6 +110,8 @@ def configure_system() -> tuple[SystemConfiguration, dict[str, dict]]:
         parsed, unknown_args = parser.parse_known_args(original_arguments)
     else:
         parsed, unknown_args = None, original_arguments
+        
+    # TODO: Should be able to infer main_filename from first sys.argv entry IF we aren't using drafter as a CLI tool
     
     #### Populate All Other Configurations
     # Merge configurations in order of priority:
@@ -127,16 +129,10 @@ def configure_system() -> tuple[SystemConfiguration, dict[str, dict]]:
     
         # From files
         # TODO: Avoid re-opening the same file multiple
-        if bootstrap_config.config_file is not None:
-            for path in bootstrap_config.config_file:
-                if config.get_key() in config_files_data:
-                    config_file_data_part = config_files_data[config.get_key()]    
-                    config.merge_in_args(config_file_data_part, raise_errors=False)
-                    modified_args[config.get_key()].update(config_file_data_part)
-    
-        # Leverage filesystem for any additional configuration
-        if not is_web():
-            config.leverage_filesystem()
+        if config.get_key() in config_files_data and config_files_data[config.get_key()]:
+            config_file_data_part = config_files_data[config.get_key()]    
+            config.merge_in_args(config_file_data_part, raise_errors=False)
+            modified_args[config.get_key()].update(config_file_data_part)
     
     #### Create SystemConfiguration
     # Merge all configurations into a single SystemConfiguration
@@ -154,6 +150,14 @@ def configure_system() -> tuple[SystemConfiguration, dict[str, dict]]:
     
     return system, modified_args
 
+
+def finish_configuration():
+    # Leverage filesystem for any additional configuration
+    system = get_system_configuration()
+    system.app_builder.leverage_filesystem()
+    system.app_common.leverage_filesystem()
+    system.app_server.leverage_filesystem()
+    system.client_server.leverage_filesystem()
     
         
 _SYSTEM: SystemConfiguration | None = None

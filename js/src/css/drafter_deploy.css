@@ -6,6 +6,10 @@
     max-width: 960px;
 }
 
+#drafter-root-- {
+    height: 100%;
+}
+
 .drafter-header-- {
     display: none;
 }

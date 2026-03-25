@@ -42,6 +42,7 @@ class AppCommonConfiguration(BaseConfiguration):
     def leverage_filesystem(self):
         if self.user_directory is False:
             found_path = seek_filename_by_line("start_server", self.main_filename)
+            print(found_path)
             self.user_directory = (
                 os.path.dirname(found_path) if found_path else os.getcwd()
             )
