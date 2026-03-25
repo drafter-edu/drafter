@@ -39,6 +39,8 @@ def render_index_html(
     mount_drafter_locally: bool = False,
     pyodide_package_style: Optional[str] = None,
     pyodide_drafter_path: Optional[str] = None,
+    system: Optional[dict] = None,
+    modified_system: Optional[dict] = None,
 ) -> str:
     """Render the index HTML page with provided configuration.
 
@@ -79,4 +81,6 @@ def render_index_html(
         pyodide_drafter_path=pyodide_drafter_path,
         pyodide_package_style=pyodide_package_style,
         static=static,
+        system=system or {},
+        modified_system=modified_system or {},
     )

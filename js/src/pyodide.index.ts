@@ -71,6 +71,17 @@ export async function setupPyodide() {
     return (window as any).pyodide;
 }
 
+function writeConfigFile(pyodide: any) {
+    const file = pyodide.FS.open("/_drafter_config.json", "w");
+    if ((window as any).DRAFTER_MODIFIED_CONFIGURATION) {
+        pyodide.FS.write(
+            file,
+            JSON.stringify((window as any).DRAFTER_MODIFIED_CONFIGURATION),
+        );
+    }
+    pyodide.FS.close(file);
+}
+
 export async function runStudentCode(
     options: DrafterInitOptions,
 ): Promise<any> {
@@ -80,6 +91,7 @@ export async function runStudentCode(
         );
     }
     const pyodide = (window as any).pyodide;
+    writeConfigFile(pyodide);
     try {
         const result = await pyodide.runPythonAsync(options.code);
         return result;

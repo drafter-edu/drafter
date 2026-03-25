@@ -208,4 +208,5 @@ class Site:
             additional_style=additional_styles,
             additional_scripts=additional_scripts,
             use_shadow_dom=configuration.use_shadow_dom,
+            framed=configuration.framed,
         )

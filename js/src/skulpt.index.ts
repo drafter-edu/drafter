@@ -1,6 +1,7 @@
 import { handleSystemError, type DrafterInitOptions } from "./bridge/engine";
 import {
     getSkulptFile,
+    setupDrafterConfigfile,
     setupSkulpt,
     startServer,
 } from "./skulpt_bridge/skulpt-tools";
@@ -15,6 +16,7 @@ export function runStudentCode(options: DrafterInitOptions) {
     } catch (error) {
         throw handleSystemError("Failed to set up Skulpt", error);
     }
+    setupDrafterConfigfile();
 
     if (options.code) {
         return startServer(options.code, "main", options.presentErrors);
@@ -23,7 +25,7 @@ export function runStudentCode(options: DrafterInitOptions) {
             .then((response) => {
                 if (!response.ok) {
                     throw new Error(
-                        "Network response was not ok " + response.statusText
+                        "Network response was not ok " + response.statusText,
                     );
                 }
                 return response.text(); // assuming the server returns text content

@@ -11,6 +11,11 @@ FalseType = Literal[False]
 @dataclass
 class BaseConfiguration:
     
+    
+    @staticmethod
+    def get_key() -> str:
+        raise NotImplementedError("Subclasses must implement get_key method to return their configuration key.")
+    
     @classmethod
     def map_from_raw(cls, parsed_args: dict[str, Any],
                      env_vars: Optional[dict[str, Any]] = None,
@@ -64,19 +69,16 @@ class BaseConfiguration:
         """
         return {}
     
-    def merge_in_file(self, file_path: str, raise_errors: bool = True) -> None:
+    def load_from_file(self, file_path: str) -> dict:
         """Merge configuration values from a JSON file.
 
         Args:
             file_path: Path to the JSON configuration file.
         """
-        if not os.path.isfile(file_path):
-            raise FileNotFoundError(f"Configuration file not found: {file_path}")
-        
+        #if not os.path.isfile(file_path):
+        #    raise FileNotFoundError(f"Configuration file not found: {file_path}")
         with open(file_path, "r") as f:
-            data = json.load(f)
-        
-        self.merge_in_args(data, raise_errors=raise_errors)
+            return json.load(f)
     
     def merge_in_args(self, new_args: dict, raise_errors=True) -> None:
         """Merge new arguments into configuration.

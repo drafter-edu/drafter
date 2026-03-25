@@ -44,6 +44,10 @@ class AppBuilderConfiguration(BaseConfiguration):
     additional_paths: list[str] = field(default_factory=list)
     
     @staticmethod
+    def get_key() -> str:
+        return "app_builder"
+    
+    @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
         result = EnvVars(env_vars)
         result.get_string_if_exists("DRAFTER_OUTPUT_DIRECTORY", "output_directory")

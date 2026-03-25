@@ -74,6 +74,10 @@ class ClientServerConfiguration(BaseConfiguration):
     # TODO: Config setting to forbid external links
     
     @staticmethod
+    def get_key() -> str:
+        return "client_server"
+    
+    @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
         result = EnvVars(env_vars)
         result.get_string_if_exists("DRAFTER_SERVER_NAME", "server_name")
@@ -103,9 +107,9 @@ class ClientServerConfiguration(BaseConfiguration):
             help="Internal server identifier",
         )
         group.add_argument(
-            "--debug",
+            "--production",
             action="store_true",
-            help="Enable debug mode with debug panel",
+            help="Enable production mode (disables debug mode and debug panel)",
         )
         group.add_argument(
             "--audit-logging",
@@ -113,7 +117,7 @@ class ClientServerConfiguration(BaseConfiguration):
             help="Enable audit logging of requests/responses",
         )
         group.add_argument(
-            "--framed",
+            "--no-frame",
             action="store_true",
             help="Whether to frame the application",
         )
@@ -174,14 +178,14 @@ class ClientServerConfiguration(BaseConfiguration):
         result = {}
         if parsed_args.get("server_name"):
             result["server_name"] = parsed_args["server_name"]
-        if parsed_args.get("debug"):
-            result["in_debug_mode"] = True
+        if parsed_args.get("production"):
+            result["in_debug_mode"] = False
         if parsed_args.get("audit_logging"):
             result["enable_audit_logging"] = True
         if parsed_args.get("site_title"):
             result["site_title"] = parsed_args["site_title"]
-        if parsed_args.get("framed"):
-            result["framed"] = True
+        if parsed_args.get("no_frame"):
+            result["framed"] = False
         if parsed_args.get("theme"):
             result["theme"] = parsed_args["theme"]
         if parsed_args.get("deploy_image_path"):

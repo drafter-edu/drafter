@@ -10,6 +10,7 @@ from drafter.config.client_server import ClientServerConfiguration
 from drafter.client_server.commands import get_main_server
 from drafter.config.system import SystemConfiguration
 from drafter.config.urls import determine_assets_url
+from drafter.configuration import get_system_config_modifications
 from drafter.scaffolding.templating import render_index_html
 from drafter.scaffolding.utils import pkg_assets_dir, pkg_root, pkg_package_root
 
@@ -114,7 +115,10 @@ def compile_site(
                                   compiled_headers=compiled_headers,
                                   mount_drafter_locally=system.app_common.mount_drafter_locally,
                                   pyodide_package_style=system.app_builder.pyodide_package_style,
-                                  pyodide_drafter_path=pyodide_drafter_path or "",)
+                                  pyodide_drafter_path=pyodide_drafter_path or "",
+                                  system=system.to_json(),
+                                  modified_system=get_system_config_modifications(),
+                                  )
     
     main_output_path.write_text(true_page, encoding="utf-8")
     if system.bootstrap.verbose:

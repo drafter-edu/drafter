@@ -202,6 +202,10 @@ class ClientBridge:
                 add_header(root, header)
 
             self.client.setup_debug_menu(self)
+            
+            if not initial_site_data.framed:
+                self.client.toggle_frame()
+            
         except Exception as e:
             console_log(f"Error setting up site: {e}")
             raise e

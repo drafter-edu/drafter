@@ -838,7 +838,7 @@ class ClientServer:
                 exception=e,
             )
             site = f"<div><h1>Error processing site configuration</h1><p>{error.message}</p></div>"
-            return InitialSiteData(site_html=site, site_title="Error", error=True)
+            return InitialSiteData(site_html=site, site_title="Error", error=True, framed=True)
         log_data(
             InitialConfigurationEvent(config=configuration.to_json()),
             "client_server.do_configuration",
@@ -871,7 +871,7 @@ class ClientServer:
                 exception=e,
             )
             site = f"<div><h1>Error rendering site</h1><p>{error.message}</p></div>"
-            return InitialSiteData(site_html=site, site_title="Error", error=True)
+            return InitialSiteData(site_html=site, site_title="Error", error=True, framed=True)
         return site
     
     def do_finish_visit(self):

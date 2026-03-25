@@ -44,6 +44,10 @@ class AppServerConfiguration(BaseConfiguration):
     inline_py: bool = True
     serve_adjacent_files: bool = True
     
+    @staticmethod
+    def get_key() -> str:
+        return "app_server"
+    
     # TODO: Additional configuration settings from `scaffolding/index.skulpt.template.html` go here
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:

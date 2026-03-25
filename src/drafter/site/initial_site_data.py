@@ -15,6 +15,7 @@ class InitialSiteData:
         additional_header: List of additional HTML header elements.
         use_shadow_dom: Whether to use Shadow DOM for style isolation.
         error: Whether an error occurred during initialization.
+        framed: Whether the site is framed (affects layout and theming).
     """
 
     site_html: str
@@ -26,4 +27,5 @@ class InitialSiteData:
     additional_header: list[str] = field(default_factory=list)
     use_shadow_dom: bool = True
     error: bool = False
+    framed: bool = True
 

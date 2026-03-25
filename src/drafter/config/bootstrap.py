@@ -10,6 +10,10 @@ class BootstrapConfiguration(BaseConfiguration):
     verbose: bool = True
     
     @staticmethod
+    def get_key() -> str:
+        return "bootstrap"
+    
+    @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
         result = EnvVars(env_vars)
         result.get_string_if_exists("DRAFTER_MODE", "compile")

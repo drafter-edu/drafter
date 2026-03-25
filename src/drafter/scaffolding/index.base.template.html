@@ -39,6 +39,10 @@
         <!-- Drafter App will initialize here -->
       {% endif %}
     </div>
+    {% if system %}<script>window.DRAFTER_CONFIGURATION = {{ system | tojson }};</script>{% endif %}
+    {% if modified_system %}
+      <script>window.DRAFTER_MODIFIED_CONFIGURATION = {{ modified_system | tojson }};</script>
+    {% endif %}
     {% if inline_py %}<script type="text/python" id="user-code">{{ user_code }}</script>{% endif %}
     {% block scripts %}<!-- Engine-specific scripts -->{% endblock %}
     <script>{% block initialization %}// Engine-specific initialization logic{% endblock %}</script>

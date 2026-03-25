@@ -17,6 +17,7 @@ import uvicorn
 
 from drafter import get_main_server
 from drafter.config.system import SystemConfiguration
+from drafter.configuration import get_system_config_modifications
 from drafter.client_server.client_server import ClientServer
 from drafter.config.urls import determine_assets_url
 from drafter.scaffolding.templating import render_index_html
@@ -50,6 +51,8 @@ async def index(req) -> Response:
         compiled_body=app.state.compiled_body,
         compiled_headers=app.state.compiled_headers,
         mount_drafter_locally=system.app_common.mount_drafter_locally,
+        system=system.to_json(),
+        modified_system=get_system_config_modifications(),
     )
     return HTMLResponse(html)
 

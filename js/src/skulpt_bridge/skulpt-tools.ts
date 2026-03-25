@@ -16,6 +16,20 @@ export function builtinRead(path: string) {
 
 const preStyle = `background-color: #f0f0f0; padding: 4px; border: 1px solid lightgrey; margin: 0px`;
 
+export function setupDrafterConfigfile() {
+    console.log("Setting up Drafter config file in Skulpt...");
+    if ((window as any).DRAFTER_MODIFIED_CONFIGURATION) {
+        const configFileContent = JSON.stringify(
+            (window as any).DRAFTER_MODIFIED_CONFIGURATION,
+        );
+        Sk.builtinFiles["files"]["_drafter_config.json"] = configFileContent;
+        Sk.environ.set$item(
+            new Sk.builtin.str("DRAFTER_CONFIG_FILE"),
+            new Sk.builtin.str("_drafter_config.json"),
+        );
+    }
+}
+
 export function setupSkulpt() {
     if (typeof Sk === "undefined") {
         console.error(

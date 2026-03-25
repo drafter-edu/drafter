@@ -25,6 +25,10 @@ class AppCommonConfiguration(BaseConfiguration):
 
     site_title: str = "Drafter App Server"
     
+    @staticmethod
+    def get_key() -> str:
+        return "app_common"
+    
     def get_full_main_file_path(self) -> Optional[str]:
         """Get the full path to the main user file.
 
