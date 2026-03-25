@@ -141,5 +141,5 @@ tests.datetimeinput_with_default = """
 
 tests.arguments_outside = Argument("secret_message", "It's a secret to everybody!")
 tests.arguments_outside = """
-<input id="secret_message" name="$@JSON~@$secret_message" type="hidden" value="&amp;quot;It&amp;#x27;s a secret to everybody!&amp;quot;">
+<input data-transform='json-decode' id="secret_message" name="secret_message" type="hidden" value="&quot;It's a secret to everybody!&quot;">
 """

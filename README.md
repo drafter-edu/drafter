@@ -299,6 +299,23 @@ File handling: When a file gets uploaded to the server, it will get stored in me
 
 `PersistentStore` is a class that lives in the ClientBridge which abstracts away the details of where data is stored (in-memory, localStorage, IndexedDB, etc.). It provides a simple interface for saving and loading data, and can be configured to use different storage backends as needed. The server can send commands to the ClientBridge to store or retrieve data using this `PersistentStore`.
 
+### State Data
+
+Drafter organizes its functionality around Route functions. A Route generates a Page. Pages provide functionality to connect to other Routes, usually via Buttons/Links (other mechanisms include things like on_change events, timers, etc.).
+
+There's four fundamental kinds of data to be handled in Drafter:
+
+1. App `State`: the current state of the application, which can be updated and passed around to route functions. This is the main way to keep track of information across different pages and interactions.
+2. Page Arguments: `Argument`s defined in `Page`s content, that will be passed to any connecting routes. They are stored in the HTML as hidden input fields (so that someday we might have local Forms, and these will "just work"). Their names are prepended with a special string to differentiate them from regular form fields, because their values are JSON encoded.
+3. Page Fields: Form Fields (e.g., text inputs, file uploads, etc.) that are defined in a `Page` and will be passed to any connecting routes. They are stored in the HTML as regular form fields, so they will be included in the form data when a request is made.
+4. Route Arguments: `Argument`s that are attached to a specific route connection, which will be passed to the connected route function when triggered. These are stored as data attributes on the relevant DOM element (e.g., a button), and are also JSON encoded to allow for complex data structures.
+5. Event Information: information about the event that triggered the route (e.g., click, scroll, etc.), which will be passed to the connected route function when triggered.
+6. Config Information: configuration parameters that are set at the start of the server and can be accessed throughout the application.
+7. Local Storage: data that is stored in the client's browser and can be accessed across sessions.
+8. Remote Storage: data that is stored on a server and can be accessed across sessions and devices.
+
+All of these get passed in as parameters to a connected route function.
+
 ### Summary of Execution Timeline
 
 Fundamentally, the user writes a python script that starts with `from drafter import *`, defines server in various ways, and then calls `start_server(initial_state)`. This user application can be run in three possible ways:

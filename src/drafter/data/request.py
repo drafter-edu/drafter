@@ -21,3 +21,4 @@ class Request:
     kwargs: dict
     event: dict
     dom_id: str = ""
+    button_pressed: str = ""

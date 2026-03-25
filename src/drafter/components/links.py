@@ -1,3 +1,4 @@
+import json
 from typing import List, Callable, Union, Optional
 from dataclasses import dataclass
 import html
@@ -7,7 +8,7 @@ from drafter.components.utilities.escaping import (
     make_safe_argument,
     make_safe_json_argument,
 )
-from drafter.constants import JSON_DECODE_SYMBOL, LABEL_SEPARATOR, SUBMIT_BUTTON_KEY
+from drafter.constants import JSON_DECODE_SYMBOL, SUBMIT_BUTTON_KEY
 from drafter.helpers.urls import (
     friendly_urls,
     check_invalid_external_url,
@@ -73,8 +74,9 @@ class Argument(Component, Arguable):
             Dictionary of HTML attributes including encoded name and value.
         """
         attributes = super().get_attributes(context)
-        attributes["name"] = f"{JSON_DECODE_SYMBOL}{self.name}"
-        attributes["value"] = make_safe_json_argument(self.value)
+        attributes["name"] = f"{self.name}"
+        attributes["value"] = json.dumps(self.value)
+        attributes["data-transform"] = "json-decode"
         return attributes
 
     def get_id(self) -> str:

@@ -8,7 +8,6 @@ from drafter.history.conversion import ConversionRecord, UnchangedRecord
 from drafter.history.forms import (
     get_params,
     remap_hidden_form_parameters,
-    extract_button_label,
 )
 from drafter.history.utils import safe_repr
 
@@ -22,5 +21,4 @@ __all__ = [
     "get_params",
     "remap_hidden_form_parameters",
     "safe_repr",
-    "extract_button_label",
 ]

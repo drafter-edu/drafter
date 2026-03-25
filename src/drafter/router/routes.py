@@ -9,7 +9,7 @@ from drafter.helpers.dates import try_convert_datetime
 from drafter.monitor.audit import log_warning
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 from drafter.components.geolocation import Location
-from drafter.constants import PREVIOUSLY_PRESSED_BUTTON, SUBMIT_BUTTON_KEY
+from drafter.constants import SUBMIT_BUTTON_KEY
 from drafter.history.forms import remap_hidden_form_parameters
 from drafter.data.request import Request
 from drafter.history.state import SiteState
@@ -100,9 +100,9 @@ class Router:
             ValueError: If parameters are invalid or unconvertible.
         """
         args, kwargs = [], request.kwargs.copy()
-        button_pressed = self.preprocess_button_press(kwargs)
+        button_pressed = self.preprocess_button_press(request, kwargs)
         signature = self.get_signature(request)
-        kwargs = remap_hidden_form_parameters(kwargs, button_pressed)
+        kwargs = remap_hidden_form_parameters(kwargs)
         self.flatten_kwargs(kwargs)
         self.inject_state(signature, args, kwargs, current_state)
         self.inject_other_dependencies(signature, args, kwargs, extra_dependencies)
@@ -500,30 +500,30 @@ class Router:
                 kwargs[key] = value[0]
             # TODO: What happens in the other cases?
 
-    def preprocess_button_press(self, kwargs: Dict[str, Any]) -> str:
-        """Extract button metadata from form submission data.
+    def preprocess_button_press(self, request: Request, kwargs: Dict[str, Any]) -> str:
+        """Extract button metadata from the request.
 
-        Handles both the current button press and the previously-pressed
-        button namespace, extracting and JSON-decoding as needed.
+        Reads button_pressed from the Request object (set by the client).
+        Falls back to extracting from kwargs for backward compatibility
+        with older clients (e.g., the TypeScript/Skulpt bridge).
 
         Args:
-            kwargs: Form data dict (modified to remove button keys).
+            request: The incoming request with button_pressed field.
+            kwargs: Form data dict (modified to remove button key if present as fallback).
 
         Returns:
             str: Button namespace/identifier, or empty string if no button.
         """
+        # Prefer the client-extracted value
+        if request.button_pressed:
+            # Still clean up kwargs in case the key leaked through
+            kwargs.pop(SUBMIT_BUTTON_KEY, None)
+            return request.button_pressed
+
+        # Fallback: extract from kwargs (for TS/Skulpt bridge compatibility)
         button_pressed = ""
         if SUBMIT_BUTTON_KEY in kwargs:
             button_value = kwargs.pop(SUBMIT_BUTTON_KEY)
-            # The value might be a list from FormData, extract first element
-            if isinstance(button_value, list) and button_value:
-                button_value = button_value[0]
-            try:
-                button_pressed = json.loads(button_value)  # type: ignore
-            except (json.JSONDecodeError, TypeError):
-                button_pressed = button_value
-        elif PREVIOUSLY_PRESSED_BUTTON in kwargs:
-            button_value = kwargs.pop(PREVIOUSLY_PRESSED_BUTTON)
             if isinstance(button_value, list) and button_value:
                 button_value = button_value[0]
             try:

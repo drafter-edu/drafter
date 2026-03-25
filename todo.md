@@ -57,7 +57,7 @@
     - [ ] Canvas element
     - [ ] SVG element
     - [ ] Other sensor APIs
-- [ ] Timer route
+    - [ ] Timer page element
 - [ ] Better testing features
     - [ ] `assert_has` and `assert_in` for checking page contents
     - [ ] `assert_state` for checking state contents

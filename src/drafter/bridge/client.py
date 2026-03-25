@@ -7,6 +7,7 @@ This module works with both Skulpt and Pyodide by using the unified `js` module 
 import json
 from drafter.bridge.helpers import swap_debug_mode
 from drafter.config.client_server import ClientServerConfiguration
+from drafter.constants import SUBMIT_BUTTON_KEY
 from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.monitor.events.config import UpdatedConfigurationEvent
@@ -18,6 +19,7 @@ from typing import Callable, Optional, Any, TYPE_CHECKING
 from dataclasses import dataclass, field
 import time
 import js
+import html
 
 if TYPE_CHECKING:
     from drafter.payloads.target import Target
@@ -29,10 +31,7 @@ DOUBLE_PRESS_THRESHOLD = 600  # milliseconds
 class NavEvent:
     kind: str
     url: str
-    data: Any  # FormData-like object
-    arguments: list[
-        str
-    ]  # The JSON blobs of data stored in the data--drafter-arguments attribute of the element and any parents.
+    data: dict  # Dictionary of data
     submitter: Optional[Any] = None
     dom_id: Optional[str] = None
 
@@ -127,14 +126,13 @@ class Client:
     def goto(
         self,
         url: str,
-        form_data: Any = None,
+        data: Optional[dict] = None,
         action="system",
-        arguments=None,
         dom_id=None,
     ):
         if self.navigation_func is None:
             raise RuntimeError("Navigation function not set in Client.")
-        return self.initiate_request(url, form_data, True, action, arguments, dom_id)
+        return self.initiate_request(url, data or {}, True, action, dom_id)
 
     def navigate(self, nav_event: NavEvent):
         return self.initiate_request(
@@ -142,7 +140,6 @@ class Client:
             nav_event.data,
             True,
             nav_event.kind,
-            nav_event.arguments,
             nav_event.dom_id,
         )
 
@@ -189,11 +186,29 @@ class Client:
                 data[key] = [data[key]]
             data[key].append(file_data)
 
+    def _extract_button_pressed(self, data: dict) -> str:
+        """Extract and decode the button identity from form data, if present."""
+        button_pressed = ""
+        if SUBMIT_BUTTON_KEY in data:
+            button_value = data.pop(SUBMIT_BUTTON_KEY)
+            if isinstance(button_value, list) and button_value:
+                button_value = button_value[0]
+            if isinstance(button_value, str):
+                try:
+                    button_pressed = json.loads(button_value)
+                except (json.JSONDecodeError, TypeError):
+                    button_pressed = button_value
+        return str(button_pressed)
+
     def _finalize_request(
-        self, action: str, url: str, data: dict, dom_id: Optional[str]
+        self, action: str, url: str, data: dict, dom_id: Optional[str],
+        button_pressed: str = "",
     ) -> Request:
         """Finalize and return a request. Override in subclasses for async handling."""
-        new_request = Request(self.request_count, action, url, data, {}, dom_id or "")
+        new_request = Request(
+            self.request_count, action, url, data, {}, dom_id or "",
+            button_pressed=button_pressed,
+        )
         self.request_count += 1
         return new_request
 
@@ -241,31 +256,16 @@ class Client:
     def make_request(
         self,
         url: str,
-        form_data: Any = None,
+        data: dict,
         action: str = "submit",
-        arguments: Optional[list[str]] = None,
         dom_id: Optional[str] = None,
     ) -> Request:
-        data = {}
-        # Convert form data to a regular dict, handling file uploads as well
-        if form_data:
-            for key, value in form_data.entries():
-                if isinstance(value, str):
-                    if key in data:
-                        if not isinstance(data[key], list):
-                            data[key] = [data[key]]
-                        data[key].append(value)
-                    else:
-                        data[key] = value
-                else:
-                    self._handle_file_upload(value, data, key)
-        # Add arguments to the data dict
-        for i, arg in enumerate(reversed(arguments or [])):
-            # TODO: Handle both of these more elegantly in case they are corrupted in some way
-            parsed = json.loads(arg)
-            data.update(parsed)
+        data = dict(data)
 
-        return self._finalize_request(action, url, data, dom_id)
+        # Extract button identity from form data before it reaches the server
+        button_pressed = self._extract_button_pressed(data)
+
+        return self._finalize_request(action, url, data, dom_id, button_pressed)
 
     def add_to_history(self, request: Request):
         url = request.url
@@ -288,16 +288,15 @@ class Client:
     def initiate_request(
         self,
         url: str,
-        form_data: Any = None,
+        data: dict,
         remember=True,
         action="submit",
-        arguments: Optional[list[str]] = None,
         dom_id: Optional[str] = None,
     ):
         if self.navigation_func is None:
             raise RuntimeError("Navigation function not set in Client.")
-        debug_log("client.initiate_request", url, form_data, remember, action)
-        request = self.make_request(url, form_data, action, arguments, dom_id)
+        debug_log("client.initiate_request", url, data, remember, action)
+        request = self.make_request(url, data, action, dom_id)
         if remember:
             self.add_to_history(request)
         next_visit = self.navigation_func(request)
@@ -340,30 +339,64 @@ class Client:
                         target_element = event.target
                         dom_id = target_element.id if hasattr(target_element, "id") else None
                         
-                        # Get arguments from the element and its parents
-                        arguments = get_attribute_recursively(
-                            target_element, Component.DRAFTER_DATA_ARGUMENT_NAME
+                        data = self.get_all_event_data(target_element, event, None)
+                        nav_event = NavEvent(
+                            kind=event_name,
+                            url=route,
+                            data=data,
+                            submitter=target_element,
+                            dom_id=dom_id,
                         )
-                        
-                        # Get the current form data
-                        form = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
-                        if form:
-                            form_data = self._create_form_data(form, None)
-                            nav_event = NavEvent(
-                                kind=event_name,
-                                url=route,
-                                data=form_data,
-                                submitter=target_element,
-                                arguments=arguments,
-                                dom_id=dom_id,
-                            )
-                            return on_navigation(nav_event)
-                        else:
-                            console_log(f"Form element not found for {event_name} event handler")
+                        return on_navigation(nav_event)
                     return handler
                 
                 wrapped_handler = self._wrap_event_handler(make_handler(event_type, route_name))
                 element.addEventListener(event_type, wrapped_handler)
+    
+    def get_all_event_data(self, originator: Any, event: Any, submitter: Any) -> dict:
+        """ Collect all relevant data for an event, including form data and arguments."""
+        data = {}
+        # Get form data
+        # TODO: Allow specifying a different form or scope for data collection instead of always grabbing from the main form
+        form = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
+        if form:
+            form_data = self._create_form_data(form, submitter)
+            # First convert all form data to a regular dict, handling file uploads as well
+            for key, value in form_data.entries():
+                if isinstance(value, str):
+                    if key in data:
+                        if not isinstance(data[key], list):
+                            data[key] = [data[key]]
+                        data[key].append(value)
+                    else:
+                        data[key] = value
+                else:
+                    self._handle_file_upload(value, data, key)
+            # Look for `data-transform` attributes to decode any special fields (e.g., JSON-encoded arguments)
+            for element in form.elements:
+                if element.hasAttribute('data-transform'):
+                    transform = element.getAttribute('data-transform')
+                    if transform == 'json-decode':
+                        key = element.name
+                        value = element.value
+                        try:
+                            decoded_value = json.loads(value)
+                            data[key] = decoded_value
+                        except json.JSONDecodeError:
+                            data[key] = value  # Fallback to raw value if JSON decoding fails
+                            # TODO: Log an error somewhere
+            
+        
+        # Get arguments from the originator and its parents
+        arguments = get_attribute_recursively(
+            originator, Component.DRAFTER_DATA_ARGUMENT_NAME
+        )
+        for i, arg in enumerate(reversed(arguments)):
+            # TODO: Handle corruption more elegantly
+            parsed = json.loads(arg)
+            data.update(parsed)
+        
+        return data
 
     def mount_navigation(self, root: Any, on_navigation: Callable):
         debug_log("client.mount_navigation")
@@ -392,30 +425,17 @@ class Client:
                 dom_id = (
                     nearest_nav_link.id if hasattr(nearest_nav_link, "id") else None
                 )
-
-                # Get the arguments from the clicked element and its parents
-                arguments = get_attribute_recursively(
-                    target, Component.DRAFTER_DATA_ARGUMENT_NAME
+                
+                is_anchor = nearest_nav_link.tagName.lower() == "a"
+                data = self.get_all_event_data(target, event, None if is_anchor else nearest_nav_link)
+                nav_event = NavEvent(
+                    kind="link",
+                    url=name,
+                    data=data,
+                    submitter=nearest_nav_link,
+                    dom_id=dom_id,
                 )
-
-                # Get the form element
-                form = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
-                if form:
-                    is_anchor = nearest_nav_link.tagName.lower() == "a"
-                    form_data = self._create_form_data(
-                        form, None if is_anchor else nearest_nav_link
-                    )
-                    nav_event = NavEvent(
-                        kind="link",
-                        url=name,
-                        data=form_data,
-                        submitter=nearest_nav_link,
-                        arguments=arguments,
-                        dom_id=dom_id,
-                    )
-                    return on_navigation(nav_event)
-                else:
-                    raise RuntimeError("Form element not found for navigation.")
+                return on_navigation(nav_event)
 
         def submit_handler(event: Any):
             debug_log("client.form_submit_handler", event)
@@ -429,13 +449,7 @@ class Client:
             else:
                 submitter = None
                 dom_id = None
-            # Get the form data
-            form_data = self._create_form_data(event.target, submitter)
-            # Handle arguments
-            # Get the arguments from the clicked element and its parents
-            arguments = get_attribute_recursively(
-                event.target, Component.DRAFTER_DATA_ARGUMENT_NAME
-            )
+            data = self.get_all_event_data(event.target, event, submitter)
             # Figure out URL
             if submitter is not None and hasattr(submitter, "getAttribute"):
                 url = submitter.getAttribute("formaction")
@@ -447,9 +461,8 @@ class Client:
             nav_event = NavEvent(
                 kind="form",
                 url=url,
-                data=form_data,
+                data=data,
                 submitter=submitter,
-                arguments=arguments,
                 dom_id=dom_id,
             )
             return on_navigation(nav_event)
@@ -571,14 +584,15 @@ class Client:
             full_url = self._create_url(js.location.href)
             full_url.searchParams.set("route", url)
             js.history.replaceState(event.state, "", full_url.toString())
-            self.initiate_request(url, None, False, "back", None, None)
+            # TODO: Restore the data dictionary
+            self.initiate_request(url, {}, False, "back", None)
         else:
             debug_log("client.handle_popstate_no_state_or_request_id", event)
             js.document.title = self.site_title
             full_url = self._create_url(js.location.href)
             full_url.searchParams.delete("route")
             js.history.replaceState({}, "", full_url.toString())
-            self.initiate_request("index", None, False, "back", None, None)
+            self.initiate_request("index", {}, False, "back", None)
 
     def register_hotkey(self, key_combo: str, callback: Callable[[], None]) -> None:
         debug_log("client.register_hotkey", key_combo)
@@ -663,9 +677,10 @@ class PyodideClient(Client):
         )
 
     def _finalize_request(
-        self, action: str, url: str, data: dict, dom_id: Optional[str]
+        self, action: str, url: str, data: dict, dom_id: Optional[str],
+        button_pressed: str = "",
     ) -> Request:
-        return super()._finalize_request(action, url, data, dom_id)
+        return super()._finalize_request(action, url, data, dom_id, button_pressed)
 
     def mount_navigation(self, root: Any, on_navigation: Callable):
         """Override to properly store and clean up Pyodide proxies."""

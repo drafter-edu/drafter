@@ -340,6 +340,60 @@ def update(state: State, input: str, textarea: str):
 start_server(State("Test <>&\\"'"))
 `;
 
+const HIDDEN_FIELDS_CODE = `
+from drafter import *
+from dataclasses import dataclass
+
+@dataclass
+class State:
+    pass
+    
+@route
+def index(state: State) -> Page:
+    return Page(
+        state,
+        [
+            "Welcome to my site!",
+            TextBox("pears", 7),
+            TextBox("plums", "3"),
+            Argument("apples", 5),
+            Argument("words", "ups' and \\" and downs"),
+            Argument("check", True),
+            Button(
+                "Buy",
+                "buy_page",
+                [
+                    Argument("oranges", 7),
+                    Argument("fruits", "oranges and pears and more"),
+                    Argument("bonus", False),
+                ],
+            ),
+        ],
+    )
+
+
+@route
+def buy_page(
+    state: State,
+    apples: int,
+    oranges: int,
+    pears: int,
+    plums: str,
+    fruits: str,
+    words: str,
+    check: bool,
+    bonus: bool,
+) -> Page:
+    return Page(
+        state,
+        [
+            f"You bought {apples} apples, {oranges} oranges, {plums} plums, and {pears} pears. ({fruits}) ({words}) ({check}) ({bonus})"
+        ],
+    )
+
+start_server(State())
+`;
+
 describe("Drafter Form Components Tests", () => {
     beforeEach(() => {
         document.body.innerHTML = "<div id='drafter-root--'></div>";
@@ -454,7 +508,7 @@ describe("Drafter Form Components Tests", () => {
             });
             await userEvent.click(subscribeCheckbox);
             await userEvent.click(
-                await app.findByRole("button", { name: /save/i })
+                await app.findByRole("button", { name: /save/i }),
             );
             await app.findByText(/Subscribed: True/);
 
@@ -464,7 +518,7 @@ describe("Drafter Form Components Tests", () => {
             });
             await userEvent.click(subscribeCheckbox2);
             await userEvent.click(
-                await app.findByRole("button", { name: /save/i })
+                await app.findByRole("button", { name: /save/i }),
             );
             await app.findByText(/Subscribed: False/);
         });
@@ -627,7 +681,7 @@ describe("Drafter Form Components Tests", () => {
 
             // Check that at least one label has a for attribute
             const hasForAttribute = Array.from(labels!).some(
-                (label) => label.getAttribute("for") !== null
+                (label) => label.getAttribute("for") !== null,
             );
             expect(hasForAttribute).toBe(true);
         });
@@ -766,7 +820,7 @@ describe("Drafter Form Components Tests", () => {
             await userEvent.clear(nameInput);
             await userEvent.type(nameInput, "First Name:)");
             await userEvent.click(
-                await app.findByRole("button", { name: /update/i })
+                await app.findByRole("button", { name: /update/i }),
             );
             await app.findByText(/Name: First Name:\)/);
             // Second update
@@ -776,7 +830,7 @@ describe("Drafter Form Components Tests", () => {
             await userEvent.clear(nameInput2);
             await userEvent.type(nameInput2, "Second Name");
             await userEvent.click(
-                await app.findByRole("button", { name: /update/i })
+                await app.findByRole("button", { name: /update/i }),
             );
             await app.findByText(/Name: Second Name:\)/);
 
@@ -787,7 +841,7 @@ describe("Drafter Form Components Tests", () => {
             await userEvent.clear(nameInput3);
             await userEvent.type(nameInput3, "Third Name");
             await userEvent.click(
-                await app.findByRole("button", { name: /update/i })
+                await app.findByRole("button", { name: /update/i }),
             );
             await app.findByText(/Name: Third Name:\)/);
         });
@@ -849,6 +903,23 @@ describe("Drafter Form Components Tests", () => {
             await userEvent.click(button);
 
             await app.findByText(/Name:\s*:\)/);
+        });
+    });
+    describe("Hidden Fields and Arguments", () => {
+        test("hidden Argument fields are passed correctly on button click", async () => {
+            await runStudentCode({
+                code: HIDDEN_FIELDS_CODE,
+                presentErrors: false,
+            });
+            const drafterBody = document.querySelector("#drafter-body--");
+            const app = within(drafterBody as HTMLElement);
+
+            const buyButton = await app.findByRole("button", { name: /buy/i });
+            await userEvent.click(buyButton);
+
+            await app.findByText(
+                /You bought 5 apples, 7 oranges, 3 plums, and 7 pears. \(oranges and pears and more\) \(ups' and " and downs\) \(True\) \(False\)/,
+            );
         });
     });
 });
