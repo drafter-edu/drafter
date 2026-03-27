@@ -1,4 +1,9 @@
-- [ ] Ensure that config settings are being passed to the launched app correctly
+- [x] Ensure that config settings are being passed to the launched app correctly
+- [ ] Refactoring ClientBridge
+    - [ ] Could become just `Client`
+    - [ ] Separate out Push/Pop state handling into a separate module
+        - [ ] Handle cleanly storing larger state in memory/localStorage and only putting a reference in the URL, for big data situations
+    - [ ] Separate out the event handler and mounting logic into a separate class
 - [ ] Fragment handler is not being correctly de-registered, leading to repeated event firing
 - [ ] The "phase" should be included in the TelemetryCorrelation
 - [ ] Should it be "SilentUpdate" or "QuietUpdate" perhaps?

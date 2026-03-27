@@ -26,7 +26,7 @@ def run_client_bridge(
     if rendered_site.error:
         return
 
-    server.do_listen_for_events(client_bridge.handle_telemetry_event)
+    server.do_listen_for_events(client_bridge.handle_server_event)
     
     def handle_visit(request):
         # Visiting Phase
@@ -47,5 +47,4 @@ def run_client_bridge(
     # Starting Phase
     server.do_start(initial_state=initial_state)
     # Started Phase
-    initial_request = client_bridge.make_initial_request()
-    handle_visit(initial_request)
+    client_bridge.start()

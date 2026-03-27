@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from typing import ClassVar
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -14,11 +15,17 @@ class Request:
         event: A dictionary of additional event information.
         dom_id: The DOM id of the element that triggered the request, if applicable.
     """
+    REQUEST_COUNTER: ClassVar[int] = 0
 
-    id: int
+    id: int = field(init=False)
     action: str
     url: str
     kwargs: dict
     event: dict
     dom_id: str = ""
     button_pressed: str = ""
+
+    def __post_init__(self):
+        type(self).REQUEST_COUNTER += 1
+        self.id = type(self).REQUEST_COUNTER
+    

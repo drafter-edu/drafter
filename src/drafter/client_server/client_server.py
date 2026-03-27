@@ -930,7 +930,7 @@ class ClientServer:
         """
         initial_site = self.do_render()
         self.do_start(initial_state=initial_state)
-        initial_request = Request(-1, "precompilation", "index", {}, {}, "")
+        initial_request = Request("precompilation", "index", {}, {}, "")
         response = self.do_visit(initial_request)
         # TODO: Extract compiled body and headers
         body = response.body or "Error during precompilation."
