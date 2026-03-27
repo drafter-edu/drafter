@@ -21,6 +21,7 @@ def build_zip(source_dir: Path, output_zip: str, skip_extensions: Optional[set[s
         source_dir: Path to the directory to zip.
         output_zip: Path to the output zip file (should end with .zip).
     """
+    os.makedirs(os.path.dirname(output_zip), exist_ok=True)
     with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
         drafter_src = Path("drafter")
         for root, dirs, files in os.walk(source_dir):
