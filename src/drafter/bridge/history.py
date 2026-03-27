@@ -37,9 +37,9 @@ class BrowserHistory:
         debug_log("client.handle_popstate", event)
         if (
             event
-            and "state" in event
-            and "request_id" in event.state
-            and event.state["request_id"] is not None
+            and hasattr(event, "state") # and "state" in event
+            and hasattr(event.state, "request_id") # and "request_id" in event.state
+            and event.state.request_id is not None
         ):
             request_id = event.state.request_id
             url = event.state.url
@@ -48,7 +48,7 @@ class BrowserHistory:
             # js.document.title = f"{self.site_title} - {url}"
             full_url = self.runtime.create_url(js.location.href)
             full_url.searchParams.set("route", url)
-            js.history.replaceState(event.state, "", full_url.toString())
+            self.runtime.history_replace_state(event.state, "", full_url.toString())
             # TODO: Restore the data dictionary
             return Request("back", url, kwargs, {}, "", "")
         else:
@@ -56,5 +56,5 @@ class BrowserHistory:
             # js.document.title = self.site_title
             full_url = self.runtime.create_url(js.location.href)
             full_url.searchParams.delete("route")
-            js.history.replaceState({}, "", full_url.toString())
+            self.runtime.history_replace_state({}, "", full_url.toString())
             return Request("back", "index", {}, {}, "", "")

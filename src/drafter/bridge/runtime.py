@@ -59,6 +59,9 @@ class RuntimeAdapter:
 
     def history_push_state(self, state: dict, title: str, url: str) -> None:
         js.history.pushState(state, title, url)
+        
+    def history_replace_state(self, state: dict, title: str, url: str) -> None:
+        js.history.replaceState(state, title, url)
 
 
 class SkulptRuntime(RuntimeAdapter):
@@ -101,6 +104,10 @@ class PyodideRuntime(RuntimeAdapter):
         raise NotImplementedError(
             "Async file upload handling in Pyodide not implemented yet."
         )
+    
 
     def history_push_state(self, state: dict, title: str, url: str) -> None:
         js.history.pushState(self._to_js(state), title, url)
+
+    def history_replace_state(self, state: dict, title: str, url: str) -> None:
+        js.history.replaceState(self._to_js(state), title, url)
