@@ -97,7 +97,7 @@ Click on the ``Commit changes`` button to save your changes.
 Step 4: Upload Additional Files (If Needed)
 -------------------------------------------
 
-If you have other files besides ``main.py`` (like images, data files, or other Python files), follow these steps to upload them:
+If you have other files besides ``main.py`` (like images, data files, additional Python files, or the log of your relevant conversations with ChatGPT/Gemini/etc.), follow these steps to upload them:
 
 1. Go to the ``Code`` tab
 2. Click on the ``Add file`` button and then ``Upload files``
