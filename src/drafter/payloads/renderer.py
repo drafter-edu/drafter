@@ -44,6 +44,7 @@ class Renderer:
         self.parts = []
         self.assets = {"css": set(), "js": set()}
         self.indentation = 2
+        self.in_preformatted = 0
 
     def flatten(self) -> str:
         """Combine all accumulated HTML parts into a single string.
@@ -84,7 +85,19 @@ class Renderer:
         # TODO: Handle errors gracefully and log them
         # print(self.component_stack, component)
         if isinstance(component, str):
-            self.write(html.escape(component))
+            escaped = html.escape(component)
+            if self.in_preformatted:
+                self.write(escaped)
+            elif '\n' in escaped:
+                lines = escaped.split('\n')
+                for i, line in enumerate(lines):
+                    self.write(line)
+                    if i < len(lines) - 1:
+                        self.new_line()
+                        self.write('<br>')
+                        self.new_line()
+            else:
+                self.write(escaped)
         elif isinstance(component, list):
             for child_index, child in enumerate(component):
                 self.component_stack.append(f"[{child_index}]")
@@ -127,6 +140,8 @@ class Renderer:
                 # TODO: Handle COLLAPSE_WHITESPACE if needed
                 self.depth += 1
                 old_depth = 0
+                if plan.collapse_whitespace:
+                    self.in_preformatted += 1
                 if plan.children:
                     for child_index, child in enumerate(plan.children):
                         self.component_stack.append(f"[{child_index}]")
@@ -139,6 +154,8 @@ class Renderer:
                         else:
                             self.depth = old_depth
                         self.component_stack.pop()
+                if plan.collapse_whitespace:
+                    self.in_preformatted -= 1
                 self.depth -= 1
                 if not plan.self_closing:
                     self.write(f"</{plan.tag_name}>")

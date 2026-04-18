@@ -135,6 +135,22 @@ tests.pre_collapse = """<pre>Line 1
     Line 3</pre>
 """
 
+tests.newline_in_span = Span("Line 1\nLine 2\nLine 3")
+tests.newline_in_span = """
+<span>
+  Line 1
+  <br>
+  Line 2
+  <br>
+  Line 3
+</span>
+"""
+
+tests.newline_in_bare_string = "Hello\nWorld"
+tests.newline_in_bare_string = """Hello
+<br>
+World"""
+
 tests.empty_text = Text("Hello world!")
 tests.empty_text = """Hello world!"""
 
