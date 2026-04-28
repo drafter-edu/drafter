@@ -108,6 +108,7 @@ _MSG_UNRELATED = (
     "FAILURE{context}, predicted answer was {y} ({y_type!r}), "
     "computed answer was {x} ({x_type!r}). "
     "You attempted to compare unrelated data types.")
+_MSG_NOT_FOUND = "FAILURE{context}, {needle!r} was not found anywhere in the page."
 
 
 def _filter_non_style_settings(settings: dict) -> dict:
@@ -350,10 +351,6 @@ def _report_in_page(found: bool, needle, line, code) -> bool:
     if None not in (line, code):
         context = _MSG_LINE_CODE.format(line=line, code=code)
 
-    _MSG_NOT_FOUND = (
-        "FAILURE{context}, {needle!r} was not found anywhere in the page.")
-    _MSG_FOUND = "TEST PASSED{context}"
-
     if bakery is not None:
         from bakery.assertions import student_tests, QUIET
         student_tests.tests += 1
@@ -361,14 +358,14 @@ def _report_in_page(found: bool, needle, line, code) -> bool:
             student_tests.lines.append(line)
         if found:
             if not QUIET:
-                print(_MSG_FOUND.format(context=context))
+                print(_MSG_SUCCESS.format(context=context))
             student_tests.successes += 1
         else:
             print(_MSG_NOT_FOUND.format(context=context, needle=needle))
             student_tests.failures += 1
     else:
         if found:
-            print(_MSG_FOUND.format(context=context))
+            print(_MSG_SUCCESS.format(context=context))
         else:
             print(_MSG_NOT_FOUND.format(context=context, needle=needle))
 
