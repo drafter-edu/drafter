@@ -115,6 +115,14 @@ def _filter_non_style_settings(settings: dict) -> dict:
     return {k: v for k, v in settings.items() if not k.startswith(_STYLE_KEY_PREFIX)}
 
 
+# How many frames to skip from the top of the stack when falling back to a
+# best-guess frame inside _get_assert_page_line_code.  The exact value accounts
+# for: _get_assert_page_line_code → assert_page → user call site (plus a couple
+# of Python internal frames).  It is intentionally generous so that the
+# reported line is always in user code rather than in drafter internals.
+_ASSERT_PAGE_FALLBACK_DEPTH = 5
+
+
 def _get_assert_page_line_code():
     """Return the (line, code) of the nearest ``assert_page`` call in the stack."""
     try:
@@ -124,10 +132,10 @@ def _get_assert_page_line_code():
             code = frame[3]
             if code and code.strip().startswith('assert_page'):
                 return frame[1], code
-        # Fallback: just return the outermost user frame
-        frame = trace[max(0, len(trace) - 5)]
+        # Fallback: return the outermost user frame heuristically
+        frame = trace[max(0, len(trace) - _ASSERT_PAGE_FALLBACK_DEPTH)]
         return frame[1], frame[3]
-    except Exception:
+    except (IndexError, TypeError):
         return None, None
 
 
