@@ -4,7 +4,7 @@ from drafter.styling import *
 from drafter.routes import *
 from drafter.server import *
 from drafter.deploy import *
-from drafter.testing import assert_equal, assert_page
+from drafter.testing import assert_equal, assert_page, assert_in_page
 import drafter.hacks
 # Note: LLM functions must be explicitly imported via 'from drafter.llm import ...'
 # ApiKeyBox component is available through the components import above

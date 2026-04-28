@@ -246,6 +246,188 @@ def _compare_page_contents(left, right, context_path: str, line, code) -> bool:
     return _page_report(left, right, context_path, line, code)
 
 
+def _content_matches_needle(candidate, needle) -> bool:
+    """
+    Return ``True`` if *candidate* matches *needle* using the same style-
+    ignoring rules as :func:`_compare_page_contents`, but without producing
+    any output or updating test counters.
+
+    This is used internally by :func:`assert_in_page` to test a single
+    candidate node against the needle before recursing.
+    """
+    from drafter.components import PageContent, Text
+
+    # str vs Text (or vice-versa) – body only, ignore styles
+    if isinstance(candidate, str) and isinstance(needle, Text):
+        return candidate == needle.body
+    if isinstance(candidate, Text) and isinstance(needle, str):
+        return candidate.body == needle
+    if isinstance(candidate, str) and isinstance(needle, str):
+        return candidate == needle
+
+    # Simple primitives
+    if isinstance(candidate, SIMPLE_PRIMITIVE_TYPES) and isinstance(needle, SIMPLE_PRIMITIVE_TYPES):
+        return candidate == needle
+
+    # Both are PageContent of the same type
+    if isinstance(candidate, PageContent) and isinstance(needle, PageContent):
+        if type(candidate) is not type(needle):
+            return False
+        if is_dataclass(candidate):
+            for field in dataclass_fields(candidate):
+                c_val = getattr(candidate, field.name)
+                n_val = getattr(needle, field.name)
+                if field.name == 'extra_settings':
+                    if _filter_non_style_settings(c_val) != _filter_non_style_settings(n_val):
+                        return False
+                elif not _content_matches_needle(c_val, n_val):
+                    return False
+            return True
+        # Non-dataclass PageContent: direct equality
+        return candidate == needle
+
+    # List vs list: same length and each element matches
+    if isinstance(candidate, list) and isinstance(needle, list):
+        if len(candidate) != len(needle):
+            return False
+        return all(_content_matches_needle(c, n) for c, n in zip(candidate, needle))
+
+    # Fallback
+    return candidate == needle
+
+
+def _search_in_haystack(haystack_item, needle) -> bool:
+    """
+    Recursively search *haystack_item* (or a list thereof) for any node that
+    matches *needle*.  Container-type :class:`~drafter.components.PageContent`
+    objects are explored by iterating over their list-typed dataclass fields
+    (e.g. ``content`` on ``Div``, ``items`` on ``BulletedList``).
+
+    :returns: ``True`` if *needle* is found anywhere inside *haystack_item*.
+    """
+    from drafter.components import PageContent
+
+    # --- list: search each element ------------------------------------------
+    if isinstance(haystack_item, list):
+        return any(_search_in_haystack(item, needle) for item in haystack_item)
+
+    # --- direct match -------------------------------------------------------
+    if _content_matches_needle(haystack_item, needle):
+        return True
+
+    # --- recurse into children of PageContent containers -------------------
+    if isinstance(haystack_item, PageContent) and is_dataclass(haystack_item):
+        for field in dataclass_fields(haystack_item):
+            val = getattr(haystack_item, field.name)
+            if isinstance(val, list):
+                if _search_in_haystack(val, needle):
+                    return True
+            elif isinstance(val, PageContent):
+                if _search_in_haystack(val, needle):
+                    return True
+
+    return False
+
+
+def _get_assert_in_page_line_code():
+    """Return the (line, code) of the nearest ``assert_in_page`` call in the stack."""
+    try:
+        from traceback import extract_stack
+        trace = extract_stack()
+        for frame in trace:
+            code = frame[3]
+            if code and code.strip().startswith('assert_in_page'):
+                return frame[1], code
+        frame = trace[max(0, len(trace) - _ASSERT_PAGE_FALLBACK_DEPTH)]
+        return frame[1], frame[3]
+    except (IndexError, TypeError):
+        return None, None
+
+
+def _report_in_page(found: bool, needle, line, code) -> bool:
+    """Print a bakery-style pass/fail message for :func:`assert_in_page`."""
+    context = ""
+    if None not in (line, code):
+        context = _MSG_LINE_CODE.format(line=line, code=code)
+
+    _MSG_NOT_FOUND = (
+        "FAILURE{context}, {needle!r} was not found anywhere in the page.")
+    _MSG_FOUND = "TEST PASSED{context}"
+
+    if bakery is not None:
+        from bakery.assertions import student_tests, QUIET
+        student_tests.tests += 1
+        if None not in (line, code):
+            student_tests.lines.append(line)
+        if found:
+            if not QUIET:
+                print(_MSG_FOUND.format(context=context))
+            student_tests.successes += 1
+        else:
+            print(_MSG_NOT_FOUND.format(context=context, needle=needle))
+            student_tests.failures += 1
+    else:
+        if found:
+            print(_MSG_FOUND.format(context=context))
+        else:
+            print(_MSG_NOT_FOUND.format(context=context, needle=needle))
+
+    return found
+
+
+def assert_in_page(haystack, needle) -> bool:
+    """
+    Assert that *needle* appears somewhere inside the :class:`~drafter.page.Page`
+    *haystack*.
+
+    The search is recursive: the entire content tree of the page is explored,
+    including nested containers such as :class:`~drafter.components.Div`,
+    :class:`~drafter.components.Span`, :class:`~drafter.components.BulletedList`,
+    etc.
+
+    Matching rules follow the same style-ignoring conventions as
+    :func:`assert_page`:
+
+    - Style fields (``extra_settings`` keys beginning with ``style_``) are
+      ignored when comparing :class:`~drafter.components.PageContent` nodes.
+    - A plain ``str`` needle matches any ``str`` or
+      :class:`~drafter.components.Text` node whose body equals the needle
+      (ignoring any styles on the ``Text``).
+    - A :class:`~drafter.components.Text` needle matches any ``str`` or
+      ``Text`` whose body equals ``needle.body`` (styles on both sides are
+      ignored).
+    - A :class:`~drafter.components.PageContent` needle matches any node of
+      the same type whose non-style fields are equal.
+
+    A single pass/fail message is printed in the Bakery ``assert_equal``
+    format.  When *needle* is not found, the message includes the repr of
+    the needle so it is easy to see what was being searched for.
+
+    :param haystack: The :class:`~drafter.page.Page` to search inside.
+    :param needle:   The element to search for.  May be a ``str``, a
+                     :class:`~drafter.components.Text`, or any
+                     :class:`~drafter.components.PageContent` subclass.
+    :returns: ``True`` if *needle* was found anywhere in *haystack*,
+              ``False`` otherwise.
+    """
+    from drafter.page import Page
+
+    line, code = _get_assert_in_page_line_code()
+
+    if bakery is not None:
+        from bakery.assertions import assert_type
+        assert_type(haystack, Page)
+    else:
+        if not isinstance(haystack, Page):
+            print(_MSG_FAILURE.format(
+                context=_MSG_LINE_CODE.format(line=line, code=code) if None not in (line, code) else "",
+                x=repr(haystack), y=repr(Page)))
+            return False
+
+    found = _search_in_haystack(haystack.content, needle)
+    return _report_in_page(found, needle, line, code)
+
+
 def assert_page(left, right) -> bool:
     """
     Assert that two :class:`~drafter.page.Page` objects are structurally equal,

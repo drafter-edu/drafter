@@ -15,7 +15,7 @@ Passing tests print ``TEST PASSED`` and failing ones print ``FAILURE``.
 """
 
 from dataclasses import dataclass
-from drafter import Page, assert_page
+from drafter import Page, assert_page, assert_in_page
 from drafter.components import (
     Div, Span, Header, Text, Button, Link,
     BulletedList, NumberedList, TextBox, CheckBox, Table,
@@ -234,4 +234,116 @@ if __name__ == '__main__':
     assert_page(
         Page(State(), [Div(bold("Title"), italic("Subtitle"))]),
         Page(State(), [Div("Title", "Subtitle")])
+    )
+
+    # ===========================================================================
+    # assert_in_page examples
+    # ===========================================================================
+
+    # -----------------------------------------------------------------------
+    # 16. Plain string at the top level of page content
+    # -----------------------------------------------------------------------
+    print("\n=== 16. assert_in_page – plain string at top level ===")
+    assert_in_page(
+        Page(State(), ["Hello, world!", "Another line"]),
+        "Hello, world!"
+    )
+
+    # -----------------------------------------------------------------------
+    # 17. String needle matches a styled Text (styles ignored)
+    # -----------------------------------------------------------------------
+    print("\n=== 17. assert_in_page – string matches italic Text ===")
+    assert_in_page(
+        Page(State(), [italic("Deep thought")]),
+        "Deep thought"
+    )
+
+    # -----------------------------------------------------------------------
+    # 18. Needle deeply nested inside Divs
+    # -----------------------------------------------------------------------
+    print("\n=== 18. assert_in_page – needle inside nested Divs ===")
+    assert_in_page(
+        nested_page(State()),
+        "Hello world!"
+    )
+
+    # -----------------------------------------------------------------------
+    # 19. PageContent needle (Header) found at top level
+    # -----------------------------------------------------------------------
+    print("\n=== 19. assert_in_page – Header component ===")
+    assert_in_page(
+        mixed_content_page(State()),
+        Header("Welcome", level=1)
+    )
+
+    # -----------------------------------------------------------------------
+    # 20. Button needle found inside page
+    # -----------------------------------------------------------------------
+    print("\n=== 20. assert_in_page – Button found ===")
+    assert_in_page(
+        mixed_content_page(State()),
+        Button("Click me", "index")
+    )
+
+    # -----------------------------------------------------------------------
+    # 21. Text needle inside a BulletedList inside a Div
+    # -----------------------------------------------------------------------
+    print("\n=== 21. assert_in_page – string inside BulletedList inside Div ===")
+    assert_in_page(
+        mixed_content_page(State()),
+        "item two"
+    )
+
+    # -----------------------------------------------------------------------
+    # 22. Styled Text needle – styles on needle are ignored
+    # -----------------------------------------------------------------------
+    print("\n=== 22. assert_in_page – styled Text needle, styles ignored ===")
+    assert_in_page(
+        Page(State(), [Div(bold("Important"), "other")]),
+        bold("Important")   # style on needle should not matter
+    )
+
+    # -----------------------------------------------------------------------
+    # 23. Needle is a Div that appears nested inside another Div
+    # -----------------------------------------------------------------------
+    print("\n=== 23. assert_in_page – Div needle inside Div ===")
+    assert_in_page(
+        Page(State(), [Div(Div("inner"))]),
+        Div("inner")
+    )
+
+    # -----------------------------------------------------------------------
+    # 24. EXPECTED FAILURE – needle not present anywhere in the page
+    # -----------------------------------------------------------------------
+    print("\n=== 24. EXPECTED FAILURE – needle not in page ===")
+    assert_in_page(
+        Page(State(), ["Hello", Div("world")]),
+        "missing"
+    )
+
+    # -----------------------------------------------------------------------
+    # 25. EXPECTED FAILURE – correct text but wrong component type
+    # -----------------------------------------------------------------------
+    print("\n=== 25. EXPECTED FAILURE – right text, wrong component type ===")
+    assert_in_page(
+        Page(State(), [Span("content")]),
+        Div("content")
+    )
+
+    # -----------------------------------------------------------------------
+    # 26. NumberedList item found inside the page
+    # -----------------------------------------------------------------------
+    print("\n=== 26. assert_in_page – NumberedList with style ===")
+    assert_in_page(
+        Page(State(), [NumberedList(["a", "b", "c"], style_color="blue")]),
+        NumberedList(["a", "b", "c"])   # style on haystack ignored
+    )
+
+    # -----------------------------------------------------------------------
+    # 27. TextBox found inside stateful page
+    # -----------------------------------------------------------------------
+    print("\n=== 27. assert_in_page – TextBox ===")
+    assert_in_page(
+        stateful_page(State("hello")),
+        TextBox("value", "hello")
     )
