@@ -41,7 +41,7 @@ Here is an example of how you might use the styling functions and keyword parame
         margin: 10px;
     }
     </style>
-    """,
+    """
 
     @route
     def index(state: str) -> Page:
