@@ -49,7 +49,6 @@ def started_server():
 def sample_request():
     """Create a sample request for testing."""
     return Request(
-        id=1,
         action="submit",
         url="test_route",
         kwargs={"arg1": "value1"},
@@ -221,7 +220,7 @@ class TestRouteManagement:
 
     def test_get_route_not_found(self, started_server: ClientServer):
         """Test getting a non-existent route raises error."""
-        request = Request(1, "click", "nonexistent", {}, {}, "")
+        request = Request("click", "nonexistent", {}, {}, "")
         with pytest.raises(VisitError) as exc_info:
             started_server.get_route(request)
         assert exc_info.value.status_code == 404
@@ -241,7 +240,7 @@ class TestRequestProcessing:
             return Page(None, ["Test Content"])
         
         started_server.add_route("test", test_handler)
-        request = Request(1, "click", "test", {}, {}, "")
+        request = Request("click", "test", {}, {}, "")
         
         response = started_server.do_visit(request)
         
@@ -255,7 +254,7 @@ class TestRequestProcessing:
             return Page({"count": 1}, ["Updated"])
         
         started_server.add_route("test", test_handler)
-        request = Request(1, "click", "test", {}, {}, "")
+        request = Request("click", "test", {}, {}, "")
         
         response = started_server.do_visit(request)
         
@@ -268,7 +267,7 @@ class TestRequestProcessing:
             return Page(None, [f"Hello {name}"])
         
         started_server.add_route("greet", test_handler)
-        request = Request(1, "submit", "greet", {"name": "World"}, {}, "")
+        request = Request("submit", "greet", {"name": "World"}, {}, "")
         
         response = started_server.do_visit(request)
         
@@ -281,7 +280,7 @@ class TestRequestProcessing:
             return Page(None, [f"Sum: {x + y}"])
         
         started_server.add_route("add", test_handler)
-        request = Request(1, "submit", "add", {"x": "5", "y": "3"}, {}, "")
+        request = Request("submit", "add", {"x": "5", "y": "3"}, {}, "")
         config = started_server.get_current_configuration()
         
         payload, representation = started_server.execute_route(
@@ -307,7 +306,7 @@ class TestRequestProcessing:
             return Page(None, ["Test"])
         
         started_server.add_route("test", test_handler)
-        request = Request(1, "click", "test", {}, {}, "")
+        request = Request("click", "test", {}, {}, "")
         
         started_server.do_visit(request)
         assert started_server.phase == "committing"
@@ -416,12 +415,12 @@ class TestStateManagement:
         started_server.add_route("increment", increment_handler)
         
         # First request
-        request1 = Request(1, "click", "increment", {}, {}, "")
+        request1 = Request("click", "increment", {}, {}, "")
         started_server.do_visit(request1)
         assert started_server.state.current == {"count": 1}
         
         # Second request
-        request2 = Request(2, "click", "increment", {}, {}, "")
+        request2 = Request("click", "increment", {}, {}, "")
         started_server.do_visit(request2)
         assert started_server.state.current == {"count": 2}
 
@@ -450,7 +449,7 @@ class TestErrorHandling:
 
     def test_visit_error_route_not_found(self, started_server: ClientServer):
         """Test error when route is not found."""
-        request = Request(1, "click", "nonexistent", {}, {}, "")
+        request = Request("click", "nonexistent", {}, {}, "")
         response = started_server.do_visit(request)
         
         assert response.status_code == 404
@@ -462,7 +461,7 @@ class TestErrorHandling:
             raise ValueError("Test error")
         
         started_server.add_route("fail", failing_handler)
-        request = Request(1, "click", "fail", {}, {}, "")
+        request = Request("click", "fail", {}, {}, "")
         
         response = started_server.do_visit(request)
         
@@ -475,7 +474,7 @@ class TestErrorHandling:
             return "Not a valid payload"
         
         started_server.add_route("invalid", invalid_handler)
-        request = Request(1, "click", "invalid", {}, {}, "")
+        request = Request("click", "invalid", {}, {}, "")
         
         response = started_server.do_visit(request)
         
@@ -553,7 +552,7 @@ class TestIntegration:
             return Page(None, ["<h1>Home</h1>", "<p>Welcome</p>"])
         
         started_server.add_route("home", home)
-        request = Request(1, "click", "home", {}, {}, "")
+        request = Request("click", "home", {}, {}, "")
         
         response = started_server.do_visit(request)
         
@@ -573,7 +572,7 @@ class TestIntegration:
             return Page(Counter(new_count), [f"Count: {new_count}"])
         
         started_server.add_route("increment", increment)
-        request = Request(1, "submit", "increment", {"amount": "5"}, {}, "")
+        request = Request("submit", "increment", {"amount": "5"}, {}, "")
         
         response = started_server.do_visit(request)
         
@@ -594,12 +593,12 @@ class TestIntegration:
         started_server.add_route("add", add_item)
         
         # Add first item
-        r1 = Request(1, "submit", "add", {"item": "apple"}, {}, "")
+        r1 = Request("submit", "add", {"item": "apple"}, {}, "")
         started_server.do_visit(r1)
         assert len(started_server.state.current.items) == 1
         
         # Add second item
-        r2 = Request(2, "submit", "add", {"item": "banana"}, {}, "")
+        r2 = Request("submit", "add", {"item": "banana"}, {}, "")
         started_server.do_visit(r2)
         assert len(started_server.state.current.items) == 2
         assert started_server.state.current.items == ["apple", "banana"]
@@ -678,7 +677,7 @@ class TestEdgeCases:
             return Page(current_value + 1, [f"Value: {current_value + 1}"])
         
         started_server.add_route("with_state", handler_with_state)
-        request = Request(1, "click", "with_state", {}, {}, "")
+        request = Request("click", "with_state", {}, {}, "")
         
         response = started_server.do_visit(request)
         
@@ -690,7 +689,7 @@ class TestEdgeCases:
             return Update({"status": "updated"})
         
         started_server.add_route("update", empty_handler)
-        request = Request(1, "click", "update", {}, {}, "")
+        request = Request("click", "update", {}, {}, "")
         
         response = started_server.do_visit(request)
         
@@ -705,7 +704,7 @@ class TestEdgeCases:
             return Page(large_state, ["Large state"])
         
         started_server.add_route("large", large_state_handler)
-        request = Request(1, "click", "large", {}, {}, "")
+        request = Request("click", "large", {}, {}, "")
         
         response = started_server.do_visit(request)
         
@@ -718,7 +717,7 @@ class TestEdgeCases:
             return Page(None, ["Hello 世界 🌍"])
         
         started_server.add_route("unicode", unicode_handler)
-        request = Request(1, "click", "unicode", {}, {}, "")
+        request = Request("click", "unicode", {}, {}, "")
         
         response = started_server.do_visit(request)
         
@@ -735,7 +734,7 @@ class TestEdgeCases:
         started_server.add_route("simple", simple_handler)
         
         for i in range(5):
-            request = Request(i, "click", "simple", {}, {}, "")
+            request = Request("click", "simple", {}, {}, "")
             response = started_server.do_visit(request)
             responses.append(response)
         
