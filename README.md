@@ -1,10 +1,14 @@
-# Websites
+# Drafter
 
-A simple Python library for making websites
-
-git checkout v2-pyodide
+A simple Python library for making websites, following good software engineering principles.
 
 ## Development
+
+This is the v2 rewrite, so you can use the following
+
+```powershell
+git checkout v2-pyodide
+```
 
 ### Setup (Python via uv)
 
@@ -318,6 +322,42 @@ All of these get passed in as parameters to a connected route function.
 
 ### Summary of Execution Timeline
 
+```mermaid
+sequenceDiagram
+    participant User
+    participant Runtime as Drafter Runtime
+    participant Launch as launch.py
+    participant AppServer
+    participant Browser
+    participant Py as Skulpt/Pyodide
+    participant CS as ClientServer
+    participant CB as ClientBridge
+
+    User->>Runtime: Run student app
+
+    Runtime->>Runtime: Initialize configuration
+    Runtime->>CS: Create MAIN_SERVER
+
+    User->>Launch: start_server()
+
+    alt Development Server Mode
+        Launch->>AppServer: Start Starlette server
+        AppServer->>Browser: Serve initial page
+    else Static Build Mode
+        Launch->>Browser: Serve compiled static assets
+    end
+
+    Browser->>Py: Initialize Python runtime
+    Py->>CS: Execute student code again
+
+    CS->>CB: Render site
+    CB->>Browser: Mount UI + handlers
+
+    CB->>CS: Initial Request(index)
+    CS-->>CB: Initial Response
+    CB->>Browser: Render initial content
+```
+
 Fundamentally, the user writes a python script that starts with `from drafter import *`, defines server in various ways, and then calls `start_server(initial_state)`. This user application can be run in three possible ways:
 
 1. From the command line like `python -m drafter user_script.py`
@@ -508,16 +548,3 @@ The bridge is split into five distinct pieces:
 - `BrowserHistory`: Keeps track of requests through pushstate/popstate
 
 All of this is kicked off in the `run_client_bridge` function, which manages the `ClientBridge` instance.
-
-Simple flow:
-
-```mermaid
-flowchart LR
-    U[User Interaction] --> E[EventManager]
-    E --> N[NavigationController]
-    N --> CS[ClientServer.do_visit]
-    CS --> CB[ClientBridge.handle_response]
-    CB --> SR[SiteRenderer]
-    SR --> DOM[DOM Update]
-    CS -. telemetry .-> CB
-```
