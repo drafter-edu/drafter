@@ -1,8 +1,5 @@
 """
-Comprehensive tests for the ClientServer class.
-
-Tests cover initialization, configuration, routing, request processing,
-state management, error handling, and server lifecycle.
+TODO: These tests are sloppy and should be reviewed and improved
 """
 
 import pytest
