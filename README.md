@@ -102,7 +102,7 @@ The main `index.html` file will create the DRAFTER_ROOT div, set up Skulpt/Pyodi
 It will try to render the student's initial page to prepopulate as much meta information as it can, as well as an HTML preview that can be shown for SEO contexts.
 The `AppBuilder` and `AppServer` are together both referred to as `AppBackend`.
 
-If the user is running the program directly in Skulpt/Pyodide, then when it reaches the `start_server` call, it will instead trigger the `launch.py` script's logic to setup the `ClientBridge`, `Client`, and get the main `ClientServer`. Note that the `ClientServer` is not a real server; it is just a class that handles requests from the `Client` and generates responses.
+If the user is running the program directly in Skulpt/Pyodide, then when it reaches the `start_server` call, it will instead trigger the `launch.py` script's logic to setup the `ClientBridge` and get the main `ClientServer`. Note that the `ClientServer` is not a real server; it is just a class that handles requests from the `ClientBridge` and generates responses.
 The `ClientBridge` is responsible for populating the DOM, tracking user interactions, and sending requests from the client side, while the `ClientServer` is responsible for processing requests, managing state, and generating responses on the server side.
 
 The area that the user sees is the `Site`, which is a frame encapsulating the `Form`, the `Body` (composed of `PageContent`), the `DebugInfo`, and additional elements that are needed (e.g., audio players).
@@ -400,10 +400,10 @@ Key insight from the above: instead of `do_main`, we should instead be doing all
     1. The `ClientBridge` receives the `Response` from the `ClientServer`
     2. The `ClientBridge` removes all the page-specific content currently in place.
     3. The `ClientBridge` injects "Before" channel content (e.g., styles, scripts) that came with the `Response`.
-    4. The `ClientBridge` asks the `Client` to update the page
-        1. The `Client` notifies te debug panel of the new route
-        2. The `Client` updates the body content if any is given
-        3. The `Client` mounts the navigation handlers
+    4. The `ClientBridge` updates the page:
+        1. The `ClientBridge` notifies the debug panel of the new route
+        2. The `ClientBridge` updates the body content if any is given
+        3. The `ClientBridge` mounts the navigation handlers
     5. The `ClientBridge` injects "After" channel content (e.g., styles, scripts) that came with the `Response`.
     6. If it was a redirect route, then we handle the redirect now.
         1. We first check to make sure we are not in a loop
@@ -413,8 +413,8 @@ Key insight from the above: instead of `do_main`, we should instead be doing all
     1. The page is now fully loaded, and we are waiting for user interaction.
 14. Navigating Phase
     1. The user interacts with the page such that an event handler is triggered (e.g., clicks a button, presses the back button, triggers a special event handler for a component, etc.)
-    2. The `Client` prepare a new `Request` object with the relevant information (e.g., route, args, event data)
-    3. The `Client` sends the `Request` to the `ClientServer` via the connection established by the `ClientBridge` (a "Visit")
+    2. The `ClientBridge` prepare a new `Request` object with the relevant information (e.g., route, args, event data)
+    3. The `ClientBridge` sends the `Request` to the `ClientServer` via the connection established by the `ClientBridge` (a "Visit")
     4. Go to (11) Visiting Phase.
 
 A complicated substep is the argument preparation:
@@ -495,3 +495,29 @@ You have to call the `reconfigure` method on the `ClientServer` in order to actu
 Interested parts of the `ClientBridge` can subscribe to configuration change events on the `EventBus` in order to know when to update things like the page title, favicon, etc. whenever the configuration changes.
 
 The Compilation pipeline is used to build a static version of the site that can be deployed to any static hosting service. It takes the user's code and compiles it into a format that can be run in the browser (e.g., using Skulpt or Pyodide), and also generates the necessary HTML, CSS, and JS files to serve the site. The `AppBuilder` class is responsible for this process, and it uses the same underlying logic as the `AppServer` to ensure that the compiled version of the site behaves consistently with the development version.
+
+### ClientBridge architecture (current)
+
+The bridge is split into five distinct pieces:
+
+- `ClientBridge`: Orchestrates startup, response handling, debug panel updates, and configuration-driven UI toggles.
+- `SiteRenderer`: Owns DOM setup and updates, including body/fragment replacement and before/after channel content.
+- `NavigationController`: Owns request creation, browser history integration, initial load navigation, and redirect loop protection.
+- `EventManager`: Owns click/submit/custom event wiring, data collection for events, and hotkey registration.
+- `RuntimeAdapter`: Encapsulates runtime-specific behavior (Skulpt/Pyodide interop, event wrapping, form/file handling).
+- `BrowserHistory`: Keeps track of requests through pushstate/popstate
+
+All of this is kicked off in the `run_client_bridge` function, which manages the `ClientBridge` instance.
+
+Simple flow:
+
+```mermaid
+flowchart LR
+    U[User Interaction] --> E[EventManager]
+    E --> N[NavigationController]
+    N --> CS[ClientServer.do_visit]
+    CS --> CB[ClientBridge.handle_response]
+    CB --> SR[SiteRenderer]
+    SR --> DOM[DOM Update]
+    CS -. telemetry .-> CB
+```

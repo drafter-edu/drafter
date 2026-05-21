@@ -84,6 +84,10 @@ class NavigationController:
         request: Request,
         remember=True,
     ):
+        """
+        Takes a Request and initiates it by invoking the navigation function,
+        while also notifying the BrowserHistory.
+        """
         if self.navigation_func is None:
             raise RuntimeError("Navigation function not set in ClientBridge.")
         debug_log("client.initiate_request", request)
