@@ -143,3 +143,10 @@ tests.arguments_outside = Argument("secret_message", "It's a secret to everybody
 tests.arguments_outside = """
 <input data-transform='json-decode' id="secret_message" name="secret_message" type="hidden" value="&quot;It's a secret to everybody!&quot;">
 """
+
+
+tests.files_upload = FileUpload("profile_picture", accept="image/*")
+tests.files_upload = """<input accept="image/*" aria-label="profile_picture" id="profile_picture" name="profile_picture" type="file">"""
+
+tests.files_upload_multiple = FileUpload("documents", accept=[".pdf", ".docx"], multiple=True)
+tests.files_upload_multiple = """<input accept=".pdf, .docx" aria-label="documents" id="documents" multiple name="documents" type="file">"""

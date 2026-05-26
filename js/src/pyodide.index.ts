@@ -6,8 +6,8 @@ export { clearDrafterSiteRoot, handleSystemError } from "./bridge/engine";
 
 window.DebugPanel = DebugPanel;
 
-async function politelyAskUserForDirectory() {
-    // Create a little permissions box to explain why we need access to the directory
+// Create a little permissions box to explain why we need access to the directory
+function buildPermissionBox() {
     const permissionBox = document.createElement("div");
     permissionBox.style.position = "fixed";
     permissionBox.style.display = "flex";
@@ -23,17 +23,19 @@ async function politelyAskUserForDirectory() {
     permissionBox.style.padding = "10px";
     permissionBox.style.zIndex = "10000";
     permissionBox.innerHTML = `
-        <p>Drafter needs access to your local Drafter directory in order to mount the local dev version of Pedal.</p>
+        <p id="permission-description">Drafter needs access to your local Drafter directory in order to mount the local dev version of Pedal.</p>
         <button id="grant-permission-button">Grant Access</button>
     `;
     document.body.appendChild(permissionBox);
+    return permissionBox;
+}
 
+async function politelyAskUserForDirectory() {
     return new Promise<void>((resolve) => {
         const button = document.getElementById(
             "grant-permission-button",
         ) as HTMLButtonElement;
         button.onclick = () => {
-            document.body.removeChild(permissionBox);
             resolve();
         };
     });
@@ -44,8 +46,32 @@ export async function mountDrafterDirectory() {
         await mountDirectory("./drafter", "reuse-drafter-directory");
     } catch (error) {
         // Ask the user for permission and try again:
-        await politelyAskUserForDirectory();
-        await mountDirectory("./drafter", "reuse-drafter-directory");
+        const permissionBox = buildPermissionBox();
+        async function repeatedlyTryMountingPolitely() {
+            await politelyAskUserForDirectory();
+            try {
+                await mountDirectory("./drafter", "reuse-drafter-directory");
+                document.body.removeChild(permissionBox);
+            } catch (error) {
+                const permissionDescription = permissionBox.querySelector(
+                    "#permission-description",
+                );
+                if (permissionDescription) {
+                    permissionDescription.innerHTML = `<p>
+                    <span style="font-size: 1.5em;">⚠️</span>
+                    Failed to mount the directory.
+                    Please ensure you have granted access and try again.</p>
+                    <pre>${error}</pre>
+                    `;
+                    await repeatedlyTryMountingPolitely();
+                } else {
+                    console.error(
+                        "Failed to find permission description element.",
+                    );
+                }
+            }
+        }
+        repeatedlyTryMountingPolitely();
     }
 }
 
@@ -87,12 +113,23 @@ function writeConfigFile(pyodide: any) {
 export async function runStudentCode(
     options: DrafterInitOptions,
 ): Promise<any> {
+    // TODO: Handle URL-based coding loading
     if ((window as any).pyodide === undefined) {
         throw new Error(
             "Pyodide is not initialized. Call setupPyodide() first.",
         );
     }
     const pyodide = (window as any).pyodide;
+    if (options.loadPackagesAutomatically) {
+        // TODO: Provide a nice loading indicator while packages are being loaded
+        console.log("Automatically loading packages for student code...");
+        const loadedPackages = await pyodide.loadPackagesFromImports(
+            options.code,
+        );
+        console.log("Loaded packages:", loadedPackages);
+    } else if (options.explicitPackageList) {
+        // TODO: Handle the semicolon-separated list of packages
+    }
     try {
         const result = await pyodide.runPythonAsync(options.code);
         return result;

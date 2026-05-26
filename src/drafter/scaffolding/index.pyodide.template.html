@@ -24,9 +24,15 @@
   await window.Drafter.runStudentCode({code: "import os; print(os.listdir('./drafter/'))"});
   const app = await window.Drafter.runStudentCode({
   {% if inline_py %}
-    code: document.getElementById('user-code').textContent
+    code: document.getElementById('user-code').textContent,
   {% else %}
-    url: '{{ python_url }}'
+    url: '{{ python_url }}',
+  {% endif %}
+  {% if load_packages_automatically %}
+    loadPackagesAutomatically: true,
+  {% elif explicit_package_list %}
+    loadPackagesAutomatically: false,
+    explicitPackageList: {{ explicit_package_list | tojson }},
   {% endif %}
   });
   console.log("[Drafter AppServer Scaffolding] Student Code Initialized with Pyodide:");

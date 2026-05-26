@@ -3,6 +3,8 @@ export interface DrafterInitOptions {
     url?: string;
     presentErrors?: boolean;
     assetsUrl?: string;
+    loadPackagesAutomatically?: boolean;
+    explicitPackageList?: string[];
 }
 
 export function clearDrafterSiteRoot() {

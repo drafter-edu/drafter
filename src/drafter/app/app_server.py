@@ -51,6 +51,8 @@ async def index(req) -> Response:
         compiled_body=app.state.compiled_body,
         compiled_headers=app.state.compiled_headers,
         mount_drafter_locally=system.app_common.mount_drafter_locally,
+        load_packages_automatically=system.app_common.load_packages_automatically,
+        explicit_package_list=system.app_common.explicit_package_list,
         system=system.to_json(),
         modified_system=get_system_config_modifications(),
     )

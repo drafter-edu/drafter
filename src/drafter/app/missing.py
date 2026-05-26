@@ -2,6 +2,8 @@
 
 Provides a custom 404 error handler that displays available routes.
 
+TODO: Is this file still relevant?
+
 TODO:
     Handle when the requested URL does not exist.
     Also serve any files that are available in the starting folder.

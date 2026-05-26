@@ -39,6 +39,8 @@ def render_index_html(
     mount_drafter_locally: bool = False,
     pyodide_package_style: Optional[str] = None,
     pyodide_drafter_path: Optional[str] = None,
+    load_packages_automatically: bool = True,
+    explicit_package_list: Optional[list[str]] = None,
     system: Optional[dict] = None,
     modified_system: Optional[dict] = None,
 ) -> str:
@@ -58,7 +60,8 @@ def render_index_html(
         compiled_headers: Pre-rendered header content.
         engine: Python engine name ('skulpt' or 'pyodide').
         mount_drafter_locally: Whether to mount Drafter locally.
-
+        load_packages_automatically: Whether to load Python packages automatically.
+        explicit_package_list: List of explicit Python packages to load (if not automatic).
     Returns:
         Rendered HTML string ready to send to client.
     """
@@ -80,6 +83,8 @@ def render_index_html(
         mount_drafter_locally=mount_drafter_locally,
         pyodide_drafter_path=pyodide_drafter_path,
         pyodide_package_style=pyodide_package_style,
+        load_packages_automatically=load_packages_automatically,
+        explicit_package_list=explicit_package_list,
         static=static,
         system=system or {},
         modified_system=modified_system or {},

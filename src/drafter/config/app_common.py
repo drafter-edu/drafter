@@ -20,6 +20,8 @@ class AppCommonConfiguration(BaseConfiguration):
     prerender_initial_page: bool = True
     
     mount_drafter_locally: bool = False
+    load_packages_automatically: bool = True
+    explicit_package_list: Optional[list[str]] = None
 
     override_asset_url: Union[bool, str] = False
 
@@ -78,6 +80,8 @@ class AppCommonConfiguration(BaseConfiguration):
         result.get_bool_if_exists("DRAFTER_MOUNT_DRAFTER_LOCALLY", "mount_drafter_locally")
         result.get_string_if_exists("DRAFTER_OVERRIDE_ASSET_URL", "override_asset_url")
         result.get_string_if_exists("DRAFTER_SITE_TITLE", "site_title")
+        result.get_bool_if_exists("DRAFTER_LOAD_PACKAGES_AUTOMATICALLY", "load_packages_automatically")
+        result.get_string_list_if_exists("DRAFTER_EXPLICIT_PACKAGE_LIST", "explicit_package_list", ";")
         return result.as_dict()
     
     @staticmethod
@@ -129,6 +133,16 @@ class AppCommonConfiguration(BaseConfiguration):
             type=str,
             help="Browser tab title",
         )
+        group.add_argument(
+            "--load-packages-automatically",
+            action="store_true",
+            help="Load Python packages automatically on startup",
+        )
+        group.add_argument(
+            "--explicit-package-list",
+            type=str,
+            help="List of explicit Python packages to load (semicolon-separated)",
+        )
         return group
     
     @staticmethod
@@ -152,4 +166,8 @@ class AppCommonConfiguration(BaseConfiguration):
             result["override_asset_url"] = parsed_args["override_asset_url"]
         if parsed_args.get("site_title"):
             result["site_title"] = parsed_args["site_title"]
+        if parsed_args.get("load_packages_automatically"):
+            result["load_packages_automatically"] = True
+        if parsed_args.get("explicit_package_list"):
+            result["explicit_package_list"] = parsed_args["explicit_package_list"].split(";")
         return result

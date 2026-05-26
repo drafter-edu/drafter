@@ -40,7 +40,7 @@ export async function mountDirectory(pyodideDirectory: any, directoryKey: any) {
     }
 
     const permissionStatus = await (directoryHandle as any).requestPermission(
-        opts
+        opts,
     );
 
     if (permissionStatus !== "granted") {
@@ -49,7 +49,7 @@ export async function mountDirectory(pyodideDirectory: any, directoryKey: any) {
 
     const { syncfs } = await (window as any).pyodide.mountNativeFS(
         pyodideDirectory,
-        directoryHandle
+        directoryHandle,
     );
     console.log("Mounted directory:", directoryHandle);
     console.log("syncfs function:", syncfs);

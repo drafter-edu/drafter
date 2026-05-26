@@ -5,6 +5,7 @@ from typing import Union, List
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.utilities.validation import validate_parameter_name
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
+from drafter.components.forms import FormComponent
 
 # TODO: Properly handle type hints for PILImage, DrafterFile, etc.
 
@@ -100,7 +101,7 @@ class Download(Component):
 
 
 @dataclass(repr=False)
-class FileUpload(Component):
+class FileUpload(FormComponent):
     """File upload input for accepting user file submissions.
 
     Supports filtering by file type using MIME types, extensions,
@@ -119,7 +120,8 @@ class FileUpload(Component):
     """
 
     tag = "input"
-    name: str
+    
+    SELF_CLOSING_TAG = True
 
     ARGUMENTS = [
         ComponentArgument("name"),
@@ -127,7 +129,7 @@ class FileUpload(Component):
     ]
 
     DEFAULT_ATTRS = {"type": "file"}
-    KNOWN_ATTRS = ["accept", "capture", "multiple", "required"]
+    KNOWN_ATTRS = ["accept", "capture", "multiple", "required", "type", "name"]
 
     def __init__(
         self, name: str, accept: Union[str, List[str], None] = None, **extra_settings
