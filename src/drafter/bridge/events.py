@@ -8,6 +8,7 @@ from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.bridge.log import debug_log, console_log
 from drafter.components.page_content import Component
+from drafter.monitor.events import request
 from drafter.monitor.events.config import UpdatedConfigurationEvent
 from drafter.monitor.telemetry import TelemetryEvent
 from drafter.site.site import DRAFTER_TAG_IDS
@@ -80,16 +81,18 @@ class EventManager:
                             else None
                         )
                         
-                        data = get_all_event_data(self.runtime, target_element, event, None)
-                        request = Request(
-                            action=event_name,
-                            url=route,
-                            kwargs=data,
-                            event={}, # TODO: Populate this with useful event info
-                            dom_id=dom_id or "",
-                            button_pressed=target_element
-                        )
-                        return do_navigation(request)
+                        incomplete_data = get_all_event_data(self.runtime, target_element, event, None)
+                        def finish_navigation(data):
+                            request = Request(
+                                action=event_name,
+                                url=route,
+                                kwargs=data,
+                                event={}, # TODO: Populate this with useful event info
+                                dom_id=dom_id or "",
+                                button_pressed=target_element
+                            )
+                            return do_navigation(request)
+                        self.runtime.finish_promises(incomplete_data).then(finish_navigation)
 
                     return handler
 
@@ -131,18 +134,25 @@ class EventManager:
                 )
 
                 is_anchor = nearest_nav_link.tagName.lower() == "a"
-                data = get_all_event_data(
+                incomplete_data = get_all_event_data(
                     self.runtime, target, event, None if is_anchor else nearest_nav_link
                 )
-                request = Request(
-                    action="link",
-                    url=name,
-                    kwargs=data,
-                    event={}, # TODO: Populate this with useful event info
-                    dom_id=dom_id or "",
-                    button_pressed=nearest_nav_link if not is_anchor else ""
-                )
-                return do_navigation(request)
+
+                def finish_navigation(files_and_data):
+                    data = files_and_data[-1] if files_and_data else {}
+                    request = Request(
+                        action="link",
+                        url=name,
+                        kwargs=data,
+                        event={}, # TODO: Populate this with useful event info
+                        dom_id=dom_id or "",
+                        button_pressed=nearest_nav_link if not is_anchor else ""
+                    )
+                    try:
+                        return do_navigation(request)
+                    except Exception as e:
+                        print("ERROR:", e)
+                self.runtime.finish_promises(incomplete_data, finish_navigation)
 
         def submit_handler(event: Any):
             debug_log("client.form_submit_handler", event)
@@ -158,7 +168,6 @@ class EventManager:
             else:
                 submitter = None
                 dom_id = None
-            data = get_all_event_data(self.runtime, event.target, event, submitter)
             if submitter is not None and hasattr(submitter, "getAttribute"):
                 url = submitter.getAttribute("formaction")
             elif hasattr(form_root, "action"):
@@ -166,15 +175,18 @@ class EventManager:
             else:
                 url = js.location.href
             # Build and dispatch navigation event
-            request = Request(
-                action="form",
-                url=url,
-                kwargs=data,
-                event={}, # TODO: Populate this with useful event info
+            incomplete_data = get_all_event_data(self.runtime, event.target, event, submitter)
+            def finish_form_navigation(data):
+                request = Request(
+                    action="form",
+                    url=url,
+                    kwargs=data,
+                    event={}, # TODO: Populate this with useful event info
                 dom_id=dom_id or "",
                 button_pressed=submitter if submitter else ""
-            )
-            return do_navigation(request)
+                )
+                return do_navigation(request)
+            self.runtime.finish_promises(incomplete_data).then(finish_form_navigation)
 
         self.click_handler = self.runtime.wrap_event_handler(handle_click)
         self.submit_handler = self.runtime.wrap_event_handler(submit_handler)
@@ -247,8 +259,9 @@ class EventManager:
 
 def get_all_event_data(
     runtime: RuntimeAdapter, originator: Any, event: Any, submitter: Any
-) -> dict:
+) -> list:
     """ Collect all relevant data for an event, including form data and arguments."""
+    incomplete_resolutions = []
     data = {}
     # Get form data
     # TODO: Allow specifying a different form or scope for data collection
@@ -265,7 +278,8 @@ def get_all_event_data(
                 else:
                     data[key] = value
             else:
-                runtime.handle_file_upload(value, data, key)
+                # TODO: Need to make this part of a chaining promise to handle async pyodide uploads
+                incomplete_resolutions.append(runtime.handle_file_upload(value, data, key))
         # Look for `data-transform` attributes to decode any special fields (e.g., JSON-encoded arguments)
         for element in form.elements:
             if element.hasAttribute("data-transform"):
@@ -288,5 +302,7 @@ def get_all_event_data(
         # TODO: Handle corruption more elegantly
         parsed = json.loads(arg)
         data.update(parsed)
+        
+    incomplete_resolutions.append(runtime.promise_data(data))
 
-    return data
+    return incomplete_resolutions

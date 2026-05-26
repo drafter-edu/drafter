@@ -10,7 +10,7 @@ import json
 import time
 import html
 
-from drafter.bridge.events import EventManager, get_all_event_data
+from drafter.bridge.events import EventManager
 from drafter.bridge.history import BrowserHistory
 from drafter.bridge.navigation import NavigationController
 from drafter.bridge.site_renderer import SiteRenderer

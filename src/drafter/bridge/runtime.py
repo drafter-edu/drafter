@@ -38,8 +38,16 @@ class RuntimeAdapter:
 
     def cleanup_event_handler(self, handler: Any) -> None:
         pass
+    
+    def finish_promises(self, promises: list[Any], afterwards: Callable) -> Any:
+        return afterwards(promises)
+        #return js.Promise.all(promises).then(afterwards)
+    
+    def promise_data(self, data: dict) -> Any:
+        """Return a promise that resolves to the provided data (for async handling)."""
+        return data
 
-    def handle_file_upload(self, file: Any, data: dict, key: str) -> None:
+    def handle_file_upload(self, file: Any, data: dict, key: str):
         buffer = file.arrayBuffer()
         raw_bytes = js.Uint8Array(buffer)
         content = bytes(raw_bytes)
@@ -56,6 +64,9 @@ class RuntimeAdapter:
             if not isinstance(data[key], list):
                 data[key] = [data[key]]
             data[key].append(file_data)
+        def return_data():
+            return data
+        return return_data
 
     def history_push_state(self, state: dict, title: str, url: str) -> None:
         js.history.pushState(state, title, url)
@@ -98,12 +109,39 @@ class PyodideRuntime(RuntimeAdapter):
             handler.destroy()
         if handler in self._proxies:
             self._proxies.remove(handler)
+    
+    def finish_promises(self, promises: list[Any], afterwards: Callable) -> Any:
+        print("I need to finish all these promises", promises)
+        return js.Promise.all(promises).catch(lambda error: print("ERROR:", error)).then(afterwards)
+    
+    def promise_data(self, data: dict) -> Any:
+        """Return a promise that resolves to the provided data (for async handling)."""
+        return self._create_proxy(js.Promise.resolve(data))
 
-    def handle_file_upload(self, file: Any, data: dict, key: str) -> None:
+    def handle_file_upload(self, file: Any, data: dict, key: str):
         # TODO: Implement async file handling for Pyodide
-        raise NotImplementedError(
-            "Async file upload handling in Pyodide not implemented yet."
-        )
+        #raise NotImplementedError(
+        #    "Async file upload handling in Pyodide not implemented yet."
+        #)
+        buffer = file.arrayBuffer()
+        def on_buffer_ready(buffer):
+            raw_bytes = js.Uint8Array.new(buffer)
+            content = bytes(raw_bytes)
+            file_data = {
+                "filename": file.name,
+                "content": content,
+                "type": file.type,
+                "size": file.size,
+                "__file_upload__": True,
+            }
+            if key not in data:
+                data[key] = file_data
+            else:
+                if not isinstance(data[key], list):
+                    data[key] = [data[key]]
+                data[key].append(file_data)
+            return data
+        return self._create_proxy(buffer.then(on_buffer_ready))
     
 
     def history_push_state(self, state: dict, title: str, url: str) -> None:

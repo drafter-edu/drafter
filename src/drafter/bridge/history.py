@@ -21,10 +21,15 @@ class BrowserHistory:
     def add_to_history(self, request: Request):
         url = request.url
         request_id = request.id
+        try:
+            kwargs = json.dumps(request.kwargs) if request.kwargs else "{}"
+        except Exception as e:
+            console_log(f"Error serializing request.kwargs to JSON: {e}")
+            kwargs = "{}"
         state = {
             "request_id": request_id,
             "url": url,
-            "kwargs": json.dumps(request.kwargs) if request.kwargs else "{}",
+            "kwargs": kwargs,
             # TODO: Track parameters as well
         }
         full_url = self.runtime.create_url(js.location.href)
