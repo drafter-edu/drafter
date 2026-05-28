@@ -118,11 +118,7 @@ class PyodideRuntime(RuntimeAdapter):
         """Return a promise that resolves to the provided data (for async handling)."""
         return self._create_proxy(js.Promise.resolve(data))
 
-    def handle_file_upload(self, file: Any, data: dict, key: str):
-        # TODO: Implement async file handling for Pyodide
-        #raise NotImplementedError(
-        #    "Async file upload handling in Pyodide not implemented yet."
-        #)
+    def handle_file_upload(self, file: Any, data: dict, key: str) -> Any:
         buffer = file.arrayBuffer()
         def on_buffer_ready(buffer):
             raw_bytes = js.Uint8Array.new(buffer)

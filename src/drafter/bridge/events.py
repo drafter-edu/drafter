@@ -92,7 +92,7 @@ class EventManager:
                                 button_pressed=target_element
                             )
                             return do_navigation(request)
-                        self.runtime.finish_promises(incomplete_data).then(finish_navigation)
+                        self.runtime.finish_promises(incomplete_data, finish_navigation)
 
                     return handler
 
@@ -186,7 +186,7 @@ class EventManager:
                 button_pressed=submitter if submitter else ""
                 )
                 return do_navigation(request)
-            self.runtime.finish_promises(incomplete_data).then(finish_form_navigation)
+            self.runtime.finish_promises(incomplete_data, finish_form_navigation)
 
         self.click_handler = self.runtime.wrap_event_handler(handle_click)
         self.submit_handler = self.runtime.wrap_event_handler(submit_handler)
