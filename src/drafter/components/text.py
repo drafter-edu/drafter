@@ -3,7 +3,7 @@ import html
 from typing import List
 from drafter.components.layout import handle_arguments_compatibility
 from drafter.components.page_content import Component, ComponentArgument, PageContent
-from drafter.components.planning.render_plan import RenderPlan
+from drafter.components.planning.render_plan import RenderPlan, NewlineMode
 
 
 @dataclass(repr=False)
@@ -22,6 +22,7 @@ class Pre(Component):
     ARGUMENTS = [ComponentArgument("content", kind="var", is_content=True)]
 
     COLLAPSE_WHITESPACE = True
+    NEWLINE_MODE = NewlineMode.RETAIN
 
     def __init__(self, *content: PageContent, **extra_settings):
         """Initialize preformatted text component.

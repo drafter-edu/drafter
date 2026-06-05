@@ -27,7 +27,7 @@ from typing import List, Union, Any, Optional, ClassVar, Callable, Sequence
 import json
 import html
 
-from drafter.components.planning.render_plan import AssetBundle, RenderPlan
+from drafter.components.planning.render_plan import AssetBundle, RenderPlan, NewlineMode
 from drafter.components.utilities.attributes import (
     BASELINE_ATTRS,
     BOOLEAN_ATTRS,
@@ -243,6 +243,7 @@ class Component:
     # Formatting settings
     COLLAPSE_WHITESPACE: ClassVar[bool] = False
     SELF_CLOSING_TAG: ClassVar[bool] = False
+    NEWLINE_MODE: ClassVar[str] = NewlineMode.CONVERT_TO_BR
 
     # Constants
     DRAFTER_DATA_ARGUMENT_NAME: ClassVar[str] = "data--drafter-arguments"
@@ -267,6 +268,7 @@ class Component:
         id=None,
         self_closing=None,
         collapse_whitespace=None,
+        newline_mode=None,
     ) -> RenderPlan:
         return RenderPlan(
             kind="tag",
@@ -282,6 +284,7 @@ class Component:
             collapse_whitespace=collapse_whitespace
             if collapse_whitespace is not None
             else self.COLLAPSE_WHITESPACE,
+            newline_mode=newline_mode if newline_mode is not None else self.NEWLINE_MODE,
         )
 
     def _handle_extra_settings(self, attributes, context) -> dict:

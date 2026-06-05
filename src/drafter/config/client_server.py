@@ -38,6 +38,7 @@ class ClientServerConfiguration(BaseConfiguration):
         root_element_id: ID prefix for root element.
         system_routes: Dict mapping route names to handler callables.
         external_pages: List of external page links (URL or (URL, Text) tuples).
+        newlines_to_br: Whether to convert newlines to <br> tags in text content.
     """
 
     server_name: str = "MAIN_SERVER"
@@ -52,6 +53,7 @@ class ClientServerConfiguration(BaseConfiguration):
     deploy_image_path: str = ""
 
     override_asset_url: Union[bool, str] = False
+    newlines_to_br: bool = False
     # Literal HTML content
     additional_header_content: list[str] = field(default_factory=list)
     # Raw literal CSS
@@ -68,6 +70,8 @@ class ClientServerConfiguration(BaseConfiguration):
     root_element_id: str = "drafter-root--"
     # System Routes
     system_routes: dict[str, Optional[Callable]] = field(default_factory=dict)
+    # Newlines to <br> conversion
+    newlines_to_br: bool = True
     # TODO: Handle the system routes as configuration settings
     # TODO: Config setting to show white flash on navigation, also to control behavior
     # TODO: Config setting to add spinner to buttons
@@ -96,6 +100,7 @@ class ClientServerConfiguration(BaseConfiguration):
         result.get_string_list_if_exists("DRAFTER_ADDITIONAL_SCRIPT_CONTENT", "additional_script_content", ";")
         result.get_bool_if_exists("DRAFTER_USE_SHADOW_DOM", "use_shadow_dom")
         result.get_string_if_exists("DRAFTER_ROOT_ELEMENT_ID", "root_element_id")
+        result.get_bool_if_exists("DRAFTER_NEWLINES_TO_BR", "newlines_to_br")
         return result.as_dict()
     
     @staticmethod
@@ -171,6 +176,11 @@ class ClientServerConfiguration(BaseConfiguration):
             type=str,
             help="ID prefix for root element",
         )
+        group.add_argument(
+            "--newlines-to-br",
+            action="store_true",
+            help="Whether to convert newlines to <br> tags in text content",
+        )
         return group
     
     @staticmethod
@@ -220,6 +230,8 @@ class ClientServerConfiguration(BaseConfiguration):
             result["use_shadow_dom"] = True
         if parsed_args.get("root_element_id"):
             result["root_element_id"] = parsed_args["root_element_id"]
+        if parsed_args.get("newlines_to_br"):
+            result["newlines_to_br"] = True
         return result
 
     def to_json(self) -> dict:
@@ -242,6 +254,7 @@ class ClientServerConfiguration(BaseConfiguration):
             "root_element_id": self.root_element_id,
             "system_routes": list(self.system_routes.keys()),
             "external_pages": self.external_pages,
+            "newlines_to_br": self.newlines_to_br,
         }
         
 
@@ -271,6 +284,7 @@ class ClientServerConfiguration(BaseConfiguration):
             system_routes=dict(self.system_routes),
             override_asset_url=self.override_asset_url,
             external_pages=list(self.external_pages) if self.external_pages else None,
+            newlines_to_br=self.newlines_to_br,
         )
 
     def update_multiple_configuration(self, **kwargs):

@@ -1,9 +1,9 @@
 - [x] Ensure that config settings are being passed to the launched app correctly
-- [ ] Refactoring ClientBridge
-    - [ ] Could become just `Client`
-    - [ ] Separate out Push/Pop state handling into a separate module
-        - [ ] Handle cleanly storing larger state in memory/localStorage and only putting a reference in the URL, for big data situations
-    - [ ] Separate out the event handler and mounting logic into a separate class
+- [x] Refactoring ClientBridge
+    - [x] Could become just `Client`
+    - [x] Separate out Push/Pop state handling into a separate module
+    - [x] Separate out the event handler and mounting logic into a separate class
+- [ ] Handle cleanly storing larger state in memory/localStorage and only putting a reference in the URL, for big data situations
 - [ ] Fragment handler is not being correctly de-registered, leading to repeated event firing
 - [ ] The "phase" should be included in the TelemetryCorrelation
 - [ ] Should it be "SilentUpdate" or "QuietUpdate" perhaps?
@@ -54,6 +54,8 @@
 - [ ] Fragment support
 - [ ] Progress support
 - [ ] Update state support
+- [ ] Empty images should have a special placeholder image, rather than just a broken icon.
+- [ ] Handle module imports in Pyodide more flexibly; support `automatic`, `none`, and explicit listing in the configuration.
 - [ ] New elements and features:
     - [ ] Audio element
     - [ ] Lat/Long
@@ -91,6 +93,7 @@
 - [x] Can we scope out the MAIN_SERVER and MAIN_EVENT_BUS to be instance-level instead of global? That way we could support multiple independent Drafter instances on the same page, and it would be easier to reason about the state and events for each instance. The EventBus could simply be tied to a specific ClientServer+ClientBridge pair.
     - [x] Increasingly feels like the EventBus should just be part of the ClientServer.
     - [ ] When you import drafter, a default MAIN_SERVER is always created. But you could also create additional ClientServer instances if you want, and adjust the "default" MAIN_SERVER.
+- [ ] Add transitions between pages, with a default fade-in/fade-out, but allow the user to customize the transition effect.
 - [ ] ShadowDom for the entire page content, to prevent CSS conflicts when embedding Drafter into an existing page
     - [ ] Need to scope out all selectors to correctly target only the `ClientBridge.root` element, and to also namespace that root element with a specific ID.
 - [ ] Test that we can create multiple servers on the same page without conflicts, and that they maintain separate state and event buses
@@ -98,6 +101,9 @@
     - [ ] Disable external links
     - [ ] Disable ability to set custom JS/CSS/Headers
 - [ ] Interface option to reload the current window without the framed/debug mode, using LocalStorage
+- [ ] Move debug area into an iframe?
+- [ ] PersistentStorage module that handles saving and restoring state to/from LocalStorage, IndexedDB, or other storage mechanisms
+- [ ] Full MatPlotLib support
 
 Pie in the sky:
 

@@ -3,7 +3,7 @@ from datetime import datetime, date, time
 import html
 from typing import List, Optional, Union, Any
 from drafter.components.page_content import Component, ComponentArgument, PageContent
-from drafter.components.planning.render_plan import RenderPlan
+from drafter.components.planning.render_plan import RenderPlan, NewlineMode
 from drafter.components.utilities.validation import validate_parameter_name
 
 
@@ -18,6 +18,8 @@ class FormComponent(Component):
     """
 
     name: str
+    
+    NEWLINE_MODE = NewlineMode.RETAIN
 
     def handle_aria(self, attributes: dict) -> None:
         """Add ARIA label attribute if not already present.
@@ -71,6 +73,8 @@ class Label(Component):
 
     KNOWN_ATTRS = ["for"]
     RENAME_ATTRS = {"for_id": "for"}
+    
+    NEWLINE_MODE = NewlineMode.CONVERT_TO_BR
 
     def __init__(
         self,

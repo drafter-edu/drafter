@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 import html
 from drafter.components import Component
-from drafter.components.planning.render_plan import RenderPlan
+from drafter.components.planning.render_plan import RenderPlan, NewlineMode
 from drafter.components.utilities.attributes import parse_extra_settings
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.history.state import SiteState
@@ -11,6 +11,7 @@ from drafter.history.state import SiteState
 class RenderError(Exception):
     """Exception raised during component rendering."""
     pass
+
 
 
 @dataclass
@@ -44,6 +45,7 @@ class Renderer:
         self.parts = []
         self.assets = {"css": set(), "js": set()}
         self.indentation = 2
+        self.newline_mode_stack = [NewlineMode.CONVERT_TO_BR]
 
     def flatten(self) -> str:
         """Combine all accumulated HTML parts into a single string.
@@ -64,6 +66,16 @@ class Renderer:
     def new_line(self):
         """Append a newline to the output."""
         self.parts.append("\n")
+        
+    def in_convert_newlines_mode(self) -> Optional[bool]:
+        """Check if the current rendering mode converts newlines to <br>.
+
+        Returns:
+            bool: True if in convert-to-<br> mode, False otherwise.
+        """
+        print("  >", self.newline_mode_stack)
+        return (self.newline_mode_stack[-1] != NewlineMode.RETAIN
+                and (self.configuration and self.configuration.newlines_to_br))
 
     def render(self, component):
         """Recursively render a component to HTML.
@@ -83,8 +95,13 @@ class Renderer:
         """
         # TODO: Handle errors gracefully and log them
         # print(self.component_stack, component)
+        print(self.depth, component, self.in_convert_newlines_mode())
         if isinstance(component, str):
-            self.write(html.escape(component))
+            if self.in_convert_newlines_mode():
+                escaped = html.escape(component).replace("\n", "<br>")
+                self.write(escaped)
+            else:
+                self.write(html.escape(component))
         elif isinstance(component, list):
             for child_index, child in enumerate(component):
                 self.component_stack.append(f"[{child_index}]")
@@ -133,7 +150,9 @@ class Renderer:
                         if plan.collapse_whitespace:
                             old_depth = self.depth
                             self.depth = 0
+                        self.newline_mode_stack.append(plan.newline_mode)
                         self.render(child)
+                        self.newline_mode_stack.pop()
                         if not plan.collapse_whitespace:
                             self.new_line()
                         else:

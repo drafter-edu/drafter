@@ -118,7 +118,7 @@ The DOM structure of the site is as follows:
 
 - There's a top-level div tag with id `drafter-root--` that contains ALL content (except for top-level script tags needed for loading the actual true initial page).
 - There's a div tag with id `drafter-site--` that contains the entire site.
-- Inside that is a `drafter-frame--` div that contains the main app, followed by the `drafter-debug-info--` div.
+- Inside that is a `drafter-form--` div that contains the main app (in `drafter-frame--`), followed by the `drafter-debug--` div.
     - The frame makes the app look like it is in a browser window.
     - The frame is only visible in development mode; otherwise, only its content is visible.
 - Inside the frame is a `drafter-header--` div, a `drafter-body--` div, and a `drafter-footer--` div.
@@ -321,42 +321,6 @@ There's four fundamental kinds of data to be handled in Drafter:
 All of these get passed in as parameters to a connected route function.
 
 ### Summary of Execution Timeline
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Runtime as Drafter Runtime
-    participant Launch as launch.py
-    participant AppServer
-    participant Browser
-    participant Py as Skulpt/Pyodide
-    participant CS as ClientServer
-    participant CB as ClientBridge
-
-    User->>Runtime: Run student app
-
-    Runtime->>Runtime: Initialize configuration
-    Runtime->>CS: Create MAIN_SERVER
-
-    User->>Launch: start_server()
-
-    alt Development Server Mode
-        Launch->>AppServer: Start Starlette server
-        AppServer->>Browser: Serve initial page
-    else Static Build Mode
-        Launch->>Browser: Serve compiled static assets
-    end
-
-    Browser->>Py: Initialize Python runtime
-    Py->>CS: Execute student code again
-
-    CS->>CB: Render site
-    CB->>Browser: Mount UI + handlers
-
-    CB->>CS: Initial Request(index)
-    CS-->>CB: Initial Response
-    CB->>Browser: Render initial content
-```
 
 Fundamentally, the user writes a python script that starts with `from drafter import *`, defines server in various ways, and then calls `start_server(initial_state)`. This user application can be run in three possible ways:
 

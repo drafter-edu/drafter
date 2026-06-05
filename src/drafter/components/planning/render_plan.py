@@ -21,6 +21,13 @@ class AssetBundle:
     js: set[str]
 
 
+# Newline Mode Stack Type Enumeration
+class NewlineMode:
+    """Enumeration for newline handling modes during rendering."""
+    RETAIN = "retain"  # Leave newlines alone
+    CONVERT_TO_BR = "convert_to_br"  # Convert newlines to <br> tags
+
+
 @dataclass
 class RenderPlan:
     """Describes how to render a component.
@@ -55,6 +62,7 @@ class RenderPlan:
     children: Any = None  #  PageContent | None
     self_closing: bool = False
     collapse_whitespace: bool = False
+    newline_mode: str = NewlineMode.CONVERT_TO_BR
     # Attributes that might be on this tag, but are not explicitly handled
     known_attributes: Optional[list[str]] = None
     id: Optional[str] = None
