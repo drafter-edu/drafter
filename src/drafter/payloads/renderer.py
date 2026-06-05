@@ -73,7 +73,6 @@ class Renderer:
         Returns:
             bool: True if in convert-to-<br> mode, False otherwise.
         """
-        print("  >", self.newline_mode_stack)
         return (self.newline_mode_stack[-1] != NewlineMode.RETAIN
                 and (self.configuration and self.configuration.newlines_to_br))
 
@@ -95,7 +94,7 @@ class Renderer:
         """
         # TODO: Handle errors gracefully and log them
         # print(self.component_stack, component)
-        print(self.depth, component, self.in_convert_newlines_mode())
+        # print(self.depth, component, self.in_convert_newlines_mode())
         if isinstance(component, str):
             if self.in_convert_newlines_mode():
                 escaped = html.escape(component).replace("\n", "<br>")
