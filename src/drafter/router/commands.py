@@ -51,3 +51,15 @@ def route(
         return func
 
     return make_route
+
+
+def add_route(url: str, func: Callable[..., object], server: Optional[ClientServer] = None):
+    """Add a route handler to the server.
+
+    Args:
+        url: Route path to register.
+        func: Function to handle requests to this route.
+        server: Server instance to register with (defaults to main server).
+    """
+    server = server or get_main_server()
+    server.add_route(url, func)
