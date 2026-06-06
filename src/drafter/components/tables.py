@@ -9,7 +9,6 @@ from drafter.components.page_content import (
 )
 from drafter.components.planning.render_plan import RenderPlan
 from drafter.history.utils import safe_repr
-from copy import deepcopy
 
 
 @dataclass(repr=False)
