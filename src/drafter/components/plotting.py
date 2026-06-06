@@ -3,13 +3,16 @@ import io
 import base64
 from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.planning.render_plan import RenderPlan
+from drafter.helpers.utils import is_pyodide
 
 try:
     import matplotlib.pyplot as plt
+    import matplotlib
 
     _has_matplotlib = True
-except ImportError:
+except ImportError as e:
     _has_matplotlib = False
+    print(e)
 
 
 @dataclass(repr=False)
@@ -65,6 +68,28 @@ class MatPlotLibPlot(Component):
         if "bbox_inches" not in extra_matplotlib_settings:
             extra_matplotlib_settings["bbox_inches"] = "tight"
         self.close_automatically = close_automatically
+        
+    def _plan_pyodide(self, context) -> RenderPlan:
+        """Generate render plan for Pyodide environment.
+
+        Uses Matplotlib's HTML5 canvas backend to get the figure as an HTML string.
+
+        Args:
+            context: Rendering context.
+        Returns:
+            RenderPlan with raw HTML for the figure.
+        """
+        # In Pyodide, we can use the HTML5 canvas backend to get the figure as HTML
+        image_data = io.BytesIO()
+        settings = self.extra_matplotlib_settings.copy()
+        if 'format' not in settings:
+            settings['format'] = 'png'
+        plt.savefig(image_data, **settings)  # type: ignore
+        decoded_image_data = base64.b64encode(image_data.getvalue()).decode("utf-8")
+        return RenderPlan(
+            kind="raw",
+            raw_html=f'<img src="data:image/png;base64,{decoded_image_data}" />'
+        )
 
     def plan(self, context) -> RenderPlan:
         """Generate render plan for the Matplotlib figure.
@@ -78,30 +103,33 @@ class MatPlotLibPlot(Component):
         Raises:
             ValueError: If format is not 'png' or 'svg'.
         """
-        # Handle image processing
-        image_data = io.BytesIO()
-        plt.savefig(image_data, **self.extra_matplotlib_settings)  # type: ignore
-        if self.close_automatically:
-            plt.close()  # type: ignore
-        image_data.seek(0)
-
-        attrs = {}
-        if self.extra_matplotlib_settings["format"] == "png":
-            figure = base64.b64encode(image_data.getvalue()).decode("utf-8")
-            figure = f"data:image/png;base64,{figure}"
-            attrs["src"] = figure
-        elif self.extra_matplotlib_settings["format"] == "svg":
-            figure = image_data.read().decode()
-            # For SVG, we return the raw HTML
-            return RenderPlan(
-                kind="raw",
-                raw_html=figure,
-            )
+        if is_pyodide():
+            return self._plan_pyodide(context)
         else:
-            raise ValueError(
-                f"Unsupported format {self.extra_matplotlib_settings['format']}"
-            )
+            # Handle image processing
+            image_data = io.BytesIO()
+            plt.savefig(image_data, **self.extra_matplotlib_settings)  # type: ignore
+            if self.close_automatically:
+                plt.close()  # type: ignore
+            image_data.seek(0)
 
-        attrs.update(self.extra_settings)
+            attrs = {}
+            if self.extra_matplotlib_settings["format"] == "png":
+                figure = base64.b64encode(image_data.getvalue()).decode("utf-8")
+                figure = f"data:image/png;base64,{figure}"
+                attrs["src"] = figure
+            elif self.extra_matplotlib_settings["format"] == "svg":
+                figure = image_data.read().decode()
+                # For SVG, we return the raw HTML
+                return RenderPlan(
+                    kind="raw",
+                    raw_html=figure,
+                )
+            else:
+                raise ValueError(
+                    f"Unsupported format {self.extra_matplotlib_settings['format']}"
+                )
 
-        return self._plan_tag(context, attributes=attrs)
+            attrs.update(self.extra_settings)
+
+            return self._plan_tag(context, attributes=attrs)

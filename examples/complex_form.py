@@ -28,7 +28,7 @@ def index(state: State) -> Page:
             CheckBox("new_availability", state.available),
             "\n",
             Label("Dogs, cats, or capybaras?"),
-            SelectBox("new_animal", ["dogs", "cats", "capybaras"], state.favorite),
+            SelectBox("new_animal", ["dogs", "cats", "capybaras", "⭐⭐⭐"], state.favorite),
             "\n",
             Label("Write me a poem, please.", "new_poem"),
             TextArea("new_poem", state.poem),

@@ -1,6 +1,14 @@
+'''
+TODO: Currently, it doesn't seem like the seaborn dependency is getting picked up
+by the automatic system?
+'''
+
+
 from drafter import *
 import random
 import matplotlib.pyplot as plt
+#import seaborn as sns
+import pandas as pd
 from dataclasses import dataclass
 
 random.seed(0)
@@ -15,8 +23,11 @@ class State:
 
 @route
 def index(state: State):
-    plt.hist(MOCK_DATA)
-    plt.title('Random data')
+    df = pd.DataFrame({"data": state.data})
+    #sns.histplot(df["data"], kde=True)
+    df.plot.hist(y="data", bins=20)
+    plt.title('Random data with Seaborn')
+    
     return Page(state, [
         "Plotting!\n",
         MatPlotLibPlot(),

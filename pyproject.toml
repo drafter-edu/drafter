@@ -86,6 +86,9 @@ dev = [
   "html5lib",
 ]
 
+[project.optional-dependencies]
+examples = ["pandas", "seaborn", "requests"]
+
 [project.scripts]
 drafter = "drafter.cli:main"
 
