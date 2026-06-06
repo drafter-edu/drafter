@@ -435,21 +435,32 @@ A complicated substep is the argument preparation:
 9. The `Router` verifies that all expected parameters are present
 10. The `Router` builds a string representation of the arguments for logging/debugging purposes
 
-### Error Handling
+### Error and warning Handling
 
-Here's how each kind of error is handled:
+Here's when different kinds of errors can occur:
 
 - Core infrastructure during initial entire page load (e.g., Skulpt setup)
 - Route resolution errors (e.g., no matching route, argument parsing errors)
 - Errors during route execution (e.g., exceptions raised in route handlers) in student code
 
+Error severity varies too:
+
+- Errors are things that prevent the page from loading or functioning properly, and should be shown to the user in a friendly way.
+- Warnings are things that might indicate a potential issue or suboptimal code, but don't necessarily prevent the page from functioning.
+- Debug information is more detailed information that is primarily for the developer's benefit and might not be relevant to the user.
+
+**Open Question**: Is there nuance within errors and warnings? For example, are there "critical" errors that should be shown in an alert popup, while less critical errors can be shown in the debug panel or as a banner on the page?
+
 Here are the places that we can show errors to the user:
 
 - The drafter page content area, where we can show friendly error messages that are styled to fit the site. This is the most common place for errors to be shown, and is where we would show things like "404: Page not found" or "500: Internal server error", as well as any custom error pages that the user might create.
-- The entire page, if Drafter's infrastructure fails to load at all.
+- The entire page, if Drafter's infrastructure fails to load at all, in a panic dialogue
 - The debug panel, where we can show error events.
+- A hidden dialogue that can be revealed with a hotkey, which shows the full error information including stack traces, request/response dumps, etc. This is important for deployed sites that want to still show some details
 - The browser console, where we can log errors for debugging purposes. This is generally for error details that are more serious and might indicate a bug in the framework itself, rather than just an error in the user's code.
-- An `alert` popup, which can be used for critical errors that require immediate attention. This should be used sparingly, as it can be disruptive to the user experience.
+- An `alert` popup, which can be used for critical errors that require immediate attention. This should be used sparingly, as it can be disruptive to the user experience. Might just be a toast.
+- The original system console
+- A file that gets written to disk
 
 ### Configuration
 
