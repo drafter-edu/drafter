@@ -807,12 +807,10 @@ class ClientServer:
         TODO:
             Inspect route function for valid signature.
         """
-        self.router.add_route(url, func)
+        details = self.router.add_route(url, func)
         log_data(
             RouteAddedEvent(
-                url=url,
-                signature=self.router.signatures[url].to_string(),
-                is_system_route=is_system_route,
+                **details, is_system_route=is_system_route
             ),
             "client_server.add_route",
         )

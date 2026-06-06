@@ -16,6 +16,70 @@ from drafter.history.utils import safe_repr
 from drafter.router.introspect import get_signature, RouteIntrospection
 
 
+def normalize_url(url: str) -> str:
+    """
+    Turns a URL into a normalized form for consistent route matching.
+    
+    This function performs the following transformations:
+    - Strips leading and trailing whitespace.
+    - Strips trailing slashes.
+    - Prepends "/" if the URL is non-empty and does not already start with "/".
+    - Converts empty URLs to "index"."
+    - Single dots are ignored
+    - Double dots delete the previous path segment, if any.
+    """
+    url = url.strip()
+    
+    segments = []
+    for segment in url.split("/"):
+        if segment in ("", "."):
+            continue
+        elif segment == "..":
+            if segments:
+                segments.pop()
+        else:
+            segments.append(segment)
+            
+    if not segments:
+        return "/index"
+    
+    normalized_url = "/" + "/".join(segments)
+    return normalized_url
+
+
+def clean_url(url: str) -> str:
+    """
+    Turns a URL into a heavily normalized form for matching against route
+    function names, instead of explicit URLs.
+    
+    The following transformations are applied:
+    - Strips leading and trailing whitespace.
+    - Strips leading and trailing slashes.
+    - Internal slashes are converted to underscores.
+    - Single dots are ignored.
+    - Double dots delete the previous path segment, if any.
+    - Non-valid characters are removed (only allows alphanumeric, underscores, and underscores).
+    """
+    url = url.strip().strip("/")
+    
+    segments = []
+    for segment in url.split("/"):
+        if segment in ("", "."):
+            continue
+        elif segment == "..":
+            if segments:
+                segments.pop()
+        else:
+            cleaned_segment = "".join(c for c in segment if c.isalnum() or c=="_")
+            segments.append(cleaned_segment)
+            
+    if not segments:
+        return "index"
+            
+    cleaned_url = "_".join(segments)
+    return cleaned_url
+
+
 @dataclass
 class Router:
     """Map URL paths to route handler functions and prepare request arguments.
@@ -27,6 +91,7 @@ class Router:
 
     def __init__(self) -> None:
         self.routes = {}
+        self.route_functions = {}
         self.signatures = {}
 
     def get_route(self, url: str) -> Optional[Callable]:
@@ -38,7 +103,12 @@ class Router:
         Returns:
             Optional[Callable]: Handler function or None if not found.
         """
-        return self.routes.get(url)
+        if clean_url(url) in self.route_functions:
+            return self.route_functions[clean_url(url)]
+        route = self.routes.get(normalize_url(url))
+        if route:
+            return route
+        return None
 
     def has_route(self, url: str) -> bool:
         """Check whether a route exists for the given URL.
@@ -49,9 +119,9 @@ class Router:
         Returns:
             bool: True if route exists, False otherwise.
         """
-        return url in self.routes
+        return clean_url(url) in self.route_functions or normalize_url(url) in self.routes
 
-    def add_route(self, url: str, func: Callable) -> None:
+    def add_route(self, url: str, func: Callable) -> dict[str, Any]:
         """Register a route handler for the given URL.
 
         Args:
@@ -61,8 +131,13 @@ class Router:
         TODO:
             Handle ignored parameters.
         """
-        self.routes[url] = func
-        self.signatures[url] = get_signature(func)
+        self.routes[normalize_url(url)] = func
+        self.route_functions[clean_url(url)] = func
+        self.signatures[normalize_url(url)] = get_signature(func)
+        return {
+            "url": url,
+            "signature": self.signatures[normalize_url(url)].to_string()
+        }
 
     def reset(self) -> None:
         """Reset router state (currently a no-op).
@@ -73,6 +148,7 @@ class Router:
     def clear(self) -> None:
         """Remove all registered routes and signatures."""
         self.routes.clear()
+        self.route_functions.clear()
         self.signatures.clear()
 
     def prepare_arguments(
@@ -433,9 +509,10 @@ class Router:
         Raises:
             ValueError: If no signature is registered for the URL.
         """
-        signature = self.signatures.get(request.url)
+        normalized_url = normalize_url(request.url)
+        signature = self.signatures.get(normalized_url)
         if not signature:
-            raise ValueError(f"No signature found for route '{request.url}'")
+            raise ValueError(f"No signature found for route '{request.url}' ('{normalized_url}')")
         return signature
 
     def inject_state(

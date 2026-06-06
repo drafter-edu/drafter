@@ -72,7 +72,7 @@ from drafter.styling.styling import (
     change_margin,
     change_padding,
 )
-from drafter.router.commands import route
+from drafter.router.commands import route, add_route
 from drafter.payloads import Page, Fragment, Redirect, Update
 from drafter.deploy import (
     hide_debug_information,
@@ -105,6 +105,7 @@ __all__ = [
     "get_main_server",
     "set_main_server",
     "route",
+    "add_route",
     "start_server",
     "PageContent",
     "Div",
