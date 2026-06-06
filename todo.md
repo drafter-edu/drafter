@@ -82,6 +82,10 @@
     - [x] Components should have a stable unique ID
     - [ ] Include sufficient whitespace and formatting in rendered HTML for easier debugging
     - [ ] Functions for testing if a component has certain attributes, styles, children, etc.
+- [ ] Debugging tools for rendered page:
+    - [ ] Should have a mode where we hover over a rendered component, and it shows the associated lines of source code that generated that component.
+    - [ ] Should have a way to see the formatted html of the page without using the inspector
+    - [ ] Should have a way to see the formatted repr of the page without using the inspector
 - [ ] Default system routes
     - [x] Route for "--reset" automatically added
     - [ ] Route for "--about" automatically added
@@ -104,6 +108,17 @@
 - [ ] Move debug area into an iframe?
 - [ ] PersistentStorage module that handles saving and restoring state to/from LocalStorage, IndexedDB, or other storage mechanisms
 - [ ] Full MatPlotLib support
+    - [ ] Skulpt requires d3 library
+    - [x] Pyodide matplotlib support
+    - [ ] Seaborn support
+- [ ] Should folks be able to add strings to components?
+    - [ ] Could be useful for labels on form elements
+    - [ ] What about for newline breaks?
+- [ ] Current State should visualize pandas dataframes/series, matplotlib figures, and other common data types in a nice way
+- [ ] Robust error handling and error screens, with better styling and helpful links to navigate out of the error
+    - [ ] Inventory all the kinds of errors that we can think of
+    - [ ] Create way better errors for any kind of issue during loading, so that users can get precise guidance on how to handle that case.
+    - [ ] Handle both `window.onerror` and `window.onunhandledrejection` for catching errors in both sync and async code
 
 Pie in the sky:
 
