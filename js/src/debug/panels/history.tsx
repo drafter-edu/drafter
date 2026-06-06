@@ -5,8 +5,13 @@ import type {
     ResponseEvent,
 } from "../telemetry/requests";
 import { createTruncatableUrl } from "../components/urls";
+import type { ReactElement } from "jsx-dom/types";
 
 export class HistoryPanel extends Panel {
+    private historyItems: ReactElement[] = [];
+    private currentPage = 1;
+    private readonly pageSize = 5;
+
     constructor(containerId: string, instanceId: number) {
         super(containerId, instanceId, "drafter-debug-history", "Page History");
     }
@@ -40,6 +45,10 @@ export class HistoryPanel extends Panel {
                         Clear History
                     </button>
                 </div>
+
+                <div
+                    class={`drafter-debug-page-history-pagination drafter-debug-page-history-pagination-${this.instanceId}`}
+                ></div>
                 <div
                     class={`drafter-debug-page-history-list drafter-debug-page-history-list-${this.instanceId}`}
                 ></div>
@@ -47,8 +56,87 @@ export class HistoryPanel extends Panel {
         );
     }
 
+    private getPaginationElement(): HTMLElement {
+        return this.queryWithin(
+            this.scopedSelector("drafter-debug-page-history-pagination"),
+            "DebugPanel: Pagination element not found.",
+        );
+    }
+
     public clearHistory(): void {
-        this.getListElement().innerHTML = "";
+        this.historyItems = [];
+        this.currentPage = 1;
+        this.renderPage();
+    }
+
+    private renderPage(): void {
+        const list = this.getListElement();
+        list.innerHTML = ""; // Clear existing items
+
+        const totalPages = Math.max(
+            1,
+            Math.ceil(this.historyItems.length / this.pageSize),
+        );
+        this.currentPage = Math.min(this.currentPage, totalPages);
+
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = Math.min(
+            startIndex + this.pageSize,
+            this.historyItems.length,
+        );
+        const pageItems = this.historyItems.slice(startIndex, endIndex);
+
+        pageItems.forEach((item) => list.appendChild(item));
+        this.renderPagination(totalPages);
+    }
+
+    private renderPagination(totalPages: number): void {
+        const pagination = this.getPaginationElement();
+        pagination.innerHTML = ""; // Clear existing pagination
+
+        if (this.historyItems.length <= this.pageSize) {
+            return; // No pagination needed
+        }
+
+        const previousButton = (
+            <button
+                class="drafter-debug-pagination-btn drafter-debug-button--"
+                disabled={this.currentPage === 1}
+            >
+                Previous
+            </button>
+        );
+
+        const pageLabel = (
+            <span class="drafter-debug-page-history-page-label">
+                Page {this.currentPage} of {totalPages}
+            </span>
+        );
+
+        const nextButton = (
+            <button
+                class="drafter-debug-pagination-btn drafter-debug-button--"
+                disabled={this.currentPage === totalPages}
+            >
+                Next
+            </button>
+        );
+
+        previousButton.addEventListener("click", () => {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.renderPage();
+            }
+        });
+
+        nextButton.addEventListener("click", () => {
+            if (this.currentPage < totalPages) {
+                this.currentPage++;
+                this.renderPage();
+            }
+        });
+
+        pagination.append(previousButton, pageLabel, nextButton);
     }
 
     public addRequest(request: RequestEvent): void {
@@ -73,17 +161,29 @@ export class HistoryPanel extends Panel {
                     <span class="drafter-history-request-time">
                         {prettyTime}
                     </span>
-                    {urlElement}
+                    <code>{request.url}</code>
                     <span class="drafter-history-request-meta">
                         <span class="drafter-history-via">via</span>{" "}
                         {request.action} (ID: {request.request_id})
                     </span>
                     {recreateLink}
                 </div>
+                <div class="drafter-debug-history-event-detail">
+                    <details>
+                        <summary>
+                            <strong>Details</strong>
+                        </summary>
+                        <div>{urlElement}</div>
+                    </details>
+                </div>
             </div>
         );
 
-        this.getListElement().prepend(requestElement);
+        // this.getListElement().prepend(requestElement);
+        this.historyItems.unshift(requestElement);
+        this.currentPage = 1; // Reset to first page on new request
+        this.renderPage();
+
         requestElement
             .querySelector(".drafter-history-request-url")
             ?.addEventListener("click", (d) => {
@@ -92,9 +192,9 @@ export class HistoryPanel extends Panel {
     }
 
     public addRequestParse(parseEvent: RequestParseEvent): void {
-        const requestEventElement = this.getContentElement().querySelector(
-            `.history-event[data-request-id="${parseEvent.request_id}"] .drafter-history-request-url`,
-        );
+        const requestEventElement = this.historyItems
+            .find((el) => el.dataset.requestId === "" + parseEvent.request_id)
+            ?.querySelector(".drafter-history-request-url");
 
         if (requestEventElement) {
             const parseElement = (
@@ -112,8 +212,8 @@ export class HistoryPanel extends Panel {
     }
 
     public addResponse(response: ResponseEvent): void {
-        const requestEventElement = this.getContentElement().querySelector(
-            `.history-event[data-request-id="${response.request_id}"]`,
+        const requestEventElement = this.historyItems.find(
+            (el) => el.dataset.requestId === "" + response.request_id,
         );
 
         if (requestEventElement) {
@@ -130,7 +230,7 @@ export class HistoryPanel extends Panel {
               ? "🟡"
               : "🟢";
         const responseElement = (
-            <div class="response-event">
+            <div class="drafter-debug-history-event-detail">
                 <details>
                     <summary>
                         <strong>Response:</strong> {marker}{" "}

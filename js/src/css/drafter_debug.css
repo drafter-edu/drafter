@@ -505,7 +505,7 @@ div.btlw-container img {
 }
 
 
-.drafter-debug-- .history-event .response-event {
+.drafter-debug-- .history-event .drafter-debug-history-event-detail {
     margin-left: 1em;
     padding: 2px 4px;
     display: flex;
@@ -513,7 +513,7 @@ div.btlw-container img {
     gap: 4px;
 }
 
-.drafter-debug-- .history-event .response-event pre {
+.drafter-debug-- .history-event .drafter-debug-history-event-detail pre {
     background-color: #e6ffed;
     border: 1px solid #a3f7b1;
     padding: 2px 4px;
