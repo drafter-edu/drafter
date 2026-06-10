@@ -443,7 +443,7 @@ class Component:
         """
         return None
 
-    def update_style(self, style, value):
+    def update_style(self, style: str, value: RouteSafeValue):
         """Update a CSS style property.
 
         Args:
@@ -456,7 +456,7 @@ class Component:
         self.extra_settings[f"style_{style}"] = value
         return self
 
-    def update_attr(self, attr, value):
+    def update_attr(self, attr: str, value: RouteSafeValue):
         """Update an HTML attribute.
 
         Args:
