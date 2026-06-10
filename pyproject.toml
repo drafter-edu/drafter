@@ -52,7 +52,16 @@ dev = [
   "hatch-nodejs-version",
   # Client Server
   "pyodide-py",
-  # Documentation
+  # New Documentation
+  "mkdocs==1.6.1",
+  "mkdocs-material",
+  "mkdocstrings-python",
+  "mkdocs-gen-files",
+  "mkdocs-literate-nav",
+  "mkdocs-section-index",
+  # Future Documentation
+  # "zensical",
+  # Old Documentation
   "Sphinx",
   "sphinx-rtd-theme",
   "cloud-sptheme",
@@ -73,6 +82,7 @@ dev = [
   "djlint",
   "mypy",
   "ruff",
+  "mdformat",
   # Tools
   "tqdm",
   "typer",

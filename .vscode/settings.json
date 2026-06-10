@@ -1,48 +1,51 @@
 {
-    "editor.formatOnSave": true,
-    "[python]": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "charliermarsh.ruff"
-    },
-    "[toml]": {
-        "editor.formatOnSave": true
-    },
-    // Associate .jinja2 files with django-html for better syntax highlighting
-    "files.associations": {
-        "*.html": "jinja-html"
-    },
-    // Add emmet tag autocomplete for jinja and django templates
-    "emmet.includeLanguages": {
-        "jinja2": "html",
-        "jinja-html": "html"
-    },
-    // Set djLint as formatter for html, jinja, jinja-html
-    "[html][jinja][jinja-html]": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "monosans.djlint",
-        "editor.detectIndentation": false,
-        "editor.linkedEditing": true,
-        "editor.tabSize": 2
-    },
-    "cSpell.words": [
-        "argparser",
-        "awatch",
-        "builtinmodule",
-        "callsim",
-        "configurer",
-        "doseq",
-        "matplotlib",
-        "maxlevels",
-        "micropip",
-        "misceval",
-        "Preparse",
-        "preparser",
-        "pyimport",
-        "skulpt",
-        "Starlette",
-        "stdlib",
-        "typer",
-        "uvicorn",
-        "watchfiles"
-    ]
+	"editor.formatOnSave": true,
+	"[python]": {
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "charliermarsh.ruff"
+	},
+	"[toml]": {
+		"editor.formatOnSave": true
+	},
+	"[markdown]": {
+		"editor.defaultFormatter": "yzhang.markdown-all-in-one"
+	},
+	// Associate .jinja2 files with django-html for better syntax highlighting
+	"files.associations": {
+		"*.html": "jinja-html"
+	},
+	// Add emmet tag autocomplete for jinja and django templates
+	"emmet.includeLanguages": {
+		"jinja2": "html",
+		"jinja-html": "html"
+	},
+	// Set djLint as formatter for html, jinja, jinja-html
+	"[html][jinja][jinja-html]": {
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "monosans.djlint",
+		"editor.detectIndentation": false,
+		"editor.linkedEditing": true,
+		"editor.tabSize": 2
+	},
+	"cSpell.words": [
+		"argparser",
+		"awatch",
+		"builtinmodule",
+		"callsim",
+		"configurer",
+		"doseq",
+		"matplotlib",
+		"maxlevels",
+		"micropip",
+		"misceval",
+		"Preparse",
+		"preparser",
+		"pyimport",
+		"skulpt",
+		"Starlette",
+		"stdlib",
+		"typer",
+		"uvicorn",
+		"watchfiles"
+	]
 }

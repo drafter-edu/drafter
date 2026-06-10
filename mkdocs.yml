@@ -1,0 +1,46 @@
+site_name: "Drafter Documentation"
+nav:
+- Home: index.md
+- Quickstart: quickstart/quickstart.md
+- Student Guide:
+  - Installation: students/installation.md
+  - Documentation for Students: students/docs.md
+  - HTML: students/html.md
+  - Styling: students/styling.md
+  - Testing: students/testing.md
+  - Deployment: students/deployment.md
+  - More Help: students/help.md
+- Workbook:
+  - Overview: workbook/index.md
+  - Part 1 - Cookie Clicker: workbook/part1/cookie.md
+  - Part 2 - Bank Account: workbook/part2/bank.md
+  - Part 3 - Adventure Game: workbook/part3/adventure.md
+  - Part 4 - Store: workbook/part4/store.md
+- Examples:
+  - Overview: examples/examples.md
+  - Calculator: examples/calculator.md
+  - Ring: examples/ring.md
+  - Forms: examples/forms.md
+  - Login: examples/login.md
+  - Nested Data: examples/nested_data.md
+- Reference:
+  - Overview: reference/reference.md
+  - Colors: reference/colors.md
+  - Components: reference/components.md
+  - Fonts: reference/fonts.md
+  - Transition to Flask: reference/flask.md
+
+theme:
+  name: material
+  palette:
+    primary: blue
+    accent: blue
+
+plugins:
+- search
+#- mkdocstrings
+#- gen-files:
+#    scripts:
+#    - tools/gen_ref_pages.py
+#- literate-nav:
+#    nav_file: SUMMARY.md
