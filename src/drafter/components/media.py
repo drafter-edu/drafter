@@ -56,7 +56,7 @@ class Audio(Component):
             autoplay: Whether to autoplay the audio. Defaults to False.
             loop: Whether to loop the audio. Defaults to False.
             muted: Whether to mute the audio. Defaults to False.
-            **kwargs: Additional HTML attributes and styles.
+            **kwargs (dict): Additional HTML attributes and styles.
         """
         self.src = src
         self.controls = controls
@@ -123,7 +123,7 @@ class Video(Component):
             autoplay: Whether to autoplay the video. Defaults to False.
             loop: Whether to loop the video. Defaults to False.
             muted: Whether to mute the video. Defaults to False.
-            **kwargs: Additional HTML attributes and styles.
+            **kwargs (dict): Additional HTML attributes and styles.
         """
         self.src = src
         self.width = width
@@ -167,7 +167,7 @@ class Canvas(Component):
             canvas_id: ID attribute for the canvas element.
             width: Width in pixels. Defaults to 300.
             height: Height in pixels. Defaults to 150.
-            **kwargs: Additional HTML attributes and styles.
+            **kwargs (dict): Additional HTML attributes and styles.
         """
         self.canvas_id = canvas_id
         self.width = width
@@ -210,6 +210,15 @@ class SVG(Component):
         viewBox: Optional[str] = None,
         **kwargs,
     ):
+        """Initialize SVG component.
+
+        Args:
+            content (str): SVG child elements or raw SVG string.
+            width (Optional[int]): Optional width attribute.
+            height (Optional[int]): Optional height attribute.
+            viewBox (Optional[str]): Optional viewBox attribute (e.g., '0 0 100 100').
+            **kwargs (dict): Additional HTML attributes and styles.
+        """
         self.content = content
         self.width = width
         self.height = height

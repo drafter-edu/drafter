@@ -255,7 +255,7 @@ class CheckBox(FormComponent):
         Args:
             name: The form field name.
             default_value: Whether initially checked. Defaults to False.
-            **kwargs: Additional HTML attributes.
+            **kwargs (dict): Additional HTML attributes.
 
         Raises:
             ValueError: If name is not a valid parameter name.

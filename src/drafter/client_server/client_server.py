@@ -59,6 +59,7 @@ class ClientServer:
     routing them to the appropriate functions, and returning responses.
 
     The Server can be in one of the following phases:
+    
     - initializing: During the initial ClientServer constructor call
     - initialized: After the constructor has completed, but before the `start` method is called
     - starting: During the execution of the `start` method

@@ -108,9 +108,9 @@ def safe_repr(value: Any, handled=None, escape=True):
     Creates a safe HTML representation of a value, handling circular references.
 
     Args:
-        value: The value to represent
-        handled: Set of already-handled object IDs (for circular reference detection)
-        escape: Whether to HTML-escape the representation
+        value (Any): The value to represent
+        handled (set): Set of already-handled object IDs (for circular reference detection)
+        escape (bool): Whether to HTML-escape the representation
 
     Returns:
         HTML-safe string representation

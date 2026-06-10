@@ -51,9 +51,9 @@ class Argument(Component, Arguable):
         """Initialize argument component.
 
         Args:
-            name: The parameter name for the argument.
-            value: The JSON-safe value to pass.
-            **extra_settings: Additional HTML attributes.
+            name (str): The parameter name for the argument.
+            value (JsonSafeValue): The JSON-safe value to pass.
+            **extra_settings (dict): Additional HTML attributes.
 
         Raises:
             ValueError: If name or value are not valid.
@@ -68,7 +68,7 @@ class Argument(Component, Arguable):
         """Get HTML attributes for the argument input.
 
         Args:
-            context: Rendering context.
+            context (dict): Rendering context.
 
         Returns:
             Dictionary of HTML attributes including encoded name and value.
@@ -242,7 +242,7 @@ class Button(LinkContent):
             text: The display text for the button.
             url: The target route or URL (function names are converted to strings).
             arguments: Optional arguments to pass to the target route.
-            **extra_settings: Additional HTML attributes and styles.
+            **extra_settings (dict): Additional HTML attributes and styles.
         """
         self.text = text
         self.url, self.external = self._handle_url(url)
@@ -254,7 +254,7 @@ class Button(LinkContent):
         """Get HTML attributes for the button.
 
         Args:
-            context: Rendering context.
+            context (dict): Rendering context.
 
         Returns:
             Dictionary including submit button data.
