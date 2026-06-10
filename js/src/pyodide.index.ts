@@ -8,132 +8,134 @@ window.DebugPanel = DebugPanel;
 
 // Create a little permissions box to explain why we need access to the directory
 function buildPermissionBox() {
-    const permissionBox = document.createElement("div");
-    permissionBox.style.position = "fixed";
-    permissionBox.style.display = "flex";
-    permissionBox.style.flexDirection = "column";
-    permissionBox.style.alignItems = "center";
-    permissionBox.style.justifyContent = "center";
-    permissionBox.style.top = "50%";
-    permissionBox.style.left = "50%";
-    permissionBox.style.transform = "translate(-50%, -50%)";
-    permissionBox.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
-    permissionBox.style.backgroundColor = "#fff";
-    permissionBox.style.border = "1px solid #ccc";
-    permissionBox.style.padding = "10px";
-    permissionBox.style.zIndex = "10000";
-    permissionBox.innerHTML = `
+	const permissionBox = document.createElement("div");
+	permissionBox.style.position = "fixed";
+	permissionBox.style.display = "flex";
+	permissionBox.style.flexDirection = "column";
+	permissionBox.style.alignItems = "center";
+	permissionBox.style.justifyContent = "center";
+	permissionBox.style.top = "50%";
+	permissionBox.style.left = "50%";
+	permissionBox.style.transform = "translate(-50%, -50%)";
+	permissionBox.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
+	permissionBox.style.backgroundColor = "#fff";
+	permissionBox.style.border = "1px solid #ccc";
+	permissionBox.style.padding = "10px";
+	permissionBox.style.zIndex = "10000";
+	permissionBox.innerHTML = `
         <p id="permission-description">Drafter needs access to your local Drafter directory in order to mount the local dev version of Pedal.</p>
         <button id="grant-permission-button">Grant Access</button>
     `;
-    document.body.appendChild(permissionBox);
-    return permissionBox;
+	document.body.appendChild(permissionBox);
+	return permissionBox;
 }
 
 async function politelyAskUserForDirectory() {
-    return new Promise<void>((resolve) => {
-        const button = document.getElementById(
-            "grant-permission-button",
-        ) as HTMLButtonElement;
-        button.onclick = () => {
-            resolve();
-        };
-    });
+	return new Promise<void>((resolve) => {
+		const button = document.getElementById(
+			"grant-permission-button",
+		) as HTMLButtonElement;
+		button.onclick = () => {
+			resolve();
+		};
+	});
 }
 
 export async function mountDrafterDirectory() {
-    try {
-        await mountDirectory("./drafter", "reuse-drafter-directory");
-    } catch (error) {
-        // Ask the user for permission and try again:
-        const permissionBox = buildPermissionBox();
-        async function repeatedlyTryMountingPolitely() {
-            await politelyAskUserForDirectory();
-            try {
-                await mountDirectory("./drafter", "reuse-drafter-directory");
-                document.body.removeChild(permissionBox);
-            } catch (error) {
-                const permissionDescription = permissionBox.querySelector(
-                    "#permission-description",
-                );
-                if (permissionDescription) {
-                    permissionDescription.innerHTML = `<p>
+	try {
+		await mountDirectory("./drafter", "reuse-drafter-directory");
+	} catch (error) {
+		// Ask the user for permission and try again:
+		const permissionBox = buildPermissionBox();
+		async function repeatedlyTryMountingPolitely() {
+			await politelyAskUserForDirectory();
+			try {
+				await mountDirectory("./drafter", "reuse-drafter-directory");
+				document.body.removeChild(permissionBox);
+			} catch (error) {
+				const permissionDescription = permissionBox.querySelector(
+					"#permission-description",
+				);
+				if (permissionDescription) {
+					permissionDescription.innerHTML = `<p>
                     <span style="font-size: 1.5em;">⚠️</span>
                     Failed to mount the directory.
                     Please ensure you have granted access and try again.</p>
                     <pre>${error}</pre>
                     `;
-                    await repeatedlyTryMountingPolitely();
-                } else {
-                    console.error(
-                        "Failed to find permission description element.",
-                    );
-                }
-            }
-        }
-        repeatedlyTryMountingPolitely();
-    }
+					await repeatedlyTryMountingPolitely();
+				} else {
+					console.error(
+						"Failed to find permission description element.",
+					);
+				}
+			}
+		}
+		repeatedlyTryMountingPolitely();
+	}
 }
 
 export async function mountDrafterRemote(url: string) {
-    /*console.log("mountDrafterRemote is not implemented yet.");
+	/*console.log("mountDrafterRemote is not implemented yet.");
     alert("mountDrafterRemote is not implemented yet.");*/
-    let response = await fetch(url); // .zip, .whl, ...
-    let buffer = await response.arrayBuffer();
-    await pyodide.unpackArchive(buffer, "zip"); // by default, unpacks to the current dir
-    pyodide.pyimport("drafter");
+	let response = await fetch(url); // .zip, .whl, ...
+	let buffer = await response.arrayBuffer();
+	await pyodide.unpackArchive(buffer, "zip"); // by default, unpacks to the current dir
+	pyodide.pyimport("drafter");
 }
 
 export async function setupPyodide() {
-    if ((window as any).pyodide === undefined) {
-        window.pyodide = (window as any).pyodide = await loadPyodide({
-            packages: ["micropip"],
-            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/",
-            env: {
-                DRAFTER_CONFIG_FILE: "/_drafter_config.json",
-            },
-        });
-        await window.pyodide.loadPackage("micropip");
-        window.micropip = window.pyodide.pyimport("micropip");
-        await window.micropip.install("bakery");
-        writeConfigFile(pyodide);
-    }
-    return (window as any).pyodide;
+	if ((window as any).pyodide === undefined) {
+		window.pyodide = (window as any).pyodide = await loadPyodide({
+			packages: ["micropip"],
+			indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/",
+			env: {
+				DRAFTER_CONFIG_FILE: "/_drafter_config.json",
+			},
+		});
+		await window.pyodide.loadPackage("micropip");
+		window.micropip = window.pyodide.pyimport("micropip");
+		await window.micropip.install("bakery");
+		writeConfigFile(pyodide);
+	}
+	return (window as any).pyodide;
 }
 
 function writeConfigFile(pyodide: any) {
-    if ((window as any).DRAFTER_MODIFIED_CONFIGURATION) {
-        pyodide.FS.writeFile(
-            "/_drafter_config.json",
-            JSON.stringify((window as any).DRAFTER_MODIFIED_CONFIGURATION),
-        );
-    }
+	if ((window as any).DRAFTER_MODIFIED_CONFIGURATION) {
+		pyodide.FS.writeFile(
+			"/_drafter_config.json",
+			JSON.stringify((window as any).DRAFTER_MODIFIED_CONFIGURATION),
+		);
+	}
 }
 
 export async function runStudentCode(
-    options: DrafterInitOptions,
+	options: DrafterInitOptions,
 ): Promise<any> {
-    // TODO: Handle URL-based coding loading
-    if ((window as any).pyodide === undefined) {
-        throw new Error(
-            "Pyodide is not initialized. Call setupPyodide() first.",
-        );
-    }
-    const pyodide = (window as any).pyodide;
-    if (options.loadPackagesAutomatically) {
-        // TODO: Provide a nice loading indicator while packages are being loaded
-        console.log("Automatically loading packages for student code...");
-        const loadedPackages = await pyodide.loadPackagesFromImports(
-            options.code,
-        );
-        console.log("Loaded packages:", loadedPackages);
-    } else if (options.explicitPackageList) {
-        // TODO: Handle the semicolon-separated list of packages
-    }
-    try {
-        const result = await pyodide.runPythonAsync(options.code);
-        return result;
-    } catch (error) {
-        throw error;
-    }
+	// TODO: Handle URL-based coding loading
+	if ((window as any).pyodide === undefined) {
+		throw new Error(
+			"Pyodide is not initialized. Call setupPyodide() first.",
+		);
+	}
+	const pyodide = (window as any).pyodide;
+	if (options.loadPackagesAutomatically) {
+		// TODO: Provide a nice loading indicator while packages are being loaded
+		console.log("Automatically loading packages for student code...");
+		const loadedPackages = await pyodide.loadPackagesFromImports(
+			options.code,
+		);
+		console.log("Loaded packages:", loadedPackages);
+	} else if (options.explicitPackageList) {
+		// TODO: Handle the semicolon-separated list of packages
+	}
+	try {
+		const result = await pyodide.runPythonAsync(options.code, {
+			filename: options?.studentFilename || "main.py",
+		});
+		return result;
+	} catch (error) {
+		throw error;
+	}
 }

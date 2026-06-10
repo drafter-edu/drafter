@@ -97,7 +97,7 @@ dev = [
 ]
 
 [project.optional-dependencies]
-examples = ["pandas", "seaborn", "requests"]
+examples = ["pandas", "seaborn", "requests", "scipy"]
 
 [project.scripts]
 drafter = "drafter.cli:main"

@@ -2,6 +2,7 @@ node_modules/
 js/coverage/
 
 examples/index.html
+secret_examples/
 
 out/
 compiled-out/
