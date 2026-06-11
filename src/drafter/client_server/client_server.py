@@ -354,12 +354,13 @@ class ClientServer:
         try:
             return route_func(*args, **kwargs), representation
         except Exception as e:
+            e.add_note(f"{representation}")
             raise VisitError(
                 log_error(
                     "request.route_execution_failed",
-                    f"Error while processing request for URL {request.url}: {e}",
+                    f"Error while processing request for URL '{request.url}': {e}",
                     "client_server.visit",
-                    repr(request),
+                    f"Full call: {representation}\nFull Request: {request!r}",
                     route=request.url,
                     exception=e,
                 ),

@@ -523,3 +523,59 @@ The bridge is split into five distinct pieces:
 - `BrowserHistory`: Keeps track of requests through pushstate/popstate
 
 All of this is kicked off in the `run_client_bridge` function, which manages the `ClientBridge` instance.
+
+
+### File System
+
+A key element of Drafter application are file systems. The Host has its own file system that can map directly to the disk, whereas the Client needs a virtual file system.
+
+The Client's file system is a combination of five possible destinations:
+- The in-memory file system
+- The localStorage file system
+- The IndexedDB file system
+- The read-only file system provided by the server (for static assets)
+- The writeable file system provided by the server (managed through a customized module for database-style writing in Firebase)
+
+The Host's file system is a simpler thing:
+- The actual disk file system
+- The in-memory file system
+
+Things that the Client file system needs to handle:
+- Reading the student's initial code
+- When the student uses `open` or `import`
+- Pyodide's locally mounted version of the Drafter library and the rest of its standard library
+- Images that the user is linking
+- Files that the user has uploaded, which need to be stored and associated with the current state.
+- More complex push/pop state
+- Official Drafter Assets that are bundled with the site, such as CSS, JS, images
+  - Note that some of these can be linked via a CDN or other solution
+
+Things that the Host file system also needs to handle:
+- Writing out logs, errors, and other debug information to disk
+- Reading in the student's code and any relevant assets during development
+- When building, we need to write files to disk
+- When serving, we need to read files from disk in order to serve them to the client
+
+Rather than trying to catch errors with pushstate/popstate, I think we should probably just use a documentId model where we refer to something stored in localStorage or IndexedDB, and then we can have a garbage collection strategy for cleaning up old documents that are no longer needed. This also allows us to store more complex data structures that might not fit in the URL or be suitable for encoding as query parameters.
+
+A key problem is making files available from the Host to the Client. Ideally, we would like it to be trivial for the user to automatically get access to adjacent and nested files, but then also provide a solution for users to explicitly include files as needed. The similar rules should apply for `requirements.txt` and automatically detecting imports (which eventually need to work across all student files).
+
+When the website is:
+- Compiled for deployment, I think we run an operation to make a manifest of all available files (including some concept of an `ignore-list`), and that is provided to the file system.
+- Served from the Local App Server, we can just read from a dynamic endpoint URL that serves files from the disk.
+- Served from a remote server, we read the same endpoint URL but it is actually being served statically.
+
+How many file system classes are there, and where do they live? 
+- The ClientBridge definitely needs access to the virtual file system.
+- The debug area definitely needs access to the file system.
+- The student code should be able to access the file system, so we need to be wrapping `open` and handling imports correctly.
+  - We probably just provide our own version of `open`, and as long as they `from drafter import *`, then they get access to it.
+  - Import might not be too bad?
+    - For the Host-side execution, we can just use the normal file system and Python's import machinery.
+    - For the Client-side Pyodide execution, they should be able to use normal imports as long as the files are available in the virtual file system. We just need to make sure that the file system is populated correctly based on the student's code and any relevant assets.
+    - For the Client-side Skulpt execution, we will need to provide a custom import hook that can read from the virtual file system. We basically already do this in BlockPy.
+- The ClientServer needs to access the file system in order to read files, I think?
+  - Either the ClientServer needs to, or the EventBus does. Someone needs to be able to write logs to disk.
+- The Builder definitely needs to be able to write files to the file system during the Compilation process.
+- The AppServer needs to be able to read files from the file system in order to serve them to the Client.
+- 
