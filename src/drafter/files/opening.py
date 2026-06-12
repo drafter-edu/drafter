@@ -43,6 +43,7 @@ def open(file_path, mode="r", encoding="utf-8", **kwargs):
                 raise FileNotFoundError(f"File not found: {actual_path}")
         return found_file
     if is_web():
+        # TODO: Handle skulpt file handling
         actual_path = file_path
         return _BUILTIN_OPEN(actual_path, mode, encoding=encoding, **kwargs)
     else:

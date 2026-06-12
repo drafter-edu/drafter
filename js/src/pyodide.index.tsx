@@ -80,6 +80,47 @@ function writeConfigFile(pyodide: any) {
 	}
 }
 
+async function patchPythonFeatures() {
+	await pyodide.runPythonAsync(`
+import sys
+import importlib.abc
+import importlib.util
+from pyodide.http import pyxhr
+
+# This code allows Python code running in Pyodide to import modules from
+# a remote server.
+class RemoteLoader(importlib.abc.Loader):
+    def __init__(self, source):
+        self.source = source
+
+    def exec_module(self, module):
+        exec(self.source, module.__dict__)
+
+
+class RemoteFinder(importlib.abc.MetaPathFinder):
+    BASE_URL = ""
+
+    def find_spec(self, fullname, path=None, target=None):
+        module_name = fullname.split(".")[-1]
+        url = f"{self.BASE_URL}/{module_name}.py"
+
+        try:
+            response = pyxhr.get(url)
+            if response.status_code != 200:
+                return None
+            text = response.text
+
+            loader = RemoteLoader(text)
+            return importlib.util.spec_from_loader(fullname, loader)
+
+        except Exception as e:
+            return None
+
+
+sys.meta_path.append(RemoteFinder())
+	`);
+}
+
 export async function runStudentCode(
 	options: DrafterInitOptions,
 ): Promise<any> {
@@ -99,6 +140,22 @@ export async function runStudentCode(
 		console.log("Loaded packages:", loadedPackages);
 	} else if (options.explicitPackageList) {
 		// TODO: Handle the semicolon-separated list of packages
+	}
+	try {
+		await patchPythonFeatures();
+	} catch (error) {
+		alertDialog(
+			<div>
+				Error setting up Python code runner: <pre>{"" + error}</pre>
+			</div>,
+			{
+				title: "Error",
+				modal: true,
+				draggable: true,
+				width: "560px",
+			},
+		);
+		throw error;
 	}
 	try {
 		const result = await pyodide.runPythonAsync(options.code, {

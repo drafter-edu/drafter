@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from PIL import Image as PILImage
 import io
 import base64
+from file_handling_external import example_code_2, example_website_2, read_in_route_2
 
 RAW_SIMPLE_IMAGE = '''R0lGODlhDwAPAKECAAAAzMzM/////wAAACwAAAAADwAPAAACIISPeQHsrZ5ModrLl
 N48CXF8m2iQ3YmmKqVlRtW4MLwWACH+H09wdGltaXplZCBieSBVbGVhZCBTbWFydFNhdmVyIQAAOw=='''
@@ -34,6 +35,12 @@ def index(state: State) -> Page:
         PreformattedText(example_website[:50]),
         "Another example:\n",
         PreformattedText(read_in_route()[:50]),
+        "External code example from file_handling_external.py:",
+        PreformattedText(example_code_2[:50]),
+        "External website example from file_handling_external.py:",
+        PreformattedText(example_website_2[:50]),
+        "External function call example from file_handling_external.py:",
+        PreformattedText(read_in_route_2()[:50]),
         "You can upload three things here:",
         HorizontalRule(),
         Div(
