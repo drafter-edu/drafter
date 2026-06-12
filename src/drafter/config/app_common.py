@@ -13,8 +13,6 @@ FalseType = Literal[False]
 class AppCommonConfiguration(BaseConfiguration):
     engine: EngineType = "pyodide"
 
-    user_directory: Union[FalseType, str] = False
-    main_filename: Union[FalseType, str] = False
     asset_directory: Union[FalseType, str] = False
     show_filename_as: Union[FalseType, str] = False
     prerender_initial_page: bool = True
@@ -30,50 +28,15 @@ class AppCommonConfiguration(BaseConfiguration):
     @staticmethod
     def get_key() -> str:
         return "app_common"
-    
-    def get_full_main_file_path(self) -> Optional[str]:
-        """Get the full path to the main user file.
-
-        Returns:
-            Full path to the main user file, or None if not set.
-        """
-        if self.user_directory is not False and self.main_filename is not False:
-            return os.path.join(self.user_directory, self.main_filename)
-        return None
-                    
+                        
     def leverage_filesystem(self):
-        if self.user_directory is False:
-            found_path = seek_filename_by_line("start_server", self.main_filename)
-            self.user_directory = (
-                os.path.dirname(found_path) if found_path else os.getcwd()
-            )
-            self.main_filename = (
-                os.path.basename(found_path)
-                if found_path
-                else (self.main_filename or "main.py")
-            )
-
-        elif not os.path.isdir(self.user_directory):
-            if os.path.isfile(self.user_directory):
-                self.main_filename = os.path.basename(self.user_directory)
-                self.user_directory = os.path.dirname(self.user_directory)
-
-        else:
-            # TODO: Logic seems redundant, maybe only do it in app_server?
-            self.main_filename = (
-                self.main_filename if self.main_filename is not False else "main.py"
-            )
-
-        if self.show_filename_as is False:
-            self.show_filename_as = self.main_filename
-            
+        pass
+        
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
         result = EnvVars(env_vars)
         result.get_string_if_exists("DRAFTER_ENGINE", "engine")
         result.get_bool_if_exists("DRAFTER_PRERENDER_INITIAL_PAGE", "prerender_initial_page")
-        result.get_string_if_exists("DRAFTER_USER_DIRECTORY", "user_directory")
-        result.get_string_if_exists("DRAFTER_MAIN_FILENAME", "main_filename")
         result.get_string_if_exists("DRAFTER_ASSET_DIRECTORY", "asset_directory")
         result.get_string_if_exists("DRAFTER_SHOW_FILENAME_AS", "show_filename_as")
         result.get_bool_if_exists("DRAFTER_MOUNT_DRAFTER_LOCALLY", "mount_drafter_locally")
@@ -96,16 +59,6 @@ class AppCommonConfiguration(BaseConfiguration):
             "--prerender-initial-page",
             action="store_true",
             help="Prerender the initial page on server start",
-        )
-        group.add_argument(
-            "--user-directory",
-            type=str,
-            help="Directory containing user files (if not specified, will be inferred)",
-        )
-        group.add_argument(
-            "--main-filename",
-            type=str,
-            help="Main user file to execute (if not specified, will be inferred)",
         )
         group.add_argument(
             "--asset-directory",
@@ -151,10 +104,6 @@ class AppCommonConfiguration(BaseConfiguration):
             result["engine"] = parsed_args["engine"]
         if parsed_args.get("prerender_initial_page"):
             result["prerender_initial_page"] = True
-        if parsed_args.get("user_directory"):
-            result["user_directory"] = parsed_args["user_directory"]
-        if parsed_args.get("main_filename"):
-            result["main_filename"] = parsed_args["main_filename"]
         if parsed_args.get("asset_directory"):
             result["asset_directory"] = parsed_args["asset_directory"]
         if parsed_args.get("show_filename_as"):

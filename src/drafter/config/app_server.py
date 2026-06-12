@@ -28,8 +28,6 @@ class AppServerConfiguration(BaseConfiguration):
         open_browser: Automatically open web browser on start.
         inline_py: Inline user code in HTML vs. load via HTTP request.
         engine: Python execution engine ("skulpt" or "pyodide").
-        user_directory: Main user folder path (auto-detected if False).
-        main_filename: Main user Python file name (auto-detected if False).
         asset_directory: Static assets directory (uses Drafter defaults if False).
         show_filename_as: Display name for main file in UI (if different).
         site_title: Browser tab title.

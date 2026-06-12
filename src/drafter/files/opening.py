@@ -26,7 +26,7 @@ def open(file_path, mode="r", encoding="utf-8", **kwargs):
     # TODO: Check config setting for whether absolute paths are allowed
     # TODO: Check config setting to decide whether we should use the students' main file path, the current working directory, or an explicit path
     system = get_system_configuration()
-    user_directory = system.app_common.user_directory
+    user_directory = system.bootstrap.get_user_directory()
     
     if is_pyodide():
         # In Pyodide, we might need to fetch the file if it is not available normally.
@@ -36,7 +36,7 @@ def open(file_path, mode="r", encoding="utf-8", **kwargs):
             found_file = _BUILTIN_OPEN(actual_path, mode, encoding=encoding, **kwargs)
         except Exception as e:
             # If the file is not found, we can try to fetch it via HTTP if it's a relative path
-            response = pyxhr.get(actual_path)
+            response = pyxhr.get(str(actual_path))
             if response.status_code == 200:
                 return io.StringIO(response.text)
             else:

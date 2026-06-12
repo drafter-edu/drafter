@@ -30,8 +30,6 @@ def start_server(
     information: Optional[dict] = None,
     # AppServer-specific parameters
     verbose: Optional[bool] = None,
-    user_directory: MaybeBoolStr = None,
-    main_filename: MaybeBoolStr = None,
     asset_directory: MaybeBoolStr = None,
     show_filename_as: MaybeBoolStr = None,
     engine: Optional[EngineType] = None,
@@ -71,8 +69,6 @@ def start_server(
         site_title: Title displayed in UI.
         information: Dict of site information (author, description, etc.).
         verbose: Enable verbose logging.
-        user_directory: User code directory (auto-detected if False).
-        main_filename: Main Python file name (auto-detected if False).
         asset_directory: Assets directory (uses Drafter defaults if False).
         show_filename_as: Display filename in UI (if different from actual).
         engine: Python engine ("skulpt" or "pyodide").
@@ -103,10 +99,6 @@ def start_server(
         parameters['information'] = information
     if verbose is not None:
         parameters['verbose'] = verbose
-    if user_directory is not None:
-        parameters['user_directory'] = user_directory
-    if main_filename is not None:
-        parameters['main_filename'] = main_filename
     if asset_directory is not None:
         parameters['asset_directory'] = asset_directory
     if show_filename_as is not None:

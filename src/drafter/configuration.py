@@ -59,14 +59,17 @@ def get_parser(mode: Optional[str] = None):
     
     return parser
 
-def configure_system() -> tuple[SystemConfiguration, dict[str, dict]]:
+def configure_system(from_cli: bool = False) -> tuple[SystemConfiguration, dict[str, dict]]:
     """
     Configure the Drafter system based on command line arguments, 
     environment variables, and configuration files. This function will create
     and return a SystemConfiguration object that encapsulates all relevant configurations.
     """
     #### Backup original arguments and environment variables
-    original_arguments = sys.argv[1:]
+    if from_cli:
+        original_arguments = sys.argv[1:] # Exclude the script name for non-CLI contexts
+    else:
+        original_arguments = sys.argv[:] 
     environment_variables = dict(os.environ)
     
     #### Keep track of changed settings for when we deploy
@@ -97,6 +100,15 @@ def configure_system() -> tuple[SystemConfiguration, dict[str, dict]]:
         bootstrap_config.merge_in_args(config_files_data_part, raise_errors=False)
         modified_args[bootstrap_config.get_key()].update(config_files_data_part)
     
+    ##### Detect main path if missing and we're in a CLI context
+    if not is_web() and bootstrap_config.path is None:
+        if len(original_arguments) > 0:
+            bootstrap_config.path = original_arguments[0]
+            modified_args[bootstrap_config.get_key()]["path"] = original_arguments[0]
+        else:
+            # TODO: Figure out if we need to raise an error instead
+            print("Warning: No entry path provided via command line arguments or environment variables. Drafter may not function correctly without an entry point.")
+    
     ##### Create All Other Configurations
     client_server_config = ClientServerConfiguration()
     app_builder_config = AppBuilderConfiguration()
@@ -110,8 +122,6 @@ def configure_system() -> tuple[SystemConfiguration, dict[str, dict]]:
     else:
         parsed, unknown_args = None, original_arguments
         
-    # TODO: Should be able to infer main_filename from first sys.argv entry IF we aren't using drafter as a CLI tool
-    
     #### Populate All Other Configurations
     # Merge configurations in order of priority:
     # environment variables < CLI args < config files
@@ -162,14 +172,14 @@ def finish_configuration():
 _SYSTEM: SystemConfiguration | None = None
 _MODIFIED_ARGS: dict[str, dict] = {}
 
-def get_system_configuration() -> SystemConfiguration:
+def get_system_configuration(from_cli: bool = False) -> SystemConfiguration:
     """
     Get the global SystemConfiguration instance. If it hasn't been created yet,
     this function will call configure_system() to create it.
     """
     global _SYSTEM, _MODIFIED_ARGS
     if _SYSTEM is None:
-        _SYSTEM, _MODIFIED_ARGS = configure_system()
+        _SYSTEM, _MODIFIED_ARGS = configure_system(from_cli=from_cli)
     return _SYSTEM
 
 def get_system_config_modifications() -> dict[str, dict]:

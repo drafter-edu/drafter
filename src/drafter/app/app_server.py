@@ -104,14 +104,9 @@ def make_app(
     initial_state
 ) -> Starlette:
     # Determine paths
-    user_directory = (
-        Path(system.app_common.user_directory).resolve()
-        if isinstance(system.app_common.user_directory, str)
-        else Path.cwd()
-    )
-    user_path = user_directory / (
-        system.app_common.main_filename if isinstance(system.app_common.main_filename, str) else "main.py"
-    )
+    user_directory = Path(system.bootstrap.get_user_directory()).resolve()
+    
+    user_path = user_directory / system.bootstrap.get_main_filename()
 
     # Determine watches and routes
     watch_paths = [
@@ -172,6 +167,10 @@ def serve_app_once(
     server: ClientServer,
     initial_state,
 ):
+    if system.bootstrap.path is None:
+        print("Error: Cannot start server because the path to the main user file is not specified.")
+        return
+    
     # Configure the server if prerendering is needed
     if system.app_common.prerender_initial_page:
         possible_error = server.do_configuration()

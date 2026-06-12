@@ -61,15 +61,13 @@ def compile_site(
 
     if system.bootstrap.verbose:
         print("Compiling drafter site...")
-        
-    user_directory = (
-        Path(system.app_common.user_directory).resolve()
-        if isinstance(system.app_common.user_directory, str)
-        else Path.cwd()
-    )
-    user_path = user_directory / (
-        system.app_common.main_filename if isinstance(system.app_common.main_filename, str) else "main.py"
-    )
+    
+    if system.bootstrap.path is None:
+        print("Error: Cannot compile site because the path to the main user file is not specified.")
+        return
+    
+    user_path = Path(system.bootstrap.path)
+
     
     output_directory = Path(system.app_builder.output_directory)
     output_directory.mkdir(parents=True, exist_ok=True)
@@ -108,7 +106,7 @@ def compile_site(
     true_page = render_index_html(title=system.app_common.site_title,
                                   inline_py=True,
                                   user_code=user_code,
-                                  python_url=str(system.app_common.main_filename),
+                                  python_url=str(system.bootstrap.get_main_filename()),
                                   assets_url=assets_url,
                                   engine=system.app_common.engine,
                                   dev_ws_url=None,

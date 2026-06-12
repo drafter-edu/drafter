@@ -17,14 +17,14 @@ from runpy import run_path
 
 def main():
     """Main CLI entry point that routes to app server or builder based on arguments."""
-    system = get_system_configuration()
-    student_file_path = system.app_common.get_full_main_file_path()
+    system = get_system_configuration(True)
     
-    if student_file_path is None:
+    if system.bootstrap.path is None:
+        # TODO: Raise an error instead, more elegantly
         print("Error: Could not determine the path to the main user file.")
         return
     
-    run_path(student_file_path, run_name="__main__")
+    run_path(system.bootstrap.path, run_name="__main__")
 
 
 if __name__ == "__main__":
