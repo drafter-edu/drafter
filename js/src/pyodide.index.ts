@@ -2,76 +2,46 @@ import { loadPyodide } from "pyodide";
 import { mountDirectory } from "./pyodide_bridge/directories";
 import { DebugPanel } from "./debug";
 import type { DrafterInitOptions } from "./bridge/engine";
+import { alertDialog, confirmDialog } from "./dialogs";
 export { clearDrafterSiteRoot, handleSystemError } from "./bridge/engine";
+export * from "./common.index";
 
 window.DebugPanel = DebugPanel;
-
-// Create a little permissions box to explain why we need access to the directory
-function buildPermissionBox() {
-	const permissionBox = document.createElement("div");
-	permissionBox.style.position = "fixed";
-	permissionBox.style.display = "flex";
-	permissionBox.style.flexDirection = "column";
-	permissionBox.style.alignItems = "center";
-	permissionBox.style.justifyContent = "center";
-	permissionBox.style.top = "50%";
-	permissionBox.style.left = "50%";
-	permissionBox.style.transform = "translate(-50%, -50%)";
-	permissionBox.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
-	permissionBox.style.backgroundColor = "#fff";
-	permissionBox.style.border = "1px solid #ccc";
-	permissionBox.style.padding = "10px";
-	permissionBox.style.zIndex = "10000";
-	permissionBox.innerHTML = `
-        <p id="permission-description">Drafter needs access to your local Drafter directory in order to mount the local dev version of Pedal.</p>
-        <button id="grant-permission-button">Grant Access</button>
-    `;
-	document.body.appendChild(permissionBox);
-	return permissionBox;
-}
-
-async function politelyAskUserForDirectory() {
-	return new Promise<void>((resolve) => {
-		const button = document.getElementById(
-			"grant-permission-button",
-		) as HTMLButtonElement;
-		button.onclick = () => {
-			resolve();
-		};
-	});
-}
 
 export async function mountDrafterDirectory() {
 	try {
 		await mountDirectory("./drafter", "reuse-drafter-directory");
 	} catch (error) {
-		// Ask the user for permission and try again:
-		const permissionBox = buildPermissionBox();
-		async function repeatedlyTryMountingPolitely() {
-			await politelyAskUserForDirectory();
+		let mountError: unknown = error;
+		while (true) {
+			const details =
+				mountError instanceof Error
+					? mountError.message
+					: String(mountError);
+			const shouldRetry = await confirmDialog(
+				`Drafter needs access to your local Drafter directory to mount the local development version of Pedal.\n\nGrant access and retry?\n\n${details}`,
+				{
+					title: "Directory Access Required",
+					confirmLabel: "Grant Access",
+					cancelLabel: "Cancel",
+					confirmVariant: "primary",
+					modal: true,
+					draggable: true,
+					width: "560px",
+				},
+			);
+
+			if (!shouldRetry) {
+				throw mountError;
+			}
+
 			try {
 				await mountDirectory("./drafter", "reuse-drafter-directory");
-				document.body.removeChild(permissionBox);
-			} catch (error) {
-				const permissionDescription = permissionBox.querySelector(
-					"#permission-description",
-				);
-				if (permissionDescription) {
-					permissionDescription.innerHTML = `<p>
-                    <span style="font-size: 1.5em;">⚠️</span>
-                    Failed to mount the directory.
-                    Please ensure you have granted access and try again.</p>
-                    <pre>${error}</pre>
-                    `;
-					await repeatedlyTryMountingPolitely();
-				} else {
-					console.error(
-						"Failed to find permission description element.",
-					);
-				}
+				return;
+			} catch (retryError) {
+				mountError = retryError;
 			}
 		}
-		repeatedlyTryMountingPolitely();
 	}
 }
 

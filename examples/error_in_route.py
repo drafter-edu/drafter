@@ -12,4 +12,6 @@ def index(state: int) -> Page:
         error_call()
     ])
     
+assert_equal(1, 5)
+    
 start_server(0)

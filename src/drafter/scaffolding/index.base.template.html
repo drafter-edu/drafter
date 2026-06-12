@@ -45,7 +45,11 @@
       <script>window.DRAFTER_MODIFIED_CONFIGURATION = {{ modified_system | tojson }};</script>
     {% endif %}
     {% if inline_py %}<script type="text/python" id="user-code">{{ user_code }}</script>{% endif %}
-    {% block scripts %}<!-- Engine-specific scripts -->{% endblock %}
-    <script>{% block initialization %}// Engine-specific initialization logic{% endblock %}</script>
+    <!-- Engine-specific scripts -->
+    {% block scripts %}
+    {% endblock scripts %}
+    <!-- Engine-specific initialization -->
+    {% block initialization %}
+    {% endblock initialization %}
   </body>
 </html>

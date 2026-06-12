@@ -5,6 +5,7 @@ import {
 	setupSkulpt,
 	startServer,
 } from "./skulpt_bridge/skulpt-tools";
+export * from "./common.index";
 
 export { clearDrafterSiteRoot, handleSystemError } from "./bridge/engine";
 

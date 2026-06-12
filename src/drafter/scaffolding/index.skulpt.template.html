@@ -6,6 +6,7 @@
   <script src="{{ static('js/drafter.skulpt.js') }}"></script>
 {% endblock scripts %}
 {% block initialization %}
+  <script>
   (async () => {
   try {
   {% if dev_ws_url %}
@@ -28,4 +29,5 @@
   document.getElementById('--drafter-initial-loading-white-screen').remove();
   }
   })();
+  </script>
 {% endblock initialization %}
