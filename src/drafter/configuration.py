@@ -19,7 +19,6 @@ from drafter.config.app_common import AppCommonConfiguration
 from drafter.config.client_server import ClientServerConfiguration
 
 
-
 def get_preparser():
     """
     Get the preparser for handling bootstrap configuration.

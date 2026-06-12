@@ -12,6 +12,8 @@ class SystemConfiguration:
     Centralized global object that holds all the configuration settings
     for each of the core components of the Drafter system.
     
+    Also includes a reference to the FileSystem interface
+    
     This should be instantiated as a singleton.
     """
     bootstrap: BootstrapConfiguration

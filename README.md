@@ -578,4 +578,12 @@ How many file system classes are there, and where do they live?
   - Either the ClientServer needs to, or the EventBus does. Someone needs to be able to write logs to disk.
 - The Builder definitely needs to be able to write files to the file system during the Compilation process.
 - The AppServer needs to be able to read files from the file system in order to serve them to the Client.
-- 
+
+How should we handle paths?
+- With absolute paths, I think the default behavior is to tell the student, "Stop using absolute paths that won't work". If they specify a command line flag, they can make them work normally.
+- With relative paths, we should resolve them based on the students' main script location. This is as opposed to the current working directory of the server. This should be configurable explicitly as well, to use either the current working directory or an explicit path.
+
+
+Currently, the configuration system only leverages the filesystem immediately before the launch, after the students' code.
+But we need the system to be able to access the filesystem during the students' code execution as well, in order to read files and serve them to the client.
+The file system interface should be able to make these decisions "on the fly" based on the current configuration settings.

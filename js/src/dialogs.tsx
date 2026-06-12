@@ -1,3 +1,5 @@
+import type { ReactElement } from "jsx-dom";
+
 /**
  * A simple dialog system for Drafter, implemented in plain TypeScript and DOM APIs without any external dependencies.
  * Provides a `showDialog` function that can be used to display custom dialogs with arbitrary content and buttons, as
@@ -36,7 +38,7 @@ export interface DialogButtonOptions<T> {
 
 export interface DialogOptions<T = unknown> {
 	title?: string;
-	content?: string | HTMLElement;
+	content?: string | HTMLElement | ReactElement;
 	modal?: boolean;
 	draggable?: boolean;
 	closeOnBackdrop?: boolean;
@@ -53,7 +55,7 @@ let dialogStack = 0;
 
 /** Internal record kept for every open dialog that has a symbolicId. */
 interface TrackedDialog {
-	updateContent: (content: string | HTMLElement) => void;
+	updateContent: (content: string | HTMLElement | ReactElement) => void;
 	promise: Promise<unknown>;
 }
 
@@ -128,7 +130,9 @@ export function showDialog<T = unknown>(
 
 	// Captured outside the constructor so we can register it in openDialogs
 	// after the promise object is created (Promise constructor runs synchronously).
-	let setContentRef: (c: string | HTMLElement) => void = () => {};
+	let setContentRef: (
+		c: string | HTMLElement | ReactElement,
+	) => void = () => {};
 
 	const promise = new Promise<T | undefined>((resolve) => {
 		dialogStack += 1;
@@ -177,7 +181,7 @@ export function showDialog<T = unknown>(
 			<div class="drafter-dialog-content"></div>
 		) as HTMLDivElement;
 
-		function setContent(newContent: string | HTMLElement) {
+		function setContent(newContent: string | HTMLElement | ReactElement) {
 			contentContainer.replaceChildren(
 				typeof newContent === "string"
 					? ((<p>{newContent}</p>) as HTMLParagraphElement)
@@ -342,7 +346,7 @@ export interface AlertDialogOptions {
 }
 
 export async function alertDialog(
-	message: string,
+	message: string | HTMLElement | ReactElement,
 	options: AlertDialogOptions = {},
 ): Promise<void> {
 	const {

@@ -7,6 +7,10 @@ Unified command-line interface for running Drafter in either:
 Usage:
     drafter [main_file.py] [options]
     drafter [main_file.py] --compile [options]
+    
+Because we set up our pyproject.toml file to point to this module's `main`,
+when you run `drafter` from the command line, it will execute the `main` function
+here, with a `sys.argv` like `['drafter', 'my_site.py', '--some-flag']`.
 """
 from drafter.configuration import get_system_configuration
 from runpy import run_path

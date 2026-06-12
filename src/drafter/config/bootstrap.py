@@ -16,7 +16,7 @@ class BootstrapConfiguration(BaseConfiguration):
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
         result = EnvVars(env_vars)
-        result.get_string_if_exists("DRAFTER_MODE", "compile")
+        result.get_string_if_exists("DRAFTER_MODE", "compile_site")
         result.get_string_list_if_exists("DRAFTER_CONFIG_FILE", "config_file", ";")
         result.get_bool_if_exists("DRAFTER_VERBOSE", "verbose")
         return result.as_dict()

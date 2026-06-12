@@ -16,7 +16,7 @@ for (const file of fs.readdirSync(cssDir)) {
 export default defineConfig([
 	{
 		entry: {
-			"drafter.skulpt": "src/skulpt.index.ts",
+			"drafter.skulpt": "src/skulpt.index.tsx",
 		},
 		format: ["iife"],
 		globalName: "Drafter", // what gets attached to window.Drafter
@@ -35,7 +35,7 @@ export default defineConfig([
 	},
 	{
 		entry: {
-			"drafter.pyodide": "src/pyodide.index.ts",
+			"drafter.pyodide": "src/pyodide.index.tsx",
 		},
 		format: ["iife"],
 		globalName: "Drafter", // what gets attached to window.Drafter

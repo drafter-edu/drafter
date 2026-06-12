@@ -106,6 +106,17 @@ export async function runStudentCode(
 		});
 		return result;
 	} catch (error) {
+		alertDialog(
+			<div>
+				Error running student code: <pre>{"" + error}</pre>
+			</div>,
+			{
+				title: "Error",
+				modal: true,
+				draggable: true,
+				width: "560px",
+			},
+		);
 		throw error;
 	}
 }
