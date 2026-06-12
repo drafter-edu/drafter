@@ -753,3 +753,26 @@ div.btlw-container img {
     font-weight: bold;
     color: #cc6600;
 }
+
+/** Two columns, equally sized **/
+.drafter-debug-files-content {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+
+.drafter-debug-files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.drafter-debug-files-list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 10px;
+}

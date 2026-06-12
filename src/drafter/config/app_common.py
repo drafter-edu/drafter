@@ -11,7 +11,7 @@ FalseType = Literal[False]
 
 @dataclass
 class AppCommonConfiguration(BaseConfiguration):
-    engine: EngineType = "skulpt"
+    engine: EngineType = "pyodide"
 
     user_directory: Union[FalseType, str] = False
     main_filename: Union[FalseType, str] = False

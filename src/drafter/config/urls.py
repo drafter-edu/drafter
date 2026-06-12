@@ -6,6 +6,7 @@ Defines reserved URL paths for WebSocket communication and asset serving.
 INTERNAL_ROUTES = {
     "WS": "__drafter_ws",
     "ASSETS": "__drafter_assets",
+    "LIST_FILES": "__drafter_list_files",
 }
 
 

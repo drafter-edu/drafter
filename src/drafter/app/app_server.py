@@ -9,8 +9,9 @@ import webbrowser
 from pathlib import Path
 
 from drafter.data.request import Request
+from pathlib import Path
 from starlette.applications import Starlette
-from starlette.responses import HTMLResponse, Response
+from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.routing import Route, WebSocketRoute, Mount
 from starlette.staticfiles import StaticFiles
 import uvicorn
@@ -58,6 +59,44 @@ async def index(req) -> Response:
     )
     return HTMLResponse(html)
 
+async def list_user_files(req) -> Response:
+    """Serve a JSON response listing user files in the user directory.
+    
+    If a path is given, it will be resolved as a subpath of the user directory, and only files within that subpath will be listed.
+    
+    Clearly indicates whether an entry is a file or a folder.
+    
+    Does not allow access to files outside the user directory, and only lists files (not directories).
+
+    Args:
+        req: Starlette request object.
+    
+    Returns:
+        JSONResponse with list of user files.
+    """
+    app: Starlette = req.app  # type: ignore
+    user_directory: Path = app.state.user_directory
+    # Get optional path query parameter
+    path_param = req.query_params.get("path", "")
+    # Resolve the requested path against the user directory
+    requested_path = (user_directory / path_param).resolve()
+    # Ensure the requested path is within the user directory
+    if not str(requested_path).startswith(str(user_directory)):
+        return JSONResponse({"error": "Invalid path"}, status_code=400)
+    # List files in the requested directory
+    if not requested_path.is_dir():
+        return JSONResponse({"error": "Path is not a directory"}, status_code=400)
+    entries = []
+    for entry in requested_path.iterdir():
+        entries.append({
+            "name": entry.name,
+            "is_dir": entry.is_dir(),
+        })
+    return JSONResponse({"entries": entries, "summary": {
+        "total_entries": len(entries),
+        "requested_path": str(requested_path.relative_to(user_directory)),
+    }})
+
 
 def make_app(
     system: SystemConfiguration,
@@ -101,6 +140,9 @@ def make_app(
     # Serve user files if enabled
     if system.app_server.serve_adjacent_files:
         watch_paths.append(user_directory)
+        routes.append(
+            Route("/"+INTERNAL_ROUTES["LIST_FILES"], list_user_files)
+        )
         routes.append(
             Mount(
                 "/",

@@ -85,6 +85,7 @@ def render_index_html(
         pyodide_package_style=pyodide_package_style,
         load_packages_automatically=load_packages_automatically,
         explicit_package_list=explicit_package_list,
+        drafter_engine=engine,
         static=static,
         system=system or {},
         modified_system=modified_system or {},
