@@ -646,3 +646,16 @@ When building, we need to either:
 
 
 For most of the development process, I've been embedding the generated files into the assets directory. That seems ridiculous now.
+But is there some value in letting the entire Build step not depend on any external internet? Same deal with Student Serving.
+I still think that the assets should not be left into the python source directory. They should be added to the build output directory instead.
+
+CI workflow steps:
+- `cd js && npm install`
+- `npm run build` to build Drafter's JS files (to `js/dist/js` and `js/dist/css`)
+- `npm run update-skulpt` to get a version of skulpt (place in `js/dist/skulpt`)
+- `npm run precompile --minify` for building Drafter in skulpt, must provide either remote URL or local path to Skulpt (place in `js/dist/skulpt`)
+- Make sure all files are `js/dist/`
+- `cd ..` to return to parent directory
+- `uv build`
+- `npm publish`
+- `twine upload dist/*`

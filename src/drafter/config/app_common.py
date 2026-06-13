@@ -20,15 +20,16 @@ class AppCommonConfiguration(BaseConfiguration):
     
     Attributes:
         mount_drafter_locally: Mount Drafter locally vs. from package. Used for local dev.
-        override_asset_url: Custom asset URL (False to use defaults).
+        asset_directory: Static assets directory (uses the packages' `src/drafter/assets/` folder if false and exists, then falls back to `js/dist/` if not, otherwise throws error).
+        override_asset_url: Custom asset URL (False to use defaults). When building, this will be used to name the output folder.
         site_title: Browser tab title.
         engine: Python execution engine ("skulpt" or "pyodide").
-        asset_directory: Static assets directory (uses Drafter defaults if False).
         show_filename_as: Display name for main file in UI (if different).
         prerender_initial_page: Prerender initial page on server start.
         load_packages_automatically: Automatically load system and project packages.
         system_packages: List of system packages to load.
         project_packages: List of project-specific packages to load.
+        pyodide_drafter_path: Optional custom path to the Drafter Pyodide package. If building from local, this is the relative path to the file (to be used as a URL). If using a CDN, this will be the full path to the wheel on PyPi or other CDN.
         pyodide_url: URL to load Pyodide from.
 
     """
@@ -41,8 +42,9 @@ class AppCommonConfiguration(BaseConfiguration):
     mount_drafter_locally: bool = False
     load_packages_automatically: bool = True
     
-    system_packages: Optional[list[str]] = DEFAULT_SYSTEM_PACKAGES
+    system_packages: Optional[list[str]] = field(default_factory=lambda: DEFAULT_SYSTEM_PACKAGES)
     project_packages: Optional[list[str]] = None
+    pyodide_drafter_path: Optional[str] = None
     pyodide_url: Optional[str] = DEFAULT_PYODIDE_URL
 
     override_asset_url: Union[bool, str] = False
@@ -61,6 +63,7 @@ class AppCommonConfiguration(BaseConfiguration):
         result.get_string_if_exists("DRAFTER_ASSET_DIRECTORY", "asset_directory")
         result.get_string_if_exists("DRAFTER_SHOW_FILENAME_AS", "show_filename_as")
         result.get_bool_if_exists("DRAFTER_MOUNT_DRAFTER_LOCALLY", "mount_drafter_locally")
+        result.get_string_if_exists("DRAFTER_PYODIDE_DRAFTER_PATH", "pyodide_drafter_path")
         result.get_string_if_exists("DRAFTER_OVERRIDE_ASSET_URL", "override_asset_url")
         result.get_string_if_exists("DRAFTER_SITE_TITLE", "site_title")
         result.get_bool_if_exists("DRAFTER_LOAD_PACKAGES_AUTOMATICALLY", "load_packages_automatically")
@@ -127,6 +130,12 @@ class AppCommonConfiguration(BaseConfiguration):
             type=str,
             help=f"Custom URL for loading Pyodide (default: '{DEFAULT_PYODIDE_URL}')",
         )
+        
+        group.add_argument(
+            "--pyodide-drafter-path",
+            type=str,
+            help="Optional custom path to the Drafter Pyodide package (used if engine is 'pyodide')",
+        )
         return group
     
     @staticmethod
@@ -154,4 +163,6 @@ class AppCommonConfiguration(BaseConfiguration):
             result["system_packages"] = parsed_args["system_packages"].split(";")
         if parsed_args.get("pyodide_url"):
             result["pyodide_url"] = parsed_args["pyodide_url"]
+        if parsed_args.get("pyodide_drafter_path"):
+            result["pyodide_drafter_path"] = parsed_args["pyodide_drafter_path"]
         return result

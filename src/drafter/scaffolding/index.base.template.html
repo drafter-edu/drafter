@@ -40,7 +40,7 @@
         <!-- Drafter App will initialize here -->
       {% endif %}
     </div>
-    {% if system %}<script>window.DRAFTER_CONFIGURATION = {{ system | tojson }};</script>{% endif %}
+    {% if system_json %}<script>window.DRAFTER_CONFIGURATION = {{ system_json | tojson }};</script>{% endif %}
     {% if modified_system %}
       <script>window.DRAFTER_MODIFIED_CONFIGURATION = {{ modified_system | tojson }};</script>
     {% endif %}

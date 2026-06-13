@@ -6,40 +6,64 @@
 {% block initialization %}
   <script>
   (async () => {
-  try {
-  {% if dev_ws_url %}
-    const ws = new WebSocket('{{ dev_ws_url }}');
-    ws.onmessage = (e) => {
-    const msg = JSON.parse(e.data);
-    if (msg.type === 'reload') location.reload();
-    };
-  {% endif %}
-  const pyodide = await window.Drafter.setupPyodide();
-  {% if mount_drafter_locally %}
-    await window.Drafter.mountDrafterDirectory();
-  {% else %}
-    await window.Drafter.mountDrafterRemote({{
-    pyodide_drafter_path | tojson
-    }});
-  {% endif %}
-  await window.Drafter.runStudentCode({code: "import os; print(os.listdir('./drafter/'))"});
-  const app = await window.Drafter.runStudentCode({
-  {% if inline_py %}
-    code: document.getElementById('user-code').textContent,
-  {% else %}
-    url: '{{ python_url }}',
-  {% endif %}
-  {% if load_packages_automatically %}
-    loadPackagesAutomatically: true,
-  {% elif explicit_package_list %}
-    loadPackagesAutomatically: false,
-    explicitPackageList: {{ explicit_package_list | tojson }},
-  {% endif %}
-  });
-  console.log("[Drafter AppServer Scaffolding] Student Code Initialized with Pyodide:");
-  } finally {
-  document.getElementById('--drafter-initial-loading-white-screen').remove();
-  }
+    try {
+
+      // 0) Set up hot-reloading websocket connection
+      {% if dev_ws_url %}
+        const ws = new WebSocket('{{ dev_ws_url }}');
+        ws.onmessage = (e) => {
+          const msg = JSON.parse(e.data);
+          if (msg.type === 'reload') {
+            location.reload();
+          }
+        };
+      {% endif %}
+  
+      // 1) Load Pyodide
+      const pyodide = await window.Drafter.setupPyodide({
+        pyodideUrl: {{ system.app_common.pyodide_url | tojson }},
+        systemPackages: {{ system.app_common.system_packages | tojson }},
+      });
+
+      // 4) Mount Drafter either locally or remotely based on configuration
+      {% if system.app_common.mount_drafter_locally %}
+        await window.Drafter.mountDrafterDirectory();
+      {% else %}
+        const url = {{ pyodide_drafter_path | tojson }};
+        await window.Drafter.mountDrafterRemote(url);
+      {% endif %}
+
+      // Old debugging step to dump the output of drafter directory
+      // await window.Drafter.runStudentCode({code: "import os; print(os.listdir('./drafter/'))"});
+
+      // 4) Patch Drafter
+      await window.Drafter.patchPythonFeatures();
+
+      // Establish execution options
+      const executionOptions = {
+        // Provide either code or URL
+        {% if inline_py %}
+          code: document.getElementById('user-code').textContent,
+        {% else %}
+          url: '{{ python_url }}',
+        {% endif %}
+
+        // Provide either automatic package loading or explicit package list
+        loadPackagesAutomatically: {{system.app_common.load_packages_automatically|tojson}},
+        explicitPackageList: {{ system.app_common.project_packages | tojson }},
+      }
+
+      // 5) Install students' dependencies
+      await window.Drafter.setupEnvironment(executionOptions);
+
+      // 6) Run students' code
+      const app = await window.Drafter.runStudentCode(executionOptions);
+
+      // All done!
+      console.log("[Drafter AppServer Scaffolding] Student Code Initialized with Pyodide:");
+    } finally {
+      document.getElementById('--drafter-initial-loading-white-screen').remove();
+    }
   })();
   </script>
 {% endblock initialization %}

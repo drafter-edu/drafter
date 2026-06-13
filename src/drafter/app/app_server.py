@@ -51,7 +51,7 @@ async def index(req) -> Response:
         assets_url="/"+determine_assets_url(system.app_common.override_asset_url),
         compiled_body=app.state.compiled_body,
         compiled_headers=app.state.compiled_headers,
-        pyodide_drafter_path=app.state.pyodide_drafter_path,
+        pyodide_drafter_path=system.app_common.pyodide_drafter_path or "",
     )
     return HTMLResponse(html)
 

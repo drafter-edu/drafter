@@ -22,9 +22,8 @@ class AppBuilderConfiguration(BaseConfiguration):
         create_404: Whether to create a 404.html file (options: "always", "never", "if_missing").
         zip_output: Whether to zip the output directory after building.
         warn_missing_info: Whether to echo a warning if set_site_information is missing.
-        pyodide_drafter_path: Optional custom path to the Drafter Pyodide package (used if engine is "pyodide").
         pyodide_package_style: Optional custom style for the Pyodide package ("build", "cdn", or "pypi"). The "build" option means that the local version of Drafter will be built for pyodide.
-        additional_paths: List of additional file paths to make available in the built site (e.g., for `open`).
+        additional_paths: List of additional file paths to make available in the built site (e.g., for `open`). These will be copied to the assets folder.
         
     """
     output_directory: str = "dist"
@@ -36,7 +35,6 @@ class AppBuilderConfiguration(BaseConfiguration):
     warn_missing_info: bool = True
     
     pyodide_package_style: Optional[str] = "build" # "build", "cdn", or "pypi"
-    pyodide_drafter_path: Optional[str] = None
     
     additional_paths: list[str] = field(default_factory=list)
     
@@ -54,7 +52,7 @@ class AppBuilderConfiguration(BaseConfiguration):
         result.get_bool_if_exists("DRAFTER_WARN_MISSING_INFO", "warn_missing_info")
         result.get_string_list_if_exists("DRAFTER_ADDITIONAL_PATHS", "additional_paths", ";")
         result.get_string_if_exists("DRAFTER_PYODIDE_PACKAGE_STYLE", "pyodide_package_style")
-        result.get_string_if_exists("DRAFTER_PYODIDE_DRAFTER_PATH", "pyodide_drafter_path")
+        
         return result.as_dict()
     
     @staticmethod
@@ -97,11 +95,6 @@ class AppBuilderConfiguration(BaseConfiguration):
             choices=["build", "cdn", "pypi"],
             help="Optional custom style for the Pyodide package ('build', 'cdn', or 'pypi')",
         )
-        group.add_argument(
-            "--pyodide-drafter-path",
-            type=str,
-            help="Optional custom path to the Drafter Pyodide package (used if engine is 'pyodide')",
-        )
         return group
     
     @staticmethod
@@ -121,7 +114,5 @@ class AppBuilderConfiguration(BaseConfiguration):
             result["additional_paths"] = parsed_args["additional_paths"].split(";")
         if parsed_args.get("pyodide_package_style"):
             result["pyodide_package_style"] = parsed_args["pyodide_package_style"]
-        if parsed_args.get("pyodide_drafter_path"):
-            result["pyodide_drafter_path"] = parsed_args["pyodide_drafter_path"]
         return result
     

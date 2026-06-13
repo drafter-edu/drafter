@@ -3,7 +3,7 @@
 Provides helpers to locate package resources including assets, templates,
 and scaffolding files.
 """
-
+import os
 import shutil
 from pathlib import Path
 
@@ -34,7 +34,13 @@ def pkg_assets_dir() -> Path:
     Returns:
         Path to src/drafter/assets/.
     """
-    return pkg_root() / "assets"
+    chosen_path = pkg_root() / "assets"
+    if os.path.exists(chosen_path):
+        return chosen_path
+    alternate_path = pkg_root().parent.parent / "js" / "dist"
+    if os.path.exists(alternate_path):
+        return alternate_path
+    raise FileNotFoundError("Assets directory not found in either src/drafter/assets/ or js/dist/")
 
 
 def pkg_scaffold_dir() -> Path:
@@ -45,15 +51,3 @@ def pkg_scaffold_dir() -> Path:
     """
     return pkg_root() / "scaffolding"
 
-
-def copy_assets_to(target_dir: Path) -> None:
-    """Copy package assets to target directory.
-
-    Args:
-        target_dir: Destination directory path.
-    """
-    target_dir.mkdir(parents=True, exist_ok=True)
-    src = pkg_assets_dir()
-    for p in src.iterdir():
-        if p.is_file():
-            shutil.copy2(p, target_dir / p.name)

@@ -1,3 +1,11 @@
+'''
+DEPRECATED
+
+Originally we were going to use this to build and copy JS assets into the Python package.
+Now we do that completely separately from the python build process.
+'''
+
+
 import subprocess, shutil, os, pathlib
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 

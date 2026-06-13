@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "hatch-nodejs-version"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
@@ -9,7 +9,9 @@ version = "2.0.0"
 description = "Student-friendly full stack web development library."
 readme = "README.md"
 urls = { "github" = "https://github.com/drafter-edu/drafter", "homepage" = "https://drafter-edu.github.io/drafter/" }
-license = { file = "LICENSE.txt" }
+license = "MIT"
+license-files = ["LICENSE.txt"]
+
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Education",
@@ -19,6 +21,8 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
@@ -37,19 +41,19 @@ dependencies = [
   "starlette",
   "uvicorn[standard]",
   # CLI Tooling
-  "click",
   "typer",
   "rich",
   # Actual library
   "bakery",
   "pillow",
   "matplotlib",
+  # TODO: Is this necessary for compatibility?
+  # "typing-extensions; python_version < '3.11'",
 ]
 [dependency-groups]
 dev = [
   # Building
   "hatchling",
-  "hatch-nodejs-version",
   # Client Server
   "pyodide-py",
   # New Documentation
@@ -103,18 +107,15 @@ examples = ["pandas", "seaborn", "requests", "scipy"]
 drafter = "drafter.cli:main"
 
 [tool.hatch.build]
-include = ["src/drafter/**"]
+
+[tool.hatch.build.targets.sdist]
+artifacts = ["js/dist/**"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/drafter"]
-force-include = { "src/drafter/assets" = "drafter/assets" }
 
-[tool.hatch.build.targets.sdist]
-# Ensure sdists also contain the assets
-include = ["src/drafter/**"]
-
-[tool.hatch.build.hooks.custom]
-# A tiny hook that: npm ci && npm run build && copies assets to src/drafter/assets
+[tool.hatch.build.targets.wheel.force-include]
+"js/dist/" = "drafter/assets/"
 
 [tool.black]
 line-length = 88
@@ -126,18 +127,3 @@ mypy_path = ["typings"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-
-# [tool.hatch.envs.pyodide]
-# description = "Pyodide build and watch environment"
-# dependencies = ["pyodide-build", "watchfiles"]
-
-# # Need to document the following
-# # cd js && npm run dev
-# # cd js && npm run precompile:watch
-
-# [tool.hatch.envs.pyodide.scripts]
-# # One-shot Pyodide wheel build
-# build = "pyodide build --out-dir dist/pyodide"
-
-# # Rebuild on source changes
-# watch = "watchfiles 'hatch run pyodide:build' src"
