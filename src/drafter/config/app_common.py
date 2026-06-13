@@ -9,8 +9,29 @@ from drafter.config.base import BaseConfiguration
 
 FalseType = Literal[False]
 
+DEFAULT_SYSTEM_PACKAGES = ["bakery", "matplotlib", "pillow"]
+DEFAULT_PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/"
+
 @dataclass
 class AppCommonConfiguration(BaseConfiguration):
+    """
+    Common configuration options for the Drafter app, in terms of the server and compiler behavior.
+    Settings for student site stuff actually belong in the ClientServer section.
+    
+    Attributes:
+        mount_drafter_locally: Mount Drafter locally vs. from package. Used for local dev.
+        override_asset_url: Custom asset URL (False to use defaults).
+        site_title: Browser tab title.
+        engine: Python execution engine ("skulpt" or "pyodide").
+        asset_directory: Static assets directory (uses Drafter defaults if False).
+        show_filename_as: Display name for main file in UI (if different).
+        prerender_initial_page: Prerender initial page on server start.
+        load_packages_automatically: Automatically load system and project packages.
+        system_packages: List of system packages to load.
+        project_packages: List of project-specific packages to load.
+        pyodide_url: URL to load Pyodide from.
+
+    """
     engine: EngineType = "pyodide"
 
     asset_directory: Union[FalseType, str] = False
@@ -19,7 +40,10 @@ class AppCommonConfiguration(BaseConfiguration):
     
     mount_drafter_locally: bool = False
     load_packages_automatically: bool = True
-    explicit_package_list: Optional[list[str]] = None
+    
+    system_packages: Optional[list[str]] = DEFAULT_SYSTEM_PACKAGES
+    project_packages: Optional[list[str]] = None
+    pyodide_url: Optional[str] = DEFAULT_PYODIDE_URL
 
     override_asset_url: Union[bool, str] = False
 
@@ -28,9 +52,6 @@ class AppCommonConfiguration(BaseConfiguration):
     @staticmethod
     def get_key() -> str:
         return "app_common"
-                        
-    def leverage_filesystem(self):
-        pass
         
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
@@ -43,7 +64,8 @@ class AppCommonConfiguration(BaseConfiguration):
         result.get_string_if_exists("DRAFTER_OVERRIDE_ASSET_URL", "override_asset_url")
         result.get_string_if_exists("DRAFTER_SITE_TITLE", "site_title")
         result.get_bool_if_exists("DRAFTER_LOAD_PACKAGES_AUTOMATICALLY", "load_packages_automatically")
-        result.get_string_list_if_exists("DRAFTER_EXPLICIT_PACKAGE_LIST", "explicit_package_list", ";")
+        result.get_string_list_if_exists("DRAFTER_PROJECT_PACKAGES", "project_packages", ";")
+        result.get_string_list_if_exists("DRAFTER_SYSTEM_PACKAGES", "system_packages", ";")
         return result.as_dict()
     
     @staticmethod
@@ -88,12 +110,22 @@ class AppCommonConfiguration(BaseConfiguration):
         group.add_argument(
             "--load-packages-automatically",
             action="store_true",
-            help="Load Python packages automatically on startup",
+            help="Load Python packages detected in students' code automatically on startup. This will be in addition to whatever are explicitly listed in the --system-packages and --project-packages options.",
         )
         group.add_argument(
-            "--explicit-package-list",
+            "--project-packages",
             type=str,
-            help="List of explicit Python packages to load (semicolon-separated)",
+            help="List of project-specific Python packages to load (semicolon-separated)",
+        )
+        group.add_argument(
+            "--system-packages",
+            type=str,
+            help=f"List of system-specific Python packages to load (semicolon-separated). The defaults ('{';'.join(DEFAULT_SYSTEM_PACKAGES)}') are usually fine, but you can override them if needed.",
+        )
+        group.add_argument(
+            "--pyodide-url",
+            type=str,
+            help=f"Custom URL for loading Pyodide (default: '{DEFAULT_PYODIDE_URL}')",
         )
         return group
     
@@ -116,6 +148,10 @@ class AppCommonConfiguration(BaseConfiguration):
             result["site_title"] = parsed_args["site_title"]
         if parsed_args.get("load_packages_automatically"):
             result["load_packages_automatically"] = True
-        if parsed_args.get("explicit_package_list"):
-            result["explicit_package_list"] = parsed_args["explicit_package_list"].split(";")
+        if parsed_args.get("project_packages"):
+            result["project_packages"] = parsed_args["project_packages"].split(";")
+        if parsed_args.get("system_packages"):
+            result["system_packages"] = parsed_args["system_packages"].split(";")
+        if parsed_args.get("pyodide_url"):
+            result["pyodide_url"] = parsed_args["pyodide_url"]
         return result

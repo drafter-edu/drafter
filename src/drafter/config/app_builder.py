@@ -17,18 +17,15 @@ class AppBuilderConfiguration(BaseConfiguration):
     # TODO: Single file output, whether to use CDN for assets, etc.
     
     Attributes:
-        verbose: Enable verbose logging to stdout.
         output_directory: Directory to output the built site files.
         output_filename: Name of the main HTML file to generate.
         create_404: Whether to create a 404.html file (options: "always", "never", "if_missing").
-        prerender_initial_page: Whether to prerender the HTML of the page into the output file.
-        engine: Python execution engine to compile for ("skulpt" or "pyodide").
-        warn_missing_info: Whether to echo a warning if set_site_information is missing.
-        additional_paths: List of additional file paths to make available in the built site (e.g., for `open`).
         zip_output: Whether to zip the output directory after building.
-        
+        warn_missing_info: Whether to echo a warning if set_site_information is missing.
         pyodide_drafter_path: Optional custom path to the Drafter Pyodide package (used if engine is "pyodide").
         pyodide_package_style: Optional custom style for the Pyodide package ("build", "cdn", or "pypi"). The "build" option means that the local version of Drafter will be built for pyodide.
+        additional_paths: List of additional file paths to make available in the built site (e.g., for `open`).
+        
     """
     output_directory: str = "dist"
     output_filename: str = "index.html"

@@ -1,3 +1,20 @@
+/**
+ * Here is the list of all the things that have to be set up:
+ *
+ * 1) Load Pyodide
+ * 2) Load Base Packages
+ *   1) Load micropip
+ *   2) Load system dependencies (e.g., Bakery, MatPlotLib, Pillow)
+ * 3) Write the Drafter configuration file
+ * 4) Mount Drafter (locally or from remote)
+ * 5) Apply Drafter's patches
+ *
+ *
+ * Then we can run student's code:
+ * 1) Load any new packages detected from code or explicitly requested
+ * 2) Execute student's code
+ */
+
 import { loadPyodide } from "pyodide";
 import { mountDirectory } from "./pyodide_bridge/directories";
 import { DebugPanel } from "./debug";
@@ -58,7 +75,7 @@ export async function setupPyodide() {
 	if ((window as any).pyodide === undefined) {
 		window.pyodide = (window as any).pyodide = await loadPyodide({
 			packages: ["micropip"],
-			indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/",
+			indexURL: options.pyodideUrl,
 			env: {
 				DRAFTER_CONFIG_FILE: "/_drafter_config.json",
 			},
@@ -71,65 +88,7 @@ export async function setupPyodide() {
 	return (window as any).pyodide;
 }
 
-function writeConfigFile(pyodide: any) {
-	if ((window as any).DRAFTER_MODIFIED_CONFIGURATION) {
-		pyodide.FS.writeFile(
-			"/_drafter_config.json",
-			JSON.stringify((window as any).DRAFTER_MODIFIED_CONFIGURATION),
-		);
-	}
-}
-
-async function patchPythonFeatures() {
-	await pyodide.runPythonAsync(`
-import sys
-import importlib.abc
-import importlib.util
-from pyodide.http import pyxhr
-
-# This code allows Python code running in Pyodide to import modules from
-# a remote server.
-class RemoteLoader(importlib.abc.Loader):
-    def __init__(self, source):
-        self.source = source
-
-    def exec_module(self, module):
-        exec(self.source, module.__dict__)
-
-
-class RemoteFinder(importlib.abc.MetaPathFinder):
-    BASE_URL = ""
-
-    def find_spec(self, fullname, path=None, target=None):
-        module_name = fullname.split(".")[-1]
-        url = f"{self.BASE_URL}/{module_name}.py"
-
-        try:
-            response = pyxhr.get(url)
-            if response.status_code != 200:
-                return None
-            text = response.text
-
-            loader = RemoteLoader(text)
-            return importlib.util.spec_from_loader(fullname, loader)
-
-        except Exception as e:
-            return None
-
-
-sys.meta_path.append(RemoteFinder())
-	`);
-}
-
-export async function runStudentCode(
-	options: DrafterInitOptions,
-): Promise<any> {
-	// TODO: Handle URL-based coding loading
-	if ((window as any).pyodide === undefined) {
-		throw new Error(
-			"Pyodide is not initialized. Call setupPyodide() first.",
-		);
-	}
+export async function setupEnvironment(packages: string[]) {
 	const pyodide = (window as any).pyodide;
 	if (options.loadPackagesAutomatically) {
 		// TODO: Provide a nice loading indicator while packages are being loaded
@@ -157,6 +116,32 @@ export async function runStudentCode(
 		);
 		throw error;
 	}
+}
+
+function writeConfigFile(pyodide: any) {
+	if ((window as any).DRAFTER_MODIFIED_CONFIGURATION) {
+		pyodide.FS.writeFile(
+			"/_drafter_config.json",
+			JSON.stringify((window as any).DRAFTER_MODIFIED_CONFIGURATION),
+		);
+	}
+}
+
+async function patchPythonFeatures() {
+	await pyodide.runPythonAsync(`import drafter.files.patch_pyodide`);
+}
+
+export async function runStudentCode(
+	options: DrafterInitOptions,
+): Promise<any> {
+	console.log("Running student code with options:", options);
+	// TODO: Handle URL-based coding loading
+	if ((window as any).pyodide === undefined) {
+		throw new Error(
+			"Pyodide is not initialized. Call setupPyodide() first.",
+		);
+	}
+
 	try {
 		const result = await pyodide.runPythonAsync(options.code, {
 			filename: options?.studentFilename || "main.py",

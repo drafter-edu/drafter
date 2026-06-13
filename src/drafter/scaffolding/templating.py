@@ -5,6 +5,7 @@ supporting multiple Python engines (Skulpt, Pyodide).
 """
 
 from typing import Optional
+from drafter.config.system import SystemConfiguration
 from jinja2 import Environment, FileSystemLoader, Template
 
 from drafter.scaffolding.utils import pkg_scaffold_dir
@@ -27,7 +28,9 @@ def _load_template_text(engine: str) -> Template:
 
 def render_index_html(
     *,
-    title: str,
+    system: SystemConfiguration,
+    modified_system: dict,
+    
     inline_py: bool,
     user_code: Optional[str],
     python_url: Optional[str],
@@ -35,14 +38,7 @@ def render_index_html(
     assets_url: Optional[str] = None,
     compiled_body: str = "",
     compiled_headers: str = "",
-    engine: str = "skulpt",
-    mount_drafter_locally: bool = False,
-    pyodide_package_style: Optional[str] = None,
-    pyodide_drafter_path: Optional[str] = None,
-    load_packages_automatically: bool = True,
-    explicit_package_list: Optional[list[str]] = None,
-    system: Optional[dict] = None,
-    modified_system: Optional[dict] = None,
+    pyodide_drafter_path: str = "",
 ) -> str:
     """Render the index HTML page with provided configuration.
 
@@ -50,7 +46,6 @@ def render_index_html(
     provided values. The assets_url parameter controls how assets are served.
 
     Args:
-        title: Page title.
         inline_py: Whether Python code is inlined in HTML.
         user_code: User Python code to inline (if inline_py=True).
         python_url: URL to load user code from (if inline_py=False).
@@ -58,20 +53,21 @@ def render_index_html(
         assets_url: Asset URL prefix (None for package defaults).
         compiled_body: Pre-rendered HTML body content.
         compiled_headers: Pre-rendered header content.
-        engine: Python engine name ('skulpt' or 'pyodide').
-        mount_drafter_locally: Whether to mount Drafter locally.
-        load_packages_automatically: Whether to load Python packages automatically.
-        explicit_package_list: List of explicit Python packages to load (if not automatic).
     Returns:
         Rendered HTML string ready to send to client.
     """
-    template = _load_template_text(engine)
+    template = _load_template_text(system.app_common.engine)
 
     def static(asset_name: str) -> str:
         return f"{assets_url}/{asset_name}"
 
     return template.render(
-        title=title,
+        # General variables
+        system=system,
+        system_json=system.to_json(),
+        modified_system=modified_system or {},
+        # Specific variables
+        title=system.app_common.site_title,
         inline_py=inline_py,
         user_code=user_code or "",
         python_url=python_url or "",
@@ -80,13 +76,6 @@ def render_index_html(
         assets_url=assets_url or "",
         compiled_body=compiled_body,
         compiled_headers=compiled_headers,
-        mount_drafter_locally=mount_drafter_locally,
         pyodide_drafter_path=pyodide_drafter_path,
-        pyodide_package_style=pyodide_package_style,
-        load_packages_automatically=load_packages_automatically,
-        explicit_package_list=explicit_package_list,
-        drafter_engine=engine,
         static=static,
-        system=system or {},
-        modified_system=modified_system or {},
     )

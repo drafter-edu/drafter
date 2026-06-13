@@ -587,3 +587,62 @@ How should we handle paths?
 Currently, the configuration system only leverages the filesystem immediately before the launch, after the students' code.
 But we need the system to be able to access the filesystem during the students' code execution as well, in order to read files and serve them to the client.
 The file system interface should be able to make these decisions "on the fly" based on the current configuration settings.
+
+
+### Serving, Building, and Packaging
+
+Drafter has a few core pieces, and they must be packaged appropriately to ensure that different instantiations can access what they need.
+
+Here are ALL the parts of Drafter that have to be hosted:
+- Drafter Python library: The core Python library compiled for CPython, usually installed through PyPi.
+- Assets: Static files and resources required by the running web application, such as CSS, JavaScript, and images.
+  - `drafter.js`: The main JavaScript file required by the web application, providing the necessary bridges and debug menus.
+  - `drafter.css`: The main CSS file required by the web application, providing core styling.
+  - `drafter_debug.css`: The CSS file providing styles for the debug menus.
+  - `drafter_deploy.css`: The CSS file providing styles for when the application is NOT in debug menu ("deployed").
+  - Themes:
+    - `default.css`: The base theme that most folks will end up using.
+    - `none.css`: An empty theme with no styling.
+    - `dark.css`: A dark theme with appropriate styling for low-light environments.
+- Drafter Skulpt Libraries:
+  - `skulpt.js`: Skulpt's core
+  - `skulpt-stdlib.js`: Skulpt's standard library.
+  - `skulpt-drafter.js`: The Skulpt-compiled version of Drafter.
+  - `drafter.skulpt.js`: The JavaScript file that integrates Drafter with the Skulpt environment.
+- Pyodide Drafter Libraries:
+  - `pyodide.js`: Pyodide itself
+  - Libraries hosted on the Pyodide CDN: External libraries required by the Pyodide environment.
+  - The Pyodide-compiled version of Drafter.
+  - `drafter.pyodide.js`: The JavaScript file that integrates Drafter with the Pyodide environment.
+- Compiled assets: There are some assets that get precompiled during the build process and are shipped with the application.
+  - Precompiled Headers: The CSS/Script content that should be embedded in the final output on page load.
+  - Precompiled Body: The HTML content that should be embedded in the final output on page load.
+- Additional student assets: These are any assets that students need for their site like images, additional python files, css, html, javascript, etc.
+
+Serving comes in two flavors: 
+- Developer: When a developer is working locally, they should generally be getting locally compiled versions of these assets.
+- Student: When students are working with Drafter, we want to use the official hosted version of most of the assets.
+
+Here are the files that we must take responsibility for packaging and publishing:
+- CPython Drafter on PyPi: The current version of the library published on PyPi.
+- Wasm Drafter on PyPi: The current version of the library published on PyPi for WebAssembly.
+- JS Files via NPM:
+  - Skulpt and its associated libraries
+  - `drafter.pyodide.js` and `drafter.skulpt.js`
+  - `drafter.js` and its associated files
+
+When we merge a new version of Drafter into the main branch, we should launch a github actions workflow to publish new versions of the library to PyPi and NPM as appropriate.
+Note that for skulpt, we will need to make sure the build system has a stable version of the Skulpt library available.
+
+
+When serving, we can keep things:
+- In memory
+- In temporary folder
+- On the CDN
+
+When building, we need to either:
+- Generate them into the output directory
+- Link to the desired CDN locations
+
+
+For most of the development process, I've been embedding the generated files into the assets directory. That seems ridiculous now.

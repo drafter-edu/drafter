@@ -32,8 +32,6 @@ class BaseConfiguration:
         filtered_args = cls.parse_args(parsed_args)
         config.merge_in_args(filtered_args, raise_errors=False)
         
-        config.leverage_filesystem()
-        
         return config
     
     @staticmethod
@@ -108,9 +106,6 @@ class BaseConfiguration:
                 value = potential_args[field.name]
                 if value is not None:
                     setattr(self, field.name, value)
-                    
-    def leverage_filesystem(self):
-        pass
     
     def to_json(self) -> dict:
         return {field.name: getattr(self, field.name) for field in fields(self)}

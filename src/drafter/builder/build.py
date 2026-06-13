@@ -103,22 +103,16 @@ def compile_site(
         pyodide_drafter_path = "drafter" if system.app_builder.pyodide_package_style == "pypi" else system.app_builder.pyodide_drafter_path
     
     
-    true_page = render_index_html(title=system.app_common.site_title,
+    true_page = render_index_html(system=system,
+                                  modified_system=get_system_config_modifications(),
                                   inline_py=True,
                                   user_code=user_code,
                                   python_url=str(system.bootstrap.get_main_filename()),
                                   assets_url=assets_url,
-                                  engine=system.app_common.engine,
                                   dev_ws_url=None,
                                   compiled_body=compiled_body,
                                   compiled_headers=compiled_headers,
-                                  mount_drafter_locally=system.app_common.mount_drafter_locally,
-                                  pyodide_package_style=system.app_builder.pyodide_package_style,
                                   pyodide_drafter_path=pyodide_drafter_path or "",
-                                  load_packages_automatically=system.app_common.load_packages_automatically,
-                                  explicit_package_list=system.app_common.explicit_package_list,
-                                  system=system.to_json(),
-                                  modified_system=get_system_config_modifications(),
                                   )
     
     main_output_path.write_text(true_page, encoding="utf-8")

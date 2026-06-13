@@ -104,6 +104,7 @@ class Image(Component):
             Tuple of (was_pil, processed_url) where was_pil indicates
             if the input was a PIL image.
         """
+        print("SABLE", HAS_PILLOW, isinstance(image, str), image)
         if not HAS_PILLOW or isinstance(image, str):
             return False, image
 

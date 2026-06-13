@@ -159,15 +159,7 @@ def configure_system(from_cli: bool = False) -> tuple[SystemConfiguration, dict[
     
     return system, modified_args
 
-
-def finish_configuration():
-    # Leverage filesystem for any additional configuration
-    system = get_system_configuration()
-    system.app_builder.leverage_filesystem()
-    system.app_common.leverage_filesystem()
-    system.app_server.leverage_filesystem()
-    system.client_server.leverage_filesystem()
-    
+   
         
 _SYSTEM: SystemConfiguration | None = None
 _MODIFIED_ARGS: dict[str, dict] = {}

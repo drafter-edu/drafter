@@ -20,20 +20,12 @@ class AppServerConfiguration(BaseConfiguration):
     file watching, code inlining, asset serving, and browser integration.
 
     Attributes:
-        verbose: Enable verbose logging to stdout.
-        prerender_initial_page: Prerender initial page on server start.
         port: Server port number.
         host: Server host address.
         use_reloader: Enable auto-reloader for code changes.
         open_browser: Automatically open web browser on start.
         inline_py: Inline user code in HTML vs. load via HTTP request.
-        engine: Python execution engine ("skulpt" or "pyodide").
-        asset_directory: Static assets directory (uses Drafter defaults if False).
-        show_filename_as: Display name for main file in UI (if different).
-        site_title: Browser tab title.
         serve_adjacent_files: Serve files from user directory.
-        mount_drafter_locally: Mount Drafter locally vs. from package. Used for local dev.
-        override_asset_url: Custom asset URL (False to use defaults).
     """
     port: int = 8000
     host: str = "localhost"
