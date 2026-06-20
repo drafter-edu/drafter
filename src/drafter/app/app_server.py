@@ -10,6 +10,7 @@ from pathlib import Path
 
 from drafter.data.request import Request
 from pathlib import Path
+from drafter.version import CURRENT_DRAFTER_VERSION
 from starlette.applications import Starlette
 from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.routing import Route, WebSocketRoute, Mount
@@ -46,27 +47,31 @@ async def index(req) -> Response:
         modified_system=get_system_config_modifications(),
         inline_py=system.app_server.inline_py,
         user_code=user_code if system.app_server.inline_py else None,
-        python_url=str(app.state.user_path) if not system.app_server.inline_py else None,
+        python_url=str(app.state.user_path)
+        if not system.app_server.inline_py
+        else None,
         dev_ws_url=system.app_server.ws_url,
-        assets_url="/"+determine_assets_url(system.app_common.override_asset_url),
+        assets_url="/" + determine_assets_url(system.app_common.override_asset_url),
         compiled_body=app.state.compiled_body,
         compiled_headers=app.state.compiled_headers,
-        pyodide_drafter_path=system.app_common.pyodide_drafter_path or "",
+        pyodide_drafter_path=system.app_common.pyodide_drafter_path
+        or f"drafter=={CURRENT_DRAFTER_VERSION}",
     )
     return HTMLResponse(html)
 
+
 async def list_user_files(req) -> Response:
     """Serve a JSON response listing user files in the user directory.
-    
+
     If a path is given, it will be resolved as a subpath of the user directory, and only files within that subpath will be listed.
-    
+
     Clearly indicates whether an entry is a file or a folder.
-    
+
     Does not allow access to files outside the user directory, and only lists files (not directories).
 
     Args:
         req: Starlette request object.
-    
+
     Returns:
         JSONResponse with list of user files.
     """
@@ -84,24 +89,29 @@ async def list_user_files(req) -> Response:
         return JSONResponse({"error": "Path is not a directory"}, status_code=400)
     entries = []
     for entry in requested_path.iterdir():
-        entries.append({
-            "name": entry.name,
-            "is_dir": entry.is_dir(),
-        })
-    return JSONResponse({"entries": entries, "summary": {
-        "total_entries": len(entries),
-        "requested_path": str(requested_path.relative_to(user_directory)),
-    }})
+        entries.append(
+            {
+                "name": entry.name,
+                "is_dir": entry.is_dir(),
+            }
+        )
+    return JSONResponse(
+        {
+            "entries": entries,
+            "summary": {
+                "total_entries": len(entries),
+                "requested_path": str(requested_path.relative_to(user_directory)),
+            },
+        }
+    )
 
 
 def make_app(
-    system: SystemConfiguration,
-    server: ClientServer, 
-    initial_state
+    system: SystemConfiguration, server: ClientServer, initial_state
 ) -> Starlette:
     # Determine paths
     user_directory = Path(system.bootstrap.get_user_directory()).resolve()
-    
+
     user_path = user_directory / system.bootstrap.get_main_filename()
 
     # Determine watches and routes
@@ -110,7 +120,7 @@ def make_app(
     ]
     routes = [
         Route("/", index),
-        WebSocketRoute("/"+INTERNAL_ROUTES["WS"], ws_endpoint),
+        WebSocketRoute("/" + INTERNAL_ROUTES["WS"], ws_endpoint),
     ]
     # Handle default assets
     if not system.app_common.override_asset_url:
@@ -123,7 +133,7 @@ def make_app(
             watch_paths.append(assets_dir)
         routes.append(
             Mount(
-                "/"+INTERNAL_ROUTES["ASSETS"],
+                "/" + INTERNAL_ROUTES["ASSETS"],
                 app=StaticFiles(directory=str(assets_dir)),
                 name="assets",
             )
@@ -131,9 +141,7 @@ def make_app(
     # Serve user files if enabled
     if system.app_server.serve_adjacent_files:
         watch_paths.append(user_directory)
-        routes.append(
-            Route("/"+INTERNAL_ROUTES["LIST_FILES"], list_user_files)
-        )
+        routes.append(Route("/" + INTERNAL_ROUTES["LIST_FILES"], list_user_files))
         routes.append(
             Mount(
                 "/",
@@ -164,9 +172,11 @@ def serve_app_once(
     initial_state,
 ):
     if system.bootstrap.path is None:
-        print("Error: Cannot start server because the path to the main user file is not specified.")
+        print(
+            "Error: Cannot start server because the path to the main user file is not specified."
+        )
         return
-    
+
     # Configure the server if prerendering is needed
     if system.app_common.prerender_initial_page:
         possible_error = server.do_configuration()
@@ -185,13 +195,20 @@ def serve_app_once(
         )
         try:
             uvicorn_config = uvicorn.Config(
-                app, host=system.app_server.host, port=system.app_server.port, log_level="info", reload=False
+                app,
+                host=system.app_server.host,
+                port=system.app_server.port,
+                log_level="info",
+                reload=False,
             )
             server = uvicorn.Server(uvicorn_config)
             if system.app_server.open_browser:
                 # Delay a touch to let server bind
                 loop.call_later(
-                    0.8, lambda: webbrowser.open(f"http://{system.app_server.host}:{system.app_server.port}/")
+                    0.8,
+                    lambda: webbrowser.open(
+                        f"http://{system.app_server.host}:{system.app_server.port}/"
+                    ),
                 )
             await server.serve()
         finally:

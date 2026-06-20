@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "drafter"
 authors = [{ name = "Austin Cory Bart", email = "acbart@udel.edu" }]
-version = "2.0.0b1"
+version = "2.0.0b3"
 description = "Student-friendly full stack web development library."
 readme = "README.md"
 urls = { "github" = "https://github.com/drafter-edu/drafter", "homepage" = "https://drafter-edu.github.io/drafter/" }

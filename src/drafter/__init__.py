@@ -4,6 +4,8 @@ from dataclasses import dataclass
 # Handle configuration if needed
 import drafter.configuration
 
+from drafter.version import CURRENT_DRAFTER_VERSION
+
 # Load all the Drafter components
 from drafter.components import (
     PageContent,
@@ -208,7 +210,7 @@ __all__ = [
     "change_padding",
 ]
 
-__version__ = "2.0.0b2"
+__version__ = CURRENT_DRAFTER_VERSION
 
 if __name__ == "__main__":
     # This drafter/__init__.py file was executed directly, unusual circumstance.

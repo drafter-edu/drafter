@@ -14,6 +14,7 @@ from drafter.config.urls import determine_assets_url, INTERNAL_FILES
 from drafter.configuration import get_system_config_modifications
 from drafter.scaffolding.templating import render_index_html
 from drafter.scaffolding.utils import pkg_assets_dir, pkg_root, pkg_package_root
+from drafter.version import CURRENT_DRAFTER_VERSION
 
 
 def build_zip(
@@ -128,7 +129,10 @@ def compile_site(
                 "pyodide_package_style must be one of 'build', 'cdn', 'pypi', or None."
             )
         pyodide_drafter_path = (
-            (system.app_common.pyodide_drafter_path or "drafter")
+            (
+                system.app_common.pyodide_drafter_path
+                or f"drafter=={CURRENT_DRAFTER_VERSION}"
+            )
             if system.app_builder.pyodide_package_style == "pypi"
             else system.app_common.pyodide_drafter_path
         )
