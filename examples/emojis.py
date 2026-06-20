@@ -8,13 +8,14 @@ class State:
 @route
 def index(state: State) -> Page:
     return Page(state, [
+        Button("🍪", "add_cookie"),
+        "\n",
         state.message,
-        Button("\"🍪", "add_cookie")
     ])
 
 @route
 def add_cookie(state: State) -> Page:
     state.message += "🍪"
-    return index(state)
+    return Redirect("index", state)
 
 start_server(State("🍪"))

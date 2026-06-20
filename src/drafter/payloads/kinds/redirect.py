@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 from dataclasses import dataclass
 from drafter.payloads.payloads import ResponsePayload
 
@@ -20,14 +20,19 @@ class Redirect(ResponsePayload):
     """
 
     target_route: str
+    state_update: Optional[Any]
     arguments: Optional[dict] = None
-    
-    def __init__(self, target_route: str, **kwargs):
+
+    def __init__(self, target_route: str, state_update: Optional[Any] = None, **kwargs):
         self.target_route = target_route
+        self.state_update = state_update
         self.arguments = kwargs if kwargs else None
-        
+
     def is_redirect(self) -> bool:
         return True
-    
+
+    def get_state_updates(self) -> tuple[bool, Any]:
+        return self.state_update is not None, self.state_update
+
     def get_redirect(self) -> tuple[str, Optional[dict]]:
         return self.target_route, self.arguments
