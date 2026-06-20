@@ -5,17 +5,18 @@ from drafter.helpers.env_vars import EnvVars
 from drafter.config.engines import EngineType
 from drafter.config.base import BaseConfiguration
 
+
 @dataclass
 class AppBuilderConfiguration(BaseConfiguration):
     """Configuration for the compilation process that builds a static version of the site.
-    
-    The compilation process will also have access to the current `ClientServerConfiguration` 
+
+    The compilation process will also have access to the current `ClientServerConfiguration`
     to generate the logic on the actual built page. These settings are the ones unique
     to the compilation process. Note that it also inherits from `AppBackendConfig`, so it also
     includes all the generic backend settings common to both the Starlette server and the compilation process.
-    
+
     # TODO: Single file output, whether to use CDN for assets, etc.
-    
+
     Attributes:
         output_directory: Directory to output the built site files.
         output_filename: Name of the main HTML file to generate.
@@ -24,24 +25,25 @@ class AppBuilderConfiguration(BaseConfiguration):
         warn_missing_info: Whether to echo a warning if set_site_information is missing.
         pyodide_package_style: Optional custom style for the Pyodide package ("build", "cdn", or "pypi"). The "build" option means that the local version of Drafter will be built for pyodide.
         additional_paths: List of additional file paths to make available in the built site (e.g., for `open`). These will be copied to the assets folder.
-        
+
     """
+
     output_directory: str = "dist"
     output_filename: str = "index.html"
     create_404: str = "if_missing"  # Options: "always", "never", "if_missing"
-    
+
     zip_output: bool = False
-    
+
     warn_missing_info: bool = True
-    
-    pyodide_package_style: Optional[str] = "build" # "build", "cdn", or "pypi"
-    
+
+    pyodide_package_style: Optional[str] = "pypi"  # "build", "cdn", or "pypi"
+
     additional_paths: list[str] = field(default_factory=list)
-    
+
     @staticmethod
     def get_key() -> str:
         return "app_builder"
-    
+
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
         result = EnvVars(env_vars)
@@ -50,11 +52,15 @@ class AppBuilderConfiguration(BaseConfiguration):
         result.get_string_if_exists("DRAFTER_CREATE_404", "create_404")
         result.get_bool_if_exists("DRAFTER_ZIP_OUTPUT", "zip_output")
         result.get_bool_if_exists("DRAFTER_WARN_MISSING_INFO", "warn_missing_info")
-        result.get_string_list_if_exists("DRAFTER_ADDITIONAL_PATHS", "additional_paths", ";")
-        result.get_string_if_exists("DRAFTER_PYODIDE_PACKAGE_STYLE", "pyodide_package_style")
-        
+        result.get_string_list_if_exists(
+            "DRAFTER_ADDITIONAL_PATHS", "additional_paths", ";"
+        )
+        result.get_string_if_exists(
+            "DRAFTER_PYODIDE_PACKAGE_STYLE", "pyodide_package_style"
+        )
+
         return result.as_dict()
-    
+
     @staticmethod
     def extend_parser(parser):
         group = parser.add_argument_group("App Builder Configuration")
@@ -96,7 +102,7 @@ class AppBuilderConfiguration(BaseConfiguration):
             help="Optional custom style for the Pyodide package ('build', 'cdn', or 'pypi')",
         )
         return group
-    
+
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:
         result = {}
@@ -115,4 +121,3 @@ class AppBuilderConfiguration(BaseConfiguration):
         if parsed_args.get("pyodide_package_style"):
             result["pyodide_package_style"] = parsed_args["pyodide_package_style"]
         return result
-    

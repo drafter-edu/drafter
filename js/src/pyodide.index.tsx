@@ -52,6 +52,16 @@ function writeConfigFile(pyodide: any) {
 	}
 }
 
+const DEFAULT_MOCK_PACKAGES = ["watchfiles", "uvicorn[standard]", "uvicorn"];
+
+export function addMockPackages(packages: string[]) {
+	if ((window as any).micropip) {
+		for (const pkg of packages) {
+			window.micropip.add_mock_package(pkg, "1.0.0");
+		}
+	}
+}
+
 interface PyodideSettings {
 	pyodideUrl: string;
 	systemPackages: string[];
@@ -71,6 +81,8 @@ export async function setupPyodide(options: PyodideSettings) {
 			// Load micropip
 			await window.pyodide.loadPackage("micropip");
 			window.micropip = window.pyodide.pyimport("micropip");
+			// Load mock packages
+			addMockPackages(DEFAULT_MOCK_PACKAGES);
 			// Load system packages
 			for (const pkg of options.systemPackages) {
 				await window.micropip.install(pkg);
@@ -134,8 +146,8 @@ export async function mountDrafterDirectory() {
 
 export async function mountDrafterRemote(url: string) {
 	try {
-		if (url === "drafter") {
-			await window.micropip.install("drafter");
+		if (url.startsWith("drafter")) {
+			await window.micropip.install(url, true);
 		} else {
 			let response = await fetch(url); // .zip, .whl, ...
 			let buffer = await response.arrayBuffer();
