@@ -1,5 +1,6 @@
 import pytest
 from drafter import *
+from drafter.components import plotting as _plotting_components
 from tests.components.helpers import eval_drafter_with_source
 
 snippets = {
@@ -44,6 +45,44 @@ snippets = {
     "text": {
         "simple": """Text('This is a simple text component.')""",
         "with_style": """Text('Styled text component.', style_font_family='Arial', style_font_size='16px')""",
+    },
+    "paragraph": {
+        "simple": """Paragraph('This is a paragraph.')""",
+        "multiple_items": """Paragraph('First sentence.', 'Second sentence.')""",
+        "with_style": """Paragraph('Styled paragraph', style_line_height='1.5', style_margin_bottom='12px')""",
+    },
+    "section": {
+        "simple": """Section('Section body')""",
+        "with_style": """Section('Styled section', style_padding='12px', style_border='1px solid #CCC')""",
+    },
+    "article": {
+        "simple": """Article('Article body')""",
+        "with_style": """Article('Styled article', style_margin='8px')""",
+    },
+    "aside": {
+        "simple": """Aside('Sidebar note')""",
+        "with_style": """Aside('Styled aside', style_background_color='#FAFAFA')""",
+    },
+    "main": {
+        "simple": """Main('Primary content')""",
+        "with_style": """Main('Styled main', style_max_width='960px')""",
+    },
+    "nav": {
+        "simple": """Nav('Home', 'Courses')""",
+        "with_style": """Nav('Menu', style_display='flex', style_gap='8px')""",
+    },
+    "headercontent": {
+        "simple": """HeaderContent('Page Header')""",
+        "with_style": """HeaderContent('Styled Header', style_background_color='#EEE')""",
+    },
+    "footercontent": {
+        "simple": """FooterContent('Page Footer')""",
+        "with_style": """FooterContent('Styled Footer', style_padding='10px')""",
+    },
+    "division": {
+        "simple": """Division('Hello from division')""",
+        "multiple_items": """Division('One', 'Two', 'Three')""",
+        "with_style": """Division('Styled division', style_background_color='#EFEFEF', style_padding='8px')""",
     },
     "row": {
         "simple": """Row(['Hello world!', 'This is a row.'])""",
@@ -137,9 +176,32 @@ snippets = {
         "multiple_lines": """Pre('line 1', 'line 2', 'line 3')""",
         "with_style": """Pre('formatted text', style_background_color='#f5f5f5', style_padding='10px')""",
     },
+    "preformattedtext": {
+        "simple": """PreformattedText('alias text block')""",
+        "multiple_lines": """PreformattedText('line a', 'line b')""",
+        "with_style": """PreformattedText('styled alias block', style_font_family='monospace')""",
+    },
+    "blockquote": {
+        "simple": """BlockQuote(None, 'Quoted text')""",
+        "with_cite": """BlockQuote('https://example.com/source', 'Cited quote')""",
+        "with_style": """BlockQuote(None, 'Styled quote', style_border_left='4px solid #999')""",
+    },
+    "inlinecode": {
+        "simple": """InlineCode('x = 42')""",
+        "with_style": """InlineCode('print(value)', style_background_color='#F4F4F4')""",
+    },
+    "htmltag": {
+        "simple": """HtmlTag('mark', 'Highlighted')""",
+        "with_style": """HtmlTag('section', 'Custom body', style_padding='4px')""",
+    },
     "rawhtml": {
         "simple": """RawHTML('<strong>Bold</strong>')""",
         "complex": """RawHTML('<div class="custom"><p>Paragraph</p></div>')""",
+    },
+    "geolocation": {
+        "current_location_simple": """CurrentLocation('student_location')""",
+        "current_location_with_options": """CurrentLocation('home_location', show_coordinates=True, id='geo-1')""",
+        "location_data": """Location('granted', message='OK', lat=37.5, lon=-77.4, accuracy=10.0)""",
     },
     "image": {
         "simple": """Image('cat.jpg')""",
@@ -201,6 +263,14 @@ snippets = {
         "all_options": """SVG('<circle cx="50" cy="50" r="40"/>', width=200, height=200, viewBox='0 0 100 100', style_border='1px solid blue')""",
     },
 }
+
+if _plotting_components._has_matplotlib:
+    # TODO: AI-generated, investigate later
+    snippets["matplotlibplot"] = {
+        "simple": """MatPlotLibPlot()""",
+        "with_settings": """MatPlotLibPlot(extra_matplotlib_settings={'format': 'svg'}, close_automatically=False)""",
+        "with_style": """MatPlotLibPlot(style_border='1px solid #444')""",
+    }
 
 
 @pytest.mark.parametrize(

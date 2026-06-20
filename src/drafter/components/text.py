@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import html
-from typing import List
+from typing import List, Optional
 from drafter.components.layout import handle_arguments_compatibility
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import RenderPlan, NewlineMode
@@ -36,6 +36,39 @@ class Pre(Component):
 
 
 PreformattedText = Pre
+
+
+@dataclass(repr=False)
+class BlockQuote(Component):
+    """Renders a blockquote element.
+
+    Attributes:
+        cite: The source URL of the blockquote, if any.
+        content: List of page content items to display in the blockquote.
+
+        tag: The HTML tag name, always 'blockquote'.
+    """
+
+    cite: Optional[str]
+    content: list[PageContent]
+    tag = "blockquote"
+
+    ARGUMENTS = [
+        ComponentArgument("cite", kind="positional", default_value=None),
+        ComponentArgument("content", kind="var", is_content=True),
+    ]
+
+    def __init__(self, cite: Optional[str], *content: PageContent, **extra_settings):
+        """Initialize blockquote component.
+
+        Args:
+            cite: The source URL of the blockquote, if any.
+            *content: Variable-length content to display in the blockquote.
+            **extra_settings: Additional HTML attributes and styles.
+        """
+        self.cite = cite
+        self.content = list(content)
+        self.extra_settings = extra_settings
 
 
 @dataclass(repr=False)
@@ -231,3 +264,27 @@ class RawHTML(Component):
         )
 
     # TODO: Are we escaping HTML correctly in Text component?
+
+
+@dataclass(repr=False)
+class HtmlTag(Component):
+    """Renders a generic HTML tag with content.
+
+    Attributes:
+        tag: The HTML tag name.
+        content: List of page content items to wrap in the tag.
+    """
+
+    tag: str
+    content: List[PageContent]
+
+    ARGUMENTS = [
+        ComponentArgument("tag", kind="positional"),
+        ComponentArgument("content", kind="var", is_content=True),
+    ]
+
+    def __init__(self, tag: str, *content: PageContent, **extra_settings):
+        self.tag = tag
+        self.content, self.extra_settings = handle_arguments_compatibility(
+            list(content), extra_settings
+        )

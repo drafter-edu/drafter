@@ -1,12 +1,21 @@
 # Provide dataclass decorator for users' convenience
 from dataclasses import dataclass
+
 # Handle configuration if needed
 import drafter.configuration
+
 # Load all the Drafter components
 from drafter.components import (
     PageContent,
     Content,
     Paragraph,
+    Section,
+    Article,
+    Aside,
+    Main,
+    Nav,
+    HeaderContent,
+    FooterContent,
     Component,
     Div,
     Span,
@@ -18,6 +27,9 @@ from drafter.components import (
     Division,
     Box,
     Text,
+    BlockQuote,
+    InlineCode,
+    HtmlTag,
     Pre,
     PreformattedText,
     Header,
@@ -86,13 +98,14 @@ from drafter.deploy import (
     get_site_information,
     deploy_site,
 )
+
 # Alternative file handling approach
 from drafter.files.opening import open
 from drafter.testing import assert_equal
 from drafter.client_server.commands import get_main_server, set_main_server
+
 # Key starting point for Drafter applications, whether building or running
 from drafter.launch import start_server
-
 
 
 __all__ = [
@@ -117,11 +130,21 @@ __all__ = [
     "HorizontalRule",
     "Row",
     "Paragraph",
+    "Section",
+    "Article",
+    "Aside",
+    "Main",
+    "Nav",
+    "HeaderContent",
+    "FooterContent",
     "BulletedList",
     "NumberedList",
     "Division",
     "Box",
+    "BlockQuote",
     "Text",
+    "InlineCode",
+    "HtmlTag",
     "Pre",
     "PreformattedText",
     "Header",
