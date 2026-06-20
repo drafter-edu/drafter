@@ -42,7 +42,7 @@ class AppCommonConfiguration(BaseConfiguration):
     mount_drafter_locally: bool = False
     load_packages_automatically: bool = True
     
-    system_packages: Optional[list[str]] = field(default_factory=lambda: DEFAULT_SYSTEM_PACKAGES)
+    system_packages: Optional[list[str]] = None
     project_packages: Optional[list[str]] = None
     pyodide_drafter_path: Optional[str] = None
     pyodide_url: Optional[str] = DEFAULT_PYODIDE_URL
@@ -50,6 +50,12 @@ class AppCommonConfiguration(BaseConfiguration):
     override_asset_url: Union[bool, str] = False
 
     site_title: str = "Drafter App Server"
+
+    def __post_init__(self):
+        # Skulpt's dataclass implementation is stricter with mutable defaults, so
+        # initialize defaults after construction instead of using a list default.
+        if self.system_packages is None:
+            self.system_packages = list(DEFAULT_SYSTEM_PACKAGES)
     
     @staticmethod
     def get_key() -> str:
