@@ -23,7 +23,7 @@ def index(state: State) -> Page:
 def ask_new_item(state: State) -> Page:
     return Page(state, [
         Header("Add New Task"),
-        "What is the new task?",
+        "What is the new task?\n",
         TextBox("new_task"),
         Button("Save new task", save_new_item),
         Button("Cancel", index)
@@ -38,9 +38,10 @@ def save_new_item(state: State, new_task) -> Page:
 def request_delete_number(state: State) -> Page:
     return Page(state, [
         Header("Delete Task"),
-        "What task do you want to delete?",
+        "What task do you want to delete?\n",
         TextBox("task_number"),
         Button("Delete task", delete_item),
+        "\n",
         Button("Cancel", index)
     ])
 

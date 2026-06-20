@@ -20,18 +20,37 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: white;
-        opacity: .5;
+        background: rgba(255, 255, 255, 0.7);
         z-index: 9999;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        font-size: 2em;
+        gap: 0.75rem;
+        font-size: 1.5em;
+      }
+
+      .drafter-loading-spinner {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 0.25rem solid #d8d8d8;
+        border-top-color: #444;
+        border-radius: 50%;
+        animation: drafter-spin 0.8s linear infinite;
+      }
+
+      @keyframes drafter-spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
   <body>
-    <div id="--drafter-initial-loading-white-screen">Loading, please wait...</div>
+    <div id="--drafter-initial-loading-white-screen">
+      <div class="drafter-loading-spinner" aria-hidden="true"></div>
+      <div>Loading, please wait...</div>
+    </div>
     <div id="{{ drafter_root }}">
       {% if compiled_body %}
         <!-- Precompiled body content -->
