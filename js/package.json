@@ -15,7 +15,7 @@
 		"update-skulpt": "node scripts/update-skulpt.mjs",
 		"precompile": "node scripts/precompile-python.mjs --minify",
 		"precompile:watch": "chokidar \"../src/drafter/**/*.py\" \"./src/bridge/**/*.ts\" -d 200 --initial -c \"node scripts/precompile-python.mjs\"",
-		"dev": "node scripts/update-skulpt.mjs && tsup --watch --onSuccess \"node scripts/sync-dist.mjs\"",
+		"dev": "node scripts/update-skulpt.mjs && tsup --watch",
 		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
 		"test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
 	},
