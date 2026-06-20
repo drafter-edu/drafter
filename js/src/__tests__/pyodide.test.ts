@@ -3,15 +3,14 @@
  */
 
 import { describe, test, expect } from "@jest/globals";
-import "../../dist/skulpt/skulpt.js";
-import "../../dist/skulpt/skulpt-stdlib.js";
-import "../../dist/skulpt/skulpt-drafter.js";
-import "../../dist/js/drafter.js";
-import * as fs from "fs";
-import * as path from "path";
-import { screen, waitFor, within } from "@testing-library/dom";
+
+import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
-import { runStudentCode, clearDrafterSiteRoot } from "../skulpt.index";
+import { runStudentCode } from "../pyodide.index";
+import {
+	resetPyodideDrafterRuntime,
+	setupPyodideWithLocalDrafter,
+} from "./pyodide-test-harness";
 
 const SIMPLE_STUDENT_CODE = `
 from drafter import *
@@ -47,8 +46,12 @@ start_server(State(0, "Welcome to Drafter!", True))
 `;
 
 describe(`Simple Drafter Application`, () => {
-	beforeAll(() => {
-		document.body.innerHTML = "<div id='drafter-root--'></div>";
+	beforeAll(async () => {
+		await setupPyodideWithLocalDrafter();
+	});
+
+	beforeEach(async () => {
+		await resetPyodideDrafterRuntime();
 	});
 	test(`can load application`, () => {
 		return runStudentCode({

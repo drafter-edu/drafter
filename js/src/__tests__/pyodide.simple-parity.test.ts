@@ -1,17 +1,15 @@
 /**
- * Basic unit tests for TypeScript client functionality
+ * Pyodide parity tests derived from simple.test.ts scenarios.
  */
 
-import { describe, test, expect } from "@jest/globals";
-import "../../dist/skulpt/skulpt.js";
-import "../../dist/skulpt/skulpt-stdlib.js";
-import "../../dist/skulpt/skulpt-drafter.js";
-import "../../dist/js/drafter.js";
-import * as fs from "fs";
-import * as path from "path";
-import { screen, waitFor, within } from "@testing-library/dom";
+import { describe, test, expect, beforeAll, beforeEach } from "@jest/globals";
+import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
-import { runStudentCode, clearDrafterSiteRoot } from "../skulpt.index";
+import { runStudentCode } from "../pyodide.index";
+import {
+	resetPyodideDrafterRuntime,
+	setupPyodideWithLocalDrafter,
+} from "./pyodide-test-harness";
 
 const SIMPLE_STUDENT_CODE = `
 from drafter import *
@@ -46,44 +44,36 @@ def plus_one(state: State, new_message: str, flag: bool):
 start_server(State(0, "Welcome to Drafter!", True))
 `;
 
-describe(`Simple Drafter Application`, () => {
-	beforeAll(() => {
-		document.body.innerHTML = "<div id='drafter-root--'></div>";
-	});
-	test(`can load application`, () => {
-		return runStudentCode({
-			code: SIMPLE_STUDENT_CODE,
-			presentErrors: false,
-		})
-			.then((mod) => {
-				// If we reach here, the student code ran successfully
-				// expect(mod.$d.index).toBeDefined();
-				expect(true).toBe(true);
-			})
-			.catch((err) => {
-				// If there was an error, fail the test
-				// expect(err).toBeUndefined();
-				throw err;
-			});
+describe("Simple Drafter Application (Pyodide parity)", () => {
+	beforeAll(async () => {
+		await setupPyodideWithLocalDrafter();
 	});
 
-	test(`can interact with application`, async () => {
+	beforeEach(async () => {
+		await resetPyodideDrafterRuntime();
+	});
+
+	test("can load application", async () => {
 		await runStudentCode({
 			code: SIMPLE_STUDENT_CODE,
 			presentErrors: false,
 		});
-		const drafterBody = await document.querySelector("#drafter-body--");
+		expect(true).toBe(true);
+	});
+
+	test("can interact with application", async () => {
+		await runStudentCode({
+			code: SIMPLE_STUDENT_CODE,
+			presentErrors: false,
+		});
+		const drafterBody = document.querySelector("#drafter-body--");
 		expect(drafterBody).not.toBeNull();
 		const app = within(drafterBody as HTMLElement);
 
-		// Simulate clicking the "Plus One" button
 		const button = await app.findByRole("button", { name: /plus one/i });
-
 		await userEvent.click(button);
-		// Check that the counter has been updated
 		await app.findByText(/Counter:\s*1/);
 
-		// Update the text box and checkbox
 		const textBox = app.getByRole("textbox", { name: /new_message/i });
 		expect(textBox).not.toBeNull();
 		await userEvent.clear(textBox);

@@ -2,14 +2,14 @@
  * Comprehensive tests for Drafter form components functionality
  */
 
-import { describe, test, expect } from "@jest/globals";
-import "../../dist/skulpt/skulpt.js";
-import "../../dist/skulpt/skulpt-stdlib.js";
-import "../../dist/skulpt/skulpt-drafter.js";
-import "../../dist/js/drafter.js";
-import { screen, waitFor, within } from "@testing-library/dom";
+import { describe, test, expect, beforeAll, beforeEach } from "@jest/globals";
+import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
-import { runStudentCode, clearDrafterSiteRoot } from "../skulpt.index";
+import {
+	resetPyodideDrafterRuntime,
+	setupPyodideWithLocalDrafter,
+} from "./pyodide-test-harness";
+import { runStudentCode } from "../pyodide.index";
 
 const TEXTBOX_CODE = `
 from drafter import *
@@ -394,9 +394,13 @@ def buy_page(
 start_server(State())
 `;
 
-describe("Drafter Form Components Tests", () => {
-	beforeEach(() => {
-		document.body.innerHTML = "<div id='drafter-root--'></div>";
+describe("Drafter Form Components Tests (Pyodide parity)", () => {
+	beforeAll(async () => {
+		await setupPyodideWithLocalDrafter();
+	});
+
+	beforeEach(async () => {
+		await resetPyodideDrafterRuntime();
 	});
 
 	describe("TextBox Component", () => {

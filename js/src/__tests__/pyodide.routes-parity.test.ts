@@ -1,17 +1,15 @@
 /**
- * Basic unit tests for TypeScript client functionality
+ * Pyodide parity tests derived from routes.test.ts scenarios.
  */
 
-import { describe, test, expect } from "@jest/globals";
-import "../../dist/skulpt/skulpt.js";
-import "../../dist/skulpt/skulpt-stdlib.js";
-import "../../dist/skulpt/skulpt-drafter.js";
-import "../../dist/js/drafter.js";
-import { runStudentCode, clearDrafterSiteRoot } from "../skulpt.index";
-import * as fs from "fs";
-import * as path from "path";
-import { screen, waitFor, within } from "@testing-library/dom";
+import { describe, test, expect, beforeAll, beforeEach } from "@jest/globals";
+import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
+import { runStudentCode } from "../pyodide.index";
+import {
+	resetPyodideDrafterRuntime,
+	setupPyodideWithLocalDrafter,
+} from "./pyodide-test-harness";
 
 const FIRST_CODE = `
 from drafter import *
@@ -62,20 +60,27 @@ def second(state: int):
         "Did we overwrite the original?",
         Button("Back", index)
     ])
-    
+
 start_server(0)
 `;
 
-describe(`Simple Drafter Application`, () => {
-	beforeAll(() => {
-		document.body.innerHTML = "<div id='drafter-root--'></div>";
+describe("Pyodide Routes Parity", () => {
+	beforeAll(async () => {
+		await setupPyodideWithLocalDrafter();
 	});
-	test(`can load applications`, async () => {
+
+	beforeEach(async () => {
+		await resetPyodideDrafterRuntime();
+	});
+
+	test("can load applications", async () => {
 		await runStudentCode({
 			code: FIRST_CODE,
 			presentErrors: false,
 		});
 		expect(true).toBe(true);
+
+		await resetPyodideDrafterRuntime();
 		await runStudentCode({
 			code: SECOND_CODE,
 			presentErrors: false,
@@ -83,57 +88,43 @@ describe(`Simple Drafter Application`, () => {
 		expect(true).toBe(true);
 	});
 
-	test(`second application run resets system`, async () => {
+	test("second application run resets system", async () => {
 		await runStudentCode({
 			code: FIRST_CODE,
 			presentErrors: false,
 		});
-		const drafterBody = await document.querySelector("#drafter-body--");
+		const drafterBody = document.querySelector("#drafter-body--");
 		expect(drafterBody).not.toBeNull();
 		const app = within(drafterBody as HTMLElement);
 
-		// Simulate clicking the "Second" button
 		const button = await app.findByRole("button", { name: /second/i });
-
 		await userEvent.click(button);
-		// Check that we are on the second page
 		await app.findByText(/the next page/i);
 
-		// Now run the second application
-		clearDrafterSiteRoot();
+		await resetPyodideDrafterRuntime();
 		await runStudentCode({
 			code: SECOND_CODE,
 			presentErrors: false,
 		});
-		let drafterBody2 = await document.querySelector("#drafter-body--");
+		let drafterBody2 = document.querySelector("#drafter-body--");
 		expect(drafterBody2).not.toBeNull();
 		let app2 = within(drafterBody2 as HTMLElement);
-		// Simulate clicking the "Second" button
 		const button2 = await app2.findByRole("button", { name: /second/i });
-
 		await userEvent.click(button2);
-
-		// Should now get an error message
 		await app2.findByText(/no route found for URL: second/i);
 
-		// Now run the third application
-		clearDrafterSiteRoot();
-		const module = await runStudentCode({
+		await resetPyodideDrafterRuntime();
+		await runStudentCode({
 			code: THIRD_CODE,
 			presentErrors: false,
 		});
-		drafterBody2 = await document.querySelector("#drafter-body--");
+		drafterBody2 = document.querySelector("#drafter-body--");
 		expect(drafterBody2).not.toBeNull();
 		app2 = within(drafterBody2 as HTMLElement);
 
 		await app2.findByText(/third app here!/i);
-
-		// Simulate clicking the "Second" button
 		const button3 = await app2.findByRole("button", { name: /second/i });
-
 		await userEvent.click(button3);
-
-		// Check that now we are on the second page of the third app
 		await app2.findByText(/did we overwrite the original\?/i);
 	});
 });

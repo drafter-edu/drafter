@@ -2,18 +2,23 @@
 import "@testing-library/jest-dom";
 
 globalThis.console = {
-    ...globalThis.console,
-    log: (...args: any[]) => {
-        // Uncomment the next line to see logs during tests
-        // process.stdout.write('[LOG] ' + args.join(' ') + '\n');
-    },
+	...globalThis.console,
+	log: (...args: any[]) => {
+		// Uncomment the next line to see logs during tests
+		// process.stdout.write('[LOG] ' + args.join(' ') + '\n');
+	},
 };
 
 const noop = () => {};
 Object.defineProperty(window, "scrollTo", { value: noop, writable: true });
 Object.defineProperty(window.URL, "createObjectURL", {
-    value: noop,
-    writable: true,
+	value: noop,
+	writable: true,
+});
+
+Object.defineProperty(window, "showDirectoryPicker", {
+	value: noop,
+	writable: true,
 });
 
 // Mock DecompressionStream if needed
