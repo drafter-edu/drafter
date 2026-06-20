@@ -166,3 +166,148 @@ tests.styled_raw_html = RawHTML(
 tests.styled_raw_html = """<div id="styled-raw-html" style="color: blue; font-size: 18px">
   <p>Styled Raw HTML</p>
 </div>"""
+
+
+# New basic component coverage
+tests.paragraph_simple = Paragraph("This is a paragraph.")
+tests.paragraph_simple = """
+<p>
+  This is a paragraph.
+</p>
+"""
+
+tests.paragraph_with_inline_content = Paragraph(
+    "Compute", InlineCode("x = 1"), "then continue."
+)
+tests.paragraph_with_inline_content = """
+<p>
+  Compute
+  <code>
+    x = 1
+  </code>
+  then continue.
+</p>
+"""
+
+tests.section_simple = Section("Section body")
+tests.section_simple = """
+<section>
+  Section body
+</section>
+"""
+
+tests.section_nested = Section(Header("Overview", level=2), Paragraph("Details"))
+tests.section_nested = """
+<section>
+  <h2>
+    Overview
+  </h2>
+  <p>
+    Details
+  </p>
+</section>
+"""
+
+tests.article_styled = Article("Article body", id="article-styled", style_margin="8px")
+tests.article_styled = """
+<article id="article-styled" style="margin: 8px">
+  Article body
+</article>
+"""
+
+tests.aside_simple = Aside("Sidebar content")
+tests.aside_simple = """
+<aside>
+  Sidebar content
+</aside>
+"""
+
+tests.main_simple = Main("Primary content")
+tests.main_simple = """
+<main>
+  Primary content
+</main>
+"""
+
+tests.nav_simple = Nav("Home", "Courses")
+tests.nav_simple = """
+<nav>
+  Home
+  Courses
+</nav>
+"""
+
+tests.header_content_simple = HeaderContent("Site Header")
+tests.header_content_simple = """
+<header>
+  Site Header
+</header>
+"""
+
+tests.footer_content_simple = FooterContent("Site Footer")
+tests.footer_content_simple = """
+<footer>
+  Site Footer
+</footer>
+"""
+
+tests.division_alias = Division("Alias div content", id="alias-div")
+tests.division_alias = """
+<div id="alias-div">
+  Alias div content
+</div>
+"""
+
+tests.preformatted_alias = PreformattedText("line 1\nline 2")
+tests.preformatted_alias = """
+<pre>line 1
+line 2</pre>
+"""
+
+tests.blockquote_simple = BlockQuote(None, "Quoted text", id="quote-basic")
+tests.blockquote_simple = """
+<blockquote id="quote-basic" style="cite: None">
+  Quoted text
+</blockquote>
+"""
+
+tests.blockquote_with_cite = BlockQuote(
+    "https://example.com", "Cited quote", id="quote-cited"
+)
+tests.blockquote_with_cite = """
+<blockquote id="quote-cited" style="cite: https://example.com">
+  Cited quote
+</blockquote>
+"""
+
+tests.inline_code_simple = InlineCode("let answer = 42")
+tests.inline_code_simple = """
+<code>
+  let answer = 42
+</code>
+"""
+
+tests.inline_code_styled = InlineCode(
+    "print(value)", id="inline-code-styled", style_background_color="#f4f4f4"
+)
+tests.inline_code_styled = """
+<code id="inline-code-styled" style="background-color: #f4f4f4">
+  print(value)
+</code>
+"""
+
+tests.html_tag_simple = HtmlTag("mark", "Highlighted", id="html-tag-mark")
+tests.html_tag_simple = """
+<mark id="html-tag-mark" style="tag: mark">
+  Highlighted
+</mark>
+"""
+
+tests.html_tag_styled = HtmlTag(
+    "section", "Custom body", id="html-tag-section", style_padding="4px"
+)
+tests.html_tag_styled = """
+<section id="html-tag-section" style="padding: 4px; tag: section">
+  Custom body
+</section>
+"""
