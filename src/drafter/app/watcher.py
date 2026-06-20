@@ -7,13 +7,11 @@ enabling live reload during development.
 import asyncio
 import json
 from pathlib import Path
-from typing import List, Set
+from typing import Any, List, Set
 
 from drafter.config.system import SystemConfiguration
 from starlette.websockets import WebSocket
 from watchfiles import awatch
-
-from drafter.config.app_server import AppServerConfiguration
 
 
 class ReloadHub:
@@ -51,12 +49,12 @@ class ReloadHub:
         async with self._lock:
             self._clients.discard(ws)
 
-    async def broadcast_reload(self) -> None:
-        """Send reload message to all connected clients.
+    async def broadcast(self, message: dict[str, Any]) -> None:
+        """Send a message to all connected clients.
 
         Removes dead connections from the client set.
         """
-        payload = json.dumps({"type": "reload"})
+        payload = json.dumps(message)
         async with self._lock:
             dead: List[WebSocket] = []
             for ws in self._clients:
@@ -66,6 +64,14 @@ class ReloadHub:
                     dead.append(ws)
             for ws in dead:
                 self._clients.discard(ws)
+
+    async def broadcast_reload(self) -> None:
+        """Send a full page reload message to all connected clients."""
+        await self.broadcast({"type": "reload"})
+
+    async def broadcast_student_restart(self, code: str) -> None:
+        """Send a student-code restart message to all connected clients."""
+        await self.broadcast({"type": "restart_student_code", "code": code})
 
 
 async def ws_endpoint(websocket: WebSocket):
@@ -89,7 +95,10 @@ async def ws_endpoint(websocket: WebSocket):
 
 
 async def _watch_and_reload(
-    hub: ReloadHub, watch_paths: list[Path], system: SystemConfiguration
+    hub: ReloadHub,
+    watch_paths: list[Path],
+    system: SystemConfiguration,
+    student_path: Path,
 ):
     """Monitor file changes and broadcast reload events.
 
@@ -102,6 +111,16 @@ async def _watch_and_reload(
         system: System configuration (for future use).
     """
     # watchfiles supports multiple roots
+    watched_student_path = student_path.resolve()
     async for changes in awatch(*watch_paths, stop_event=None):
-        # Debounce simple bursts by scheduling a single broadcast per tick
-        await hub.broadcast_reload()
+        changed_paths = {Path(path).resolve() for _, path in changes}
+        if changed_paths and changed_paths.issubset({watched_student_path}):
+            try:
+                await hub.broadcast_student_restart(
+                    watched_student_path.read_text(encoding="utf-8")
+                )
+            except Exception:
+                await hub.broadcast_reload()
+        else:
+            # Debounce simple bursts by scheduling a single broadcast per tick
+            await hub.broadcast_reload()

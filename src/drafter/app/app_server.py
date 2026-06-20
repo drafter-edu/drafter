@@ -8,8 +8,6 @@ import asyncio
 import webbrowser
 from pathlib import Path
 
-from drafter.data.request import Request
-from pathlib import Path
 from drafter.version import CURRENT_DRAFTER_VERSION
 from starlette.applications import Starlette
 from starlette.responses import HTMLResponse, JSONResponse, Response
@@ -17,7 +15,6 @@ from starlette.routing import Route, WebSocketRoute, Mount
 from starlette.staticfiles import StaticFiles
 import uvicorn
 
-from drafter import get_main_server
 from drafter.config.system import SystemConfiguration
 from drafter.configuration import get_system_config_modifications
 from drafter.client_server.client_server import ClientServer
@@ -25,9 +22,7 @@ from drafter.config.urls import determine_assets_url
 from drafter.scaffolding.templating import render_index_html
 from drafter.scaffolding.utils import pkg_assets_dir
 from drafter.config.urls import INTERNAL_ROUTES
-from drafter.config.app_server import AppServerConfiguration
 from drafter.app.watcher import ReloadHub, ws_endpoint, _watch_and_reload
-from drafter.data.response import Response as DrafterResponse
 
 
 async def index(req) -> Response:
@@ -191,7 +186,12 @@ def serve_app_once(
     # Background watcher task
     async def supervisor():
         watcher = asyncio.create_task(
-            _watch_and_reload(app.state.hub, app.state.watch_paths, system)
+            _watch_and_reload(
+                app.state.hub,
+                app.state.watch_paths,
+                system,
+                app.state.user_path,
+            )
         )
         try:
             uvicorn_config = uvicorn.Config(

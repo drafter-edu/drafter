@@ -19,6 +19,7 @@ import { mountDirectory } from "./pyodide_bridge/directories";
 import { DebugPanel } from "./debug";
 import type { DrafterInitOptions } from "./bridge/engine";
 import { alertDialog, confirmDialog } from "./dialogs";
+import { clearDrafterSiteRoot } from "./bridge/engine";
 export { clearDrafterSiteRoot, handleSystemError } from "./bridge/engine";
 export * from "./common.index";
 
@@ -65,6 +66,184 @@ export function addMockPackages(packages: string[]) {
 interface PyodideSettings {
 	pyodideUrl: string;
 	systemPackages: string[];
+}
+
+interface AppServerPyodideOptions {
+	devWsUrl?: string;
+	pythonUrl?: string;
+	inlineCode?: string;
+	loadPackagesAutomatically?: boolean;
+	explicitPackageList?: string[];
+}
+
+interface WindowWithDrafterInterruptBuffer extends Window {
+	__drafterInterruptBuffer?: Int32Array;
+}
+
+let appServerWebSocket: WebSocket | null = null;
+
+async function resetPyodideRuntime() {
+	const pyodide = (window as any).pyodide;
+	if (pyodide === undefined) {
+		return;
+	}
+
+	try {
+		await pyodide.runPythonAsync(
+			[
+				"from drafter.client_server.commands import set_main_server",
+				"set_main_server(None)",
+			].join("\n"),
+		);
+	} catch (error) {
+		console.warn(
+			"[Drafter AppServer Scaffolding] Failed to reset main server:",
+			error,
+		);
+	}
+
+	clearDrafterSiteRoot();
+}
+
+function interruptActiveRun() {
+	const pyodide = (window as any).pyodide;
+	if (pyodide === undefined) {
+		return;
+	}
+
+	try {
+		if (
+			typeof SharedArrayBuffer !== "undefined" &&
+			typeof Atomics !== "undefined"
+		) {
+			const stateWindow = window as WindowWithDrafterInterruptBuffer;
+			if (
+				!stateWindow.__drafterInterruptBuffer &&
+				typeof pyodide?.setInterruptBuffer === "function"
+			) {
+				stateWindow.__drafterInterruptBuffer = new Int32Array(
+					new SharedArrayBuffer(4),
+				);
+				pyodide.setInterruptBuffer(
+					stateWindow.__drafterInterruptBuffer,
+				);
+			}
+
+			if (stateWindow.__drafterInterruptBuffer) {
+				Atomics.store(stateWindow.__drafterInterruptBuffer, 0, 2);
+			}
+		}
+	} catch (error) {
+		console.warn(
+			"[Drafter AppServer Scaffolding] Could not interrupt active run:",
+			error,
+		);
+	}
+}
+
+async function fetchStudentCode(pythonUrl?: string): Promise<string> {
+	if (!pythonUrl) {
+		throw new Error(
+			"Cannot fetch student code because pythonUrl was not provided.",
+		);
+	}
+	const response = await fetch(`${pythonUrl}?t=${Date.now()}`, {
+		cache: "no-store",
+	});
+	if (!response.ok) {
+		throw new Error(
+			`Failed to fetch student code: ${response.status} ${response.statusText}`,
+		);
+	}
+	return response.text();
+}
+
+export async function startPyodideAppServerSession(
+	options: AppServerPyodideOptions,
+) {
+	let latestStudentCode: string | null = null;
+	let runInProgress = false;
+	let restartRequested = false;
+
+	const getStudentCode = async () => {
+		if (latestStudentCode !== null) {
+			return latestStudentCode;
+		}
+		if (typeof options.inlineCode === "string") {
+			return options.inlineCode;
+		}
+		return fetchStudentCode(options.pythonUrl);
+	};
+
+	const runStudentExecution = async () => {
+		if (runInProgress) {
+			restartRequested = true;
+			interruptActiveRun();
+			return;
+		}
+
+		runInProgress = true;
+		try {
+			while (true) {
+				restartRequested = false;
+				await resetPyodideRuntime();
+				const code = await getStudentCode();
+				const executionOptions: DrafterInitOptions = {
+					code,
+					loadPackagesAutomatically:
+						options.loadPackagesAutomatically,
+					explicitPackageList: options.explicitPackageList,
+				};
+
+				try {
+					await setupEnvironment(executionOptions);
+					await runStudentCode(executionOptions);
+				} catch (error) {
+					// Interrupt-driven restarts are expected while live-editing.
+					if (!restartRequested) {
+						throw error;
+					}
+				}
+
+				if (!restartRequested) {
+					break;
+				}
+			}
+		} finally {
+			runInProgress = false;
+		}
+	};
+
+	if (appServerWebSocket) {
+		appServerWebSocket.close();
+		appServerWebSocket = null;
+	}
+
+	if (options.devWsUrl) {
+		appServerWebSocket = new WebSocket(options.devWsUrl);
+		appServerWebSocket.onmessage = (e) => {
+			const msg = JSON.parse(e.data);
+			if (msg.type === "reload") {
+				location.reload();
+				return;
+			}
+			if (msg.type === "restart_student_code") {
+				if (typeof msg.code === "string") {
+					latestStudentCode = msg.code;
+				} else {
+					latestStudentCode = null;
+				}
+				runStudentExecution().catch((error) => {
+					console.error(
+						"[Drafter AppServer Scaffolding] Failed to restart student code:",
+						error,
+					);
+				});
+			}
+		};
+	}
+
+	await runStudentExecution();
 }
 
 export async function setupPyodide(options: PyodideSettings) {
@@ -261,6 +440,13 @@ export async function runStudentCode(
 		});
 		return result;
 	} catch (error) {
+		if (
+			error instanceof Error &&
+			error.message.includes("KeyboardInterrupt")
+		) {
+			console.info("Student code execution interrupted.");
+			throw error;
+		}
 		alertDialog(
 			<div>
 				Error running student code: <pre>{"" + error}</pre>

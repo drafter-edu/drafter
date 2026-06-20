@@ -13,7 +13,7 @@
     const ws = new WebSocket('{{ dev_ws_url }}');
     ws.onmessage = (e) => {
     const msg = JSON.parse(e.data);
-    if (msg.type === 'reload') location.reload();
+    if (msg.type === 'reload' || msg.type === 'restart_student_code') location.reload();
     };
   {% endif %}
   const app = await window.Drafter.runStudentCode({

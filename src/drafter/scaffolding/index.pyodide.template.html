@@ -7,20 +7,9 @@
   <script>
   (async () => {
     try {
-
-      // 0) Set up hot-reloading websocket connection
-      {% if dev_ws_url %}
-        const ws = new WebSocket('{{ dev_ws_url }}');
-        ws.onmessage = (e) => {
-          const msg = JSON.parse(e.data);
-          if (msg.type === 'reload') {
-            location.reload();
-          }
-        };
-      {% endif %}
   
       // 1) Load Pyodide
-      const pyodide = await window.Drafter.setupPyodide({
+      await window.Drafter.setupPyodide({
         pyodideUrl: {{ system.app_common.pyodide_url | tojson }},
         systemPackages: {{ system.app_common.system_packages | tojson }},
       });
@@ -39,25 +28,14 @@
       // 4) Patch Drafter
       await window.Drafter.patchPythonFeatures();
 
-      // Establish execution options
-      const executionOptions = {
-        // Provide either code or URL
-        {% if inline_py %}
-          code: document.getElementById('user-code').textContent,
-        {% else %}
-          url: '{{ python_url }}',
-        {% endif %}
-
-        // Provide either automatic package loading or explicit package list
+      // 5) Initial run of student's code
+      await window.Drafter.startPyodideAppServerSession({
+        devWsUrl: {{ dev_ws_url | tojson }},
+        pythonUrl: {{ python_url | tojson }},
+        inlineCode: {% if inline_py %}document.getElementById('user-code')?.textContent || ''{% else %}undefined{% endif %},
         loadPackagesAutomatically: {{system.app_common.load_packages_automatically|tojson}},
         explicitPackageList: {{ system.app_common.project_packages | tojson }},
-      }
-
-      // 5) Install students' dependencies
-      await window.Drafter.setupEnvironment(executionOptions);
-
-      // 6) Run students' code
-      const app = await window.Drafter.runStudentCode(executionOptions);
+      });
 
       // All done!
       console.log("[Drafter AppServer Scaffolding] Student Code Initialized with Pyodide:");

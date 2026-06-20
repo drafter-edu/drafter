@@ -14,7 +14,7 @@ def index(state: State) -> Page:
         Header("Todo List App"),
         "Here are your todo items:",
         NumberedList(state.todos),
-        "What would you like to do?",
+        "What would you like to do?\n",
         Button("Add new task", ask_new_item),
         Button("Delete task", request_delete_number)
     ])
