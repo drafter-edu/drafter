@@ -18,5 +18,5 @@
 		"esModuleInterop": true,
 		"isolatedModules": false
 	},
-	"include": ["src", "src/__tests__"]
+	"include": ["src", "src/__tests__", "src/services/tools/rawTransformer.js"]
 }

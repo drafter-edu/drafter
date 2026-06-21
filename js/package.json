@@ -24,9 +24,10 @@
 		"@jest/globals": "^30.2.0",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/user-event": "^14.6.1",
+		"@types/css-tree": "^2.3.11",
 		"@types/jest": "^30.0.0",
 		"@types/jquery": "^3.5.33",
-		"@types/node": "^24.10.0",
+		"@types/node": "^24.13.2",
 		"@types/wicg-file-system-access": "^2023.10.7",
 		"autoprefixer": "^10.4.21",
 		"browserslist-to-esbuild": "^2.1.1",
@@ -40,6 +41,7 @@
 		"playwright": "^1.56.1",
 		"postcss": "^8.5.6",
 		"postcss-preset-env": "^10.4.0",
+		"py-ast": "^1.9.0",
 		"terser": "^5.44.0",
 		"ts-jest": "^29.4.5",
 		"ts-node": "^10.9.2",
@@ -47,11 +49,13 @@
 		"typescript": "^5"
 	},
 	"dependencies": {
+		"css-tree": "^3.2.1",
 		"diff2html": "^3.4.52",
 		"highlight.js": "^11.11.1",
 		"i18next": "^25.6.2",
 		"jsx-dom": "^8.1.6",
 		"lit": "^3.3.1",
+		"parse5": "^8.0.1",
 		"pyodide": "^0.29.0",
 		"string-diff-viewer": "^0.4.4"
 	},

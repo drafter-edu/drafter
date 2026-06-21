@@ -1,0 +1,210 @@
+{
+	"type": "element",
+	"name": "#document",
+	"attrs": {},
+	"styles": {},
+	"children": [
+		{
+			"type": "element",
+			"name": "#documentType",
+			"attrs": {},
+			"styles": {},
+			"children": []
+		},
+		{
+			"type": "element",
+			"name": "html",
+			"attrs": {
+				"lang": "en"
+			},
+			"styles": {},
+			"children": [
+				{
+					"type": "element",
+					"name": "head",
+					"attrs": {},
+					"styles": {},
+					"children": [
+						{
+							"type": "element",
+							"name": "title",
+							"attrs": {},
+							"styles": {},
+							"children": [
+								{
+									"type": "text",
+									"text": "Simple Document",
+									"children": []
+								}
+							]
+						},
+						{
+							"type": "element",
+							"name": "meta",
+							"attrs": {
+								"charset": "UTF-8"
+							},
+							"styles": {},
+							"children": []
+						},
+						{
+							"type": "element",
+							"name": "meta",
+							"attrs": {
+								"name": "viewport",
+								"content": "width=device-width, initial-scale=1.0"
+							},
+							"styles": {},
+							"children": []
+						},
+						{
+							"type": "element",
+							"name": "meta",
+							"attrs": {
+								"http-equiv": "X-UA-Compatible",
+								"content": "IE=edge"
+							},
+							"styles": {},
+							"children": []
+						},
+						{
+							"type": "element",
+							"name": "link",
+							"attrs": {
+								"rel": "stylesheet",
+								"href": "styles.css"
+							},
+							"styles": {},
+							"children": []
+						},
+						{
+							"type": "element",
+							"name": "script",
+							"attrs": {
+								"src": "script.js"
+							},
+							"styles": {},
+							"children": []
+						},
+						{
+							"type": "element",
+							"name": "meta",
+							"attrs": {
+								"name": "description",
+								"content": "A simple HTML document"
+							},
+							"styles": {},
+							"children": []
+						},
+						{
+							"type": "element",
+							"name": "meta",
+							"attrs": {
+								"name": "author",
+								"content": "Author Name"
+							},
+							"styles": {},
+							"children": []
+						},
+						{
+							"type": "element",
+							"name": "meta",
+							"attrs": {
+								"name": "keywords",
+								"content": "HTML, simple document"
+							},
+							"styles": {},
+							"children": []
+						},
+						{
+							"type": "element",
+							"name": "style",
+							"attrs": {},
+							"styles": {},
+							"children": [
+								{
+									"type": "text",
+									"text": "body { margin: 0; font-family: sans-serif; }\n      .card { padding: 1rem; color: red; }",
+									"children": []
+								}
+							],
+							"css": [
+								{
+									"selector": "body",
+									"declarations": {
+										"margin": "0",
+										"font-family": "sans-serif"
+									}
+								},
+								{
+									"selector": ".card",
+									"declarations": {
+										"padding": "1rem",
+										"color": "red"
+									}
+								}
+							]
+						}
+					]
+				},
+				{
+					"type": "element",
+					"name": "body",
+					"attrs": {},
+					"styles": {},
+					"children": [
+						{
+							"type": "element",
+							"name": "div",
+							"attrs": {
+								"class": "card"
+							},
+							"styles": {},
+							"children": [
+								{
+									"type": "text",
+									"text": "Hello",
+									"children": []
+								},
+								{
+									"type": "element",
+									"name": "strong",
+									"attrs": {},
+									"styles": {},
+									"children": [
+										{
+											"type": "text",
+											"text": "world",
+											"children": []
+										}
+									]
+								},
+								{
+									"type": "text",
+									"text": "!",
+									"children": []
+								},
+								{
+									"type": "element",
+									"name": "button",
+									"attrs": {},
+									"styles": {
+										"padding": "0.5rem",
+										"color": "blue"
+									},
+									"children": [
+										{
+											"type": "text",
+											"text": "Click Me",
+											"children": []
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

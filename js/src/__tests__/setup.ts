@@ -5,7 +5,7 @@ globalThis.console = {
 	...globalThis.console,
 	log: (...args: any[]) => {
 		// Uncomment the next line to see logs during tests
-		// process.stdout.write('[LOG] ' + args.join(' ') + '\n');
+		process.stdout.write("[LOG] " + args.join(" ") + "\n");
 	},
 };
 

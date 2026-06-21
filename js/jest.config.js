@@ -15,6 +15,8 @@ export default {
 				tsconfig: "tsconfig.jest.json",
 			},
 		],
+		"^.+\\.html$": "<rootDir>/src/services/tools/rawTransformer.js",
+		"^.+\\.py$": "<rootDir>/src/services/tools/rawTransformer.js",
 	},
 	testMatch: [
 		"**/__tests__/**/*.test.{ts,tsx}",
