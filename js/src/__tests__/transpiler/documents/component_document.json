@@ -1,0 +1,738 @@
+{
+  "type": "element",
+  "name": "#document",
+  "attrs": {},
+  "styles": {},
+  "children": [
+    {
+      "type": "element",
+      "name": "#documentType",
+      "attrs": {},
+      "styles": {},
+      "children": []
+    },
+    {
+      "type": "element",
+      "name": "html",
+      "attrs": {},
+      "styles": {},
+      "children": [
+        {
+          "type": "element",
+          "name": "head",
+          "attrs": {},
+          "styles": {},
+          "children": [
+            {
+              "type": "element",
+              "name": "style",
+              "attrs": {},
+              "styles": {},
+              "children": [
+                {
+                  "type": "text",
+                  "text": ".panel { border: 1px solid #ccc; }",
+                  "children": []
+                }
+              ],
+              "css": [
+                {
+                  "selector": ".panel",
+                  "declarations": {
+                    "border": "1px solid #ccc"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "body",
+          "attrs": {},
+          "styles": {},
+          "children": [
+            {
+              "type": "element",
+              "name": "header",
+              "attrs": {},
+              "styles": {},
+              "children": [
+                {
+                  "type": "text",
+                  "text": "Top",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "nav",
+              "attrs": {},
+              "styles": {},
+              "children": [
+                {
+                  "type": "element",
+                  "name": "a",
+                  "attrs": {
+                    "href": "/home"
+                  },
+                  "styles": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "text": "Home",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "main",
+              "attrs": {},
+              "styles": {},
+              "children": [
+                {
+                  "type": "element",
+                  "name": "section",
+                  "attrs": {},
+                  "styles": {},
+                  "children": [
+                    {
+                      "type": "element",
+                      "name": "article",
+                      "attrs": {
+                        "class": "panel"
+                      },
+                      "styles": {},
+                      "children": [
+                        {
+                          "type": "element",
+                          "name": "h1",
+                          "attrs": {},
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "Title",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "h2",
+                          "attrs": {},
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "Subtitle",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "p",
+                          "attrs": {},
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "Paragraph",
+                              "children": []
+                            },
+                            {
+                              "type": "element",
+                              "name": "span",
+                              "attrs": {},
+                              "styles": {},
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "text",
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": "and",
+                              "children": []
+                            },
+                            {
+                              "type": "element",
+                              "name": "code",
+                              "attrs": {},
+                              "styles": {},
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "x = 1",
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": ".",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "pre",
+                          "attrs": {},
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "line 1\nline 2",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "blockquote",
+                          "attrs": {
+                            "cite": "https://example.com"
+                          },
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "Quoted",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "ul",
+                          "attrs": {},
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "element",
+                              "name": "li",
+                              "attrs": {},
+                              "styles": {},
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "First",
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "name": "li",
+                              "attrs": {},
+                              "styles": {},
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "Second",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "ol",
+                          "attrs": {},
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "element",
+                              "name": "li",
+                              "attrs": {},
+                              "styles": {},
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "One",
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "name": "li",
+                              "attrs": {},
+                              "styles": {},
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "Two",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "div",
+                          "attrs": {},
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "element",
+                              "name": "img",
+                              "attrs": {
+                                "src": "logo.png",
+                                "width": "320",
+                                "height": "200",
+                                "alt": "logo"
+                              },
+                              "styles": {},
+                              "children": []
+                            },
+                            {
+                              "type": "element",
+                              "name": "audio",
+                              "attrs": {
+                                "src": "sound.mp3",
+                                "autoplay": "",
+                                "muted": ""
+                              },
+                              "styles": {},
+                              "children": []
+                            },
+                            {
+                              "type": "element",
+                              "name": "video",
+                              "attrs": {
+                                "src": "video.mp4",
+                                "width": "640",
+                                "height": "360",
+                                "loop": ""
+                              },
+                              "styles": {},
+                              "children": []
+                            },
+                            {
+                              "type": "element",
+                              "name": "canvas",
+                              "attrs": {
+                                "id": "draw",
+                                "width": "400",
+                                "height": "200"
+                              },
+                              "styles": {},
+                              "children": []
+                            },
+                            {
+                              "type": "element",
+                              "name": "svg",
+                              "attrs": {
+                                "width": "100",
+                                "height": "50",
+                                "viewBox": "0 0 100 50"
+                              },
+                              "styles": {},
+                              "children": [
+                                {
+                                  "type": "element",
+                                  "name": "rect",
+                                  "attrs": {
+                                    "width": "100",
+                                    "height": "50"
+                                  },
+                                  "styles": {},
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "label",
+                          "attrs": {
+                            "for": "username"
+                          },
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "Username",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "input",
+                          "attrs": {
+                            "type": "text",
+                            "name": "username",
+                            "value": "alice"
+                          },
+                          "styles": {},
+                          "children": []
+                        },
+                        {
+                          "type": "element",
+                          "name": "input",
+                          "attrs": {
+                            "type": "password",
+                            "name": "password",
+                            "value": "hunter2"
+                          },
+                          "styles": {},
+                          "children": []
+                        },
+                        {
+                          "type": "element",
+                          "name": "input",
+                          "attrs": {
+                            "type": "checkbox",
+                            "name": "agree",
+                            "checked": ""
+                          },
+                          "styles": {},
+                          "children": []
+                        },
+                        {
+                          "type": "element",
+                          "name": "input",
+                          "attrs": {
+                            "type": "date",
+                            "name": "birthday",
+                            "value": "2024-01-15"
+                          },
+                          "styles": {},
+                          "children": []
+                        },
+                        {
+                          "type": "element",
+                          "name": "input",
+                          "attrs": {
+                            "type": "time",
+                            "name": "alarm",
+                            "value": "08:30:00"
+                          },
+                          "styles": {},
+                          "children": []
+                        },
+                        {
+                          "type": "element",
+                          "name": "input",
+                          "attrs": {
+                            "type": "datetime-local",
+                            "name": "meeting",
+                            "value": "2024-01-15T14:30"
+                          },
+                          "styles": {},
+                          "children": []
+                        },
+                        {
+                          "type": "element",
+                          "name": "input",
+                          "attrs": {
+                            "type": "file",
+                            "name": "documents",
+                            "accept": ".pdf, .docx",
+                            "multiple": ""
+                          },
+                          "styles": {},
+                          "children": []
+                        },
+                        {
+                          "type": "element",
+                          "name": "input",
+                          "attrs": {
+                            "type": "hidden",
+                            "name": "token",
+                            "value": "abc123"
+                          },
+                          "styles": {},
+                          "children": []
+                        },
+                        {
+                          "type": "element",
+                          "name": "textarea",
+                          "attrs": {
+                            "name": "bio",
+                            "rows": "3",
+                            "cols": "20"
+                          },
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "Hello there",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "select",
+                          "attrs": {
+                            "name": "color"
+                          },
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "element",
+                              "name": "option",
+                              "attrs": {
+                                "value": "red"
+                              },
+                              "styles": {},
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "Red",
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "name": "option",
+                              "attrs": {
+                                "value": "blue",
+                                "selected": ""
+                              },
+                              "styles": {},
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "Blue",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "output",
+                          "attrs": {
+                            "name": "result",
+                            "for": "username"
+                          },
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "Ready",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "progress",
+                          "attrs": {
+                            "value": "0.75",
+                            "max": "1"
+                          },
+                          "styles": {},
+                          "children": []
+                        },
+                        {
+                          "type": "element",
+                          "name": "table",
+                          "attrs": {},
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "element",
+                              "name": "thead",
+                              "attrs": {},
+                              "styles": {},
+                              "children": [
+                                {
+                                  "type": "element",
+                                  "name": "tr",
+                                  "attrs": {},
+                                  "styles": {},
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "name": "th",
+                                      "attrs": {},
+                                      "styles": {},
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "text": "Name",
+                                          "children": []
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "element",
+                                      "name": "th",
+                                      "attrs": {},
+                                      "styles": {},
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "text": "Age",
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "element",
+                              "name": "tbody",
+                              "attrs": {},
+                              "styles": {},
+                              "children": [
+                                {
+                                  "type": "element",
+                                  "name": "tr",
+                                  "attrs": {},
+                                  "styles": {},
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "name": "td",
+                                      "attrs": {},
+                                      "styles": {},
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "text": "Ada",
+                                          "children": []
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "element",
+                                      "name": "td",
+                                      "attrs": {},
+                                      "styles": {},
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "text": "36",
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "element",
+                                  "name": "tr",
+                                  "attrs": {},
+                                  "styles": {},
+                                  "children": [
+                                    {
+                                      "type": "element",
+                                      "name": "td",
+                                      "attrs": {},
+                                      "styles": {},
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "text": "Bob",
+                                          "children": []
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "element",
+                                      "name": "td",
+                                      "attrs": {},
+                                      "styles": {},
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "text": "28",
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "hr",
+                          "attrs": {},
+                          "styles": {},
+                          "children": []
+                        },
+                        {
+                          "type": "element",
+                          "name": "br",
+                          "attrs": {},
+                          "styles": {},
+                          "children": []
+                        },
+                        {
+                          "type": "element",
+                          "name": "button",
+                          "attrs": {
+                            "data-nav": "next_page"
+                          },
+                          "styles": {},
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "Continue",
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "name": "aside",
+                  "attrs": {},
+                  "styles": {},
+                  "children": [
+                    {
+                      "type": "text",
+                      "text": "Side notes",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "footer",
+              "attrs": {},
+              "styles": {},
+              "children": [
+                {
+                  "type": "text",
+                  "text": "Bottom",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
