@@ -76,10 +76,16 @@ export function openCodeEditor(): void {
 				closesDialog: true,
 				onClick: () => {
 					const newCode = view.state.doc.toString();
+					// Keep the global snapshot in sync so the editor shows the
+					// latest code if reopened before the restart completes.
+					(window as any).__drafterCurrentCode = newCode;
 					view.destroy();
 					window.dispatchEvent(
 						new CustomEvent("drafter-restart-student-code", {
-							detail: { code: newCode },
+							detail: {
+								code: newCode,
+								_token: (window as any).__drafterRestartToken,
+							},
 						}),
 					);
 				},
