@@ -29,6 +29,12 @@
             "icon.close": "❌",
             "button.close": "Close",
             "button.close.tooltip": "Close the server connection and this page.",
+            "icon.edit": "📝",
+            "button.edit": "Edit Source",
+            "button.edit.tooltip": "Edit the source code and reload the site",
+            "editor.title": "Edit Source Code",
+            "editor.run": "Run",
+            "editor.cancel": "Cancel",
 
             "footer.route": "Route: "
         }

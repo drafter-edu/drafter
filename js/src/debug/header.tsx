@@ -1,4 +1,5 @@
 import { t } from "../i18n";
+import { openCodeEditor } from "./editor";
 
 export class DebugHeaderBar {
     private headerElement: HTMLElement;
@@ -28,6 +29,18 @@ export class DebugHeaderBar {
     }
 
     private createHotButtons() {
+        const editButton = (
+            <button
+                title={t("button.edit.tooltip")}
+                class="drafter-edit-button"
+            >
+                {t("icon.edit")}
+            </button>
+        ) as HTMLButtonElement;
+        editButton.addEventListener("click", () => {
+            openCodeEditor();
+        });
+
         return (
             <div className="drafter-header-hot-buttons">
                 <button title={t("button.home")} class="drafter-home-button">
@@ -39,6 +52,7 @@ export class DebugHeaderBar {
                 <button title={t("button.about")} class="drafter-about-button">
                     {t("icon.about")}
                 </button>
+                {editButton}
                 <button title={t("button.save")} class="drafter-save-button">
                     {t("icon.save")}
                 </button>

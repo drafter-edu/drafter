@@ -8,6 +8,7 @@ export const ICONS = {
     upload: "⬆️",
     toggle: "👁️",
     close: "❌",
+    edit: "📝",
 };
 
 export const LABELS = {
@@ -20,4 +21,5 @@ export const LABELS = {
     upload: "Upload state from JSON File",
     toggle: "Toggle debug panel",
     close: "Close local web server",
+    edit: "Edit source code and reload",
 };

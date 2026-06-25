@@ -776,3 +776,20 @@ div.btlw-container img {
     gap: 2px;
     margin-top: 10px;
 }
+/* Code editor dialog */
+.drafter-code-editor-container {
+    width: 100%;
+    height: 480px;
+    border: 1px solid #CCC;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.drafter-code-editor-container .cm-editor {
+    height: 100%;
+}
+
+.drafter-code-editor-container .cm-editor.cm-focused {
+    outline: 2px solid #3a7db8;
+    outline-offset: -2px;
+}

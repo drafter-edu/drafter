@@ -188,6 +188,8 @@ export async function startPyodideAppServerSession(
 				restartRequested = false;
 				await resetPyodideRuntime();
 				const code = await getStudentCode();
+				// Expose the current code so the editor can read it
+				(window as any).__drafterCurrentCode = code;
 				const executionOptions: DrafterInitOptions = {
 					code,
 					loadPackagesAutomatically:
@@ -242,6 +244,26 @@ export async function startPyodideAppServerSession(
 			}
 		};
 	}
+
+	// Allow external callers (e.g. the in-browser code editor) to trigger a
+	// restart with optionally new code by dispatching a custom window event.
+	window.addEventListener(
+		"drafter-restart-student-code",
+		(event: Event) => {
+			const detail = (event as CustomEvent<{ code?: string }>).detail;
+			if (typeof detail?.code === "string") {
+				latestStudentCode = detail.code;
+			} else {
+				latestStudentCode = null;
+			}
+			runStudentExecution().catch((error) => {
+				console.error(
+					"[Drafter AppServer Scaffolding] Failed to restart student code via editor:",
+					error,
+				);
+			});
+		},
+	);
 
 	await runStudentExecution();
 }
