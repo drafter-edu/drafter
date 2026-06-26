@@ -73,4 +73,16 @@ body {
 		margin-left: 10px;
 		margin-right: 10px;
 	}
+
+	drafter-timer {
+		display: inline-block;
+		margin: 0.25em 0.25em;
+		border: 1px solid black;
+		padding: 0.25em 1em;
+		background-color: #f9f9f9;
+		border-radius: 1em;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+		text-align: center;
+		width: fit-content;
+	}
 }

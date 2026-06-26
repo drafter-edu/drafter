@@ -61,12 +61,14 @@ class ComponentArgument:
         kind: The argument kind: "positional", "var", or "keyword".
         default_value: Default value if not provided.
         is_content: Whether this argument represents child content.
+        is_event: Whether this argument represents an event route handler.
     """
 
     name: str
     kind: str = "positional"  # "positional", "var", "keyword"
     default_value: Any = None
     is_content: bool = False
+    is_event: bool = False
 
 
 @dataclass
@@ -155,7 +157,8 @@ def convert_arguments_to_json(arguments, only_validate=False) -> Optional[str]:
         raise ValueError(
             "The arguments must be an Argument, a list of Argument objects, a list of (name, value) pairs, or a dict of name to value."
         )
-        
+
+
 def repr_arg(key: str, value: Any) -> str:
     if key.startswith("on"):
         if callable(value):
@@ -250,13 +253,25 @@ class Component:
     DRAFTER_DATA_HANDLERS_NAME: ClassVar[str] = "data--drafter-handlers"
     # Supported event types for route dispatching
     SUPPORTED_EVENTS: ClassVar[list[str]] = [
-        "blur", "change", "focus", "input", "keydown", "keyup", "keypress",
-        "mouseenter", "mouseleave", "mouseover", "mouseout", "click", "dblclick"
+        "blur",
+        "change",
+        "focus",
+        "input",
+        "keydown",
+        "keyup",
+        "keypress",
+        "mouseenter",
+        "mouseleave",
+        "mouseover",
+        "mouseout",
+        "click",
+        "dblclick",
     ]
+    EXTRA_SUPPORTED_EVENTS: ClassVar[list[str]] = []
 
     def plan(self, context) -> RenderPlan:
         return self._plan_tag(context)
-    
+
     def _plan_tag(
         self,
         context,
@@ -284,28 +299,35 @@ class Component:
             collapse_whitespace=collapse_whitespace
             if collapse_whitespace is not None
             else self.COLLAPSE_WHITESPACE,
-            newline_mode=newline_mode if newline_mode is not None else self.NEWLINE_MODE,
+            newline_mode=newline_mode
+            if newline_mode is not None
+            else self.NEWLINE_MODE,
         )
 
-    def _handle_extra_settings(self, attributes, context) -> dict:
-        event_handlers = {}
+    def _handle_event(self, attribute_key, attribute_value):
+        if attribute_key.startswith("on_"):
+            event_type = attribute_key[3:]
+            if event_type in (self.SUPPORTED_EVENTS + self.EXTRA_SUPPORTED_EVENTS):
+                route_name = (
+                    attribute_value.__name__
+                    if callable(attribute_value)
+                    else attribute_value
+                )
+                return True, event_type, route_name
+        return False, attribute_key, attribute_value
+
+    def _handle_extra_settings(self, attributes, context, event_handlers) -> dict:
         for key, value in self.extra_settings.items():
             if key == "arguments":
                 attributes[self.DRAFTER_DATA_ARGUMENT_NAME] = convert_arguments_to_json(
                     value
                 )
-            elif key.startswith("on_"):
-                # Extract event type (e.g., "on_blur" -> "blur")
-                event_type = key[3:]  # Remove "on_" prefix
-                if event_type in self.SUPPORTED_EVENTS:
-                    # Convert callable to function name
-                    route_name = value.__name__ if callable(value) else value
+            else:
+                is_event, event_type, route_name = self._handle_event(key, value)
+                if is_event:
                     event_handlers[event_type] = route_name
                 else:
-                    # Pass through unsupported events as regular attributes
                     attributes[key] = value
-            else:
-                attributes[key] = value
         # Add event handlers as data attribute if any exist
         if event_handlers:
             attributes[self.DRAFTER_DATA_HANDLERS_NAME] = json.dumps(event_handlers)
@@ -313,6 +335,7 @@ class Component:
 
     def get_attributes(self, context) -> dict:
         attributes = {}
+        event_handlers = {}
         # Default attributes that should always be included, unless overridden by extra_settings
         if self.DEFAULT_ATTRS:
             attributes.update(self.DEFAULT_ATTRS)
@@ -326,9 +349,16 @@ class Component:
             key = self.RENAME_ATTRS.get(key, key)
             if not key:
                 continue
-            attributes[key] = value
+            if argument.is_event:
+                is_event, event_type, route_name = self._handle_event(key, value)
+                if is_event:
+                    event_handlers[event_type] = route_name
+                else:
+                    attributes[key] = value
+            else:
+                attributes[key] = value
         # Handle extra settings
-        attributes = self._handle_extra_settings(attributes, context)
+        attributes = self._handle_extra_settings(attributes, context, event_handlers)
         return attributes
 
     def get_tag(self, context) -> str:
@@ -383,7 +413,9 @@ class Component:
                         if still_positional:
                             arguments.append(repr_arg(parameter_name, value))
                         else:
-                            arguments.append(f"{parameter_name}={repr_arg(parameter_name, value)}")
+                            arguments.append(
+                                f"{parameter_name}={repr_arg(parameter_name, value)}"
+                            )
                     else:
                         still_positional = False
             else:
@@ -398,7 +430,9 @@ class Component:
                         if still_positional:
                             arguments.append(repr_arg(parameter_name, value))
                         else:
-                            arguments.append(f"{parameter_name}={repr_arg(parameter_name, value)}")
+                            arguments.append(
+                                f"{parameter_name}={repr_arg(parameter_name, value)}"
+                            )
                     else:
                         still_positional = False
 

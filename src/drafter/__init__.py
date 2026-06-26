@@ -60,6 +60,8 @@ from drafter.components import (
     Download,
     FileUpload,
     MatPlotLibPlot,
+    Timer,
+    Clock,
 )
 
 from drafter.styling.styling import (
@@ -175,6 +177,8 @@ __all__ = [
     "Download",
     "FileUpload",
     "MatPlotLibPlot",
+    "Timer",
+    "Clock",
     "hide_debug_information",
     "show_debug_information",
     "set_website_title",

@@ -29,7 +29,7 @@ class EventManager:
     hotkey_events: dict[str, Callable[[], None]] = field(default_factory=dict)
     last_press_time: int = 0
     hotkey_listener_ready: bool = False
-    
+
     def __init__(self, runtime: RuntimeAdapter):
         self.runtime = runtime
         self.click_handler = None
@@ -39,32 +39,36 @@ class EventManager:
         self.hotkey_events = {}
         self.last_press_time = 0
         self.hotkey_listener_ready = False
-        
+
     # Event Mounts
 
     def mount_event_handlers(self, root: Any, do_navigation: Callable):
         """Mount event handlers for components with data--drafter-handlers attribute.
-        
+
         This sets up delegation for events like blur, change, focus, input, etc.,
         that should trigger route dispatches.
-        
+
         Args:
             root: The root element to attach listeners to.
             do_navigation: Callback to handle navigation events.
         """
         debug_log("client.mount_event_handlers")
 
-        elements_with_handlers = root.querySelectorAll("[data--drafter-handlers]")
+        elements_with_handlers = root.querySelectorAll(
+            f"[{Component.DRAFTER_DATA_HANDLERS_NAME}]"
+        )
 
         for element in elements_with_handlers:
-            handlers_json = element.getAttribute("data--drafter-handlers")
+            handlers_json = element.getAttribute(Component.DRAFTER_DATA_HANDLERS_NAME)
             if not handlers_json:
                 continue
 
             try:
                 handlers = json.loads(handlers_json)
-            except:
-                console_log(f"Failed to parse event handlers: {handlers_json}")
+            except Exception as e:
+                console_log(
+                    f"Failed to parse event handlers: {handlers_json}. Error: {e}"
+                )
                 continue
             # For each event type in the handlers
             for event_type, route_name in handlers.items():
@@ -72,26 +76,29 @@ class EventManager:
                 def make_handler(event_name, route):
                     def handler(event):
                         debug_log(f"client.event_handler.{event_name}", event)
-                        
+
                         # Don't prevent default for most events (except clicks handled elsewhere)
                         target_element = event.target
                         dom_id = (
-                            target_element.id
-                            if hasattr(target_element, "id")
-                            else None
+                            target_element.id if hasattr(target_element, "id") else None
                         )
-                        
-                        incomplete_data = get_all_event_data(self.runtime, target_element, event, None)
-                        def finish_navigation(data):
+
+                        incomplete_data = get_all_event_data(
+                            self.runtime, target_element, event, None
+                        )
+
+                        def finish_navigation(files_and_data):
+                            data = files_and_data[-1] if files_and_data else {}
                             request = Request(
                                 action=event_name,
                                 url=route,
                                 kwargs=data,
-                                event={}, # TODO: Populate this with useful event info
+                                event={},  # TODO: Populate this with useful event info
                                 dom_id=dom_id or "",
-                                button_pressed=target_element
+                                button_pressed=target_element,
                             )
                             return do_navigation(request)
+
                         self.runtime.finish_promises(incomplete_data, finish_navigation)
 
                     return handler
@@ -100,6 +107,7 @@ class EventManager:
                     make_handler(event_type, route_name)
                 )
                 element.addEventListener(event_type, wrapped_handler)
+                console_log(f"Added event handler {event_type} to {element}")
 
     def mount_navigation(self, do_navigation: Callable):
         debug_log("client.mount_navigation")
@@ -128,9 +136,7 @@ class EventManager:
                     return
 
                 dom_id = (
-                    nearest_nav_link.id
-                    if hasattr(nearest_nav_link, "id")
-                    else None
+                    nearest_nav_link.id if hasattr(nearest_nav_link, "id") else None
                 )
 
                 is_anchor = nearest_nav_link.tagName.lower() == "a"
@@ -144,14 +150,15 @@ class EventManager:
                         action="link",
                         url=name,
                         kwargs=data,
-                        event={}, # TODO: Populate this with useful event info
+                        event={},  # TODO: Populate this with useful event info
                         dom_id=dom_id or "",
-                        button_pressed=nearest_nav_link if not is_anchor else ""
+                        button_pressed=nearest_nav_link if not is_anchor else "",
                     )
                     try:
                         return do_navigation(request)
                     except Exception as e:
                         print("ERROR:", e)
+
                 self.runtime.finish_promises(incomplete_data, finish_navigation)
 
         def submit_handler(event: Any):
@@ -161,9 +168,7 @@ class EventManager:
             if hasattr(event, "submitter"):
                 submitter = event.submitter
                 dom_id = (
-                    submitter.id
-                    if submitter and hasattr(submitter, "id")
-                    else None
+                    submitter.id if submitter and hasattr(submitter, "id") else None
                 )
             else:
                 submitter = None
@@ -175,17 +180,21 @@ class EventManager:
             else:
                 url = js.location.href
             # Build and dispatch navigation event
-            incomplete_data = get_all_event_data(self.runtime, event.target, event, submitter)
+            incomplete_data = get_all_event_data(
+                self.runtime, event.target, event, submitter
+            )
+
             def finish_form_navigation(data):
                 request = Request(
                     action="form",
                     url=url,
                     kwargs=data,
-                    event={}, # TODO: Populate this with useful event info
-                dom_id=dom_id or "",
-                button_pressed=submitter if submitter else ""
+                    event={},  # TODO: Populate this with useful event info
+                    dom_id=dom_id or "",
+                    button_pressed=submitter if submitter else "",
                 )
                 return do_navigation(request)
+
             self.runtime.finish_promises(incomplete_data, finish_form_navigation)
 
         self.click_handler = self.runtime.wrap_event_handler(handle_click)
@@ -210,7 +219,7 @@ class EventManager:
         key_handlers: dict[str, Callable[[], None]],
     ) -> None:
         debug_log("client.setup_events")
-        
+
         # Global events
         for event_name, handler in event_handlers.items():
             self._register_event(event_name, handler)
@@ -233,9 +242,7 @@ class EventManager:
 
         def hotkey_handler(event: Any):
             event_key = event.key.lower() if hasattr(event, "key") else ""
-            ctrl = getattr(event, "ctrlKey", False) or getattr(
-                event, "metaKey", False
-            )
+            ctrl = getattr(event, "ctrlKey", False) or getattr(event, "metaKey", False)
 
             if ctrl and event_key in self.hotkey_events:
                 current_time = int(time.time() * 1000)
@@ -245,7 +252,7 @@ class EventManager:
                     debug_log("client.hotkey_triggered", event_key)
                     event.preventDefault()
                     self.hotkey_events[event_key]()
-                    self.last_press_time = 0 # Reset to avoid triple presses being treated as double presses
+                    self.last_press_time = 0  # Reset to avoid triple presses being treated as double presses
                 else:
                     self.last_press_time = current_time
 
@@ -255,14 +262,20 @@ class EventManager:
             js.document.addEventListener("keydown", wrapped_handler)
             self.hotkey_listener_ready = True
             debug_log("client.hotkey_listener_registered")
-    
+
 
 def get_all_event_data(
     runtime: RuntimeAdapter, originator: Any, event: Any, submitter: Any
 ) -> list:
-    """ Collect all relevant data for an event, including form data and arguments."""
+    """Collect all relevant data for an event, including form data and arguments."""
     incomplete_resolutions = []
     data = {}
+
+    # Get any custom event details
+    if hasattr(event, "detail"):
+        for key, value in js.Object.entries(event.detail):
+            data[key] = value
+
     # Get form data
     # TODO: Allow specifying a different form or scope for data collection
     form = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
@@ -279,7 +292,9 @@ def get_all_event_data(
                     data[key] = value
             else:
                 # TODO: Need to make this part of a chaining promise to handle async pyodide uploads
-                incomplete_resolutions.append(runtime.handle_file_upload(value, data, key))
+                incomplete_resolutions.append(
+                    runtime.handle_file_upload(value, data, key)
+                )
         # Look for `data-transform` attributes to decode any special fields (e.g., JSON-encoded arguments)
         for element in form.elements:
             if element.hasAttribute("data-transform"):
@@ -291,7 +306,9 @@ def get_all_event_data(
                         decoded_value = json.loads(value)
                         data[key] = decoded_value
                     except json.JSONDecodeError:
-                        data[key] = value # Fallback to raw value if JSON decoding fails
+                        data[key] = (
+                            value  # Fallback to raw value if JSON decoding fails
+                        )
                         # TODO: Log an error somewhere
 
     # Get arguments from the originator and its parents
@@ -302,7 +319,7 @@ def get_all_event_data(
         # TODO: Handle corruption more elegantly
         parsed = json.loads(arg)
         data.update(parsed)
-        
+
     incomplete_resolutions.append(runtime.promise_data(data))
 
     return incomplete_resolutions

@@ -29,7 +29,7 @@ class Fragment(ResponsePayload):
     Args:
         state: The state of the fragment. If only one argument is provided, this will default to be ``None``.
         content: The content of the fragment. Must always be provided as a list of strings and components.
-        target: The target element to inject into. Can be a Target instance, a string ID/selector, or None.
+        target: The target element to inject into. Can be a Target instance, a string ID/selector, or None. In most cases, using `None` will target the original element that launched the request.
         css: Optional CSS content to inject dynamically when this fragment is rendered.
         js: Optional JavaScript content to inject dynamically when this fragment is rendered.
     """
@@ -100,10 +100,10 @@ class Fragment(ResponsePayload):
         self.js.extend(content.assets["js"])
         self.css.extend(content.assets["css"])
         return content.flatten()
-    
+
     def format_target(self) -> str:
         return f", target={format_page_content(self.target)}"
-    
+
     def format(
         self,
         state: SiteState,
@@ -132,7 +132,7 @@ class Fragment(ResponsePayload):
             pieces.append(f", css={format_page_content(self.css)}")
         if self.js:
             pieces.append(f", js={format_page_content(self.js)}")
-            
+
         class_name = self.__class__.__name__
 
         return "".join(

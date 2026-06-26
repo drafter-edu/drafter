@@ -53,6 +53,7 @@ from drafter.components.plotting import MatPlotLibPlot
 
 from drafter.components.media import Audio, Video, Canvas, SVG
 
+from drafter.components.timer import Timer, Clock
 
 __all__ = [
     "PageContent",
@@ -107,4 +108,6 @@ __all__ = [
     "Video",
     "Canvas",
     "SVG",
+    "Timer",
+    "Clock",
 ]

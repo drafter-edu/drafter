@@ -14,13 +14,14 @@ from drafter.bridge.log import debug_log, console_log
 
 class BrowserHistory:
     runtime: RuntimeAdapter
-    
+
     def __init__(self, runtime: RuntimeAdapter):
         self.runtime = runtime
 
     def add_to_history(self, request: Request):
         url = request.url
         request_id = request.id
+        print(type(request.kwargs))
         try:
             kwargs = json.dumps(request.kwargs) if request.kwargs else "{}"
         except Exception as e:
@@ -42,13 +43,17 @@ class BrowserHistory:
         debug_log("client.handle_popstate", event)
         if (
             event
-            and hasattr(event, "state") # and "state" in event
-            and hasattr(event.state, "request_id") # and "request_id" in event.state
+            and hasattr(event, "state")  # and "state" in event
+            and hasattr(event.state, "request_id")  # and "request_id" in event.state
             and event.state.request_id is not None
         ):
             request_id = event.state.request_id
             url = event.state.url
-            kwargs = json.loads(event.state.kwargs) if hasattr(event.state, "kwargs") and event.state.kwargs else {}
+            kwargs = (
+                json.loads(event.state.kwargs)
+                if hasattr(event.state, "kwargs") and event.state.kwargs
+                else {}
+            )
             debug_log("client.handle_popstate_with_state", request_id, url)
             # js.document.title = f"{self.site_title} - {url}"
             full_url = self.runtime.create_url(js.location.href)
