@@ -462,6 +462,15 @@ Here are the places that we can show errors to the user:
 - The original system console
 - A file that gets written to disk
 
+#### Error Details
+
+Some kinds of errors can be given extra details that will provide more help:
+
+- Unknown route should show the list of routes available, and use string distance to find routes that the user might have intended.
+- Missing required parameter should indicate which parameter is missing and what type it should be.
+- Invalid parameter type should indicate the expected type and the received type.
+- Errors during the route should indicate the exact line number and context within the user's code where the error occurred.
+
 ### Configuration
 
 1. Bootstrap Phase: BootstrapConfiguration
