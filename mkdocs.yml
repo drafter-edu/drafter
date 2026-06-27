@@ -28,6 +28,7 @@ nav:
   - Colors: reference/colors.md
   - Components: reference/components.md
   - Fonts: reference/fonts.md
+  - Hybrid Components: reference/hybrid-components.md
   - Transition to Flask: reference/flask.md
 
 theme:
