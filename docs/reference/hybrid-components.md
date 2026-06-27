@@ -1,6 +1,6 @@
 # Hybrid Components
 
-A *hybrid component* is a Drafter component whose visual behaviour and
+A *hybrid component* is a Drafter component whose visual behavior and
 interactivity are split across two layers:
 
 - **Python layer** — a `Component` subclass that describes what HTML to emit
@@ -194,7 +194,7 @@ import "./my-widget";
 `Timer` (`src/drafter/components/timer.py` + `js/src/components/timer.tsx`) is
 the canonical example of a hybrid component.
 
-| Python parameter | HTML attribute | JS behaviour |
+| Python parameter | HTML attribute | JS behavior |
 |---|---|---|
 | `duration` | `duration` | Total countdown in ms |
 | `on_finish` | encoded in `data--drafter-handlers["finish"]` | Route called when timer expires |

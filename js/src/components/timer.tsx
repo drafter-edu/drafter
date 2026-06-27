@@ -1,8 +1,4 @@
-const DRAFTER_EVENT_HANDLER = "data--drafter-handlers";
-function getHandlers(element: HTMLElement) {
-	const handlers = element.getAttribute(DRAFTER_EVENT_HANDLER);
-	return handlers ? JSON.parse(handlers) : {};
-}
+import { getHandlers } from "./utils";
 
 class Timer extends HTMLElement {
 	DEFAULT_RATE = 1000;

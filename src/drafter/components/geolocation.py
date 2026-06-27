@@ -52,7 +52,7 @@ class CurrentLocation(Component):
     """A component that requests and displays browser geolocation.
 
     Rendered as a ``<drafter-geolocation>`` custom HTML element whose
-    behaviour is implemented in TypeScript (``js/src/components/geolocation.tsx``).
+    behavior is implemented in TypeScript (``js/src/components/geolocation.tsx``).
     The element creates a hidden form input that stores JSON-serialised
     location data, so the component works both in plain form-submission flows
     and in event-driven flows via the optional callback parameters.

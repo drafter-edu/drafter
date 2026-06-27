@@ -1,9 +1,4 @@
-const DRAFTER_EVENT_HANDLER = "data--drafter-handlers";
-
-function getHandlers(element: HTMLElement): Record<string, string> {
-	const handlers = element.getAttribute(DRAFTER_EVENT_HANDLER);
-	return handlers ? JSON.parse(handlers) : {};
-}
+import { getHandlers } from "./utils";
 
 /** Inject component styles once into the document head. */
 function injectGeolocationStyles() {
