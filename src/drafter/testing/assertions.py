@@ -295,11 +295,9 @@ def compare_mappings(
     return all_differences
 
 
-def render_difference(difference: Difference) -> str:
-    if not difference.path:
-        return difference.message
-    message = ["In"]
-    remaining_parts = difference.path[:]
+def render_path(path: list[PathItem]) -> str:
+    message = []
+    remaining_parts = path[:]
     while remaining_parts:
         path_item = remaining_parts.pop(0)
         if path_item.kind == "attributes":
@@ -329,7 +327,14 @@ def render_difference(difference: Difference) -> str:
             message.append(f"index '{path_item.name}'")
         else:
             message.append(f"{path_item.kind} '{path_item.name}'")
-    return " ".join(message) + f": {difference.message}"
+    return " ".join(message)
+
+
+def render_difference(difference: Difference) -> str:
+    if not difference.path:
+        return difference.message
+    path = render_path(difference.path)
+    return f"In {path}: {difference.message}"
 
 
 def compare_drafter_types(
@@ -394,10 +399,10 @@ def compare_drafter_types(
         do_comparison = True
 
     if do_comparison:
-        print("Actual Positional:", actual_positional)
-        print("Expected Positional:", expected_positional)
-        print("Actual Attributes:", actual_attributes)
-        print("Expected Attributes:", expected_attributes)
+        # print("Actual Positional:", actual_positional)
+        # print("Expected Positional:", expected_positional)
+        # print("Actual Attributes:", actual_attributes)
+        # print("Expected Attributes:", expected_attributes)
         result = compare_mappings(
             ignore_styles(actual_attributes),
             ignore_styles(expected_attributes),
@@ -453,6 +458,94 @@ def compare_positional(
     return differences
 
 
+def search_content(
+    actual, needle, settings, path: list[PathItem]
+) -> list[list[PathItem]]:
+    """
+    Search through the `actual` value and look for anything equal to `needle`.
+
+    Returns a list of PathItem objects indicating where matches were found.
+
+    Args:
+        actual (Any): The actual content to search through.
+        needle (Any): The value to search for within the actual content.
+        settings (ComparisonSettings): The settings to use for comparison.
+        path (list[PathItem]): The current path within the content, used for tracking nested locations.
+    """
+    print("Seeking", path, actual, type(actual))
+    # Did we find it?
+    differences = compare_equal(actual, needle, settings, path)
+    if not differences:
+        return [path]
+
+    # Drafter specific content
+    if isinstance(actual, Fragment):
+        return search_content(actual.content, needle, settings, path)
+    if isinstance(actual, Component):
+        component_name = make_type_name(actual)
+        actual_attributes, actual_positional = actual.get_fields()
+        matches = []
+        for key, value in actual_attributes.items():
+            matches.extend(
+                search_content(
+                    value,
+                    needle,
+                    settings,
+                    path
+                    + [
+                        PathItem("attributes", component_name),
+                        PathItem("key", str(key)),
+                    ],
+                )
+            )
+        for key, value in actual_positional.items():
+            matches.extend(
+                search_content(
+                    value,
+                    needle,
+                    settings,
+                    path
+                    + [
+                        PathItem("positional", component_name),
+                        PathItem("key", str(key)),
+                    ],
+                )
+            )
+        return matches
+
+    # Composite types
+    if isinstance(actual, (dict,)):
+        matches = []
+        for k, v in actual.items():
+            matches.extend(
+                search_content(v, needle, settings, path + [PathItem("key", str(k))])
+            )
+        return matches
+    if isinstance(actual, (list, tuple)):
+        matches = []
+        for i, item in enumerate(actual):
+            matches.extend(
+                search_content(
+                    item, needle, settings, path + [PathItem("index", str(i))]
+                )
+            )
+        return matches
+
+        return path
+    if isinstance(actual, (set, frozenset)):
+        matches = []
+        for item in actual:
+            matches.extend(
+                search_content(
+                    item, needle, settings, path + [PathItem("set_item", str(item))]
+                )
+            )
+        return matches
+
+    # Couldn't find it
+    return []
+
+
 def assert_page(
     actual, expected, precision=4, exact_strings=False, strict_styles=False
 ):
@@ -468,6 +561,12 @@ def assert_page(
         exact_strings (bool, optional): Whether to require exact string matches. Defaults to False.
         strict_styles (bool, optional): Whether to require exact style matches. Defaults to False.
     """
+
+
+def assert_content(
+    actual, expected, precision=4, exact_strings=False, strict_styles=False
+):
+    pass
 
 
 def assert_state(
@@ -494,3 +593,7 @@ def assert_state(
         exact_strings=exact_strings,
         strict_styles=strict_styles,
     )
+
+
+def assert_has(actual, needle, precision=4, exact_strings=False, strict_styles=False):
+    pass

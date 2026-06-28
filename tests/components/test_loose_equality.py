@@ -30,6 +30,16 @@ snippets = {
             """Button('Hello World', 'different-link', style_color='blue')""",
             ["In Button url: Expected 'different-link' but got 'link'"],
         ),
+        "buttons_are_not_text": (
+            """'Hello World'""",
+            """Button('Hello World', '/link')""",
+            ["Expected type Button but got type str"],
+        ),
+        "text_is_not_buttons": (
+            """Button('Hello World', '/link')""",
+            """'Hello World'""",
+            ["Expected type str but got type Button"],
+        ),
     },
     "div": {
         "simple_div": (
