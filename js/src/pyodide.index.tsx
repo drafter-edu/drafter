@@ -53,7 +53,16 @@ function writeConfigFile(pyodide: any) {
 	}
 }
 
-const DEFAULT_MOCK_PACKAGES = ["watchfiles", "uvicorn[standard]", "uvicorn"];
+const DEFAULT_MOCK_PACKAGES = [
+	"watchfiles",
+	"uvicorn[standard]",
+	"uvicorn",
+	"typer",
+	"shellingham",
+	"annotated-doc",
+	"starlette",
+	"rich",
+];
 
 export function addMockPackages(packages: string[]) {
 	if ((window as any).micropip) {
@@ -242,7 +251,6 @@ export async function startPyodideAppServerSession(
 			}
 		};
 	}
-
 	await runStudentExecution();
 }
 

@@ -98,6 +98,7 @@ dev = [
   "tox",
   "lxml",
   "html5lib",
+  "snakeviz>=2.2.1",
 ]
 
 [project.optional-dependencies]
