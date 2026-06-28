@@ -23,16 +23,10 @@ Technically, we need the component to return not just its HTML, but also its CSS
 """
 
 from dataclasses import dataclass
-from typing import List, Union, Any, Optional, ClassVar, Callable, Sequence
+from typing import List, Union, Any, Optional, ClassVar, Callable
 import json
-import html
 
 from drafter.components.planning.render_plan import AssetBundle, RenderPlan, NewlineMode
-from drafter.components.utilities.attributes import (
-    BASELINE_ATTRS,
-    BOOLEAN_ATTRS,
-    remap_attr_styles,
-)
 from drafter.components.utilities.validation import (
     validate_json_value,
     validate_parameter_name,
@@ -442,6 +436,45 @@ class Component:
                     continue
                 arguments.append(f"{key}={repr_arg(key, value)}")
         return arguments
+
+    def get_fields(self) -> tuple[dict[str, Any], dict[str, Any]]:
+        """
+        Get the fields of the component, suitable for comparison.
+        """
+        arguments = {}
+        positional_arguments = {}
+        handled_arguments = set()
+        still_positional = True
+        index = 0
+        for argument in self.ARGUMENTS:
+            parameter_name = argument.name
+            # Don't double-render any keyword arguments that will also be in extra_settings
+            if argument.kind == "keyword" and parameter_name in self.extra_settings:
+                continue
+            handled_arguments.add(parameter_name)
+            value = getattr(self, parameter_name, argument.default_value)
+            if argument.kind == "positional":
+                arguments[parameter_name] = value
+            elif argument.kind == "var":
+                for item in value:
+                    positional_arguments[f"{parameter_name} (item {index})"] = item
+                    index += 1
+                still_positional = False
+            elif argument.kind == "keyword":
+                if value != argument.default_value:
+                    if still_positional:
+                        positional_arguments[f"{parameter_name} (item {index})"] = value
+                    else:
+                        arguments[parameter_name] = value
+                else:
+                    still_positional = False
+
+        if self.extra_settings:
+            for key, value in sorted(self.extra_settings.items()):
+                if key in handled_arguments:
+                    continue
+                arguments[key] = value
+        return arguments, positional_arguments
 
     def get_assets(self, context) -> Optional[AssetBundle]:
         return None

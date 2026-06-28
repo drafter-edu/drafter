@@ -25,6 +25,7 @@ class BakeryTestCase:
         result: The result or return value from the test function.
         line: The line number in the source file where the test was called.
         caller: The name or description of the test function/assertion.
+        kind: The type of assertion (e.g., 'assert_equal', 'assert_state').
     """
 
     args: tuple
@@ -32,6 +33,7 @@ class BakeryTestCase:
     result: Any
     line: int
     caller: str
+    kind: str
 
 
 def try_getting_full_code(filename: str, lineno: int) -> Optional[str]:
@@ -125,9 +127,12 @@ class BakeryTests:
             if line is None or code is None:
                 line = -1
                 code = "<Missing code>"
-            self.tests.append(BakeryTestCase(args, kwargs, result, line, code))
+            test_case = BakeryTestCase(
+                args, kwargs, result, line, code, kind="assert_equal"
+            )
+            self.tests.append(test_case)
             try:
-                self._emit_test_event(BakeryTestCase(args, kwargs, result, line, code))
+                self._emit_test_event(test_case)
             except Exception as e:
                 # TODO: Do something better here
                 print(f"Error emitting test event: {e}")
@@ -169,6 +174,7 @@ class BakeryTests:
                 line=test_case.line,
                 caller=test_case.caller,
                 passed=bool(test_case.result),
+                kind=test_case.kind,
                 given=actual_str,
                 expected=expected_str,
                 given_formatted=actual_formatted,
