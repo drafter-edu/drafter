@@ -39,7 +39,108 @@ snippets = {
             """Button('Click Me', '/link')""",
             ["Div content (item 0) Div content (item 0) Div content (item 0)"],
         ),
-    }
+    },
+    "links": {
+        "link_found_in_nav": (
+            """Nav(Link('Home', '/'), Link('About', '/about'))""",
+            """Link('Home', '/')""",
+            ["Nav content (item 0)"],
+        ),
+        "link_text_in_nav": (
+            """Nav(Link('Home', '/'), Link('About', '/about'))""",
+            """'Home'""",
+            ["Nav content (item 0) Link text"],
+        ),
+        "missing_link_text_in_nav": (
+            """Nav(Link('Home', '/'), Link('About', '/about'))""",
+            """'Contact'""",
+            [],
+        ),
+    },
+    "headers": {
+        "text_in_header": (
+            """Header('Welcome to the Site')""",
+            """'Welcome to the Site'""",
+            ["Header body"],
+        ),
+        "missing_text_in_header": (
+            """Header('Welcome to the Site')""",
+            """'Goodbye'""",
+            [],
+        ),
+        "header_in_article": (
+            """Article(Header('Title'), Paragraph('Body'))""",
+            """Header('Title')""",
+            ["Article content (item 0)"],
+        ),
+    },
+    "paragraphs_and_sections": {
+        "text_in_paragraph": (
+            """Section(Paragraph('Some content here'))""",
+            """'Some content here'""",
+            ["Section content (item 0) Paragraph content (item 0)"],
+        ),
+        "button_deep_in_section": (
+            """Section(Article(Div(Button('Click', '/link'))))""",
+            """Button('Click', '/link')""",
+            ["Section content (item 0) Article content (item 0) Div content (item 0)"],
+        ),
+        "text_four_levels_deep": (
+            """Section(Article(Div(Paragraph('Deep text'))))""",
+            """'Deep text'""",
+            [
+                "Section content (item 0) Article content (item 0) Div content (item 0) Paragraph content (item 0)"
+            ],
+        ),
+        "span_text_in_section": (
+            """Section(Span('Highlighted text'))""",
+            """'Highlighted text'""",
+            ["Section content (item 0) Span content (item 0)"],
+        ),
+        "text_five_levels_deep": (
+            """Section(Article(Div(Paragraph(Span('Very deep text')))))""",
+            """'Very deep text'""",
+            [
+                "Section content (item 0) Article content (item 0) Div content (item 0) Paragraph content (item 0) Span content (item 0)"
+            ],
+        ),
+    },
+    "multiple_matches": {
+        "same_text_appears_twice": (
+            """Div('Hello', 'World', 'Hello')""",
+            """'Hello'""",
+            ["Div content (item 0)", "Div content (item 2)"],
+        ),
+        "link_text_in_mixed_container": (
+            """Div(Link('About Us', '/about'), Link('Contact', '/contact'))""",
+            """'About Us'""",
+            ["Div content (item 0) Link text"],
+        ),
+    },
+    "forms": {
+        "textbox_in_div": (
+            """Div(TextBox('username', default_value='alice'))""",
+            """TextBox('username', default_value='alice')""",
+            ["Div content (item 0)"],
+        ),
+        "textbox_missing": (
+            """Div(TextBox('username', default_value='alice'))""",
+            """TextBox('username', default_value='bob')""",
+            [],
+        ),
+    },
+    "images": {
+        "image_in_div": (
+            """Div(Image('https://example.com/img.png'))""",
+            """Image('https://example.com/img.png')""",
+            ["Div content (item 0)"],
+        ),
+        "missing_image": (
+            """Div(Image('https://example.com/img.png'))""",
+            """Image('https://example.com/other.png')""",
+            [],
+        ),
+    },
 }
 
 
