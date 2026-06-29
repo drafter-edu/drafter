@@ -1,8 +1,7 @@
-'''
+"""
 This file should only be imported by Pyodide.
 It patches the Python import system to allow importing modules from a remote server.
-'''
-
+"""
 
 import sys
 import importlib.abc
@@ -12,6 +11,7 @@ from pyodide.http import pyxhr
 import js
 
 js.console.log("Patching Python import system to support remote imports...")
+
 
 # This code allows Python code running in Pyodide to import modules from
 # a remote server.
@@ -24,12 +24,10 @@ class RemoteLoader(importlib.abc.Loader):
 
 
 class RemoteFinder(importlib.abc.MetaPathFinder):
-
     def find_spec(self, fullname, path=None, target=None):
         module_path = fullname.split(".")
         path = "/".join(module_path) + ".py"
         url = path
-        
 
         try:
             response = pyxhr.get(url)

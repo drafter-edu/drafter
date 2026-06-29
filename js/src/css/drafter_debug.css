@@ -758,6 +758,12 @@ div.btlw-container img {
 	font-weight: 700;
 }
 
+.drafter-debug-rep-pillow-image-value {
+	width: 100px;
+	height: 100px;
+	object-fit: contain;
+}
+
 .drafter-debug-config-item-updated {
 	font-weight: bold;
 	color: #cc6600;

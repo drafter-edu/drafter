@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 import base64
 import io
-from typing import Optional
+from typing import Optional, Union
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 from drafter.components.page_content import Component, ComponentArgument
-from drafter.components.links import LinkContent, UrlOrFunction
-from drafter.components.planning.render_plan import RenderPlan
+from drafter.components.links import UrlOrFunction
 from drafter.helpers.urls import check_invalid_external_url, friendly_urls
 
 BASE_IMAGE_FOLDER = "/__images"
@@ -26,7 +25,8 @@ class Image(Component):
         tag: The HTML tag name, always 'img'.
         SELF_CLOSING_TAG: Indicates this is a self-closing tag.
     """
-    url: str
+
+    url: Union[str, PILImage.Image]
     width: Optional[int]
     height: Optional[int]
 
@@ -41,7 +41,9 @@ class Image(Component):
         ComponentArgument("height", kind="keyword", default_value=None),
     ]
 
-    def __init__(self, url: str, width=None, height=None, **kwargs):
+    def __init__(
+        self, url: Union[str, PILImage.Image], width=None, height=None, **kwargs
+    ):
         """Initialize image component.
 
         Args:
@@ -156,7 +158,7 @@ class Image(Component):
         if was_pil:
             attributes["src"] = url
         else:
-            url_processed, external = self._handle_url(self.url)
+            url_processed, external = self._handle_url(self.url)  # type: ignore
             if not external:
                 # Ensure we have a leading slash
                 if not url_processed.startswith("/"):

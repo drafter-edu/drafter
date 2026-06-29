@@ -104,7 +104,7 @@ from drafter.deploy import (
 )
 
 # Alternative file handling approach
-from drafter.files.opening import open
+from drafter.files.opening import open, get_drafter_path
 from drafter.testing import assert_equal
 from drafter.client_server.commands import get_main_server, set_main_server
 
@@ -115,6 +115,7 @@ from drafter.launch import start_server
 __all__ = [
     "dataclass",
     "open",
+    "get_drafter_path",
     "Page",
     "Fragment",
     "Update",

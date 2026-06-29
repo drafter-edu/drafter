@@ -4,6 +4,7 @@ A Drafter example with many complex state types.
 
 from drafter import *
 from PIL import Image as PILImage
+import pandas as pd
 
 
 @dataclass
@@ -29,6 +30,7 @@ class Company:
 
 @dataclass
 class State:
+    pokemon: pd.DataFrame
     count: int
     grade: float
     name: str
@@ -42,8 +44,8 @@ class State:
     companies: list[Company]
     owner: Person
     addresses: list[Address]
-    # main_image: PILImage.Image
-    # all_images: list[PILImage.Image]
+    main_image: PILImage.Image
+    all_images: list[PILImage.Image]
 
 
 PEOPLE = [
@@ -70,6 +72,7 @@ ADDRESSES = [
 ]
 
 STARTING_DATA = State(
+    pokemon=pd.read_csv("files/pokemon.csv"),
     count=33,
     grade=49.5,
     name="Lelouch Lamperouge",
@@ -92,17 +95,20 @@ STARTING_DATA = State(
     ],
     owner=Person(first_name="Guido", last_name="van Rossum", age=65),
     addresses=ADDRESSES[5:],
-    # main_image=PILImage.open("images/soon-128.png"),
-    # all_images=[
-    #     PILImage.open("images/soon-128.png"),
-    #     PILImage.open("images/soon-128.png"),
-    # ],
+    main_image=PILImage.open(("images/soon-128.png")),
+    all_images=[
+        PILImage.open(("images/car_blockpy.gif")),
+        PILImage.open(("images/soon-128.png")),
+    ],
 )
 
 
 @route
 def index(state: State):
-    return Page(state, ["Nothing to see here... Check the debug dashboard!"])
+    return Page(
+        state,
+        ["Nothing to see here... Check the debug dashboard!", Image(state.main_image)],
+    )
 
 
 start_server(STARTING_DATA)

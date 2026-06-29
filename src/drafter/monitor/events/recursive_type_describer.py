@@ -72,6 +72,7 @@ List of Dataclasses:
 from dataclasses import fields, is_dataclass
 from typing import Any
 
+from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 from drafter.history.utils import safe_repr
 
 
@@ -251,8 +252,22 @@ class RecursiveTypeDescriber:
         # Dict expansion
         if isinstance(value, dict):
             return self._visit_dict(value, depth, new_seen_ids)
+
+        # Pillow image
+        if HAS_PILLOW and isinstance(value, PILImage.Image):
+            return self._visit_pillow_image(value)
+
         # Primitive or other object: record leaf
         return self._visit_unknown(value)
+
+    def _visit_pillow_image(self, value: PILImage.Image):
+        return {
+            "kind": "pillow_image",
+            "type": self.value_type(value),
+            "id": id(value),
+            "complexity": 1,
+            "value": getattr(value, "filename", None),
+        }
 
     def _visit_tuple(
         self, value: Any, depth: int, seen_ids: set[int]

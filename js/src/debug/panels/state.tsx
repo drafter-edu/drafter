@@ -220,6 +220,24 @@ function renderRepresentation(rep: SpecificRepresentation) {
 					</div>
 				</div>
 			);
+		case "pillow_image":
+			return (
+				<div class="drafter-debug-rep-pillow-image drafter-debug-rep-row">
+					<div class="drafter-debug-rep-pillow-image-type drafter-debug-rep-cell">
+						{rep.value ? (
+							<img
+								src={rep.value}
+								class="drafter-debug-rep-pillow-image-value"
+							/>
+						) : (
+							<span>Image not available</span>
+						)}
+					</div>
+					<div class="drafter-debug-rep-pillow-image-type drafter-debug-rep-cell">
+						{rep.type}
+					</div>
+				</div>
+			);
 		default:
 			return (
 				<div class="drafter-debug-rep-default drafter-debug-rep-row">
