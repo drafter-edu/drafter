@@ -7,6 +7,10 @@ so the rest of the bridge code doesn't need to care about the runtime.
 import json
 import js
 from drafter.bridge.log import debug_log
+from drafter.bridge.error_handling import (
+    normalize_bridge_exception,
+    report_bridge_error,
+)
 from drafter.constants import SUBMIT_BUTTON_KEY
 from drafter.data.request import Request
 from drafter.site.site import DRAFTER_TAG_IDS
@@ -38,11 +42,11 @@ class RuntimeAdapter:
 
     def cleanup_event_handler(self, handler: Any) -> None:
         pass
-    
+
     def finish_promises(self, promises: list[Any], afterwards: Callable) -> Any:
         return afterwards(promises)
-        #return js.Promise.all(promises).then(afterwards)
-    
+        # return js.Promise.all(promises).then(afterwards)
+
     def promise_data(self, data: dict) -> Any:
         """Return a promise that resolves to the provided data (for async handling)."""
         return data
@@ -64,19 +68,22 @@ class RuntimeAdapter:
             if not isinstance(data[key], list):
                 data[key] = [data[key]]
             data[key].append(file_data)
+
         def return_data():
             return data
+
         return return_data
 
     def history_push_state(self, state: dict, title: str, url: str) -> None:
         js.history.pushState(state, title, url)
-        
+
     def history_replace_state(self, state: dict, title: str, url: str) -> None:
         js.history.replaceState(state, title, url)
 
 
 class SkulptRuntime(RuntimeAdapter):
     """Runtime adapter for Skulpt — uses direct JS constructor calls."""
+
     pass
 
 
@@ -85,6 +92,7 @@ class PyodideRuntime(RuntimeAdapter):
 
     def __init__(self):
         from pyodide.ffi import create_proxy, to_js
+
         self._create_proxy = create_proxy
         self._to_js = to_js
         # Stored proxies to prevent garbage collection and enable cleanup
@@ -109,17 +117,32 @@ class PyodideRuntime(RuntimeAdapter):
             handler.destroy()
         if handler in self._proxies:
             self._proxies.remove(handler)
-    
+
+    def _handle_promise_failure(self, error: Any) -> None:
+        normalized_error = normalize_bridge_exception(error)
+        drafter_error = report_bridge_error(
+            "client.promise_resolution_failed",
+            "Failed to resolve bridge runtime promises",
+            "bridge.runtime.PyodideRuntime.finish_promises",
+            f"Original error: {repr(error)}",
+            exception=normalized_error,
+        )
+        raise RuntimeError(drafter_error.message) from normalized_error
+
     def finish_promises(self, promises: list[Any], afterwards: Callable) -> Any:
-        print("I need to finish all these promises", promises)
-        return js.Promise.all(promises).catch(lambda error: print("ERROR:", error)).then(afterwards)
-    
+        return (
+            js.Promise.all(promises)
+            .catch(self._handle_promise_failure)
+            .then(afterwards)
+        )
+
     def promise_data(self, data: dict) -> Any:
         """Return a promise that resolves to the provided data (for async handling)."""
         return self._create_proxy(js.Promise.resolve(data))
 
     def handle_file_upload(self, file: Any, data: dict, key: str) -> Any:
         buffer = file.arrayBuffer()
+
         def on_buffer_ready(buffer):
             raw_bytes = js.Uint8Array.new(buffer)
             content = bytes(raw_bytes)
@@ -137,8 +160,8 @@ class PyodideRuntime(RuntimeAdapter):
                     data[key] = [data[key]]
                 data[key].append(file_data)
             return data
+
         return self._create_proxy(buffer.then(on_buffer_ready))
-    
 
     def history_push_state(self, state: dict, title: str, url: str) -> None:
         js.history.pushState(self._to_js(state), title, url)

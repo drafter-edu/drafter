@@ -1,16 +1,15 @@
 import json
 import time
 from dataclasses import dataclass, field
-from typing import Any, Optional, Callable
+from typing import Any, Callable
 from drafter.bridge.runtime import RuntimeAdapter
-from drafter.constants import SUBMIT_BUTTON_KEY
-from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.bridge.log import debug_log, console_log
+from drafter.bridge.error_handling import (
+    raise_bridge_system_error,
+    report_bridge_error,
+)
 from drafter.components.page_content import Component
-from drafter.monitor.events import request
-from drafter.monitor.events.config import UpdatedConfigurationEvent
-from drafter.monitor.telemetry import TelemetryEvent
 from drafter.site.site import DRAFTER_TAG_IDS
 from drafter.bridge.dom import (
     get_attribute_recursively,
@@ -157,7 +156,16 @@ class EventManager:
                     try:
                         return do_navigation(request)
                     except Exception as e:
-                        print("ERROR:", e)
+                        report_bridge_error(
+                            "client.navigation_failed",
+                            "Failed to dispatch navigation request",
+                            "bridge.events.mount_navigation",
+                            f"Request: {repr(request)}",
+                            exception=e,
+                            route=request.url,
+                            dom_id=request.dom_id,
+                            request_id=request.id,
+                        )
 
                 self.runtime.finish_promises(incomplete_data, finish_navigation)
 
@@ -206,7 +214,12 @@ class EventManager:
         if form_root:
             form_root.addEventListener("submit", self.submit_handler)
         else:
-            raise RuntimeError("Form root element not found for mounting navigation.")
+            raise_bridge_system_error(
+                "client.form_root_missing",
+                "Form root element not found while mounting navigation",
+                "bridge.events.mount_navigation",
+                f"Expected form id: {DRAFTER_TAG_IDS['FORM']}",
+            )
 
         # Mount event handlers for components
         self.mount_event_handlers(root, do_navigation)

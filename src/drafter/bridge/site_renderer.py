@@ -10,6 +10,7 @@ from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.bridge.runtime import RuntimeAdapter, create_runtime
 from drafter.bridge.log import debug_log, console_log
+from drafter.bridge.error_handling import raise_bridge_system_error
 from drafter.site.site import (
     DRAFTER_TAG_IDS,
     DRAFTER_TAG_CLASSES,
@@ -121,8 +122,13 @@ class SiteRenderer:
                 self.toggle_frame()
 
         except Exception as e:
-            console_log(f"Error setting up site: {e}")
-            raise e
+            raise_bridge_system_error(
+                "client.site_setup_failed",
+                "Failed to set up site container",
+                "bridge.site_renderer.setup",
+                f"InitialSiteData: {repr(initial_site_data)}",
+                exception=e,
+            )
         
     def update_site(self, response: Response) -> bool:
         """
@@ -141,8 +147,12 @@ class SiteRenderer:
             elements = js.document.querySelectorAll(selector)
 
             if not elements:
-                # TODO: Handle this more gracefully
-                raise RuntimeError("Target element not found in document.")
+                raise_bridge_system_error(
+                    "client.update_site_target_missing",
+                    "Target element not found while applying response body",
+                    "bridge.site_renderer.update_site",
+                    f"Selector: {selector}; response_url: {response.url}",
+                )
 
             elements.forEach(
                 lambda element, index, array: replace_html(

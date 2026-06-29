@@ -30,6 +30,10 @@ from drafter.bridge.dom import (
     swap_debug_mode,
 )
 from drafter.bridge.log import debug_log, console_log
+from drafter.bridge.error_handling import (
+    raise_bridge_system_error,
+    report_bridge_error,
+)
 from drafter.bridge.runtime import RuntimeAdapter, create_runtime
 from drafter.config.client_server import ClientServerConfiguration
 
@@ -94,9 +98,13 @@ class ClientBridge:
                 DRAFTER_TAG_IDS["DEBUG"], self
             )
         except Exception as e:
-            # TODO: Surface this error in the UI instead of just logging it
-            print(f"[Drafter Client] Failed to set up debug menu because of {e}")
-            raise e
+            raise_bridge_system_error(
+                "client.setup_debug_menu_failed",
+                "Failed to set up debug panel",
+                "bridge.client_bridge._setup_debug_menu",
+                f"Container id: {DRAFTER_TAG_IDS['DEBUG']}",
+                exception=e,
+            )
         
     def _handle_debug_events(self, event: dict) -> bool:
         if self.debug_panel:
@@ -104,13 +112,20 @@ class ClientBridge:
                 handled = self.debug_panel.handleEvent(event)
                 return handled
             except Exception as e:
-                print(
-                    f"[Drafter Client] Failed to handle event {event} because of {e}"
+                raise_bridge_system_error(
+                    "client.handle_debug_event_failed",
+                    "Failed to handle debug panel event",
+                    "bridge.client_bridge._handle_debug_events",
+                    f"Event: {repr(event)}",
+                    exception=e,
                 )
-                raise e
         else:
-            print(f"[Drafter Client] No debug panel to handle event {event}")
-            raise RuntimeError("No debug panel to handle event.")
+            raise_bridge_system_error(
+                "client.no_debug_panel",
+                "No debug panel is available to handle telemetry event",
+                "bridge.client_bridge._handle_debug_events",
+                f"Event: {repr(event)}",
+            )
         
     def _notify_debug_panel(self, response_url: str):
         if self.debug_panel:
@@ -143,7 +158,12 @@ class ClientBridge:
             elif event.get("data", {}).get("key") == "in_debug_mode":
                 swap_debug_mode(js.document)
             else:
-                print("NEED TO HANDLE CONFIG UPDATE EVENT IN CLIENT", event)
+                report_bridge_error(
+                    "client.unhandled_config_update",
+                    "Unhandled configuration update event",
+                    "bridge.client_bridge.handle_server_event",
+                    f"Event payload: {repr(event)}",
+                )
         handled = self._handle_debug_events(event)
         
         # Any unhandled events get logged to the console for now

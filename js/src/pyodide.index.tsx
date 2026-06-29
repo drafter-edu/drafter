@@ -18,8 +18,12 @@ import { loadPyodide } from "pyodide";
 import { mountDirectory } from "./pyodide_bridge/directories";
 import { DebugPanel } from "./debug";
 import type { DrafterInitOptions } from "./bridge/engine";
-import { alertDialog, confirmDialog } from "./dialogs";
-import { clearDrafterSiteRoot } from "./bridge/engine";
+import { confirmDialog } from "./dialogs";
+import {
+	clearDrafterSiteRoot,
+	handleSystemError,
+	handleSystemErrorWithOptions,
+} from "./bridge/engine";
 export { clearDrafterSiteRoot, handleSystemError } from "./bridge/engine";
 export * from "./common.index";
 
@@ -35,20 +39,10 @@ function writeConfigFile(pyodide: any) {
 				JSON.stringify((window as any).DRAFTER_MODIFIED_CONFIGURATION),
 			);
 		} catch (error) {
-			alertDialog(
-				<div>
-					Error writing Drafter configuration file:{" "}
-					<pre>{"" + error}</pre>
-				</div>,
-				{
-					title: "Error",
-					modal: true,
-					draggable: true,
-					width: "560px",
-				},
+			throw handleSystemError(
+				"Error writing Drafter configuration file",
+				error,
 			);
-			console.error("Error writing Drafter configuration file:", error);
-			throw error;
 		}
 	}
 }
@@ -277,18 +271,7 @@ export async function setupPyodide(options: PyodideSettings) {
 			// Write Drafter configuration file
 			writeConfigFile(window.pyodide);
 		} catch (error) {
-			alertDialog(
-				<div>
-					Error setting up Pyodide: <pre>{"" + error}</pre>
-				</div>,
-				{
-					title: "Error",
-					modal: true,
-					draggable: true,
-					width: "560px",
-				},
-			);
-			throw error;
+			throw handleSystemError("Error setting up Pyodide", error);
 		}
 	}
 	return (window as any).pyodide;
@@ -343,18 +326,7 @@ export async function mountDrafterRemote(url: string) {
 			pyodide.pyimport("drafter");
 		}
 	} catch (error) {
-		alertDialog(
-			<div>
-				Error mounting Drafter remotely: <pre>{"" + error}</pre>
-			</div>,
-			{
-				title: "Error",
-				modal: true,
-				draggable: true,
-				width: "560px",
-			},
-		);
-		throw error;
+		throw handleSystemError("Error mounting Drafter remotely", error);
 	}
 }
 
@@ -369,19 +341,10 @@ export async function setupEnvironment(options: DrafterInitOptions) {
 			);
 			console.log("Loaded packages:", loadedPackages);
 		} catch (error) {
-			alertDialog(
-				<div>
-					Error loading packages automatically:{" "}
-					<pre>{"" + error}</pre>
-				</div>,
-				{
-					title: "Error",
-					modal: true,
-					draggable: true,
-					width: "560px",
-				},
+			throw handleSystemError(
+				"Error loading packages automatically",
+				error,
 			);
-			throw error;
 		}
 	} else if (options.explicitPackageList) {
 		// TODO: Handle the semicolon-separated list of packages
@@ -391,19 +354,10 @@ export async function setupEnvironment(options: DrafterInitOptions) {
 				await pyodide.micropip.install(pkg);
 				loaded.push(pkg);
 			} catch (error) {
-				alertDialog(
-					<div>
-						Error installing package "{pkg}":{" "}
-						<pre>{"" + error}</pre>
-					</div>,
-					{
-						title: "Error",
-						modal: true,
-						draggable: true,
-						width: "560px",
-					},
+				throw handleSystemError(
+					`Error installing package \"${pkg}\"`,
+					error,
 				);
-				throw error;
 			}
 		}
 		console.log("Loaded explicit packages:", loaded);
@@ -416,18 +370,7 @@ export async function patchPythonFeatures() {
 			`import drafter.files.patch_pyodide as _PYODIDE_PATCHED_SUCCESSFULLY`,
 		);
 	} catch (error) {
-		alertDialog(
-			<div>
-				Error patching Python features: <pre>{"" + error}</pre>
-			</div>,
-			{
-				title: "Error",
-				modal: true,
-				draggable: true,
-				width: "560px",
-			},
-		);
-		throw error;
+		throw handleSystemError("Error patching Python features", error);
 	}
 }
 
@@ -455,17 +398,13 @@ export async function runStudentCode(
 			console.info("Student code execution interrupted.");
 			throw error;
 		}
-		alertDialog(
-			<div>
-				Error running student code: <pre>{"" + error}</pre>
-			</div>,
+		throw handleSystemErrorWithOptions(
+			"Error running student code",
+			error,
 			{
 				title: "Error",
-				modal: true,
-				draggable: true,
-				width: "560px",
+				presentation: "dialog",
 			},
 		);
-		throw error;
 	}
 }
