@@ -167,7 +167,7 @@ export class HistoryPanel extends Panel {
 		const requestElement = (
 			<div class="history-event" data-request-id={request.request_id}>
 				<div class="request-event">
-					<strong>Request:</strong>{" "}
+					<strong>Visit:</strong>{" "}
 					<span class="drafter-history-request-time">
 						{prettyTime}
 					</span>
@@ -181,7 +181,7 @@ export class HistoryPanel extends Panel {
 				<div class="drafter-debug-history-event-detail">
 					<details>
 						<summary>
-							<strong>Details</strong>
+							<strong>Request</strong>
 						</summary>
 						<div>{urlElement}</div>
 					</details>

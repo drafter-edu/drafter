@@ -37,6 +37,9 @@ class RuntimeAdapter:
     def create_form_data(self, form: Any, submitter: Any = None) -> Any:
         return js.FormData(form, submitter)
 
+    def convert_to_js(self, obj: Any) -> Any:
+        return obj
+
     def wrap_event_handler(self, handler: Callable) -> Any:
         return handler
 
@@ -106,6 +109,9 @@ class PyodideRuntime(RuntimeAdapter):
 
     def create_form_data(self, form: Any, submitter: Any = None) -> Any:
         return js.FormData.new(form, submitter)
+
+    def convert_to_js(self, obj: Any) -> Any:
+        return self._to_js(obj, create_pyproxies=False)
 
     def wrap_event_handler(self, handler: Callable) -> Any:
         proxy = self._create_proxy(handler)

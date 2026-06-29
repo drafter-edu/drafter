@@ -1,4 +1,4 @@
-'''
+"""
 Returns a dictionary with at least the fields: name, type, value
 
 Value is always able to be a single or nested Representation
@@ -42,18 +42,18 @@ Primitives:
     str: "Hello World"
     int: 42
     float: 3.14
-    
+
 List of Primitives:
     list[str]: ["apple", "banana", "cherry"]
     list[int]: [1, 2, 3, 4, 5]
-    
+
 2D List of Primitives: Try to show as a table
     list[list[int]]: [ [1, 2, 3], [4, 5, 6], [7, 8, 9] ]
-    
+
 
 List of Unions:
     list[str | int]: [ ("apple", str), (42, int), ("banana", str) ]
-    
+
 Dataclass with Primitives:
     Dog
     [name, str, "Fido"]
@@ -67,7 +67,7 @@ List of Dataclasses:
         [name, str, "Spot"], [age, int, 4], [is_good, bool, True]
     ],
 
-'''
+"""
 
 from dataclasses import fields, is_dataclass
 from typing import Any
@@ -88,6 +88,7 @@ def first_shared_base(cls1, cls2):
 
     return None
 
+
 # Adding a list of dogs
 # Then adding a list of cats
 
@@ -98,11 +99,13 @@ class TypeFlattener:
     # string representation
     def __init__(self):
         self._types: set[str] = set()
-        
+
     def add_type(self, representation: dict):
-        full_type = representation.get("fullType", representation.get("type", "unknown"))
+        full_type = representation.get(
+            "fullType", representation.get("type", "unknown")
+        )
         self._types.add(full_type)
-    
+
     def flatten(self) -> tuple[str, list[str]]:
         if len(self._types) == 1:
             return "homogenous", [self._types.pop()]
@@ -110,7 +113,6 @@ class TypeFlattener:
             return "union", sorted(self._types)
         else:
             return "none", []
-    
 
 
 class RecursiveTypeDescriber:
@@ -120,7 +122,7 @@ class RecursiveTypeDescriber:
 
     def __init__(self, *, max_depth: int = 5) -> None:
         self.max_depth: int = max_depth
-        
+
     def analyze(self, value: Any) -> dict[str, Any]:
         try:
             result = self._walk(value, 0, set())
@@ -137,7 +139,7 @@ class RecursiveTypeDescriber:
             return value.__class__.__name__
         except Exception:
             return type(value).__name__
-        
+
     def _visit_error(self, value: Any, error: Exception):
         return {
             "kind": "error",
@@ -147,8 +149,10 @@ class RecursiveTypeDescriber:
             "id": id(value),
             "complexity": 0,
         }
-    
-    def _visit_complete_failure(self, value: Any, original_error: Exception, new_error: Exception):
+
+    def _visit_complete_failure(
+        self, value: Any, original_error: Exception, new_error: Exception
+    ):
         return {
             "kind": "complete_failure",
             "error_message": str(original_error),
@@ -157,9 +161,13 @@ class RecursiveTypeDescriber:
             "type": "?",
             "complexity": 0,
         }
-        
+
     def _visit_primitive(self, value: str | int | float | bool | None):
-        display_value = repr(value) if isinstance(value, str) else value
+        display_value = (
+            repr(value)
+            if isinstance(value, (str, bool, int, float, bytes, complex))
+            else value
+        )
         return {
             "kind": "primitive",
             "value": display_value,
@@ -167,7 +175,7 @@ class RecursiveTypeDescriber:
             "id": id(value),
             "complexity": 1,
         }
-    
+
     def _visit_cycle(self, value: Any):
         return {
             "kind": "cycle_reference",
@@ -175,7 +183,7 @@ class RecursiveTypeDescriber:
             "targetId": id(value),
             "complexity": 100,
         }
-        
+
     def _visit_past_max_depth(self, value: Any):
         return {
             "kind": "max_depth_reached",
@@ -183,27 +191,25 @@ class RecursiveTypeDescriber:
             "id": id(value),
             "complexity": 1,
         }
-        
-    def _visit_class_instance(self, value: Any, is_a_dataclass: bool, depth: int, seen_ids: set[int]):
+
+    def _visit_class_instance(
+        self, value: Any, is_a_dataclass: bool, depth: int, seen_ids: set[int]
+    ):
         rows: list[dict[str, Any]] = []
         total_complexity = 0
         for f in fields(value):
-            row = self._walk(
-                getattr(value, f.name),
-                depth + 1,
-                seen_ids
-            )
+            row = self._walk(getattr(value, f.name), depth + 1, seen_ids)
             rows.append({"name": f.name, "value": row})
             total_complexity += row.get("complexity", 0)
-        
+
         return {
             "kind": "dataclass" if is_a_dataclass else "class",
             "type": value.__class__.__name__,
             "id": id(value),
             "fields": rows,
-            "complexity": 10+total_complexity,
+            "complexity": 10 + total_complexity,
         }
-        
+
     def _visit_unknown(self, value: Any):
         return {
             "kind": "unknown",
@@ -216,12 +222,12 @@ class RecursiveTypeDescriber:
     def _walk(self, value: Any, depth: int, seen_ids: set[int]) -> dict[str, Any]:
         # Prevent infinite recursion on cyclic refs
         obj_id = id(value)
-        
+
         if obj_id in seen_ids:
             return self._visit_cycle(value)
-        
+
         new_seen_ids = seen_ids | {obj_id}
-        
+
         # Primitive Types
         if isinstance(value, (str, int, float, bool, type(None))):
             return self._visit_primitive(value)
@@ -233,7 +239,7 @@ class RecursiveTypeDescriber:
         # Dataclass expansion
         if is_dataclass(value):
             return self._visit_class_instance(value, True, depth, new_seen_ids)
-        
+
         # Tuple expansion
         if isinstance(value, tuple):
             return self._visit_tuple(value, depth, new_seen_ids)
@@ -241,14 +247,16 @@ class RecursiveTypeDescriber:
         # List/Set expansion
         if isinstance(value, (list, set, frozenset)):
             return self._visit_linear_collection(value, depth, new_seen_ids)
-        
+
         # Dict expansion
         if isinstance(value, dict):
             return self._visit_dict(value, depth, new_seen_ids)
         # Primitive or other object: record leaf
         return self._visit_unknown(value)
-    
-    def _visit_tuple(self, value: Any, depth: int, seen_ids: set[int]) -> dict[str, Any]:
+
+    def _visit_tuple(
+        self, value: Any, depth: int, seen_ids: set[int]
+    ) -> dict[str, Any]:
         rows: list[dict[str, Any]] = []
         types: list[str] = []
         total_complexity = 0
@@ -262,7 +270,7 @@ class RecursiveTypeDescriber:
                 "kind": "empty_tuple",
                 "type": self.value_type(value),
                 "id": id(value),
-                "complexity": 10+total_complexity,
+                "complexity": 10 + total_complexity,
             }
         else:
             return {
@@ -271,10 +279,12 @@ class RecursiveTypeDescriber:
                 "fullType": f"tuple[{', '.join(types)}]",
                 "elements": rows,
                 "id": id(value),
-                "complexity": 10+total_complexity,
+                "complexity": 10 + total_complexity,
             }
-     
-    def _visit_linear_collection(self, value: Any, depth: int, seen_ids: set[int]) -> dict[str, Any]:
+
+    def _visit_linear_collection(
+        self, value: Any, depth: int, seen_ids: set[int]
+    ) -> dict[str, Any]:
         rows: list[dict[str, Any]] = []
         type_flattener = TypeFlattener()
         maximum_complexity = 0
@@ -289,7 +299,7 @@ class RecursiveTypeDescriber:
                 "kind": "empty_linear_collection",
                 "type": self.value_type(value),
                 "id": id(value),
-                "complexity": 10+maximum_complexity,
+                "complexity": 10 + maximum_complexity,
             }
         elif element_kind == "homogenous":
             if element_type[0].startswith("list["):
@@ -300,7 +310,7 @@ class RecursiveTypeDescriber:
                     "rows": rows,
                     "fullType": f"list[{element_type[0]}]",
                     "id": id(value),
-                    "complexity": 20+maximum_complexity,
+                    "complexity": 20 + maximum_complexity,
                 }
             return {
                 "kind": "homogenous_linear_collection",
@@ -309,7 +319,7 @@ class RecursiveTypeDescriber:
                 "fullType": f"{self.value_type(value)}[{element_type[0]}]",
                 "elements": rows,
                 "id": id(value),
-                "complexity": 10+maximum_complexity,
+                "complexity": 10 + maximum_complexity,
             }
         elif element_kind == "union":
             flat_type = " | ".join(element_type)
@@ -320,11 +330,11 @@ class RecursiveTypeDescriber:
                 "fullType": f"{self.value_type(value)}[{flat_type}]",
                 "elements": rows,
                 "id": id(value),
-                "complexity": 10+maximum_complexity,
+                "complexity": 10 + maximum_complexity,
             }
         else:
             return self._visit_unknown(value)
-        
+
     def _visit_dict(self, value: Any, depth: int, seen_ids: set[int]) -> dict[str, Any]:
         rows: list[dict[str, Any]] = []
         key_type_flattener = TypeFlattener()
@@ -340,10 +350,12 @@ class RecursiveTypeDescriber:
                 child_key_row.get("complexity", 0),
                 child_value_row.get("complexity", 0),
             )
-            rows.append({
-                "key": child_key_row,
-                "value": child_value_row,
-            })
+            rows.append(
+                {
+                    "key": child_key_row,
+                    "value": child_value_row,
+                }
+            )
         key_kind, key_types = key_type_flattener.flatten()
         value_kind, value_types = value_type_flattener.flatten()
         if not rows:
@@ -351,7 +363,7 @@ class RecursiveTypeDescriber:
                 "kind": "empty_dict",
                 "type": self.value_type(value),
                 "id": id(value),
-                "complexity": 20+maximum_complexity,
+                "complexity": 20 + maximum_complexity,
             }
         else:
             flat_keys, flat_values = " | ".join(key_types), " | ".join(value_types)
@@ -365,8 +377,9 @@ class RecursiveTypeDescriber:
                 "fullType": f"dict[{flat_keys}, {flat_values}]",
                 "entries": rows,
                 "id": id(value),
-                "complexity": 20+maximum_complexity,
+                "complexity": 20 + maximum_complexity,
             }
+
 
 def analyze_type(value: Any, max_depth: int = 5) -> dict[str, Any]:
     return RecursiveTypeDescriber(max_depth=max_depth).analyze(value)

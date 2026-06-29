@@ -59,30 +59,39 @@ class ClientBridge:
     debug_panel: Optional[Any] = None
     runtime: RuntimeAdapter = field(default_factory=create_runtime)
     site_title: str = "Default Title"
-    
 
     def __init__(self, configuration: ClientServerConfiguration):
         self.runtime = create_runtime()
-        self.site_renderer = SiteRenderer(self.runtime, configuration.root_element_id, configuration.root_element_id)
+        self.site_renderer = SiteRenderer(
+            self.runtime, configuration.root_element_id, configuration.root_element_id
+        )
         self.navigator = NavigationController(self.runtime)
         self.events = EventManager(self.runtime)
         self.debug_panel = None
-    
+
     def setup_site(self, initial_site_data: InitialSiteData) -> None:
         self.set_site_title(initial_site_data.site_title)
         self.site_renderer.setup(initial_site_data)
         self._setup_debug_menu()
-        
-    def setup_events(self, handle_visit: Callable[[Request], Response], handle_toggle_frame: Callable, handle_debug_mode: Callable) -> None:
+
+    def setup_events(
+        self,
+        handle_visit: Callable[[Request], Response],
+        handle_toggle_frame: Callable,
+        handle_debug_mode: Callable,
+    ) -> None:
         self.navigator.set_navigation_func(handle_visit)
-        self.events.setup_events({
-            "drafter-toggle-frame": lambda event: handle_toggle_frame(), 
-            "drafter-navigate": lambda event: self.navigator.goto(event.detail),
-            "popstate": self.navigator.handle_popstate
-        }, {
-            "Q": handle_debug_mode,
-        })
-        
+        self.events.setup_events(
+            {
+                "drafter-toggle-frame": lambda event: handle_toggle_frame(),
+                "drafter-navigate": lambda event: self.navigator.goto(event.detail),
+                "popstate": self.navigator.handle_popstate,
+            },
+            {
+                "Q": handle_debug_mode,
+            },
+        )
+
     def start(self):
         """
         Load the initial request.
@@ -105,11 +114,21 @@ class ClientBridge:
                 f"Container id: {DRAFTER_TAG_IDS['DEBUG']}",
                 exception=e,
             )
-        
+
     def _handle_debug_events(self, event: dict) -> bool:
+        try:
+            js_event = self.runtime.convert_to_js(event)
+        except Exception as e:
+            report_bridge_error(
+                "client.convert_event_to_js",
+                f"Error converting event to JS: {repr(e)}",
+                "bridge.client_bridge.handle_server_event",
+                f"Exception: {repr(e)}",
+            )
+            return False
         if self.debug_panel:
             try:
-                handled = self.debug_panel.handleEvent(event)
+                handled = self.debug_panel.handleEvent(js_event)
                 return handled
             except Exception as e:
                 raise_bridge_system_error(
@@ -126,7 +145,8 @@ class ClientBridge:
                 "bridge.client_bridge._handle_debug_events",
                 f"Event: {repr(event)}",
             )
-        
+        return False
+
     def _notify_debug_panel(self, response_url: str):
         if self.debug_panel:
             self.debug_panel.setRoute(response_url)
@@ -150,8 +170,17 @@ class ClientBridge:
 
     ### Event Handling
     def handle_server_event(self, event_data: TelemetryEvent) -> bool:
-        event = event_data.to_json()
-        debug_log("client.handle_event", event)
+        try:
+            event = event_data.to_json()
+            debug_log("client.handle_event", event)
+        except Exception as e:
+            report_bridge_error(
+                "client.convert_event_to_json",
+                f"Error converting event to JSON: {repr(e)}",
+                "bridge.client_bridge.handle_server_event",
+                f"Exception: {repr(e)}",
+            )
+            return False
         if event["event_type"] == UpdatedConfigurationEvent.event_type:
             if event.get("data", {}).get("key") == "framed":
                 self.site_renderer.toggle_frame()
@@ -165,15 +194,15 @@ class ClientBridge:
                     f"Event payload: {repr(event)}",
                 )
         handled = self._handle_debug_events(event)
-        
+
         # Any unhandled events get logged to the console for now
         if not handled:
             console_log(event)
-        
+
         return handled
-        
+
     ### Specialized Helpers
-    
+
     def set_site_title(self, title: str) -> None:
         self.site_title = title
         js.document.title = title
