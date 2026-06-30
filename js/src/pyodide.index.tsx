@@ -24,10 +24,12 @@ import {
 	handleSystemError,
 	handleSystemErrorWithOptions,
 } from "./bridge/engine";
+import { initializeRuntimeConfigurationOverrides } from "./config_overrides";
 export { clearDrafterSiteRoot, handleSystemError } from "./bridge/engine";
 export * from "./common.index";
 
 window.DebugPanel = DebugPanel;
+initializeRuntimeConfigurationOverrides();
 
 const DRAFTER_CONFIG_FILENAME = "/_drafter_config.json";
 

@@ -5,11 +5,14 @@ import {
 	setupSkulpt,
 	startServer,
 } from "./skulpt_bridge/skulpt-tools";
+import { initializeRuntimeConfigurationOverrides } from "./config_overrides";
 export * from "./common.index";
 
 export { clearDrafterSiteRoot, handleSystemError } from "./bridge/engine";
 
 const x: pyStr = new Sk.builtin.str("hello");
+
+initializeRuntimeConfigurationOverrides();
 
 export function runStudentCode(options: DrafterInitOptions) {
 	try {

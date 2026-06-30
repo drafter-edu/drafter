@@ -769,6 +769,175 @@ div.btlw-container img {
 	color: #cc6600;
 }
 
+.drafter-debug-- .drafter-debug-config-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 0.75rem;
+}
+
+.drafter-debug-- .drafter-debug-config-note {
+	font-size: 0.9em;
+	color: #4a637a;
+}
+
+.drafter-debug-- .drafter-debug-config-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.drafter-debug-- .drafter-debug-config-item {
+	padding: 2px 4px;
+	background: #f9fcff;
+}
+
+.drafter-debug-- .drafter-debug-config-item-overridden {
+	border-top: 1px solid #d67f00;
+	border-bottom: 1px solid #d67f00;
+	background: #fff8ea;
+}
+
+.drafter-debug-- .drafter-debug-config-item-header {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.5rem;
+	margin-bottom: 0;
+}
+
+.drafter-debug-- .drafter-debug-config-inline-main {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	min-width: 0;
+	flex: 1 1 auto;
+}
+
+.drafter-debug-- .drafter-debug-config-inline-main strong {
+	flex: 0 0 auto;
+}
+
+.drafter-debug-- .drafter-debug-config-inline-separator {
+	color: #5f7790;
+	flex: 0 0 auto;
+}
+
+.drafter-debug-- .drafter-debug-config-inline-value {
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: #1f3f5f;
+}
+
+.drafter-debug-- .drafter-debug-config-inline-right {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin-left: auto;
+	flex: 0 0 auto;
+}
+
+.drafter-debug-- .drafter-debug-config-source {
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 0.8em;
+	font-weight: 600;
+	border: 1px solid transparent;
+}
+
+.drafter-debug-- .drafter-debug-config-source-base {
+	background: #eaf5ff;
+	color: #134f8a;
+	border-color: #95c6ef;
+}
+
+.drafter-debug-- .drafter-debug-config-source-override {
+	background: #fff1d9;
+	color: #8c4f00;
+	border-color: #e2b56a;
+}
+
+.drafter-debug-- .drafter-debug-config-base-value {
+	font-size: 0.9em;
+	margin-top: 0.35rem;
+	margin-bottom: 0;
+	color: #7b560f;
+}
+
+.drafter-debug-- .drafter-debug-config-base-value code {
+	background: #fff5e2;
+	padding: 1px 4px;
+	border-radius: 3px;
+	border: 1px solid #efd19f;
+}
+
+.drafter-debug-- .drafter-debug-config-value {
+	font-size: 0.95em;
+	background: #f4f9ff;
+	border: 1px solid #d2e5f7;
+	border-radius: 4px;
+	padding: 6px 8px;
+	white-space: normal;
+	word-break: break-word;
+}
+
+.drafter-debug-- .drafter-debug-config-value code {
+	background: transparent;
+	padding: 0;
+	border: 0;
+}
+
+.drafter-debug-- .drafter-debug-config-editor {
+	width: 100%;
+	min-height: 4.5rem;
+	resize: vertical;
+	font-family: monospace;
+	font-size: 0.9em;
+	padding: 8px;
+	border: 1px solid #a9c6df;
+	border-radius: 4px;
+	background: white;
+	box-sizing: border-box;
+}
+
+.drafter-debug-- .drafter-debug-config-buttons {
+	display: flex;
+	gap: 0.35rem;
+	margin-top: 0;
+	flex-wrap: wrap;
+}
+
+.drafter-debug-- .drafter-debug-config-buttons button,
+.drafter-debug-- .drafter-debug-config-actions button {
+	padding: 2px 6px;
+	cursor: pointer;
+	background-color: white;
+	color: black;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 0.85em;
+}
+
+.drafter-debug-- .drafter-debug-config-buttons button:hover,
+.drafter-debug-- .drafter-debug-config-actions button:hover {
+	background-color: #ddd;
+}
+
+.drafter-debug-- .drafter-debug-config-error {
+	margin-top: 0.35rem;
+	min-height: 1rem;
+	font-size: 0.85em;
+	color: #b63030;
+	visibility: hidden;
+}
+
+.drafter-debug-- .drafter-debug-config-error.visible {
+	visibility: visible;
+}
+
 /** Two columns, equally sized **/
 .drafter-debug-files-content {
 	display: flex;
@@ -790,4 +959,22 @@ div.btlw-container img {
 	flex-direction: column;
 	gap: 2px;
 	margin-top: 10px;
+}
+
+/* Code editor dialog */
+.drafter-code-editor-container {
+	width: 100%;
+	height: 480px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.drafter-code-editor-container .cm-editor {
+	height: 100%;
+}
+
+.drafter-code-editor-container .cm-editor.cm-focused {
+	outline: 2px solid #3a7db8;
+	outline-offset: -2px;
 }

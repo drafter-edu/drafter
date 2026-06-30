@@ -15,6 +15,14 @@ declare global {
 	var DebugPanel: typeof import("../debug").DebugPanel;
 
 	var DRAFTER_ENGINE: "skulpt" | "pyodide";
+	var DRAFTER_CONFIGURATION: Record<string, unknown> | undefined;
+	var DRAFTER_MODIFIED_CONFIGURATION: Record<string, unknown> | undefined;
+	var DRAFTER_EMBEDDED_MODIFIED_CONFIGURATION:
+		| Record<string, unknown>
+		| undefined;
+	var DRAFTER_PERSISTED_CONFIGURATION_OVERRIDES:
+		| Record<string, unknown>
+		| undefined;
 
 	// Pyodide globals:
 	var pyodide: any;
