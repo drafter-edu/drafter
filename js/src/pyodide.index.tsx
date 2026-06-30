@@ -193,6 +193,7 @@ export async function startPyodideAppServerSession(
 				restartRequested = false;
 				await resetPyodideRuntime();
 				const code = await getStudentCode();
+				(window as any).__drafterCurrentCode = code;
 				const executionOptions: DrafterInitOptions = {
 					code,
 					loadPackagesAutomatically:
@@ -247,6 +248,37 @@ export async function startPyodideAppServerSession(
 			}
 		};
 	}
+
+	// Allow external callers (e.g. the in-browser code editor) to trigger a
+	// restart with optionally new code by dispatching a custom window event.
+	// A per-session token is used to ensure only events originating from this
+	// application's own editor are accepted.
+	const sessionToken = crypto.randomUUID();
+	(window as any).__drafterRestartToken = sessionToken;
+
+	window.addEventListener("drafter-restart-student-code", (event: Event) => {
+		const detail = (
+			event as CustomEvent<{ code?: string; _token?: string }>
+		).detail;
+		if (detail?._token !== sessionToken) {
+			console.warn(
+				"[Drafter] Ignoring drafter-restart-student-code event with invalid token.",
+			);
+			return;
+		}
+		if (typeof detail?.code === "string") {
+			latestStudentCode = detail.code;
+		} else {
+			latestStudentCode = null;
+		}
+		runStudentExecution().catch((error) => {
+			console.error(
+				"[Drafter AppServer Scaffolding] Failed to restart student code via editor:",
+				error,
+			);
+		});
+	});
+
 	await runStudentExecution();
 }
 
