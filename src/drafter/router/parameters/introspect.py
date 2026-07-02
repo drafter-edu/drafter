@@ -4,6 +4,36 @@ from typing import Any, Dict, List, Tuple
 
 
 @dataclass
+class RouteParamSpec:
+    name: str
+    annotation: Any
+    has_default: bool
+    default: Any
+    kind: inspect._ParameterKind
+    injected: bool = False
+    aliases: tuple[str, ...] = ()
+
+    @property
+    def required(self) -> bool:
+        if self.injected:
+            return False
+        if self.kind in (
+            inspect.Parameter.VAR_POSITIONAL,
+            inspect.Parameter.VAR_KEYWORD,
+        ):
+            return False
+        return not self.has_default
+
+
+@dataclass
+class RouteSignatureSpec:
+    function_name: str
+    params: tuple[RouteParamSpec, ...]
+    accepts_var_keyword: bool
+    accepts_var_positional: bool
+
+
+@dataclass
 class RouteIntrospection:
     """Store introspection metadata for a route function signature.
 

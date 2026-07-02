@@ -17,6 +17,7 @@ from drafter.bridge.dom import (
 import js
 
 DOUBLE_PRESS_THRESHOLD = 600  # milliseconds
+DRAFTER_PAGE_LOADED_EVENT = "drafter-page-loaded"
 
 
 @dataclass
@@ -240,6 +241,18 @@ class EventManager:
         # Keyboard events
         for key_combo, handler in key_handlers.items():
             self._register_hotkey(key_combo, handler)
+
+    def dispatch_page_loaded(
+        self, route: str, request_id: int, response_id: int
+    ) -> None:
+        detail = {
+            "route": route,
+            "requestId": request_id,
+            "responseId": response_id,
+        }
+        event = self.runtime.create_custom_event(DRAFTER_PAGE_LOADED_EVENT, detail)
+        self.runtime.dispatch_window_event(event)
+        debug_log("client.page_loaded_event_dispatched", detail)
 
     def _register_event(self, event_name: str, handler: Callable[[Any], Any]) -> None:
         if self.listeners.get(event_name):

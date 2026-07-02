@@ -21,8 +21,12 @@ def index(state: State):
             ),
             "\nCustom Ticker:",
             Timer(1000 * 4, "/beep", on_tick="/tick", rate=100),
+            "\nCustom Ticker with TextBox:",
+            Timer(1000 * 4, "/beep_with_box", on_tick="/tick_with_box"),
             "\nReturn to this page.",
             Button("Reload", index),
+            "\nTextbox for form example:",
+            TextBox("example_textbox", "Banana"),
         ],
     )
 
@@ -35,6 +39,18 @@ def beep(state: State):
 @route
 def tick(state: State, remaining: int):
     return Fragment(state, [f"Time remaining: {remaining} ms"])
+
+
+@route
+def tick_with_box(state: State, remaining: int, example_textbox: str):
+    return Fragment(
+        state, [f"Time remaining: {remaining} ms", f"Textbox value: {example_textbox}"]
+    )
+
+
+@route
+def beep_with_box(state: State, remaining: int, example_textbox: str):
+    return Fragment(state, [f"BEEPED: {example_textbox}"])
 
 
 start_server(State(0))

@@ -22,6 +22,8 @@ class Target:
     all: bool = False
 
     # Actions
+    #: Indicates that this is a full page load, resetting most content
+    is_page_load: bool = False
     #: Replace the entire node, not just its children
     replace: bool = False
     #: Only remove the matching element
@@ -46,7 +48,7 @@ class Target:
 
     #: If this target fails to find any elements, use the fallback instead
     fallback: "Optional[Target]" = None
-    
+
     def __repr__(self) -> str:
         pieces = []
         if self.id:
@@ -173,4 +175,6 @@ class Target:
         return selector
 
 
-DEFAULT_BODY_TARGET = Target(id=DRAFTER_TAG_IDS["BODY"], replace=False)
+DEFAULT_BODY_TARGET = Target(
+    id=DRAFTER_TAG_IDS["BODY"], replace=False, is_page_load=True
+)

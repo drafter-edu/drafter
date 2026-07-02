@@ -13,13 +13,13 @@ from drafter.constants import SUBMIT_BUTTON_KEY
 from drafter.data.request import Request
 from drafter.history.state import SiteState
 from drafter.history.utils import safe_repr
-from drafter.router.introspect import get_signature, RouteIntrospection
+from drafter.router.parameters.introspect import get_signature, RouteIntrospection
 
 
 def normalize_url(url: str) -> str:
     """
     Turns a URL into a normalized form for consistent route matching.
-    
+
     This function performs the following transformations:
     - Strips leading and trailing whitespace.
     - Strips trailing slashes.
@@ -29,7 +29,7 @@ def normalize_url(url: str) -> str:
     - Double dots delete the previous path segment, if any.
     """
     url = url.strip()
-    
+
     segments = []
     for segment in url.split("/"):
         if segment in ("", "."):
@@ -39,10 +39,10 @@ def normalize_url(url: str) -> str:
                 segments.pop()
         else:
             segments.append(segment)
-            
+
     if not segments:
         return "/index"
-    
+
     normalized_url = "/" + "/".join(segments)
     return normalized_url
 
@@ -51,7 +51,7 @@ def clean_url(url: str) -> str:
     """
     Turns a URL into a heavily normalized form for matching against route
     function names, instead of explicit URLs.
-    
+
     The following transformations are applied:
     - Strips leading and trailing whitespace.
     - Strips leading and trailing slashes.
@@ -61,7 +61,7 @@ def clean_url(url: str) -> str:
     - Non-valid characters are removed (only allows alphanumeric, underscores, and underscores).
     """
     url = url.strip().strip("/")
-    
+
     segments = []
     for segment in url.split("/"):
         if segment in ("", "."):
@@ -70,12 +70,12 @@ def clean_url(url: str) -> str:
             if segments:
                 segments.pop()
         else:
-            cleaned_segment = "".join(c for c in segment if c.isalnum() or c=="_")
+            cleaned_segment = "".join(c for c in segment if c.isalnum() or c == "_")
             segments.append(cleaned_segment)
-            
+
     if not segments:
         return "index"
-            
+
     cleaned_url = "_".join(segments)
     return cleaned_url
 
@@ -119,7 +119,9 @@ class Router:
         Returns:
             bool: True if route exists, False otherwise.
         """
-        return clean_url(url) in self.route_functions or normalize_url(url) in self.routes
+        return (
+            clean_url(url) in self.route_functions or normalize_url(url) in self.routes
+        )
 
     def add_route(self, url: str, func: Callable) -> dict[str, Any]:
         """Register a route handler for the given URL.
@@ -136,7 +138,7 @@ class Router:
         self.signatures[normalize_url(url)] = get_signature(func)
         return {
             "url": url,
-            "signature": self.signatures[normalize_url(url)].to_string()
+            "signature": self.signatures[normalize_url(url)].to_string(),
         }
 
     def reset(self) -> None:
@@ -175,6 +177,7 @@ class Router:
             ValueError: If parameters are invalid or unconvertible.
         """
         args, kwargs = [], request.kwargs.copy()
+        # TODO: Is the button_pressed now redundant?
         button_pressed = self.preprocess_button_press(request, kwargs)
         signature = self.get_signature(request)
         self.flatten_kwargs(kwargs)
@@ -409,12 +412,13 @@ class Router:
         outcome, result = try_convert_datetime(value, target_type)
         if outcome:
             return True, result
-        
+
         # Try Location conversion
         if target_type is Location:
             if isinstance(value, str):
                 # Parse JSON string from hidden input
                 import json
+
                 try:
                     data = json.loads(value)
                     return True, Location(**data)
@@ -422,7 +426,7 @@ class Router:
                     # Return empty location with error status
                     return True, Location(
                         status="error",
-                        message=f"Failed to parse location data: {str(e)}"
+                        message=f"Failed to parse location data: {str(e)}",
                     )
             elif isinstance(value, dict):
                 # Direct dict, convert to Location
@@ -430,7 +434,7 @@ class Router:
             elif isinstance(value, Location):
                 # Already a Location object
                 return True, value
-        
+
         return False, None
 
     def convert_argument_types(
@@ -512,7 +516,9 @@ class Router:
         normalized_url = normalize_url(request.url)
         signature = self.signatures.get(normalized_url)
         if not signature:
-            raise ValueError(f"No signature found for route '{request.url}' ('{normalized_url}')")
+            raise ValueError(
+                f"No signature found for route '{request.url}' ('{normalized_url}')"
+            )
         return signature
 
     def inject_state(

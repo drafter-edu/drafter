@@ -27,6 +27,7 @@ describe("drafter-timer", () => {
 			timer.setAttribute(name, value);
 		}
 		document.body.appendChild(timer);
+		window.dispatchEvent(new CustomEvent("drafter-page-loaded"));
 		return timer;
 	}
 
@@ -52,6 +53,21 @@ describe("drafter-timer", () => {
 
 		timer.removeAttribute("show");
 		expect(timer.hidden).toBe(false);
+	});
+
+	test("does not start counting down before the page-loaded event", () => {
+		const timer = document.createElement("drafter-timer");
+		timer.setAttribute("duration", "3000");
+		timer.setAttribute("rate", "1000");
+		document.body.appendChild(timer);
+
+		expect(getLabel(timer).textContent).toBe("0:03");
+		jest.advanceTimersByTime(1500);
+		expect(getLabel(timer).textContent).toBe("0:03");
+
+		window.dispatchEvent(new CustomEvent("drafter-page-loaded"));
+		jest.advanceTimersByTime(1000);
+		expect(getLabel(timer).textContent).toBe("0:02");
 	});
 
 	test("pauses, resumes, finishes, and restarts from the controls", () => {

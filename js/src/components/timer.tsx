@@ -1,17 +1,13 @@
 import { DrafterHTMLElement } from "./drafterHTMLElement";
+import {
+	DRAFTER_PAGE_LOADED_EVENT,
+	type DrafterPageLoadedDetail,
+} from "./events";
 
 type TimerState = "running" | "finished" | "paused";
 
-type PersistedTimerState = {
-	duration: number;
-	rate: number;
-	remainingMs: number;
-	state: TimerState;
-};
-
 const DEFAULT_RATE = 1000;
 const DEFAULT_DURATION = 1000;
-const persistedTimers = new Map<string, PersistedTimerState>();
 
 class Timer extends DrafterHTMLElement {
 	static get observedAttributes() {
@@ -26,9 +22,23 @@ class Timer extends DrafterHTMLElement {
 	private label: HTMLSpanElement | null = null;
 	private toggleButton: HTMLButtonElement | null = null;
 	private restartButton: HTMLButtonElement | null = null;
+	private waitingForPageLoad = false;
+	private pageLoadedForCurrentView = false;
+
+	private handlePageLoaded = (event: Event): void => {
+		const detail = (event as CustomEvent<DrafterPageLoadedDetail>).detail;
+
+		this.pageLoadedForCurrentView = true;
+		if (!this.isConnected || !this.waitingForPageLoad) {
+			return;
+		}
+
+		this.waitingForPageLoad = false;
+		this.beginRunning();
+	};
 
 	private formatTime(ms: number): string {
-		const totalSeconds = Math.floor(ms / 1000);
+		const totalSeconds = Math.ceil(ms / 1000);
 		const minutes = Math.floor(totalSeconds / 60);
 		const seconds = totalSeconds % 60;
 		return `${minutes}:${seconds.toString().padStart(2, "0")}`;
@@ -248,6 +258,14 @@ class Timer extends DrafterHTMLElement {
 		this.beginRunning();
 	}
 
+	private waitForPageLoadThenStart(): void {
+		this.waitingForPageLoad = true;
+		this.startedAt = null;
+		this.clearTimers();
+		this.updateDisplay();
+		this.updateControls();
+	}
+
 	private initializeTimer(preferPersistedState: boolean): void {
 		this.clearTimers();
 
@@ -255,7 +273,11 @@ class Timer extends DrafterHTMLElement {
 
 		this.renderStructure();
 		if (this.state === "running") {
-			this.beginRunning();
+			if (this.pageLoadedForCurrentView) {
+				this.beginRunning();
+			} else {
+				this.waitForPageLoadThenStart();
+			}
 		} else {
 			this.updateDisplay();
 			this.updateControls();
@@ -263,6 +285,11 @@ class Timer extends DrafterHTMLElement {
 	}
 
 	connectedCallback() {
+		this.pageLoadedForCurrentView = false;
+		window.addEventListener(
+			DRAFTER_PAGE_LOADED_EVENT,
+			this.handlePageLoaded,
+		);
 		this.initializeTimer(true);
 	}
 
@@ -289,7 +316,12 @@ class Timer extends DrafterHTMLElement {
 	}
 
 	disconnectedCallback() {
+		window.removeEventListener(
+			DRAFTER_PAGE_LOADED_EVENT,
+			this.handlePageLoaded,
+		);
 		this.clearTimers();
+		this.waitingForPageLoad = false;
 		this.label = null;
 		this.toggleButton = null;
 		this.restartButton = null;

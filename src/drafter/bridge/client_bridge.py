@@ -163,6 +163,13 @@ class ClientBridge:
         updated = self.site_renderer.update_site(response)
         if updated:
             self.events.mount_navigation(self.navigator.navigate)
+            # TODO: Improve this check for a full page load
+            if not response.target or response.target.is_page_load:
+                self.events.dispatch_page_loaded(
+                    route=response.url,
+                    request_id=response.request_id,
+                    response_id=response.id,
+                )
         self.site_renderer.apply_after_channel(response)
         if response.payload.is_redirect():
             self.navigator.handle_redirect(response, callback)

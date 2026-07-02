@@ -91,9 +91,6 @@ def scrollTo(x: int, y: int) -> None: ...
 scrollX: int
 scrollY: int
 
-# TODO: Provide a better type for DebugPanel
-DebugPanel: Any
-
 def addEventListener(
     type: str,
     listener: Any,
@@ -104,6 +101,13 @@ def removeEventListener(
     listener: Any,
     options: Any = ...,
 ) -> None: ...
+
+class CustomEvent:
+    def __init__(self, type: str, event_init_dict: Any = None) -> None: ...
+    @staticmethod
+    def new(type: str, event_init_dict: Any = None) -> Any: ...
+
+def dispatchEvent(event: Any) -> None: ...
 
 class CSSStyleSheet:
     def replaceSync(self, css: str) -> None: ...
@@ -119,3 +123,8 @@ class XMLHttpRequest:
     def send(self) -> None: ...
     @staticmethod
     def new() -> "XMLHttpRequest": ...
+
+# Custom Drafter constructs
+
+# TODO: Provide a better type for DebugPanel
+DebugPanel: Any

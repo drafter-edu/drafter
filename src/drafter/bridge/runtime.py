@@ -83,6 +83,12 @@ class RuntimeAdapter:
     def history_replace_state(self, state: dict, title: str, url: str) -> None:
         js.history.replaceState(state, title, url)
 
+    def create_custom_event(self, name: str, detail: dict) -> Any:
+        return js.CustomEvent(name, {"detail": detail})
+
+    def dispatch_window_event(self, event: Any) -> None:
+        js.dispatchEvent(event)
+
 
 class SkulptRuntime(RuntimeAdapter):
     """Runtime adapter for Skulpt — uses direct JS constructor calls."""
@@ -174,3 +180,9 @@ class PyodideRuntime(RuntimeAdapter):
 
     def history_replace_state(self, state: dict, title: str, url: str) -> None:
         js.history.replaceState(self._to_js(state), title, url)
+
+    def create_custom_event(self, name: str, detail: dict) -> Any:
+        return js.CustomEvent.new(
+            name,
+            self._to_js({"detail": detail}, create_pyproxies=False),
+        )

@@ -2,9 +2,10 @@ from typing import Union, Callable, Optional, TypeVar, overload, ParamSpec, cast
 from functools import wraps
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import get_main_server
-from drafter.router.introspect import get_signature
+from drafter.router.parameters.introspect import get_signature
 
 T = TypeVar("T", bound=Callable[..., object])
+
 
 @overload
 def route(url: T) -> T: ...
@@ -44,7 +45,7 @@ def route(
         local_url = func.__name__
         server.add_route(local_url, func)
         return func
-    
+
     def make_route(func: T) -> T:
         local_url = url if url is not None else func.__name__
         server.add_route(local_url, func)
@@ -53,7 +54,9 @@ def route(
     return make_route
 
 
-def add_route(url: str, func: Callable[..., object], server: Optional[ClientServer] = None):
+def add_route(
+    url: str, func: Callable[..., object], server: Optional[ClientServer] = None
+):
     """Add a route handler to the server.
 
     Args:
