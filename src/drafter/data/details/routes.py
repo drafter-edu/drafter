@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 from typing import Any
 
-from drafter.monitor.events.base import BaseEvent
+from drafter.data.telemetry import TelemetryRecord
 
 
 @dataclass
-class RouteAddedEvent(BaseEvent):
+class RouteAddedEvent(TelemetryRecord):
     url: str = ""
     signature: str = ""
     is_system_route: bool = False
-    event_type: str = "RouteAdded"
+    kind: str = "RouteAdded"
 
     def to_json(self) -> dict[str, Any]:
         return {

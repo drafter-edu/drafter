@@ -1,10 +1,16 @@
-import { describe, expect, test } from "@jest/globals";
+import { afterEach, describe, expect, test } from "@jest/globals";
 
 import {
-	handleSystemError,
 	normalizeSystemError,
-	presentSystemError,
+	reportSystemError,
+	setSystemErrorSink,
+	type ErrorTelemetryRecord,
 } from "../bridge/engine";
+
+afterEach(() => {
+	setSystemErrorSink(null);
+	document.body.innerHTML = "";
+});
 
 describe("system error helpers", () => {
 	test("normalizeSystemError wraps non-Error values", () => {
@@ -13,35 +19,97 @@ describe("system error helpers", () => {
 		expect(error).toBeInstanceOf(Error);
 		expect(error.message).toBe("boom");
 	});
+});
 
-	test("presentSystemError can render into the Drafter root", () => {
+describe("reportSystemError presentation policy", () => {
+	test("unrecoverable errors render into the root", () => {
 		document.body.innerHTML = '<div id="drafter-root--"></div>';
 
-		const error = presentSystemError(
-			"Failed to initialize",
-			new Error("boom"),
-			{
-				presentation: "root",
-				suggestion: "Reload and try again.",
-			},
-		);
+		reportSystemError({
+			id: "runtime.pyodide_setup_failed",
+			category: "runtime",
+			message: "Error setting up Pyodide",
+			error: new Error("boom"),
+		});
 
 		const root = document.getElementById("drafter-root--");
-		expect(error).toBeInstanceOf(Error);
 		expect(root?.textContent).toContain("Drafter System Error");
-		expect(root?.textContent).toContain("Failed to initialize");
-		expect(root?.textContent).toContain("Reload and try again.");
-		expect(root?.textContent).toContain("Error: boom");
+		expect(root?.textContent).toContain("Error setting up Pyodide");
 	});
 
-	test("handleSystemError returns the normalized error", () => {
+	test("recoverable errors do not take over the root", () => {
 		document.body.innerHTML = '<div id="drafter-root--"></div>';
 
-		const error = handleSystemError(
-			"Failed to initialize",
-			"boom",
-			"Reload and try again.",
-		);
+		reportSystemError({
+			id: "runtime.student_code_failed",
+			category: "runtime",
+			message: "Error running student code",
+			error: new Error("boom"),
+			recoverable: true,
+		});
+
+		const root = document.getElementById("drafter-root--");
+		expect(root?.textContent).not.toContain("Drafter System Error");
+	});
+
+	test("warnings only go to the debug panel sink", () => {
+		document.body.innerHTML = '<div id="drafter-root--"></div>';
+		const received: ErrorTelemetryRecord[] = [];
+		setSystemErrorSink((event) => received.push(event));
+
+		reportSystemError({
+			id: "runtime.slow_startup",
+			category: "runtime",
+			message: "Startup took longer than expected",
+			severity: "warning",
+		});
+
+		const root = document.getElementById("drafter-root--");
+		expect(root?.textContent).not.toContain("Drafter System Error");
+		expect(received).toHaveLength(1);
+		expect(received[0].metadata.level).toBe("warning");
+		expect(received[0].error.severity).toBe("warning");
+	});
+
+	test("sink receives canonical envelope with stable id and context", () => {
+		const received: ErrorTelemetryRecord[] = [];
+		setSystemErrorSink((event) => received.push(event));
+
+		reportSystemError({
+			id: "runtime.pyodide_setup_failed",
+			category: "runtime",
+			message: "Error setting up Pyodide",
+			error: new Error("boom"),
+			context: { phase: "setup", request_id: 3, route: "index" },
+		});
+
+		expect(received).toHaveLength(1);
+		const event = received[0];
+		expect(event.kind).toBe("runtime.pyodide_setup_failed");
+		expect(event.metadata.level).toBe("error");
+		expect(event.correlation.request_id).toBe(3);
+		expect(event.correlation.route).toBe("index");
+		const envelope = event.error;
+		expect(envelope.id).toBe("runtime.pyodide_setup_failed");
+		expect(envelope.category).toBe("runtime");
+		expect(envelope.severity).toBe("error");
+		expect(envelope.status_code).toBe("error");
+		expect(envelope.recoverable).toBe(false);
+		expect(envelope.context.phase).toBe("setup");
+		expect(envelope.details).toContain("boom");
+	});
+
+	test("sink failures do not break error reporting", () => {
+		setSystemErrorSink(() => {
+			throw new Error("sink exploded");
+		});
+
+		const error = reportSystemError({
+			id: "runtime.pyodide_setup_failed",
+			category: "runtime",
+			message: "Error setting up Pyodide",
+			error: new Error("boom"),
+		});
 
 		expect(error).toBeInstanceOf(Error);
 		expect(error.message).toBe("boom");

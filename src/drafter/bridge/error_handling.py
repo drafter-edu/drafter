@@ -2,12 +2,25 @@
 
 These helpers centralize exception normalization and telemetry reporting so
 bridge modules can avoid ad hoc ``print`` + ``raise`` patterns.
+
+All reports are envelope-first: a canonical :class:`ErrorDetails`
+(category ``bridge``) is created before telemetry is emitted, mirroring the
+server-side visit lifecycle. Bridge lifecycle ``phase`` tags are ``setup``,
+``navigation``, ``channel_execution``, and ``event_dispatch``.
 """
 
 from typing import Any, Optional
 
+from drafter.data.errors import (
+    CATEGORY_BRIDGE,
+    SEVERITY_ERROR,
+    SEVERITY_WARNING,
+    STATUS_ERROR,
+    Correlation,
+    ErrorDetails,
+    envelope_from_exception,
+)
 from drafter.monitor.audit import log_error
-from drafter.monitor.events.errors import DrafterError
 
 
 def normalize_bridge_exception(error: Any) -> Exception:
@@ -30,38 +43,107 @@ def report_bridge_error(
     response_id: Optional[int] = None,
     dom_id: Optional[str] = None,
     route: Optional[str] = None,
-) -> DrafterError:
-    """Log a bridge error and return a DrafterError payload.
+    phase: Optional[str] = None,
+    severity: str = SEVERITY_ERROR,
+    status_code: Optional[str] = None,
+    recoverable: bool = True,
+) -> ErrorDetails:
+    """Build a canonical bridge envelope, emit telemetry, and return the event.
 
-    Falls back to an in-memory DrafterError if telemetry logging itself fails.
+    The envelope is created first (category ``bridge``, correlation context
+    from the keyword arguments), then :func:`log_error` publishes it.
+    Falls back to returning the in-memory envelope if telemetry logging itself
+    fails.
+
+    Args:
+        event_type: Stable, code-like id (e.g. ``bridge.redirect_loop_detected``).
+        message: Human-safe message.
+        source: The component/function reporting the failure.
+        details: Developer-focused details.
+        exception: Originating exception or thrown value, if any.
+        request_id: Associated request id, if known.
+        response_id: Associated response id, if known.
+        dom_id: Associated DOM element id, if known.
+        route: Associated route, if known.
+        phase: Bridge lifecycle phase (setup, navigation, channel_execution,
+            event_dispatch).
+        severity: Canonical severity (default ``error``).
+        status_code: Symbolic status string; defaults to STATUS_ERROR.
+        recoverable: Whether the bridge can continue after this failure.
     """
     normalized_exception = (
         normalize_bridge_exception(exception) if exception is not None else None
     )
-    try:
-        return log_error(
+    context = Correlation(
+        route=route,
+        request_id=request_id,
+        response_id=response_id,
+        dom_id=dom_id,
+        phase=phase,
+    )
+    resolved_status = status_code if status_code is not None else STATUS_ERROR
+    if normalized_exception is not None:
+        envelope = envelope_from_exception(
+            normalized_exception,
             event_type,
-            message,
-            source,
-            details,
-            exception=normalized_exception,
-            request_id=request_id,
-            response_id=response_id,
-            dom_id=dom_id,
-            route=route,
-        )
-    except Exception as logging_error:
-        # Last-resort fallback: keep an actionable local error object even if
-        # event bus/telemetry plumbing is unavailable.
-        fallback_details = (
-            f"{details}\nTelemetry logging failure: {repr(logging_error)}"
-        )
-        return DrafterError(
+            CATEGORY_BRIDGE,
             message=message,
-            where=source,
-            details=fallback_details,
-            traceback=None,
+            details=details,
+            severity=severity,
+            context=context,
+            status_code=resolved_status,
+            recoverable=recoverable,
         )
+    else:
+        envelope = ErrorDetails(
+            id=event_type,
+            category=CATEGORY_BRIDGE,
+            message=message,
+            severity=severity,
+            details=details,
+            context=context,
+            status_code=resolved_status,
+            recoverable=recoverable,
+        )
+    try:
+        return log_error(envelope, source)
+    except Exception:
+        return envelope
+
+
+def report_bridge_warning(
+    event_type: str,
+    message: str,
+    source: str,
+    details: str,
+    *,
+    exception: Optional[Any] = None,
+    request_id: Optional[int] = None,
+    response_id: Optional[int] = None,
+    dom_id: Optional[str] = None,
+    route: Optional[str] = None,
+    phase: Optional[str] = None,
+    status_code: Optional[str] = None,
+) -> ErrorDetails:
+    """Report a non-fatal bridge issue as a canonical warning.
+
+    Same contract as :func:`report_bridge_error` with warning severity;
+    use for degraded-but-recovered situations (e.g. fallbacks applied).
+    """
+    return report_bridge_error(
+        event_type,
+        message,
+        source,
+        details,
+        exception=exception,
+        request_id=request_id,
+        response_id=response_id,
+        dom_id=dom_id,
+        route=route,
+        phase=phase,
+        severity=SEVERITY_WARNING,
+        status_code=status_code,
+    )
 
 
 def raise_bridge_system_error(
@@ -75,12 +157,14 @@ def raise_bridge_system_error(
     response_id: Optional[int] = None,
     dom_id: Optional[str] = None,
     route: Optional[str] = None,
+    phase: Optional[str] = None,
+    status_code: Optional[str] = None,
 ) -> None:
     """Log and raise a normalized RuntimeError for bridge system failures."""
     normalized_exception = (
         normalize_bridge_exception(exception) if exception is not None else None
     )
-    drafter_error = report_bridge_error(
+    envelope = report_bridge_error(
         event_type,
         message,
         source,
@@ -90,5 +174,8 @@ def raise_bridge_system_error(
         response_id=response_id,
         dom_id=dom_id,
         route=route,
+        phase=phase,
+        status_code=status_code,
+        recoverable=False,
     )
-    raise RuntimeError(drafter_error.message) from normalized_exception
+    raise RuntimeError(envelope.message) from normalized_exception

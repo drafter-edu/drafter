@@ -1,7 +1,8 @@
-import type { TelemetryEvent } from "./telemetry";
+import type { TelemetryRecord, TypedRecord } from "./telemetry";
 import { t } from "../i18n";
 import { DebugHeaderBar } from "./header";
 import { DebugFooterBar } from "./footer";
+import { setSystemErrorSink } from "../bridge/engine";
 import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrapper";
 import type { TestCaseEvent } from "./telemetry/tests";
 import { TestPanel } from "./panels/testing";
@@ -22,7 +23,7 @@ export class DebugPanel {
 
 	private panelElement: HTMLElement | null = null;
 	private contentElement: HTMLElement | null = null;
-	private events: TelemetryEvent[] = [];
+	private events: TelemetryRecord[] = [];
 	private pageHistory: any[] = [];
 	private errors: any[] = [];
 	private warnings: any[] = [];
@@ -72,6 +73,12 @@ export class DebugPanel {
 
 		this.panels.forEach((p) => p.initialize());
 		this.attachEventHandlers();
+
+		// Receive TypeScript-side system errors (boot/runtime failures) so
+		// they appear in the event log alongside Python telemetry.
+		setSystemErrorSink((event) => {
+			this.handleEvent(event as unknown as TelemetryRecord);
+		});
 	}
 
 	private reportError(message: string) {
@@ -197,41 +204,39 @@ export class DebugPanel {
 		});
 	}
 
-	public handleEvent(event: TelemetryEvent): boolean {
+	public handleEvent(event: TelemetryRecord): boolean {
 		this.events.push(event);
 		let handled = true;
-		switch (event.data?.event_type) {
+		const typed = event as TypedRecord;
+		switch (typed.kind) {
 			case "RouteAdded":
 				this.routesPanel?.renderRoute(
-					event.data.url,
-					event.data.signature,
-					event.data.is_system_route,
+					typed.url,
+					typed.signature,
+					typed.is_system_route,
 				);
 				break;
 			case "RequestEvent":
-				this.historyPanel?.addRequest(event.data);
+				this.historyPanel?.addRequest(typed);
 				break;
 			case "RequestParseEvent":
-				this.historyPanel?.addRequestParse(event.data);
+				this.historyPanel?.addRequestParse(typed);
 				break;
 			case "ResponseEvent":
-				this.historyPanel?.addResponse(event.data);
+				this.historyPanel?.addResponse(typed);
 				break;
 			case "UpdatedState":
-				this.statePanel?.renderState(event.data.representation);
+				this.statePanel?.renderState(typed.representation);
 				break;
 			case "TestCaseEvent":
-				this.testingPanel?.renderTest(event.data);
+				this.testingPanel?.renderTest(typed);
 				this.testingPanel?.updateTestSummary();
 				break;
 			case "InitialConfiguration":
-				this.configPanel?.renderInitialConfig(event.data.config);
+				this.configPanel?.renderInitialConfig(typed.config);
 				break;
 			case "UpdatedConfiguration":
-				this.configPanel?.renderConfigUpdate(
-					event.data.key,
-					event.data.value,
-				);
+				this.configPanel?.renderConfigUpdate(typed.key, typed.value);
 				break;
 			default:
 				handled = false;

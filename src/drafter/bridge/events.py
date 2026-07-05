@@ -4,10 +4,11 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 from drafter.bridge.runtime import RuntimeAdapter
 from drafter.data.request import Request
-from drafter.bridge.log import debug_log, console_log
+from drafter.bridge.log import debug_log
 from drafter.bridge.error_handling import (
     raise_bridge_system_error,
     report_bridge_error,
+    report_bridge_warning,
 )
 from drafter.components.page_content import Component
 from drafter.site.site import DRAFTER_TAG_IDS
@@ -66,8 +67,14 @@ class EventManager:
             try:
                 handlers = json.loads(handlers_json)
             except Exception as e:
-                console_log(
-                    f"Failed to parse event handlers: {handlers_json}. Error: {e}"
+                report_bridge_error(
+                    "bridge.event_handlers_parse_failed",
+                    "Failed to parse component event handlers attribute; skipping element",
+                    "bridge.events.mount_event_handlers",
+                    f"Attribute value: {handlers_json}",
+                    exception=e,
+                    dom_id=element.id if hasattr(element, "id") else None,
+                    phase="setup",
                 )
                 continue
             # For each event type in the handlers
@@ -97,7 +104,20 @@ class EventManager:
                                 dom_id=dom_id or "",
                                 button_pressed=target_element,
                             )
-                            return do_navigation(request)
+                            try:
+                                return do_navigation(request)
+                            except Exception as e:
+                                report_bridge_error(
+                                    "bridge.event_dispatch_failed",
+                                    f"Failed to dispatch {event_name} event to route {route}",
+                                    "bridge.events.mount_event_handlers",
+                                    f"Request: {repr(request)}",
+                                    exception=e,
+                                    route=request.url,
+                                    dom_id=request.dom_id,
+                                    request_id=request.id,
+                                    phase="event_dispatch",
+                                )
 
                         self.runtime.finish_promises(incomplete_data, finish_navigation)
 
@@ -107,7 +127,7 @@ class EventManager:
                     make_handler(event_type, route_name)
                 )
                 element.addEventListener(event_type, wrapped_handler)
-                console_log(f"Added event handler {event_type} to {element}")
+                debug_log("client.event_handler_added", event_type, element)
 
     def mount_navigation(self, do_navigation: Callable):
         debug_log("client.mount_navigation")
@@ -166,6 +186,7 @@ class EventManager:
                             route=request.url,
                             dom_id=request.dom_id,
                             request_id=request.id,
+                            phase="navigation",
                         )
 
                 self.runtime.finish_promises(incomplete_data, finish_navigation)
@@ -202,7 +223,20 @@ class EventManager:
                     dom_id=dom_id or "",
                     button_pressed=submitter if submitter else "",
                 )
-                return do_navigation(request)
+                try:
+                    return do_navigation(request)
+                except Exception as e:
+                    report_bridge_error(
+                        "client.navigation_failed",
+                        "Failed to dispatch form submission request",
+                        "bridge.events.mount_navigation",
+                        f"Request: {repr(request)}",
+                        exception=e,
+                        route=request.url,
+                        dom_id=request.dom_id,
+                        request_id=request.id,
+                        phase="navigation",
+                    )
 
             self.runtime.finish_promises(incomplete_data, finish_form_navigation)
 
@@ -220,6 +254,7 @@ class EventManager:
                 "Form root element not found while mounting navigation",
                 "bridge.events.mount_navigation",
                 f"Expected form id: {DRAFTER_TAG_IDS['FORM']}",
+                phase="setup",
             )
 
         # Mount event handlers for components
@@ -331,19 +366,38 @@ def get_all_event_data(
                     try:
                         decoded_value = json.loads(value)
                         data[key] = decoded_value
-                    except json.JSONDecodeError:
+                    except json.JSONDecodeError as e:
                         data[key] = (
                             value  # Fallback to raw value if JSON decoding fails
                         )
-                        # TODO: Log an error somewhere
+                        report_bridge_warning(
+                            "bridge.form_field_decode_failed",
+                            f"Could not JSON-decode form field '{key}'; using raw value",
+                            "bridge.events.get_all_event_data",
+                            f"Field value: {value!r}",
+                            exception=e,
+                            dom_id=element.id if hasattr(element, "id") else None,
+                            phase="event_dispatch",
+                        )
 
     # Get arguments from the originator and its parents
     arguments = get_attribute_recursively(
         originator, Component.DRAFTER_DATA_ARGUMENT_NAME
     )
     for i, arg in enumerate(reversed(arguments)):
-        # TODO: Handle corruption more elegantly
-        parsed = json.loads(arg)
+        try:
+            parsed = json.loads(arg)
+        except Exception as e:
+            report_bridge_error(
+                "bridge.component_argument_corrupted",
+                "Could not parse component argument data; skipping it",
+                "bridge.events.get_all_event_data",
+                f"Argument value: {arg!r}",
+                exception=e,
+                dom_id=originator.id if hasattr(originator, "id") else None,
+                phase="event_dispatch",
+            )
+            continue
         data.update(parsed)
 
     incomplete_resolutions.append(runtime.promise_data(data))

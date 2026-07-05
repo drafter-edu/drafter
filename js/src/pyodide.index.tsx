@@ -19,13 +19,9 @@ import { mountDirectory } from "./pyodide_bridge/directories";
 import { DebugPanel } from "./debug";
 import type { DrafterInitOptions } from "./bridge/engine";
 import { confirmDialog } from "./dialogs";
-import {
-	clearDrafterSiteRoot,
-	handleSystemError,
-	handleSystemErrorWithOptions,
-} from "./bridge/engine";
+import { clearDrafterSiteRoot, reportSystemError } from "./bridge/engine";
 import { initializeRuntimeConfigurationOverrides } from "./config_overrides";
-export { clearDrafterSiteRoot, handleSystemError } from "./bridge/engine";
+export { clearDrafterSiteRoot, reportSystemError } from "./bridge/engine";
 export * from "./common.index";
 
 window.DebugPanel = DebugPanel;
@@ -41,10 +37,13 @@ function writeConfigFile(pyodide: any) {
 				JSON.stringify((window as any).DRAFTER_MODIFIED_CONFIGURATION),
 			);
 		} catch (error) {
-			throw handleSystemError(
-				"Error writing Drafter configuration file",
+			throw reportSystemError({
+				id: "config.write_failed",
+				category: "config",
+				message: "Error writing Drafter configuration file",
 				error,
-			);
+				context: { phase: "setup" },
+			});
 		}
 	}
 }
@@ -305,7 +304,13 @@ export async function setupPyodide(options: PyodideSettings) {
 			// Write Drafter configuration file
 			writeConfigFile(window.pyodide);
 		} catch (error) {
-			throw handleSystemError("Error setting up Pyodide", error);
+			throw reportSystemError({
+				id: "runtime.pyodide_setup_failed",
+				category: "runtime",
+				message: "Error setting up Pyodide",
+				error,
+				context: { phase: "setup" },
+			});
 		}
 	}
 	return (window as any).pyodide;
@@ -360,7 +365,13 @@ export async function mountDrafterRemote(url: string) {
 			pyodide.pyimport("drafter");
 		}
 	} catch (error) {
-		throw handleSystemError("Error mounting Drafter remotely", error);
+		throw reportSystemError({
+			id: "runtime.drafter_mount_failed",
+			category: "runtime",
+			message: "Error mounting Drafter remotely",
+			error,
+			context: { phase: "setup" },
+		});
 	}
 }
 
@@ -375,10 +386,13 @@ export async function setupEnvironment(options: DrafterInitOptions) {
 			);
 			console.log("Loaded packages:", loadedPackages);
 		} catch (error) {
-			throw handleSystemError(
-				"Error loading packages automatically",
+			throw reportSystemError({
+				id: "runtime.package_load_failed",
+				category: "runtime",
+				message: "Error loading packages automatically",
 				error,
-			);
+				context: { phase: "setup" },
+			});
 		}
 	} else if (options.explicitPackageList) {
 		// TODO: Handle the semicolon-separated list of packages
@@ -388,10 +402,13 @@ export async function setupEnvironment(options: DrafterInitOptions) {
 				await pyodide.micropip.install(pkg);
 				loaded.push(pkg);
 			} catch (error) {
-				throw handleSystemError(
-					`Error installing package \"${pkg}\"`,
+				throw reportSystemError({
+					id: "runtime.package_install_failed",
+					category: "runtime",
+					message: `Error installing package \"${pkg}\"`,
 					error,
-				);
+					context: { phase: "setup" },
+				});
 			}
 		}
 		console.log("Loaded explicit packages:", loaded);
@@ -404,7 +421,13 @@ export async function patchPythonFeatures() {
 			`import drafter.files.patch_pyodide as _PYODIDE_PATCHED_SUCCESSFULLY`,
 		);
 	} catch (error) {
-		throw handleSystemError("Error patching Python features", error);
+		throw reportSystemError({
+			id: "runtime.python_patch_failed",
+			category: "runtime",
+			message: "Error patching Python features",
+			error,
+			context: { phase: "setup" },
+		});
 	}
 }
 
@@ -432,13 +455,14 @@ export async function runStudentCode(
 			console.info("Student code execution interrupted.");
 			throw error;
 		}
-		throw handleSystemErrorWithOptions(
-			"Error running student code",
+		throw reportSystemError({
+			id: "runtime.student_code_failed",
+			category: "runtime",
+			message: "Error running student code",
+			title: "Error",
 			error,
-			{
-				title: "Error",
-				presentation: "dialog",
-			},
-		);
+			recoverable: true,
+			context: { phase: "setup" },
+		});
 	}
 }

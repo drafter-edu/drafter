@@ -1,8 +1,8 @@
-import type { BaseEvent } from "./base";
+import type { TelemetryRecord } from "./base";
 
-export interface RouteAddedEvent extends BaseEvent {
-    event_type: "RouteAdded";
-    url: string;
-    signature: string;
-    is_system_route: boolean;
+export interface RouteAddedEvent extends TelemetryRecord {
+	kind: "RouteAdded";
+	url: string;
+	signature: string;
+	is_system_route: boolean;
 }

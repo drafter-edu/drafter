@@ -4,9 +4,15 @@ import json
 from typing import Union, Callable, Optional, Tuple, List, Dict, Any
 from dataclasses import dataclass
 from drafter.config.client_server import ClientServerConfiguration
+from drafter.data.correlation import Correlation
+from drafter.data.errors import (
+    CATEGORY_REQUEST,
+    SEVERITY_WARNING,
+    ErrorDetails,
+)
 from drafter.data.files import DrafterBinaryFile, DrafterTextFile
 from drafter.helpers.dates import try_convert_datetime
-from drafter.monitor.audit import log_warning
+from drafter.monitor.audit import log_error
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 from drafter.components.geolocation import Location
 from drafter.constants import SUBMIT_BUTTON_KEY
@@ -486,13 +492,19 @@ class Router:
         # TODO: Allow the target route function to quiet this warning
         # Check if there are too many arguments
         if len(signature.expected_parameters) < len(args) + len(kwargs):
-            log_warning(
-                "request.unused_arguments",
-                f"Too many arguments for {signature.function_name}",
+            log_error(
+                ErrorDetails(
+                    id="request.unused_arguments",
+                    category=CATEGORY_REQUEST,
+                    message=f"Too many arguments for {signature.function_name}",
+                    severity=SEVERITY_WARNING,
+                    details=(
+                        f"Expected {len(signature.expected_parameters)} parameters: {', '.join(signature.expected_parameters)}\n"
+                        f"But got {len(args) + len(kwargs)}: args={repr(args)}, kwargs={repr(kwargs)}"
+                    ),
+                    context=Correlation(route=request.url),
+                ),
                 "router.trim_excess_arguments",
-                f"Expected {len(signature.expected_parameters)} parameters: {', '.join(signature.expected_parameters)}\n"
-                f"But got {len(args) + len(kwargs)}: args={repr(args)}, kwargs={repr(kwargs)}",
-                route=request.url,
             )
             # Trim excess arguments
             args = args[: len(signature.expected_parameters)]

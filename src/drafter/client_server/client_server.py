@@ -1,29 +1,39 @@
 from dataclasses import dataclass
-from typing import Any, Callable, Literal, Optional, List, Tuple, Union, Dict
+from typing import Any, Literal, Optional, List, Union
 import time
 
 from drafter.client_server.context import Scope
-from drafter.client_server.errors import VisitError
 from drafter.configuration import get_system_configuration
 from drafter.data.channel import Message
+from drafter.data.correlation import Correlation
+from drafter.data.errors import (
+    CATEGORY_PAYLOAD,
+    CATEGORY_REQUEST,
+    CATEGORY_SYSTEM,
+    SEVERITY_INFO,
+    STATUS_BAD_REQUEST,
+    STATUS_ERROR,
+    STATUS_NOT_FOUND,
+    ErrorDetails,
+    envelope_from_exception,
+)
 from drafter.history.state import SiteState
 from drafter.monitor.bus import EventBus
-from drafter.monitor.events.config import (
+from drafter.data.details.config import (
     InitialConfigurationEvent,
     ResetServerEvent,
     ServerInitializedEvent,
     UpdatedConfigurationEvent,
 )
-from drafter.monitor.events.errors import DrafterError
-from drafter.monitor.events.request import (
+from drafter.data.details.request import (
     RequestEvent,
     RequestParseEvent,
     ResponseEvent,
 )
-from drafter.monitor.events.routes import RouteAddedEvent
-from drafter.monitor.events.state import UpdatedStateEvent
-from drafter.monitor.telemetry import TelemetryCorrelation, TelemetryEvent
-from drafter.payloads.kinds.error_page import ErrorPage, SimpleErrorPage
+from drafter.data.details.routes import RouteAddedEvent
+from drafter.data.details.state import UpdatedStateEvent
+from drafter.data.telemetry import ErrorRecord, TelemetryMetadata
+from drafter.payloads.kinds.error_page import SimpleErrorPage
 from drafter.payloads.payloads import ResponsePayload
 from drafter.data.request import Request
 from drafter.data.response import Response
@@ -32,7 +42,7 @@ from drafter.payloads.verification import (
     verify_response_payload_type,
 )
 from drafter.router.routes import Router
-from drafter.monitor.audit import log_error, log_warning, log_info, log_data
+from drafter.monitor.audit import log_error, log_record
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import DRAFTER_TAG_CLASSES, Site
 from drafter.config.client_server import ClientServerConfiguration
@@ -59,7 +69,7 @@ class ClientServer:
     routing them to the appropriate functions, and returning responses.
 
     The Server can be in one of the following phases:
-    
+
     - initializing: During the initial ClientServer constructor call
     - initialized: After the constructor has completed, but before the `start` method is called
     - starting: During the execution of the `start` method
@@ -90,16 +100,12 @@ class ClientServer:
     def __init__(self, custom_name: str) -> None:
         self.custom_name = custom_name
         self.event_bus = EventBus()
-        
-        server_initialized_event = ServerInitializedEvent()
-        self.event_bus.publish(
-            TelemetryEvent(
-                event_type=server_initialized_event.event_type,
-                data=server_initialized_event,
-                correlation=TelemetryCorrelation(),
-                source="client_server.server_initialized",
-            )
+
+        server_initialized_event = ServerInitializedEvent(
+            metadata=TelemetryMetadata(source="client_server.server_initialized"),
+            correlation=Correlation(phase=self.phase),
         )
+        self.event_bus.publish(server_initialized_event)
         self.site = Site()
         self.router = Router()
         self.state = SiteState()
@@ -121,17 +127,11 @@ class ClientServer:
         # self.monitor.reset()
         self.response_count = 0
         self.requests.reset()
-        log_data(
+        log_record(
             ResetServerEvent(),
             "client_server.reset",
         )
-        # log_info(
-        #     "server.reset",
-        #     "Resetting ClientServer to initial state",
-        #     "client_server.reset",
-        #     f"Server name: {self.custom_name}",
-        # )
-        
+
     def transition(self, new_phase: ServerPhases):
         """Transition the server to a new phase.
 
@@ -155,7 +155,7 @@ class ClientServer:
         configuration = self.get_default_configuration()
         self.site.set_configuration(configuration)
         return configuration
-    
+
     def is_configured(self) -> bool:
         """Check if the server has been configured with a configuration instance."""
         return self.site._configuration is not None
@@ -174,7 +174,7 @@ class ClientServer:
                     self.get_default_configuration().update_configuration(key, value)
             else:
                 self.get_default_configuration().update_configuration(key, value)
-            log_data(
+            log_record(
                 UpdatedConfigurationEvent(
                     key=key, value=value, update_default=update_default
                 ),
@@ -219,30 +219,41 @@ class ClientServer:
         if initial_state is not None:
             try:
                 self.state.update(initial_state)
-                log_info(
-                    "state.initialized",
-                    "Initializing server state",
+                log_error(
+                    ErrorDetails(
+                        id="state.initialized",
+                        category=CATEGORY_SYSTEM,
+                        message="Initializing server state",
+                        severity=SEVERITY_INFO,
+                        details=f"Initial state: {repr(initial_state)}",
+                    ),
                     "client_server.start",
-                    f"Initial state: {repr(initial_state)}",
                 )
             except Exception as e:
                 log_error(
-                    "state.initialization_failed",
-                    "Failed to initialize server state",
+                    envelope_from_exception(
+                        e,
+                        "state.initialization_failed",
+                        CATEGORY_SYSTEM,
+                        message="Failed to initialize server state",
+                        details=f"Initial state: {repr(initial_state)}",
+                    ),
                     "client_server.start",
-                    f"Initial state: {repr(initial_state)}",
-                    exception=e,
                 )
         # Register any default routes, if needed
         self.register_system_routes()
         # All done!
         self.transition("started")
         self.started = True
-        log_info(
-            "server.started",
-            "Started ClientServer",
+        log_error(
+            ErrorDetails(
+                id="server.started",
+                category=CATEGORY_SYSTEM,
+                message="Started ClientServer",
+                severity=SEVERITY_INFO,
+                details=f"Server name: {self.custom_name}",
+            ),
             "client_server.start",
-            f"Server name: {self.custom_name}",
         )
 
     def register_system_routes(self):
@@ -262,6 +273,62 @@ class ClientServer:
             if not self.router.has_route(route):
                 self.add_route(route, route_handler, True)
 
+    def make_visit_error(
+        self,
+        error_id: str,
+        category: str,
+        message: str,
+        request: Request,
+        *,
+        details: str = "",
+        status_code: Optional[str] = None,
+        exception: Optional[Exception] = None,
+        source: str = "client_server.visit",
+    ) -> ErrorDetails:
+        """Build a canonical envelope for a visit failure and emit telemetry.
+
+        This is the single path for visit lifecycle failures: the canonical
+        :class:`ErrorDetails` is created first, telemetry is emitted from it,
+        and the returned envelope is raised directly.
+
+        Args:
+            error_id: Stable, code-like id (e.g. ``request.route_not_found``).
+            category: Canonical error category.
+            message: Human-safe message.
+            request: The request being processed (for correlation context).
+            details: Developer-focused details.
+            status_code: Symbolic status string; defaults to
+                :data:`STATUS_ERROR`.
+            exception: Originating exception, if any (for traceback capture).
+            source: The component/function reporting the failure.
+
+        Returns:
+            ErrorDetails ready to be raised by the caller.
+        """
+        context = Correlation(route=request.url, request_id=request.id, phase="visit")
+        resolved_status = status_code if status_code is not None else STATUS_ERROR
+        if exception is not None:
+            envelope = envelope_from_exception(
+                exception,
+                error_id,
+                category,
+                message=message,
+                details=details,
+                context=context,
+                status_code=resolved_status,
+            )
+        else:
+            envelope = ErrorDetails(
+                id=error_id,
+                category=category,
+                message=message,
+                details=details,
+                context=context,
+                status_code=resolved_status,
+            )
+        log_error(envelope, source)
+        return envelope
+
     def get_route(self, request: Request):
         """Resolve a request URL to a route handler function.
 
@@ -272,20 +339,17 @@ class ClientServer:
             Callable: The route handler function.
 
         Raises:
-            VisitError: If no route matches the URL (404).
+            ErrorDetails: If no route matches the URL (404).
         """
         route_func = self.router.get_route(request.url)
         if route_func is None:
-            raise VisitError(
-                log_error(
-                    "request.route_not_found",
-                    f"No route found for URL: {request.url}",
-                    "client_server.visit",
-                    repr(request),
-                    route=request.url,
-                    request_id=request.id,
-                ),
-                404,
+            raise self.make_visit_error(
+                "request.route_not_found",
+                CATEGORY_REQUEST,
+                f"No route found for URL: {request.url}",
+                request,
+                details=repr(request),
+                status_code=STATUS_NOT_FOUND,
             )
         return route_func
 
@@ -320,7 +384,7 @@ class ClientServer:
             Tuple of (payload result, string representation of arguments).
 
         Raises:
-            VisitError: On argument parsing or execution failures.
+            ErrorDetails: On argument parsing or execution failures.
         """
         # Call the route function to get the payload
         try:
@@ -330,7 +394,7 @@ class ClientServer:
                 configuration,
                 self._get_extra_dependencies(request, configuration),
             )
-            log_data(
+            log_record(
                 RequestParseEvent(
                     request_id=request.id,
                     representation=representation,
@@ -340,31 +404,27 @@ class ClientServer:
                 request_id=request.id,
             )
         except Exception as e:
-            raise VisitError(
-                log_error(
-                    "request.argument_parsing_failed",
-                    f"Error while parsing arguments for request to URL {request.url}: {e}",
-                    "client_server.visit",
-                    repr(request),
-                    route=request.url,
-                    exception=e,
-                ),
-                400,
+            raise self.make_visit_error(
+                "request.argument_parsing_failed",
+                CATEGORY_REQUEST,
+                f"Error while parsing arguments for request to URL {request.url}: {e}",
+                request,
+                details=repr(request),
+                status_code=STATUS_BAD_REQUEST,
+                exception=e,
             )
         try:
             return route_func(*args, **kwargs), representation
         except Exception as e:
             e.add_note(f"{representation}")
-            raise VisitError(
-                log_error(
-                    "request.route_execution_failed",
-                    f"Error while processing request for URL '{request.url}': {e}",
-                    "client_server.visit",
-                    f"Full call: {representation}\nFull Request: {request!r}",
-                    route=request.url,
-                    exception=e,
-                ),
-                500,
+            raise self.make_visit_error(
+                "request.route_execution_failed",
+                CATEGORY_REQUEST,
+                f"Error while processing request for URL '{request.url}': {e}",
+                request,
+                details=f"Full call: {representation}\nFull Request: {request!r}",
+                status_code=STATUS_ERROR,
+                exception=e,
             )
 
     def verify_payload(
@@ -378,35 +438,31 @@ class ClientServer:
             configuration: Current server configuration.
 
         Raises:
-            VisitError: If payload verification fails.
+            ErrorDetails: If payload verification fails.
         """
         # Check that it's a valid payload type
         possible_incorrect_type = verify_response_payload_type(request, payload)
         if possible_incorrect_type is not None:
-            raise VisitError(
-                log_error(
-                    "request.payload_verification_failed",
-                    f"Payload verification failed for URL {request.url}: {possible_incorrect_type}",
-                    "client_server.visit",
-                    f"Request: {repr(request)}\nPayload: {repr(payload)}",
-                    route=request.url,
-                ),
-                501,
+            raise self.make_visit_error(
+                "payload.verification_failed",
+                CATEGORY_PAYLOAD,
+                f"Payload verification failed for URL {request.url}: {possible_incorrect_type}",
+                request,
+                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                status_code=STATUS_ERROR,
             )
         # Payload specific verification
         try:
             payload.verify(self.router, self.state, configuration, request)
         except Exception as e:
-            raise VisitError(
-                log_error(
-                    "request.payload_verification_failed",
-                    f"Payload verification failed for URL {request.url}: {e}",
-                    "client_server.visit",
-                    f"Request: {repr(request)}\nPayload: {repr(payload)}",
-                    route=request.url,
-                    exception=e,
-                ),
-                502,
+            raise self.make_visit_error(
+                "payload.verification_failed",
+                CATEGORY_PAYLOAD,
+                f"Payload verification failed for URL {request.url}: {e}",
+                request,
+                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                status_code=STATUS_ERROR,
+                exception=e,
             )
 
     def render_payload(
@@ -426,22 +482,20 @@ class ClientServer:
             str or None: HTML output of the rendered payload.
 
         Raises:
-            VisitError: If rendering fails.
+            ErrorDetails: If rendering fails.
         """
         # Render the payload
         try:
             return payload.render(self.state, configuration)
         except Exception as e:
-            raise VisitError(
-                log_error(
-                    "request.payload_rendering_failed",
-                    f"Error while rendering payload for URL {request.url}: {e}",
-                    "client_server.visit",
-                    f"Request: {repr(request)}\nPayload: {repr(payload)}",
-                    route=request.url,
-                    exception=e,
-                ),
-                503,
+            raise self.make_visit_error(
+                "payload.rendering_failed",
+                CATEGORY_PAYLOAD,
+                f"Payload rendering failed for URL {request.url}: {e}",
+                request,
+                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                status_code=STATUS_ERROR,
+                exception=e,
             )
 
     def format_payload(
@@ -463,22 +517,20 @@ class ClientServer:
             str: Formatted payload representation.
 
         Raises:
-            VisitError: If formatting fails.
+            ErrorDetails: If formatting fails.
         """
         # Format the payload for display in the history panel
         try:
             return payload.format(self.state, representation, configuration)
         except Exception as e:
-            raise VisitError(
-                log_error(
-                    "request.payload_formatting_failed",
-                    f"Error while formatting payload for URL {request.url}: {e}",
-                    "client_server.visit",
-                    f"Request: {repr(request)}\nPayload: {repr(payload)}",
-                    route=request.url,
-                    exception=e,
-                ),
-                509,
+            raise self.make_visit_error(
+                "payload.formatting_failed",
+                CATEGORY_PAYLOAD,
+                f"Payload formatting failed for URL {request.url}: {e}",
+                request,
+                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                status_code=STATUS_ERROR,
+                exception=e,
             )
 
     def handle_state_updates(
@@ -495,7 +547,7 @@ class ClientServer:
             configuration: Current server configuration.
 
         Raises:
-            VisitError: If state verification or update fails.
+            ErrorDetails: If state verification or update fails.
         """
         is_updated, updated_state = payload.get_state_updates()
         if is_updated:
@@ -504,34 +556,33 @@ class ClientServer:
                 request, updated_state, self.state.history
             )
             if possible_state_update_issue is not None:
-                raise VisitError(
-                    log_error(
-                        "request.payload_verification_failed",
-                        f"Payload verification failed for URL {request.url}: {possible_state_update_issue}",
-                        "client_server.visit",
-                        f"Request: {repr(request)}\nPayload: {repr(payload)}",
-                        route=request.url,
-                    ),
-                    501,
+                raise self.make_visit_error(
+                    "payload.state_verification_failed",
+                    CATEGORY_PAYLOAD,
+                    f"State verification failed for URL {request.url}: {possible_state_update_issue}",
+                    request,
+                    details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                    status_code=STATUS_ERROR,
+                    source="client_server.handle_state_updates",
                 )
             try:
                 self.state.update(updated_state)
-                log_data(
+                log_record(
                     UpdatedStateEvent.from_state(updated_state),
                     "client_server.handle_state_updates",
                     request_id=request.id,
                     route=request.url,
                 )
             except Exception as e:
-                raise VisitError(
-                    log_error(
-                        "state.update_failed",
-                        "Failed to update server state from payload",
-                        "client_server.handle_state_updates",
-                        f"Updated state: {repr(updated_state)}",
-                        exception=e,
-                    ),
-                    403,
+                raise self.make_visit_error(
+                    "payload.state_update_failed",
+                    CATEGORY_PAYLOAD,
+                    f"Failed to update server state from payload for URL {request.url}: {e}",
+                    request,
+                    details=f"Updated state: {repr(updated_state)}",
+                    status_code=STATUS_ERROR,
+                    exception=e,
+                    source="client_server.handle_state_updates",
                 )
 
     def start_timer(self):
@@ -552,70 +603,105 @@ class ClientServer:
         Orchestrates route resolution, execution, verification, rendering,
         and state updates before returning a Response to the client.
 
+        Request-scoped warnings (warning-level telemetry correlated with this
+        request's id) emitted during the visit are collected and attached to
+        the outgoing response (success or error), so they appear in both
+        telemetry and response metadata.
+
         Args:
             request: The request to process.
 
         Returns:
             Response: Success or error response to send to the client.
         """
+        from drafter.client_server.commands import get_main_event_bus
+
         self.start_timer()
         self.transition("visiting")
-        log_data(
+        log_record(
             RequestEvent.from_request(request),
             "client_server.visit",
             route=request.url,
             request_id=request.id,
         )
-        with self.requests.push(request):
-            try:
-                # TODO: Most of these should be private methods
-                configuration = self.get_current_configuration()
-                route_func = self.get_route(request)
-                payload, representation = self.execute_route(
-                    route_func, request, configuration
-                )
-                self.verify_payload(request, payload, configuration)
-                body = self.render_payload(request, payload, configuration)
-                formatted_body = self.format_payload(
-                    request, representation, payload, configuration
-                )
-                self.handle_state_updates(request, payload, configuration)
-                messages = self.get_messages(request, payload, configuration)
-                target = self.get_target(request, payload, configuration)
-            except VisitError as ve:
-                return self.make_error_response(
-                    request, ve.error, status_code=ve.status_code
-                )
+        visit_warnings: List[ErrorDetails] = []
 
-            # Return successfully
-            try:
-                response = self.make_success_response(
-                    request.id, request.url, body, payload, messages, target
-                )
-            except Exception as e:
-                return self.make_error_response(
-                    request,
-                    log_error(
-                        "response.creation_failed",
+        def capture_warning(event):
+            if isinstance(event, ErrorRecord) and event.error is not None:
+                visit_warnings.append(event.error)
+
+        warning_subscription = get_main_event_bus().subscribe(
+            "*",
+            capture_warning,
+            filter=lambda event: (
+                event.metadata.level == "warning"
+                and event.correlation.request_id == request.id
+                and isinstance(event, ErrorRecord)
+            ),
+        )
+        try:
+            with self.requests.push(request):
+                try:
+                    # TODO: Most of these should be private methods
+                    configuration = self.get_current_configuration()
+                    route_func = self.get_route(request)
+                    payload, representation = self.execute_route(
+                        route_func, request, configuration
+                    )
+                    self.verify_payload(request, payload, configuration)
+                    body = self.render_payload(request, payload, configuration)
+                    formatted_body = self.format_payload(
+                        request, representation, payload, configuration
+                    )
+                    self.handle_state_updates(request, payload, configuration)
+                    messages = self.get_messages(request, payload, configuration)
+                    target = self.get_target(request, payload, configuration)
+                except ErrorDetails as ve:
+                    return self.make_error_response(
+                        request,
+                        ve,
+                        warnings=visit_warnings,
+                    )
+
+                # Return successfully
+                try:
+                    response = self.make_success_response(
+                        request.id,
+                        request.url,
+                        body,
+                        payload,
+                        messages,
+                        target,
+                        warnings=visit_warnings,
+                    )
+                except Exception as e:
+                    envelope = self.make_visit_error(
+                        "system.response_creation_failed",
+                        CATEGORY_SYSTEM,
                         f"Failed to create success response for URL {request.url}: {e}",
-                        "client_server.visit",
-                        f"Request: {repr(request)}",
-                        route=request.url,
+                        request,
+                        details=f"Request: {repr(request)}",
+                        status_code=STATUS_ERROR,
                         exception=e,
+                    )
+                    return self.make_error_response(
+                        request,
+                        envelope,
+                        warnings=visit_warnings,
+                    )
+                log_record(
+                    ResponseEvent.from_response(
+                        response, formatted_body, self.check_timer()
                     ),
-                    504,
+                    "client_server.visit",
+                    route=request.url,
+                    request_id=request.id,
+                    response_id=response.id,
                 )
-            log_data(
-                ResponseEvent.from_response(
-                    response, formatted_body, self.check_timer()
-                ),
-                "client_server.visit",
-                route=request.url,
-                request_id=request.id,
-                response_id=response.id,
-            )
-            self.transition("committing")
-            return response
+                self.transition("committing")
+                return response
+        finally:
+            get_main_event_bus().unsubscribe(warning_subscription)
 
     def make_success_response(
         self,
@@ -625,6 +711,7 @@ class ClientServer:
         payload: ResponsePayload,
         messages: List[Message],
         target: Optional[Target],
+        warnings: Optional[List[ErrorDetails]] = None,
     ) -> Response:
         """Construct a successful response from request processing results.
 
@@ -635,6 +722,8 @@ class ClientServer:
             payload: ResponsePayload that generated the body.
             messages: Channel messages to execute on the client.
             target: Optional target selector for fragment updates.
+            warnings: Request-scoped warnings (non-fatal issues) generated
+                while processing the request, attached to the response.
 
         Returns:
             Response: Success response ready to send to the client.
@@ -646,6 +735,7 @@ class ClientServer:
             body=body,
             url=url,
             target=target,
+            warnings=list(warnings) if warnings else [],
         )
         response.send_messages(messages)
         self.response_count += 1
@@ -669,21 +759,19 @@ class ClientServer:
             Optional[Target]: Target object (e.g., for Fragment updates).
 
         Raises:
-            VisitError: If target retrieval fails.
+            ErrorDetails: If target retrieval fails.
         """
         try:
             return payload.get_target(request)
         except Exception as e:
-            raise VisitError(
-                log_error(
-                    "request.payload_target_retrieval_failed",
-                    f"Error while retrieving target from payload for URL {request.url}: {e}",
-                    "client_server.visit",
-                    f"Request: {repr(request)}\nPayload: {repr(payload)}",
-                    route=request.url,
-                    exception=e,
-                ),
-                505,
+            raise self.make_visit_error(
+                "payload.target_retrieval_failed",
+                CATEGORY_PAYLOAD,
+                f"Payload target retrieval failed for URL {request.url}: {e}",
+                request,
+                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                status_code=STATUS_ERROR,
+                exception=e,
             )
         return None
 
@@ -704,23 +792,21 @@ class ClientServer:
             list[Message]: Messages to execute on the client.
 
         Raises:
-            VisitError: If message retrieval fails.
+            ErrorDetails: If message retrieval fails.
         """
         try:
             messages = payload.get_messages(self.state, configuration)
             if messages is None:
                 messages = []
         except Exception as e:
-            raise VisitError(
-                log_error(
-                    "request.payload_message_retrieval_failed",
-                    f"Error while retrieving messages from payload for URL {request.url}: {e}",
-                    "client_server.visit",
-                    f"Request: {repr(request)}\nPayload: {repr(payload)}",
-                    route=request.url,
-                    exception=e,
-                ),
-                510,
+            raise self.make_visit_error(
+                "payload.message_retrieval_failed",
+                CATEGORY_PAYLOAD,
+                f"Payload message retrieval failed for URL {request.url}: {e}",
+                request,
+                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                status_code=STATUS_ERROR,
+                exception=e,
             )
 
         return messages
@@ -728,18 +814,21 @@ class ClientServer:
     def make_error_response(
         self,
         request: Request,
-        error: DrafterError,
-        status_code: int = 500,
+        envelope: ErrorDetails,
+        warnings: Optional[List[ErrorDetails]] = None,
     ) -> Response:
         """Construct an error response with appropriate error payload.
 
-        Attempts to render a full ErrorPage; falls back to SimpleErrorPage
-        if that fails.
+        Canonical rendering policy: the system ``--error`` route (a regular
+        route returning a ``Page``, overridable via
+        ``configuration.system_routes``) is the canonical error rendering
+        path. ``SimpleErrorPage`` is the last-resort fallback when the error
+        route itself fails; the ``ErrorPage`` payload class is not used here.
 
         Args:
             request: Associated request for context and URL.
-            error: Domain error to report.
-            status_code: HTTP-like status code for the error.
+            envelope: Canonical envelope describing the failure.
+            warnings: Request-scoped warnings to attach to the response.
 
         Returns:
             Response: Error response ready to send to the client.
@@ -753,29 +842,35 @@ class ClientServer:
                 raise Exception(
                     f"No error handler registered for {_SYSTEM_ERROR_ROUTE} route"
                 )
-            error_payload = error_handler(self.state, error, self)
+            error_payload = error_handler(self.state, envelope, self)
             body = error_payload.render(self.state, configuration)
-            # error_payload = ErrorPage(error)
-            # body = error_payload.render(self.state, configuration)
         except Exception as e:
-            error_page_error = log_error(
-                "error_page.creation_failed",
-                "Failed to create ErrorPage payload",
-                "client_server.make_error_response",
-                f"Original error: {repr(error)}\nError during ErrorPage creation: {repr(e)}",
-                route=request.url,
-                exception=e,
+            error_page_envelope = envelope_from_exception(
+                e,
+                "system.error_page_failed",
+                CATEGORY_SYSTEM,
+                message="Failed to create ErrorPage payload",
+                details=(
+                    f"Original error: {repr(envelope)}\n"
+                    f"Error during ErrorPage creation: {repr(e)}"
+                ),
+                context=Correlation(
+                    route=request.url, request_id=request.id, phase="visit"
+                ),
+                status_code=STATUS_ERROR,
             )
-            simpler_error_payload = SimpleErrorPage(error_page_error.message)
+            log_error(error_page_envelope, "client_server.make_error_response")
+            simpler_error_payload = SimpleErrorPage(error_page_envelope.message)
             response = Response(
                 id=self.response_count,
                 request_id=request.id,
                 payload=simpler_error_payload,
                 url=request.url,
-                status_code=500,
+                status_code=STATUS_ERROR,
                 body=simpler_error_payload.render(self.state, None),
-                message=error_page_error.message,
-                errors=[error, error_page_error],
+                message=error_page_envelope.message,
+                errors=[envelope, error_page_envelope],
+                warnings=list(warnings) if warnings else [],
             )
         else:
             response = Response(
@@ -784,11 +879,12 @@ class ClientServer:
                 body=body,
                 url=request.url,
                 payload=error_payload,
-                status_code=status_code,
-                message=error.message,
-                errors=[error],
+                status_code=envelope.status_code or STATUS_ERROR,
+                message=envelope.message,
+                errors=[envelope],
+                warnings=list(warnings) if warnings else [],
             )
-        log_data(
+        log_record(
             ResponseEvent.from_response(response, "", self.check_timer()),
             "client_server.make_error_response",
             route=request.url,
@@ -810,10 +906,8 @@ class ClientServer:
             Inspect route function for valid signature.
         """
         details = self.router.add_route(url, func)
-        log_data(
-            RouteAddedEvent(
-                **details, is_system_route=is_system_route
-            ),
+        log_record(
+            RouteAddedEvent(**details, is_system_route=is_system_route),
             "client_server.add_route",
         )
 
@@ -830,16 +924,22 @@ class ClientServer:
         try:
             configuration = self.process_dynamic_configuration()
         except Exception as e:
-            error = log_error(
+            envelope = envelope_from_exception(
+                e,
                 "site.processing_failed",
-                "Failed to process default site configuration",
-                "client_server.render_site",
-                f"Original exception: {e}",
-                exception=e,
+                CATEGORY_SYSTEM,
+                message="Failed to process default site configuration",
+                details=f"Original exception: {e}",
             )
-            site = f"<div><h1>Error processing site configuration</h1><p>{error.message}</p></div>"
-            return InitialSiteData(site_html=site, site_title="Error", error=True, framed=True)
-        log_data(
+            log_error(
+                envelope,
+                "client_server.render_site",
+            )
+            site = f"<div><h1>Error processing site configuration</h1><p>{envelope.message}</p></div>"
+            return InitialSiteData(
+                site_html=site, site_title="Error", error=True, framed=True
+            )
+        log_record(
             InitialConfigurationEvent(config=configuration.to_json()),
             "client_server.do_configuration",
         )
@@ -856,28 +956,37 @@ class ClientServer:
         self.transition("rendering")
         try:
             site = self.site.render()
-            log_info(
-                "site.rendered",
-                "Initial site HTML rendered",
+            log_error(
+                ErrorDetails(
+                    id="site.rendered",
+                    category=CATEGORY_SYSTEM,
+                    message="Initial site HTML rendered",
+                    severity=SEVERITY_INFO,
+                    details=f"Site HTML: {site}",
+                ),
                 "client_server.render_site",
-                f"Site HTML: {site}",
             )
         except Exception as e:
-            error = log_error(
+            envelope = envelope_from_exception(
+                e,
                 "site.rendering_failed",
-                "Failed to render initial site HTML",
-                "client_server.render_site",
-                f"Original exception: {e}",
-                exception=e,
+                CATEGORY_SYSTEM,
+                message="Failed to render initial site HTML",
+                details=f"Original exception: {e}",
             )
-            site = f"<div><h1>Error rendering site</h1><p>{error.message}</p></div>"
-            return InitialSiteData(site_html=site, site_title="Error", error=True, framed=True)
+            log_error(
+                envelope,
+                "client_server.render_site",
+            )
+            site = f"<div><h1>Error rendering site</h1><p>{envelope.message}</p></div>"
+            return InitialSiteData(
+                site_html=site, site_title="Error", error=True, framed=True
+            )
         return site
-    
+
     def do_finish_visit(self):
         """Transition the server to the idle phase, allowing it to receive requests."""
         self.transition("idle")
-    
 
     def do_listen_for_events(self, handler: Any) -> None:
         """Subscribe a handler to all events on the event bus.
@@ -914,7 +1023,7 @@ class ClientServer:
         """
         current_request = self.requests.get_current()
         return current_request.id if current_request is not None else None
-    
+
     def precompile_server(self, initial_state: Any) -> tuple[str, str]:
         """Precompile initial page render for faster loading.
 
@@ -935,8 +1044,11 @@ class ClientServer:
         # TODO: Extract compiled body and headers
         body = response.body or "Error during precompilation."
         headers = initial_site.additional_css
-        headers = "\n".join([
-            header.precompile_to_html({DRAFTER_TAG_CLASSES["PRECOMPILE_HEADERS"]}) for header in headers
-        ])
+        headers = "\n".join(
+            [
+                header.precompile_to_html({DRAFTER_TAG_CLASSES["PRECOMPILE_HEADERS"]})
+                for header in headers
+            ]
+        )
 
         return body, headers

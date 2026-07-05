@@ -132,14 +132,15 @@ class PyodideRuntime(RuntimeAdapter):
 
     def _handle_promise_failure(self, error: Any) -> None:
         normalized_error = normalize_bridge_exception(error)
-        drafter_error = report_bridge_error(
+        envelope = report_bridge_error(
             "client.promise_resolution_failed",
             "Failed to resolve bridge runtime promises",
             "bridge.runtime.PyodideRuntime.finish_promises",
             f"Original error: {repr(error)}",
             exception=normalized_error,
+            phase="event_dispatch",
         )
-        raise RuntimeError(drafter_error.message) from normalized_error
+        raise RuntimeError(envelope.message) from normalized_error
 
     def finish_promises(self, promises: list[Any], afterwards: Callable) -> Any:
         return (

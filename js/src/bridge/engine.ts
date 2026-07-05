@@ -1,4 +1,12 @@
+import type {
+	ErrorTelemetryRecord,
+	SystemErrorReport,
+	ErrorDetailsJson,
+	SystemErrorPresentation,
+} from "../debug/telemetry/errors";
 import { alertDialog } from "../dialogs";
+
+export type { ErrorTelemetryRecord } from "../debug/telemetry/errors";
 
 export interface DrafterInitOptions {
 	studentFilename?: string;
@@ -10,11 +18,21 @@ export interface DrafterInitOptions {
 	explicitPackageList?: string[];
 }
 
-export interface SystemErrorOptions {
-	title?: string;
-	suggestion?: string;
-	presentation?: "auto" | "dialog" | "root";
-	symbolicId?: string;
+const DEFAULT_SUGGESTION = "Please show this to your instructor for more help.";
+
+const SYSTEM_ERROR_SOURCE = "js.bridge.engine";
+
+type SystemTelemetrySink = (event: ErrorTelemetryRecord) => void;
+
+let systemTelemetrySink: SystemTelemetrySink | null = null;
+let syntheticEventCounter = 0;
+
+/**
+ * Register the consumer for system-error telemetry (normally the debug
+ * panel). The last registered sink wins, so re-created panels take over.
+ */
+export function setSystemErrorSink(sink: SystemTelemetrySink | null): void {
+	systemTelemetrySink = sink;
 }
 
 export function clearDrafterSiteRoot() {
@@ -34,6 +52,94 @@ export function normalizeSystemError(error: unknown): Error {
 	}
 
 	return new Error(String(error));
+}
+
+function buildEnvelope(
+	report: SystemErrorReport,
+	error: Error,
+): ErrorDetailsJson {
+	const context = report.context ?? {};
+	return {
+		id: report.id,
+		category: report.category,
+		severity: report.severity ?? "error",
+		message: report.message,
+		details: `${error.name}: ${error.message}`,
+		traceback: error.stack ?? null,
+		context: {
+			route: context.route ?? null,
+			request_id: context.request_id ?? null,
+			response_id: context.response_id ?? null,
+			dom_id: context.dom_id ?? null,
+			phase: context.phase ?? null,
+		},
+		status_code: "error",
+		recoverable: report.recoverable ?? false,
+	};
+}
+
+function emitSystemTelemetry(envelope: ErrorDetailsJson): void {
+	const level =
+		envelope.severity === "critical" ? "error" : envelope.severity;
+	const event: ErrorTelemetryRecord = {
+		kind: envelope.id,
+		metadata: {
+			source: SYSTEM_ERROR_SOURCE,
+			level,
+			id: --syntheticEventCounter,
+			version: "0.0.1",
+			timestamp: new Date().toISOString(),
+		},
+		correlation: {
+			route: envelope.context.route ?? undefined,
+			request_id: envelope.context.request_id ?? undefined,
+			response_id: envelope.context.response_id ?? undefined,
+			dom_id: envelope.context.dom_id ?? undefined,
+		},
+		error: envelope,
+	};
+	if (systemTelemetrySink) {
+		try {
+			systemTelemetrySink(event);
+		} catch (sinkError) {
+			console.error(
+				"[Drafter System Error] Failed to deliver system error to debug panel",
+				sinkError,
+			);
+		}
+	}
+}
+
+/**
+ * Presentation policy matrix:
+ *
+ * | Severity  | Recoverable | Presentation        |
+ * |-----------|-------------|---------------------|
+ * | critical  | any         | root render         |
+ * | error     | false       | root render         |
+ * | error     | true        | dialog              |
+ * | warning   | any         | debug panel logging |
+ * | info      | any         | debug panel logging |
+ *
+ * Explicit `presentation` overrides win; a root render falls back to a
+ * dialog when the root element is unavailable. All reports are always
+ * mirrored to the debug panel sink and the console regardless of mode.
+ */
+function resolvePresentation(
+	report: SystemErrorReport,
+): Exclude<SystemErrorPresentation, "auto"> {
+	if (report.presentation && report.presentation !== "auto") {
+		return report.presentation;
+	}
+	const severity = report.severity ?? "error";
+	const recoverable = report.recoverable ?? false;
+	if (severity === "critical") {
+		return "root";
+	}
+	if (severity === "error") {
+		return recoverable ? "dialog" : "root";
+	}
+	return "log";
 }
 
 function formatSystemErrorMessage(
@@ -76,58 +182,56 @@ function renderSystemErrorInRoot(
 	return true;
 }
 
-export function presentSystemError(
-	message: string,
-	error: unknown,
-	{
-		title = "System Error",
-		suggestion = "Please show this to your instructor for more help.",
-		presentation = "auto",
-		symbolicId = "drafter-system-error",
-	}: SystemErrorOptions = {},
-): Error {
-	const normalizedError = normalizeSystemError(error);
+/**
+ * Single entry point for reporting TypeScript-side system errors.
+ *
+ * Normalizes the report into a canonical envelope, mirrors it to the
+ * console and the debug panel sink, and presents it according to the
+ * presentation policy matrix (see resolvePresentation).
+ */
+export function reportSystemError(report: SystemErrorReport): Error {
+	const normalizedError = normalizeSystemError(
+		report.error ?? report.message,
+	);
+	console.error(
+		`[Drafter System Error] ${report.id}:`,
+		report.message,
+		report.error,
+	);
+	const envelope = buildEnvelope(report, normalizedError);
+	emitSystemTelemetry(envelope);
+
+	const mode = resolvePresentation(report);
+	const suggestion = report.suggestion ?? DEFAULT_SUGGESTION;
 
 	if (
-		(presentation === "root" || presentation === "auto") &&
-		renderSystemErrorInRoot(message, normalizedError, suggestion)
+		mode === "root" &&
+		renderSystemErrorInRoot(report.message, normalizedError, suggestion)
 	) {
 		return normalizedError;
 	}
 
-	void alertDialog(
-		formatSystemErrorMessage(message, normalizedError, suggestion),
-		{
-			title,
-			modal: true,
-			draggable: true,
-			width: "560px",
-			symbolicId,
-		},
-	).catch((dialogError) => {
-		console.error(
-			"[Drafter System Error] Failed to present system error dialog",
-			dialogError,
-		);
-	});
+	if (mode === "root" || mode === "dialog") {
+		void alertDialog(
+			formatSystemErrorMessage(
+				report.message,
+				normalizedError,
+				suggestion,
+			),
+			{
+				title: report.title ?? "System Error",
+				modal: true,
+				draggable: true,
+				width: "560px",
+				symbolicId: report.id,
+			},
+		).catch((dialogError) => {
+			console.error(
+				"[Drafter System Error] Failed to present system error dialog",
+				dialogError,
+			);
+		});
+	}
 
 	return normalizedError;
-}
-
-export function handleSystemError(
-	message: string,
-	error: unknown,
-	suggestion: string = "Please show this to your instructor for more help.",
-) {
-	console.error("[Drafter System Error]", message, error);
-	return presentSystemError(message, error, { suggestion });
-}
-
-export function handleSystemErrorWithOptions(
-	message: string,
-	error: unknown,
-	options: SystemErrorOptions,
-) {
-	console.error("[Drafter System Error]", message, error);
-	return presentSystemError(message, error, options);
 }

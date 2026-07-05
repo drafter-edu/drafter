@@ -10,10 +10,10 @@ from drafter.components import (
     InlineCode,
     Div,
 )
-from drafter.monitor.events.errors import DrafterError
+from drafter.data.errors import ErrorDetails
 
 
-def default_error(state, error: DrafterError, server: ClientServer):
+def default_error(state, error: ErrorDetails, server: ClientServer):
     """Default error route handler.
 
     Args:
@@ -26,14 +26,14 @@ def default_error(state, error: DrafterError, server: ClientServer):
     content = [
         Div(
             Header("Error", level=2),
-            Paragraph("An error has occurred:", InlineCode(type(error).__name__)),
+            Paragraph("An error has occurred:", InlineCode(error.id)),
             Paragraph("Message:"),
             PreformattedText(error.message),
             Paragraph("Traceback:"),
             PreformattedText(error.traceback or "No traceback available."),
             Paragraph("Details:"),
             PreformattedText(error.details),
-            Paragraph("Where:", InlineCode(error.where)),
+            Paragraph("Category:", InlineCode(error.category)),
             Paragraph("Navigation options:"),
             BulletedList(
                 [

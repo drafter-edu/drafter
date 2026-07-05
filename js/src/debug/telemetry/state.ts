@@ -1,4 +1,4 @@
-import type { BaseEvent } from "./base";
+import type { TelemetryRecord } from "./base";
 
 export interface Representation {
 	kind: string;
@@ -119,8 +119,8 @@ export interface Dict extends Representation {
 	fullType: string;
 }
 
-export interface UpdatedStateEvent extends BaseEvent {
-	event_type: "UpdatedState";
+export interface UpdatedStateEvent extends TelemetryRecord {
+	kind: "UpdatedState";
 	representation: SpecificRepresentation;
 }
 

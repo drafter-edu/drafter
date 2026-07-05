@@ -1,4 +1,4 @@
-from drafter.monitor.events.recursive_type_describer import analyze_type
+from drafter.data.details.recursive_type_describer import analyze_type
 from dataclasses import dataclass
 
 

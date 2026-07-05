@@ -9,8 +9,12 @@ from drafter.data.channel import DEFAULT_CHANNEL_AFTER, DEFAULT_CHANNEL_BEFORE, 
 from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.bridge.runtime import RuntimeAdapter, create_runtime
-from drafter.bridge.log import debug_log, console_log
-from drafter.bridge.error_handling import raise_bridge_system_error
+from drafter.bridge.log import debug_log
+from drafter.bridge.error_handling import (
+    raise_bridge_system_error,
+    report_bridge_error,
+    report_bridge_warning,
+)
 from drafter.site.site import (
     DRAFTER_TAG_IDS,
     DRAFTER_TAG_CLASSES,
@@ -33,25 +37,26 @@ from drafter.bridge.dom import (
     swap_debug_mode,
 )
 
+
 class SiteRenderer:
     """
     Handles all aspects of updating and rendering the DOM.
     Does not handle event handling or navigation logic.
     """
-    
+
     root_id: str
     true_root_id: str
     runtime: RuntimeAdapter
     channel_history: dict[str, set[str]] = field(default_factory=dict)
     debug_panel: Optional[Any] = None
-    
+
     def __init__(self, runtime, root_id, true_root_id, debug_panel=None):
         self.runtime = runtime
         self.root_id = root_id
         self.true_root_id = true_root_id
         self.debug_panel = debug_panel
         self.channel_history = {}
-        
+
     ### Accessors
 
     def get_root(self):
@@ -59,9 +64,15 @@ class SiteRenderer:
         return document.getElementById(self.root_id)
 
     ### Site
-    
+
     def _setup_error_site(self, initial_site_data: InitialSiteData) -> None:
-        console_log("Error in initial site data: " + repr(initial_site_data))
+        report_bridge_warning(
+            "bridge.error_site_rendered",
+            "Initial site data contained an error; rendering fallback error site",
+            "bridge.site_renderer._setup_error_site",
+            f"InitialSiteData: {repr(initial_site_data)}",
+            phase="setup",
+        )
         true_root = document.getElementById(self.true_root_id)
         true_root.innerHTML = initial_site_data.site_html
         return None
@@ -89,9 +100,7 @@ class SiteRenderer:
                     css_classes = (
                         " ".join(css.classes) if hasattr(css, "classes") else ""
                     )
-                    classes = (
-                        f"{DRAFTER_TAG_CLASSES['THEME']} {css_classes}".strip()
-                    )
+                    classes = f"{DRAFTER_TAG_CLASSES['THEME']} {css_classes}".strip()
                     add_link_to_shadow(shadow_root, css_url, with_class=classes)
                 for style in initial_site_data.additional_style:
                     add_style_to_shadow(
@@ -106,9 +115,7 @@ class SiteRenderer:
                     css_classes = (
                         " ".join(css.classes) if hasattr(css, "classes") else ""
                     )
-                    classes = (
-                        f"{DRAFTER_TAG_CLASSES['THEME']} {css_classes}".strip()
-                    )
+                    classes = f"{DRAFTER_TAG_CLASSES['THEME']} {css_classes}".strip()
                     add_link(root, css_url, with_class=classes)
                 for style in initial_site_data.additional_style:
                     add_style(root, style, with_class=DRAFTER_TAG_CLASSES["THEME"])
@@ -128,8 +135,9 @@ class SiteRenderer:
                 "bridge.site_renderer.setup",
                 f"InitialSiteData: {repr(initial_site_data)}",
                 exception=e,
+                phase="setup",
             )
-        
+
     def update_site(self, response: Response) -> bool:
         """
         Updates the DOM based on the response from the server.
@@ -152,6 +160,10 @@ class SiteRenderer:
                     "Target element not found while applying response body",
                     "bridge.site_renderer.update_site",
                     f"Selector: {selector}; response_url: {response.url}",
+                    route=response.url,
+                    request_id=response.request_id,
+                    response_id=response.id,
+                    phase="navigation",
                 )
 
             elements.forEach(
@@ -168,33 +180,48 @@ class SiteRenderer:
                 return True
 
         return False
-        
-            
+
     ### Channel Content
-            
+
     def remove_page_specific_content(self) -> None:
         """
         Removes CSS and JS that were added for the previous page.
         This ensures that page-specific styles/scripts don't persist across navigation.
         """
         remove_page_content(self.get_root())
-        
+
     def apply_before_channel(self, response: Response) -> None:
-        self.add_channel_content(response.channels.get(DEFAULT_CHANNEL_BEFORE), is_page_specific=True)
-    
+        self.add_channel_content(
+            response.channels.get(DEFAULT_CHANNEL_BEFORE),
+            is_page_specific=True,
+            response=response,
+        )
+
     def apply_after_channel(self, response: Response) -> None:
-        self.add_channel_content(response.channels.get(DEFAULT_CHANNEL_AFTER), is_page_specific=True)
+        self.add_channel_content(
+            response.channels.get(DEFAULT_CHANNEL_AFTER),
+            is_page_specific=True,
+            response=response,
+        )
 
     def add_channel_content(
-        self, channel: Optional[Channel], is_page_specific: bool = False
+        self,
+        channel: Optional[Channel],
+        is_page_specific: bool = False,
+        response: Optional[Response] = None,
     ) -> None:
         """
         Processes messages from a channel and adds them to the page.
         Supports 'script' and 'style' message kinds.
 
+        Failures applying an individual message are reported through
+        structured telemetry (phase ``channel_execution``) and do not stop
+        the remaining messages from being applied.
+
         Args:
             channel: The channel containing messages to process.
             is_page_specific: If True, marks content as page-specific (will be removed on navigation).
+            response: The response the channel belongs to (for correlation).
         """
         if channel:
             root = self.get_root()
@@ -205,19 +232,31 @@ class SiteRenderer:
                     if message.sigil in self.channel_history[channel.name]:
                         continue
                     self.channel_history[channel.name].add(message.sigil)
-                if message.kind == "script":
-                    # TODO: Handle errors while executing this script
-                    add_js(root, message.content, is_page_specific=is_page_specific)
-                elif message.kind == "style":
-                    # TODO: Need to look up whether we are using the shadow dom or not
-                    add_style(
-                        root,
-                        message.content,
-                        is_page_specific=is_page_specific,
+                try:
+                    if message.kind == "script":
+                        add_js(root, message.content, is_page_specific=is_page_specific)
+                    elif message.kind == "style":
+                        # TODO: Need to look up whether we are using the shadow dom or not
+                        add_style(
+                            root,
+                            message.content,
+                            is_page_specific=is_page_specific,
+                        )
+                except Exception as e:
+                    report_bridge_error(
+                        "bridge.channel_message_failed",
+                        f"Failed to apply {message.kind} message from channel '{channel.name}'",
+                        "bridge.site_renderer.add_channel_content",
+                        f"Message content: {message.content!r}",
+                        exception=e,
+                        route=response.url if response else None,
+                        request_id=response.request_id if response else None,
+                        response_id=response.id if response else None,
+                        phase="channel_execution",
                     )
-                    
+
     ### Frame
-                    
+
     def toggle_frame(self) -> None:
         FRAME_PIECES = ",".join(
             f".{DRAFTER_TAG_IDS[key]}"

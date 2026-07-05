@@ -1,22 +1,22 @@
 from dataclasses import dataclass, field
 from typing import Callable, Optional
-from drafter.monitor.telemetry import TelemetryEvent
+from drafter.data.telemetry import TelemetryRecord
 
 
 @dataclass
 class Subscription:
     """
-    Represents a subscription to a topic on the bus.
+    Represents a subscription to a kind of record on the bus.
 
     Attributes:
-        topic: The topic to which the subscription is made.
-        handler: The handler function to be called when an event is published to the topic.
-        filter: An optional filter function to filter events.
-        once: Whether the subscription should be removed after the first event.
+        topic: The record kind to which the subscription is made ("*" for all).
+        handler: The handler function to be called when a record is published to the topic.
+        filter: An optional filter function to filter records.
+        once: Whether the subscription should be removed after the first record.
     """
 
     topic: str
-    handler: Callable[[TelemetryEvent], None]
+    handler: Callable[[TelemetryRecord], None]
     filter: Optional[Callable] = None
     once: bool = False
 
@@ -36,14 +36,14 @@ class EventBus:
 
     maximum_queue_size: int = 500
     subscribers: list[Subscription] = field(default_factory=list)
-    unprocessed_events: list[TelemetryEvent] = field(default_factory=list)
+    unprocessed_events: list[TelemetryRecord] = field(default_factory=list)
 
-    def publish(self, event: TelemetryEvent) -> None:
+    def publish(self, event: TelemetryRecord) -> None:
         """
-        Publish an event to the bus.
+        Publish a record to the bus.
 
         Args:
-            event: The telemetry event to publish.
+            event: The telemetry record to publish.
         """
         if len(self.unprocessed_events) >= self.maximum_queue_size:
             self.unprocessed_events.pop(0)
@@ -53,15 +53,15 @@ class EventBus:
             for subscription in self.subscribers:
                 self.process_event(event, subscription)
 
-    def process_event(self, event: TelemetryEvent, subscription: Subscription) -> None:
+    def process_event(self, event: TelemetryRecord, subscription: Subscription) -> None:
         """
-        Process an event for a given subscription.
+        Process a record for a given subscription.
 
         Args:
-            event: The telemetry event to process.
-            subscription: The subscription to process the event for.
+            event: The telemetry record to process.
+            subscription: The subscription to process the record for.
         """
-        if subscription.topic.startswith(event.event_type) or subscription.topic == "*":
+        if subscription.topic.startswith(event.kind) or subscription.topic == "*":
             if subscription.filter is None or subscription.filter(event):
                 subscription.handler(event)
             if subscription.once:
@@ -70,7 +70,7 @@ class EventBus:
     def subscribe(
         self,
         topic: str,
-        handler: Callable[[TelemetryEvent], None],
+        handler: Callable[[TelemetryRecord], None],
         filter: Optional[Callable] = None,
         once: bool = False,
     ) -> Subscription:

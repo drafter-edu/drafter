@@ -41,8 +41,8 @@ from drafter.components.page_content import Component
 from drafter.data.channel import DEFAULT_CHANNEL_AFTER, DEFAULT_CHANNEL_BEFORE, Channel
 from drafter.data.response import Response
 from drafter.data.request import Request
-from drafter.monitor.events.config import UpdatedConfigurationEvent
-from drafter.monitor.telemetry import TelemetryEvent
+from drafter.data.details.config import UpdatedConfigurationEvent
+from drafter.data.telemetry import TelemetryRecord
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import (
     DRAFTER_TAG_IDS,
@@ -113,6 +113,7 @@ class ClientBridge:
                 "bridge.client_bridge._setup_debug_menu",
                 f"Container id: {DRAFTER_TAG_IDS['DEBUG']}",
                 exception=e,
+                phase="setup",
             )
 
     def _handle_debug_events(self, event: dict) -> bool:
@@ -124,6 +125,8 @@ class ClientBridge:
                 f"Error converting event to JS: {repr(e)}",
                 "bridge.client_bridge.handle_server_event",
                 f"Exception: {repr(e)}",
+                exception=e,
+                phase="event_dispatch",
             )
             return False
         if self.debug_panel:
@@ -137,6 +140,7 @@ class ClientBridge:
                     "bridge.client_bridge._handle_debug_events",
                     f"Event: {repr(event)}",
                     exception=e,
+                    phase="event_dispatch",
                 )
         else:
             raise_bridge_system_error(
@@ -144,6 +148,7 @@ class ClientBridge:
                 "No debug panel is available to handle telemetry event",
                 "bridge.client_bridge._handle_debug_events",
                 f"Event: {repr(event)}",
+                phase="event_dispatch",
             )
         return False
 
@@ -176,7 +181,7 @@ class ClientBridge:
         return updated
 
     ### Event Handling
-    def handle_server_event(self, event_data: TelemetryEvent) -> bool:
+    def handle_server_event(self, event_data: TelemetryRecord) -> bool:
         try:
             event = event_data.to_json()
             debug_log("client.handle_event", event)
@@ -186,12 +191,14 @@ class ClientBridge:
                 f"Error converting event to JSON: {repr(e)}",
                 "bridge.client_bridge.handle_server_event",
                 f"Exception: {repr(e)}",
+                exception=e,
+                phase="event_dispatch",
             )
             return False
-        if event["event_type"] == UpdatedConfigurationEvent.event_type:
-            if event.get("data", {}).get("key") == "framed":
+        if event["kind"] == UpdatedConfigurationEvent.kind:
+            if event.get("key") == "framed":
                 self.site_renderer.toggle_frame()
-            elif event.get("data", {}).get("key") == "in_debug_mode":
+            elif event.get("key") == "in_debug_mode":
                 swap_debug_mode(js.document)
             else:
                 report_bridge_error(
@@ -199,6 +206,7 @@ class ClientBridge:
                     "Unhandled configuration update event",
                     "bridge.client_bridge.handle_server_event",
                     f"Event payload: {repr(event)}",
+                    phase="event_dispatch",
                 )
         handled = self._handle_debug_events(event)
 

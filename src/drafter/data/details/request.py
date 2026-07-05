@@ -5,11 +5,12 @@ Request/Response events for tracking page visits and server interactions.
 from dataclasses import dataclass
 from typing import Any
 
-from drafter.monitor.events.base import BaseEvent
+from drafter.data.errors import STATUS_OK
+from drafter.data.telemetry import TelemetryRecord
 
 
 @dataclass
-class RequestEvent(BaseEvent):
+class RequestEvent(TelemetryRecord):
     """
     Event emitted when a request is received.
 
@@ -26,7 +27,7 @@ class RequestEvent(BaseEvent):
     kwargs: str = ""
     event: str = ""
     request_id: int = -1
-    event_type: str = "RequestEvent"
+    kind: str = "RequestEvent"
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -50,7 +51,7 @@ class RequestEvent(BaseEvent):
 
 
 @dataclass
-class RequestParseEvent(BaseEvent):
+class RequestParseEvent(TelemetryRecord):
     """
     Event emitted when a request is parsed.
 
@@ -67,7 +68,7 @@ class RequestParseEvent(BaseEvent):
 
     request_id: int = -1
     representation: str = ""
-    event_type: str = "RequestParseEvent"
+    kind: str = "RequestParseEvent"
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -78,12 +79,12 @@ class RequestParseEvent(BaseEvent):
 
 
 @dataclass
-class ResponseEvent(BaseEvent):
+class ResponseEvent(TelemetryRecord):
     """
     Event emitted when a response is sent.
 
     Attributes:
-        status_code: HTTP status code
+        status_code: Symbolic response status (see drafter.data.errors.STATUSES)
         payload_type: Type of the response payload
         body_length: Length of the response body
         has_errors: Whether the response has errors
@@ -93,7 +94,7 @@ class ResponseEvent(BaseEvent):
         request_id: ID of the associated request
     """
 
-    status_code: int = 200
+    status_code: str = STATUS_OK
     payload_type: str = ""
     body_length: int = 0
     has_errors: bool = False
@@ -102,7 +103,7 @@ class ResponseEvent(BaseEvent):
     response_id: int = -1
     request_id: int = -1
     formatted_page_content: str = ""
-    event_type: str = "ResponseEvent"
+    kind: str = "ResponseEvent"
 
     def to_json(self) -> dict[str, Any]:
         return {

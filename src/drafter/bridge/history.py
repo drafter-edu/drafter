@@ -9,7 +9,8 @@ from drafter.bridge.runtime import RuntimeAdapter
 from drafter.constants import SUBMIT_BUTTON_KEY
 from drafter.data.response import Response
 from drafter.data.request import Request
-from drafter.bridge.log import debug_log, console_log
+from drafter.bridge.log import debug_log
+from drafter.bridge.error_handling import report_bridge_warning
 
 
 class BrowserHistory:
@@ -21,11 +22,19 @@ class BrowserHistory:
     def add_to_history(self, request: Request):
         url = request.url
         request_id = request.id
-        print(type(request.kwargs))
         try:
             kwargs = json.dumps(request.kwargs) if request.kwargs else "{}"
         except Exception as e:
-            console_log(f"Error serializing request.kwargs to JSON: {e}")
+            report_bridge_warning(
+                "bridge.history_kwargs_serialization_failed",
+                "Could not serialize request arguments for browser history; using empty arguments",
+                "bridge.history.add_to_history",
+                f"Request kwargs: {repr(request.kwargs)}",
+                exception=e,
+                route=url,
+                request_id=request_id,
+                phase="navigation",
+            )
             kwargs = "{}"
         state = {
             "request_id": request_id,

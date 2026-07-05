@@ -1,10 +1,10 @@
 /**
  * Test status event types for tracking student test results.
  */
-import type { BaseEvent } from "./base";
+import type { TelemetryRecord } from "./base";
 
-export interface TestCaseEvent extends BaseEvent {
-	event_type: "TestCaseEvent";
+export interface TestCaseEvent extends TelemetryRecord {
+	kind: "TestCaseEvent";
 	line: number;
 	caller: string;
 	passed: boolean;
@@ -13,5 +13,5 @@ export interface TestCaseEvent extends BaseEvent {
 	given_formatted: string;
 	expected_formatted: string;
 	diff_html: string;
-	kind: string;
+	assertion_kind: string;
 }

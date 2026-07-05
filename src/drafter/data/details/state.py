@@ -1,14 +1,14 @@
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from drafter.monitor.events.base import BaseEvent
+from drafter.data.telemetry import TelemetryRecord
 from drafter.history.utils import safe_repr
-from drafter.monitor.events.recursive_type_describer import analyze_type
+from drafter.data.details.recursive_type_describer import analyze_type
 
 
 @dataclass
-class UpdatedStateEvent(BaseEvent):
-    event_type: str = "UpdatedState"
+class UpdatedStateEvent(TelemetryRecord):
+    kind: str = "UpdatedState"
     representation: Optional[dict] = None
 
     def to_json(self) -> dict[str, Any]:

@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from drafter.monitor.events.base import BaseEvent
+from drafter.data.telemetry import TelemetryRecord
 
 
 @dataclass
-class InitialConfigurationEvent(BaseEvent):
-    event_type: str = "InitialConfiguration"
+class InitialConfigurationEvent(TelemetryRecord):
+    kind: str = "InitialConfiguration"
     config: Optional[dict[str, Any]] = None
 
     def to_json(self) -> dict[str, Any]:
@@ -17,8 +17,8 @@ class InitialConfigurationEvent(BaseEvent):
 
 
 @dataclass
-class UpdatedConfigurationEvent(BaseEvent):
-    event_type: str = "UpdatedConfiguration"
+class UpdatedConfigurationEvent(TelemetryRecord):
+    kind: str = "UpdatedConfiguration"
     key: Optional[str] = None
     value: Optional[Any] = None
     update_default: bool = False
@@ -33,17 +33,18 @@ class UpdatedConfigurationEvent(BaseEvent):
 
 
 @dataclass
-class ResetServerEvent(BaseEvent):
-    event_type: str = "ResetServer"
+class ResetServerEvent(TelemetryRecord):
+    kind: str = "ResetServer"
 
     def to_json(self) -> dict[str, Any]:
         return {
             **super().to_json(),
         }
 
+
 @dataclass
-class ServerInitializedEvent(BaseEvent):
-    event_type: str = "ServerInitialized"
+class ServerInitializedEvent(TelemetryRecord):
+    kind: str = "ServerInitialized"
 
     def to_json(self) -> dict[str, Any]:
         return {

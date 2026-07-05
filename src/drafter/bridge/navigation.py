@@ -5,36 +5,53 @@ from dataclasses import dataclass, field
 from typing import Callable, Optional, Any
 
 from drafter.bridge.history import BrowserHistory
+from drafter.bridge.error_handling import report_bridge_error
 from drafter.constants import SUBMIT_BUTTON_KEY
 from drafter.data.response import Response
 from drafter.data.request import Request
-from drafter.bridge.log import debug_log, console_log
+from drafter.bridge.log import debug_log
+
 
 class NavigationController:
     history: BrowserHistory
     navigation_func: Optional[Callable[[Request], Response]] = None
     redirect_loop_stack: list[str] = field(default_factory=list)
-    
+
     def __init__(self, runtime):
         self.history = BrowserHistory(runtime)
         self.redirect_loop_stack = []
         self.navigation_func = None
-        
+
     def set_navigation_func(self, func: Callable[[Request], Response]) -> None:
         self.navigation_func = func
-    
+
     ### Redirect Handling
-    
+
     def clear_redirect_stack(self) -> None:
         self.redirect_loop_stack.clear()
 
     def handle_redirect(
         self, response: Response, callback: Callable[[Request], Response]
     ) -> None:
+        """Follow a redirect payload, aborting deterministically on loops.
+
+        Policy: a redirect loop is a canonical bridge *error* (the app's
+        redirect logic is broken), reported through structured telemetry.
+        The redirect chain is aborted at the first repeated payload, leaving
+        the last successfully rendered page in place.
+        """
         if repr(response.payload) in self.redirect_loop_stack:
-            # TODO: Raise an error here instead of just logging
-            console_log(
-                "Redirect loop detected: " + " -> ".join(self.redirect_loop_stack)
+            report_bridge_error(
+                "bridge.redirect_loop_detected",
+                "Redirect loop detected; aborting redirect chain",
+                "bridge.navigation.handle_redirect",
+                "Redirect chain: "
+                + " -> ".join(self.redirect_loop_stack)
+                + f" -> {repr(response.payload)}",
+                route=response.url,
+                request_id=response.request_id,
+                response_id=response.id,
+                phase="navigation",
             )
             return
         debug_log("client.handle_redirect", response)
@@ -50,7 +67,7 @@ class NavigationController:
         # TODO: Investigate whether we can use the navigation_func
         callback(new_request)
         self.redirect_loop_stack.pop()
-        
+
     ### Functions for initiating requests ("navigating")
 
     def goto(
@@ -67,14 +84,20 @@ class NavigationController:
         a new request and initiating it.
         """
         button_pressed = button_pressed or extract_button_pressed(data or {})
-        request = Request(action, url, data or {}, {}, dom_id or "",
-                          button_pressed=button_pressed or "")
+        request = Request(
+            action,
+            url,
+            data or {},
+            {},
+            dom_id or "",
+            button_pressed=button_pressed or "",
+        )
         return self.navigate(request, remember)
-    
+
     def do_initial_request(self):
         initial_request = Request("page_load", "index", {}, {}, "")
         return self.navigate(initial_request, remember=False)
-        
+
     def handle_popstate(self, event: Any):
         request = self.history.convert_popstate_to_request(event)
         self.navigate(request, False)
@@ -95,8 +118,8 @@ class NavigationController:
             self.history.add_to_history(request)
         next_visit = self.navigation_func(request)
         return next_visit
-    
-    
+
+
 def extract_button_pressed(data: dict) -> str:
     button_pressed = ""
     if SUBMIT_BUTTON_KEY in data:

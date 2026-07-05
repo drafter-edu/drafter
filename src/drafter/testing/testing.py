@@ -4,8 +4,8 @@ from functools import wraps
 from typing import Any, Optional
 
 import difflib
-from drafter.monitor.audit import log_data
-from drafter.monitor.events.tests import TestCaseEvent
+from drafter.monitor.audit import log_record
+from drafter.data.details.tests import TestCaseEvent
 from drafter.history.formatting import format_page_content
 from drafter.helpers.ast_tools import get_all_relevant_lines
 
@@ -169,12 +169,12 @@ class BakeryTests:
             )
             # print(diff_html)
 
-        log_data(
+        log_record(
             TestCaseEvent(
                 line=test_case.line,
                 caller=test_case.caller,
                 passed=bool(test_case.result),
-                kind=test_case.kind,
+                assertion_kind=test_case.kind,
                 given=actual_str,
                 expected=expected_str,
                 given_formatted=actual_formatted,

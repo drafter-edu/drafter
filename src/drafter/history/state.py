@@ -2,7 +2,8 @@ from typing import Any
 from dataclasses import dataclass, field
 from copy import deepcopy
 
-from drafter.monitor.audit import log_warning
+from drafter.data.errors import CATEGORY_SYSTEM, SEVERITY_WARNING, ErrorDetails
+from drafter.monitor.audit import log_error
 
 
 @dataclass
@@ -37,11 +38,15 @@ class SiteState:
                 old_type_name = type(last_state).__name__
                 new_type_name = type(new_state).__name__
                 # TODO: Log additional information about the route
-                log_warning(
-                    "state.type_change",
-                    f"SiteState type changed from {old_type_name} to {new_type_name}.",
+                log_error(
+                    ErrorDetails(
+                        id="state.type_change",
+                        category=CATEGORY_SYSTEM,
+                        message=f"SiteState type changed from {old_type_name} to {new_type_name}.",
+                        severity=SEVERITY_WARNING,
+                        details=f"SiteState type changed from {old_type_name} to {new_type_name}.",
+                    ),
                     "site_state.update",
-                    f"SiteState type changed from {old_type_name} to {new_type_name}.",
                 )
         # TODO: Should these be deep copies?
         self.current = new_state

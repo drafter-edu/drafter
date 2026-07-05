@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, Optional, TYPE_CHECKING
 from drafter.data.channel import Channel, Message
-from drafter.monitor.events.errors import DrafterError, DrafterWarning
+from drafter.data.errors import STATUS_OK, ErrorDetails
 from drafter.payloads.payloads import ResponsePayload
 
 if TYPE_CHECKING:
@@ -17,7 +17,8 @@ class Response:
         id: The unique identifier for this response.
         request_id: The identifier of the request this response corresponds to.
         payload: The payload content to send to the client (usually a Page).
-        status_code: The status code of the response.
+        status_code: The symbolic status of the response (one of
+            :data:`drafter.data.errors.STATUSES`; ``"ok"`` for success).
         message: A human-readable message associated with the response.
         url: The URL associated with the response. Could technically be different from the request URL.
         body: The full HTML body of the response, which will be injected directly into the site's frame.
@@ -25,8 +26,8 @@ class Response:
         channels: A dictionary of channels for additional communication. Common
             channels include "audio", "before", and "after". The latter two are used to
             send script tags to be executed before and after the main content is rendered.
-        errors: A list of DrafterError instances representing errors that occurred.
-        warnings: A list of DrafterWarning instances representing warnings that occurred.
+        errors: A list of canonical ErrorDetails values representing errors.
+        warnings: A list of canonical ErrorDetails values representing warnings.
         metadata: A dictionary of additional metadata associated with the response.
     """
 
@@ -34,13 +35,13 @@ class Response:
     request_id: int
     payload: ResponsePayload
     url: str
-    status_code: int = 200
+    status_code: str = STATUS_OK
     message: str = "OK"
     body: Optional[str] = None
     target: "Optional[Target]" = None
     channels: Dict[str, Channel] = field(default_factory=dict)
-    errors: list[DrafterError] = field(default_factory=list)
-    warnings: list[DrafterWarning] = field(default_factory=list)
+    errors: list[ErrorDetails] = field(default_factory=list)
+    warnings: list[ErrorDetails] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
 
     def send_messages(self, messages: list[Message]) -> None:

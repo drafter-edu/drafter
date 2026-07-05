@@ -1,145 +1,82 @@
-from dataclasses import dataclass, field
-import traceback
-from typing import Optional, Any
-from drafter.monitor.events.base import BaseEvent
-from drafter.monitor.events.errors import DrafterError, DrafterInfo, DrafterWarning
-from drafter.monitor.telemetry import TelemetryCorrelation, TelemetryEvent
+from typing import Optional
+from drafter.data.errors import (
+    ErrorDetails,
+)
+from drafter.data.correlation import Correlation
+from drafter.data.telemetry import ErrorRecord, TelemetryMetadata, TelemetryRecord
 
 
 def log_error(
-    event_type: str,
-    message: str,
+    envelope: ErrorDetails,
     source: str,
-    details: str,
-    exception: Optional[Exception] = None,
     causation_id: Optional[int] = None,
-    request_id: Optional[int] = None,
-    response_id: Optional[int] = None,
-    dom_id: Optional[str] = None,
-    route: Optional[str] = None,
-) -> DrafterError:
+) -> ErrorDetails:
+    """Emit canonical telemetry for an ErrorDetails as an ErrorRecord.
+
+    Publishes an ErrorRecord whose kind is the envelope's stable id
+    and which carries the canonical ErrorDetails itself.
+
+    Args:
+        envelope: The canonical error envelope to report.
+        source: The component/function reporting the failure.
+        causation_id: Optional id of the event that caused this one.
+
+    Returns:
+        The canonical envelope that was published.
+    """
     from drafter.client_server.commands import get_main_event_bus
 
-    print("Logging error:", message, source, details, route, exception)
-    error = DrafterError(
-        message=message,
-        where=source,
-        details=details,
-        traceback=traceback.format_exc() if exception else None,
-    )
+    if envelope.severity == "warning":
+        level = "warning"
+    elif envelope.severity == "info":
+        level = "info"
+    else:
+        # "error" and "critical" both map to the "error" telemetry level;
+        # the finer severity remains available on the envelope itself.
+        level = "error"
     get_main_event_bus().publish(
-        TelemetryEvent(
-            event_type=event_type,
-            correlation=TelemetryCorrelation(
-                causation_id=causation_id,
-                route=route,
-                request_id=request_id,
-                response_id=response_id,
-                dom_id=dom_id,
-            ),
-            source=source,
-            level="error",
-            data=error,
+        ErrorRecord(
+            kind=envelope.id,
+            metadata=TelemetryMetadata(source=source, level=level),
+            correlation=envelope.context,
+            error=envelope,
         )
     )
-    return error
+    return envelope
 
 
-def log_warning(
-    event_type: str,
-    message: str,
-    source: str,
-    details: str,
-    exception: Optional[Exception] = None,
-    causation_id: Optional[int] = None,
-    request_id: Optional[int] = None,
-    response_id: Optional[int] = None,
-    dom_id: Optional[str] = None,
-    route: Optional[str] = None,
-) -> DrafterWarning:
-    from drafter.client_server.commands import get_main_event_bus
-
-    warning = DrafterWarning(
-        message=message,
-        where=source,
-        details=details,
-        # TODO: Skulpt does not let me do format_traceback yet
-        traceback=traceback.format_exc() if exception else None,
-    )
-    get_main_event_bus().publish(
-        TelemetryEvent(
-            event_type=event_type,
-            correlation=TelemetryCorrelation(
-                causation_id=causation_id,
-                route=route,
-                request_id=request_id,
-                response_id=response_id,
-                dom_id=dom_id,
-            ),
-            source=source,
-            level="warning",
-            data=warning,
-        )
-    )
-    return warning
-
-
-def log_info(
-    event_type: str,
-    message: str,
-    source: str,
-    details: str,
-    exception: Optional[Exception] = None,
-    causation_id: Optional[int] = None,
-    request_id: Optional[int] = None,
-    response_id: Optional[int] = None,
-    dom_id: Optional[str] = None,
-    route: Optional[str] = None,
-) -> DrafterInfo:
-    from drafter.client_server.commands import get_main_event_bus
-
-    info = DrafterInfo(message=message, where=source, details=details)
-    get_main_event_bus().publish(
-        TelemetryEvent(
-            event_type=event_type,
-            correlation=TelemetryCorrelation(
-                causation_id=causation_id,
-                route=route,
-                request_id=request_id,
-                response_id=response_id,
-                dom_id=dom_id,
-            ),
-            source=source,
-            level="info",
-            data=info,
-        )
-    )
-    return info
-
-
-def log_data(
-    data: BaseEvent,
+def log_record(
+    record: TelemetryRecord,
     source: str,
     causation_id: Optional[int] = None,
     request_id: Optional[int] = None,
     response_id: Optional[int] = None,
     dom_id: Optional[str] = None,
     route: Optional[str] = None,
-) -> None:
+) -> TelemetryRecord:
+    """Fill in a record's metadata/correlation and publish it on the main bus.
+
+    Args:
+        record: The telemetry record to publish.
+        source: The component/function emitting the record.
+        causation_id: Optional id of the event that caused this one.
+        request_id: Optional id of the associated request.
+        response_id: Optional id of the associated response.
+        dom_id: Optional id of the associated DOM element.
+        route: Optional route name/url associated with the record.
+
+    Returns:
+        The record that was published.
+    """
     from drafter.client_server.commands import get_main_event_bus
 
-    get_main_event_bus().publish(
-        TelemetryEvent(
-            event_type=data.event_type,
-            correlation=TelemetryCorrelation(
-                causation_id=causation_id,
-                route=route,
-                request_id=request_id,
-                response_id=response_id,
-                dom_id=dom_id,
-            ),
-            source=source,
-            level="info",
-            data=data,
-        )
+    record.metadata = TelemetryMetadata(source=source, level="info")
+    record.correlation = Correlation(
+        causation_id=causation_id,
+        route=route,
+        request_id=request_id,
+        response_id=response_id,
+        dom_id=dom_id,
     )
+    get_main_event_bus().publish(record)
+    return record

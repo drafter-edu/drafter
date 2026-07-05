@@ -1,4 +1,4 @@
-import { handleSystemError, type DrafterInitOptions } from "./bridge/engine";
+import { reportSystemError, type DrafterInitOptions } from "./bridge/engine";
 import {
 	getSkulptFile,
 	setupDrafterConfigfile,
@@ -8,7 +8,7 @@ import {
 import { initializeRuntimeConfigurationOverrides } from "./config_overrides";
 export * from "./common.index";
 
-export { clearDrafterSiteRoot, handleSystemError } from "./bridge/engine";
+export { clearDrafterSiteRoot, reportSystemError } from "./bridge/engine";
 
 const x: pyStr = new Sk.builtin.str("hello");
 
@@ -18,7 +18,13 @@ export function runStudentCode(options: DrafterInitOptions) {
 	try {
 		setupSkulpt();
 	} catch (error) {
-		throw handleSystemError("Failed to set up Skulpt", error);
+		throw reportSystemError({
+			id: "runtime.skulpt_setup_failed",
+			category: "runtime",
+			message: "Failed to set up Skulpt",
+			error,
+			context: { phase: "setup" },
+		});
 	}
 	setupDrafterConfigfile();
 

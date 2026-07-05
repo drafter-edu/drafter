@@ -5,11 +5,11 @@ Test status events for tracking student test results.
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from drafter.monitor.events.base import BaseEvent
+from drafter.data.telemetry import TelemetryRecord
 
 
 @dataclass
-class TestCaseEvent(BaseEvent):
+class TestCaseEvent(TelemetryRecord):
     """
     Event emitted for a single test case result.
 
@@ -21,7 +21,7 @@ class TestCaseEvent(BaseEvent):
         expected: String representation of what was expected
         given_formatted: Formatted version of the given value
         expected_formatted: Formatted version of the expected value
-        kind: The type of assertion (e.g., 'assert_equal', 'assert_state')
+        assertion_kind: The type of assertion (e.g., 'assert_equal', 'assert_state')
         diff_html: HTML diff showing the differences (if test failed)
     """
 
@@ -33,8 +33,8 @@ class TestCaseEvent(BaseEvent):
     given_formatted: str = ""
     expected_formatted: str = ""
     diff_html: str = ""
-    kind: str = "assert_equal"
-    event_type: str = "TestCaseEvent"
+    assertion_kind: str = "assert_equal"
+    kind: str = "TestCaseEvent"
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -46,6 +46,6 @@ class TestCaseEvent(BaseEvent):
             "expected": self.expected,
             "given_formatted": self.given_formatted,
             "expected_formatted": self.expected_formatted,
-            "kind": self.kind,
+            "assertion_kind": self.assertion_kind,
             "diff_html": self.diff_html,
         }
