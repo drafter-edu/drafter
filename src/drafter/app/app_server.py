@@ -14,6 +14,7 @@ from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.routing import Route, WebSocketRoute, Mount
 from starlette.staticfiles import StaticFiles
 import uvicorn
+from drafter.app.hacks import DRAFTER_LOG_CONFIG_FOR_UVICORN
 
 from drafter.config.system import SystemConfiguration
 from drafter.configuration import get_system_config_modifications
@@ -199,6 +200,7 @@ def serve_app_once(
                 host=system.app_server.host,
                 port=system.app_server.port,
                 log_level="info",
+                log_config=DRAFTER_LOG_CONFIG_FOR_UVICORN,
                 reload=False,
             )
             server = uvicorn.Server(uvicorn_config)
