@@ -3,12 +3,12 @@
  */
 
 import { describe, test, expect } from "@jest/globals";
-import "../../dist/skulpt/skulpt.js";
-import "../../dist/skulpt/skulpt-stdlib.js";
-import "../../dist/skulpt/skulpt-drafter.js";
-import "../../dist/js/drafter.js";
-import { builtinRead, setupSkulpt } from "../skulpt_bridge/skulpt-tools.js";
-import { runStudentCode } from "../skulpt.index";
+import "../../../dist/skulpt/skulpt.js";
+import "../../../dist/skulpt/skulpt-stdlib.js";
+import "../../../dist/skulpt/skulpt-drafter.js";
+import "../../../dist/js/drafter.js";
+import { builtinRead, setupSkulpt } from "../../skulpt_bridge/skulpt-tools.js";
+import { runStudentCode } from "../../skulpt.index.js";
 
 describe("TypeScript Client Basic Tests", () => {
 	test("basic test infrastructure works", () => {

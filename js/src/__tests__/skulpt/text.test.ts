@@ -3,12 +3,12 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach } from "@jest/globals";
-import "../../dist/skulpt/skulpt.js";
-import "../../dist/skulpt/skulpt-stdlib.js";
-import "../../dist/skulpt/skulpt-drafter.js";
-import "../../dist/js/drafter.js";
+import "../../../dist/skulpt/skulpt.js";
+import "../../../dist/skulpt/skulpt-stdlib.js";
+import "../../../dist/skulpt/skulpt-drafter.js";
+import "../../../dist/js/drafter.js";
 import { within } from "@testing-library/dom";
-import { runStudentCode, clearDrafterSiteRoot } from "../skulpt.index";
+import { runStudentCode, clearDrafterSiteRoot } from "../../skulpt.index.js";
 
 const TEXT_LAYOUT_CODE = `
 from drafter import *

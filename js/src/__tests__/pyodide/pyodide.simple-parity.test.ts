@@ -5,7 +5,7 @@
 import { describe, test, expect, beforeAll, beforeEach } from "@jest/globals";
 import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
-import { runStudentCode } from "../pyodide.index";
+import { runStudentCode } from "../../pyodide.index";
 import {
 	resetPyodideDrafterRuntime,
 	setupPyodideWithLocalDrafter,

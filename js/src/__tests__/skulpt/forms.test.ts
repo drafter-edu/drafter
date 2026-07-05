@@ -3,13 +3,13 @@
  */
 
 import { describe, test, expect } from "@jest/globals";
-import "../../dist/skulpt/skulpt.js";
-import "../../dist/skulpt/skulpt-stdlib.js";
-import "../../dist/skulpt/skulpt-drafter.js";
-import "../../dist/js/drafter.js";
+import "../../../dist/skulpt/skulpt.js";
+import "../../../dist/skulpt/skulpt-stdlib.js";
+import "../../../dist/skulpt/skulpt-drafter.js";
+import "../../../dist/js/drafter.js";
 import { screen, waitFor, within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
-import { runStudentCode, clearDrafterSiteRoot } from "../skulpt.index";
+import { runStudentCode, clearDrafterSiteRoot } from "../../skulpt.index.js";
 
 const TEXTBOX_CODE = `
 from drafter import *

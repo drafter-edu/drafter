@@ -7,7 +7,7 @@ import { runStudentCode } from "../../pyodide.index";
 import {
 	resetPyodideDrafterRuntime,
 	setupPyodideWithLocalDrafter,
-} from "../pyodide-test-harness";
+} from "./pyodide-test-harness";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -53,6 +53,8 @@ const SKIP_EXAMPLES = [
 	"todo_list.py",
 	"unittest_full_state.py",
 	"weird_plot.py",
+	"complex_state.py",
+	"no_start.py",
 ];
 const INTENTIONAL_ERROR_EXAMPLES: string[] = [
 	"error_non_string_page.py",

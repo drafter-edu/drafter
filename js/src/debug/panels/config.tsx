@@ -333,7 +333,7 @@ export class ConfigPanel extends Panel {
 			<div class="drafter-debug-config-item" data-key={key}>
 				{this.newItemContents(key)}
 			</div>
-		);
+		) as HTMLElement;
 		if (isOverridden) {
 			configItem.classList.add("drafter-debug-config-item-overridden");
 		}

@@ -1,4 +1,4 @@
-import { clearDrafterSiteRoot, setupPyodide } from "../pyodide.index";
+import { clearDrafterSiteRoot, setupPyodide } from "../../pyodide.index";
 
 type WindowWithPyodideState = Window & {
 	pyodide?: any;
@@ -33,6 +33,9 @@ export async function setupPyodideWithLocalDrafter() {
 
 		stateWindow.__drafterPyodideMounted = true;
 	}
+
+	await micropip.install("bakery");
+	await micropip.install("pillow");
 
 	// Drafter expects this config file to exist when DRAFTER_CONFIG_FILE is set.
 	pyodide.FS.writeFile("/_drafter_config.json", "{}");

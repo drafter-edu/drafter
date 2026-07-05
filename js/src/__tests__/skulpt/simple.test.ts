@@ -3,15 +3,15 @@
  */
 
 import { describe, test, expect } from "@jest/globals";
-import "../../dist/skulpt/skulpt.js";
-import "../../dist/skulpt/skulpt-stdlib.js";
-import "../../dist/skulpt/skulpt-drafter.js";
-import "../../dist/js/drafter.js";
+import "../../../dist/skulpt/skulpt.js";
+import "../../../dist/skulpt/skulpt-stdlib.js";
+import "../../../dist/skulpt/skulpt-drafter.js";
+import "../../../dist/js/drafter.js";
 import * as fs from "fs";
 import * as path from "path";
 import { screen, waitFor, within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
-import { runStudentCode, clearDrafterSiteRoot } from "../skulpt.index";
+import { runStudentCode, clearDrafterSiteRoot } from "../../skulpt.index.js";
 
 const SIMPLE_STUDENT_CODE = `
 from drafter import *

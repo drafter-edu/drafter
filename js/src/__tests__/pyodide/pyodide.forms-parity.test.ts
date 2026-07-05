@@ -9,7 +9,7 @@ import {
 	resetPyodideDrafterRuntime,
 	setupPyodideWithLocalDrafter,
 } from "./pyodide-test-harness";
-import { runStudentCode } from "../pyodide.index";
+import { runStudentCode } from "../../pyodide.index";
 
 const TEXTBOX_CODE = `
 from drafter import *

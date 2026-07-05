@@ -3,7 +3,7 @@
  */
 
 import { describe, test, expect, beforeAll, beforeEach } from "@jest/globals";
-import { runStudentCode } from "../pyodide.index";
+import { runStudentCode } from "../../pyodide.index";
 import {
 	resetPyodideDrafterRuntime,
 	setupPyodideWithLocalDrafter,

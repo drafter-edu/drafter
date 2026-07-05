@@ -1,4 +1,6 @@
-export default {
+import type { Config } from "jest";
+
+const sharedConfig = {
 	preset: "ts-jest/presets/default-esm",
 	testEnvironment: "<rootDir>/jest.jsdom-env.cjs",
 	extensionsToTreatAsEsm: [".ts", ".tsx"],
@@ -29,3 +31,19 @@ export default {
 	],
 	testTimeout: 30000,
 };
+
+const config: Config = {
+	projects: [
+		{
+			...sharedConfig,
+			displayName: "pyodide",
+			testMatch: ["**/__tests__/pyodide/**/*.test.{ts,tsx}"],
+		},
+		{
+			...sharedConfig,
+			displayName: "skulpt",
+			testMatch: ["**/__tests__/skulpt/**/*.test.{ts,tsx}"],
+		},
+	],
+};
+export default config;

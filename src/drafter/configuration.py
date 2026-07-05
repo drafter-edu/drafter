@@ -109,7 +109,7 @@ def configure_system(
         bootstrap_config.merge_in_args(config_files_data_part, raise_errors=False)
         modified_args[bootstrap_config.get_key()].update(config_files_data_part)
 
-    print("CONFIG FILE DATA", config_files_data)
+    # print("CONFIG FILE DATA", config_files_data)
 
     ##### Detect main path if missing and we're in a CLI context
     if not is_web() and bootstrap_config.path is None:
@@ -144,28 +144,23 @@ def configure_system(
         app_server_config,
         app_common_config,
     ]:
-        print(">>>", config)
         # Environment variables
         env_vars = config.parse_env_variables(environment_variables)
-        print("EV", env_vars)
         config.merge_in_args(env_vars, False)
         modified_args[config.get_key()].update(env_vars)
         # CLI Args
         if parsed:
             parsed_args = config.parse_args(vars(parsed))
-            print("PA", parsed_args)
             config.merge_in_args(parsed_args, raise_errors=False)
             modified_args[config.get_key()].update(parsed_args)
 
         # From files
         # TODO: Avoid re-opening the same file multiple
-        print(config.get_key())
         if (
             config.get_key() in config_files_data
             and config_files_data[config.get_key()]
         ):
             config_file_data_part = config_files_data[config.get_key()]
-            print("CFP", config_file_data_part)
             config.merge_in_args(config_file_data_part, raise_errors=False)
             modified_args[config.get_key()].update(config_file_data_part)
 
