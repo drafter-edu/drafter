@@ -81,6 +81,6 @@ start_server()
 		await runStudentCode({ code, presentErrors: false });
 
 		const drafterBody = document.querySelector("#drafter-body--");
-		expect(drafterBody?.textContent).toContain("An error has occurred");
+		expect(drafterBody?.textContent).toContain("Something Went Wrong");
 	});
 });

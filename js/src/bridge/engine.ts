@@ -143,14 +143,68 @@ function resolvePresentation(
 }
 
 function formatSystemErrorMessage(
+	report: SystemErrorReport,
 	message: string,
 	error: Error,
 	suggestion: string,
 ): string {
-	return `${message}\n\n${suggestion}\n\n${error.name}: ${error.message}`;
+	const technicalDetails = [
+		`Error ID: ${report.id}`,
+		`Category: ${report.category}`,
+		`Severity: ${report.severity ?? "error"}`,
+		`${error.name}: ${error.message}`,
+	].join("\n");
+	return `${message}\n\nWhat to try:\n- ${suggestion}\n\nTechnical details:\n${technicalDetails}`;
+}
+
+function buildStudentLead(report: SystemErrorReport): string {
+	if (report.id.includes("pyodide_setup")) {
+		return "Drafter could not finish setting up Python in the browser.";
+	}
+	if (report.id.includes("package_")) {
+		return "Drafter had trouble loading one of the Python packages your code needs.";
+	}
+	if (report.id.includes("student_code_failed")) {
+		return "Your code started running but stopped because of an error.";
+	}
+	if (report.category === "runtime") {
+		return "A runtime problem interrupted your program before it could finish.";
+	}
+	return "Something went wrong while Drafter was running your project.";
+}
+
+function buildStudentSteps(
+	report: SystemErrorReport,
+	error: Error,
+	suggestion: string,
+): string[] {
+	const combined = `${report.message}\n${error.name}: ${error.message}\n${error.stack ?? ""}`;
+
+	if (combined.includes("SyntaxError")) {
+		return [
+			"Open the file and line shown in the traceback or stack details.",
+			"Check punctuation first: missing colons, commas, quotes, or parentheses.",
+			"Run your code again after fixing one syntax issue at a time.",
+		];
+	}
+
+	if (combined.includes("NameError")) {
+		return [
+			"Check for misspelled variable or function names.",
+			"Make sure names are defined before they are used.",
+			"Check capitalization because names are case-sensitive.",
+		];
+	}
+
+	return [
+		suggestion,
+		"Read the technical details and focus on the first failing line.",
+		"If needed, share the Error ID with your instructor for faster help.",
+	];
 }
 
 function renderSystemErrorInRoot(
+	report: SystemErrorReport,
 	message: string,
 	error: Error,
 	suggestion: string,
@@ -166,18 +220,47 @@ function renderSystemErrorInRoot(
 	container.className = "drafter-system-error";
 
 	const title = document.createElement("h1");
-	title.textContent = "Drafter System Error";
+	title.textContent = "Something Went Wrong";
 
 	const lead = document.createElement("p");
-	lead.textContent = message;
+	lead.textContent = buildStudentLead(report);
 
 	const advice = document.createElement("p");
-	advice.textContent = suggestion;
+	advice.textContent = "What to try next:";
+
+	const steps = document.createElement("ul");
+	for (const step of buildStudentSteps(report, error, suggestion)) {
+		const item = document.createElement("li");
+		item.textContent = step;
+		steps.appendChild(item);
+	}
+
+	const summary = document.createElement("p");
+	summary.textContent = `Message: ${message}`;
+
+	const detailsHeading = document.createElement("h2");
+	detailsHeading.textContent = "Technical Details";
 
 	const details = document.createElement("pre");
-	details.textContent = `${error.name}: ${error.message}`;
+	details.textContent = [
+		`Error ID: ${report.id}`,
+		`Category: ${report.category}`,
+		`Severity: ${report.severity ?? "error"}`,
+		`Recoverable: ${String(report.recoverable ?? false)}`,
+		`Message: ${message}`,
+		"",
+		`${error.name}: ${error.message}`,
+	].join("\n");
 
-	container.append(title, lead, advice, details);
+	container.append(
+		title,
+		lead,
+		advice,
+		steps,
+		summary,
+		detailsHeading,
+		details,
+	);
 	rootElement.appendChild(container);
 	return true;
 }
@@ -206,7 +289,12 @@ export function reportSystemError(report: SystemErrorReport): Error {
 
 	if (
 		mode === "root" &&
-		renderSystemErrorInRoot(report.message, normalizedError, suggestion)
+		renderSystemErrorInRoot(
+			report,
+			report.message,
+			normalizedError,
+			suggestion,
+		)
 	) {
 		return normalizedError;
 	}
@@ -214,6 +302,7 @@ export function reportSystemError(report: SystemErrorReport): Error {
 	if (mode === "root" || mode === "dialog") {
 		void alertDialog(
 			formatSystemErrorMessage(
+				report,
 				report.message,
 				normalizedError,
 				suggestion,

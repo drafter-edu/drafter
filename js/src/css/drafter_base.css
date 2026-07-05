@@ -51,3 +51,91 @@
 .drafter-body-- .error-page .error-home-link:hover {
 	background-color: #2c5aa0;
 }
+
+.drafter-body-- .drafter-traceback {
+	background-color: #fffaf0;
+	border: 1px solid #e2e8f0;
+	border-left: 4px solid #e53e3e;
+	border-radius: 4px;
+	padding: 12px 15px;
+	font-size: 14px;
+}
+
+.drafter-body-- .drafter-traceback .traceback-hint {
+	margin: 0 0 10px;
+	color: #4a5568;
+	font-style: italic;
+	font-size: 0.95em;
+}
+
+.drafter-body-- .drafter-traceback .traceback-header {
+	color: #718096;
+	font-family: "Consolas", "Monaco", "Courier New", monospace;
+	font-size: 0.9em;
+	margin-bottom: 8px;
+}
+
+.drafter-body-- .drafter-traceback .traceback-frame {
+	border: 1px solid #e2e8f0;
+	border-radius: 4px;
+	background-color: #ffffff;
+	padding: 8px 10px;
+	margin-bottom: 8px;
+	opacity: 0.75;
+}
+
+.drafter-body-- .drafter-traceback .traceback-frame.is-student-code {
+	border-color: #ecc94b;
+	background-color: #fffff0;
+	opacity: 1;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.drafter-body-- .drafter-traceback .traceback-location {
+	font-family: "Consolas", "Monaco", "Courier New", monospace;
+	color: #2d3748;
+	line-height: 1.6;
+}
+
+.drafter-body-- .drafter-traceback .traceback-label {
+	color: #718096;
+}
+
+.drafter-body-- .drafter-traceback .traceback-badge {
+	display: inline-block;
+	margin-left: 8px;
+	padding: 1px 8px;
+	border-radius: 10px;
+	background-color: #d69e2e;
+	color: #ffffff;
+	font-family: inherit;
+	font-size: 0.75em;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	vertical-align: middle;
+}
+
+.drafter-body-- .drafter-traceback pre.traceback-code {
+	margin: 6px 0 0;
+	padding: 6px 10px;
+	background-color: #f7fafc;
+	border-left: 3px solid #cbd5e0;
+	border-radius: 2px;
+}
+
+.drafter-body--
+	.drafter-traceback
+	.traceback-frame.is-student-code
+	pre.traceback-code {
+	border-left-color: #d69e2e;
+}
+
+.drafter-body-- .drafter-traceback pre.traceback-exception {
+	margin: 4px 0 0;
+	padding: 10px 12px;
+	background-color: #fff5f5;
+	border-left: 4px solid #c53030;
+	color: #c53030;
+	font-weight: 700;
+}
