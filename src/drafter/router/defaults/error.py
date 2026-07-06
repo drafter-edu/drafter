@@ -100,7 +100,7 @@ def _render_traceback_frame(frame: _TracebackFrame):
     if frame.is_student_code:
         location_parts.append(Span("your code", classes="traceback-badge"))
 
-    children = [Div(*location_parts, classes="traceback-location")]
+    children: list = [Div(*location_parts, classes="traceback-location")]
     if frame.code_lines:
         # Dedent uniformly so the code and any caret markers stay aligned.
         indent = min(len(line) - len(line.lstrip()) for line in frame.code_lines)
