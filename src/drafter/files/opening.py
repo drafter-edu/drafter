@@ -21,9 +21,9 @@ def open(file_path, mode="r", *args, **kwargs):
     Returns:
         A file-like object that can be used to read from or write to the specified file path, with behavior adapted to the execution environment.
     """
-    if not isinstance(file_path, (str, pathlib.Path)):
+    if not isinstance(file_path, (str, pathlib.Path, os.PathLike)):
         raise ValueError(
-            f"Invalid file path: {file_path}. Must be a string or pathlib.Path."
+            f"Invalid file path: {file_path}. Must be a string, pathlib.Path, or os.PathLike."
         )
 
     # TODO: Check config setting for whether absolute paths are allowed
@@ -90,7 +90,9 @@ def open(file_path, mode="r", *args, **kwargs):
             return _BUILTIN_OPEN(actual_path, mode, *args, **kwargs)
 
 
-def get_drafter_path(path: Union[str, pathlib.Path]) -> pathlib.Path:
+def get_drafter_path(
+    path: Union[str, pathlib.Path, os.PathLike],
+) -> pathlib.Path:
     system = get_system_configuration()
     user_directory = system.bootstrap.get_user_directory()
     actual_path = pathlib.Path(path)
