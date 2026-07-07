@@ -1265,7 +1265,7 @@ wheels = [
 
 [[package]]
 name = "drafter"
-version = "2.0.0b5"
+version = "2.0.0b6"
 source = { editable = "." }
 dependencies = [
     { name = "bakery" },
