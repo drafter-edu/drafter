@@ -238,7 +238,6 @@ class Row(BlockComponent):
 
 class _HtmlList(Component):
     items: list[PageContent]
-    POSITIONAL_ARGS = []
 
     ARGUMENTS = [ComponentArgument("items", is_content=True)]
 
