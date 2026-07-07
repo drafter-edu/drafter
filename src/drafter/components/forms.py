@@ -193,7 +193,7 @@ class SelectBox(FormComponent):
     options: List[str]
     default_value: Optional[str]
 
-    KNOWN_ATTRS = ["name"]
+    KNOWN_ATTRS = ["name", "multiple", "required", "size"]
     ARGUMENTS = [
         ComponentArgument("name"),
         ComponentArgument("options"),
@@ -294,6 +294,43 @@ class CheckBox(FormComponent):
         checkbox_plan = self._plan_tag(context)
 
         return RenderPlan(kind="fragment", items=[hidden_plan, checkbox_plan])
+
+
+@dataclass(repr=False)
+class RelatedCheckBox(FormComponent):
+    default_value: bool
+
+    tag = "input"
+    KNOWN_ATTRS = ["type", "name", "checked"]
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("value"),
+        ComponentArgument("default_value", kind="keyword", default_value=False),
+    ]
+    RENAME_ATTRS = {"default_value": "checked"}
+    DEFAULT_ATTRS = {"type": "checkbox", "data-cardinality": "many"}
+
+    def __init__(self, name: str, value: str, default_value: bool = False, **kwargs):
+        """Initialize checkbox component.
+
+        Args:
+            name: The form field name.
+            value: The value of the checkbox, which will be transformed into a list element
+            default_value: Whether initially checked. Defaults to False.
+            **kwargs (dict): Additional HTML attributes.
+
+        Raises:
+            ValueError: If name is not a valid parameter name.
+        """
+        validate_parameter_name(name, "CheckBox")
+        self.name = name
+        self.value = value
+        self.default_value = bool(default_value)
+        self.extra_settings = kwargs
+
+    def get_id(self) -> str:
+        return self.extra_settings.get("id", self.value)
 
 
 @dataclass(repr=False)

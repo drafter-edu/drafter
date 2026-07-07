@@ -34,6 +34,7 @@ from drafter.components.forms import (
     TextArea,
     SelectBox,
     CheckBox,
+    RelatedCheckBox,
     Label,
     DateTimeInput,
     DateInput,

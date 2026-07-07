@@ -1,4 +1,6 @@
+from collections import Counter
 import json
+from operator import mul
 import time
 from dataclasses import dataclass, field
 from typing import Any, Callable
@@ -325,6 +327,149 @@ class EventManager:
             debug_log("client.hotkey_listener_registered")
 
 
+def get_single_checkbox_names(form: Any) -> set[str]:
+    checkbox_counts: Counter[str] = Counter()
+
+    for element in form.elements:
+        name = str(getattr(element, "name", "") or "")
+        tag_name = str(getattr(element, "tagName", "") or "").lower()
+        input_type = str(getattr(element, "type", "") or "").lower()
+
+        if name and tag_name == "input" and input_type == "checkbox":
+            checkbox_counts[name] += 1
+
+    return {name for name, count in checkbox_counts.items() if count == 1}
+
+
+def get_multiple_field_names(form: Any) -> set[str]:
+    """Get the names of all form fields that can have multiple values."""
+
+    multiple_names: set[str] = set()
+    checkbox_counts: Counter[str] = Counter()
+
+    for element in form.elements:
+        name = str(getattr(element, "name", "") or "")
+        if not name:
+            continue
+
+        tag_name = str(getattr(element, "tagName", "") or "").lower()
+        input_type = str(getattr(element, "type", "") or "").lower()
+
+        if tag_name == "input" and input_type == "checkbox":
+            checkbox_counts[name] += 1
+
+        if tag_name == "select" and bool(getattr(element, "multiple", False)):
+            multiple_names.add(name)
+
+        if (
+            tag_name == "input"
+            and input_type == "file"
+            and bool(getattr(element, "multiple", False))
+        ):
+            multiple_names.add(name)
+
+        if element.getAttribute("data-cardinality") == "many":
+            multiple_names.add(name)
+
+    multiple_names.update(name for name, count in checkbox_counts.items() if count > 1)
+
+    return multiple_names
+
+
+def group_form_data(
+    form: Any,
+    form_data: Any,
+) -> tuple[dict[str, list[Any]], set[str]]:
+    """
+    Convert FormData into its natural Python representation:
+    a mapping from names to lists of submitted values.
+    """
+    multiple_names = get_multiple_field_names(form)
+
+    # FormData.keys() repeats names, so deduplicate them here. Include
+    # declared multiple fields so an unselected <select multiple> becomes [].
+    names = {str(name) for name in form_data.keys()} | multiple_names
+
+    grouped = {name: list(form_data.getAll(name)) for name in names}
+
+    return grouped, multiple_names
+
+
+def normalize_form_data(
+    grouped: dict[str, list[Any]],
+    multiple_names: set[str],
+    single_checkbox_names: set[str],
+) -> dict[str, Any]:
+    """
+    Multi-valued fields are always lists. Scalar fields are scalars unless
+    malformed or duplicate controls submitted more than one value.
+    """
+    normalized: dict[str, Any] = {}
+
+    for name, values in grouped.items():
+        if name in multiple_names:
+            normalized[name] = values
+        elif len(values) == 1:
+            normalized[name] = values[0]
+        elif len(values) > 1:
+            # TODO: Decide if this should be an error/warning, or if it should be promoted
+            normalized[name] = values
+        elif name in single_checkbox_names:
+            normalized[name] = bool(values)
+
+    return normalized
+
+
+def json_decode_form_value(
+    key: str,
+    value: Any,
+    *,
+    element: Any,
+) -> Any:
+    def decode_one(item: Any) -> Any:
+        # Files and other non-string values are not JSON-decoded.
+        if not isinstance(item, str):
+            return item
+
+        try:
+            return json.loads(item)
+        except json.JSONDecodeError as exc:
+            report_bridge_warning(
+                "bridge.form_field_decode_failed",
+                f"Could not JSON-decode form field '{key}'; using raw value",
+                "bridge.events.get_all_event_data",
+                f"Field value: {item!r}",
+                exception=exc,
+                dom_id=element.id if hasattr(element, "id") else None,
+                phase="event_dispatch",
+            )
+            return item
+
+    if isinstance(value, list):
+        return [decode_one(item) for item in value]
+
+    return decode_one(value)
+
+
+def apply_form_transforms(form: Any, form_values: dict[str, Any]) -> None:
+    processed_names: set[str] = set()
+
+    for element in form.elements:
+        key = str(getattr(element, "name", "") or "")
+
+        if not key or key in processed_names or key not in form_values:
+            continue
+
+        if element.getAttribute("data-transform") == "json-decode":
+            form_values[key] = json_decode_form_value(
+                key,
+                form_values[key],
+                element=element,
+            )
+
+        processed_names.add(key)
+
+
 def get_all_event_data(
     runtime: RuntimeAdapter, originator: Any, event: Any, submitter: Any
 ) -> list:
@@ -342,43 +487,30 @@ def get_all_event_data(
     form = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
     if form:
         form_data = runtime.create_form_data(form, submitter)
-        # First convert all form data to a regular dict, handling file uploads as well
-        for key, value in form_data.entries():
-            if isinstance(value, str):
-                if key in data:
-                    if not isinstance(data[key], list):
-                        data[key] = [data[key]]
-                    data[key].append(value)
-                else:
-                    data[key] = value
-            else:
-                # TODO: Need to make this part of a chaining promise to handle async pyodide uploads
-                incomplete_resolutions.append(
-                    runtime.handle_file_upload(value, data, key)
-                )
+        js.console.log(form_data)
+        grouped, multiple_names = group_form_data(form, form_data)
+        single_checkbox_names = get_single_checkbox_names(form)
+        form_values = normalize_form_data(
+            grouped, multiple_names, single_checkbox_names
+        )
+        # # First convert all form data to a regular dict, handling file uploads as well
+        # for key, value in form_data.entries():
+        #     if isinstance(value, str):
+        #         if key in data:
+        #             if not isinstance(data[key], list):
+        #                 data[key] = [data[key]]
+        #             data[key].append(value)
+        #         else:
+        #             data[key] = value
+        #     else:
+        #         # TODO: Need to make this part of a chaining promise to handle async pyodide uploads
+        #         incomplete_resolutions.append(
+        #             runtime.handle_file_upload(value, data, key)
+        #         )
         # Look for `data-transform` attributes to decode any special fields (e.g., JSON-encoded arguments)
-        for element in form.elements:
-            if element.hasAttribute("data-transform"):
-                transform = element.getAttribute("data-transform")
-                if transform == "json-decode":
-                    key = element.name
-                    value = element.value
-                    try:
-                        decoded_value = json.loads(value)
-                        data[key] = decoded_value
-                    except json.JSONDecodeError as e:
-                        data[key] = (
-                            value  # Fallback to raw value if JSON decoding fails
-                        )
-                        report_bridge_warning(
-                            "bridge.form_field_decode_failed",
-                            f"Could not JSON-decode form field '{key}'; using raw value",
-                            "bridge.events.get_all_event_data",
-                            f"Field value: {value!r}",
-                            exception=e,
-                            dom_id=element.id if hasattr(element, "id") else None,
-                            phase="event_dispatch",
-                        )
+        apply_form_transforms(form, form_values)
+        print(form, form_values)
+        data.update(form_values)
 
     # Get arguments from the originator and its parents
     arguments = get_attribute_recursively(

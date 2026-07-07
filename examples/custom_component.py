@@ -44,10 +44,11 @@ If you did want to make a custom component, since it's returning more than just 
 HTML element, you'll need to use the `RenderPlan` API. It's a little more complicated
 and requires diving into some of Drafter's internals.
 
-The SelectBox, _HtmlList, and Table classes are examples of this in action.
+The SelectBox, CheckBox, _HtmlList, and Table classes are examples of this in action.
 
 Usually, it would be expected that if you're making a component, there would only
-be one outermost component (rather than a list).
+be one outermost component (rather than a list). But if you want, you can use the
+`RenderPlan(kind="fragment", items=[...])` to achieve this (which is what CheckBox does).
 """
 from drafter.components import PageContent, Component
 from drafter.components.page_content import ComponentArgument, RenderPlan

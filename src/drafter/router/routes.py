@@ -186,7 +186,7 @@ class Router:
         # TODO: Is the button_pressed now redundant?
         button_pressed = self.preprocess_button_press(request, kwargs)
         signature = self.get_signature(request)
-        self.flatten_kwargs(kwargs)
+        # self.flatten_kwargs(kwargs)
         self.inject_state(signature, args, kwargs, current_state)
         self.inject_other_dependencies(signature, args, kwargs, extra_dependencies)
         self.trim_excess_arguments(request, signature, args, kwargs)
@@ -580,6 +580,8 @@ class Router:
     def flatten_kwargs(self, kwargs: Dict[str, Any]) -> None:
         """Unwrap single-element lists in kwargs for cleaner parameter passing.
 
+        DEPRECATED: We now keep lists as they are.
+
         Args:
             kwargs: Keyword arguments dict (modified in-place).
 
@@ -587,11 +589,11 @@ class Router:
             Warn when data is lost in unwrapping.
             Handle other cases appropriately.
         """
-        for key, value in kwargs.items():
-            if isinstance(value, list) and len(value) == 1:
-                # TODO: Warn if this happens and data is being lost?
-                kwargs[key] = value[0]
-            # TODO: What happens in the other cases?
+        # for key, value in kwargs.items():
+        #    if isinstance(value, list) and len(value) == 1:
+        #        # TODO: Warn if this happens and data is being lost?
+        #        kwargs[key] = value[0]
+        #    # TODO: What happens in the other cases?
 
     def preprocess_button_press(self, request: Request, kwargs: Dict[str, Any]) -> str:
         """Extract button metadata from the request.
