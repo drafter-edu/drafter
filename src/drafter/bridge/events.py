@@ -385,11 +385,7 @@ def group_form_data(
     a mapping from names to lists of submitted values.
     """
     multiple_names = get_multiple_field_names(form)
-
-    # FormData.keys() repeats names, so deduplicate them here. Include
-    # declared multiple fields so an unselected <select multiple> becomes [].
     names = {str(name) for name in form_data.keys()} | multiple_names
-
     grouped = {name: list(form_data.getAll(name)) for name in names}
 
     return grouped, multiple_names
@@ -416,6 +412,21 @@ def normalize_form_data(
             normalized[name] = values
         elif name in single_checkbox_names:
             normalized[name] = bool(values)
+
+    # # First convert all form data to a regular dict, handling file uploads as well
+    # for key, value in form_data.entries():
+    #     if isinstance(value, str):
+    #         if key in data:
+    #             if not isinstance(data[key], list):
+    #                 data[key] = [data[key]]
+    #             data[key].append(value)
+    #         else:
+    #             data[key] = value
+    #     else:
+    #         # TODO: Need to make this part of a chaining promise to handle async pyodide uploads
+    #         incomplete_resolutions.append(
+    #             runtime.handle_file_upload(value, data, key)
+    #         )
 
     return normalized
 
@@ -474,45 +485,16 @@ def get_all_event_data(
     runtime: RuntimeAdapter, originator: Any, event: Any, submitter: Any
 ) -> list:
     """Collect all relevant data for an event, including form data and arguments."""
-    incomplete_resolutions = []
-    data = {}
+    base_data: dict[str, Any] = {}
 
-    # Get any custom event details
+    # Phase 1: Get any custom event details
     if hasattr(event, "detail"):
         for key, value in js.Object.entries(event.detail):
-            data[key] = value
+            base_data[str(key)] = value
 
-    # Get form data
-    # TODO: Allow specifying a different form or scope for data collection
-    form = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
-    if form:
-        form_data = runtime.create_form_data(form, submitter)
-        js.console.log(form_data)
-        grouped, multiple_names = group_form_data(form, form_data)
-        single_checkbox_names = get_single_checkbox_names(form)
-        form_values = normalize_form_data(
-            grouped, multiple_names, single_checkbox_names
-        )
-        # # First convert all form data to a regular dict, handling file uploads as well
-        # for key, value in form_data.entries():
-        #     if isinstance(value, str):
-        #         if key in data:
-        #             if not isinstance(data[key], list):
-        #                 data[key] = [data[key]]
-        #             data[key].append(value)
-        #         else:
-        #             data[key] = value
-        #     else:
-        #         # TODO: Need to make this part of a chaining promise to handle async pyodide uploads
-        #         incomplete_resolutions.append(
-        #             runtime.handle_file_upload(value, data, key)
-        #         )
-        # Look for `data-transform` attributes to decode any special fields (e.g., JSON-encoded arguments)
-        apply_form_transforms(form, form_values)
-        print(form, form_values)
-        data.update(form_values)
+    # Phase 2: Get arguments from the originator and its parents
+    argument_data: dict[str, Any] = {}
 
-    # Get arguments from the originator and its parents
     arguments = get_attribute_recursively(
         originator, Component.DRAFTER_DATA_ARGUMENT_NAME
     )
@@ -522,7 +504,7 @@ def get_all_event_data(
         except Exception as e:
             report_bridge_error(
                 "bridge.component_argument_corrupted",
-                "Could not parse component argument data; skipping it",
+                f"Could not parse component argument data ({i}); skipping it",
                 "bridge.events.get_all_event_data",
                 f"Argument value: {arg!r}",
                 exception=e,
@@ -530,8 +512,138 @@ def get_all_event_data(
                 phase="event_dispatch",
             )
             continue
-        data.update(parsed)
+        argument_data.update(parsed)
 
-    incomplete_resolutions.append(runtime.promise_data(data))
+    # Phase 3: Get form data
+    # TODO: Allow specifying a different form or scope for data collection
+    form = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
 
-    return incomplete_resolutions
+    if not form:
+        base_data.update(argument_data)
+        return [runtime.promise_data(base_data)]
+
+    return process_form_data(
+        runtime,
+        form,
+        submitter,
+        base_data,
+        argument_data,
+    )
+
+
+_PENDING_UPLOAD = object()
+
+
+def _commit_uploaded_files(
+    grouped: dict[str, Any], staging: dict[str, Any], key: str, index: int
+):
+    """Create a Promise.then callback for one uploaded file."""
+
+    def commit(_result: Any) -> None:
+        if key not in staging:
+            raise RuntimeError(
+                f"File upload for field {key!r} resolved without"
+                "placing a value in the target mapping."
+            )
+        grouped[key][index] = staging[key]
+
+    return commit
+
+
+def collect_form_data(
+    runtime: RuntimeAdapter,
+    form: Any,
+    submitter: Any,
+) -> tuple[
+    dict[str, list[Any]],
+    set[str],
+    list[Any],
+]:
+    """
+    Collect raw form values.
+
+    All fields are represented as lists until file uploads complete
+    and cardinality normalization occurs.
+
+    Args:
+        runtime (RuntimeAdapter): _description_
+        form (Any): _description_
+        submitter (Any): _description_
+
+    Returns:
+        tuple[ dict[str, list[Any]], set[str], list[Any], ]: _description_
+    """
+    form_data = runtime.create_form_data(form, submitter)
+    multiple_names = get_multiple_field_names(form)
+
+    grouped: dict[str, list[Any]] = {name: [] for name in multiple_names}
+
+    upload_promises: list[Any] = []
+
+    for raw_key, value in form_data.entries():
+        key = str(raw_key)
+        values = grouped.setdefault(key, [])
+
+        if isinstance(value, str):
+            values.append(value)
+            continue
+
+        # Preserve the FormData entry's position, even when several uploads
+        # for the same field finish out of order.
+        index = len(values)
+        values.append(_PENDING_UPLOAD)
+
+        # handle_file_upload expects to write data[key]. Giving each
+        # upload its own mapping prvents same-name files from overwriting each other.
+        staging: dict[str, Any] = {}
+        upload_promise = runtime.handle_file_upload(value, staging, key)
+
+        commit = _commit_uploaded_files(grouped, staging, key, index)
+
+        upload_promises.append(runtime.thenable(upload_promise, commit))
+    return grouped, multiple_names, upload_promises
+
+
+def ensure_uploads_resolved(
+    grouped: dict[str, list[Any]],
+) -> None:
+    for key, values in grouped.items():
+        for index, value in enumerate(values):
+            if value is _PENDING_UPLOAD:
+                raise RuntimeError(
+                    f"File upload for field {key!r}, index {index}, has not resolved"
+                )
+
+
+def process_form_data(
+    runtime: RuntimeAdapter,
+    form: Any,
+    submitter: Any,
+    base_data: dict[str, Any],
+    argument_data: dict[str, Any],
+) -> list[Any]:
+    grouped, multiple_names, upload_promises = collect_form_data(
+        runtime, form, submitter
+    )
+    single_checkbox_names = get_single_checkbox_names(form)
+
+    def finalize(_result: Any = None) -> Any:
+        ensure_uploads_resolved(grouped)
+
+        form_values = normalize_form_data(
+            grouped, multiple_names, single_checkbox_names
+        )
+        # Look for `data-transform` attributes to decode any special fields (e.g., JSON-encoded arguments)
+        apply_form_transforms(form, form_values)
+        data = dict(base_data)
+        data.update(form_values)
+        data.update(argument_data)
+        # Return the promise itself (not wrapped in a list): when used as a
+        # .then() callback, the thenable is flattened by the promise chain,
+        # and callers expect files_and_data[-1] to be the data dict.
+        return runtime.promise_data(data)
+
+    if not upload_promises:
+        return [finalize()]
+
+    return [runtime.finish_promises(upload_promises, finalize)]

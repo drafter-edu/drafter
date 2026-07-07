@@ -54,6 +54,9 @@ class RuntimeAdapter:
         """Return a promise that resolves to the provided data (for async handling)."""
         return data
 
+    def thenable(self, promise: Any, afterwards: Callable) -> Any:
+        return afterwards(promise)
+
     def handle_file_upload(self, file: Any, data: dict, key: str):
         buffer = file.arrayBuffer()
         raw_bytes = js.Uint8Array(buffer)
@@ -143,27 +146,51 @@ class PyodideRuntime(RuntimeAdapter):
         raise RuntimeError(envelope.message) from normalized_error
 
     def finish_promises(self, promises: list[Any], afterwards: Callable) -> Any:
-        return (
-            js.Promise.all(promises)
+        # Promise.all must receive a real JS array. Passing the Python list
+        # directly makes JS iterate a PyProxy, yielding *borrowed* proxies
+        # that are destroyed once iteration finishes -- but Promise.all calls
+        # .then() on them asynchronously afterwards, causing
+        # "This borrowed proxy was automatically destroyed" errors.
+        js_promises = js.Array.new()
+        for promise in promises:
+            js_promises.push(promise)
+        chained = (
+            js.Promise.all(js_promises)
             .catch(self._handle_promise_failure)
             .then(afterwards)
         )
+        # Calling .then()/.catch() from Python yields a PyodideFuture (a
+        # Python object), not a JS promise. If this result is handed back to
+        # JS (e.g. nested finish_promises for file uploads), it must be a
+        # persistent proxy -- otherwise JS receives a borrowed proxy that is
+        # destroyed at the end of the call, and Promise.all later fails with
+        # "This borrowed proxy was automatically destroyed".
+        return self._create_proxy(chained)
 
     def promise_data(self, data: dict) -> Any:
         """Return a promise that resolves to the provided data (for async handling)."""
         return self._create_proxy(js.Promise.resolve(data))
 
+    def thenable(self, promise: Any, afterwards: Callable) -> Any:
+        return self._create_proxy(promise.then(afterwards))
+
     def handle_file_upload(self, file: Any, data: dict, key: str) -> Any:
+        # Read metadata eagerly: `file` may be a borrowed proxy (e.g. yielded
+        # by a FormData iterator) that is destroyed once iteration finishes,
+        # so it must not be touched inside the async callback below.
         buffer = file.arrayBuffer()
+        filename = file.name
+        file_type = file.type
+        file_size = file.size
 
         def on_buffer_ready(buffer):
             raw_bytes = js.Uint8Array.new(buffer)
             content = bytes(raw_bytes)
             file_data = {
-                "filename": file.name,
+                "filename": filename,
                 "content": content,
-                "type": file.type,
-                "size": file.size,
+                "type": file_type,
+                "size": file_size,
                 "__file_upload__": True,
             }
             if key not in data:
