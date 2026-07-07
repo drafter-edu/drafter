@@ -18,7 +18,7 @@ class FormComponent(Component):
     """
 
     name: str
-    
+
     NEWLINE_MODE = NewlineMode.RETAIN
 
     def handle_aria(self, attributes: dict) -> None:
@@ -73,7 +73,7 @@ class Label(Component):
 
     KNOWN_ATTRS = ["for"]
     RENAME_ATTRS = {"for_id": "for"}
-    
+
     NEWLINE_MODE = NewlineMode.CONVERT_TO_BR
 
     def __init__(
@@ -121,7 +121,17 @@ class TextBox(FormComponent):
     RENAME_ATTRS = {"kind": "type", "default_value": "value"}
     # TODO: There are many more of these to add in, see URL below
     # https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#attributes
-    KNOWN_ATTRS = ["type", "name", "value", "alt"]
+    KNOWN_ATTRS = [
+        "type",
+        "name",
+        "value",
+        "alt",
+        "size",
+        "maxlength",
+        "pattern",
+        "minlength",
+        "placeholder",
+    ]
     DEFAULT_ATTRS = {"type": "text"}
 
     def __init__(
