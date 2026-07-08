@@ -3,8 +3,8 @@ import { wordWrap } from "../utils/text";
 import { Panel } from "./panel";
 
 export class FilesPanel extends Panel {
-	constructor(containerId: string, instanceId: number) {
-		super(containerId, instanceId, "drafter-debug-files", "File Systems");
+	constructor(containerId: string, instanceId: number, root: ParentNode = document) {
+		super(containerId, instanceId, "drafter-debug-files", "File Systems", root);
 	}
 
 	protected get initialContent() {

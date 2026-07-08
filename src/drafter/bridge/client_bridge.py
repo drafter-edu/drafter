@@ -72,6 +72,10 @@ class ClientBridge:
     def setup_site(self, initial_site_data: InitialSiteData) -> None:
         self.set_site_title(initial_site_data.site_title)
         self.site_renderer.setup(initial_site_data)
+        # Scope this instance's event lookups (BODY/FORM) to the same node the
+        # renderer rendered into (its shadow root, when shadow DOM is on), so
+        # concurrent instances never resolve each other's elements.
+        self.events.set_scope(self.site_renderer.scope)
         self._setup_debug_menu()
 
     def setup_events(
@@ -104,7 +108,7 @@ class ClientBridge:
         debug_log("client.setup_debug_menu")
         try:
             self.debug_panel = self.runtime.create_debug_panel(
-                DRAFTER_TAG_IDS["DEBUG"], self
+                DRAFTER_TAG_IDS["DEBUG"], self, self.site_renderer.scope
             )
         except Exception as e:
             raise_bridge_system_error(
@@ -220,7 +224,10 @@ class ClientBridge:
 
     def set_site_title(self, title: str) -> None:
         self.site_title = title
-        js.document.title = title
+        # Only the primary instance (the default root) owns the shared page
+        # <title>; embedded/secondary instances must not fight over it.
+        if self.site_renderer.root_id == DRAFTER_TAG_IDS["ROOT"]:
+            js.document.title = title
         if self.debug_panel:
             self.debug_panel.setHeaderTitle(title)
         # debug_log("client.set_title", title)

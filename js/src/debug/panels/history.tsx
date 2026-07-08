@@ -12,8 +12,8 @@ export class HistoryPanel extends Panel {
 	private currentPage = 1;
 	private readonly pageSize = 5;
 
-	constructor(containerId: string, instanceId: number) {
-		super(containerId, instanceId, "drafter-debug-history", "Page History");
+	constructor(containerId: string, instanceId: number, root: ParentNode = document) {
+		super(containerId, instanceId, "drafter-debug-history", "Page History", root);
 	}
 
 	protected getListElement(): HTMLElement {

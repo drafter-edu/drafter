@@ -42,6 +42,15 @@ class EventManager:
         self.hotkey_events = {}
         self.last_press_time = 0
         self.hotkey_listener_ready = False
+        # The node inner-frame lookups (BODY/FORM) are scoped to. Defaults to the
+        # global document (single-instance); set to the instance's shadow root by
+        # set_scope() so concurrent instances don't find each other's elements.
+        self.scope: Any = js.document
+
+    def set_scope(self, scope: Any) -> None:
+        """Scope this manager's inner-frame lookups to the given node."""
+        if scope is not None:
+            self.scope = scope
 
     # Event Mounts
 
@@ -93,7 +102,7 @@ class EventManager:
                         )
 
                         incomplete_data = get_all_event_data(
-                            self.runtime, target_element, event, None
+                            self.runtime, target_element, event, None, self.scope
                         )
 
                         def finish_navigation(files_and_data):
@@ -133,8 +142,8 @@ class EventManager:
 
     def mount_navigation(self, do_navigation: Callable):
         debug_log("client.mount_navigation")
-        # Get the body element
-        root = js.document.getElementById(DRAFTER_TAG_IDS["BODY"])
+        # Get the body element (scoped to this instance's shadow root)
+        root = self.scope.querySelector("#" + DRAFTER_TAG_IDS["BODY"])
         # Clean up old handlers if they exist
         if self.click_handler is not None:
             root.removeEventListener("click", self.click_handler)
@@ -163,7 +172,11 @@ class EventManager:
 
                 is_anchor = nearest_nav_link.tagName.lower() == "a"
                 incomplete_data = get_all_event_data(
-                    self.runtime, target, event, None if is_anchor else nearest_nav_link
+                    self.runtime,
+                    target,
+                    event,
+                    None if is_anchor else nearest_nav_link,
+                    self.scope,
                 )
 
                 def finish_navigation(files_and_data):
@@ -213,7 +226,7 @@ class EventManager:
                 url = js.location.href
             # Build and dispatch navigation event
             incomplete_data = get_all_event_data(
-                self.runtime, event.target, event, submitter
+                self.runtime, event.target, event, submitter, self.scope
             )
 
             def finish_form_navigation(data):
@@ -247,7 +260,7 @@ class EventManager:
 
         root.addEventListener("click", self.click_handler)
 
-        form_root = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
+        form_root = self.scope.querySelector("#" + DRAFTER_TAG_IDS["FORM"])
         if form_root:
             form_root.addEventListener("submit", self.submit_handler)
         else:
@@ -482,7 +495,11 @@ def apply_form_transforms(form: Any, form_values: dict[str, Any]) -> None:
 
 
 def get_all_event_data(
-    runtime: RuntimeAdapter, originator: Any, event: Any, submitter: Any
+    runtime: RuntimeAdapter,
+    originator: Any,
+    event: Any,
+    submitter: Any,
+    scope: Any = js.document,
 ) -> list:
     """Collect all relevant data for an event, including form data and arguments."""
     base_data: dict[str, Any] = {}
@@ -514,9 +531,8 @@ def get_all_event_data(
             continue
         argument_data.update(parsed)
 
-    # Phase 3: Get form data
-    # TODO: Allow specifying a different form or scope for data collection
-    form = js.document.getElementById(DRAFTER_TAG_IDS["FORM"])
+    # Phase 3: Get form data (scoped to this instance's shadow root)
+    form = scope.querySelector("#" + DRAFTER_TAG_IDS["FORM"])
 
     if not form:
         base_data.update(argument_data)

@@ -13,7 +13,10 @@ export abstract class Panel {
         protected readonly containerId: string,
         protected readonly instanceId: number,
         protected readonly panelName: string,
-        protected readonly panelTitle: string
+        protected readonly panelTitle: string,
+        // The node to scope element lookups to (the instance's shadow root when
+        // shadow DOM is on). Defaults to document for the single-instance case.
+        protected readonly root: ParentNode = document
     ) {
         this.container = this.requireElementById(
             containerId,
@@ -73,7 +76,9 @@ export abstract class Panel {
     }
 
     private requireElementById(id: string, errorMessage: string): HTMLElement {
-        const element = document.getElementById(id);
+        // Scoped lookup: shadow roots have no getElementById, so query by id
+        // selector within the instance root. All panel elements live under it.
+        const element = this.root.querySelector(`#${id}`) as HTMLElement | null;
         if (!element) {
             throw new Error(errorMessage);
         }

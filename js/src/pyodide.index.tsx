@@ -78,15 +78,26 @@ interface AppServerPyodideOptions {
 	inlineCode?: string;
 	loadPackagesAutomatically?: boolean;
 	explicitPackageList?: string[];
+	/** Root element this instance renders into. Defaults to "drafter-root--". */
+	rootElementId?: string;
+	/** Isolate this instance in a shadow root (default true unless set false). */
+	useShadowDom?: boolean;
+}
+
+/** Handle for one live Drafter instance on the page. */
+export interface DrafterInstanceHandle {
+	rootElementId: string;
+	/** Re-run this instance, optionally with new code. */
+	restart: (code?: string) => Promise<void>;
+	/** Tear down this instance's websocket and event listeners. */
+	stop: () => void;
 }
 
 interface WindowWithDrafterInterruptBuffer extends Window {
 	__drafterInterruptBuffer?: Int32Array;
 }
 
-let appServerWebSocket: WebSocket | null = null;
-
-async function resetPyodideRuntime() {
+async function resetPyodideRuntime(rootElementId: string) {
 	const pyodide = (window as any).pyodide;
 	if (pyodide === undefined) {
 		return;
@@ -95,18 +106,18 @@ async function resetPyodideRuntime() {
 	try {
 		await pyodide.runPythonAsync(
 			[
-				"from drafter.client_server.commands import set_main_server",
-				"set_main_server(None)",
+				"from drafter.client_server.commands import reset_server_for_root",
+				`reset_server_for_root(${JSON.stringify(rootElementId)})`,
 			].join("\n"),
 		);
 	} catch (error) {
 		console.warn(
-			"[Drafter AppServer Scaffolding] Failed to reset main server:",
+			"[Drafter AppServer Scaffolding] Failed to reset server for root:",
 			error,
 		);
 	}
 
-	clearDrafterSiteRoot();
+	clearDrafterSiteRoot(rootElementId);
 }
 
 function interruptActiveRun() {
@@ -162,12 +173,24 @@ async function fetchStudentCode(pythonUrl?: string): Promise<string> {
 	return response.text();
 }
 
-export async function startPyodideAppServerSession(
+/**
+ * Create and start one Drafter instance rendering into `options.rootElementId`.
+ *
+ * All session state (websocket, restart token, current code, run-loop flags)
+ * lives in this closure, so multiple instances can run concurrently on one page,
+ * sharing the single Pyodide runtime. Each instance renders into its own root
+ * element (and, by default, its own shadow root for isolation).
+ */
+export async function createDrafterInstance(
 	options: AppServerPyodideOptions,
-) {
+): Promise<DrafterInstanceHandle> {
+	const rootElementId = options.rootElementId ?? "drafter-root--";
+	const useShadowDom = options.useShadowDom;
+
 	let latestStudentCode: string | null = null;
 	let runInProgress = false;
 	let restartRequested = false;
+	let instanceWebSocket: WebSocket | null = null;
 
 	const getStudentCode = async () => {
 		if (latestStudentCode !== null) {
@@ -190,11 +213,15 @@ export async function startPyodideAppServerSession(
 		try {
 			while (true) {
 				restartRequested = false;
-				await resetPyodideRuntime();
+				await resetPyodideRuntime(rootElementId);
 				const code = await getStudentCode();
 				(window as any).__drafterCurrentCode = code;
 				const executionOptions: DrafterInitOptions = {
 					code,
+					// Pass the RAW option (may be undefined) so the single-instance
+					// back-compat path never triggers per-instance reconfiguration.
+					rootElementId: options.rootElementId,
+					useShadowDom,
 					loadPackagesAutomatically:
 						options.loadPackagesAutomatically,
 					explicitPackageList: options.explicitPackageList,
@@ -219,14 +246,9 @@ export async function startPyodideAppServerSession(
 		}
 	};
 
-	if (appServerWebSocket) {
-		appServerWebSocket.close();
-		appServerWebSocket = null;
-	}
-
 	if (options.devWsUrl) {
-		appServerWebSocket = new WebSocket(options.devWsUrl);
-		appServerWebSocket.onmessage = (e) => {
+		instanceWebSocket = new WebSocket(options.devWsUrl);
+		instanceWebSocket.onmessage = (e) => {
 			const msg = JSON.parse(e.data);
 			if (msg.type === "reload") {
 				location.reload();
@@ -250,15 +272,26 @@ export async function startPyodideAppServerSession(
 
 	// Allow external callers (e.g. the in-browser code editor) to trigger a
 	// restart with optionally new code by dispatching a custom window event.
-	// A per-session token is used to ensure only events originating from this
-	// application's own editor are accepted.
+	// A per-instance token ensures only events targeting THIS instance are
+	// accepted; the dispatcher must include the token and (optionally) the
+	// rootElementId so multiple instances don't all restart at once.
 	const sessionToken = crypto.randomUUID();
 	(window as any).__drafterRestartToken = sessionToken;
 
-	window.addEventListener("drafter-restart-student-code", (event: Event) => {
+	const restartListener = (event: Event) => {
 		const detail = (
-			event as CustomEvent<{ code?: string; _token?: string }>
+			event as CustomEvent<{
+				code?: string;
+				_token?: string;
+				rootElementId?: string;
+			}>
 		).detail;
+		if (
+			detail?.rootElementId !== undefined &&
+			detail.rootElementId !== rootElementId
+		) {
+			return;
+		}
 		if (detail?._token !== sessionToken) {
 			console.warn(
 				"[Drafter] Ignoring drafter-restart-student-code event with invalid token.",
@@ -276,9 +309,38 @@ export async function startPyodideAppServerSession(
 				error,
 			);
 		});
-	});
+	};
+	window.addEventListener("drafter-restart-student-code", restartListener);
 
 	await runStudentExecution();
+
+	return {
+		rootElementId,
+		restart: async (code?: string) => {
+			latestStudentCode = typeof code === "string" ? code : null;
+			await runStudentExecution();
+		},
+		stop: () => {
+			if (instanceWebSocket) {
+				instanceWebSocket.close();
+				instanceWebSocket = null;
+			}
+			window.removeEventListener(
+				"drafter-restart-student-code",
+				restartListener,
+			);
+		},
+	};
+}
+
+/**
+ * Back-compat entry point for the single-instance scaffolding. Starts one
+ * instance on the default root and resolves once its initial run completes.
+ */
+export async function startPyodideAppServerSession(
+	options: AppServerPyodideOptions,
+): Promise<void> {
+	await createDrafterInstance(options);
 }
 
 export async function setupPyodide(options: PyodideSettings) {
@@ -431,7 +493,23 @@ export async function patchPythonFeatures() {
 	}
 }
 
-export async function runStudentCode(
+// Serializes student-code execution across all instances. Pyodide is single
+// threaded and each run mutates shared global config (via configure_instance),
+// so concurrent createDrafterInstance() calls (e.g. Promise.all) must not
+// interleave their configure -> run critical sections. This chain guarantees
+// each run completes fully before the next begins.
+let executionChain: Promise<unknown> = Promise.resolve();
+
+export function runStudentCode(options: DrafterInitOptions): Promise<any> {
+	const result = executionChain.then(
+		() => runStudentCodeInner(options),
+		() => runStudentCodeInner(options),
+	);
+	executionChain = result.catch(() => undefined);
+	return result;
+}
+
+async function runStudentCodeInner(
 	options: DrafterInitOptions,
 ): Promise<any> {
 	console.log("Running student code with options:", options);
@@ -442,10 +520,47 @@ export async function runStudentCode(
 		);
 	}
 
+	// Only reconfigure when a root is explicitly requested (the multi-instance
+	// path). The single-instance back-compat path leaves rootElementId undefined
+	// so config/env defaults (root id, shadow DOM) are preserved exactly.
+	if (options.rootElementId !== undefined) {
+		const shadowArg =
+			options.useShadowDom === undefined
+				? "None"
+				: options.useShadowDom
+					? "True"
+					: "False";
+		try {
+			await pyodide.runPythonAsync(
+				[
+					"from drafter.client_server.commands import configure_instance",
+					`configure_instance(${JSON.stringify(
+						options.rootElementId,
+					)}, ${shadowArg})`,
+				].join("\n"),
+			);
+		} catch (error) {
+			throw reportSystemError({
+				id: "runtime.instance_configure_failed",
+				category: "runtime",
+				message: "Error configuring Drafter instance",
+				error,
+				context: { phase: "setup", dom_id: options.rootElementId },
+			});
+		}
+	}
+
+	// For concurrent instances, run the student code in its own module namespace
+	// so they don't share __main__ globals (route functions, State classes, etc.).
+	// The single-instance path runs in the main globals exactly as before.
+	const runOptions: { filename: string; globals?: any } = {
+		filename: options?.studentFilename || "main.py",
+	};
+	if (options.rootElementId !== undefined) {
+		runOptions.globals = pyodide.toPy({ __name__: "__main__" });
+	}
 	try {
-		const result = await pyodide.runPythonAsync(options.code, {
-			filename: options?.studentFilename || "main.py",
-		});
+		const result = await pyodide.runPythonAsync(options.code, runOptions);
 		return result;
 	} catch (error) {
 		if (

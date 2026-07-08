@@ -12,8 +12,8 @@ export class ConfigPanel extends Panel {
 	private overrides: JsonObject = {};
 	private editingKeys = new Set<string>();
 
-	constructor(containerId: string, instanceId: number) {
-		super(containerId, instanceId, "drafter-debug-config", "Configuration");
+	constructor(containerId: string, instanceId: number, root: ParentNode = document) {
+		super(containerId, instanceId, "drafter-debug-config", "Configuration", root);
 		this.overrides = getStoredConfigurationOverrides();
 	}
 

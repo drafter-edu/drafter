@@ -6,8 +6,8 @@ import type { ReactElement } from "jsx-dom";
 export class TestPanel extends Panel {
     private tests: TestCaseEvent[] = [];
 
-    constructor(containerId: string, instanceId: number) {
-        super(containerId, instanceId, "drafter-debug-tests", "Your Tests");
+    constructor(containerId: string, instanceId: number, root: ParentNode = document) {
+        super(containerId, instanceId, "drafter-debug-tests", "Your Tests", root);
     }
 
     protected get initialContent() {

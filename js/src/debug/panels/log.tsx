@@ -7,8 +7,8 @@ interface LogEntry {
 }
 
 export class LogPanel extends Panel {
-	constructor(containerId: string, instanceId: number) {
-		super(containerId, instanceId, "drafter-debug-log", "Event Log");
+	constructor(containerId: string, instanceId: number, root: ParentNode = document) {
+		super(containerId, instanceId, "drafter-debug-log", "Event Log", root);
 	}
 
 	protected get initialContent() {

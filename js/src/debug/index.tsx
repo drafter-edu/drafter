@@ -39,21 +39,30 @@ export class DebugPanel {
 	private filesPanel: FilesPanel;
 	private panels: Panel[];
 
+	// The node to scope all debug DOM lookups to: the instance's shadow root
+	// when shadow DOM is on, else document. Lets concurrent instances each
+	// mount their own debug panel without colliding on shared ids/classes.
+	private root: ParentNode;
+
 	constructor(
 		private containerId: string,
 		private clientBridge: ClientBridgeWrapperInterface,
+		// May arrive as null when marshalled from Python (None -> null), which
+		// bypasses default params, so normalize explicitly.
+		root: ParentNode | null = document,
 	) {
+		this.root = root ?? document;
 		this.instanceId = DebugPanel.instanceCounter++;
 
-		this.headerBar = new DebugHeaderBar("");
-		this.footerBar = new DebugFooterBar();
-		this.testingPanel = new TestPanel(this.containerId, this.instanceId);
-		this.statePanel = new StatePanel(this.containerId, this.instanceId);
-		this.routesPanel = new RoutesPanel(this.containerId, this.instanceId);
-		this.historyPanel = new HistoryPanel(this.containerId, this.instanceId);
-		this.logPanel = new LogPanel(this.containerId, this.instanceId);
-		this.configPanel = new ConfigPanel(this.containerId, this.instanceId);
-		this.filesPanel = new FilesPanel(this.containerId, this.instanceId);
+		this.headerBar = new DebugHeaderBar("", this.root);
+		this.footerBar = new DebugFooterBar(this.root);
+		this.testingPanel = new TestPanel(this.containerId, this.instanceId, this.root);
+		this.statePanel = new StatePanel(this.containerId, this.instanceId, this.root);
+		this.routesPanel = new RoutesPanel(this.containerId, this.instanceId, this.root);
+		this.historyPanel = new HistoryPanel(this.containerId, this.instanceId, this.root);
+		this.logPanel = new LogPanel(this.containerId, this.instanceId, this.root);
+		this.configPanel = new ConfigPanel(this.containerId, this.instanceId, this.root);
+		this.filesPanel = new FilesPanel(this.containerId, this.instanceId, this.root);
 		this.panels = [
 			this.statePanel,
 			this.routesPanel,
@@ -88,7 +97,9 @@ export class DebugPanel {
 	}
 
 	private getContainerElement(): HTMLElement {
-		const container = document.getElementById(this.containerId);
+		const container = this.root.querySelector(
+			`#${this.containerId}`,
+		) as HTMLElement | null;
 		if (!container) {
 			throw this.reportError(
 				`DebugPanel: Container with id '${this.containerId}' not found.`,
@@ -192,7 +203,7 @@ export class DebugPanel {
 			[".drafter-about-button", "--about"],
 		];
 		NAVIGATION_BUTTONS.forEach(([selector, detail]) => {
-			const buttons = document.querySelectorAll(selector);
+			const buttons = this.root.querySelectorAll(selector);
 			buttons.forEach((button) => {
 				button.addEventListener("click", (event) => {
 					event.preventDefault();

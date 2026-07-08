@@ -4,8 +4,8 @@ export class DebugFooterBar {
     private footerElement: HTMLElement;
     private routeElement: HTMLElement;
 
-    constructor() {
-        this.footerElement = document.querySelector(
+    constructor(root: ParentNode = document) {
+        this.footerElement = root.querySelector(
             ".drafter-footer--"
         ) as HTMLElement;
 

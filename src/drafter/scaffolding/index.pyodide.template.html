@@ -1,6 +1,6 @@
 {% extends "index.base.template.html" %}
 {% block scripts %}
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js"></script>
+  <script src="{{ system.app_common.pyodide_url | tojson }}/pyodide.js"></script>
   <script src="{{ static('js/drafter.pyodide.js') }}"></script>
 {% endblock scripts %}
 {% block initialization %}

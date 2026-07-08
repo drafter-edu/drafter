@@ -1,12 +1,13 @@
 import { Panel } from "./panel";
 
 export class RoutesPanel extends Panel {
-    constructor(containerId: string, instanceId: number) {
+    constructor(containerId: string, instanceId: number, root: ParentNode = document) {
         super(
             containerId,
             instanceId,
             "drafter-debug-routes",
             "Registered Routes",
+            root,
         );
     }
 

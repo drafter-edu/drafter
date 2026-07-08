@@ -255,12 +255,13 @@ function renderRepresentation(rep: SpecificRepresentation) {
 export class StatePanel extends Panel {
 	private currentState: SpecificRepresentation | null = null;
 
-	constructor(containerId: string, instanceId: number) {
+	constructor(containerId: string, instanceId: number, root: ParentNode = document) {
 		super(
 			containerId,
 			instanceId,
 			"drafter-debug-current-state",
 			"Current State",
+			root,
 		);
 	}
 

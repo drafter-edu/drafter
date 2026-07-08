@@ -3,6 +3,7 @@ from drafter.config.system import SystemConfiguration
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.bridge.client_bridge import ClientBridge
 from drafter.client_server.client_server import ClientServer
+from drafter.client_server.commands import register_server, set_main_server
 
 def run_client_bridge(
     system: SystemConfiguration,
@@ -20,6 +21,9 @@ def run_client_bridge(
     else:
         configuration = server.get_current_configuration()
         rendered_site = server.do_render()
+    # Register this server under its root id so multiple concurrent instances can
+    # coexist and be looked up / reset independently by their root_element_id.
+    register_server(configuration.root_element_id, server)
     client_bridge = ClientBridge(configuration)
     client_bridge.setup_site(rendered_site)
     
@@ -29,6 +33,10 @@ def run_client_bridge(
     server.do_listen_for_events(client_bridge.handle_server_event)
     
     def handle_visit(request):
+        # Make this instance's server "current" for the duration of the visit so
+        # runtime get_main_server() calls (e.g. the default reset route) resolve
+        # to this instance rather than whichever instance loaded last.
+        set_main_server(server)
         # Visiting Phase
         response = server.do_visit(request)
         # Committing Phase

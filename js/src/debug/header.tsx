@@ -4,8 +4,8 @@ import { openCodeEditor } from "./editor";
 export class DebugHeaderBar {
 	private headerElement: HTMLElement;
 
-	constructor(siteName: string) {
-		this.headerElement = document.querySelector(
+	constructor(siteName: string, root: ParentNode = document) {
+		this.headerElement = root.querySelector(
 			".drafter-header--",
 		) as HTMLElement;
 

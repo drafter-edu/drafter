@@ -133,10 +133,14 @@ def add_link_to_shadow(
     shadow_root.appendChild(link)
 
 
-def add_style_to_shadow(shadow_root, css: str, with_class: str = "") -> None:
+def add_style_to_shadow(
+    shadow_root, css: str, with_class: str = "", is_page_specific: bool = False
+) -> None:
     """Adds CSS content to the shadow DOM by creating a style element."""
     style = document.createElement("style")
     style.innerHTML = css
+    if is_page_specific:
+        style.setAttribute(ATTR_PAGE_SPECIFIC, "true")
     if with_class:
         style.setAttribute("class", with_class)
     shadow_root.appendChild(style)
@@ -153,17 +157,21 @@ def add_header(root, header_content: str) -> None:
 
 
 def remove_page_content(root) -> None:
-    """Removes all page-specific CSS and JS that were added for the previous page."""
+    """Removes all page-specific CSS and JS that were added for the previous page.
+
+    Page-specific styles may live in the global head (light DOM) or inside an
+    instance's shadow root, so remove each element from its own parent rather
+    than assuming the head.
+    """
     elements = list(root.querySelectorAll(f"style[{ATTR_PAGE_SPECIFIC}='true']"))
     elements.extend(root.querySelectorAll(f"script[{ATTR_PAGE_SPECIFIC}='true']"))
-    # TODO: For shadowdom need to find the pseudo-head
     head = document.getElementsByTagName("head")[0]
-
-    if not head:
-        return
+    if head:
+        elements.extend(head.querySelectorAll(f"style[{ATTR_PAGE_SPECIFIC}='true']"))
+        elements.extend(head.querySelectorAll(f"script[{ATTR_PAGE_SPECIFIC}='true']"))
 
     for element in elements:
-        head.removeChild(element)
+        element.remove()
 
 
 def remove_existing_theme(root, theme_class: str) -> None:

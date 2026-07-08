@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Drafter — Multiple Instances Playground</title>
+    <style>
+			body {
+				font-family: system-ui, Arial, sans-serif;
+				margin: 0;
+				background: #f5f7fb;
+				color: #222;
+			}
+			header {
+				padding: 16px 24px;
+				background: #fff;
+				border-bottom: 1px solid #ddd;
+			}
+			header h1 {
+				margin: 0 0 4px;
+				font-size: 20px;
+			}
+			#status {
+				color: #555;
+				font-size: 14px;
+			}
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+				gap: 20px;
+				padding: 20px 24px;
+			}
+			.panel {
+				background: #fff;
+				border: 1px solid #ddd;
+				border-radius: 12px;
+				overflow: hidden;
+				box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+			}
+			.panel > .label {
+				padding: 8px 14px;
+				font-weight: 600;
+				font-size: 13px;
+				background: #eef1f8;
+				border-bottom: 1px solid #e0e4ee;
+			}
+			.panel > .mount {
+				min-height: 160px;
+				padding: 6px;
+			}
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Drafter — Multiple Instances on One Page</h1>
+      <div id="status">Booting Pyodide…</div>
+    </header>
+    <!-- Each instance renders into its own root element; shadow DOM keeps their
+		     ids and styles isolated even though they share one Pyodide runtime. -->
+    <div class="grid">
+      <div class="panel">
+        <div class="label">Instance A — Counter</div>
+        <div class="mount">
+          <div id="drafter-root--a"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="label">Instance B — Greeter</div>
+        <div class="mount">
+          <div id="drafter-root--b"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="label">Instance C — Counter (independent)</div>
+        <div class="mount">
+          <div id="drafter-root--c"></div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js"></script>
+    <script src="__drafter_assets/js/drafter.pyodide.js"></script>
+    <script>
+			// Minimal system config so Drafter's config file exists in the FS.
+			window.DRAFTER_MODIFIED_CONFIGURATION = {};
+
+			const COUNTER_APP = (title) => `
+from drafter import *
+hide_debug_information()
+
+@dataclass
+class State:
+    count: int
+
+@route
+def index(state: State):
+    return Page(state, [
+        "${title}",
+        f"Count: {state.count}",
+        Button("Increment", increment),
+        Button("Reset", reset),
+    ])
+
+@route
+def increment(state: State):
+    state.count += 1
+    return index(state)
+
+@route
+def reset(state: State):
+    state.count = 0
+    return index(state)
+
+start_server(State(0))
+`;
+
+			const GREETER_APP = `
+from drafter import *
+hide_debug_information()
+
+
+add_website_css('''div {
+  background-color: red;
+}''')
+
+@dataclass
+class State:
+    name: str
+    greeting: str
+
+@route
+def index(state: State):
+    return Page(state, [
+        "Instance B — Greeter",
+        state.greeting if state.greeting else "Type a name and greet!",
+        TextBox("name", state.name),
+        Button("Greet", greet),
+    ])
+
+@route
+def greet(state: State, name: str):
+    state.name = name
+    state.greeting = f"Hello, {name or 'stranger'}!"
+    return index(state)
+
+start_server(State("", ""))
+`;
+
+			const status = document.getElementById("status");
+			const setStatus = (msg) => (status.textContent = msg);
+
+			(async () => {
+				try {
+					setStatus("Loading Pyodide…");
+					await window.Drafter.setupPyodide({
+						pyodideUrl:
+							"https://cdn.jsdelivr.net/pyodide/v0.29.0/full/",
+						systemPackages: [],
+					});
+
+					setStatus("Mounting Drafter…");
+					await window.Drafter.mountDrafterRemote(
+						"__drafter_assets/drafter-pyodide.zip",
+					);
+					await window.Drafter.patchPythonFeatures();
+
+					setStatus("Starting instances…");
+					// Start each instance in its own shadow-DOM root. They run
+					// concurrently on the single shared Pyodide runtime.
+					const instances = await Promise.all([
+						window.Drafter.createDrafterInstance({
+							rootElementId: "drafter-root--a",
+							useShadowDom: true,
+							inlineCode: COUNTER_APP("Instance A — Counter"),
+						}),
+						window.Drafter.createDrafterInstance({
+							rootElementId: "drafter-root--b",
+							useShadowDom: true,
+							inlineCode: GREETER_APP,
+						}),
+						window.Drafter.createDrafterInstance({
+							rootElementId: "drafter-root--c",
+							useShadowDom: true,
+							inlineCode: COUNTER_APP(
+								"Instance C — Counter (independent)",
+							),
+						}),
+					]);
+
+					window.__drafterInstances = instances;
+					setStatus(
+						`Ready — ${instances.length} independent Drafter instances running on one Pyodide runtime.`,
+					);
+				} catch (error) {
+					console.error(error);
+					setStatus("Error: " + (error?.message || error));
+				}
+			})();
+    </script>
+  </body>
+</html>

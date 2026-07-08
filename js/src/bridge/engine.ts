@@ -16,6 +16,10 @@ export interface DrafterInitOptions {
 	assetsUrl?: string;
 	loadPackagesAutomatically?: boolean;
 	explicitPackageList?: string[];
+	/** The root element this instance renders into (for concurrent instances). */
+	rootElementId?: string;
+	/** Whether to isolate this instance in a shadow root. */
+	useShadowDom?: boolean;
 }
 
 const DEFAULT_SUGGESTION = "Please show this to your instructor for more help.";
@@ -35,14 +39,12 @@ export function setSystemErrorSink(sink: SystemTelemetrySink | null): void {
 	systemTelemetrySink = sink;
 }
 
-export function clearDrafterSiteRoot() {
-	const rootElement = document.getElementById(
-		"drafter-root--",
-	) as HTMLElement;
+export function clearDrafterSiteRoot(rootElementId: string = "drafter-root--") {
+	const rootElement = document.getElementById(rootElementId) as HTMLElement;
 	if (rootElement) {
 		rootElement.innerHTML = "";
 	} else {
-		throw new Error(`Element with ID drafter-root-- not found`);
+		throw new Error(`Element with ID ${rootElementId} not found`);
 	}
 }
 

@@ -10,14 +10,16 @@ from drafter.config.base import BaseConfiguration
 FalseType = Literal[False]
 
 DEFAULT_SYSTEM_PACKAGES = ["bakery", "matplotlib", "pillow"]
+# "https://cdn.jsdelivr.net/pyodide/v0.29.0/debug/"
 DEFAULT_PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/"
+
 
 @dataclass
 class AppCommonConfiguration(BaseConfiguration):
     """
     Common configuration options for the Drafter app, in terms of the server and compiler behavior.
     Settings for student site stuff actually belong in the ClientServer section.
-    
+
     Attributes:
         mount_drafter_locally: Mount Drafter locally vs. from package. Used for local dev.
         asset_directory: Static assets directory (uses the packages' `src/drafter/assets/` folder if false and exists, then falls back to `js/dist/` if not, otherwise throws error).
@@ -33,15 +35,16 @@ class AppCommonConfiguration(BaseConfiguration):
         pyodide_url: URL to load Pyodide from.
 
     """
+
     engine: EngineType = "pyodide"
 
     asset_directory: Union[FalseType, str] = False
     show_filename_as: Union[FalseType, str] = False
     prerender_initial_page: bool = True
-    
+
     mount_drafter_locally: bool = False
     load_packages_automatically: bool = True
-    
+
     system_packages: Optional[list[str]] = None
     project_packages: Optional[list[str]] = None
     pyodide_drafter_path: Optional[str] = None
@@ -56,27 +59,39 @@ class AppCommonConfiguration(BaseConfiguration):
         # initialize defaults after construction instead of using a list default.
         if self.system_packages is None:
             self.system_packages = list(DEFAULT_SYSTEM_PACKAGES)
-    
+
     @staticmethod
     def get_key() -> str:
         return "app_common"
-        
+
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
         result = EnvVars(env_vars)
         result.get_string_if_exists("DRAFTER_ENGINE", "engine")
-        result.get_bool_if_exists("DRAFTER_PRERENDER_INITIAL_PAGE", "prerender_initial_page")
+        result.get_bool_if_exists(
+            "DRAFTER_PRERENDER_INITIAL_PAGE", "prerender_initial_page"
+        )
         result.get_string_if_exists("DRAFTER_ASSET_DIRECTORY", "asset_directory")
         result.get_string_if_exists("DRAFTER_SHOW_FILENAME_AS", "show_filename_as")
-        result.get_bool_if_exists("DRAFTER_MOUNT_DRAFTER_LOCALLY", "mount_drafter_locally")
-        result.get_string_if_exists("DRAFTER_PYODIDE_DRAFTER_PATH", "pyodide_drafter_path")
+        result.get_bool_if_exists(
+            "DRAFTER_MOUNT_DRAFTER_LOCALLY", "mount_drafter_locally"
+        )
+        result.get_string_if_exists(
+            "DRAFTER_PYODIDE_DRAFTER_PATH", "pyodide_drafter_path"
+        )
         result.get_string_if_exists("DRAFTER_OVERRIDE_ASSET_URL", "override_asset_url")
         result.get_string_if_exists("DRAFTER_SITE_TITLE", "site_title")
-        result.get_bool_if_exists("DRAFTER_LOAD_PACKAGES_AUTOMATICALLY", "load_packages_automatically")
-        result.get_string_list_if_exists("DRAFTER_PROJECT_PACKAGES", "project_packages", ";")
-        result.get_string_list_if_exists("DRAFTER_SYSTEM_PACKAGES", "system_packages", ";")
+        result.get_bool_if_exists(
+            "DRAFTER_LOAD_PACKAGES_AUTOMATICALLY", "load_packages_automatically"
+        )
+        result.get_string_list_if_exists(
+            "DRAFTER_PROJECT_PACKAGES", "project_packages", ";"
+        )
+        result.get_string_list_if_exists(
+            "DRAFTER_SYSTEM_PACKAGES", "system_packages", ";"
+        )
         return result.as_dict()
-    
+
     @staticmethod
     def extend_parser(parser):
         group = parser.add_argument_group("App Common Configuration")
@@ -136,14 +151,14 @@ class AppCommonConfiguration(BaseConfiguration):
             type=str,
             help=f"Custom URL for loading Pyodide (default: '{DEFAULT_PYODIDE_URL}')",
         )
-        
+
         group.add_argument(
             "--pyodide-drafter-path",
             type=str,
             help="Optional custom path to the Drafter Pyodide package (used if engine is 'pyodide')",
         )
         return group
-    
+
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:
         result = {}

@@ -19,7 +19,9 @@
 		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects pyodide",
 		"test:skulpt": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects skulpt",
 		"test:all": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects pyodide,skulpt",
-		"test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
+		"test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+		"playground:build": "npm run build && node playground/build-playground.mjs",
+		"playground": "npm run playground:build && python -m http.server 8777 --directory playground"
 	},
 	"devDependencies": {
 		"@chialab/esbuild-plugin-postcss": "^0.18.0",

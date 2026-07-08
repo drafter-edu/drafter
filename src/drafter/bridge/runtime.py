@@ -28,8 +28,10 @@ def create_runtime() -> "RuntimeAdapter":
 class RuntimeAdapter:
     """Base adapter for runtime-specific JS API calls."""
 
-    def create_debug_panel(self, debug_id: str, client_bridge: Any) -> Any:
-        return js.DebugPanel(debug_id, client_bridge)
+    def create_debug_panel(
+        self, debug_id: str, client_bridge: Any, scope: Any = None
+    ) -> Any:
+        return js.DebugPanel(debug_id, client_bridge, scope)
 
     def create_url(self, href: str) -> Any:
         return js.URL(href)
@@ -110,8 +112,10 @@ class PyodideRuntime(RuntimeAdapter):
         # Stored proxies to prevent garbage collection and enable cleanup
         self._proxies: list[Any] = []
 
-    def create_debug_panel(self, debug_id: str, client_bridge: Any) -> Any:
-        return js.DebugPanel.new(debug_id, client_bridge)
+    def create_debug_panel(
+        self, debug_id: str, client_bridge: Any, scope: Any = None
+    ) -> Any:
+        return js.DebugPanel.new(debug_id, client_bridge, scope)
 
     def create_url(self, href: str) -> Any:
         return js.URL.new(href)

@@ -56,12 +56,25 @@ class SiteRenderer:
         self.true_root_id = true_root_id
         self.debug_panel = debug_panel
         self.channel_history = {}
+        # The DOM node all inner-frame lookups are scoped to: the shadow root
+        # when shadow DOM is enabled, otherwise the root element. Set during
+        # setup(). Scoping here (instead of the global document) is what lets
+        # multiple concurrent instances coexist without ID collisions.
+        self.scope = None
+        # Whether this instance renders inside a shadow root. Controls whether
+        # runtime-injected CSS is scoped to the shadow root or the global head.
+        self.use_shadow_dom = False
 
     ### Accessors
 
-    def get_root(self):
-        # TODO: Handle this correctly for shadowdom
+    def get_scope(self):
+        """The node to scope inner-frame DOM queries to (shadow root or root)."""
+        if self.scope is not None:
+            return self.scope
         return document.getElementById(self.root_id)
+
+    def get_root(self):
+        return self.get_scope()
 
     ### Site
 
@@ -75,11 +88,14 @@ class SiteRenderer:
         )
         true_root = document.getElementById(self.true_root_id)
         true_root.innerHTML = initial_site_data.site_html
+        self.scope = true_root
         return None
 
     def setup(self, initial_site_data: InitialSiteData) -> None:
         if initial_site_data.error:
             return self._setup_error_site(initial_site_data)
+
+        self.use_shadow_dom = initial_site_data.use_shadow_dom
 
         try:
             true_root = document.getElementById(self.true_root_id)
@@ -88,7 +104,11 @@ class SiteRenderer:
 
             if initial_site_data.use_shadow_dom:
                 true_root.innerHTML = SITE_HTML_SHADOW_DOM_TEMPLATE
-                shadow_host = document.getElementById(DRAFTER_TAG_IDS["SHADOW_HOST"])
+                # Scope to this instance's root: the shadow-host id is shared, so a
+                # global getElementById would return the first instance's host.
+                shadow_host = true_root.querySelector(
+                    "#" + DRAFTER_TAG_IDS["SHADOW_HOST"]
+                )
                 if not shadow_host:
                     raise ValueError("Shadow host element not found in the document.")
                 shadow_root = shadow_host.attachShadow({"mode": "open"})
@@ -103,6 +123,7 @@ class SiteRenderer:
                     classes = f"{DRAFTER_TAG_CLASSES['THEME']} {css_classes}".strip()
                     add_link_to_shadow(shadow_root, css_url, with_class=classes)
                 for style in initial_site_data.additional_style:
+                    js.console.log("Adding", style, shadow_root)
                     add_style_to_shadow(
                         shadow_root, style, with_class=DRAFTER_TAG_CLASSES["THEME"]
                     )
@@ -124,6 +145,10 @@ class SiteRenderer:
                 add_js(root, js_code, with_class=DRAFTER_TAG_CLASSES["THEME"])
             for header in initial_site_data.additional_header:
                 add_header(root, header)
+
+            # Remember the scope (shadow root or root element) for all later
+            # inner-frame lookups.
+            self.scope = root
 
             if not initial_site_data.framed:
                 self.toggle_frame()
@@ -152,7 +177,7 @@ class SiteRenderer:
             else:
                 selector = f"#{DRAFTER_TAG_IDS['BODY']}"
 
-            elements = js.document.querySelectorAll(selector)
+            elements = self.get_scope().querySelectorAll(selector)
 
             if not elements:
                 raise_bridge_system_error(
@@ -236,12 +261,20 @@ class SiteRenderer:
                     if message.kind == "script":
                         add_js(root, message.content, is_page_specific=is_page_specific)
                     elif message.kind == "style":
-                        # TODO: Need to look up whether we are using the shadow dom or not
-                        add_style(
-                            root,
-                            message.content,
-                            is_page_specific=is_page_specific,
-                        )
+                        # Scope runtime CSS to this instance's shadow root so it
+                        # doesn't leak into other instances via the global head.
+                        if self.use_shadow_dom:
+                            add_style_to_shadow(
+                                root,
+                                message.content,
+                                is_page_specific=is_page_specific,
+                            )
+                        else:
+                            add_style(
+                                root,
+                                message.content,
+                                is_page_specific=is_page_specific,
+                            )
                 except Exception as e:
                     report_bridge_error(
                         "bridge.channel_message_failed",
@@ -262,10 +295,11 @@ class SiteRenderer:
             f".{DRAFTER_TAG_IDS[key]}"
             for key in ["PADDING_V", "PADDING_H", "HEADER", "FOOTER"]
         )
-        frames = js.document.querySelectorAll(FRAME_PIECES)
+        scope = self.get_scope()
+        frames = scope.querySelectorAll(FRAME_PIECES)
         if frames:
             for frame in frames:
                 frame.classList.toggle("drafter-hidden--")
-        body = js.document.querySelector("." + DRAFTER_TAG_IDS["BODY"])
+        body = scope.querySelector("." + DRAFTER_TAG_IDS["BODY"])
         if body:
             body.classList.toggle("drafter-body-frame-hidden--")
