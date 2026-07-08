@@ -106,7 +106,8 @@ class EventManager:
                         )
 
                         def finish_navigation(files_and_data):
-                            data = files_and_data[-1] if files_and_data else {}
+                            bundle = files_and_data[-1] if files_and_data else {}
+                            data, raw_payload = unpack_event_bundle(bundle)
                             request = Request(
                                 action=event_name,
                                 url=route,
@@ -114,6 +115,7 @@ class EventManager:
                                 event={},  # TODO: Populate this with useful event info
                                 dom_id=dom_id or "",
                                 button_pressed=target_element,
+                                raw_payload=raw_payload,
                             )
                             try:
                                 return do_navigation(request)
@@ -180,7 +182,8 @@ class EventManager:
                 )
 
                 def finish_navigation(files_and_data):
-                    data = files_and_data[-1] if files_and_data else {}
+                    bundle = files_and_data[-1] if files_and_data else {}
+                    data, raw_payload = unpack_event_bundle(bundle)
                     request = Request(
                         action="link",
                         url=name,
@@ -188,6 +191,7 @@ class EventManager:
                         event={},  # TODO: Populate this with useful event info
                         dom_id=dom_id or "",
                         button_pressed=nearest_nav_link if not is_anchor else "",
+                        raw_payload=raw_payload,
                     )
                     try:
                         return do_navigation(request)
@@ -229,7 +233,12 @@ class EventManager:
                 self.runtime, event.target, event, submitter, self.scope
             )
 
-            def finish_form_navigation(data):
+            def finish_form_navigation(files_and_data):
+                # Like the other handlers, this receives the resolved list of
+                # promises; the last entry is the event-data envelope. (The
+                # previous version passed the whole list as kwargs.)
+                bundle = files_and_data[-1] if files_and_data else {}
+                data, raw_payload = unpack_event_bundle(bundle)
                 request = Request(
                     action="form",
                     url=url,
@@ -237,6 +246,7 @@ class EventManager:
                     event={},  # TODO: Populate this with useful event info
                     dom_id=dom_id or "",
                     button_pressed=submitter if submitter else "",
+                    raw_payload=raw_payload,
                 )
                 try:
                     return do_navigation(request)
@@ -494,6 +504,44 @@ def apply_form_transforms(form: Any, form_values: dict[str, Any]) -> None:
         processed_names.add(key)
 
 
+def build_payload_entries(
+    form_values: dict[str, Any],
+    event_data: dict[str, Any],
+    argument_data: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Tag every collected value with its source, for router-side provenance.
+
+    The router merges these by precedence (component arguments > event detail
+    > form fields) and reports collisions, so all values are kept here.
+    """
+    entries: list[dict[str, Any]] = []
+    for source, mapping in (
+        ("form_field", form_values),
+        ("event_detail", event_data),
+        ("component_argument", argument_data),
+    ):
+        for key, value in mapping.items():
+            entries.append(
+                {
+                    "name": str(key),
+                    "value": value,
+                    "source": source,
+                    "source_detail": "",
+                }
+            )
+    return entries
+
+
+def unpack_event_bundle(bundle: Any) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Split an event-data envelope into (merged values, provenance entries).
+
+    Tolerates legacy plain-dict bundles (no provenance) for safety.
+    """
+    if isinstance(bundle, dict) and "values" in bundle and "payload" in bundle:
+        return bundle.get("values") or {}, bundle.get("payload") or []
+    return (bundle or {}, [])
+
+
 def get_all_event_data(
     runtime: RuntimeAdapter,
     originator: Any,
@@ -535,8 +583,16 @@ def get_all_event_data(
     form = scope.querySelector("#" + DRAFTER_TAG_IDS["FORM"])
 
     if not form:
-        base_data.update(argument_data)
-        return [runtime.promise_data(base_data)]
+        merged = dict(base_data)
+        merged.update(argument_data)
+        return [
+            runtime.promise_data(
+                {
+                    "values": merged,
+                    "payload": build_payload_entries({}, base_data, argument_data),
+                }
+            )
+        ]
 
     return process_form_data(
         runtime,
@@ -651,13 +707,21 @@ def process_form_data(
         )
         # Look for `data-transform` attributes to decode any special fields (e.g., JSON-encoded arguments)
         apply_form_transforms(form, form_values)
-        data = dict(base_data)
-        data.update(form_values)
+        # Merge by precedence: component arguments > event detail > form fields.
+        data = dict(form_values)
+        data.update(base_data)
         data.update(argument_data)
         # Return the promise itself (not wrapped in a list): when used as a
         # .then() callback, the thenable is flattened by the promise chain,
-        # and callers expect files_and_data[-1] to be the data dict.
-        return runtime.promise_data(data)
+        # and callers expect files_and_data[-1] to be the envelope dict.
+        return runtime.promise_data(
+            {
+                "values": data,
+                "payload": build_payload_entries(
+                    form_values, base_data, argument_data
+                ),
+            }
+        )
 
     if not upload_promises:
         return [finalize()]

@@ -10,6 +10,12 @@ from typing import Optional, Literal
 
 from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
 from drafter.components.planning.render_plan import RenderPlan, AssetBundle
+from drafter.components.utilities.contracts import (
+    ComponentContract,
+    EventPayloadFieldSpec,
+    EventPayloadSpec,
+)
+from drafter.components.utilities.registry import COMPONENT_CONTRACT_REGISTRY
 from drafter.components.utilities.validation import validate_parameter_name
 
 
@@ -61,6 +67,46 @@ class Timer(Component):
     ]
     EXTRA_SUPPORTED_EVENTS = ["finish", "tick"]
 
+    #: What this component emits: the JS implementation (js/src/components/
+    #: timer.tsx) must match this contract, and the router uses it to reason
+    #: about event payload fields.
+    CONTRACT = ComponentContract(
+        component_name="Timer",
+        html_tag="drafter-timer",
+        emitted_events=[
+            EventPayloadSpec(
+                event_name="tick",
+                fields=[
+                    EventPayloadFieldSpec(
+                        "remaining",
+                        int,
+                        "Milliseconds left before the timer finishes.",
+                    ),
+                    EventPayloadFieldSpec(
+                        "duration",
+                        int,
+                        "Total duration of the timer in milliseconds.",
+                    ),
+                ],
+            ),
+            EventPayloadSpec(
+                event_name="finish",
+                fields=[
+                    EventPayloadFieldSpec(
+                        "remaining",
+                        int,
+                        "Always 0 when the timer finishes.",
+                    ),
+                    EventPayloadFieldSpec(
+                        "duration",
+                        int,
+                        "Total duration of the timer in milliseconds.",
+                    ),
+                ],
+            ),
+        ],
+    )
+
     def __init__(
         self,
         duration: int,
@@ -80,6 +126,9 @@ class Timer(Component):
         self.rate = rate
         self.on_tick = on_tick
         self.extra_settings = kwargs
+
+
+COMPONENT_CONTRACT_REGISTRY.register(Timer.CONTRACT)
 
 
 @dataclass(repr=False)

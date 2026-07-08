@@ -1,10 +1,33 @@
+"""
+Route signature introspection.
+
+The binder (see :mod:`drafter.router.parameters.binding`) needs richer
+signature metadata than just names and types: defaults, parameter kind,
+whether a parameter is framework-injected, and aliases. This module turns a
+route function into a :class:`RouteSignatureSpec` capturing all of that.
+"""
+
 import inspect
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple
+from typing import Any, Optional
 
 
 @dataclass
 class RouteParamSpec:
+    """A single parameter of a route function.
+
+    Attributes:
+        name: The parameter name.
+        annotation: The type annotation, or ``inspect.Parameter.empty``.
+        has_default: Whether the parameter declares a default value.
+        default: The default value (meaningless if ``has_default`` is False).
+        kind: The inspect parameter kind (positional, keyword-only, variadic).
+        injected: Whether the framework supplies this parameter (state,
+            configuration, request); injected parameters are never required
+            from the request payload.
+        aliases: Alternate payload names that may bind to this parameter.
+    """
+
     name: str
     annotation: Any
     has_default: bool
@@ -17,37 +40,68 @@ class RouteParamSpec:
     def required(self) -> bool:
         if self.injected:
             return False
-        if self.kind in (
-            inspect.Parameter.VAR_POSITIONAL,
-            inspect.Parameter.VAR_KEYWORD,
-        ):
+        if self.is_variadic:
             return False
         return not self.has_default
+
+    @property
+    def is_variadic(self) -> bool:
+        return self.kind in (
+            inspect.Parameter.VAR_POSITIONAL,
+            inspect.Parameter.VAR_KEYWORD,
+        )
+
+    @property
+    def has_annotation(self) -> bool:
+        return self.annotation is not inspect.Parameter.empty
+
+    @property
+    def show_name(self) -> bool:
+        """Whether the argument is rendered as ``name=value`` in call
+        representations (keyword-only and var-keyword parameters)."""
+        return self.kind in (
+            inspect.Parameter.KEYWORD_ONLY,
+            inspect.Parameter.VAR_KEYWORD,
+        )
+
+    def describe_annotation(self) -> Optional[str]:
+        if not self.has_annotation:
+            return None
+        if hasattr(self.annotation, "__name__"):
+            return self.annotation.__name__
+        return str(self.annotation)
 
 
 @dataclass
 class RouteSignatureSpec:
+    """Full signature metadata for a route function.
+
+    Attributes:
+        function_name: Name of the route handler function.
+        params: Every parameter, in declaration order (including variadics).
+        accepts_var_keyword: Whether the function declares ``**kwargs``.
+        accepts_var_positional: Whether the function declares ``*args``.
+    """
+
     function_name: str
     params: tuple[RouteParamSpec, ...]
     accepts_var_keyword: bool
     accepts_var_positional: bool
 
+    @property
+    def named_params(self) -> tuple[RouteParamSpec, ...]:
+        """Parameters that can be bound by name (excludes variadics)."""
+        return tuple(param for param in self.params if not param.is_variadic)
 
-@dataclass
-class RouteIntrospection:
-    """Store introspection metadata for a route function signature.
+    @property
+    def parameter_names(self) -> list[str]:
+        return [param.name for param in self.params]
 
-    Attributes:
-        expected_parameters: List of parameter names the function accepts.
-        show_names: Dict mapping parameter names to whether shown as kwargs.
-        expected_types: Dict mapping parameter names to their type hints.
-        function_name: Name of the route handler function.
-    """
-
-    expected_parameters: list[str]
-    show_names: dict[str, bool]
-    expected_types: dict[str, Any]
-    function_name: str
+    def get(self, name: str) -> Optional[RouteParamSpec]:
+        for param in self.params:
+            if param.name == name:
+                return param
+        return None
 
     def to_string(self) -> str:
         """Generate a string representation of the function signature.
@@ -56,52 +110,49 @@ class RouteIntrospection:
             str: Signature string in format "func_name(param: Type, ...)".
         """
         parts = []
-        for param in self.expected_parameters:
-            expected_type = self.expected_types.get(param, Any)
-            type_name = (
-                expected_type.__name__
-                if hasattr(expected_type, "__name__")
-                else (
-                    str(expected_type)
-                    if expected_type is not inspect.Parameter.empty
-                    else None
-                )
-            )
+        for param in self.params:
+            type_name = param.describe_annotation()
             if type_name is None:
-                parts.append(f"{param}")
+                parts.append(param.name)
             else:
-                parts.append(f"{param}: {type_name}")
-        params_str = ", ".join(parts)
-        return f"{self.function_name}({params_str})"
+                parts.append(f"{param.name}: {type_name}")
+        return f"{self.function_name}({', '.join(parts)})"
 
 
-def get_signature(func):
-    """Extract parameter metadata from a function signature.
+#: Parameters with these names are supplied by the framework, not the request.
+INJECTED_PARAMETER_PREFIX = "_"
 
-    Inspects the function using the inspect module to determine which
-    parameters it accepts, their names, types, and kinds.
+
+def get_signature(func) -> RouteSignatureSpec:
+    """Extract parameter metadata from a route function's signature.
 
     Args:
         func: Function to introspect.
 
     Returns:
-        RouteIntrospection: Collected signature information.
+        RouteSignatureSpec: Collected signature information.
     """
-    # Get function signature
     signature_parameters = inspect.signature(func).parameters
-    expected_parameters = list(signature_parameters.keys())
-    show_names = {
-        param.name: (
-            param.kind
-            in (inspect.Parameter.KEYWORD_ONLY, inspect.Parameter.VAR_KEYWORD)
+    params = tuple(
+        RouteParamSpec(
+            name=parameter.name,
+            annotation=parameter.annotation,
+            has_default=parameter.default is not inspect.Parameter.empty,
+            default=parameter.default,
+            kind=parameter.kind,
+            injected=parameter.name.startswith(INJECTED_PARAMETER_PREFIX),
         )
-        for param in signature_parameters.values()
-    }
-    expected_types = {name: p.annotation for name, p in signature_parameters.items()}
-
-    return RouteIntrospection(
-        expected_parameters=expected_parameters,
-        show_names=show_names,
-        expected_types=expected_types,
+        for parameter in signature_parameters.values()
+    )
+    return RouteSignatureSpec(
         function_name=func.__name__,
+        params=params,
+        accepts_var_keyword=any(
+            parameter.kind is inspect.Parameter.VAR_KEYWORD
+            for parameter in signature_parameters.values()
+        ),
+        accepts_var_positional=any(
+            parameter.kind is inspect.Parameter.VAR_POSITIONAL
+            for parameter in signature_parameters.values()
+        ),
     )
