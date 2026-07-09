@@ -16,6 +16,7 @@ class Theme:
     name: str
     css_paths: list[str]
     js_paths: list[str]
+    metadata: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -96,7 +97,22 @@ theme_system.register_theme(
         js_paths=[],
     ),
 )
-# TODO: Classic Drafter theme
+
+theme_system.register_theme(
+    Theme(
+        name="mvp",
+        css_paths=["css/mvp.css"],
+        js_paths=[],
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="sakura",
+        css_paths=["css/sakura.css"],
+        js_paths=[],
+    )
+)
 
 
 def get_theme_system() -> ThemeSystem:

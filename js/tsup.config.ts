@@ -4,14 +4,21 @@ import * as fs from "fs";
 import * as path from "path";
 import postcss from "@chialab/esbuild-plugin-postcss";
 
-const cssEntries: Record<string, string> = {};
-const cssDir = path.resolve(__dirname, "src", "css");
-for (const file of fs.readdirSync(cssDir)) {
-	if (file.endsWith(".css")) {
-		const name = path.basename(file, ".css");
-		cssEntries[name] = path.join(cssDir, file);
+function findCssFiles(dir: string): Record<string, string> {
+	const entries: Record<string, string> = {};
+	for (const file of fs.readdirSync(dir)) {
+		if (file.endsWith(".css")) {
+			const name = path.basename(file, ".css");
+			entries[name] = path.join(dir, file);
+		}
 	}
+	return entries;
 }
+
+const cssEntries: Record<string, string> = {
+	...findCssFiles(path.resolve(__dirname, "src", "css")),
+	...findCssFiles(path.resolve(__dirname, "src", "css", "themes")),
+};
 
 export default defineConfig([
 	{
