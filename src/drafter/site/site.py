@@ -9,8 +9,6 @@ from drafter.config.site_information import SiteInformation
 from drafter.site.headers import CSSLink
 
 
-
-
 GLOBAL_DRAFTER_CSS_PATHS = {
     True: CSSLink(url="css/drafter_debug.css", classes={"drafter-debug-css--"}),
     False: CSSLink(url="css/drafter_deploy.css", classes={"drafter-non-debug-css--"}),
@@ -35,7 +33,7 @@ DRAFTER_TAG_CLASSES = {
     "THEME": "drafter-theme--",
     "DEBUG_CSS": "drafter-debug-css--",
     "NON_DEBUG_CSS": "drafter-non-debug-css--",
-    "PRECOMPILE_HEADERS": "drafter-precompiled-headers--"
+    "PRECOMPILE_HEADERS": "drafter-precompiled-headers--",
 }
 
 SITE_HTML_TEMPLATE = f"""
@@ -46,7 +44,7 @@ SITE_HTML_TEMPLATE = f"""
     <div id="{DRAFTER_TAG_IDS["FRAME"]}" class="{DRAFTER_TAG_IDS["FRAME"]}">
         <div id="{DRAFTER_TAG_IDS["HEADER"]}" class="{DRAFTER_TAG_IDS["HEADER"]}"></div>
         <div id="{DRAFTER_TAG_IDS["BODY"]}" class="{DRAFTER_TAG_IDS["BODY"]} body">
-        Loading
+        {{initial_body_content}}
         </div>
         <div id="{DRAFTER_TAG_IDS["FOOTER"]}" class="{DRAFTER_TAG_IDS["FOOTER"]}"></div>
     </div>
@@ -145,7 +143,49 @@ class Site:
             f"{determine_assets_url(configuration.override_asset_url)}/{url}"
             for url in urls
         ]
-        
+
+    def render_error_fallback(self, envelope) -> InitialSiteData:
+        site_html = SITE_HTML_TEMPLATE.format(
+            initial_body_content=f"""
+            <div>
+                <h1>System Error</h1>
+                <p>We encountered the following major system error while setting up the site.</p>
+                <p>Id: {envelope.id}</p>
+                <p>Status Code: {envelope.status_code}</p>
+                <p>Category: {envelope.category}</p>
+                <p>Message: <pre>{envelope.message}</pre></p>
+                <p>Severity: {envelope.severity}</p>
+                <p>Details: <pre>{envelope.details}</pre></p>
+                <p>Traceback: <pre>{envelope.traceback}</pre></p>
+                <p>Context: <pre>{envelope.context.to_json()}</pre></p>
+                <p>Recoverable: {envelope.recoverable}</p>
+                <p>Raw Details:</p>
+                <pre style='white-space: pre-wrap;'>{repr(envelope)}</pre>
+            </div>
+            """
+        )
+
+        # Add global CSS with appropriate classes
+        global_css_link = GLOBAL_DRAFTER_CSS_PATHS[True]
+        additional_css = [global_css_link]
+        # Try to remap the Built-in CSS if possible
+        configuration = self.get_configuration()
+        additional_css = [
+            CSSLink(
+                url=self.remap_urls_to_assets(css.url, configuration=configuration)[0],
+                classes=css.classes,
+            )
+            for css in additional_css
+        ]
+
+        return InitialSiteData(
+            site_html=site_html,
+            site_title="System Error (Fallback Level 1)",
+            additional_css=additional_css,
+            additional_js=[],
+            error=True,
+            framed=True,
+        )
 
     def render(self) -> InitialSiteData:
         """Render the site HTML structure with assets and configuration.
@@ -155,23 +195,26 @@ class Site:
         """
         configuration = self.get_configuration()
 
-        site_html = SITE_HTML_TEMPLATE
+        site_html = SITE_HTML_TEMPLATE.format(initial_body_content="Loading")
 
         additional_css, additional_js = self._get_theme_headers(configuration)
-        
+
         # Add global CSS with appropriate classes
         global_css_link = GLOBAL_DRAFTER_CSS_PATHS[configuration.in_debug_mode]
         additional_css.insert(0, global_css_link)
-        
+
         # Add built-in CSS
         additional_css.extend(BUILT_IN_ADDITIONAL_CSS_PATHS)
-        
+
         # Remap URLs for CSS links
         additional_css = [
-            CSSLink(url=self.remap_urls_to_assets(css.url, configuration=configuration)[0], classes=css.classes)
+            CSSLink(
+                url=self.remap_urls_to_assets(css.url, configuration=configuration)[0],
+                classes=css.classes,
+            )
             for css in additional_css
         ]
-        
+
         additional_js = self.remap_urls_to_assets(
             *additional_js, configuration=configuration
         )

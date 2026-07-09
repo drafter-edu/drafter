@@ -910,6 +910,30 @@ class ClientServer:
             "client_server.add_route",
         )
 
+    def format_simple_site_error(self, envelope) -> InitialSiteData:
+        """Format a simple HTML error message for site rendering failures.
+
+        Args:
+            envelope: The error details envelope to display.
+        """
+        try:
+            return self.site.render_error_fallback(envelope)
+        except Exception as e:
+            return InitialSiteData(
+                site_html=f"""
+        <div>
+            <h1>System Error</h1>
+            <p>We encountered the following major system error while setting up the site. Details:</p>
+            <pre style='white-space: pre-wrap;'>{repr(envelope)}</pre>
+            <p>Additionally, an error occurred while trying to render the error message:</p>
+            <pre style='white-space: pre-wrap;'>{repr(e)}</pre>
+            <p>Please share this information with the developers to help us fix this issue. We apologize for the inconvenience.</p>
+        </div>""",
+                site_title="System Error (Fallback Level 2)",
+                error=True,
+                framed=True,
+            )
+
     def do_configuration(self) -> Optional[InitialSiteData]:
         """Apply dynamic configuration and return initial site data.
 
@@ -934,10 +958,7 @@ class ClientServer:
                 envelope,
                 "client_server.render_site",
             )
-            site = f"<div><h1>Error processing site configuration</h1><p>{envelope.message}</p></div>"
-            return InitialSiteData(
-                site_html=site, site_title="Error", error=True, framed=True
-            )
+            return self.format_simple_site_error(envelope)
         log_record(
             InitialConfigurationEvent(config=configuration.to_json()),
             "client_server.do_configuration",
@@ -977,10 +998,8 @@ class ClientServer:
                 envelope,
                 "client_server.render_site",
             )
-            site = f"<div><h1>Error rendering site</h1><p>{envelope.message}</p></div>"
-            return InitialSiteData(
-                site_html=site, site_title="Error", error=True, framed=True
-            )
+            # TODO: Clean this nested error template up a little bit
+            return self.format_simple_site_error(envelope)
         return site
 
     def do_finish_visit(self):
