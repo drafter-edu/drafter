@@ -1,1 +1,1 @@
-show_error = False
+show_error = True

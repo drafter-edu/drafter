@@ -117,6 +117,17 @@ async function resetPyodideRuntime(rootElementId: string) {
 		);
 	}
 
+	try {
+		await pyodide.runPythonAsync(
+			`from drafter.files.patch_pyodide import expire_remote_imports; expire_remote_imports()`,
+		);
+	} catch (error) {
+		console.warn(
+			"[Drafter AppServer Scaffolding] Failed to expire remote imports:",
+			error,
+		);
+	}
+
 	clearDrafterSiteRoot(rootElementId);
 }
 
@@ -509,9 +520,7 @@ export function runStudentCode(options: DrafterInitOptions): Promise<any> {
 	return result;
 }
 
-async function runStudentCodeInner(
-	options: DrafterInitOptions,
-): Promise<any> {
+async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 	console.log("Running student code with options:", options);
 	// TODO: Handle URL-based coding loading
 	if ((window as any).pyodide === undefined) {

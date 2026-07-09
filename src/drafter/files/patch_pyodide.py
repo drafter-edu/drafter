@@ -23,6 +23,9 @@ class RemoteLoader(importlib.abc.Loader):
         exec(self.source, module.__dict__)
 
 
+EXTERNAL_IMPORTS = set()
+
+
 class RemoteFinder(importlib.abc.MetaPathFinder):
     def find_spec(self, fullname, path=None, target=None):
         module_path = fullname.split(".")
@@ -36,10 +39,18 @@ class RemoteFinder(importlib.abc.MetaPathFinder):
             text = response.text
 
             loader = RemoteLoader(text)
+            EXTERNAL_IMPORTS.add(fullname)
             return importlib.util.spec_from_loader(fullname, loader)
 
         except Exception as e:
             return None
+
+
+def expire_remote_imports():
+    for fullname in list(EXTERNAL_IMPORTS):
+        if fullname in sys.modules:
+            del sys.modules[fullname]
+        EXTERNAL_IMPORTS.remove(fullname)
 
 
 sys.meta_path.append(RemoteFinder())
