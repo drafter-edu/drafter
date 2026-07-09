@@ -416,7 +416,6 @@ class ClientServer:
         try:
             return route_func(*args, **kwargs), representation
         except Exception as e:
-            e.add_note(f"{representation}")
             raise self.make_visit_error(
                 "request.route_execution_failed",
                 CATEGORY_REQUEST,

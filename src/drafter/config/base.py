@@ -1,39 +1,43 @@
 import os
 import json
 from dataclasses import dataclass, field, fields
-from typing import Any, Union, Optional, Literal, Self
+from typing import Any, Union, Optional, Literal
 
 from drafter.helpers.utils import seek_filename_by_line
 from drafter.config.engines import EngineType
 
 FalseType = Literal[False]
 
+
 @dataclass
 class BaseConfiguration:
-    
-    
     @staticmethod
     def get_key() -> str:
-        raise NotImplementedError("Subclasses must implement get_key method to return their configuration key.")
-    
+        raise NotImplementedError(
+            "Subclasses must implement get_key method to return their configuration key."
+        )
+
     @classmethod
-    def map_from_raw(cls, parsed_args: dict[str, Any],
-                     env_vars: Optional[dict[str, Any]] = None,
-                     existing_config: "Optional[Self]" = None) -> "Self":
+    def map_from_raw(
+        cls,
+        parsed_args: dict[str, Any],
+        env_vars: Optional[dict[str, Any]] = None,
+        existing_config=None,
+    ):
         if existing_config is None:
             config = cls()
         else:
             config = existing_config.copy()
-        
+
         if env_vars:
             filtered_env = cls.parse_env_variables(env_vars)
             config.merge_in_args(filtered_env, raise_errors=False)
-        
+
         filtered_args = cls.parse_args(parsed_args)
         config.merge_in_args(filtered_args, raise_errors=False)
-        
+
         return config
-    
+
     @staticmethod
     def extend_parser(parser):
         """Extend argument parser with configuration-specific arguments.
@@ -42,7 +46,7 @@ class BaseConfiguration:
             parser: An argparse.ArgumentParser instance to extend.
         """
         return parser
-    
+
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
         """Parse environment variables relevant to this configuration.
@@ -54,7 +58,7 @@ class BaseConfiguration:
             A dictionary of configuration values extracted from environment variables.
         """
         return {}
-    
+
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:
         """Parse command line arguments relevant to this configuration.
@@ -66,18 +70,18 @@ class BaseConfiguration:
             A dictionary of configuration values extracted from command line arguments.
         """
         return {}
-    
+
     def load_from_file(self, file_path: str) -> dict:
         """Merge configuration values from a JSON file.
 
         Args:
             file_path: Path to the JSON configuration file.
         """
-        #if not os.path.isfile(file_path):
+        # if not os.path.isfile(file_path):
         #    raise FileNotFoundError(f"Configuration file not found: {file_path}")
         with open(file_path, "r") as f:
             return json.load(f)
-    
+
     def merge_in_args(self, new_args: dict, raise_errors=True) -> None:
         """Merge new arguments into configuration.
 
@@ -106,21 +110,21 @@ class BaseConfiguration:
                 value = potential_args[field.name]
                 if value is not None:
                     setattr(self, field.name, value)
-    
+
     def to_json(self) -> dict:
         return {field.name: getattr(self, field.name) for field in fields(self)}
-    
+
     @classmethod
-    def from_json(cls, data: dict) -> "Self":
-        return cls(
-            **data
-        )
-        
-    def copy(self) -> "Self":
+    def from_json(cls, data: dict):
+        return cls(**data)
+
+    def copy(self):
         """
         Creates a copy of the current configuration instance.
 
         Returns:
             Self: A new instance of the same class with the same values.
         """
-        return self.__class__(**{field.name: getattr(self, field.name) for field in fields(self)})
+        return self.__class__(
+            **{field.name: getattr(self, field.name) for field in fields(self)}
+        )

@@ -37,7 +37,11 @@ const config: Config = {
 		{
 			...sharedConfig,
 			displayName: "pyodide",
-			testMatch: ["**/__tests__/pyodide/**/*.test.{ts,tsx}"],
+			testMatch: [
+				"**/__tests__/pyodide/**/*.test.{ts,tsx}",
+				"**/__tests__/engine.test.ts",
+				"**/__tests__/timer.test.ts",
+			],
 		},
 		{
 			...sharedConfig,
