@@ -5,6 +5,7 @@ file watching, and pre-rendering of initial pages.
 """
 
 import asyncio
+from dataclasses import dataclass
 import webbrowser
 from pathlib import Path
 
@@ -23,7 +24,7 @@ from drafter.config.urls import determine_assets_url
 from drafter.scaffolding.templating import render_index_html
 from drafter.scaffolding.utils import pkg_assets_dir
 from drafter.config.urls import INTERNAL_ROUTES
-from drafter.app.watcher import ReloadHub, ws_endpoint, _watch_and_reload
+from drafter.app.watcher import ReloadHub, ws_endpoint, _watch_and_reload, WatchedPath
 
 
 async def index(req) -> Response:
@@ -112,7 +113,7 @@ def make_app(
 
     # Determine watches and routes
     watch_paths = [
-        user_path,
+        WatchedPath(user_path, False),
     ]
     routes = [
         Route("/", index),
@@ -126,7 +127,7 @@ def make_app(
             else pkg_assets_dir()
         )
         if assets_dir.exists():
-            watch_paths.append(assets_dir)
+            watch_paths.append(WatchedPath(assets_dir, True))
         routes.append(
             Mount(
                 "/" + INTERNAL_ROUTES["ASSETS"],
@@ -136,7 +137,7 @@ def make_app(
         )
     # Serve user files if enabled
     if system.app_server.serve_adjacent_files:
-        watch_paths.append(user_directory)
+        watch_paths.append(WatchedPath(user_directory, False))
         routes.append(Route("/" + INTERNAL_ROUTES["LIST_FILES"], list_user_files))
         routes.append(
             Mount(

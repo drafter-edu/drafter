@@ -8,10 +8,24 @@ import asyncio
 import json
 from pathlib import Path
 from typing import Any, List, Set
+from dataclasses import dataclass
 
 from drafter.config.system import SystemConfiguration
 from starlette.websockets import WebSocket
 from watchfiles import awatch
+
+
+@dataclass
+class WatchedPath:
+    """Represents a file system path to be watched for changes.
+
+    Attributes:
+        directory: The file system path to watch.
+        full_reload: Whether to trigger a full page reload when changes are detected in this path, or just restart the code.
+    """
+
+    directory: Path
+    full_reload: bool = True
 
 
 class ReloadHub:
@@ -96,7 +110,7 @@ async def ws_endpoint(websocket: WebSocket):
 
 async def _watch_and_reload(
     hub: ReloadHub,
-    watch_paths: list[Path],
+    watch_paths: list[WatchedPath],
     system: SystemConfiguration,
     student_path: Path,
 ):
@@ -112,15 +126,28 @@ async def _watch_and_reload(
     """
     # watchfiles supports multiple roots
     watched_student_path = student_path.resolve()
-    async for changes in awatch(*watch_paths, stop_event=None):
+    restart_paths = {wp.directory.resolve() for wp in watch_paths if not wp.full_reload}
+    async for changes in awatch(*[wp.directory for wp in watch_paths], stop_event=None):
         changed_paths = {Path(path).resolve() for _, path in changes}
-        if changed_paths and changed_paths.issubset({watched_student_path}):
+        print("Checking for", restart_paths, "in", changed_paths)
+        if changed_paths and any(
+            changed_path.is_relative_to(restart_path)
+            for changed_path in changed_paths
+            for restart_path in restart_paths
+        ):
             try:
+                print(
+                    "Trying to restart student code due to changes in:", changed_paths
+                )
                 await hub.broadcast_student_restart(
                     watched_student_path.read_text(encoding="utf-8")
                 )
             except Exception:
+                print("Failed. Reloading instead.")
                 await hub.broadcast_reload()
         else:
+            print(
+                "Changes detected in watched paths, broadcasting reload:", changed_paths
+            )
             # Debounce simple bursts by scheduling a single broadcast per tick
             await hub.broadcast_reload()
