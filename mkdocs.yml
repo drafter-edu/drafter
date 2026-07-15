@@ -38,6 +38,11 @@ theme:
 
 plugins:
 - search
+- drafter-codeblocks:
+    marker: drafter
+    language: python
+    output_subdir: drafter-demos
+    iframe_height: 430
 #- mkdocstrings
 #- gen-files:
 #    scripts:

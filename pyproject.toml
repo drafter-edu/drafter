@@ -105,6 +105,9 @@ examples = ["pandas", "seaborn", "requests", "scipy"]
 [project.scripts]
 drafter = "drafter.cli:main"
 
+[project.entry-points."mkdocs.plugins"]
+drafter-codeblocks = "drafter.docs.mkdocs_plugin:DrafterCodeBlockPlugin"
+
 [tool.hatch.build]
 
 [tool.hatch.build.targets.sdist]
