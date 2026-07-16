@@ -104,6 +104,7 @@ examples = ["pandas", "seaborn", "requests", "scipy"]
 
 [project.scripts]
 drafter = "drafter.cli:main"
+drafter-docs = "drafter.docs.mkdocs_build:main"
 
 [project.entry-points."mkdocs.plugins"]
 drafter-codeblocks = "drafter.docs.mkdocs_plugin:DrafterCodeBlockPlugin"

@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import html
 import logging
+import os
 import posixpath
 import re
 import shutil
@@ -51,6 +52,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
         self._site_output_dir = Path("site")
         self._temp_root: Path | None = None
         self._compiled_cache: dict[str, PurePosixPath] = {}
+        self._pyodide_package_style = "pypi"
 
     def on_config(self, config):
         self._docs_dir = Path(config["docs_dir"]).resolve()
@@ -59,6 +61,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
         self._site_output_dir.mkdir(parents=True, exist_ok=True)
         self._temp_root = Path(tempfile.mkdtemp(prefix="mkdocs-drafter-"))
         self._compiled_cache.clear()
+        self._pyodide_package_style = self._resolve_pyodide_package_style()
         return config
 
     def on_page_markdown(self, markdown, /, *, page, config, files):
@@ -159,7 +162,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
             "--output-filename",
             "index.html",
             "--pyodide-package-style",
-            self.config["pyodide_package_style"],
+            self._pyodide_package_style,
             "--production" if self.config["production"] else "",
             "--subtle-debug-entry" if self.config["subtle_debug_entry"] else "",
             "--system-packages",
@@ -188,6 +191,12 @@ class DrafterCodeBlockPlugin(BasePlugin):
         rel_path = PurePosixPath(self.config["output_subdir"]) / demo_id / "index.html"
         self._compiled_cache[demo_id] = rel_path
         return rel_path
+
+    def _resolve_pyodide_package_style(self) -> str:
+        dev_flag = os.getenv("DRAFTER_MKDOCS_DEV", "").strip().lower()
+        if dev_flag in {"1", "true", "yes", "on"}:
+            return "build"
+        return str(self.config["pyodide_package_style"])
 
     def _prepare_code(self, code: str) -> str:
         prepared = code.rstrip() + "\n"
