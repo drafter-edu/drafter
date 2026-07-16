@@ -33,6 +33,10 @@ body {
 	border: 0;
 }
 
+.drafter-subtle-debug-entry-- {
+	display: none !important;
+}
+
 .drafter-form-- {
 	flex: 1;
 	display: flex;

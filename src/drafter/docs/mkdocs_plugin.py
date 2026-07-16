@@ -70,7 +70,9 @@ class DrafterCodeBlockPlugin(BasePlugin):
                 return match.group(0)
 
             block_counter["value"] += 1
-            demo_id = self._make_demo_id(page.file.src_uri, block_counter["value"], code)
+            demo_id = self._make_demo_id(
+                page.file.src_uri, block_counter["value"], code
+            )
 
             try:
                 demo_rel_path = self._build_demo(code, demo_id)
@@ -102,7 +104,9 @@ class DrafterCodeBlockPlugin(BasePlugin):
         if not info:
             return False
 
-        tokens = [token.strip().lower() for token in info.replace(",", " ").split() if token]
+        tokens = [
+            token.strip().lower() for token in info.replace(",", " ").split() if token
+        ]
         if not tokens:
             return False
 
@@ -128,7 +132,9 @@ class DrafterCodeBlockPlugin(BasePlugin):
         target_dir = self._site_output_dir / demo_id
         target_index = target_dir / "index.html"
         if target_index.exists():
-            rel_path = PurePosixPath(self.config["output_subdir"]) / demo_id / "index.html"
+            rel_path = (
+                PurePosixPath(self.config["output_subdir"]) / demo_id / "index.html"
+            )
             self._compiled_cache[demo_id] = rel_path
             return rel_path
 
@@ -197,16 +203,16 @@ class DrafterCodeBlockPlugin(BasePlugin):
         src = html.escape(iframe_src)
         height = int(self.config["iframe_height"])
         return (
-            "<div class=\"drafter-demo\" data-drafter-demo=\""
+            '<div class="drafter-demo" data-drafter-demo="'
             + html.escape(demo_id)
-            + "\">\n"
+            + '">\n'
             + "  <iframe "
-            + f"src=\"{src}\" "
-            + f"title=\"{title}\" "
-            + "loading=\"lazy\" "
-            + "sandbox=\"allow-scripts allow-forms allow-same-origin allow-downloads\" "
-            + "style=\"width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; "
-            + f"min-height: {height}px;\""
+            + f'src="{src}" '
+            + f'title="{title}" '
+            + 'loading="lazy" '
+            + 'sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" '
+            + 'style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; '
+            + f'min-height: {height}px;"'
             + "></iframe>\n"
             + "</div>"
         )

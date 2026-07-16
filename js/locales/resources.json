@@ -32,6 +32,9 @@
 			"icon.edit": "📝",
 			"button.edit": "Edit Source",
 			"button.edit.tooltip": "Edit the source code and reload the site",
+			"icon.exit_debug": "🚪",
+			"button.exit_debug": "Production",
+			"button.exit_debug.tooltip": "Exit debug mode and switch to production view",
 			"editor.title": "Edit Source Code",
 			"editor.run": "Run",
 			"editor.cancel": "Cancel",
@@ -55,6 +58,8 @@
 			"button.upload": "Subir",
 			"icon.toggle": "⚙️",
 			"button.toggle": "Alternar",
+			"icon.exit_debug": "🚪",
+			"button.exit_debug": "Producción",
 			"icon.close": "❌",
 			"button.close": "Cerrar"
 		}

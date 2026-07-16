@@ -25,6 +25,7 @@ DRAFTER_TAG_IDS = {
     "FOOTER": "drafter-footer--",
     "FORM": "drafter-form--",
     "DEBUG": "drafter-debug--",
+    "SUBTLE_DEBUG_ENTRY": "drafter-subtle-debug-entry--",
     "PADDING_V": "drafter-padding-v--",
     "PADDING_H": "drafter-padding-h--",
 }
@@ -52,6 +53,7 @@ SITE_HTML_TEMPLATE = f"""
   </form>
   <div class="{DRAFTER_TAG_IDS["PADDING_H"]}"></div>
   <div id="{DRAFTER_TAG_IDS["DEBUG"]}" class="{DRAFTER_TAG_IDS["DEBUG"]}"></div>
+    <button id="{DRAFTER_TAG_IDS["SUBTLE_DEBUG_ENTRY"]}" class="{DRAFTER_TAG_IDS["SUBTLE_DEBUG_ENTRY"]}" type="button" title="Enter debug mode" aria-label="Enter debug mode" onclick="window.dispatchEvent(new CustomEvent('drafter-toggle-debug-mode'));" {{subtle_debug_attrs}}>debug</button>
 </div>
 """
 
@@ -162,7 +164,8 @@ class Site:
                 <p>Raw Details:</p>
                 <pre style='white-space: pre-wrap;'>{repr(envelope)}</pre>
             </div>
-            """
+                """,
+            subtle_debug_attrs='data-enabled="false" data-visible="false"',
         )
 
         # Add global CSS with appropriate classes
@@ -195,7 +198,17 @@ class Site:
         """
         configuration = self.get_configuration()
 
-        site_html = SITE_HTML_TEMPLATE.format(initial_body_content="Loading")
+        subtle_enabled = bool(configuration.enable_subtle_debug_entry)
+        subtle_visible = subtle_enabled and not configuration.in_debug_mode
+        subtle_debug_attrs = (
+            f'data-enabled="{str(subtle_enabled).lower()}" '
+            f'data-visible="{str(subtle_visible).lower()}"'
+        )
+
+        site_html = SITE_HTML_TEMPLATE.format(
+            initial_body_content="Loading",
+            subtle_debug_attrs=subtle_debug_attrs,
+        )
 
         additional_css, additional_js = self._get_theme_headers(configuration)
 
