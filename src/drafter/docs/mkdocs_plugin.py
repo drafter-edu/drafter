@@ -96,7 +96,8 @@ class DrafterCodeBlockPlugin(BasePlugin):
                 return f"{match.group(0)}{failure}"
 
             if self.config["show_source"]:
-                return f"{match.group(0)}\n\n{iframe_html}"
+                source_block = self._build_source_block(info, code)
+                return f"{source_block}\n\n{iframe_html}"
             return iframe_html
 
         return FENCE_RE.sub(replace_block, markdown)
@@ -198,6 +199,32 @@ class DrafterCodeBlockPlugin(BasePlugin):
             return "build"
         return str(self.config["pyodide_package_style"])
 
+    def _build_source_block(self, info: str, code: str) -> str:
+        source_info = self._normalized_source_info(info)
+        return f"```{source_info}\n{code}\n```"
+
+    def _normalized_source_info(self, info: str) -> str:
+        marker = self.config["marker"].lower()
+        language = self.config["language"]
+        language_lower = language.lower()
+
+        tokens = info.split()
+        kept_tokens: list[str] = []
+        has_language = False
+
+        for token in tokens:
+            normalized_token = token.strip(",").lower()
+            if normalized_token == marker:
+                continue
+            if normalized_token == language_lower:
+                has_language = True
+            kept_tokens.append(token)
+
+        if not has_language:
+            kept_tokens.insert(0, language)
+
+        return " ".join(kept_tokens).strip() or language
+
     def _prepare_code(self, code: str) -> str:
         prepared = code.rstrip() + "\n"
         if re.search(r"\bstart_server\s*\(", prepared):
@@ -222,6 +249,14 @@ class DrafterCodeBlockPlugin(BasePlugin):
         title = html.escape(f"Drafter Demo {demo_id}")
         src = html.escape(iframe_src)
         height = int(self.config["iframe_height"])
+        style_parts = [
+            "width: 100%",
+            "border: 1px solid #c6c6c6",
+            "border-radius: 8px",
+        ]
+        if height > 0:
+            style_parts.append(f"min-height: {height}px")
+        style_value = "; ".join(style_parts) + ";"
         return (
             '<div class="drafter-demo" data-drafter-demo="'
             + html.escape(demo_id)
@@ -231,8 +266,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
             + f'title="{title}" '
             + 'loading="lazy" '
             + 'sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" '
-            + 'style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; '
-            + (f'min-height: {height}px;"' if height > 0 else "")
+            + f'style="{style_value}" '
             + "></iframe>\n"
             + "</div>"
         )
