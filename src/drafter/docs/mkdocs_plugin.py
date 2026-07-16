@@ -33,7 +33,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
         ("marker", config_options.Type(str, default="drafter")),
         ("language", config_options.Type(str, default="python")),
         ("output_subdir", config_options.Type(str, default="drafter-demos")),
-        ("iframe_height", config_options.Type(int, default=430)),
+        ("iframe_height", config_options.Type(int, default=-1)),
         ("show_source", config_options.Type(bool, default=True)),
         ("python_executable", config_options.Optional(config_options.Type(str))),
         ("compile_timeout", config_options.Type(int, default=120)),
@@ -232,7 +232,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
             + 'loading="lazy" '
             + 'sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" '
             + 'style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; '
-            + f'min-height: {height}px;"'
+            + (f'min-height: {height}px;"' if height > 0 else "")
             + "></iframe>\n"
             + "</div>"
         )
