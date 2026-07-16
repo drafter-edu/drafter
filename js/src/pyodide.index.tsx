@@ -29,6 +29,25 @@ initializeRuntimeConfigurationOverrides();
 
 const DRAFTER_CONFIG_FILENAME = "/_drafter_config.json";
 
+function toVirtualStudentPath(studentFilename?: string): string {
+	const rawFilename = (studentFilename ?? "main.py").trim() || "main.py";
+	return rawFilename.startsWith("/") ? rawFilename : `/${rawFilename}`;
+}
+
+function writeStudentCodeFile(
+	pyodide: any,
+	studentFilename: string | undefined,
+	code: string,
+) {
+	const filePath = toVirtualStudentPath(studentFilename);
+	const lastSlash = filePath.lastIndexOf("/");
+	const parentDirectory = lastSlash > 0 ? filePath.slice(0, lastSlash) : "/";
+	if (parentDirectory !== "/") {
+		pyodide.FS.mkdirTree(parentDirectory);
+	}
+	pyodide.FS.writeFile(filePath, code);
+}
+
 function writeConfigFile(pyodide: any) {
 	if ((window as any).DRAFTER_MODIFIED_CONFIGURATION) {
 		try {
@@ -564,14 +583,29 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 	// For concurrent instances, run the student code in its own module namespace
 	// so they don't share __main__ globals (route functions, State classes, etc.).
 	// The single-instance path runs in the main globals exactly as before.
+	const studentFilename = options?.studentFilename || "main.py";
+	const codeToRun = options.code ?? "";
+	try {
+		writeStudentCodeFile(pyodide, studentFilename, codeToRun);
+	} catch (error) {
+		throw reportSystemError({
+			id: "runtime.student_code_write_failed",
+			category: "runtime",
+			message: "Error writing student code file",
+			error,
+			recoverable: true,
+			context: { phase: "setup" },
+		});
+	}
+
 	const runOptions: { filename: string; globals?: any } = {
-		filename: options?.studentFilename || "main.py",
+		filename: studentFilename,
 	};
 	if (options.rootElementId !== undefined) {
 		runOptions.globals = pyodide.toPy({ __name__: "__main__" });
 	}
 	try {
-		const result = await pyodide.runPythonAsync(options.code, runOptions);
+		const result = await pyodide.runPythonAsync(codeToRun, runOptions);
 		return result;
 	} catch (error) {
 		if (
