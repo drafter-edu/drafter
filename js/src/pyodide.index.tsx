@@ -76,6 +76,7 @@ interface AppServerPyodideOptions {
 	devWsUrl?: string;
 	pythonUrl?: string;
 	inlineCode?: string;
+	studentFilename?: string;
 	loadPackagesAutomatically?: boolean;
 	explicitPackageList?: string[];
 	/** Root element this instance renders into. Defaults to "drafter-root--". */
@@ -229,6 +230,7 @@ export async function createDrafterInstance(
 				(window as any).__drafterCurrentCode = code;
 				const executionOptions: DrafterInitOptions = {
 					code,
+					studentFilename: options.studentFilename,
 					// Pass the RAW option (may be undefined) so the single-instance
 					// back-compat path never triggers per-instance reconfiguration.
 					rootElementId: options.rootElementId,

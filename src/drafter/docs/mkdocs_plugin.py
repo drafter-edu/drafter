@@ -40,6 +40,8 @@ class DrafterCodeBlockPlugin(BasePlugin):
             "pyodide_package_style",
             config_options.Choice(("build", "cdn", "pypi"), default="pypi"),
         ),
+        ("subtle_debug_entry", config_options.Type(bool, default=True)),
+        ("production", config_options.Type(bool, default=True)),
     )
 
     def __init__(self) -> None:
@@ -59,7 +61,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
         self._compiled_cache.clear()
         return config
 
-    def on_page_markdown(self, markdown, page, config, files):
+    def on_page_markdown(self, markdown, /, *, page, config, files):
         block_counter = {"value": 0}
 
         def replace_block(match: re.Match[str]) -> str:
@@ -96,7 +98,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
 
         return FENCE_RE.sub(replace_block, markdown)
 
-    def on_post_build(self, config):
+    def on_post_build(self, *, config):
         if self._temp_root and self._temp_root.exists():
             shutil.rmtree(self._temp_root, ignore_errors=True)
 
@@ -157,6 +159,8 @@ class DrafterCodeBlockPlugin(BasePlugin):
             "index.html",
             "--pyodide-package-style",
             self.config["pyodide_package_style"],
+            "--production" if self.config["production"] else "",
+            "--subtle-debug-entry" if self.config["subtle_debug_entry"] else "",
         ]
 
         build_result = subprocess.run(

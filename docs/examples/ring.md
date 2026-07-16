@@ -8,7 +8,7 @@ This application demonstrates three pages linked together.
 
 ![](ring/ring3.png)
 
-```python
+```python drafter
 from drafter import route, start_server, Page, Link
 from bakery import assert_equal
 
