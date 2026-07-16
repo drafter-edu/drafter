@@ -167,9 +167,7 @@ class CurrentLocation(Component):
                     EventPayloadFieldSpec(
                         "message", str, "Descriptive message about the status."
                     ),
-                    EventPayloadFieldSpec(
-                        "lat", float, "Latitude in decimal degrees."
-                    ),
+                    EventPayloadFieldSpec("lat", float, "Latitude in decimal degrees."),
                     EventPayloadFieldSpec(
                         "lon", float, "Longitude in decimal degrees."
                     ),

@@ -105,7 +105,9 @@ describe("drafter-current-location", () => {
 		const button = element.querySelector("button") as HTMLButtonElement;
 		button.click();
 		expect(getStoredLocation(element).status).toBe("pending");
-		expect(element.querySelector(".drafter-geolocation-spinner")).not.toBeNull();
+		expect(
+			element.querySelector(".drafter-geolocation-spinner"),
+		).not.toBeNull();
 
 		resolvePosition().success({
 			coords: {
