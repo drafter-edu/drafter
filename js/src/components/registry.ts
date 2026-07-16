@@ -1,1 +1,2 @@
+import "./geolocation";
 import "./timer";
