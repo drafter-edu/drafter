@@ -144,7 +144,8 @@ class DrafterCodeBlockPlugin(BasePlugin):
             raise RuntimeError("Temporary build directory was not initialized.")
 
         script_path = self._temp_root / f"{demo_id}.py"
-        script_path.write_text(self._prepare_code(code), encoding="utf-8")
+        prepared_code = self._prepare_code(code)
+        script_path.write_text(prepared_code, encoding="utf-8")
 
         python_executable = self.config["python_executable"] or sys.executable
         command = [
@@ -161,6 +162,9 @@ class DrafterCodeBlockPlugin(BasePlugin):
             self.config["pyodide_package_style"],
             "--production" if self.config["production"] else "",
             "--subtle-debug-entry" if self.config["subtle_debug_entry"] else "",
+            "--system-packages",
+            "bakery",
+            "--verbose",
         ]
 
         build_result = subprocess.run(
@@ -177,6 +181,9 @@ class DrafterCodeBlockPlugin(BasePlugin):
             stdout = (build_result.stdout or "").strip()
             details = stderr or stdout or "Unknown error while compiling Drafter app"
             raise RuntimeError(details)
+
+        target_script_path = target_dir / f"{demo_id}.py"
+        target_script_path.write_text(prepared_code, encoding="utf-8")
 
         rel_path = PurePosixPath(self.config["output_subdir"]) / demo_id / "index.html"
         self._compiled_cache[demo_id] = rel_path

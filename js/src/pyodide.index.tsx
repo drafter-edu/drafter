@@ -92,6 +92,8 @@ interface PyodideSettings {
 }
 
 interface AppServerPyodideOptions {
+	/** How verbose the Pyodide runtime should be in terms of logging. */
+	verbose: boolean;
 	devWsUrl?: string;
 	pythonUrl?: string;
 	inlineCode?: string;
@@ -375,8 +377,15 @@ export async function startPyodideAppServerSession(
 	await createDrafterInstance(options);
 }
 
-export async function setupPyodide(options: PyodideSettings) {
+export async function setupPyodide(options: PyodideSettings, verbose = false) {
+	const verboseLog = (...args: any[]) => {
+		if (verbose) {
+			console.log("[Drafter AppServer Scaffolding]", ...args);
+		}
+	};
+
 	if ((window as any).pyodide === undefined) {
+		verboseLog("Loading Pyodide with options:", options);
 		try {
 			// Load Pyodide itself
 			window.pyodide = (window as any).pyodide = await loadPyodide({
@@ -386,17 +395,26 @@ export async function setupPyodide(options: PyodideSettings) {
 					DRAFTER_CONFIG_FILE: DRAFTER_CONFIG_FILENAME,
 				},
 			});
+			verboseLog(
+				"Pyodide loaded successfully. Environment Variables:",
+				window.pyodide?._module?.ENV,
+			);
 			// Load micropip
+			verboseLog("Loading micropip...");
 			await window.pyodide.loadPackage("micropip");
 			window.micropip = window.pyodide.pyimport("micropip");
 			// Load mock packages
+			verboseLog("Adding mock packages:", DEFAULT_MOCK_PACKAGES);
 			addMockPackages(DEFAULT_MOCK_PACKAGES);
 			// Load system packages
+			verboseLog("Installing system packages:", options.systemPackages);
 			for (const pkg of options.systemPackages) {
 				await window.micropip.install(pkg);
 			}
 			// Write Drafter configuration file
+			verboseLog("Writing Drafter configuration file...");
 			writeConfigFile(window.pyodide);
+			verboseLog("Pyodide setup complete.");
 		} catch (error) {
 			throw reportSystemError({
 				id: "runtime.pyodide_setup_failed",

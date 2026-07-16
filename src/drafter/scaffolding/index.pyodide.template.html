@@ -12,7 +12,7 @@
       await window.Drafter.setupPyodide({
         pyodideUrl: {{ system.app_common.pyodide_url | tojson }},
         systemPackages: {{ system.app_common.system_packages | tojson }},
-      });
+      }, {{ system.bootstrap.verbose | tojson }});
 
       // 4) Mount Drafter either locally or remotely based on configuration
       {% if system.app_common.mount_drafter_locally %}
