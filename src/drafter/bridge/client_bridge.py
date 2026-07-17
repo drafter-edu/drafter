@@ -28,6 +28,7 @@ from drafter.bridge.dom import (
     replace_html,
     get_attribute_recursively,
     swap_debug_mode,
+    update_subtle_debug_entry,
 )
 from drafter.bridge.log import debug_log, console_log
 from drafter.bridge.error_handling import (
@@ -56,12 +57,14 @@ from typing import Callable, Optional, Any
 class ClientBridge:
     site_renderer: SiteRenderer
     navigator: NavigationController
+    configuration: ClientServerConfiguration = field(init=False)
     debug_panel: Optional[Any] = None
     runtime: RuntimeAdapter = field(default_factory=create_runtime)
     site_title: str = "Default Title"
 
     def __init__(self, configuration: ClientServerConfiguration):
         self.runtime = create_runtime()
+        self.configuration = configuration
         self.site_renderer = SiteRenderer(
             self.runtime, configuration.root_element_id, configuration.root_element_id
         )
@@ -72,6 +75,11 @@ class ClientBridge:
     def setup_site(self, initial_site_data: InitialSiteData) -> None:
         self.set_site_title(initial_site_data.site_title)
         self.site_renderer.setup(initial_site_data)
+        update_subtle_debug_entry(
+            self.site_renderer.get_scope(),
+            self.configuration.in_debug_mode,
+            self.configuration.enable_subtle_debug_entry,
+        )
         # Scope this instance's event lookups (BODY/FORM) to the same node the
         # renderer rendered into (its shadow root, when shadow DOM is on), so
         # concurrent instances never resolve each other's elements.
@@ -88,6 +96,7 @@ class ClientBridge:
         self.events.setup_events(
             {
                 "drafter-toggle-frame": lambda event: handle_toggle_frame(),
+                "drafter-toggle-debug-mode": lambda event: handle_debug_mode(),
                 "drafter-navigate": lambda event: self.navigator.goto(event.detail),
                 "popstate": self.navigator.handle_popstate,
             },
@@ -203,7 +212,20 @@ class ClientBridge:
             if event.get("key") == "framed":
                 self.site_renderer.toggle_frame()
             elif event.get("key") == "in_debug_mode":
+                self.configuration.in_debug_mode = bool(event.get("value"))
                 swap_debug_mode(js.document)
+                update_subtle_debug_entry(
+                    self.site_renderer.get_scope(),
+                    self.configuration.in_debug_mode,
+                    self.configuration.enable_subtle_debug_entry,
+                )
+            elif event.get("key") == "enable_subtle_debug_entry":
+                self.configuration.enable_subtle_debug_entry = bool(event.get("value"))
+                update_subtle_debug_entry(
+                    self.site_renderer.get_scope(),
+                    self.configuration.in_debug_mode,
+                    self.configuration.enable_subtle_debug_entry,
+                )
             else:
                 report_bridge_error(
                     "client.unhandled_config_update",

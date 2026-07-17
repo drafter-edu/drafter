@@ -12,7 +12,7 @@
       await window.Drafter.setupPyodide({
         pyodideUrl: {{ system.app_common.pyodide_url | tojson }},
         systemPackages: {{ system.app_common.system_packages | tojson }},
-      });
+      }, {{ system.bootstrap.verbose | tojson }});
 
       // 4) Mount Drafter either locally or remotely based on configuration
       {% if system.app_common.mount_drafter_locally %}
@@ -33,6 +33,7 @@
         devWsUrl: {{ dev_ws_url | tojson }},
         pythonUrl: {{ python_url | tojson }},
         inlineCode: {% if inline_py %}document.getElementById('user-code')?.textContent || ''{% else %}undefined{% endif %},
+        studentFilename: {{ (system.app_common.show_filename_as if system.app_common.show_filename_as else system.bootstrap.get_main_filename()) | tojson }},
         loadPackagesAutomatically: {{system.app_common.load_packages_automatically|tojson}},
         explicitPackageList: {{ system.app_common.project_packages | tojson }},
       });

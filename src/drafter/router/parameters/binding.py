@@ -12,10 +12,13 @@ import difflib
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from drafter.data.converter import ConversionContext
+from drafter.data.converter import (
+    ConversionContext,
+    ConverterRegistry,
+    preview_value,
+)
 from drafter.data.payload import PayloadValue, describe_source
 from drafter.history.conversion import ConversionRecord, UnchangedRecord
-from drafter.router.parameters.conversion import ConverterRegistry, preview_value
 from drafter.router.parameters.diagnostics import RouteDiagnostic
 from drafter.router.parameters.introspect import RouteSignatureSpec
 

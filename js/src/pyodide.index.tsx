@@ -29,6 +29,25 @@ initializeRuntimeConfigurationOverrides();
 
 const DRAFTER_CONFIG_FILENAME = "/_drafter_config.json";
 
+function toVirtualStudentPath(studentFilename?: string): string {
+	const rawFilename = (studentFilename ?? "main.py").trim() || "main.py";
+	return rawFilename.startsWith("/") ? rawFilename : `/${rawFilename}`;
+}
+
+function writeStudentCodeFile(
+	pyodide: any,
+	studentFilename: string | undefined,
+	code: string,
+) {
+	const filePath = toVirtualStudentPath(studentFilename);
+	const lastSlash = filePath.lastIndexOf("/");
+	const parentDirectory = lastSlash > 0 ? filePath.slice(0, lastSlash) : "/";
+	if (parentDirectory !== "/") {
+		pyodide.FS.mkdirTree(parentDirectory);
+	}
+	pyodide.FS.writeFile(filePath, code);
+}
+
 function writeConfigFile(pyodide: any) {
 	if ((window as any).DRAFTER_MODIFIED_CONFIGURATION) {
 		try {
@@ -73,9 +92,12 @@ interface PyodideSettings {
 }
 
 interface AppServerPyodideOptions {
+	/** How verbose the Pyodide runtime should be in terms of logging. */
+	verbose: boolean;
 	devWsUrl?: string;
 	pythonUrl?: string;
 	inlineCode?: string;
+	studentFilename?: string;
 	loadPackagesAutomatically?: boolean;
 	explicitPackageList?: string[];
 	/** Root element this instance renders into. Defaults to "drafter-root--". */
@@ -229,6 +251,7 @@ export async function createDrafterInstance(
 				(window as any).__drafterCurrentCode = code;
 				const executionOptions: DrafterInitOptions = {
 					code,
+					studentFilename: options.studentFilename,
 					// Pass the RAW option (may be undefined) so the single-instance
 					// back-compat path never triggers per-instance reconfiguration.
 					rootElementId: options.rootElementId,
@@ -354,8 +377,15 @@ export async function startPyodideAppServerSession(
 	await createDrafterInstance(options);
 }
 
-export async function setupPyodide(options: PyodideSettings) {
+export async function setupPyodide(options: PyodideSettings, verbose = false) {
+	const verboseLog = (...args: any[]) => {
+		if (verbose) {
+			console.log("[Drafter AppServer Scaffolding]", ...args);
+		}
+	};
+
 	if ((window as any).pyodide === undefined) {
+		verboseLog("Loading Pyodide with options:", options);
 		try {
 			// Load Pyodide itself
 			window.pyodide = (window as any).pyodide = await loadPyodide({
@@ -365,17 +395,26 @@ export async function setupPyodide(options: PyodideSettings) {
 					DRAFTER_CONFIG_FILE: DRAFTER_CONFIG_FILENAME,
 				},
 			});
+			verboseLog(
+				"Pyodide loaded successfully. Environment Variables:",
+				window.pyodide?._module?.ENV,
+			);
 			// Load micropip
+			verboseLog("Loading micropip...");
 			await window.pyodide.loadPackage("micropip");
 			window.micropip = window.pyodide.pyimport("micropip");
 			// Load mock packages
+			verboseLog("Adding mock packages:", DEFAULT_MOCK_PACKAGES);
 			addMockPackages(DEFAULT_MOCK_PACKAGES);
 			// Load system packages
+			verboseLog("Installing system packages:", options.systemPackages);
 			for (const pkg of options.systemPackages) {
 				await window.micropip.install(pkg);
 			}
 			// Write Drafter configuration file
+			verboseLog("Writing Drafter configuration file...");
 			writeConfigFile(window.pyodide);
+			verboseLog("Pyodide setup complete.");
 		} catch (error) {
 			throw reportSystemError({
 				id: "runtime.pyodide_setup_failed",
@@ -562,14 +601,29 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 	// For concurrent instances, run the student code in its own module namespace
 	// so they don't share __main__ globals (route functions, State classes, etc.).
 	// The single-instance path runs in the main globals exactly as before.
+	const studentFilename = options?.studentFilename || "main.py";
+	const codeToRun = options.code ?? "";
+	try {
+		writeStudentCodeFile(pyodide, studentFilename, codeToRun);
+	} catch (error) {
+		throw reportSystemError({
+			id: "runtime.student_code_write_failed",
+			category: "runtime",
+			message: "Error writing student code file",
+			error,
+			recoverable: true,
+			context: { phase: "setup" },
+		});
+	}
+
 	const runOptions: { filename: string; globals?: any } = {
-		filename: options?.studentFilename || "main.py",
+		filename: studentFilename,
 	};
 	if (options.rootElementId !== undefined) {
 		runOptions.globals = pyodide.toPy({ __name__: "__main__" });
 	}
 	try {
-		const result = await pyodide.runPythonAsync(options.code, runOptions);
+		const result = await pyodide.runPythonAsync(codeToRun, runOptions);
 		return result;
 	} catch (error) {
 		if (

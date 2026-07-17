@@ -200,7 +200,9 @@ snippets = {
     },
     "geolocation": {
         "current_location_simple": """CurrentLocation('student_location')""",
+        "current_location_hidden": """CurrentLocation('hidden_location', show=False)""",
         "current_location_with_options": """CurrentLocation('home_location', show_coordinates=True, id='geo-1')""",
+        "current_location_with_handler": """CurrentLocation('spot', on_locate='record_location')""",
         "location_data": """Location('granted', message='OK', lat=37.5, lon=-77.4, accuracy=10.0)""",
     },
     "image": {

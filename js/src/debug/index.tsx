@@ -56,13 +56,41 @@ export class DebugPanel {
 
 		this.headerBar = new DebugHeaderBar("", this.root);
 		this.footerBar = new DebugFooterBar(this.root);
-		this.testingPanel = new TestPanel(this.containerId, this.instanceId, this.root);
-		this.statePanel = new StatePanel(this.containerId, this.instanceId, this.root);
-		this.routesPanel = new RoutesPanel(this.containerId, this.instanceId, this.root);
-		this.historyPanel = new HistoryPanel(this.containerId, this.instanceId, this.root);
-		this.logPanel = new LogPanel(this.containerId, this.instanceId, this.root);
-		this.configPanel = new ConfigPanel(this.containerId, this.instanceId, this.root);
-		this.filesPanel = new FilesPanel(this.containerId, this.instanceId, this.root);
+		this.testingPanel = new TestPanel(
+			this.containerId,
+			this.instanceId,
+			this.root,
+		);
+		this.statePanel = new StatePanel(
+			this.containerId,
+			this.instanceId,
+			this.root,
+		);
+		this.routesPanel = new RoutesPanel(
+			this.containerId,
+			this.instanceId,
+			this.root,
+		);
+		this.historyPanel = new HistoryPanel(
+			this.containerId,
+			this.instanceId,
+			this.root,
+		);
+		this.logPanel = new LogPanel(
+			this.containerId,
+			this.instanceId,
+			this.root,
+		);
+		this.configPanel = new ConfigPanel(
+			this.containerId,
+			this.instanceId,
+			this.root,
+		);
+		this.filesPanel = new FilesPanel(
+			this.containerId,
+			this.instanceId,
+			this.root,
+		);
 		this.panels = [
 			this.statePanel,
 			this.routesPanel,
@@ -161,6 +189,17 @@ export class DebugPanel {
 		toggleFrame.addEventListener("click", () => {
 			this.toggleFrame();
 		});
+		const exitDebug = (
+			<button
+				title={t("button.exit_debug.tooltip")}
+				class="drafter-exit-debug-button"
+			>
+				{t("icon.exit_debug")} {t("button.exit_debug")}
+			</button>
+		);
+		exitDebug.addEventListener("click", () => {
+			window.dispatchEvent(new CustomEvent("drafter-toggle-debug-mode"));
+		});
 		return (
 			<div class="drafter-debug-actions">
 				<button
@@ -175,6 +214,7 @@ export class DebugPanel {
 				>
 					{t("icon.reset")} {t("button.reset")}
 				</button>
+				{exitDebug}
 				{toggleFrame}
 			</div>
 		);

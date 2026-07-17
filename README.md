@@ -47,6 +47,22 @@ uv run examples\shop.py
 
 If you need the Skulpt engine explicitly, pass `--engine skulpt`.
 
+### build and serve docs
+
+Use the Drafter docs wrapper instead of calling MkDocs directly:
+
+    uv run drafter-docs build
+    uv run drafter-docs serve
+
+Optional dev mode:
+
+    uv run drafter-docs build --dev
+    uv run drafter-docs serve --dev
+
+In dev mode, the MkDocs Drafter codeblock plugin compiles embedded demos with
+Pyodide package style `build` (local package build) instead of the default
+`pypi`.
+
 ### watch JS assets
 
 To iterate on the JS client and have changes flow into the Python package automatically:

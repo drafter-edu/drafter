@@ -3,7 +3,11 @@ DOM manipulation helpers for the bridge module.
 Functions for adding/removing scripts, styles, links, and other DOM elements.
 """
 
-from drafter.site.site import DRAFTER_TAG_CLASSES, GLOBAL_DRAFTER_CSS_PATHS
+from drafter.site.site import (
+    DRAFTER_TAG_CLASSES,
+    DRAFTER_TAG_IDS,
+    GLOBAL_DRAFTER_CSS_PATHS,
+)
 from drafter.helpers.utils import is_skulpt, is_pyodide
 from typing import Any
 import js
@@ -120,9 +124,7 @@ def add_link(
     return link
 
 
-def add_link_to_shadow(
-    shadow_root, css_link: str, with_class: str = ""
-) -> None:
+def add_link_to_shadow(shadow_root, css_link: str, with_class: str = "") -> None:
     """Adds a link element to the shadow DOM for CSS files."""
     link = document.createElement("link")
     link.setAttribute("type", "text/css")
@@ -201,8 +203,10 @@ def _swap_asset_href(current_href: str, from_path: str, to_path: str) -> str:
 def swap_debug_mode(root):
     debug_css = GLOBAL_DRAFTER_CSS_PATHS[True].url
     non_debug_css = GLOBAL_DRAFTER_CSS_PATHS[False].url
-    existing_debug_link = root.querySelector(f'link.{DRAFTER_TAG_CLASSES["DEBUG_CSS"]}')
-    existing_non_debug_link = root.querySelector(f'link.{DRAFTER_TAG_CLASSES["NON_DEBUG_CSS"]}')
+    existing_debug_link = root.querySelector(f"link.{DRAFTER_TAG_CLASSES['DEBUG_CSS']}")
+    existing_non_debug_link = root.querySelector(
+        f"link.{DRAFTER_TAG_CLASSES['NON_DEBUG_CSS']}"
+    )
     if existing_debug_link:
         current_href = existing_debug_link.getAttribute("href")
         existing_debug_link.setAttribute(
@@ -217,3 +221,15 @@ def swap_debug_mode(root):
         )
         existing_non_debug_link.classList.remove(DRAFTER_TAG_CLASSES["NON_DEBUG_CSS"])
         existing_non_debug_link.classList.add(DRAFTER_TAG_CLASSES["DEBUG_CSS"])
+
+
+def update_subtle_debug_entry(root, in_debug_mode: bool, enabled: bool) -> None:
+    """Update subtle production debug-entry visibility and metadata."""
+    subtle_entry = root.querySelector(f"#{DRAFTER_TAG_IDS['SUBTLE_DEBUG_ENTRY']}")
+    if not subtle_entry:
+        return
+
+    subtle_entry.setAttribute("data-enabled", "true" if enabled else "false")
+    subtle_entry.setAttribute(
+        "data-visible", "true" if enabled and not in_debug_mode else "false"
+    )

@@ -34,9 +34,15 @@ start_server()
 CurrentLocation(
     name,                    # Required: form field name
     show_coordinates=False,  # Optional: show lat/lon when granted
+    on_locate=None,          # Optional: route (function or URL) called when a
+                             #   location (or failure) is resolved
     **extra_settings         # Optional: HTML attributes (class, id, style, etc.)
 )
 ```
+
+With `on_locate=`, the target route can receive the location either as the
+form field (`def moved(state, my_location: Location)`) or as individual event
+fields (`def moved(state, lat: float, lon: float)`).
 
 ## Location Dataclass
 

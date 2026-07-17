@@ -6,7 +6,7 @@ Here are a few different versions of the Calculator application.
 
 ![](calculator/calculator_basic.png)
 
-```python
+```python drafter
 from dataclasses import dataclass
 from drafter import *
 from bakery import assert_equal

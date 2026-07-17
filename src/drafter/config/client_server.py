@@ -22,6 +22,7 @@ class ClientServerConfiguration(BaseConfiguration):
     Attributes:
         server_name: Internal server identifier.
         in_debug_mode: Enable debug mode with debug panel.
+        enable_subtle_debug_entry: Show a subtle production-only control to enter debug mode.
         enable_audit_logging: Enable audit logging of requests/responses.
         site_title: Title displayed in the UI.
         information: Optional SiteInformation object with site metadata.
@@ -43,6 +44,7 @@ class ClientServerConfiguration(BaseConfiguration):
 
     server_name: str = "MAIN_SERVER"
     in_debug_mode: bool = True
+    enable_subtle_debug_entry: bool = False
     enable_audit_logging: bool = True
     site_title: str = "Drafter Application"
     information: Optional[SiteInformation] = None
@@ -76,33 +78,50 @@ class ClientServerConfiguration(BaseConfiguration):
     # TODO: Config setting to show white flash on navigation, also to control behavior
     # TODO: Config setting to add spinner to buttons
     # TODO: Config setting to forbid external links
-    
+
     @staticmethod
     def get_key() -> str:
         return "client_server"
-    
+
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
         result = EnvVars(env_vars)
         result.get_string_if_exists("DRAFTER_SERVER_NAME", "server_name")
         result.get_bool_if_exists("DRAFTER_IN_DEBUG_MODE", "in_debug_mode")
-        result.get_bool_if_exists("DRAFTER_ENABLE_AUDIT_LOGGING", "enable_audit_logging")
+        result.get_bool_if_exists(
+            "DRAFTER_ENABLE_SUBTLE_DEBUG_ENTRY", "enable_subtle_debug_entry"
+        )
+        result.get_bool_if_exists(
+            "DRAFTER_ENABLE_AUDIT_LOGGING", "enable_audit_logging"
+        )
         result.get_string_if_exists("DRAFTER_SITE_TITLE", "site_title")
         result.get_string_if_exists("DRAFTER_FRAMED", "framed")
         result.get_string_if_exists("DRAFTER_THEME", "theme")
         result.get_string_if_exists("DRAFTER_DEPLOY_IMAGE_PATH", "deploy_image_path")
-        result.get_string_list_if_exists("DRAFTER_EXTERNAL_PAGES", "external_pages", ";")
+        result.get_string_list_if_exists(
+            "DRAFTER_EXTERNAL_PAGES", "external_pages", ";"
+        )
         result.get_string_if_exists("DRAFTER_OVERRIDE_ASSET_URL", "override_asset_url")
-        result.get_string_list_if_exists("DRAFTER_ADDITIONAL_HEADER_CONTENT", "additional_header_content", ";")
-        result.get_string_list_if_exists("DRAFTER_ADDITIONAL_STYLE_CONTENT", "additional_style_content", ";")
-        result.get_string_list_if_exists("DRAFTER_ADDITIONAL_CSS_CONTENT", "additional_css_content", ";")
-        result.get_string_list_if_exists("DRAFTER_ADDITIONAL_JS_CONTENT", "additional_js_content", ";")
-        result.get_string_list_if_exists("DRAFTER_ADDITIONAL_SCRIPT_CONTENT", "additional_script_content", ";")
+        result.get_string_list_if_exists(
+            "DRAFTER_ADDITIONAL_HEADER_CONTENT", "additional_header_content", ";"
+        )
+        result.get_string_list_if_exists(
+            "DRAFTER_ADDITIONAL_STYLE_CONTENT", "additional_style_content", ";"
+        )
+        result.get_string_list_if_exists(
+            "DRAFTER_ADDITIONAL_CSS_CONTENT", "additional_css_content", ";"
+        )
+        result.get_string_list_if_exists(
+            "DRAFTER_ADDITIONAL_JS_CONTENT", "additional_js_content", ";"
+        )
+        result.get_string_list_if_exists(
+            "DRAFTER_ADDITIONAL_SCRIPT_CONTENT", "additional_script_content", ";"
+        )
         result.get_bool_if_exists("DRAFTER_USE_SHADOW_DOM", "use_shadow_dom")
         result.get_string_if_exists("DRAFTER_ROOT_ELEMENT_ID", "root_element_id")
         result.get_bool_if_exists("DRAFTER_NEWLINES_TO_BR", "newlines_to_br")
         return result.as_dict()
-    
+
     @staticmethod
     def extend_parser(parser):
         group = parser.add_argument_group("Client Server Configuration")
@@ -115,6 +134,11 @@ class ClientServerConfiguration(BaseConfiguration):
             "--production",
             action="store_true",
             help="Enable production mode (disables debug mode and debug panel)",
+        )
+        group.add_argument(
+            "--subtle-debug-entry",
+            action="store_true",
+            help="Show a subtle production-only control to enter debug mode",
         )
         group.add_argument(
             "--audit-logging",
@@ -182,7 +206,7 @@ class ClientServerConfiguration(BaseConfiguration):
             help="Whether to convert newlines to <br> tags in text content",
         )
         return group
-    
+
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:
         result = {}
@@ -190,6 +214,8 @@ class ClientServerConfiguration(BaseConfiguration):
             result["server_name"] = parsed_args["server_name"]
         if parsed_args.get("production"):
             result["in_debug_mode"] = False
+        if parsed_args.get("subtle_debug_entry"):
+            result["enable_subtle_debug_entry"] = True
         if parsed_args.get("audit_logging"):
             result["enable_audit_logging"] = True
         if parsed_args.get("site_title"):
@@ -208,23 +234,28 @@ class ClientServerConfiguration(BaseConfiguration):
             result["override_asset_url"] = parsed_args["override_asset_url"]
         if parsed_args.get("additional_header_content"):
             result["additional_header_content"] = [
-                content.strip() for content in parsed_args["additional_header_content"].split(";")
+                content.strip()
+                for content in parsed_args["additional_header_content"].split(";")
             ]
         if parsed_args.get("additional_style_content"):
             result["additional_style_content"] = [
-                content.strip() for content in parsed_args["additional_style_content"].split(";")
+                content.strip()
+                for content in parsed_args["additional_style_content"].split(";")
             ]
         if parsed_args.get("additional_css_content"):
             result["additional_css_content"] = [
-                content.strip() for content in parsed_args["additional_css_content"].split(";")
+                content.strip()
+                for content in parsed_args["additional_css_content"].split(";")
             ]
         if parsed_args.get("additional_js_content"):
             result["additional_js_content"] = [
-                content.strip() for content in parsed_args["additional_js_content"].split(";")
+                content.strip()
+                for content in parsed_args["additional_js_content"].split(";")
             ]
         if parsed_args.get("additional_script_content"):
             result["additional_script_content"] = [
-                content.strip() for content in parsed_args["additional_script_content"].split(";")
+                content.strip()
+                for content in parsed_args["additional_script_content"].split(";")
             ]
         if parsed_args.get("use_shadow_dom"):
             result["use_shadow_dom"] = True
@@ -238,6 +269,7 @@ class ClientServerConfiguration(BaseConfiguration):
         return {
             "server_name": self.server_name,
             "in_debug_mode": self.in_debug_mode,
+            "enable_subtle_debug_entry": self.enable_subtle_debug_entry,
             "enable_audit_logging": self.enable_audit_logging,
             "site_title": self.site_title,
             "information": self.information.to_json() if self.information else None,
@@ -256,7 +288,6 @@ class ClientServerConfiguration(BaseConfiguration):
             "external_pages": self.external_pages,
             "newlines_to_br": self.newlines_to_br,
         }
-        
 
     def copy(self) -> "ClientServerConfiguration":
         """
@@ -267,6 +298,7 @@ class ClientServerConfiguration(BaseConfiguration):
         """
         return ClientServerConfiguration(
             in_debug_mode=self.in_debug_mode,
+            enable_subtle_debug_entry=self.enable_subtle_debug_entry,
             enable_audit_logging=self.enable_audit_logging,
             site_title=self.site_title,
             information=self.information.copy() if self.information else None,
@@ -302,7 +334,7 @@ class ClientServerConfiguration(BaseConfiguration):
         """
         for key, value in kwargs.items():
             self.update_configuration(key, value)
-            
+
     SITE_INFORMATION_KEYS = ("author", "description", "sources", "planning", "links")
 
     def update_configuration(self, key: str, value):

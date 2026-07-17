@@ -5,26 +5,26 @@ Components define what they emit; these registries aggregate that metadata
 at startup so the router can reason globally (binding, aliases, docs
 generation, and consistency checks).
 
-The converter registry itself lives in the router layer
-(:mod:`drafter.router.parameters.conversion`), since the router owns
-conversion policy; it is re-exported here so components have a natural place
-to import it from when registering component-specific converters.
+The converter registry machinery lives in the data layer
+(:mod:`drafter.data.converter`), a light leaf both this layer and the router
+can import eagerly; it is re-exported here so components have a natural
+place to import it from when registering component-specific converters.
+The router installs the shared cross-component converters into it when
+:mod:`drafter.router.parameters.conversion` loads, since the router owns
+conversion policy.
 """
 
 from typing import Optional
 
 from drafter.components.utilities.contracts import ComponentContract
+from drafter.data.converter import CONVERTER_REGISTRY, ConverterRegistry
 
-
-def __getattr__(name: str):
-    # Lazy re-export: components import the converter registry from here, but
-    # the router layer must not load while component modules are still
-    # initializing (it would recreate a circular import through drafter.data).
-    if name in ("CONVERTER_REGISTRY", "ConverterRegistry"):
-        from drafter.router.parameters import conversion
-
-        return getattr(conversion, name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+__all__ = [
+    "CONVERTER_REGISTRY",
+    "ConverterRegistry",
+    "COMPONENT_CONTRACT_REGISTRY",
+    "ComponentContractRegistry",
+]
 
 
 class ComponentContractRegistry:
