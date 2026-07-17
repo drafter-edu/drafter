@@ -29,12 +29,24 @@ nav:
   - Components: reference/components.md
   - Fonts: reference/fonts.md
   - Transition to Flask: reference/flask.md
-
+- Curious:
+  - Curious: Curious/curious.md
 theme:
   name: material
   palette:
-    primary: blue
-    accent: blue
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
 
 plugins:
 - search
@@ -44,3 +56,7 @@ plugins:
 #    - tools/gen_ref_pages.py
 #- literate-nav:
 #    nav_file: SUMMARY.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
