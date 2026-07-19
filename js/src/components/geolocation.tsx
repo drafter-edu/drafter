@@ -11,8 +11,8 @@ type LocationStatus =
 type LocationData = {
 	status: LocationStatus;
 	message?: string;
-	lat?: number;
-	lon?: number;
+	latitude?: number;
+	longitude?: number;
 	accuracy?: number;
 	altitude?: number;
 	heading?: number;
@@ -117,8 +117,8 @@ class CurrentLocation extends DrafterHTMLElement {
 		const location: LocationData = {
 			status: "granted",
 			message: "Location available",
-			lat: coords.latitude,
-			lon: coords.longitude,
+			latitude: coords.latitude,
+			longitude: coords.longitude,
 			accuracy: coords.accuracy,
 			timestamp: position.timestamp,
 		};
@@ -210,11 +210,11 @@ class CurrentLocation extends DrafterHTMLElement {
 					message ?? "Location available",
 				),
 			);
-			const { lat, lon, accuracy } = this.location;
+			const { latitude, longitude, accuracy } = this.location;
 			if (
 				this.shouldShowCoordinates() &&
-				lat !== undefined &&
-				lon !== undefined
+				latitude !== undefined &&
+				longitude !== undefined
 			) {
 				const accuracyText = accuracy
 					? ` (±${Math.round(accuracy)}m)`
@@ -222,7 +222,7 @@ class CurrentLocation extends DrafterHTMLElement {
 				children.push(
 					paragraph(
 						"drafter-geolocation-coords",
-						`${lat.toFixed(6)}, ${lon.toFixed(6)}${accuracyText}`,
+						`${latitude.toFixed(6)}, ${longitude.toFixed(6)}${accuracyText}`,
 					),
 				);
 			}

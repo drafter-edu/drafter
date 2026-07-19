@@ -43,8 +43,8 @@ class Location:
     Attributes:
         status: Current permission/availability state.
         message: Optional descriptive message about the status.
-        lat: Latitude in decimal degrees (None if unavailable).
-        lon: Longitude in decimal degrees (None if unavailable).
+        latitude: Latitude in decimal degrees (None if unavailable).
+        longitude: Longitude in decimal degrees (None if unavailable).
         accuracy: Position accuracy in meters (None if unavailable).
         altitude: Altitude in meters above sea level (None if unavailable).
         heading: Direction of travel in degrees (None if unavailable).
@@ -54,8 +54,8 @@ class Location:
 
     status: LocationStatus
     message: Optional[str] = None
-    lat: Optional[float] = None
-    lon: Optional[float] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     accuracy: Optional[float] = None
     altitude: Optional[float] = None
     heading: Optional[float] = None
@@ -126,7 +126,7 @@ class CurrentLocation(Component):
     Attributes:
         name: The form field name that will contain location data.
         show: Whether to display the geolocation status UI. Defaults to True.
-        show_coordinates: Whether to display lat/lon when granted (default: False).
+        show_coordinates: Whether to display latitude/longitude when granted (default: False).
         on_locate: Function or URL to call when a location (or failure) is
             resolved. Defaults to None.
     """
@@ -167,9 +167,11 @@ class CurrentLocation(Component):
                     EventPayloadFieldSpec(
                         "message", str, "Descriptive message about the status."
                     ),
-                    EventPayloadFieldSpec("lat", float, "Latitude in decimal degrees."),
                     EventPayloadFieldSpec(
-                        "lon", float, "Longitude in decimal degrees."
+                        "latitude", float, "Latitude in decimal degrees."
+                    ),
+                    EventPayloadFieldSpec(
+                        "longitude", float, "Longitude in decimal degrees."
                     ),
                     EventPayloadFieldSpec(
                         "accuracy", float, "Position accuracy in meters."
