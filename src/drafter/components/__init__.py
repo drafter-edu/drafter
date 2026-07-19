@@ -56,6 +56,21 @@ from drafter.components.media import Audio, Video, Canvas, SVG
 
 from drafter.components.timer import Timer, Clock
 
+from drafter.components.audio import (
+    AudioLevel,
+    AudioRecorder,
+    Distortion,
+    Echo,
+    Melody,
+    Microphone,
+    Muffle,
+    Recording,
+    Reverb,
+    Sharpen,
+    Sound,
+    Tone,
+)
+
 __all__ = [
     "PageContent",
     "Content",
@@ -111,4 +126,16 @@ __all__ = [
     "SVG",
     "Timer",
     "Clock",
+    "Tone",
+    "Melody",
+    "Sound",
+    "Microphone",
+    "AudioRecorder",
+    "AudioLevel",
+    "Recording",
+    "Echo",
+    "Reverb",
+    "Muffle",
+    "Sharpen",
+    "Distortion",
 ]

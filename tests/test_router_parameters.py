@@ -287,11 +287,13 @@ class TestFileUploadConversion:
 
 class TestLocationConversion:
     def test_from_json_string(self):
-        raw = json.dumps({"status": "granted", "lat": 39.68, "lon": -75.75})
+        raw = json.dumps(
+            {"status": "granted", "latitude": 39.68, "longitude": -75.75}
+        )
         result = convert(raw, Location)
         assert result.ok
         assert result.value.status == "granted"
-        assert result.value.lat == 39.68
+        assert result.value.latitude == 39.68
 
     def test_from_dict(self):
         result = convert({"status": "denied"}, Location)

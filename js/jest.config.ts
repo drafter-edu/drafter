@@ -42,6 +42,7 @@ const config: Config = {
 				"**/__tests__/engine.test.ts",
 				"**/__tests__/timer.test.ts",
 				"**/__tests__/clock.test.ts",
+				"**/__tests__/audio.test.ts",
 			],
 		},
 		{
