@@ -1,4 +1,8 @@
 import { DrafterHTMLElement } from "./drafterHTMLElement";
+import {
+	geolocationBroker,
+	type LocationRequestOptions,
+} from "./geolocationBroker";
 
 type LocationStatus =
 	| "unavailable"
@@ -85,11 +89,11 @@ class CurrentLocation extends DrafterHTMLElement {
 		return parsed;
 	}
 
-	private getGeolocationOptions(): PositionOptions {
+	private getRequestOptions(): LocationRequestOptions {
 		return {
 			enableHighAccuracy: this.getEnableHighAccuracy(),
-			timeout: this.getNumericOption("timeout", 10000),
-			maximumAge: this.getNumericOption("maximum-age", 0),
+			timeoutMs: this.getNumericOption("timeout", 10000),
+			maxAgeMs: this.getNumericOption("maximum-age", 0),
 		};
 	}
 
@@ -144,11 +148,10 @@ class CurrentLocation extends DrafterHTMLElement {
 			{ status: "pending", message: "Requesting permission..." },
 			false,
 		);
-		navigator.geolocation.getCurrentPosition(
-			(position) => this.handleSuccess(position),
-			(error) => this.handleError(error),
-			this.getGeolocationOptions(),
-		);
+		geolocationBroker
+			.getPosition(this.getRequestOptions())
+			.then((position) => this.handleSuccess(position))
+			.catch((error) => this.handleError(error));
 	}
 
 	private handleSuccess(position: GeolocationPosition): void {
@@ -173,16 +176,29 @@ class CurrentLocation extends DrafterHTMLElement {
 		this.setLocation(location);
 	}
 
-	private handleError(error: GeolocationPositionError): void {
+	private handleError(error: unknown): void {
 		let status: LocationStatus = "error";
 		let message = "Could not retrieve location";
-		if (error.code === error.PERMISSION_DENIED) {
+		const geolocationError = error as
+			| (GeolocationPositionError & {
+					PERMISSION_DENIED?: number;
+					POSITION_UNAVAILABLE?: number;
+					TIMEOUT?: number;
+			  })
+			| undefined;
+		const code = geolocationError?.code;
+		if (code === geolocationError?.PERMISSION_DENIED || code === 1) {
 			status = "denied";
 			message = "Location access denied";
-		} else if (error.code === error.POSITION_UNAVAILABLE) {
+		} else if (
+			code === geolocationError?.POSITION_UNAVAILABLE ||
+			code === 2
+		) {
 			message = "Location information unavailable";
-		} else if (error.code === error.TIMEOUT) {
+		} else if (code === geolocationError?.TIMEOUT || code === 3) {
 			message = "Location request timed out";
+		} else if (error instanceof Error && error.message) {
+			message = error.message;
 		}
 		this.setLocation({ status, message });
 	}
