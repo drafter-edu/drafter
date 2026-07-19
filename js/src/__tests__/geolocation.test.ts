@@ -125,8 +125,8 @@ describe("drafter-current-location", () => {
 		expect(stored).toEqual({
 			status: "granted",
 			message: "Location available",
-			lat: 39.68,
-			lon: -75.75,
+			latitude: 39.68,
+			longitude: -75.75,
 			accuracy: 12.4,
 			timestamp: 1234567890,
 		});
@@ -137,13 +137,35 @@ describe("drafter-current-location", () => {
 		expect(locateListener).toHaveBeenCalledTimes(1);
 		const event = locateListener.mock.calls[0][0] as CustomEvent;
 		expect(event.detail.status).toBe("granted");
-		expect(event.detail.lat).toBe(39.68);
+		expect(event.detail.latitude).toBe(39.68);
+	});
+
+	test("uses configurable geolocation options when provided", () => {
+		const element = createComponent({
+			name: "spot",
+			"enable-high-accuracy": "false",
+			timeout: "2500",
+			"maximum-age": "120000",
+		});
+
+		(element.querySelector("button") as HTMLButtonElement).click();
+
+		expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+		expect(getCurrentPosition.mock.calls[0][2]).toEqual({
+			enableHighAccuracy: false,
+			timeout: 2500,
+			maximumAge: 120000,
+		});
 	});
 
 	test("maps a permission error to the denied state", () => {
 		const element = createComponent({ name: "spot" });
 		const locateListener = jest.fn();
+		const errorListener = jest.fn();
+		const deniedListener = jest.fn();
 		element.addEventListener("locate", locateListener);
+		element.addEventListener("error", errorListener);
+		element.addEventListener("denied", deniedListener);
 
 		(element.querySelector("button") as HTMLButtonElement).click();
 		resolvePosition().fail({ code: 1, ...ERROR_CODES });
@@ -157,10 +179,16 @@ describe("drafter-current-location", () => {
 				?.textContent,
 		).toBe("Location access denied");
 		expect(locateListener).toHaveBeenCalledTimes(1);
+		expect(errorListener).toHaveBeenCalledTimes(1);
+		expect(deniedListener).toHaveBeenCalledTimes(1);
 	});
 
 	test("maps a timeout to the error state", () => {
 		const element = createComponent({ name: "spot" });
+		const errorListener = jest.fn();
+		const timeoutListener = jest.fn();
+		element.addEventListener("error", errorListener);
+		element.addEventListener("timeout", timeoutListener);
 
 		(element.querySelector("button") as HTMLButtonElement).click();
 		resolvePosition().fail({ code: 3, ...ERROR_CODES });
@@ -169,6 +197,8 @@ describe("drafter-current-location", () => {
 			status: "error",
 			message: "Location request timed out",
 		});
+		expect(errorListener).toHaveBeenCalledTimes(1);
+		expect(timeoutListener).toHaveBeenCalledTimes(1);
 	});
 
 	test("reports unavailable when the geolocation API is missing", () => {

@@ -20,12 +20,6 @@ type LocationData = {
 	timestamp?: number;
 };
 
-const GEOLOCATION_OPTIONS: PositionOptions = {
-	enableHighAccuracy: true,
-	timeout: 10000,
-	maximumAge: 0,
-};
-
 const DENIED_HELP_INSTRUCTIONS = [
 	"To enable location access:",
 	"",
@@ -46,7 +40,14 @@ function paragraph(className: string, text: string): HTMLParagraphElement {
 
 class CurrentLocation extends DrafterHTMLElement {
 	static get observedAttributes() {
-		return ["name", "show", "show-coordinates"];
+		return [
+			"name",
+			"show",
+			"show-coordinates",
+			"enable-high-accuracy",
+			"timeout",
+			"maximum-age",
+		];
 	}
 
 	private input: HTMLInputElement | null = null;
@@ -63,6 +64,33 @@ class CurrentLocation extends DrafterHTMLElement {
 
 	private shouldShow(): boolean {
 		return this.getBooleanAttribute("show", true);
+	}
+
+	private getEnableHighAccuracy(): boolean {
+		return this.getBooleanAttribute("enable-high-accuracy", true);
+	}
+
+	private getNumericOption(
+		attributeName: string,
+		defaultValue: number,
+	): number {
+		const rawValue = this.getAttribute(attributeName);
+		if (rawValue === null || rawValue.trim() === "") {
+			return defaultValue;
+		}
+		const parsed = Number(rawValue);
+		if (!Number.isFinite(parsed) || parsed < 0) {
+			return defaultValue;
+		}
+		return parsed;
+	}
+
+	private getGeolocationOptions(): PositionOptions {
+		return {
+			enableHighAccuracy: this.getEnableHighAccuracy(),
+			timeout: this.getNumericOption("timeout", 10000),
+			maximumAge: this.getNumericOption("maximum-age", 0),
+		};
 	}
 
 	private syncVisibility(): void {
@@ -94,9 +122,22 @@ class CurrentLocation extends DrafterHTMLElement {
 		}
 		this.renderStatus();
 		if (emit) {
+			const detail = { ...location };
 			this.dispatchEvent(
-				new CustomEvent("locate", { detail: { ...location } }),
+				new CustomEvent("locate", { detail }),
 			);
+			if (location.status === "denied") {
+				this.dispatchEvent(new CustomEvent("error", { detail }));
+				this.dispatchEvent(new CustomEvent("denied", { detail }));
+			} else if (
+				location.status === "error" &&
+				(location.message ?? "") === "Location request timed out"
+			) {
+				this.dispatchEvent(new CustomEvent("error", { detail }));
+				this.dispatchEvent(new CustomEvent("timeout", { detail }));
+			} else if (location.status === "error") {
+				this.dispatchEvent(new CustomEvent("error", { detail }));
+			}
 		}
 	}
 
@@ -108,11 +149,12 @@ class CurrentLocation extends DrafterHTMLElement {
 		navigator.geolocation.getCurrentPosition(
 			(position) => this.handleSuccess(position),
 			(error) => this.handleError(error),
-			GEOLOCATION_OPTIONS,
+			this.getGeolocationOptions(),
 		);
 	}
 
 	private handleSuccess(position: GeolocationPosition): void {
+		console.log("Geolocation success:", position, this);
 		const coords = position.coords;
 		const location: LocationData = {
 			status: "granted",

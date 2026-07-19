@@ -203,6 +203,7 @@ snippets = {
         "current_location_hidden": """CurrentLocation('hidden_location', show=False)""",
         "current_location_with_options": """CurrentLocation('home_location', show_coordinates=True, id='geo-1')""",
         "current_location_with_handler": """CurrentLocation('spot', on_locate='record_location')""",
+        "current_location_with_events_and_geo_options": """CurrentLocation('spot', enable_high_accuracy=False, timeout=2500, maximum_age=120000, on_error='handle_geo_error', on_denied='handle_geo_denied', on_timeout='handle_geo_timeout')""",
         "location_data": """Location('granted', message='OK', lat=37.5, lon=-77.4, accuracy=10.0)""",
     },
     "image": {
