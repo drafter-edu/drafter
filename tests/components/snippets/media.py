@@ -23,8 +23,10 @@ tests.audio_autoplay = Audio(
     "background.mp3", controls=False, autoplay=True, muted=True, id="bg-audio"
 )
 tests.audio_autoplay = """
-<audio autoplay data-drafter-persist-key="bg-audio" id="bg-audio" muted src="background.mp3">
-</audio>
+<drafter-media autoplay>
+  <audio data-drafter-persist-key="bg-audio" id="bg-audio" muted src="background.mp3">
+  </audio>
+</drafter-media>
 """
 
 tests.audio_loop = Audio("loop_sound.mp3", loop=True, id="audio1")
@@ -50,8 +52,10 @@ tests.video_autoplay_muted = Video(
     "intro.mp4", autoplay=True, muted=True, controls=False, id="vid2"
 )
 tests.video_autoplay_muted = """
-<video autoplay data-drafter-persist-key="vid2" id="vid2" muted src="intro.mp4">
-</video>
+<drafter-media autoplay>
+  <video data-drafter-persist-key="vid2" id="vid2" muted src="intro.mp4">
+  </video>
+</drafter-media>
 """
 
 tests.video_loop = Video("demo.mp4", loop=True, id="vid1")

@@ -3,6 +3,33 @@ from typing import Optional
 from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.planning.render_plan import RenderPlan
 
+#: Custom element (js/src/components/media.tsx) that defers autoplay until
+#: the drafter-page-loaded event fires.
+AUTOPLAY_WRAPPER_TAG = "drafter-media"
+
+
+def _plan_with_deferred_autoplay(component: Component, context) -> RenderPlan:
+    """Plan a media tag, deferring autoplay to the page-loaded event.
+
+    A native ``autoplay`` attribute starts playback as soon as the element
+    is inserted into the DOM, which happens while the new page's HTML is
+    still loading. Instead, the ``autoplay`` attribute is moved onto a
+    ``<drafter-media>`` wrapper element, whose client-side implementation
+    starts playback when the drafter page-loaded event fires.
+    """
+    attributes = component.get_attributes(context)
+    autoplay = attributes.pop("autoplay", False)
+    inner = component._plan_tag(context, attributes=attributes)
+    if not autoplay:
+        return inner
+    return RenderPlan(
+        kind="tag",
+        tag_name=AUTOPLAY_WRAPPER_TAG,
+        attributes={"autoplay": True},
+        children=[inner],
+        known_attributes=["autoplay"],
+    )
+
 
 @dataclass(repr=False)
 class Audio(Component):
@@ -58,7 +85,10 @@ class Audio(Component):
         Args:
             src: Source URL of the audio file.
             controls: Whether to display audio controls. Defaults to True.
-            autoplay: Whether to autoplay the audio. Defaults to False.
+            autoplay: Whether to autoplay the audio. Playback starts once
+                the page has finished loading (the drafter page-loaded
+                event), not while the page is still being inserted.
+                Defaults to False.
             loop: Whether to loop the audio. Defaults to False.
             muted: Whether to mute the audio. Defaults to False.
             persistent: Whether the audio keeps playing across page
@@ -74,6 +104,9 @@ class Audio(Component):
         self.muted = muted
         self.persistent = persistent
         self.extra_settings = kwargs
+
+    def plan(self, context) -> RenderPlan:
+        return _plan_with_deferred_autoplay(self, context)
 
 
 @dataclass(repr=False)
@@ -135,7 +168,10 @@ class Video(Component):
             width: Optional width in pixels.
             height: Optional height in pixels.
             controls: Whether to show playback controls. Defaults to True.
-            autoplay: Whether to autoplay the video. Defaults to False.
+            autoplay: Whether to autoplay the video. Playback starts once
+                the page has finished loading (the drafter page-loaded
+                event), not while the page is still being inserted.
+                Defaults to False.
             loop: Whether to loop the video. Defaults to False.
             muted: Whether to mute the video. Defaults to False.
             persistent: Whether the video keeps playing across page
@@ -152,6 +188,9 @@ class Video(Component):
         self.muted = muted
         self.persistent = persistent
         self.extra_settings = kwargs
+
+    def plan(self, context) -> RenderPlan:
+        return _plan_with_deferred_autoplay(self, context)
 
 
 @dataclass(repr=False)

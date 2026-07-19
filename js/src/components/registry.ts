@@ -3,5 +3,6 @@ import "./timer";
 import "./tone";
 import "./melody";
 import "./sound";
+import "./media";
 import "./microphone";
 import "./audioRecorder";

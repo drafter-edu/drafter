@@ -86,6 +86,12 @@ body {
 		width: fit-content;
 	}
 
+	/* Deferred-autoplay wrapper around <audio>/<video>; must never affect
+	   layout, so the wrapped media element renders exactly as if bare. */
+	drafter-media {
+		display: contents;
+	}
+
 	drafter-tone[hidden],
 	drafter-melody[hidden],
 	drafter-sound[hidden],
