@@ -2,6 +2,19 @@ site_name: "Drafter Documentation"
 nav:
 - Home: index.md
 - Quickstart: quickstart/quickstart.md
+- Component Documentation: 
+  - Basic Components:
+    - Overview: ComponentDocs/BasicComponents/index.md
+    - Button: ComponentDocs/BasicComponents/button.md
+    - Link: ComponentDocs/BasicComponents/link.md
+    - TextBox: ComponentDocs/BasicComponents/textbox.md
+    - TextArea: ComponentDocs/BasicComponents/textarea.md
+    - CheckBox: ComponentDocs/BasicComponents/checkbox.md
+  - Advanced Components: ComponentDocs/AdvancedComponents/index.md
+  - Specialized Components:
+    - Overview: ComponentDocs/SpecializedComponents/index.md
+    - Matplotlib: ComponentDocs/SpecializedComponents/matplotlib/index.md
+  - Styling components: ComponentDocs/StylingComponents/index.md
 - Student Guide:
   - Installation: students/installation.md
   - Documentation for Students: students/docs.md
@@ -30,13 +43,13 @@ nav:
   - Fonts: reference/fonts.md
   - Transition to Flask: reference/flask.md
 - Curious:
-  - Curious: Curious/curious.md
+  - Button: Curious/curious.md
 theme:
   name: material
   palette:
     - scheme: default
       primary: blue
-      accent: blue
+      accent: indigo
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
@@ -65,3 +78,6 @@ plugins:
 markdown_extensions:
   - pymdownx.highlight
   - pymdownx.superfences
+
+extra_css:
+  - extra.css

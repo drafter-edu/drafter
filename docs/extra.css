@@ -1,0 +1,14 @@
+[data-md-color-scheme="default"] {
+    --md-default-bg-color: #c9daea;
+}
+
+/* Optional: make content cards slightly whiter */
+[data-md-color-scheme="default"] .md-content__inner {
+    background: #bcc5df;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.md-typeset {
+    font-size: 16px;
+}
