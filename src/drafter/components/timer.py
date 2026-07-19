@@ -150,3 +150,73 @@ class Clock(Component):
     interval: int
     route: UrlOrFunction
     show: bool = True
+    controls: bool = False
+    persistent: bool = False
+    on_tick: Optional[UrlOrFunction] = None
+
+    tag = "drafter-clock"
+
+    DEFAULT_ATTRS = {"role": "clock"}
+    RENAME_ATTRS = {"route": "on_tick"}
+    KNOWN_ATTRS = [
+        "interval",
+        "on_tick",
+        "show",
+        "controls",
+        "persistent",
+    ]
+    ARGUMENTS = [
+        ComponentArgument("interval", "positional", 1000),
+        ComponentArgument("route", "positional", None, is_event=True),
+        ComponentArgument("show", "keyword", True),
+        ComponentArgument("controls", "keyword", False),
+        ComponentArgument("persistent", "keyword", False),
+        ComponentArgument("on_tick", "keyword", None, is_event=True),
+    ]
+    EXTRA_SUPPORTED_EVENTS = ["tick"]
+
+    #: What this component emits: the JS implementation (js/src/components/
+    #: timer.tsx) must match this contract, and the router uses it to reason
+    #: about event payload fields.
+    CONTRACT = ComponentContract(
+        component_name="Clock",
+        html_tag="drafter-clock",
+        emitted_events=[
+            EventPayloadSpec(
+                event_name="tick",
+                fields=[
+                    EventPayloadFieldSpec(
+                        "elapsed",
+                        int,
+                        "Milliseconds elapsed since the clock started.",
+                    ),
+                    EventPayloadFieldSpec(
+                        "interval",
+                        int,
+                        "Current interval in milliseconds between ticks.",
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    def __init__(
+        self,
+        interval: int,
+        route: UrlOrFunction,
+        show: bool = True,
+        controls: bool = False,
+        persistent: bool = False,
+        on_tick: Optional[UrlOrFunction] = None,
+        **kwargs,
+    ):
+        self.interval = interval
+        self.route = route
+        self.show = show
+        self.controls = controls
+        self.persistent = persistent
+        self.on_tick = on_tick
+        self.extra_settings = kwargs
+
+
+COMPONENT_CONTRACT_REGISTRY.register(Clock.CONTRACT)
