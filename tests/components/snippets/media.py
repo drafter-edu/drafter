@@ -7,7 +7,7 @@ tests = TestableComponentSet("media")
 # Audio tests
 tests.audio_simple = Audio("path/to/audio.mp3", id="audio1")
 tests.audio_simple = """
-<audio controls id="audio1" src="path/to/audio.mp3">
+<audio controls data-drafter-persist-key="audio1" id="audio1" src="path/to/audio.mp3">
 </audio>
 """
 
@@ -15,7 +15,7 @@ tests.audio_controls_only = Audio(
     "music.ogg", controls=True, autoplay=False, loop=False, muted=False, id="audio2"
 )
 tests.audio_controls_only = """
-<audio controls id="audio2" src="music.ogg">
+<audio controls data-drafter-persist-key="audio2" id="audio2" src="music.ogg">
 </audio>
 """
 
@@ -23,26 +23,26 @@ tests.audio_autoplay = Audio(
     "background.mp3", controls=False, autoplay=True, muted=True, id="bg-audio"
 )
 tests.audio_autoplay = """
-<audio autoplay id="bg-audio" muted src="background.mp3">
+<audio autoplay data-drafter-persist-key="bg-audio" id="bg-audio" muted src="background.mp3">
 </audio>
 """
 
 tests.audio_loop = Audio("loop_sound.mp3", loop=True, id="audio1")
 tests.audio_loop = """
-<audio controls id="audio1" loop src="loop_sound.mp3">
+<audio controls data-drafter-persist-key="audio1" id="audio1" loop src="loop_sound.mp3">
 </audio>
 """
 
 # Video tests
 tests.video_simple = Video("path/to/video.mp4", id="vid1")
 tests.video_simple = """
-<video controls id="vid1" src="path/to/video.mp4">
+<video controls data-drafter-persist-key="vid1" id="vid1" src="path/to/video.mp4">
 </video>
 """
 
 tests.video_with_dimensions = Video("tutorial.mp4", width=640, height=480, id="vid1")
 tests.video_with_dimensions = """
-<video controls height="480" id="vid1" src="tutorial.mp4" width="640">
+<video controls data-drafter-persist-key="vid1" height="480" id="vid1" src="tutorial.mp4" width="640">
 </video>
 """
 
@@ -50,13 +50,13 @@ tests.video_autoplay_muted = Video(
     "intro.mp4", autoplay=True, muted=True, controls=False, id="vid2"
 )
 tests.video_autoplay_muted = """
-<video autoplay id="vid2" muted src="intro.mp4">
+<video autoplay data-drafter-persist-key="vid2" id="vid2" muted src="intro.mp4">
 </video>
 """
 
 tests.video_loop = Video("demo.mp4", loop=True, id="vid1")
 tests.video_loop = """
-<video controls id="vid1" loop src="demo.mp4">
+<video controls data-drafter-persist-key="vid1" id="vid1" loop src="demo.mp4">
 </video>
 """
 

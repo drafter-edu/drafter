@@ -31,6 +31,7 @@ from drafter.bridge.dom import (
     update_subtle_debug_entry,
 )
 from drafter.bridge.log import debug_log, console_log
+from drafter.bridge.persistence import evict_key
 from drafter.bridge.error_handling import (
     raise_bridge_system_error,
     report_bridge_error,
@@ -97,6 +98,9 @@ class ClientBridge:
             {
                 "drafter-toggle-frame": lambda event: handle_toggle_frame(),
                 "drafter-toggle-debug-mode": lambda event: handle_debug_mode(),
+                "drafter-evict-persistent": lambda event: self.evict_persistent(
+                    event
+                ),
                 "drafter-navigate": lambda event: self.navigator.goto(event.detail),
                 "popstate": self.navigator.handle_popstate,
             },
@@ -110,6 +114,15 @@ class ClientBridge:
         Load the initial request.
         """
         self.navigator.do_initial_request()
+
+    def evict_persistent(self, event) -> None:
+        """Evict a persisted component by key (from the debug panel UI)."""
+        key = getattr(event, "detail", None)
+        if not key:
+            return
+        parking_area = self.site_renderer.get_parking_area()
+        if parking_area is not None:
+            evict_key(parking_area, str(key))
 
     ### Debug Panel
 

@@ -27,6 +27,7 @@ from typing import List, Union, Any, Optional, ClassVar, Callable
 import json
 
 from drafter.components.planning.render_plan import AssetBundle, RenderPlan, NewlineMode
+from drafter.components.utilities.persistence import add_persistence_attributes
 from drafter.components.utilities.validation import (
     validate_json_value,
     validate_parameter_name,
@@ -237,6 +238,12 @@ class Component:
     KNOWN_ATTRS: ClassVar[list[str]] = []
     RENAME_ATTRS: ClassVar[dict[str, str]] = {}
 
+    # Whether this component can persist across simulated page reloads via a
+    # `persistent=True` argument. Persistable components always render a
+    # data-drafter-persist-key identity attribute (see
+    # drafter.components.utilities.persistence).
+    PERSISTABLE: ClassVar[bool] = False
+
     # Formatting settings
     COLLAPSE_WHITESPACE: ClassVar[bool] = False
     SELF_CLOSING_TAG: ClassVar[bool] = False
@@ -353,6 +360,8 @@ class Component:
                 attributes[key] = value
         # Handle extra settings
         attributes = self._handle_extra_settings(attributes, context, event_handlers)
+        if self.PERSISTABLE:
+            add_persistence_attributes(self.tag, attributes, self.KNOWN_ATTRS)
         return attributes
 
     def get_tag(self, context) -> str:

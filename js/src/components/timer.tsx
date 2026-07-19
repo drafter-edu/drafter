@@ -281,6 +281,10 @@ class Timer extends DrafterHTMLElement {
 	}
 
 	connectedCallback() {
+		if (this.isMovingBetweenParents()) {
+			// Persistence move in progress: keep running state untouched.
+			return;
+		}
 		this.pageLoadedForCurrentView = false;
 		window.addEventListener(
 			DRAFTER_PAGE_LOADED_EVENT,
@@ -312,6 +316,10 @@ class Timer extends DrafterHTMLElement {
 	}
 
 	disconnectedCallback() {
+		if (this.isMovingBetweenParents()) {
+			// Persistence move in progress: keep running state untouched.
+			return;
+		}
 		window.removeEventListener(
 			DRAFTER_PAGE_LOADED_EVENT,
 			this.handlePageLoaded,
@@ -543,6 +551,10 @@ class DrafterClock extends DrafterHTMLElement {
 	}
 
 	connectedCallback() {
+		if (this.isMovingBetweenParents()) {
+			// Persistence move in progress: keep running state untouched.
+			return;
+		}
 		this.pageLoadedForCurrentView = false;
 		window.addEventListener(
 			DRAFTER_PAGE_LOADED_EVENT,
@@ -574,6 +586,10 @@ class DrafterClock extends DrafterHTMLElement {
 	}
 
 	disconnectedCallback() {
+		if (this.isMovingBetweenParents()) {
+			// Persistence move in progress: keep running state untouched.
+			return;
+		}
 		window.removeEventListener(
 			DRAFTER_PAGE_LOADED_EVENT,
 			this.handlePageLoaded,

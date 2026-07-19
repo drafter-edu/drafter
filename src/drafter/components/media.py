@@ -18,6 +18,7 @@ class Audio(Component):
         autoplay: Whether to autoplay the audio.
         loop: Whether to loop the audio.
         muted: Whether to mute the audio.
+        persistent: Whether the audio keeps playing across page transitions.
         tag: The HTML tag name, always 'audio'.
     """
 
@@ -26,8 +27,10 @@ class Audio(Component):
     autoplay: bool
     loop: bool
     muted: bool
+    persistent: bool
 
     tag = "audio"
+    PERSISTABLE = True
     KNOWN_ATTRS = ["src", "controls", "autoplay", "loop", "muted"]
     ARGUMENTS = [
         ComponentArgument("src"),
@@ -35,6 +38,7 @@ class Audio(Component):
         ComponentArgument("autoplay", kind="keyword", default_value=False),
         ComponentArgument("loop", kind="keyword", default_value=False),
         ComponentArgument("muted", kind="keyword", default_value=False),
+        ComponentArgument("persistent", kind="keyword", default_value=False),
     ]
 
     DEFAULT_ATTRS = {"controls": True}
@@ -46,6 +50,7 @@ class Audio(Component):
         autoplay: bool = False,
         loop: bool = False,
         muted: bool = False,
+        persistent: bool = False,
         **kwargs,
     ):
         """Initialize audio component.
@@ -56,6 +61,10 @@ class Audio(Component):
             autoplay: Whether to autoplay the audio. Defaults to False.
             loop: Whether to loop the audio. Defaults to False.
             muted: Whether to mute the audio. Defaults to False.
+            persistent: Whether the audio keeps playing across page
+                transitions (e.g., background music). Note that browsers
+                require a user interaction before audio can start playing.
+                Defaults to False.
             **kwargs (dict): Additional HTML attributes and styles.
         """
         self.src = src
@@ -63,6 +72,7 @@ class Audio(Component):
         self.autoplay = autoplay
         self.loop = loop
         self.muted = muted
+        self.persistent = persistent
         self.extra_settings = kwargs
 
 
@@ -78,6 +88,7 @@ class Video(Component):
         autoplay: Whether to autoplay the video.
         loop: Whether to loop the video.
         muted: Whether to mute the video.
+        persistent: Whether the video keeps playing across page transitions.
         tag: The HTML tag name, always 'video'.
     """
 
@@ -89,6 +100,8 @@ class Video(Component):
     autoplay: bool
     loop: bool
     muted: bool
+    persistent: bool
+    PERSISTABLE = True
     KNOWN_ATTRS = ["src", "width", "height", "controls", "autoplay", "loop", "muted"]
     ARGUMENTS = [
         ComponentArgument("src"),
@@ -98,6 +111,7 @@ class Video(Component):
         ComponentArgument("autoplay", kind="keyword", default_value=False),
         ComponentArgument("loop", kind="keyword", default_value=False),
         ComponentArgument("muted", kind="keyword", default_value=False),
+        ComponentArgument("persistent", kind="keyword", default_value=False),
     ]
 
     DEFAULT_ATTRS = {"controls": True}
@@ -111,6 +125,7 @@ class Video(Component):
         autoplay: bool = False,
         loop: bool = False,
         muted: bool = False,
+        persistent: bool = False,
         **kwargs,
     ):
         """Initialize video component.
@@ -123,6 +138,9 @@ class Video(Component):
             autoplay: Whether to autoplay the video. Defaults to False.
             loop: Whether to loop the video. Defaults to False.
             muted: Whether to mute the video. Defaults to False.
+            persistent: Whether the video keeps playing across page
+                transitions. Note that browsers require a user interaction
+                before unmuted media can start playing. Defaults to False.
             **kwargs (dict): Additional HTML attributes and styles.
         """
         self.src = src
@@ -132,6 +150,7 @@ class Video(Component):
         self.autoplay = autoplay
         self.loop = loop
         self.muted = muted
+        self.persistent = persistent
         self.extra_settings = kwargs
 
 

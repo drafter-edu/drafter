@@ -36,6 +36,10 @@ from drafter.bridge.dom import (
     get_attribute_recursively,
     swap_debug_mode,
 )
+from drafter.bridge.persistence import (
+    apply_persistence,
+    park_persistent_components,
+)
 
 
 class SiteRenderer:
@@ -75,6 +79,13 @@ class SiteRenderer:
 
     def get_root(self):
         return self.get_scope()
+
+    def get_parking_area(self):
+        """The hidden footer area that holds persisted components, or None."""
+        scope = self.get_scope()
+        if scope is None:
+            return None
+        return scope.querySelector("#" + DRAFTER_TAG_IDS["PERSIST"])
 
     ### Site
 
@@ -191,13 +202,21 @@ class SiteRenderer:
                     phase="navigation",
                 )
 
-            elements.forEach(
-                lambda element, index, array: replace_html(
+            parking_area = self.get_parking_area()
+            for element in list(elements):
+                # Move persistent components (background music, running
+                # timers) out of the subtree before it is destroyed.
+                if parking_area is not None:
+                    park_persistent_components(element, parking_area)
+                replace_html(
                     element,
                     body,
                     response.target.replace if response.target else False,
                 )
-            )
+            # Swap parked components back in place of their freshly-rendered
+            # counterparts (and process any eviction markers).
+            if parking_area is not None:
+                apply_persistence(self.get_scope(), parking_area)
 
             debug_log("client.update_site_complete", response)
             # TODO: Shouldn't it be detecting the specific targets that were updated?

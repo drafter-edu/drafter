@@ -22,6 +22,11 @@ import js
 DOUBLE_PRESS_THRESHOLD = 600  # milliseconds
 DRAFTER_PAGE_LOADED_EVENT = "drafter-page-loaded"
 
+# Set on an element once its per-element handlers are attached. Persisted
+# components survive page swaps with their listeners intact, so re-mounting on
+# a later page load would dispatch every event twice (and leak listeners).
+HANDLERS_MOUNTED_ATTR = "data-drafter-handlers-mounted"
+
 
 @dataclass
 class EventManager:
@@ -71,6 +76,8 @@ class EventManager:
         )
 
         for element in elements_with_handlers:
+            if element.getAttribute(HANDLERS_MOUNTED_ATTR):
+                continue
             handlers_json = element.getAttribute(Component.DRAFTER_DATA_HANDLERS_NAME)
             if not handlers_json:
                 continue
@@ -141,6 +148,7 @@ class EventManager:
                 )
                 element.addEventListener(event_type, wrapped_handler)
                 debug_log("client.event_handler_added", event_type, element)
+            element.setAttribute(HANDLERS_MOUNTED_ATTR, "true")
 
     def mount_navigation(self, do_navigation: Callable):
         debug_log("client.mount_navigation")

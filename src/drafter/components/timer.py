@@ -46,6 +46,7 @@ class Timer(Component):
 
     tag = "drafter-timer"
 
+    PERSISTABLE = True
     DEFAULT_ATTRS = {"role": "timer"}
     KNOWN_ATTRS = [
         "duration",
@@ -156,6 +157,7 @@ class Clock(Component):
 
     tag = "drafter-clock"
 
+    PERSISTABLE = True
     DEFAULT_ATTRS = {"role": "clock"}
     RENAME_ATTRS = {"route": "on_tick"}
     KNOWN_ATTRS = [

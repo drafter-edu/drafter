@@ -139,3 +139,10 @@
 	color: #c53030;
 	font-weight: 700;
 }
+
+/* Persisted components live here between page loads; they must stay in the
+   DOM (so media keeps playing and timers keep ticking) but never render
+   unless the debug panel reveals them. */
+.drafter-persist--[hidden] {
+	display: none !important;
+}

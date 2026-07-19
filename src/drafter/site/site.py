@@ -23,6 +23,7 @@ DRAFTER_TAG_IDS = {
     "HEADER": "drafter-header--",
     "BODY": "drafter-body--",
     "FOOTER": "drafter-footer--",
+    "PERSIST": "drafter-persist--",
     "FORM": "drafter-form--",
     "DEBUG": "drafter-debug--",
     "SUBTLE_DEBUG_ENTRY": "drafter-subtle-debug-entry--",
@@ -47,7 +48,7 @@ SITE_HTML_TEMPLATE = f"""
         <div id="{DRAFTER_TAG_IDS["BODY"]}" class="{DRAFTER_TAG_IDS["BODY"]} body">
         {{initial_body_content}}
         </div>
-        <div id="{DRAFTER_TAG_IDS["FOOTER"]}" class="{DRAFTER_TAG_IDS["FOOTER"]}"></div>
+        <div id="{DRAFTER_TAG_IDS["FOOTER"]}" class="{DRAFTER_TAG_IDS["FOOTER"]}"><div id="{DRAFTER_TAG_IDS["PERSIST"]}" class="{DRAFTER_TAG_IDS["PERSIST"]}" hidden></div></div>
     </div>
     <div class="{DRAFTER_TAG_IDS["PADDING_V"]}"></div>
   </form>
