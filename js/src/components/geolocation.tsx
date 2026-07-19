@@ -123,9 +123,7 @@ class CurrentLocation extends DrafterHTMLElement {
 		this.renderStatus();
 		if (emit) {
 			const detail = { ...location };
-			this.dispatchEvent(
-				new CustomEvent("locate", { detail }),
-			);
+			this.dispatchEvent(new CustomEvent("locate", { detail }));
 			if (location.status === "denied") {
 				this.dispatchEvent(new CustomEvent("error", { detail }));
 				this.dispatchEvent(new CustomEvent("denied", { detail }));
@@ -154,7 +152,6 @@ class CurrentLocation extends DrafterHTMLElement {
 	}
 
 	private handleSuccess(position: GeolocationPosition): void {
-		console.log("Geolocation success:", position, this);
 		const coords = position.coords;
 		const location: LocationData = {
 			status: "granted",
