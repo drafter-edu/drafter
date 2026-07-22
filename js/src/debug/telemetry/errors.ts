@@ -75,6 +75,14 @@ export interface SystemErrorReport {
 	context?: SystemErrorCorrelation;
 	/** Explicit presentation override; "auto" applies the policy matrix. */
 	presentation?: SystemErrorPresentation;
+	/**
+	 * Document to render root-presented errors into (an iframe's document for
+	 * embedded instances). Defaults to the global document. Presentation-only;
+	 * never serialized into the telemetry envelope.
+	 */
+	targetDocument?: Document;
+	/** Root element id for root-presented errors (default "drafter-root--"). */
+	rootElementId?: string;
 }
 
 /**

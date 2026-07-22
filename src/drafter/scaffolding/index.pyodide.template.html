@@ -7,7 +7,52 @@
   <script>
   (async () => {
     try {
-  
+      {% if system.app_builder.shared_runtime %}
+      // Shared-runtime mode: when this page is embedded in an iframe whose
+      // parent has the Drafter bundle loaded, attach to the parent's host and
+      // share its single Pyodide runtime instead of booting our own. This
+      // page's own document still fully encapsulates the app's HTML/CSS.
+      // Falls through to the standalone boot when no host is reachable
+      // (direct viewing, cross-origin parent, or an old parent bundle).
+      const parentHost = (() => {
+        try {
+          if (window.parent === window) { return null; }
+          return window.parent.Drafter?.getHost?.() ?? null;
+        } catch (error) {
+          return null;
+        }
+      })();
+      if (parentHost) {
+        try {
+          // The host fetches from the PARENT page's URL, so every relative
+          // asset URL must be made absolute against THIS document first.
+          const absolute = (url) => (url ? new URL(url, window.location.href).href : url);
+          const drafterPath = {{ pyodide_drafter_path | tojson }};
+          await parentHost.attach({
+            window: window,
+            code: {% if inline_py %}document.getElementById('user-code')?.textContent || ''{% else %}await (await fetch({{ python_url | tojson }})).text(){% endif %},
+            instanceId: window.name ? `embed-${window.name}` : undefined,
+            studentFilename: {{ (system.app_common.show_filename_as if system.app_common.show_filename_as else system.bootstrap.get_main_filename()) | tojson }},
+            loadPackagesAutomatically: {{ system.app_common.load_packages_automatically | tojson }},
+            explicitPackageList: {{ system.app_common.project_packages | tojson }},
+            bootSettings: {
+              pyodideUrl: absolute({{ system.app_common.pyodide_url | tojson }}),
+              systemPackages: {{ system.app_common.system_packages | tojson }},
+              drafterPath: drafterPath && !drafterPath.startsWith("drafter") ? absolute(drafterPath) : drafterPath,
+              mountDrafterLocally: {{ system.app_common.mount_drafter_locally | tojson }},
+              verbose: {{ system.bootstrap.verbose | tojson }},
+              modifiedConfiguration: window.DRAFTER_MODIFIED_CONFIGURATION,
+            },
+          });
+          console.log("[Drafter AppServer Scaffolding] Attached to parent page's shared Pyodide runtime.");
+          return;
+        } catch (error) {
+          // e.g. the shared runtime ships a Drafter too old for the attach
+          // protocol. Booting our own runtime still works, so degrade to that.
+          console.warn("[Drafter AppServer Scaffolding] Shared-runtime attach failed; falling back to standalone boot:", error);
+        }
+      }
+      {% endif %}
       // 1) Load Pyodide
       await window.Drafter.setupPyodide({
         pyodideUrl: {{ system.app_common.pyodide_url | tojson }},

@@ -23,7 +23,6 @@ from drafter.site.site import (
 
 import js
 from drafter.bridge.dom import (
-    document,
     add_js,
     add_style,
     add_link,
@@ -60,6 +59,10 @@ class SiteRenderer:
         self.true_root_id = true_root_id
         self.debug_panel = debug_panel
         self.channel_history = {}
+        # The document this instance renders into: an iframe's document for
+        # embedded instances, otherwise the global one. All root lookups must
+        # go through it so instances in different documents never collide.
+        self.document = runtime.context.document
         # The DOM node all inner-frame lookups are scoped to: the shadow root
         # when shadow DOM is enabled, otherwise the root element. Set during
         # setup(). Scoping here (instead of the global document) is what lets
@@ -75,7 +78,7 @@ class SiteRenderer:
         """The node to scope inner-frame DOM queries to (shadow root or root)."""
         if self.scope is not None:
             return self.scope
-        return document.getElementById(self.root_id)
+        return self.document.getElementById(self.root_id)
 
     def get_root(self):
         return self.get_scope()
@@ -97,7 +100,7 @@ class SiteRenderer:
             f"InitialSiteData: {repr(initial_site_data)}",
             phase="setup",
         )
-        true_root = document.getElementById(self.true_root_id)
+        true_root = self.document.getElementById(self.true_root_id)
         true_root.innerHTML = initial_site_data.site_html
         self.scope = true_root
         return None
@@ -109,7 +112,7 @@ class SiteRenderer:
         self.use_shadow_dom = initial_site_data.use_shadow_dom
 
         try:
-            true_root = document.getElementById(self.true_root_id)
+            true_root = self.document.getElementById(self.true_root_id)
             remove_existing_theme(true_root, DRAFTER_TAG_CLASSES["THEME"])
             remove_existing_theme(true_root, DRAFTER_TAG_CLASSES["PRECOMPILE_HEADERS"])
 

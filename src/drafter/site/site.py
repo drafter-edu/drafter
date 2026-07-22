@@ -54,7 +54,7 @@ SITE_HTML_TEMPLATE = f"""
   </form>
   <div class="{DRAFTER_TAG_IDS["PADDING_H"]}"></div>
   <div id="{DRAFTER_TAG_IDS["DEBUG"]}" class="{DRAFTER_TAG_IDS["DEBUG"]}"></div>
-    <button id="{DRAFTER_TAG_IDS["SUBTLE_DEBUG_ENTRY"]}" class="{DRAFTER_TAG_IDS["SUBTLE_DEBUG_ENTRY"]}" type="button" title="Enter debug mode" aria-label="Enter debug mode" onclick="window.dispatchEvent(new CustomEvent('drafter-toggle-debug-mode'));" {{subtle_debug_attrs}}>debug</button>
+    <button id="{DRAFTER_TAG_IDS["SUBTLE_DEBUG_ENTRY"]}" class="{DRAFTER_TAG_IDS["SUBTLE_DEBUG_ENTRY"]}" type="button" title="Enter debug mode" aria-label="Enter debug mode" {{subtle_debug_attrs}}>debug</button>
 </div>
 """
 

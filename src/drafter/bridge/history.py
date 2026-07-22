@@ -1,7 +1,6 @@
 import json
 import time
 import html
-import js
 from dataclasses import dataclass, field
 from typing import Callable, Optional, Any
 
@@ -18,6 +17,10 @@ class BrowserHistory:
 
     def __init__(self, runtime: RuntimeAdapter):
         self.runtime = runtime
+
+    def _current_href(self) -> str:
+        """The href of the window this instance renders into (may be an iframe)."""
+        return self.runtime.context.window.location.href
 
     def add_to_history(self, request: Request):
         url = request.url
@@ -42,7 +45,7 @@ class BrowserHistory:
             "kwargs": kwargs,
             # TODO: Track parameters as well
         }
-        full_url = self.runtime.create_url(js.location.href)
+        full_url = self.runtime.create_url(self._current_href())
         # js.document.title = f"{self.site_title} - {url}"
         full_url.searchParams.set("route", url)
         self.runtime.history_push_state(state, "", full_url.toString())
@@ -65,7 +68,7 @@ class BrowserHistory:
             )
             debug_log("client.handle_popstate_with_state", request_id, url)
             # js.document.title = f"{self.site_title} - {url}"
-            full_url = self.runtime.create_url(js.location.href)
+            full_url = self.runtime.create_url(self._current_href())
             full_url.searchParams.set("route", url)
             self.runtime.history_replace_state(event.state, "", full_url.toString())
             # TODO: Restore the data dictionary
@@ -73,7 +76,7 @@ class BrowserHistory:
         else:
             debug_log("client.handle_popstate_no_state_or_request_id", event)
             # js.document.title = self.site_title
-            full_url = self.runtime.create_url(js.location.href)
+            full_url = self.runtime.create_url(self._current_href())
             full_url.searchParams.delete("route")
             self.runtime.history_replace_state({}, "", full_url.toString())
             return Request("back", "index", {}, {}, "", "")

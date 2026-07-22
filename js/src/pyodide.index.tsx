@@ -20,7 +20,11 @@ import { DebugPanel } from "./debug";
 import type { DrafterInitOptions } from "./bridge/engine";
 import { confirmDialog } from "./dialogs";
 import { clearDrafterSiteRoot, reportSystemError } from "./bridge/engine";
-import { initializeRuntimeConfigurationOverrides } from "./config_overrides";
+import {
+	getStoredConfigurationOverrides,
+	initializeRuntimeConfigurationOverrides,
+	syncWindowConfigurationOverrides,
+} from "./config_overrides";
 export { clearDrafterSiteRoot, reportSystemError } from "./bridge/engine";
 export * from "./common.index";
 
@@ -89,6 +93,7 @@ export function addMockPackages(packages: string[]) {
 interface PyodideSettings {
 	pyodideUrl: string;
 	systemPackages: string[];
+	loadSlowly?: boolean;
 }
 
 interface AppServerPyodideOptions {
@@ -104,6 +109,18 @@ interface AppServerPyodideOptions {
 	rootElementId?: string;
 	/** Isolate this instance in a shadow root (default true unless set false). */
 	useShadowDom?: boolean;
+	/**
+	 * The window this instance renders into (an iframe's contentWindow for
+	 * embedded instances sharing this page's Pyodide runtime). Defaults to
+	 * the global window.
+	 */
+	targetWindow?: Window;
+	/**
+	 * Unique key for this instance in the shared Python server registry.
+	 * Required when several instances use the same rootElementId in separate
+	 * iframe documents; defaults to rootElementId.
+	 */
+	instanceId?: string;
 }
 
 /** Handle for one live Drafter instance on the page. */
@@ -119,7 +136,11 @@ interface WindowWithDrafterInterruptBuffer extends Window {
 	__drafterInterruptBuffer?: Int32Array;
 }
 
-async function resetPyodideRuntime(rootElementId: string) {
+async function resetPyodideRuntime(
+	instanceKey: string,
+	rootElementId: string,
+	targetDocument?: Document,
+) {
 	const pyodide = (window as any).pyodide;
 	if (pyodide === undefined) {
 		return;
@@ -129,7 +150,7 @@ async function resetPyodideRuntime(rootElementId: string) {
 		await pyodide.runPythonAsync(
 			[
 				"from drafter.client_server.commands import reset_server_for_root",
-				`reset_server_for_root(${JSON.stringify(rootElementId)})`,
+				`reset_server_for_root(${JSON.stringify(instanceKey)})`,
 			].join("\n"),
 		);
 	} catch (error) {
@@ -150,7 +171,7 @@ async function resetPyodideRuntime(rootElementId: string) {
 		);
 	}
 
-	clearDrafterSiteRoot(rootElementId);
+	clearDrafterSiteRoot(rootElementId, targetDocument ?? document);
 }
 
 function interruptActiveRun() {
@@ -219,6 +240,11 @@ export async function createDrafterInstance(
 ): Promise<DrafterInstanceHandle> {
 	const rootElementId = options.rootElementId ?? "drafter-root--";
 	const useShadowDom = options.useShadowDom;
+	// Registry key in the shared Python runtime. Iframe-embedded instances all
+	// use the same root id in their own documents, so they must supply a
+	// unique instanceId to stay distinguishable.
+	const instanceKey = options.instanceId ?? rootElementId;
+	const targetDocument = options.targetWindow?.document;
 
 	let latestStudentCode: string | null = null;
 	let runInProgress = false;
@@ -246,7 +272,6 @@ export async function createDrafterInstance(
 		try {
 			while (true) {
 				restartRequested = false;
-				await resetPyodideRuntime(rootElementId);
 				const code = await getStudentCode();
 				(window as any).__drafterCurrentCode = code;
 				const executionOptions: DrafterInitOptions = {
@@ -256,14 +281,26 @@ export async function createDrafterInstance(
 					// back-compat path never triggers per-instance reconfiguration.
 					rootElementId: options.rootElementId,
 					useShadowDom,
+					targetWindow: options.targetWindow,
+					instanceId: options.instanceId,
 					loadPackagesAutomatically:
 						options.loadPackagesAutomatically,
 					explicitPackageList: options.explicitPackageList,
 				};
 
 				try {
-					await setupEnvironment(executionOptions);
-					await runStudentCode(executionOptions);
+					// One queue slot for the whole reset -> package-install ->
+					// configure -> run critical section, so concurrent
+					// instances can never interleave their setup phases.
+					await enqueueRuntimeWork(async () => {
+						await resetPyodideRuntime(
+							instanceKey,
+							rootElementId,
+							targetDocument,
+						);
+						await setupEnvironment(executionOptions);
+						return runStudentCodeInner(executionOptions);
+					});
 				} catch (error) {
 					// Interrupt-driven restarts are expected while live-editing.
 					if (!restartRequested) {
@@ -377,6 +414,19 @@ export async function startPyodideAppServerSession(
 	await createDrafterInstance(options);
 }
 
+function yieldToBrowser(loadSlowly = false): Promise<void> {
+	if (!loadSlowly) {
+		return Promise.resolve();
+	}
+	// scheduler.yield() is not yet in TS's lib definitions.
+	const scheduler = (globalThis as any).scheduler;
+	if (scheduler?.yield) {
+		return scheduler.yield();
+	}
+
+	return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 export async function setupPyodide(options: PyodideSettings, verbose = false) {
 	const verboseLog = (...args: any[]) => {
 		if (verbose) {
@@ -402,6 +452,7 @@ export async function setupPyodide(options: PyodideSettings, verbose = false) {
 			// Load micropip
 			verboseLog("Loading micropip...");
 			await window.pyodide.loadPackage("micropip");
+			await yieldToBrowser(options.loadSlowly);
 			window.micropip = window.pyodide.pyimport("micropip");
 			// Load mock packages
 			verboseLog("Adding mock packages:", DEFAULT_MOCK_PACKAGES);
@@ -410,6 +461,7 @@ export async function setupPyodide(options: PyodideSettings, verbose = false) {
 			verboseLog("Installing system packages:", options.systemPackages);
 			for (const pkg of options.systemPackages) {
 				await window.micropip.install(pkg);
+				await yieldToBrowser(options.loadSlowly);
 			}
 			// Write Drafter configuration file
 			verboseLog("Writing Drafter configuration file...");
@@ -487,6 +539,11 @@ export async function mountDrafterRemote(url: string) {
 	}
 }
 
+// Package specs already installed through this runtime, so several instances
+// sharing it never re-request the same package. (loadPackagesFromImports has
+// its own built-in tracking of loaded packages.)
+const requestedPackageSpecs = new Set<string>();
+
 export async function setupEnvironment(options: DrafterInitOptions) {
 	const pyodide = (window as any).pyodide;
 	if (options.loadPackagesAutomatically) {
@@ -510,8 +567,12 @@ export async function setupEnvironment(options: DrafterInitOptions) {
 		// TODO: Handle the semicolon-separated list of packages
 		const loaded = [];
 		for (const pkg of options.explicitPackageList) {
+			if (requestedPackageSpecs.has(pkg)) {
+				continue;
+			}
 			try {
-				await pyodide.micropip.install(pkg);
+				await (window as any).micropip.install(pkg);
+				requestedPackageSpecs.add(pkg);
 				loaded.push(pkg);
 			} catch (error) {
 				throw reportSystemError({
@@ -543,20 +604,23 @@ export async function patchPythonFeatures() {
 	}
 }
 
-// Serializes student-code execution across all instances. Pyodide is single
-// threaded and each run mutates shared global config (via configure_instance),
-// so concurrent createDrafterInstance() calls (e.g. Promise.all) must not
-// interleave their configure -> run critical sections. This chain guarantees
-// each run completes fully before the next begins.
+// Serializes all work that touches the shared Pyodide interpreter: package
+// installs, configure -> run critical sections, and instance teardown.
+// Pyodide is single threaded and each run mutates shared global config (via
+// configure_instance), so concurrent createDrafterInstance() calls (e.g. from
+// several iframes attaching to one host) must not interleave. This chain
+// guarantees each unit of work completes fully before the next begins.
 let executionChain: Promise<unknown> = Promise.resolve();
 
-export function runStudentCode(options: DrafterInitOptions): Promise<any> {
-	const result = executionChain.then(
-		() => runStudentCodeInner(options),
-		() => runStudentCodeInner(options),
-	);
+/** Run `work` after all previously enqueued interpreter work has finished. */
+export function enqueueRuntimeWork<T>(work: () => Promise<T>): Promise<T> {
+	const result = executionChain.then(work, work);
 	executionChain = result.catch(() => undefined);
 	return result;
+}
+
+export function runStudentCode(options: DrafterInitOptions): Promise<any> {
+	return enqueueRuntimeWork(() => runStudentCodeInner(options));
 }
 
 async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
@@ -568,10 +632,25 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 		);
 	}
 
-	// Only reconfigure when a root is explicitly requested (the multi-instance
-	// path). The single-instance back-compat path leaves rootElementId undefined
-	// so config/env defaults (root id, shadow DOM) are preserved exactly.
-	if (options.rootElementId !== undefined) {
+	// Only reconfigure when an instance is explicitly requested (the
+	// multi-instance path). The single-instance back-compat path leaves these
+	// options undefined so config/env defaults (root id, shadow DOM) are
+	// preserved exactly.
+	const isConfiguredInstance =
+		options.rootElementId !== undefined ||
+		options.instanceId !== undefined ||
+		options.targetWindow !== undefined;
+	// Each configured instance owns a subtree of the shared virtual filesystem
+	// so concurrent instances never read or write each other's files.
+	const instanceRoot = isConfiguredInstance
+		? `/instances/${(
+				options.instanceId ??
+				options.rootElementId ??
+				"drafter-root--"
+			).replace(/[^A-Za-z0-9_-]/g, "-")}`
+		: undefined;
+	if (isConfiguredInstance) {
+		const rootId = options.rootElementId ?? "drafter-root--";
 		const shadowArg =
 			options.useShadowDom === undefined
 				? "None"
@@ -579,14 +658,35 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 					? "True"
 					: "False";
 		try {
-			await pyodide.runPythonAsync(
-				[
-					"from drafter.client_server.commands import configure_instance",
-					`configure_instance(${JSON.stringify(
-						options.rootElementId,
-					)}, ${shadowArg})`,
-				].join("\n"),
-			);
+			// The target window (an iframe's contentWindow) can't be encoded
+			// in source text; hand it over through the interpreter globals.
+			const hasTargetWindow = options.targetWindow !== undefined;
+			if (hasTargetWindow) {
+				pyodide.globals.set(
+					"__drafter_instance_window",
+					options.targetWindow,
+				);
+			}
+			const windowArg = hasTargetWindow
+				? "__drafter_instance_window"
+				: "None";
+			try {
+				await pyodide.runPythonAsync(
+					[
+						"from drafter.client_server.commands import configure_instance",
+						`configure_instance(${JSON.stringify(rootId)}, ${shadowArg}, ` +
+							`js_window=${windowArg}, ` +
+							`instance_id=${JSON.stringify(
+								options.instanceId ?? rootId,
+							)}, ` +
+							`instance_root=${JSON.stringify(instanceRoot)})`,
+					].join("\n"),
+				);
+			} finally {
+				if (hasTargetWindow) {
+					pyodide.globals.delete("__drafter_instance_window");
+				}
+			}
 		} catch (error) {
 			throw reportSystemError({
 				id: "runtime.instance_configure_failed",
@@ -594,6 +694,7 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 				message: "Error configuring Drafter instance",
 				error,
 				context: { phase: "setup", dom_id: options.rootElementId },
+				targetDocument: options.targetWindow?.document,
 			});
 		}
 	}
@@ -602,9 +703,13 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 	// so they don't share __main__ globals (route functions, State classes, etc.).
 	// The single-instance path runs in the main globals exactly as before.
 	const studentFilename = options?.studentFilename || "main.py";
+	// Configured instances keep their code file inside their own FS subtree.
+	const virtualFilename = instanceRoot
+		? `${instanceRoot}/${studentFilename.replace(/^\/+/, "")}`
+		: studentFilename;
 	const codeToRun = options.code ?? "";
 	try {
-		writeStudentCodeFile(pyodide, studentFilename, codeToRun);
+		writeStudentCodeFile(pyodide, virtualFilename, codeToRun);
 	} catch (error) {
 		throw reportSystemError({
 			id: "runtime.student_code_write_failed",
@@ -617,9 +722,9 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 	}
 
 	const runOptions: { filename: string; globals?: any } = {
-		filename: studentFilename,
+		filename: virtualFilename,
 	};
-	if (options.rootElementId !== undefined) {
+	if (isConfiguredInstance) {
 		runOptions.globals = pyodide.toPy({ __name__: "__main__" });
 	}
 	try {
@@ -641,6 +746,183 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 			error,
 			recoverable: true,
 			context: { phase: "setup" },
+			targetDocument: options.targetWindow?.document,
+			rootElementId: options.rootElementId,
 		});
 	}
+}
+
+/**
+ * Boot settings for the shared runtime. Only the FIRST registration's
+ * settings are used to boot; later registrations reuse the live runtime.
+ * URL-ish fields must be absolute (embeds resolve their relative asset URLs
+ * against their own document before registering, since the host page lives
+ * at a different URL).
+ */
+export interface DrafterHostBootSettings {
+	pyodideUrl: string;
+	systemPackages?: string[];
+	/** Absolute wheel/zip URL, or a "drafter==x.y.z" requirement. */
+	drafterPath?: string;
+	/** Dev-only: mount a local drafter working directory instead. */
+	mountDrafterLocally?: boolean;
+	verbose?: boolean;
+	/** The embed's DRAFTER_MODIFIED_CONFIGURATION, written before boot. */
+	modifiedConfiguration?: unknown;
+}
+
+/** What an embedded page hands to the host to run inside its own document. */
+export interface DrafterHostRegistration {
+	/** The embed's window (its iframe's contentWindow). */
+	window: Window;
+	/** Student code to run. */
+	code: string;
+	/** Runtime boot settings (used only if the runtime isn't booted yet). */
+	bootSettings: DrafterHostBootSettings;
+	/**
+	 * Stable id for this embed (e.g. the compiled demo id). Keys the Python
+	 * server registry and the embed's virtual-filesystem folder. Generated
+	 * when omitted.
+	 */
+	instanceId?: string;
+	studentFilename?: string;
+	loadPackagesAutomatically?: boolean;
+	explicitPackageList?: string[];
+	rootElementId?: string;
+	/** Defaults to false: the iframe already encapsulates HTML/CSS. */
+	useShadowDom?: boolean;
+}
+
+/**
+ * One shared Pyodide runtime for every Drafter embed on a page.
+ *
+ * The host lives in the top-level page; each embedded iframe loads only the
+ * (cheap, cached) JS bundle and registers itself here instead of booting its
+ * own Pyodide. The iframe keeps HTML/CSS encapsulated in its own document,
+ * while Python execution, installed packages, and sys.modules are shared.
+ * Isolation between embeds comes from per-instance DOM contexts, module
+ * namespaces, and virtual-filesystem subtrees, plus the runtime work queue
+ * that serializes all interpreter access.
+ */
+export class DrafterHost {
+	private runtimePromise: Promise<void> | null = null;
+	private instances = new Map<string, DrafterInstanceHandle>();
+	private instanceCounter = 0;
+
+	/** Boot the shared runtime exactly once, even under concurrent attach. */
+	private ensureRuntime(settings: DrafterHostBootSettings): Promise<void> {
+		if (!this.runtimePromise) {
+			this.runtimePromise = (async () => {
+				if (settings.modifiedConfiguration !== undefined) {
+					// The embed's compiled configuration must reach the Python
+					// runtime's config file. The host page has no embedded
+					// config of its own — its bundle initialized
+					// DRAFTER_MODIFIED_CONFIGURATION to empty overrides at
+					// load — so adopt the embed's as the embedded config and
+					// re-merge any persisted debug overrides on top.
+					(window as any).DRAFTER_EMBEDDED_MODIFIED_CONFIGURATION =
+						settings.modifiedConfiguration;
+					syncWindowConfigurationOverrides(
+						getStoredConfigurationOverrides(),
+					);
+				}
+				await setupPyodide(
+					{
+						pyodideUrl: settings.pyodideUrl,
+						systemPackages: settings.systemPackages ?? [],
+					},
+					settings.verbose ?? false,
+				);
+				if (settings.mountDrafterLocally) {
+					await mountDrafterDirectory();
+				} else if (settings.drafterPath) {
+					await mountDrafterRemote(settings.drafterPath);
+				}
+				await patchPythonFeatures();
+			})();
+		}
+		return this.runtimePromise;
+	}
+
+	/**
+	 * Run an embed's code in the shared runtime, rendering into the embed's
+	 * own document. Resolves once the embed's first page has rendered.
+	 */
+	async attach(
+		registration: DrafterHostRegistration,
+	): Promise<DrafterInstanceHandle> {
+		const instanceId =
+			registration.instanceId ??
+			`drafter-embed-${++this.instanceCounter}`;
+		if (this.instances.has(instanceId)) {
+			// Same embed attaching again (e.g. its iframe was reloaded and
+			// pagehide cleanup hasn't finished): tear the old one down first.
+			await this.detach(instanceId);
+		}
+		await this.ensureRuntime(registration.bootSettings);
+		const handle = await createDrafterInstance({
+			verbose: registration.bootSettings.verbose ?? false,
+			inlineCode: registration.code,
+			studentFilename: registration.studentFilename,
+			rootElementId: registration.rootElementId ?? "drafter-root--",
+			useShadowDom: registration.useShadowDom ?? false,
+			targetWindow: registration.window,
+			instanceId,
+			loadPackagesAutomatically: registration.loadPackagesAutomatically,
+			explicitPackageList: registration.explicitPackageList,
+		});
+		this.instances.set(instanceId, handle);
+		// Tear down when the embed's document goes away (reload or removal).
+		registration.window.addEventListener(
+			"pagehide",
+			() => {
+				void this.detach(instanceId);
+			},
+			{ once: true },
+		);
+		return handle;
+	}
+
+	/** Stop an embed and forget its server in the shared interpreter. */
+	async detach(instanceId: string): Promise<void> {
+		const handle = this.instances.get(instanceId);
+		if (!handle) {
+			return;
+		}
+		this.instances.delete(instanceId);
+		handle.stop();
+		const pyodide = (window as any).pyodide;
+		if (pyodide === undefined) {
+			return;
+		}
+		try {
+			await enqueueRuntimeWork(() =>
+				pyodide.runPythonAsync(
+					[
+						"from drafter.client_server.commands import reset_server_for_root",
+						`reset_server_for_root(${JSON.stringify(instanceId)})`,
+					].join("\n"),
+				),
+			);
+		} catch (error) {
+			console.warn(
+				"[Drafter Host] Failed to reset server for detached instance:",
+				error,
+			);
+		}
+	}
+}
+
+let sharedHost: DrafterHost | null = null;
+
+/**
+ * The page's shared host, created on first use. Embedded iframes reach it as
+ * `window.parent.Drafter?.getHost?.()` and fall back to a standalone boot
+ * when it is unavailable (direct viewing, cross-origin, or an old bundle).
+ */
+export function getHost(): DrafterHost {
+	if (!sharedHost) {
+		sharedHost = new DrafterHost();
+	}
+	return sharedHost;
 }

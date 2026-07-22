@@ -20,6 +20,18 @@ export interface DrafterInitOptions {
 	rootElementId?: string;
 	/** Whether to isolate this instance in a shadow root. */
 	useShadowDom?: boolean;
+	/**
+	 * The window this instance renders into (an iframe's contentWindow for
+	 * embedded instances sharing the host page's Pyodide runtime). Defaults
+	 * to the global window.
+	 */
+	targetWindow?: Window;
+	/**
+	 * Unique key for this instance in the shared Python server registry.
+	 * Required when several instances use the same rootElementId in separate
+	 * documents (iframes); defaults to rootElementId.
+	 */
+	instanceId?: string;
 }
 
 const DEFAULT_SUGGESTION = "Please show this to your instructor for more help.";
@@ -39,8 +51,13 @@ export function setSystemErrorSink(sink: SystemTelemetrySink | null): void {
 	systemTelemetrySink = sink;
 }
 
-export function clearDrafterSiteRoot(rootElementId: string = "drafter-root--") {
-	const rootElement = document.getElementById(rootElementId) as HTMLElement;
+export function clearDrafterSiteRoot(
+	rootElementId: string = "drafter-root--",
+	targetDocument: Document = document,
+) {
+	const rootElement = targetDocument.getElementById(
+		rootElementId,
+	) as HTMLElement;
 	if (rootElement) {
 		rootElement.innerHTML = "";
 	} else {
@@ -211,39 +228,44 @@ function renderSystemErrorInRoot(
 	error: Error,
 	suggestion: string,
 ): boolean {
-	const rootElement = document.getElementById("drafter-root--");
+	// Embedded instances report which document/root the error belongs to;
+	// default to the primary root in the global document.
+	const targetDocument = report.targetDocument ?? document;
+	const rootElement = targetDocument.getElementById(
+		report.rootElementId ?? "drafter-root--",
+	);
 	if (!rootElement) {
 		return false;
 	}
 
 	rootElement.replaceChildren();
 
-	const container = document.createElement("div");
+	const container = targetDocument.createElement("div");
 	container.className = "drafter-system-error";
 
-	const title = document.createElement("h1");
+	const title = targetDocument.createElement("h1");
 	title.textContent = "Something Went Wrong";
 
-	const lead = document.createElement("p");
+	const lead = targetDocument.createElement("p");
 	lead.textContent = buildStudentLead(report);
 
-	const advice = document.createElement("p");
+	const advice = targetDocument.createElement("p");
 	advice.textContent = "What to try next:";
 
-	const steps = document.createElement("ul");
+	const steps = targetDocument.createElement("ul");
 	for (const step of buildStudentSteps(report, error, suggestion)) {
-		const item = document.createElement("li");
+		const item = targetDocument.createElement("li");
 		item.textContent = step;
 		steps.appendChild(item);
 	}
 
-	const summary = document.createElement("p");
+	const summary = targetDocument.createElement("p");
 	summary.textContent = `Message: ${message}`;
 
-	const detailsHeading = document.createElement("h2");
+	const detailsHeading = targetDocument.createElement("h2");
 	detailsHeading.textContent = "Technical Details";
 
-	const details = document.createElement("pre");
+	const details = targetDocument.createElement("pre");
 	details.textContent = [
 		`Error ID: ${report.id}`,
 		`Category: ${report.category}`,

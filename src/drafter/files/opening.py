@@ -9,6 +9,27 @@ import builtins
 _BUILTIN_OPEN = builtins.open
 
 
+def _resolve_instance_path(
+    file_path: Union[str, pathlib.Path, os.PathLike],
+) -> Union[str, pathlib.Path, os.PathLike]:
+    """Resolve a relative path inside the current instance's virtual folder.
+
+    When several Drafter instances share one interpreter (each in its own
+    iframe), every instance owns a subtree of the shared virtual filesystem
+    (e.g. "/instances/demo-1"). Absolute paths and the single-instance case
+    (no instance root configured) pass through unchanged.
+    """
+    from drafter.client_server.commands import get_current_instance_root
+
+    instance_root = get_current_instance_root()
+    if instance_root is None:
+        return file_path
+    path = pathlib.PurePosixPath(str(file_path))
+    if path.is_absolute():
+        return file_path
+    return str(pathlib.PurePosixPath(instance_root) / path)
+
+
 def open(file_path, mode="r", *args, **kwargs):
     """
     Opens files for reading or writing, with special handling for web environments.
@@ -31,7 +52,9 @@ def open(file_path, mode="r", *args, **kwargs):
 
     if is_pyodide():
         # In Pyodide, we might need to fetch the file if it is not available normally.
-        actual_path = file_path
+        # Relative paths resolve inside the current instance's folder so that
+        # several instances sharing one interpreter keep separate files.
+        actual_path = _resolve_instance_path(file_path)
 
         try:
             found_file = _BUILTIN_OPEN(actual_path, mode, *args, **kwargs)
@@ -40,7 +63,9 @@ def open(file_path, mode="r", *args, **kwargs):
                 from js import XMLHttpRequest
 
                 req = XMLHttpRequest.new()
-                req.open("GET", str(actual_path), False)
+                # Fetch with the ORIGINAL path: the network fallback resolves
+                # relative to the page URL, not the instance's virtual folder.
+                req.open("GET", str(file_path), False)
                 req.overrideMimeType("text/plain; charset=x-user-defined")
                 req.send()
                 if req.status == 200:
