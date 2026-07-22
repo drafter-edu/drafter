@@ -2,6 +2,7 @@ site_name: "Drafter Documentation"
 nav:
 - Home: index.md
 - Quickstart: quickstart/quickstart.md
+- Multiple Examples: multiple_examples.md
 - Student Guide:
   - Installation: students/installation.md
   - Documentation for Students: students/docs.md

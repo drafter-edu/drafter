@@ -8,5 +8,6 @@ This site focuses on student-facing material in Markdown/MkDocs format:
 - [Student Guide](students/installation.md)
 - [Workbook](workbook/index.md)
 - [Examples](examples/examples.md)
+- [Multiple Examples](multiple_examples.md)
 
 If you are looking for developer/reference internals, those are intentionally excluded from this migration pass.
