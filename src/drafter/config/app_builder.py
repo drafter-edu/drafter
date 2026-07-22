@@ -25,6 +25,10 @@ class AppBuilderConfiguration(BaseConfiguration):
         warn_missing_info: Whether to echo a warning if set_site_information is missing.
         pyodide_package_style: Optional custom style for the Pyodide package ("build", "cdn", or "pypi"). The "build" option means that the local version of Drafter will be built for pyodide.
         additional_paths: List of additional file paths to make available in the built site (e.g., for `open`). These will be copied to the assets folder.
+        shared_runtime: When True, the compiled page attaches to a Drafter host
+            in its parent page (sharing that page's single Pyodide runtime)
+            whenever one is available, and only boots its own Pyodide as a
+            fallback. Used for embedding many demos on one page via iframes.
 
     """
 
@@ -39,6 +43,8 @@ class AppBuilderConfiguration(BaseConfiguration):
     pyodide_package_style: Optional[str] = "pypi"  # "build", "cdn", or "pypi"
 
     additional_paths: list[str] = field(default_factory=list)
+
+    shared_runtime: bool = False
 
     @staticmethod
     def get_key() -> str:
@@ -58,6 +64,7 @@ class AppBuilderConfiguration(BaseConfiguration):
         result.get_string_if_exists(
             "DRAFTER_PYODIDE_PACKAGE_STYLE", "pyodide_package_style"
         )
+        result.get_bool_if_exists("DRAFTER_SHARED_RUNTIME", "shared_runtime")
 
         return result.as_dict()
 
@@ -101,6 +108,11 @@ class AppBuilderConfiguration(BaseConfiguration):
             choices=["build", "cdn", "pypi"],
             help="Optional custom style for the Pyodide package ('build', 'cdn', or 'pypi')",
         )
+        group.add_argument(
+            "--shared-runtime",
+            action="store_true",
+            help="Compile the page to attach to a Drafter host in its parent page (sharing one Pyodide runtime across embedded demos) when available",
+        )
         return group
 
     @staticmethod
@@ -120,4 +132,6 @@ class AppBuilderConfiguration(BaseConfiguration):
             result["additional_paths"] = parsed_args["additional_paths"].split(";")
         if parsed_args.get("pyodide_package_style"):
             result["pyodide_package_style"] = parsed_args["pyodide_package_style"]
+        if parsed_args.get("shared_runtime"):
+            result["shared_runtime"] = True
         return result

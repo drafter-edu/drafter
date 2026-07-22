@@ -6,6 +6,7 @@ so the rest of the bridge code doesn't need to care about the runtime.
 
 import json
 import js
+from drafter.bridge.context import DomContext
 from drafter.bridge.log import debug_log
 from drafter.bridge.error_handling import (
     normalize_bridge_exception,
@@ -18,20 +19,38 @@ from drafter.helpers.utils import is_pyodide
 from typing import Callable, Any, Optional
 
 
-def create_runtime() -> "RuntimeAdapter":
+def create_runtime(context: Optional[DomContext] = None) -> "RuntimeAdapter":
     """Factory: returns the correct runtime adapter for the current environment."""
     if is_pyodide():
-        return PyodideRuntime()
-    return SkulptRuntime()
+        return PyodideRuntime(context)
+    return SkulptRuntime(context)
 
 
 class RuntimeAdapter:
-    """Base adapter for runtime-specific JS API calls."""
+    """Base adapter for runtime-specific JS API calls.
+
+    Holds the instance's DomContext so that window-level operations (history,
+    window events, realm-sensitive constructors) target the window this
+    instance renders into — which may be an iframe rather than the top page.
+    """
+
+    def __init__(self, context: Optional[DomContext] = None):
+        self.context = context if context is not None else DomContext.default()
+
+    def _window_class(self, name: str) -> Any:
+        """A constructor from the instance's window, or the global fallback.
+
+        Embedding hosts may hand us a bare iframe window that lacks classes
+        the Drafter bundle defines (e.g. DebugPanel); fall back to the global
+        scope for those.
+        """
+        window_class = getattr(self.context.window, name, None)
+        return window_class if window_class is not None else getattr(js, name)
 
     def create_debug_panel(
         self, debug_id: str, client_bridge: Any, scope: Any = None
     ) -> Any:
-        return js.DebugPanel(debug_id, client_bridge, scope)
+        return self._window_class("DebugPanel")(debug_id, client_bridge, scope)
 
     def create_url(self, href: str) -> Any:
         return js.URL(href)
@@ -83,16 +102,16 @@ class RuntimeAdapter:
         return return_data
 
     def history_push_state(self, state: dict, title: str, url: str) -> None:
-        js.history.pushState(state, title, url)
+        self.context.window.history.pushState(state, title, url)
 
     def history_replace_state(self, state: dict, title: str, url: str) -> None:
-        js.history.replaceState(state, title, url)
+        self.context.window.history.replaceState(state, title, url)
 
     def create_custom_event(self, name: str, detail: dict) -> Any:
         return js.CustomEvent(name, {"detail": detail})
 
     def dispatch_window_event(self, event: Any) -> None:
-        js.dispatchEvent(event)
+        self.context.window.dispatchEvent(event)
 
 
 class SkulptRuntime(RuntimeAdapter):
@@ -104,7 +123,8 @@ class SkulptRuntime(RuntimeAdapter):
 class PyodideRuntime(RuntimeAdapter):
     """Runtime adapter for Pyodide — uses .new() constructors and proxy management."""
 
-    def __init__(self):
+    def __init__(self, context: Optional[DomContext] = None):
+        super().__init__(context)
         from pyodide.ffi import create_proxy, to_js
 
         self._create_proxy = create_proxy
@@ -115,7 +135,7 @@ class PyodideRuntime(RuntimeAdapter):
     def create_debug_panel(
         self, debug_id: str, client_bridge: Any, scope: Any = None
     ) -> Any:
-        return js.DebugPanel.new(debug_id, client_bridge, scope)
+        return self._window_class("DebugPanel").new(debug_id, client_bridge, scope)
 
     def create_url(self, href: str) -> Any:
         return js.URL.new(href)
@@ -208,10 +228,10 @@ class PyodideRuntime(RuntimeAdapter):
         return self._create_proxy(buffer.then(on_buffer_ready))
 
     def history_push_state(self, state: dict, title: str, url: str) -> None:
-        js.history.pushState(self._to_js(state), title, url)
+        self.context.window.history.pushState(self._to_js(state), title, url)
 
     def history_replace_state(self, state: dict, title: str, url: str) -> None:
-        js.history.replaceState(self._to_js(state), title, url)
+        self.context.window.history.replaceState(self._to_js(state), title, url)
 
     def create_custom_event(self, name: str, detail: dict) -> Any:
         return js.CustomEvent.new(

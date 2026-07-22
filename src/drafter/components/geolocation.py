@@ -43,8 +43,8 @@ class Location:
     Attributes:
         status: Current permission/availability state.
         message: Optional descriptive message about the status.
-        lat: Latitude in decimal degrees (None if unavailable).
-        lon: Longitude in decimal degrees (None if unavailable).
+        latitude: Latitude in decimal degrees (None if unavailable).
+        longitude: Longitude in decimal degrees (None if unavailable).
         accuracy: Position accuracy in meters (None if unavailable).
         altitude: Altitude in meters above sea level (None if unavailable).
         heading: Direction of travel in degrees (None if unavailable).
@@ -54,8 +54,8 @@ class Location:
 
     status: LocationStatus
     message: Optional[str] = None
-    lat: Optional[float] = None
-    lon: Optional[float] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     accuracy: Optional[float] = None
     altitude: Optional[float] = None
     heading: Optional[float] = None
@@ -126,26 +126,51 @@ class CurrentLocation(Component):
     Attributes:
         name: The form field name that will contain location data.
         show: Whether to display the geolocation status UI. Defaults to True.
-        show_coordinates: Whether to display lat/lon when granted (default: False).
+        show_coordinates: Whether to display latitude/longitude when granted (default: False).
+        enable_high_accuracy: Whether to prefer high-accuracy geolocation. Defaults to True.
+        timeout: Maximum time to wait for a position in milliseconds. Defaults to 10000.
+        maximum_age: Maximum cached position age in milliseconds. Defaults to 0.
         on_locate: Function or URL to call when a location (or failure) is
             resolved. Defaults to None.
+        on_error: Function or URL to call when geolocation fails for any reason.
+        on_denied: Function or URL to call when geolocation permission is denied.
+        on_timeout: Function or URL to call when geolocation request times out.
     """
 
     name: str
     show: bool = True
     show_coordinates: bool = False
+    enable_high_accuracy: bool = True
+    timeout: int = 10000
+    maximum_age: int = 0
     on_locate: Optional[UrlOrFunction] = None
+    on_error: Optional[UrlOrFunction] = None
+    on_denied: Optional[UrlOrFunction] = None
+    on_timeout: Optional[UrlOrFunction] = None
 
     tag = "drafter-current-location"
 
-    KNOWN_ATTRS = ["name", "show", "show-coordinates"]
+    KNOWN_ATTRS = [
+        "name",
+        "show",
+        "show-coordinates",
+        "enable-high-accuracy",
+        "timeout",
+        "maximum-age",
+    ]
     ARGUMENTS = [
         ComponentArgument("name", "positional"),
         ComponentArgument("show", "keyword", True),
         ComponentArgument("show_coordinates", "keyword", False),
+        ComponentArgument("enable_high_accuracy", "keyword", True),
+        ComponentArgument("timeout", "keyword", 10000),
+        ComponentArgument("maximum_age", "keyword", 0),
         ComponentArgument("on_locate", "keyword", None, is_event=True),
+        ComponentArgument("on_error", "keyword", None, is_event=True),
+        ComponentArgument("on_denied", "keyword", None, is_event=True),
+        ComponentArgument("on_timeout", "keyword", None, is_event=True),
     ]
-    EXTRA_SUPPORTED_EVENTS = ["locate"]
+    EXTRA_SUPPORTED_EVENTS = ["locate", "error", "denied", "timeout"]
 
     #: What this component emits: the JS implementation (js/src/components/
     #: geolocation.tsx) must match this contract, and the router uses it to
@@ -167,9 +192,11 @@ class CurrentLocation(Component):
                     EventPayloadFieldSpec(
                         "message", str, "Descriptive message about the status."
                     ),
-                    EventPayloadFieldSpec("lat", float, "Latitude in decimal degrees."),
                     EventPayloadFieldSpec(
-                        "lon", float, "Longitude in decimal degrees."
+                        "latitude", float, "Latitude in decimal degrees."
+                    ),
+                    EventPayloadFieldSpec(
+                        "longitude", float, "Longitude in decimal degrees."
                     ),
                     EventPayloadFieldSpec(
                         "accuracy", float, "Position accuracy in meters."
@@ -188,6 +215,51 @@ class CurrentLocation(Component):
                     ),
                 ],
             ),
+            EventPayloadSpec(
+                event_name="error",
+                fields=[
+                    EventPayloadFieldSpec(
+                        "status",
+                        str,
+                        "Failure state: denied or error.",
+                    ),
+                ],
+                optional_fields=[
+                    EventPayloadFieldSpec(
+                        "message", str, "Descriptive message about the failure."
+                    ),
+                ],
+            ),
+            EventPayloadSpec(
+                event_name="denied",
+                fields=[
+                    EventPayloadFieldSpec(
+                        "status",
+                        str,
+                        "Always denied when permission is rejected.",
+                    ),
+                ],
+                optional_fields=[
+                    EventPayloadFieldSpec(
+                        "message", str, "Descriptive message about the denial."
+                    ),
+                ],
+            ),
+            EventPayloadSpec(
+                event_name="timeout",
+                fields=[
+                    EventPayloadFieldSpec(
+                        "status",
+                        str,
+                        "Always error when the request exceeds timeout.",
+                    ),
+                ],
+                optional_fields=[
+                    EventPayloadFieldSpec(
+                        "message", str, "Descriptive timeout error message."
+                    ),
+                ],
+            ),
         ],
     )
 
@@ -196,7 +268,13 @@ class CurrentLocation(Component):
         name: str,
         show: bool = True,
         show_coordinates: bool = False,
+        enable_high_accuracy: bool = True,
+        timeout: int = 10000,
+        maximum_age: int = 0,
         on_locate: Optional[UrlOrFunction] = None,
+        on_error: Optional[UrlOrFunction] = None,
+        on_denied: Optional[UrlOrFunction] = None,
+        on_timeout: Optional[UrlOrFunction] = None,
         **extra_settings,
     ):
         """Initialize the CurrentLocation component.
@@ -205,14 +283,26 @@ class CurrentLocation(Component):
             name: The form field name for geolocation data.
             show: Whether to display the geolocation status UI.
             show_coordinates: Whether to display coordinates when available.
+            enable_high_accuracy: Whether to prefer high-accuracy geolocation.
+            timeout: Maximum time to wait for geolocation in milliseconds.
+            maximum_age: Maximum age for cached location in milliseconds.
             on_locate: Function or URL to call when a location is resolved.
+            on_error: Function or URL to call when geolocation fails.
+            on_denied: Function or URL to call when permission is denied.
+            on_timeout: Function or URL to call when geolocation times out.
             **extra_settings: Additional HTML attributes.
         """
         validate_parameter_name(name, "CurrentLocation")
         self.name = name
         self.show = show
         self.show_coordinates = show_coordinates
+        self.enable_high_accuracy = enable_high_accuracy
+        self.timeout = timeout
+        self.maximum_age = maximum_age
         self.on_locate = on_locate
+        self.on_error = on_error
+        self.on_denied = on_denied
+        self.on_timeout = on_timeout
         self.extra_settings = extra_settings
 
 

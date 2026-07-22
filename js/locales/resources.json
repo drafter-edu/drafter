@@ -38,7 +38,14 @@
 			"editor.title": "Edit Source Code",
 			"editor.run": "Run",
 			"editor.cancel": "Cancel",
-			"footer.route": "Route: "
+			"footer.route": "Route: ",
+			"footer.persisted": "Persisted",
+			"footer.persisted.tooltip": "Show components persisting across page reloads",
+			"footer.persisted.empty": "No persisted components",
+			"footer.persisted.evict": "Remove",
+			"footer.persisted.evict.tooltip": "Stop and discard this persisted component",
+			"footer.persisted.reveal": "Reveal",
+			"footer.persisted.reveal.tooltip": "Show/hide the persisted components in the footer"
 		}
 	},
 	"es": {

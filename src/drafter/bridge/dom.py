@@ -12,18 +12,34 @@ from drafter.helpers.utils import is_skulpt, is_pyodide
 from typing import Any
 import js
 
-document = js.document  # type: ignore
-
 ATTR_PAGE_SPECIFIC = "data-drafter-page-specific"
+
+
+def get_document(node: Any) -> Any:
+    """The document owning a node (element or shadow root).
+
+    Instances may render into an iframe's document rather than the global one,
+    so DOM helpers must always resolve the document from the node they operate
+    on instead of capturing the global ``js.document``.
+    """
+    doc = getattr(node, "ownerDocument", None) if node is not None else None
+    return doc if doc is not None else js.document
+
+
+def get_window(node: Any) -> Any:
+    """The window owning a node, falling back to the global scope."""
+    view = getattr(get_document(node), "defaultView", None)
+    return view if view is not None else js
 
 
 def replace_html(tag: Any, html_content: str, is_fragment: bool = False) -> None:
     """Replace the contents or the tag itself with new HTML."""
-    scroll_top = js.scrollY
-    scroll_left = js.scrollX
+    window = get_window(tag)
+    scroll_top = window.scrollY
+    scroll_left = window.scrollX
 
     try:
-        r = js.document.createRange()
+        r = get_document(tag).createRange()
         r.selectNode(tag)
         fragment = r.createContextualFragment(html_content)
 
@@ -48,7 +64,7 @@ def replace_html(tag: Any, html_content: str, is_fragment: bool = False) -> None
             parent.removeChild(tag)
 
     finally:
-        js.scrollTo(scroll_left, scroll_top)
+        window.scrollTo(scroll_left, scroll_top)
 
 
 def get_attribute_recursively(element: Any, attribute_name: str) -> list[str]:
@@ -65,6 +81,7 @@ def add_js(
     root, src: str, is_page_specific: bool = False, with_class: str = ""
 ) -> None:
     """Adds a script to the page."""
+    document = get_document(root)
     # TODO: Investigate whether this has to be a blob for CSP compliance
     script = document.createElement("script")
     script.type = "text/javascript"
@@ -87,11 +104,15 @@ def add_style(
     using_shadow_dom: bool = False,
 ) -> None:
     """Adds CSS content to the page."""
+    document = get_document(root)
     if using_shadow_dom:
+        # Constructed stylesheets can only be adopted by documents from the
+        # same realm, so build it with the owning window's constructor.
+        window = get_window(root)
         if is_pyodide():
-            style_sheet = js.CSSStyleSheet.new()
+            style_sheet = window.CSSStyleSheet.new()
         else:
-            style_sheet = js.CSSStyleSheet()
+            style_sheet = window.CSSStyleSheet()
         style_sheet.replaceSync(css)
         root.adoptedStyleSheets = root.adoptedStyleSheets.concat([style_sheet])
     else:
@@ -110,6 +131,7 @@ def add_link(
     root, css_link: str, is_page_specific: bool = False, with_class: str = ""
 ) -> None:
     """Adds a link element to the page for CSS files."""
+    document = get_document(root)
     link = document.createElement("link")
     link.setAttribute("type", "text/css")
     link.setAttribute("rel", "stylesheet")
@@ -126,7 +148,7 @@ def add_link(
 
 def add_link_to_shadow(shadow_root, css_link: str, with_class: str = "") -> None:
     """Adds a link element to the shadow DOM for CSS files."""
-    link = document.createElement("link")
+    link = get_document(shadow_root).createElement("link")
     link.setAttribute("type", "text/css")
     link.setAttribute("rel", "stylesheet")
     link.setAttribute("href", css_link)
@@ -139,7 +161,7 @@ def add_style_to_shadow(
     shadow_root, css: str, with_class: str = "", is_page_specific: bool = False
 ) -> None:
     """Adds CSS content to the shadow DOM by creating a style element."""
-    style = document.createElement("style")
+    style = get_document(shadow_root).createElement("style")
     style.innerHTML = css
     if is_page_specific:
         style.setAttribute(ATTR_PAGE_SPECIFIC, "true")
@@ -150,6 +172,7 @@ def add_style_to_shadow(
 
 def add_header(root, header_content: str) -> None:
     """Adds content to the document head."""
+    document = get_document(root)
     # TODO: For shadow DOM need to find the pseudo-head
     head = document.getElementsByTagName("head")[0]
     temp_div = document.createElement("div")
@@ -167,7 +190,7 @@ def remove_page_content(root) -> None:
     """
     elements = list(root.querySelectorAll(f"style[{ATTR_PAGE_SPECIFIC}='true']"))
     elements.extend(root.querySelectorAll(f"script[{ATTR_PAGE_SPECIFIC}='true']"))
-    head = document.getElementsByTagName("head")[0]
+    head = get_document(root).getElementsByTagName("head")[0]
     if head:
         elements.extend(head.querySelectorAll(f"style[{ATTR_PAGE_SPECIFIC}='true']"))
         elements.extend(head.querySelectorAll(f"script[{ATTR_PAGE_SPECIFIC}='true']"))
@@ -178,6 +201,7 @@ def remove_page_content(root) -> None:
 
 def remove_existing_theme(root, theme_class: str) -> None:
     """Removes existing theme-related link and style elements from the document head."""
+    document = get_document(root)
     elements = list(document.querySelectorAll(f"link.{theme_class}"))
     elements.extend(document.querySelectorAll(f"script.{theme_class}"))
 

@@ -43,8 +43,8 @@ def side_location(state, user_location: Location):
     return Fragment(
         [
             Paragraph("Location data received:"),
-            Paragraph(f"Latitude: {user_location.lat}"),
-            Paragraph(f"Longitude: {user_location.lon}"),
+            Paragraph(f"Latitude: {user_location.latitude}"),
+            Paragraph(f"Longitude: {user_location.longitude}"),
             Paragraph(f"Accuracy: ±{user_location.accuracy}m"),
         ],
         target="#location_output",
@@ -62,8 +62,8 @@ def process_location(state, user_location: Location):
     if user_location.status == "granted":
         content.extend(
             [
-                Paragraph(f"Latitude: {user_location.lat}"),
-                Paragraph(f"Longitude: {user_location.lon}"),
+                Paragraph(f"Latitude: {user_location.latitude}"),
+                Paragraph(f"Longitude: {user_location.longitude}"),
                 Paragraph(f"Accuracy: ±{user_location.accuracy}m"),
             ]
         )

@@ -3,6 +3,33 @@ from typing import Optional
 from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.planning.render_plan import RenderPlan
 
+#: Custom element (js/src/components/media.tsx) that defers autoplay until
+#: the drafter-page-loaded event fires.
+AUTOPLAY_WRAPPER_TAG = "drafter-media"
+
+
+def _plan_with_deferred_autoplay(component: Component, context) -> RenderPlan:
+    """Plan a media tag, deferring autoplay to the page-loaded event.
+
+    A native ``autoplay`` attribute starts playback as soon as the element
+    is inserted into the DOM, which happens while the new page's HTML is
+    still loading. Instead, the ``autoplay`` attribute is moved onto a
+    ``<drafter-media>`` wrapper element, whose client-side implementation
+    starts playback when the drafter page-loaded event fires.
+    """
+    attributes = component.get_attributes(context)
+    autoplay = attributes.pop("autoplay", False)
+    inner = component._plan_tag(context, attributes=attributes)
+    if not autoplay:
+        return inner
+    return RenderPlan(
+        kind="tag",
+        tag_name=AUTOPLAY_WRAPPER_TAG,
+        attributes={"autoplay": True},
+        children=[inner],
+        known_attributes=["autoplay"],
+    )
+
 
 @dataclass(repr=False)
 class Audio(Component):
@@ -18,6 +45,7 @@ class Audio(Component):
         autoplay: Whether to autoplay the audio.
         loop: Whether to loop the audio.
         muted: Whether to mute the audio.
+        persistent: Whether the audio keeps playing across page transitions.
         tag: The HTML tag name, always 'audio'.
     """
 
@@ -26,8 +54,10 @@ class Audio(Component):
     autoplay: bool
     loop: bool
     muted: bool
+    persistent: bool
 
     tag = "audio"
+    PERSISTABLE = True
     KNOWN_ATTRS = ["src", "controls", "autoplay", "loop", "muted"]
     ARGUMENTS = [
         ComponentArgument("src"),
@@ -35,6 +65,7 @@ class Audio(Component):
         ComponentArgument("autoplay", kind="keyword", default_value=False),
         ComponentArgument("loop", kind="keyword", default_value=False),
         ComponentArgument("muted", kind="keyword", default_value=False),
+        ComponentArgument("persistent", kind="keyword", default_value=False),
     ]
 
     DEFAULT_ATTRS = {"controls": True}
@@ -46,6 +77,7 @@ class Audio(Component):
         autoplay: bool = False,
         loop: bool = False,
         muted: bool = False,
+        persistent: bool = False,
         **kwargs,
     ):
         """Initialize audio component.
@@ -53,9 +85,16 @@ class Audio(Component):
         Args:
             src: Source URL of the audio file.
             controls: Whether to display audio controls. Defaults to True.
-            autoplay: Whether to autoplay the audio. Defaults to False.
+            autoplay: Whether to autoplay the audio. Playback starts once
+                the page has finished loading (the drafter page-loaded
+                event), not while the page is still being inserted.
+                Defaults to False.
             loop: Whether to loop the audio. Defaults to False.
             muted: Whether to mute the audio. Defaults to False.
+            persistent: Whether the audio keeps playing across page
+                transitions (e.g., background music). Note that browsers
+                require a user interaction before audio can start playing.
+                Defaults to False.
             **kwargs (dict): Additional HTML attributes and styles.
         """
         self.src = src
@@ -63,7 +102,11 @@ class Audio(Component):
         self.autoplay = autoplay
         self.loop = loop
         self.muted = muted
+        self.persistent = persistent
         self.extra_settings = kwargs
+
+    def plan(self, context) -> RenderPlan:
+        return _plan_with_deferred_autoplay(self, context)
 
 
 @dataclass(repr=False)
@@ -78,6 +121,7 @@ class Video(Component):
         autoplay: Whether to autoplay the video.
         loop: Whether to loop the video.
         muted: Whether to mute the video.
+        persistent: Whether the video keeps playing across page transitions.
         tag: The HTML tag name, always 'video'.
     """
 
@@ -89,6 +133,8 @@ class Video(Component):
     autoplay: bool
     loop: bool
     muted: bool
+    persistent: bool
+    PERSISTABLE = True
     KNOWN_ATTRS = ["src", "width", "height", "controls", "autoplay", "loop", "muted"]
     ARGUMENTS = [
         ComponentArgument("src"),
@@ -98,6 +144,7 @@ class Video(Component):
         ComponentArgument("autoplay", kind="keyword", default_value=False),
         ComponentArgument("loop", kind="keyword", default_value=False),
         ComponentArgument("muted", kind="keyword", default_value=False),
+        ComponentArgument("persistent", kind="keyword", default_value=False),
     ]
 
     DEFAULT_ATTRS = {"controls": True}
@@ -111,6 +158,7 @@ class Video(Component):
         autoplay: bool = False,
         loop: bool = False,
         muted: bool = False,
+        persistent: bool = False,
         **kwargs,
     ):
         """Initialize video component.
@@ -120,9 +168,15 @@ class Video(Component):
             width: Optional width in pixels.
             height: Optional height in pixels.
             controls: Whether to show playback controls. Defaults to True.
-            autoplay: Whether to autoplay the video. Defaults to False.
+            autoplay: Whether to autoplay the video. Playback starts once
+                the page has finished loading (the drafter page-loaded
+                event), not while the page is still being inserted.
+                Defaults to False.
             loop: Whether to loop the video. Defaults to False.
             muted: Whether to mute the video. Defaults to False.
+            persistent: Whether the video keeps playing across page
+                transitions. Note that browsers require a user interaction
+                before unmuted media can start playing. Defaults to False.
             **kwargs (dict): Additional HTML attributes and styles.
         """
         self.src = src
@@ -132,7 +186,11 @@ class Video(Component):
         self.autoplay = autoplay
         self.loop = loop
         self.muted = muted
+        self.persistent = persistent
         self.extra_settings = kwargs
+
+    def plan(self, context) -> RenderPlan:
+        return _plan_with_deferred_autoplay(self, context)
 
 
 @dataclass(repr=False)

@@ -41,6 +41,10 @@ const config: Config = {
 				"**/__tests__/pyodide/**/*.test.{ts,tsx}",
 				"**/__tests__/engine.test.ts",
 				"**/__tests__/timer.test.ts",
+				"**/__tests__/clock.test.ts",
+				"**/__tests__/audio.test.ts",
+				"**/__tests__/media.test.ts",
+				"**/__tests__/persistence.test.ts",
 			],
 		},
 		{

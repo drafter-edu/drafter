@@ -43,7 +43,15 @@ class DrafterCodeBlockPlugin(BasePlugin):
         ),
         ("subtle_debug_entry", config_options.Type(bool, default=True)),
         ("production", config_options.Type(bool, default=True)),
+        # One Pyodide runtime per page, shared by all demos on it. Each demo's
+        # iframe only keeps HTML/CSS encapsulated; the parent page hosts the
+        # (expensive) Python runtime and every demo attaches to it.
+        ("shared_runtime", config_options.Type(bool, default=True)),
     )
+
+    # All demos on a page share one copy of the JS/CSS assets (and the parent
+    # page loads the Drafter bundle from here to host the shared runtime).
+    SHARED_ASSETS_DIRNAME = "_shared"
 
     def __init__(self) -> None:
         super().__init__()
@@ -53,6 +61,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
         self._temp_root: Path | None = None
         self._compiled_cache: dict[str, PurePosixPath] = {}
         self._pyodide_package_style = "pypi"
+        self._pages_with_demos: set[str] = set()
 
     def on_config(self, config):
         self._docs_dir = Path(config["docs_dir"]).resolve()
@@ -61,6 +70,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
         self._site_output_dir.mkdir(parents=True, exist_ok=True)
         self._temp_root = Path(tempfile.mkdtemp(prefix="mkdocs-drafter-"))
         self._compiled_cache.clear()
+        self._pages_with_demos.clear()
         self._pyodide_package_style = self._resolve_pyodide_package_style()
         return config
 
@@ -100,7 +110,31 @@ class DrafterCodeBlockPlugin(BasePlugin):
                 return f"{source_block}\n\n{iframe_html}"
             return iframe_html
 
-        return FENCE_RE.sub(replace_block, markdown)
+        result = FENCE_RE.sub(replace_block, markdown)
+        if block_counter["value"] > 0:
+            self._pages_with_demos.add(page.file.src_uri)
+        return result
+
+    def on_page_content(self, page_html, /, *, page, config, files):
+        """Host the shared Pyodide runtime on pages that embed demos.
+
+        Loads the Drafter bundle in the PARENT page (before any demo iframes,
+        so an iframe can never race ahead and boot its own runtime) and every
+        embedded demo attaches to the resulting single shared runtime.
+        """
+        if not self.config["shared_runtime"]:
+            return page_html
+        if page.file.src_uri not in self._pages_with_demos:
+            return page_html
+        bundle_path = (
+            PurePosixPath(self.config["output_subdir"])
+            / self.SHARED_ASSETS_DIRNAME
+            / "js"
+            / "drafter.pyodide.js"
+        )
+        bundle_url = self._relative_url_for_page(page.url, bundle_path)
+        host_script = f'<script src="{html.escape(bundle_url)}"></script>\n'
+        return host_script + page_html
 
     def on_post_build(self, *, config):
         if self._temp_root and self._temp_root.exists():
@@ -170,6 +204,13 @@ class DrafterCodeBlockPlugin(BasePlugin):
             "bakery",
             "--verbose",
         ]
+        if self.config["shared_runtime"]:
+            command.append("--shared-runtime")
+            # All demos on the site share one assets folder (a sibling of the
+            # per-demo output folders), instead of one full copy per demo.
+            command.extend(
+                ["--override-asset-url", f"../{self.SHARED_ASSETS_DIRNAME}"]
+            )
 
         build_result = subprocess.run(
             command,
@@ -264,6 +305,9 @@ class DrafterCodeBlockPlugin(BasePlugin):
             + "  <iframe "
             + f'src="{src}" '
             + f'title="{title}" '
+            # The iframe's name reaches the embed as window.name, giving its
+            # shared-runtime instance a stable id (registry key + FS folder).
+            + f'name="{html.escape(demo_id)}" '
             + 'loading="lazy" '
             + 'sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" '
             + f'style="{style_value}" '

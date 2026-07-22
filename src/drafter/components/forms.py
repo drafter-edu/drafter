@@ -206,7 +206,7 @@ class SelectBox(FormComponent):
         self,
         name: str,
         options: List[str],
-        default_value: Optional[Union[str, int, float]] = None,
+        default_value: Optional[str] = None,
         **kwargs,
     ):
         """Initialize select box component.
@@ -247,6 +247,10 @@ class SelectBox(FormComponent):
 
 @dataclass(repr=False)
 class CheckBox(FormComponent):
+    """
+    A checkbox input component for boolean values.
+    """
+
     default_value: bool
 
     tag = "input"
@@ -298,6 +302,11 @@ class CheckBox(FormComponent):
 
 @dataclass(repr=False)
 class RelatedCheckBox(FormComponent):
+    """
+    A checkbox component that is part of a group of related checkboxes.
+    These checkboxes share the same name and are submitted as a list of values.
+    """
+
     default_value: bool
 
     tag = "input"
@@ -312,7 +321,7 @@ class RelatedCheckBox(FormComponent):
     DEFAULT_ATTRS = {"type": "checkbox", "data-cardinality": "many"}
 
     def __init__(self, name: str, value: str, default_value: bool = False, **kwargs):
-        """Initialize checkbox component.
+        """Initialize RelatedCheckBox component.
 
         Args:
             name: The form field name.
@@ -323,7 +332,7 @@ class RelatedCheckBox(FormComponent):
         Raises:
             ValueError: If name is not a valid parameter name.
         """
-        validate_parameter_name(name, "CheckBox")
+        validate_parameter_name(name, "RelatedCheckBox")
         self.name = name
         self.value = value
         self.default_value = bool(default_value)
@@ -331,6 +340,68 @@ class RelatedCheckBox(FormComponent):
 
     def get_id(self) -> str:
         return self.extra_settings.get("id", self.value)
+
+
+@dataclass(repr=False)
+class RadioButtonGroup(FormComponent):
+    options: List[str]
+    default_value: str
+
+    tag = "div"
+    KNOWN_ATTRS = []
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("options"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+    ]
+    RENAME_ATTRS = {}
+    DEFAULT_ATTRS = {"type": "radio", "data-cardinality": "one"}
+
+    def __init__(
+        self,
+        name: str,
+        options: List[str],
+        default_value: Optional[Union[str, int, float]] = None,
+        **kwargs,
+    ):
+        """Initialize a group of radio button components.
+
+        Args:
+            name: The form field name.
+            options: The list of radio button options.
+            default_value: The initially selected option. Defaults to None.
+            **kwargs (dict): Additional HTML attributes.
+
+        Raises:
+            ValueError: If name is not a valid parameter name.
+        """
+        validate_parameter_name(name, "RadioButtonGroup")
+        self.name = name
+        self.options = [str(option) for option in options]
+        self.default_value = str(default_value) if default_value is not None else ""
+        self.extra_settings = kwargs
+
+    def get_children(self, context) -> list[PageContent | RenderPlan]:
+        children = []
+        for option in self.options:
+            option_attrs: dict[str, Any] = {"value": option}
+            if option == self.default_value:
+                option_attrs["checked"] = True
+            children.append(
+                RenderPlan(
+                    kind="tag",
+                    tag_name="input",
+                    attributes=option_attrs,
+                    children=[],
+                    known_attributes=["type", "name", "value", "checked"],
+                )
+            )
+
+        return children
+
+    def get_id(self) -> str:
+        return self.extra_settings.get("id", self.default_value)
 
 
 @dataclass(repr=False)

@@ -86,6 +86,137 @@ body {
 		width: fit-content;
 	}
 
+	/* Deferred-autoplay wrapper around <audio>/<video>; must never affect
+	   layout, so the wrapped media element renders exactly as if bare. */
+	drafter-media {
+		display: contents;
+	}
+
+	drafter-tone[hidden],
+	drafter-melody[hidden],
+	drafter-sound[hidden],
+	drafter-microphone[hidden],
+	drafter-audio-recorder[hidden] {
+		display: none !important;
+	}
+
+	drafter-tone,
+	drafter-melody {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5em;
+
+		.drafter-audio-status {
+			min-width: 1.5em;
+			color: #3e3e9e;
+		}
+	}
+
+	drafter-sound {
+		display: inline-flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.25em;
+		vertical-align: middle;
+
+		audio {
+			vertical-align: middle;
+		}
+	}
+
+	.drafter-audio-visualizer {
+		display: block;
+		width: 300px;
+		height: 60px;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		background-color: #f9f9f9;
+	}
+
+	drafter-microphone,
+	drafter-audio-recorder {
+		display: block;
+		margin: 1rem 0;
+		padding: 1rem;
+		border: 1px solid #ddd;
+		border-radius: 8px;
+		background-color: #f9f9f9;
+
+		.drafter-microphone-status,
+		.drafter-recorder-status {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 0.5rem;
+			text-align: center;
+
+			p {
+				margin: 0;
+			}
+		}
+
+		.drafter-microphone-spinner {
+			width: 32px;
+			height: 32px;
+			border: 3px solid #f3f3f3;
+			border-top: 3px solid #007bff;
+			border-radius: 50%;
+			animation: drafter-geolocation-spin 1s linear infinite;
+		}
+
+		.drafter-microphone-meter {
+			width: 100%;
+			max-width: 300px;
+			height: 20px;
+			border: 1px solid #ccc;
+			border-radius: 10px;
+			background-color: #eee;
+			overflow: hidden;
+		}
+
+		.drafter-microphone-meter-fill {
+			height: 100%;
+			width: 0%;
+			background-color: #28a745;
+			transition: width 0.05s linear;
+		}
+
+		.drafter-microphone-meter-loud {
+			background-color: #dc3545;
+		}
+
+		.drafter-microphone-live-message {
+			font-size: 0.875rem;
+			color: #666;
+		}
+
+		.drafter-microphone-error-icon {
+			font-size: 2rem;
+		}
+
+		.drafter-microphone-error-message {
+			font-weight: 600;
+			color: #dc3545;
+		}
+
+		.drafter-microphone-help-link {
+			background: none;
+			border: none;
+			box-shadow: none;
+			color: #007bff;
+			font-size: 0.875rem;
+			text-decoration: underline;
+			padding: 0;
+			margin: 0;
+		}
+
+		.drafter-recorder-elapsed {
+			font-family: monospace;
+			color: #dc3545;
+			font-weight: 600;
+		}
+	}
+
 	drafter-current-location {
 		display: block;
 		margin: 1rem 0;

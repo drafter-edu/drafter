@@ -14,7 +14,6 @@ from drafter.bridge.events import EventManager
 from drafter.bridge.history import BrowserHistory
 from drafter.bridge.navigation import NavigationController
 from drafter.bridge.site_renderer import SiteRenderer
-import js
 from dataclasses import dataclass, field
 from drafter.bridge.dom import (
     add_js,
@@ -31,10 +30,12 @@ from drafter.bridge.dom import (
     update_subtle_debug_entry,
 )
 from drafter.bridge.log import debug_log, console_log
+from drafter.bridge.persistence import evict_key
 from drafter.bridge.error_handling import (
     raise_bridge_system_error,
     report_bridge_error,
 )
+from drafter.bridge.context import DomContext
 from drafter.bridge.runtime import RuntimeAdapter, create_runtime
 from drafter.config.client_server import ClientServerConfiguration
 
@@ -62,8 +63,13 @@ class ClientBridge:
     runtime: RuntimeAdapter = field(default_factory=create_runtime)
     site_title: str = "Default Title"
 
-    def __init__(self, configuration: ClientServerConfiguration):
-        self.runtime = create_runtime()
+    def __init__(
+        self,
+        configuration: ClientServerConfiguration,
+        context: Optional[DomContext] = None,
+    ):
+        self.context = context if context is not None else DomContext.default()
+        self.runtime = create_runtime(self.context)
         self.configuration = configuration
         self.site_renderer = SiteRenderer(
             self.runtime, configuration.root_element_id, configuration.root_element_id
@@ -97,6 +103,9 @@ class ClientBridge:
             {
                 "drafter-toggle-frame": lambda event: handle_toggle_frame(),
                 "drafter-toggle-debug-mode": lambda event: handle_debug_mode(),
+                "drafter-evict-persistent": lambda event: self.evict_persistent(
+                    event
+                ),
                 "drafter-navigate": lambda event: self.navigator.goto(event.detail),
                 "popstate": self.navigator.handle_popstate,
             },
@@ -104,12 +113,25 @@ class ClientBridge:
                 "Q": handle_debug_mode,
             },
         )
+        # The subtle production debug-entry button is part of the site frame
+        # (injected once at setup, outside the re-rendered body), so a single
+        # direct binding here covers the instance's lifetime.
+        self.events.mount_subtle_debug_entry(handle_debug_mode)
 
     def start(self):
         """
         Load the initial request.
         """
         self.navigator.do_initial_request()
+
+    def evict_persistent(self, event) -> None:
+        """Evict a persisted component by key (from the debug panel UI)."""
+        key = getattr(event, "detail", None)
+        if not key:
+            return
+        parking_area = self.site_renderer.get_parking_area()
+        if parking_area is not None:
+            evict_key(parking_area, str(key))
 
     ### Debug Panel
 
@@ -213,7 +235,7 @@ class ClientBridge:
                 self.site_renderer.toggle_frame()
             elif event.get("key") == "in_debug_mode":
                 self.configuration.in_debug_mode = bool(event.get("value"))
-                swap_debug_mode(js.document)
+                swap_debug_mode(self.context.document)
                 update_subtle_debug_entry(
                     self.site_renderer.get_scope(),
                     self.configuration.in_debug_mode,
@@ -246,10 +268,12 @@ class ClientBridge:
 
     def set_site_title(self, title: str) -> None:
         self.site_title = title
-        # Only the primary instance (the default root) owns the shared page
-        # <title>; embedded/secondary instances must not fight over it.
+        # Only the primary instance (the default root) owns its document's
+        # <title>; secondary instances sharing a document must not fight over
+        # it. Embedded instances each own their iframe's document, so their
+        # (default-root) titles never collide.
         if self.site_renderer.root_id == DRAFTER_TAG_IDS["ROOT"]:
-            js.document.title = title
+            self.context.document.title = title
         if self.debug_panel:
             self.debug_panel.setHeaderTitle(title)
         # debug_log("client.set_title", title)

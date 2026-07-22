@@ -1,4 +1,8 @@
 import { DrafterHTMLElement } from "./drafterHTMLElement";
+import {
+	geolocationBroker,
+	type LocationRequestOptions,
+} from "./geolocationBroker";
 
 type LocationStatus =
 	| "unavailable"
@@ -11,19 +15,13 @@ type LocationStatus =
 type LocationData = {
 	status: LocationStatus;
 	message?: string;
-	lat?: number;
-	lon?: number;
+	latitude?: number;
+	longitude?: number;
 	accuracy?: number;
 	altitude?: number;
 	heading?: number;
 	speed?: number;
 	timestamp?: number;
-};
-
-const GEOLOCATION_OPTIONS: PositionOptions = {
-	enableHighAccuracy: true,
-	timeout: 10000,
-	maximumAge: 0,
 };
 
 const DENIED_HELP_INSTRUCTIONS = [
@@ -46,7 +44,14 @@ function paragraph(className: string, text: string): HTMLParagraphElement {
 
 class CurrentLocation extends DrafterHTMLElement {
 	static get observedAttributes() {
-		return ["name", "show", "show-coordinates"];
+		return [
+			"name",
+			"show",
+			"show-coordinates",
+			"enable-high-accuracy",
+			"timeout",
+			"maximum-age",
+		];
 	}
 
 	private input: HTMLInputElement | null = null;
@@ -63,6 +68,33 @@ class CurrentLocation extends DrafterHTMLElement {
 
 	private shouldShow(): boolean {
 		return this.getBooleanAttribute("show", true);
+	}
+
+	private getEnableHighAccuracy(): boolean {
+		return this.getBooleanAttribute("enable-high-accuracy", true);
+	}
+
+	private getNumericOption(
+		attributeName: string,
+		defaultValue: number,
+	): number {
+		const rawValue = this.getAttribute(attributeName);
+		if (rawValue === null || rawValue.trim() === "") {
+			return defaultValue;
+		}
+		const parsed = Number(rawValue);
+		if (!Number.isFinite(parsed) || parsed < 0) {
+			return defaultValue;
+		}
+		return parsed;
+	}
+
+	private getRequestOptions(): LocationRequestOptions {
+		return {
+			enableHighAccuracy: this.getEnableHighAccuracy(),
+			timeoutMs: this.getNumericOption("timeout", 10000),
+			maxAgeMs: this.getNumericOption("maximum-age", 0),
+		};
 	}
 
 	private syncVisibility(): void {
@@ -94,9 +126,20 @@ class CurrentLocation extends DrafterHTMLElement {
 		}
 		this.renderStatus();
 		if (emit) {
-			this.dispatchEvent(
-				new CustomEvent("locate", { detail: { ...location } }),
-			);
+			const detail = { ...location };
+			this.dispatchEvent(new CustomEvent("locate", { detail }));
+			if (location.status === "denied") {
+				this.dispatchEvent(new CustomEvent("error", { detail }));
+				this.dispatchEvent(new CustomEvent("denied", { detail }));
+			} else if (
+				location.status === "error" &&
+				(location.message ?? "") === "Location request timed out"
+			) {
+				this.dispatchEvent(new CustomEvent("error", { detail }));
+				this.dispatchEvent(new CustomEvent("timeout", { detail }));
+			} else if (location.status === "error") {
+				this.dispatchEvent(new CustomEvent("error", { detail }));
+			}
 		}
 	}
 
@@ -105,11 +148,10 @@ class CurrentLocation extends DrafterHTMLElement {
 			{ status: "pending", message: "Requesting permission..." },
 			false,
 		);
-		navigator.geolocation.getCurrentPosition(
-			(position) => this.handleSuccess(position),
-			(error) => this.handleError(error),
-			GEOLOCATION_OPTIONS,
-		);
+		geolocationBroker
+			.getPosition(this.getRequestOptions())
+			.then((position) => this.handleSuccess(position))
+			.catch((error) => this.handleError(error));
 	}
 
 	private handleSuccess(position: GeolocationPosition): void {
@@ -117,8 +159,8 @@ class CurrentLocation extends DrafterHTMLElement {
 		const location: LocationData = {
 			status: "granted",
 			message: "Location available",
-			lat: coords.latitude,
-			lon: coords.longitude,
+			latitude: coords.latitude,
+			longitude: coords.longitude,
 			accuracy: coords.accuracy,
 			timestamp: position.timestamp,
 		};
@@ -134,16 +176,29 @@ class CurrentLocation extends DrafterHTMLElement {
 		this.setLocation(location);
 	}
 
-	private handleError(error: GeolocationPositionError): void {
+	private handleError(error: unknown): void {
 		let status: LocationStatus = "error";
 		let message = "Could not retrieve location";
-		if (error.code === error.PERMISSION_DENIED) {
+		const geolocationError = error as
+			| (GeolocationPositionError & {
+					PERMISSION_DENIED?: number;
+					POSITION_UNAVAILABLE?: number;
+					TIMEOUT?: number;
+			  })
+			| undefined;
+		const code = geolocationError?.code;
+		if (code === geolocationError?.PERMISSION_DENIED || code === 1) {
 			status = "denied";
 			message = "Location access denied";
-		} else if (error.code === error.POSITION_UNAVAILABLE) {
+		} else if (
+			code === geolocationError?.POSITION_UNAVAILABLE ||
+			code === 2
+		) {
 			message = "Location information unavailable";
-		} else if (error.code === error.TIMEOUT) {
+		} else if (code === geolocationError?.TIMEOUT || code === 3) {
 			message = "Location request timed out";
+		} else if (error instanceof Error && error.message) {
+			message = error.message;
 		}
 		this.setLocation({ status, message });
 	}
@@ -210,11 +265,11 @@ class CurrentLocation extends DrafterHTMLElement {
 					message ?? "Location available",
 				),
 			);
-			const { lat, lon, accuracy } = this.location;
+			const { latitude, longitude, accuracy } = this.location;
 			if (
 				this.shouldShowCoordinates() &&
-				lat !== undefined &&
-				lon !== undefined
+				latitude !== undefined &&
+				longitude !== undefined
 			) {
 				const accuracyText = accuracy
 					? ` (±${Math.round(accuracy)}m)`
@@ -222,7 +277,7 @@ class CurrentLocation extends DrafterHTMLElement {
 				children.push(
 					paragraph(
 						"drafter-geolocation-coords",
-						`${lat.toFixed(6)}, ${lon.toFixed(6)}${accuracyText}`,
+						`${latitude.toFixed(6)}, ${longitude.toFixed(6)}${accuracyText}`,
 					),
 				);
 			}

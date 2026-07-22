@@ -99,6 +99,11 @@ class ClientServer:
 
     def __init__(self, custom_name: str) -> None:
         self.custom_name = custom_name
+        # Virtual-filesystem folder this instance's relative paths resolve to
+        # (e.g. "/instances/demo-1") when several instances share one
+        # interpreter. None means the interpreter-wide default. Assigned by
+        # run_client_bridge from the configure_instance handoff.
+        self.instance_root: Optional[str] = None
         self.event_bus = EventBus()
 
         server_initialized_event = ServerInitializedEvent(
@@ -152,7 +157,11 @@ class ClientServer:
         Returns:
             ClientServerConfiguration: The applied configuration.
         """
-        configuration = self.get_default_configuration()
+        # Snapshot the shared defaults: each server must own its active
+        # configuration so runtime changes on one instance (reconfigure,
+        # configure_instance for a later instance) never leak into another
+        # server sharing the interpreter.
+        configuration = self.get_default_configuration().copy()
         self.site.set_configuration(configuration)
         return configuration
 

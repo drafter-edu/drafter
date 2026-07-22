@@ -2,8 +2,13 @@ from typing import TYPE_CHECKING
 from drafter.config.system import SystemConfiguration
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.bridge.client_bridge import ClientBridge
+from drafter.bridge.context import DomContext
 from drafter.client_server.client_server import ClientServer
-from drafter.client_server.commands import register_server, set_main_server
+from drafter.client_server.commands import (
+    consume_pending_instance_context,
+    register_server,
+    set_main_server,
+)
 
 def run_client_bridge(
     system: SystemConfiguration,
@@ -21,10 +26,18 @@ def run_client_bridge(
     else:
         configuration = server.get_current_configuration()
         rendered_site = server.do_render()
-    # Register this server under its root id so multiple concurrent instances can
-    # coexist and be looked up / reset independently by their root_element_id.
-    register_server(configuration.root_element_id, server)
-    client_bridge = ClientBridge(configuration)
+    # The embedding host may have handed this instance its own window (an
+    # iframe's contentWindow) and a unique registry key via configure_instance.
+    pending_context = consume_pending_instance_context() or {}
+    context = DomContext.for_window(pending_context.get("window"))
+    instance_key = pending_context.get("instance_id") or configuration.root_element_id
+    # Adopt the instance's filesystem folder before registration so
+    # register_server's set_main_server() syncs the current instance-root.
+    server.instance_root = pending_context.get("instance_root")
+    # Register this server under its instance key so multiple concurrent
+    # instances can coexist and be looked up / reset independently.
+    register_server(instance_key, server)
+    client_bridge = ClientBridge(configuration, context=context)
     client_bridge.setup_site(rendered_site)
     
     if rendered_site.error:
@@ -46,9 +59,14 @@ def run_client_bridge(
         return response
 
     def handle_toggle_frame():
+        # Like handle_visit: make this instance current so the resulting
+        # UpdatedConfigurationEvent publishes on THIS instance's event bus
+        # (log_record routes through the global current-server pointer).
+        set_main_server(server)
         server.reconfigure_flip("framed")
 
     def handle_debug_mode():
+        set_main_server(server)
         server.reconfigure_flip("in_debug_mode")
 
     client_bridge.setup_events(handle_visit, handle_toggle_frame, handle_debug_mode)

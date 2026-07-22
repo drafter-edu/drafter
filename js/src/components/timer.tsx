@@ -1,10 +1,8 @@
 import { DrafterHTMLElement } from "./drafterHTMLElement";
-import {
-	DRAFTER_PAGE_LOADED_EVENT,
-	type DrafterPageLoadedDetail,
-} from "./events";
+import { DRAFTER_PAGE_LOADED_EVENT } from "./events";
 
 type TimerState = "running" | "finished" | "paused";
+type ClockState = "running" | "paused";
 
 const DEFAULT_RATE = 1000;
 const DEFAULT_DURATION = 1000;
@@ -25,9 +23,7 @@ class Timer extends DrafterHTMLElement {
 	private waitingForPageLoad = false;
 	private pageLoadedForCurrentView = false;
 
-	private handlePageLoaded = (event: Event): void => {
-		const detail = (event as CustomEvent<DrafterPageLoadedDetail>).detail;
-
+	private handlePageLoaded = (_event: Event): void => {
 		this.pageLoadedForCurrentView = true;
 		if (!this.isConnected || !this.waitingForPageLoad) {
 			return;
@@ -285,6 +281,10 @@ class Timer extends DrafterHTMLElement {
 	}
 
 	connectedCallback() {
+		if (this.isMovingBetweenParents()) {
+			// Persistence move in progress: keep running state untouched.
+			return;
+		}
 		this.pageLoadedForCurrentView = false;
 		window.addEventListener(
 			DRAFTER_PAGE_LOADED_EVENT,
@@ -316,6 +316,10 @@ class Timer extends DrafterHTMLElement {
 	}
 
 	disconnectedCallback() {
+		if (this.isMovingBetweenParents()) {
+			// Persistence move in progress: keep running state untouched.
+			return;
+		}
 		window.removeEventListener(
 			DRAFTER_PAGE_LOADED_EVENT,
 			this.handlePageLoaded,
@@ -328,4 +332,275 @@ class Timer extends DrafterHTMLElement {
 	}
 }
 
+class DrafterClock extends DrafterHTMLElement {
+	static get observedAttributes() {
+		return ["interval", "show", "controls", "persistent"];
+	}
+
+	private state: ClockState = "running";
+	private intervalId: number | null = null;
+	private startedAt: number | null = null;
+	private elapsedMs = 0;
+	private label: HTMLSpanElement | null = null;
+	private toggleButton: HTMLButtonElement | null = null;
+	private restartButton: HTMLButtonElement | null = null;
+	private waitingForPageLoad = false;
+	private pageLoadedForCurrentView = false;
+
+	private handlePageLoaded = (_event: Event): void => {
+		this.pageLoadedForCurrentView = true;
+		if (!this.isConnected || !this.waitingForPageLoad) {
+			return;
+		}
+
+		this.waitingForPageLoad = false;
+		this.beginRunning();
+	};
+
+	private formatTime(ms: number): string {
+		const totalSeconds = Math.floor(ms / 1000);
+		const minutes = Math.floor(totalSeconds / 60);
+		const seconds = totalSeconds % 60;
+		return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+	}
+
+	private getInterval(): number {
+		return Math.max(this.getNumberAttribute("interval", DEFAULT_RATE), 1);
+	}
+
+	private shouldShow(): boolean {
+		return this.getBooleanAttribute("show", true);
+	}
+
+	private hasControls(): boolean {
+		return this.getBooleanAttribute("controls", false);
+	}
+
+	private isPersistent(): boolean {
+		return this.getBooleanAttribute("persistent", false);
+	}
+
+	private clearIntervalTimer(): void {
+		if (this.intervalId !== null) {
+			window.clearInterval(this.intervalId);
+			this.intervalId = null;
+		}
+	}
+
+	private computeElapsedMs(): number {
+		if (this.state !== "running" || this.startedAt === null) {
+			return this.elapsedMs;
+		}
+
+		return this.elapsedMs + (Date.now() - this.startedAt);
+	}
+
+	private syncVisibility(): void {
+		this.hidden = !this.shouldShow();
+	}
+
+	private renderStructure(): void {
+		const label = document.createElement("span");
+		const children: Node[] = [label];
+
+		this.label = label;
+		this.toggleButton = null;
+		this.restartButton = null;
+
+		if (this.hasControls()) {
+			const toggleButton = document.createElement("button");
+			toggleButton.type = "button";
+			toggleButton.addEventListener("click", () => {
+				this.toggleRunningState();
+			});
+
+			const restartButton = document.createElement("button");
+			restartButton.type = "button";
+			restartButton.textContent = "🔄";
+			restartButton.addEventListener("click", () => {
+				this.restart();
+			});
+
+			this.toggleButton = toggleButton;
+			this.restartButton = restartButton;
+			children.push(toggleButton, restartButton);
+		}
+
+		this.replaceChildren(...children);
+		this.syncVisibility();
+		this.updateDisplay();
+		this.updateControls();
+	}
+
+	private resetState(): void {
+		this.state = "running";
+		this.startedAt = null;
+		this.elapsedMs = 0;
+	}
+
+	private emitTick(elapsed = this.computeElapsedMs()): void {
+		this.dispatchEvent(
+			new CustomEvent("tick", {
+				detail: {
+					elapsed,
+					interval: this.getInterval(),
+				},
+			}),
+		);
+	}
+
+	private updateDisplay(): void {
+		if (this.label === null) {
+			return;
+		}
+
+		this.label.textContent = this.formatTime(this.computeElapsedMs());
+	}
+
+	private updateControls(): void {
+		if (this.toggleButton !== null) {
+			this.toggleButton.textContent =
+				this.state === "running" ? "⏸" : "▶";
+			this.toggleButton.setAttribute(
+				"aria-label",
+				this.state === "running" ? "Pause clock" : "Resume clock",
+			);
+		}
+
+		if (this.restartButton !== null) {
+			this.restartButton.setAttribute("aria-label", "Restart clock");
+		}
+	}
+
+	private handleIntervalTick(): void {
+		if (this.state !== "running") {
+			return;
+		}
+
+		this.updateDisplay();
+		this.emitTick();
+	}
+
+	private beginRunning(): void {
+		this.clearIntervalTimer();
+		this.state = "running";
+		this.startedAt = Date.now();
+		this.intervalId = window.setInterval(() => {
+			this.handleIntervalTick();
+		}, this.getInterval());
+		this.updateDisplay();
+		this.updateControls();
+		this.emitTick();
+	}
+
+	private pause(): void {
+		if (this.state !== "running") {
+			return;
+		}
+
+		this.elapsedMs = this.computeElapsedMs();
+		this.state = "paused";
+		this.startedAt = null;
+		this.clearIntervalTimer();
+		this.updateDisplay();
+		this.updateControls();
+	}
+
+	private resume(): void {
+		this.beginRunning();
+	}
+
+	private toggleRunningState(): void {
+		if (this.state === "running") {
+			this.pause();
+		} else {
+			this.resume();
+		}
+	}
+
+	private restart(): void {
+		this.clearIntervalTimer();
+		this.resetState();
+		this.beginRunning();
+	}
+
+	private waitForPageLoadThenStart(): void {
+		this.waitingForPageLoad = true;
+		this.startedAt = null;
+		this.clearIntervalTimer();
+		this.updateDisplay();
+		this.updateControls();
+	}
+
+	private initializeClock(preferPersistedState: boolean): void {
+		this.clearIntervalTimer();
+
+		this.resetState();
+
+		this.renderStructure();
+		if (this.state === "running") {
+			if (this.pageLoadedForCurrentView) {
+				this.beginRunning();
+			} else {
+				this.waitForPageLoadThenStart();
+			}
+		} else {
+			this.updateDisplay();
+			this.updateControls();
+		}
+	}
+
+	connectedCallback() {
+		if (this.isMovingBetweenParents()) {
+			// Persistence move in progress: keep running state untouched.
+			return;
+		}
+		this.pageLoadedForCurrentView = false;
+		window.addEventListener(
+			DRAFTER_PAGE_LOADED_EVENT,
+			this.handlePageLoaded,
+		);
+		this.initializeClock(true);
+	}
+
+	attributeChangedCallback(
+		name: string,
+		oldValue: string | null,
+		newValue: string | null,
+	) {
+		if (oldValue === newValue || !this.isConnected) {
+			return;
+		}
+
+		if (name === "show") {
+			this.syncVisibility();
+			return;
+		}
+
+		if (name === "controls") {
+			this.renderStructure();
+			return;
+		}
+
+		this.initializeClock(false);
+	}
+
+	disconnectedCallback() {
+		if (this.isMovingBetweenParents()) {
+			// Persistence move in progress: keep running state untouched.
+			return;
+		}
+		window.removeEventListener(
+			DRAFTER_PAGE_LOADED_EVENT,
+			this.handlePageLoaded,
+		);
+		this.clearIntervalTimer();
+		this.waitingForPageLoad = false;
+		this.label = null;
+		this.toggleButton = null;
+		this.restartButton = null;
+	}
+}
+
 customElements.define("drafter-timer", Timer);
+customElements.define("drafter-clock", DrafterClock);

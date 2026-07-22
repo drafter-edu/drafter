@@ -22,6 +22,11 @@ import js
 DOUBLE_PRESS_THRESHOLD = 600  # milliseconds
 DRAFTER_PAGE_LOADED_EVENT = "drafter-page-loaded"
 
+# Set on an element once its per-element handlers are attached. Persisted
+# components survive page swaps with their listeners intact, so re-mounting on
+# a later page load would dispatch every event twice (and leak listeners).
+HANDLERS_MOUNTED_ATTR = "data-drafter-handlers-mounted"
+
 
 @dataclass
 class EventManager:
@@ -42,10 +47,11 @@ class EventManager:
         self.hotkey_events = {}
         self.last_press_time = 0
         self.hotkey_listener_ready = False
-        # The node inner-frame lookups (BODY/FORM) are scoped to. Defaults to the
-        # global document (single-instance); set to the instance's shadow root by
-        # set_scope() so concurrent instances don't find each other's elements.
-        self.scope: Any = js.document
+        # The node inner-frame lookups (BODY/FORM) are scoped to. Defaults to
+        # the instance's document (the iframe's document for embedded
+        # instances); set to the instance's shadow root by set_scope() so
+        # concurrent instances don't find each other's elements.
+        self.scope: Any = runtime.context.document
 
     def set_scope(self, scope: Any) -> None:
         """Scope this manager's inner-frame lookups to the given node."""
@@ -71,6 +77,8 @@ class EventManager:
         )
 
         for element in elements_with_handlers:
+            if element.getAttribute(HANDLERS_MOUNTED_ATTR):
+                continue
             handlers_json = element.getAttribute(Component.DRAFTER_DATA_HANDLERS_NAME)
             if not handlers_json:
                 continue
@@ -141,6 +149,7 @@ class EventManager:
                 )
                 element.addEventListener(event_type, wrapped_handler)
                 debug_log("client.event_handler_added", event_type, element)
+            element.setAttribute(HANDLERS_MOUNTED_ATTR, "true")
 
     def mount_navigation(self, do_navigation: Callable):
         debug_log("client.mount_navigation")
@@ -227,7 +236,7 @@ class EventManager:
             elif hasattr(form_root, "action"):
                 url = form_root.action
             else:
-                url = js.location.href
+                url = self.runtime.context.window.location.href
             # Build and dispatch navigation event
             incomplete_data = get_all_event_data(
                 self.runtime, event.target, event, submitter, self.scope
@@ -286,6 +295,22 @@ class EventManager:
         self.mount_event_handlers(root, do_navigation)
         debug_log("client.mount_navigation_complete")
 
+    def mount_subtle_debug_entry(self, callback: Callable[[], None]) -> None:
+        """Wire the subtle production debug-entry button to the debug toggle.
+
+        Bound here with a proper proxied listener (not an inline onclick in the
+        site HTML) so the click is handled by this instance's own bridge no
+        matter which document (e.g. an iframe) the site renders into.
+        """
+        button = self.scope.querySelector(
+            "#" + DRAFTER_TAG_IDS["SUBTLE_DEBUG_ENTRY"]
+        )
+        if not button:
+            return
+        wrapped_handler = self.runtime.wrap_event_handler(lambda event: callback())
+        button.addEventListener("click", wrapped_handler)
+        debug_log("client.subtle_debug_entry_mounted")
+
     ### Global Event Handler Registration
     def setup_events(
         self,
@@ -315,11 +340,12 @@ class EventManager:
         debug_log("client.page_loaded_event_dispatched", detail)
 
     def _register_event(self, event_name: str, handler: Callable[[Any], Any]) -> None:
+        window = self.runtime.context.window
         if self.listeners.get(event_name):
-            js.removeEventListener(event_name, self.listeners[event_name])
+            window.removeEventListener(event_name, self.listeners[event_name])
             self.runtime.cleanup_event_handler(self.listeners[event_name])
         wrapped_handler = self.runtime.wrap_event_handler(handler)
-        js.addEventListener(event_name, wrapped_handler)
+        window.addEventListener(event_name, wrapped_handler)
         self.listeners[event_name] = wrapped_handler
 
     def _register_hotkey(self, key_combo: str, callback: Callable[[], None]) -> None:
@@ -345,7 +371,9 @@ class EventManager:
         self.hotkey_events[key] = callback
         if not self.hotkey_listener_ready:
             wrapped_handler = self.runtime.wrap_event_handler(hotkey_handler)
-            js.document.addEventListener("keydown", wrapped_handler)
+            self.runtime.context.document.addEventListener(
+                "keydown", wrapped_handler
+            )
             self.hotkey_listener_ready = True
             debug_log("client.hotkey_listener_registered")
 
@@ -547,9 +575,11 @@ def get_all_event_data(
     originator: Any,
     event: Any,
     submitter: Any,
-    scope: Any = js.document,
+    scope: Any = None,
 ) -> list:
     """Collect all relevant data for an event, including form data and arguments."""
+    if scope is None:
+        scope = runtime.context.document
     base_data: dict[str, Any] = {}
 
     # Phase 1: Get any custom event details
