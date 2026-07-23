@@ -1,46 +1,98 @@
+# Drafter v2 Architecture
+
+This document describes the architecture as it is actually implemented, with design intent that has
+not yet been built explicitly marked **[PLANNED]**. When a name in this document and a name in the
+code disagree, the code wins - please update this document rather than "fixing" the code to match it.
+
 ## Organization
 
-When you run a Drafter program that has a `start_server` call, then it will actually trigger the `launch.py` script's logic that will either run the application differently depending on whether it is in Skulpt/Pyodide (web) mode or normal Python (app) mode.
+When you run a Drafter program that has a `start_server` call, the logic in `src/drafter/launch.py`
+dispatches three ways (`launch.py`, `start_server` dispatch):
 
-If a user runs the program directly, then when it reaches `start_server`, it will start a local development server (the `AppServer`) using Starlette.
-This server will serve a single page with a div that contains the DRAFTER_ROOT.
-The page will sets up Skulpt/Pyodide and a hot-reload connection to the server.
-Finally, the page will also load the user's code into Skulpt/Pyodide and run it, which should rerun this process from the beginning, but instead triggering the alternative path where we run in `web` mode (see below). Effectively, this is running the program twice. The first time is "server side" with no real implications (other than starting the server, unit tests, print statements, etc.). The second time is "client side" in Skulpt/Pyodide, where the user's code is actually run.
+1. **Web mode** (`is_web()` is true - we are running inside Skulpt or Pyodide in the browser):
+   `run_client_bridge` is called to wire up the `ClientBridge` and `ClientServer`.
+2. **Compile mode** (`system.bootstrap.mode == "compile_site"`): `compile_site` (in
+   `src/drafter/builder/build.py`) generates static HTML/CSS/JS files that can be deployed to any
+   static hosting service.
+3. **App mode** (everything else - normal CPython): `serve_app_once` (in
+   `src/drafter/app/app_server.py`) starts a local development server.
 
-If the `build` command is used from the command line script, then the `AppBuilder` will instead generate static HTML, CSS, and JS files that can be deployed to any static hosting service.
-The main `index.html` file will create the DRAFTER_ROOT div, set up Skulpt/Pyodide and load the user's code into it.
-It will try to render the student's initial page to prepopulate as much meta information as it can, as well as an HTML preview that can be shown for SEO contexts.
-The `AppBuilder` and `AppServer` are together both referred to as `AppBackend`.
+The dev server and the builder are function-based modules: `make_app()`/`serve_app_once()` build and run a **Starlette**
+application served by **uvicorn**, and `compile_site()` performs the static build. The similarly
+named `AppServerConfiguration` and `AppBuilderConfiguration` classes are configuration dataclasses
+only (see Configuration below), with shared fields in `AppCommonConfiguration`.
 
-If the user is running the program directly in Skulpt/Pyodide, then when it reaches the `start_server` call, it will instead trigger the `launch.py` script's logic to setup the `ClientBridge` and get the main `ClientServer`. Note that the `ClientServer` is not a real server; it is just a class that handles requests from the `ClientBridge` and generates responses.
-The `ClientBridge` is responsible for populating the DOM, tracking user interactions, and sending requests from the client side, while the `ClientServer` is responsible for processing requests, managing state, and generating responses on the server side.
+In app mode, the server serves a single "True Page" containing a div with the Drafter root. The page
+sets up Skulpt/Pyodide plus a hot-reload WebSocket connection back to the dev server, and then loads
+and runs the user's code in the browser runtime. This effectively runs the program twice: first
+"server side" in CPython (starting the server, running unit tests, printing output), then "client
+side" in Skulpt/Pyodide, where the user's application actually runs. The default engine is
+**Pyodide** (`AppCommonConfiguration.engine = "pyodide"`); Skulpt remains a semi-supported alternative
+via `--engine skulpt`.
 
-The area that the user sees is the `Site`, which is a frame encapsulating the `Form`, the `Body` (composed of `PageContent`), the `DebugInfo`, and additional elements that are needed (e.g., audio players).
-The `Site` is a container that holds all the elements of the user interface and is populated by the `ClientBridge` based on the responses it gets from the `ClientServer`.
-The `ClientBridge` is stupid when it comes to the site, and doesn't really understand what it has; as much of that logic as possible is pushed into the `ClientServer`.
-The `ClientServer` generally sends information to the `ClientBridge`, which then performs updates on the page (e.g., sending info to the `DebugInfo` panel, updating the `PageContent`, adding new JS/CSS, etc.).
+Hot reload: the dev server exposes a WebSocket route backed by `ReloadHub` and a `watchfiles`
+watcher (`src/drafter/app/watcher.py`). The watcher distinguishes "full reload" from "restart
+student code" messages, but the Skulpt client currently handles both with `location.reload()`; the
+Pyodide client receives the restart message through `startPyodideAppServerSession`.
 
-The DOM structure of the site is as follows:
+If the user runs the program directly in Skulpt/Pyodide, then reaching `start_server` triggers
+`run_client_bridge` (`src/drafter/bridge/bridger.py`), which sets up the `ClientBridge` and the main
+`ClientServer`. The `ClientServer` is **not** a real server; it is a class that handles requests
+from the `ClientBridge` and generates responses.
 
-- There's a top-level div tag with id `drafter-root--` that contains ALL content (except for top-level script tags needed for loading the actual true initial page).
-- There's a div tag with id `drafter-site--` that contains the entire site.
-- Inside that is a `drafter-form--` div that contains the main app (in `drafter-frame--`), followed by the `drafter-debug--` div.
-    - The frame makes the app look like it is in a browser window.
-    - The frame is only visible in development mode; otherwise, only its content is visible.
-- Inside the frame is a `drafter-header--` div, a `drafter-body--` div, and a `drafter-footer--` div.
-    - The header and footer are only visible in development mode.
-    - The header has things like the site title and quick links for resetting state, going to the about page, etc.
-    - The footer has quick information like the current route, status, etc.
-- The first child of the `drafter-body--` is a `form` tag with id `drafter-form--`.
-- Subsequent children of the body can be additional tags that are outside the form (e.g., modals, audio players, etc.).
-- When the page content is rendered, it replaces content within the header/body/footer that is inside of the Form (without replacing the form itself).
+- The `ClientBridge` (`src/drafter/bridge/client_bridge.py`) populates the DOM, tracks user
+  interactions, and sends requests from the client side.
+- The `ClientServer` (`src/drafter/client_server/client_server.py`) processes requests, manages
+  state, and generates responses on the "server" side.
+
+The `ClientBridge` is deliberately stupid about the site's contents; as much logic as possible is
+pushed into the `ClientServer`. The `ClientServer` sends information to the `ClientBridge`, which
+performs updates on the page (updating page content, adding new JS/CSS, notifying the debug panel,
+etc.).
+
+The default server instance is the module-level global `MAIN_SERVER` in
+`src/drafter/client_server/commands.py`. It is created **lazily** by `get_main_server()` on first
+access (not eagerly at import). A multi-instance registry (`_SERVER_REGISTRY`, `register_server`,
+`configure_instance`, `instance_root`) supports embedding multiple independent Drafter apps on one
+page (e.g., in documentation via iframes/shadow DOM); `configure_instance` clears `MAIN_SERVER` so
+each instance gets its own server and event bus. See "Multi-Instance Embedding" below.
+
+## DOM Structure
+
+The single source of truth for element ids is `DRAFTER_TAG_IDS` and `SITE_HTML_TEMPLATE` in
+`src/drafter/site/site.py`. The ids all use a trailing `--` suffix:
+
+- `drafter-root--` - the top-level div that contains ALL Drafter content (except top-level script
+  tags needed to load the true initial page). The site template is injected into it.
+- `drafter-site--` - a div containing the entire site.
+- `drafter-form--` - a **`<form>` tag** , a direct child of the site. It wraps the frame,
+  so all form fields inside the page content participate in one form.
+- `drafter-frame--` - a div inside the form that makes the app look like it is in a browser window.
+  The frame chrome is only visible in development mode; in deployed mode only its content shows.
+- `drafter-header--`, `drafter-body--`, `drafter-footer--` - divs inside the frame. Header and
+  footer are hidden in deployed mode (`drafter_deploy.css`). The header holds the site title and
+  quick links (reset state, about page, edit source); the footer holds the current route/status and
+  the persisted-components list.
+- `drafter-debug--` - the debug panel, a **sibling of the form** (both are children of the site).
+- `drafter-persist--` - a hidden div inside the footer used to "park" persistent components (see
+  Component Persistence below).
+- `drafter-subtle-debug-entry--` - a mostly-hidden button that offers a debug entry point on
+  deployed sites (guarded by `data-enabled`/`data-visible` attributes in `drafter_deploy.css`).
+- `drafter-shadow-host--` - the host element used when the site is rendered into a shadow DOM
+  (multi-instance embedding).
+
+Padding is provided by class-only divs `drafter-padding-h--` (wrapping the form horizontally inside
+the site) and `drafter-padding-v--` (above/below the frame inside the form). Other notable classes:
+`drafter-theme--`, `drafter-debug-css--`, `drafter-non-debug-css--`, `drafter-precompiled-headers--`
+(marker classes for injected style/script tags) and the visibility toggles `drafter-hidden--` /
+`drafter-body-frame-hidden--`.
 
 The structure can be summarized as:
 
 - Root > Site > Form > Frame > Header
 - Root > Site > Form > Frame > Body > (Page's content goes here)
-- Root > Site > Form > Frame > Footer
-- Root > Site > DebugInfo
+- Root > Site > Form > Frame > Footer > Persist
+- Root > Site > DebugInfo (sibling of the Form)
 
 ```
 ┌─True─Site─────────────────────────────────────────────┐
@@ -77,500 +129,763 @@ The structure can be summarized as:
 └───────────────────────────────────────────────────────┘
 ```
 
-We'll use a request/response model to update the page content, based around events.
-When the user interacts with the page (clicks a link, submits a form, etc.), the `ClientBridge` will send a request to the `ClientServer` with the relevant information:
+When page content is rendered, it replaces the content of the body (inside the form) without
+replacing the form itself.
 
-- The action that led to the request (e.g., "click", "back", "forward", "reset button")
-- The URL path being requested (which will match to a route function)
-- The form data (which will be unpacked into named parameters, if matched)
-    - Input forms
-    - Files
-    - The `Argument` objects
-- Extra event information, passed as its own dataclass instance in a specially named `event` parameter.
-    - Clicked button
-    - Scroll position
-    - Etc.
+A note on the `Site` class (`src/drafter/site/site.py`): despite the name, it is not a container of
+Form/Body/DebugInfo objects. It is a small dataclass holding the current `ClientServerConfiguration`
+(private `_configuration` field) that knows how to render the site frame HTML (`render()` →
+`InitialSiteData`), render theme/style headers, and render an error fallback. The DOM structure
+above lives in its `SITE_HTML_TEMPLATE` (and `SITE_HTML_SHADOW_DOM_TEMPLATE`).
 
-The `ClientServer` will process the request and choose an appropriate route handler by using the `visit` method.
-The provided function will be called, providing the current State and the request information (via named parameters).
-That function is expected to return a `ResponsePayload`, which can be any of various subclasses: `Page` (the most common), `Fragment`, `Update`, `Redirect`, `Download`, `Progress`, `ErrorPage`. That Page gets post-processed and wrapped in a `Response` along with metadata (e.g., status code, errors, headers, etc.) and sent to the `ClientBridge`. The `Response` is always sent back to the `ClientBridge`, even in error cases. Think of the Payload as being "the thing we will show the user", while the Response is "the meta information for the system." So most error metadata will be in the Response, while the Payload might still be a Page that shows a friendly error message.
+## Request/Response Model
 
-Note that route functions usually expect `state: State` as their first parameter, but you can also do `page: Page` instead if you want to get the current state of the Page object (which includes the State). The `ClientServer` will automatically provide the appropriate object based on the function signature. So the complete list of "special" route parameter names:
+We use a request/response model to update page content, based around events. When the user
+interacts with the page (clicks a link, submits a form, etc.), the `ClientBridge` sends a `Request`
+to the `ClientServer`.
 
-- `state: Any`: The current State object; only if this is the first parameter.
-- `page: Page`: The current Page object (which includes the State); only if this is the first parameter.
-- `event: Event`: The event information as a dataclass instance.
-- `kwargs: dict`: Any other form fields that were not matched to named parameters will be provided as a dictionary in this parameter.
-- `request: Request`: The full raw Request object, if desired.
+The `Request` dataclass (`src/drafter/data/request.py`) carries:
 
-The `ClientBridge` will then unwrap the page contents and update the DOM faithfully according to whatever it got from the `Response`, changing the contents of the `form` and replacing the click handler. It should update the browser history as appropriate, and run any scripts that were included in the response. If it had any errors or warnings, it should display those in the debug panel.
+- `action`: what led to the request (e.g., `"click"`, `"back"`, `"redirect"`, `"precompilation"`).
+- `url`: the URL path being requested (which matches a route function).
+- `kwargs`: the merged form data (input fields, `Argument`s, uploaded files) as a dict.
+- `event`: extra event information as a plain **dict** (clicked button, scroll position, etc.).
+- `dom_id`, `button_pressed`, `raw_payload`, `id`: bookkeeping fields. `raw_payload` is a list of
+  provenance-tagged entries (`name`/`value`/`source`/`source_detail`) that the Router uses to bind
+  parameters with correct precedence.
 
-A `ResponsePayload` has a few key methods that should be implemented to fit into the lifecycle:
+The `ClientServer` processes the request in `do_visit` (there is no method named just `visit`):
+route lookup is `get_route` (delegating to `Router.get_route`), then `execute_route` calls the route
+function safely, converting exceptions into error responses. The route function is expected to
+return a `ResponsePayload`. The payload gets post-processed and wrapped in a `Response`
+(`src/drafter/data/response.py`) along with metadata - a symbolic `status_code` string (one of the
+`STATUSES` in `drafter/data/errors.py`, not a numeric HTTP code), `errors`, `warnings`, `channels`,
+`target`, `metadata`, etc. The `Response` is **always** sent back to the `ClientBridge`, even in
+error cases. Think of the Payload as "the thing we will show the user," while the Response is "the
+meta information for the system": error metadata rides on the Response, while the Payload might
+still be a Page showing a friendly error message.
 
-- `verify`: Before being sent to the client, the `ResponsePayload` is verified to ensure it is valid and can be rendered properly. This might include checking for required fields, ensuring that links are valid, etc.
-- `render`: The payload is rendered in the `ClientServer` by calling its `render` method, which produces HTML. Typically, for a `Page`, this involves rendering all of its components and assembling them into a complete HTML document fragment. Note that this must be done recursively, so that each component renders its children, and so on.
-- `get_messages`: The payload can also generate any additional scripts that need to be run before or after the main content is inserted; these are sent along as part of the `Response` and executed by the `ClientBridge`. This is all facilitated by the `channels` of the `ClientBridge` and `ClientServer`, which allow sending messages back and forth; this is also useful for things like controlling page-level audio. So a `ResponsePayload` generates its messages, and these messages are sent to the `ClientBridge` to be executed at the appropriate time.
-- `format`: The payload is turned into a string that can be used to recreate the payload, essentially the same as `repr`. This is useful for debugging and logging purposes.
-- `get_state_updates`: If the payload needs to make any changes to the `State` (e.g., updating fields, adding history entries, etc.), it can provide those updates via this method. The `ClientServer` will apply these updates to the current `State` after processing the request but before sending the response back to the client.
+### Payloads
 
-After the response is successfully (or unsuccessfully) processed, the `ClientBridge` sends notifications to the Audit system.
+`ResponsePayload` (`src/drafter/payloads/payloads.py`) has these subclasses under
+`src/drafter/payloads/kinds/`:
 
-How is the first page handled? When the server starts up, it will create an initial State object. While Starlette or the compiler is going through its initial setup run of the code, it will find the `index` route and execute it to generate initial page content (this can be disabled if needed). This information is provided in the generated template that the server serves to the client, so that SEO crawlers can see the initial content.
-When the `ClientBridge` connects, it will immediately request the index page (unless a specific other page was requested first, via query arguments), which will be run on the `ClientServer` side to generate the actual page content for the user.
+- `Fragment` - the real base payload: an HTML string injected at a `Target`.
+- `Page` - subclasses `Fragment` with a predefined target (`DEFAULT_BODY_TARGET`, pointing at the
+  body div with `replace=False` and `is_page_load=True`). So a Page literally *is* a Fragment with a
+  predefined target location.
+- `Update`, `Redirect`, `Download`.
+- `SimpleErrorPage` - the last-resort error payload. **Note:** there is no `ErrorPage` payload
+  class; normal error rendering goes through the system error *route* (see Error Handling), and
+  `SimpleErrorPage` is only the fallback when that itself fails. (An overridable `ErrorPage` payload
+  remains a TODO.)
+- `Progress` - **[PLANNED]** currently an empty stub ("not yet ready"); see Streaming below.
 
-How are errors and warnings handled? At any point during the process, we can generate either errors or warnings, and they get attached to the eventual `Response` AND also sent out through Telemetry. In some cases, we may want to short-circuit the normal flow and return an error response immediately (e.g., if a route handler raises an exception). In other cases, we may want to accumulate warnings and send them along with a successful response. There are many kinds of errors, all of which are documented in the `drafter.data.error` module.
+Lifecycle methods on `ResponsePayload`:
 
-How is History handled? Whenever a Request/Response completes, the Bridge notifies the `PersistentStorage` to store relevant data. That system uses the current Session ID in order to persist data that can then be restored if the page is reloaded or navigated back to. It has to keep track of everything in such a way that it can play it back later. This includes the State, the accessed pages, the arguments used, and any files that were uploaded. These updates should happen asynchronously wherever possible.
+- `verify(router, state, configuration, request)`: before being sent to the client, the payload is
+  verified (required fields present, links valid, etc.).
+- `render(state, configuration)`: produces the HTML, recursively rendering components and their
+  children.
+- `get_messages(state, configuration)`: generates additional content to run before/after the main
+  content is inserted (e.g., `Fragment` emits CSS into the `"before"` channel and JS into the
+  `"after"` channel).
+- `format(state, representation, configuration)`: a string representation used for
+  logging/debugging and test generation - `Fragment.format` actually emits an `assert_equal(...)`
+  style test string, not a plain repr.
+- `get_state_updates()` → `(bool, Any)`: changes the payload wants applied to the State; applied by
+  the `ClientServer` after processing but before responding.
+- `is_redirect()`, `get_redirect()`, `get_target(request)`: redirect detection/unpacking and target
+  resolution.
 
-When the user navigates back or forward without leaving the site (e.g., since we hijacked the back button), the `ClientBridge` sends a request with the appropriate State ID, and the `ClientServer` retrieves that State and generates the corresponding page content. This allows for seamless navigation through the user's history of interactions with the site. When a tab gets opened, we check to see if the sessionStorage has a session ID for this tab. This can happen when the user navigates away to a different server and then comes back (e.g., via the back button). If there is no session ID, we generate a new one and store it in sessionStorage. This allows us to maintain continuity across page reloads and navigations within the same tab.
+### Channels
 
-How are streaming responses handled? How are long-running tasks handled? In both cases, we can yield `Progress` payloads from route handlers, which will be sent to the `ClientBridge` as they are generated. The `ClientBridge` can then update the page to show progress indicators or partial results as they come in. This means that a single request can actually result in multiple responses being sent to the client over time.
+Messages between server and bridge ride on named `Channel`s of `Message`s
+(`src/drafter/data/channel.py`), attached to the `Response` (`Response.channels`, with
+`send`/`send_messages` helpers). Default channel names are `"before"`, `"after"`, and `"audio"`.
+The bridge injects "before" content (e.g., styles) before updating the page and "after" content
+(e.g., scripts) afterwards.
 
-From the student developer's perspective, they are building a `Site`, which can have multiple `Route`s. A `Route` is a decorated function that takes in the current `State` and any relevant parameters, and returns a `Page` (or other `ResponsePayload`). A `Site` also has metadata like title, description, favicon, language, etc.
+### Targets
 
-- How do users create "dynamic" route functions? They don't. Instead, they should focus on parameterizing their route functions appropriately. This still allows for dynamic behavior using response payloads like `Fragment`, where you attach a route to a component that can then be triggered through some other kind of event. For example:
-    - A textbox has an `on_change` event that is meant to do live validation of the text that the user is typing. The `on_change` event can be linked to a route function that takes in the current state and the text value, and returns a `Fragment` that updates the validation message below the textbox. Rough pseudocode:
+The `target` parameter accepts `Target` instances (`src/drafter/payloads/target.py`) that specify
+where and how content is injected. A `Target` can select by `id`, `tag`, `class_name`, raw
+`selector`, `data_attribute`, `attribute`, `nth_child`, `closest`, or `within`; `all` controls
+one-vs-all matches; `replace` toggles replacing the whole node vs. its children. Targets also
+support actions beyond injection: `remove`, `append`, `prepend`, `before`, `after`,
+`attributes_to_set`, `styles_to_set`, `class_toggles`, plus `fallback` targets and an
+`is_page_load` flag. For a `Page`, the target is always the body div.
 
-    ```python
-    @route
-    def validate_name(state: State, name: str) -> Fragment:
-        if len(name) < 3:
-            return Fragment(state, "#name_validation", "Invalid")
-        else:
-            return Fragment(state, "#name_validation", "Valid")
+### Special Route Parameters
 
-    @route
-    def index(state: State) -> Page:
-        return Page(state, [
-            TextBox("name_input", on_change=validate_name),
-            Div("name_validation", "")
-        ])
-    ```
+Route functions usually expect `state` as their first parameter. The complete set of "special"
+parameter behaviors (implemented in `src/drafter/router/parameters/binding.py` and
+`introspect.py`):
 
-The `target` parameter accepts `Target` classes that specify where and how the content should be injected. For a `Page`, the target is always the `drafter-body--` div, which is essentially the main content area of the page. For a `Fragment`, the target can be any CSS selector that identifies an element on the page; the content will be injected into that element. You can also control how many matches (one or all), whether the content replaces the children or the entire node, etc.
+- `state`: injected positionally when the first parameter is literally named `state`, or when an
+  arity heuristic determines the function expects exactly one more parameter than the request
+  supplied.
+- `_request`, `_server`, `_configuration`: framework-injected dependencies. Any parameter starting
+  with an underscore (`INJECTED_PARAMETER_PREFIX = "_"`) is treated as framework-injected;
+  `_request` receives the raw `Request`, `_server` the `ClientServer`, `_configuration` the current
+  `ClientServerConfiguration`.
+- `**kwargs`: if the function declares a var-keyword parameter, leftover unmatched form fields are
+  collected into it. (A parameter merely *named* `kwargs` is not special.)
+- Event data is **not** injected as a single `event` object; individual event-detail values are
+  spread into the payload (tagged `source="event_detail"`) and bound by name like any other value.
 
-How does updating the page content work? The `Page` payload has an HTML string that is going to be injected into the page at the `drafter-body--` div. The `Fragment` payload has an HTML string that is going to be injected into a specific component on the page, identified by the `target` provided. So essentially a Page is just a Fragment with a predefined target location.
+**[PLANNED]** Injecting a `page: Page` object as an alternative first parameter (giving access to
+the current Page including the State) is designed but not implemented.
 
-A `URL` is a string that represents a unique `Route` function in the `Site`. It should follow the naming conventions of a Python function (e.g., lowercase letters, numbers, underscores, no spaces or special characters). Eventually, we might support slashes for things like classes or modules (which would probably translate to periods).
+Reentrant pages: if a route function has default parameters, the URL can be called without those
+parameters and the defaults will be used (missing parameters are only an error when they have no
+default). This allows reentrant URLs that can be bookmarked or shared.
 
-Things that have to be kept in the server:
+### Committing Responses
 
-- State
-- Initial state (for resetting)
-- Accessed pages, args
-- History of state
-- History of request parameters, which includes files.
+The `ClientBridge.handle_response` path updates the DOM faithfully according to the `Response`:
 
-The debug information present in the frame:
+1. Removes all page-specific content currently in place.
+2. Injects "before" channel content (e.g., styles).
+3. Registers the navigation callback and notifies the debug panel of the new route.
+4. Updates the body content (and, on full page loads, dispatches a page-loaded event).
+5. Re-mounts navigation/interaction handlers.
+6. Injects "after" channel content (e.g., scripts).
+7. If the payload is a redirect, `NavigationController.handle_redirect` first checks a redirect-loop
+   stack (by payload repr) - a repeat aborts with a `bridge.redirect_loop_detected` error -
+   otherwise it builds a new `Request("redirect", ...)` and starts over from the top.
 
-- Quick link to reset the state and return to index
-- Link to the About page
-- Status information:
-    - Any errors and warnings, nicely formatted
-    - Current route information, as given by the `request.visit` events
-    - Request/Response dump, including the metadata and actual contents, time taken.
-    - Current state dump, buttons to save/load state in localStorage or download/upload JSON (`state.*` events)
-    - Current page information (`request.*` events)
-    - All available routes (`request.add` events)
-        - As a flat list
-        - As a graph
-    - Page load history (`request.*` events)
-        - Pages, state, args, timestamps, etc.
-        - VCR playback controls
-        - Automatically produced tests
-    - Test status information (`request.visit` events)
-        - There should be an interactive menu for building up good tests
-        - An inconvenient download button for downloading "regression tests". Make this more of a "once your site is done" sort of thing, instead of encouraging them to do it all the time. I would like them to think critically about their tests instead of just spamming them out.
-    - Button to activate codemirror instance that let's us do a REPL type thing?
-- Test production button
-- Compile site button
+Errors and warnings are surfaced in the debug panel via telemetry (see Telemetry).
 
-The `EventBus` is a pub/sub system that allows different parts of the application to communicate with each other without being tightly coupled. Various components can publish events to the bus, and other components can subscribe to those events to receive notifications when they occur (mostly the Monitor).
-Telemetry entails logging events like page loads, errors, warnings, state, performance metrics, user interactions, etc. Essentially, any debug information from the server should
-be logged as `TelemetryEvent`, and certain kinds of client interactions. To help figure out where the data came from, there is also `TelemetryCorrelation`. Think of the `TelemetryEvent` as the envelope around the actual event data (which are subclasses of the `BaseEvent`).
-The `Monitor` has visualizers that can handle the rendering logic for different contexts: raw information to be printed on stdout, logs for storing on disk, analytics for displaying in the debug panel.
-The `Audit` module has a bunch of helper functions for publishing `TelemetryEvent` to the main EventBus in a consistent manner.
+### Streaming and Long-Running Tasks **[PLANNED]**
 
-Essentially:
+The design is to let route handlers `yield` `Progress` payloads which are sent to the
+`ClientBridge` as they are generated, so a single request can produce multiple responses over time
+(progress indicators, partial results). None of this is implemented yet: `Progress` is a stub and
+the `ClientServer` has no generator handling.
 
-- The `ClientBridge` handles all DOM manipulation and user interaction on the client side.
-- The `ClientServer` processes requests, manages state, and generates responses on the server side
-- The `Page` (and other `ResponsePayload`s) represent the content and structure of the pages being served, and are created by the user-developer.
-- The `Request` wraps user interaction data for transmission from client to server, and is created by the `ClientBridge`.
-- The `Response` wraps the `ResponsePayload` with metadata for transmission between client and server, and is created by the `ClientServer`.
+## The Developer's Perspective
 
-How is `open` and `read` handled? Skulpt should first check builtinFiles, then localStorage (or IndexedDB if configured), and then ask its server using fetch. If its server (Starlette or Github Pages) can't find it, it should 404. If it's using write mode, then it should try to write to localStorage first, and then ask its server to write it (which will cause an error unless we're on a real server that supports it).
+From the student developer's perspective, they are building a site with multiple routes. A route is
+a decorated function that takes the current `State` and any relevant parameters and returns a `Page`
+(or other `ResponsePayload`). The site also has metadata like title, description, language, etc.
+(see `SiteInformation` in `src/drafter/config/site_information.py`).
 
-Images will assume to be available via the server.
+How do users create "dynamic" route functions? They don't. Instead, they parameterize their route
+functions. Dynamic behavior comes from payloads like `Fragment`, where a route is attached to a
+component and triggered through an event. For example, a textbox `on_change` event doing live
+validation:
 
-Reentrant pages: If a route function has default parameters, then the URL can be called without those parameters, and the defaults will be used. This allows for reentrant URLs that can be bookmarked or shared.
+```python
+@route
+def validate_name(state: State, name: str) -> Fragment:
+    if len(name) < 3:
+        return Fragment(state, "#name_validation", "Invalid")
+    else:
+        return Fragment(state, "#name_validation", "Valid")
 
-File handling: When a file gets uploaded to the server, it will get stored in memory (or IndexedDB/localStorage if needed) and associated with the current state. When navigating back and forth, the file will be restored as needed. Note that files past a certain size may not be storable in localStorage, so we may need to have a strategy for handling large files (e.g., using IndexedDB, prompting the user to re-upload, substituting a smaller file).
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        TextBox("name_input", on_change=validate_name),
+        Div("name_validation", "")
+    ])
+```
 
-`PersistentStore` is a class that lives in the ClientBridge which abstracts away the details of where data is stored (in-memory, localStorage, IndexedDB, etc.). It provides a simple interface for saving and loading data, and can be configured to use different storage backends as needed. The server can send commands to the ClientBridge to store or retrieve data using this `PersistentStore`.
+A URL is a string that represents a unique route function. It should follow Python function naming
+conventions (lowercase letters, numbers, underscores). Eventually, we might support slashes for
+things like classes or modules (which would probably translate to periods).
 
-### State Data
+## State Data
 
-Drafter organizes its functionality around Route functions. A Route generates a Page. Pages provide functionality to connect to other Routes, usually via Buttons/Links (other mechanisms include things like on_change events, timers, etc.).
+Drafter organizes its functionality around route functions. A route generates a Page. Pages connect
+to other routes, usually via Buttons/Links (other mechanisms include `on_change` events, timers,
+etc.).
 
-There's four fundamental kinds of data to be handled in Drafter:
+There are eight kinds of data handled in Drafter (the last two are **[PLANNED]**):
 
-1. App `State`: the current state of the application, which can be updated and passed around to route functions. This is the main way to keep track of information across different pages and interactions.
-2. Page Arguments: `Argument`s defined in `Page`s content, that will be passed to any connecting routes. They are stored in the HTML as hidden input fields (so that someday we might have local Forms, and these will "just work"). Their names are prepended with a special string to differentiate them from regular form fields, because their values are JSON encoded.
-3. Page Fields: Form Fields (e.g., text inputs, file uploads, etc.) that are defined in a `Page` and will be passed to any connecting routes. They are stored in the HTML as regular form fields, so they will be included in the form data when a request is made.
-4. Route Arguments: `Argument`s that are attached to a specific route connection, which will be passed to the connected route function when triggered. These are stored as data attributes on the relevant DOM element (e.g., a button), and are also JSON encoded to allow for complex data structures.
-5. Event Information: information about the event that triggered the route (e.g., click, scroll, etc.), which will be passed to the connected route function when triggered.
-6. Config Information: configuration parameters that are set at the start of the server and can be accessed throughout the application.
-7. Local Storage: data that is stored in the client's browser and can be accessed across sessions.
-8. Remote Storage: data that is stored on a server and can be accessed across sessions and devices.
+1. App `State`: the current application state, passed to route functions and tracked (with history)
+   by `SiteState` (`src/drafter/history/state.py`).
+2. Page Arguments: `Argument`s defined in a `Page`'s content, passed to any connecting routes. They
+   are rendered as hidden input fields with the name stored **verbatim** (no prefix); the value is
+   JSON-encoded and flagged for client-side decoding with a `data-transform="json-decode"`
+   attribute (`src/drafter/components/links.py`). (The old design of prefixing the *name* with a
+   special marker string was dropped; the leftover `JSON_DECODE_SYMBOL` constant is unused.)
+3. Page Fields: form fields (text inputs, file uploads, etc.) defined in a `Page`, stored as regular
+   form fields and included in the form data of any request.
+4. Route Arguments: `Argument`s attached to a specific route connection, stored JSON-encoded in
+   `data--drafter-arguments` (and handlers in `data--drafter-handlers`) attributes on the relevant
+   DOM element (`src/drafter/components/page_content.py`).
+5. Event Information: details about the triggering event, spread into the request payload as
+   individual `event_detail` values (see Special Route Parameters).
+6. Config Information: configuration parameters accessible via the injected `_configuration`
+   parameter.
+7. **[PLANNED]** Local Storage: data stored in the client's browser across sessions. (localStorage
+   is currently used only for debug config overrides - there is no general storage mechanism.)
+8. **[PLANNED]** Remote Storage: data stored on a server across sessions and devices.
 
-All of these get passed in as parameters to a connected route function.
+## Summary of Execution Timeline
 
-### Summary of Execution Timeline
+Fundamentally, the user writes a Python script that starts with `from drafter import *`, defines
+routes, and calls `start_server(initial_state)`. This can be run three ways:
 
-Fundamentally, the user writes a python script that starts with `from drafter import *`, defines server in various ways, and then calls `start_server(initial_state)`. This user application can be run in three possible ways:
+1. `python -m drafter user_script.py` (via `src/drafter/__main__.py`)
+2. `drafter user_script.py` (via the `drafter = "drafter.cli:main"` entry point in `pyproject.toml`)
+3. `python user_script.py`
 
-1. From the command line like `python -m drafter user_script.py`
-2. From the command line like `drafter user_script.py`
-3. From the command line like `python user_script.py`
-
-All three work roughly the same: the package gets imported, configuration is processed (which comes from sys.args, os.environs, or a config file) into a singleton, the default web server object (not the starlette, but the framework's server) and other core pieces of infrastructure. Then, it starts (1/2) or resumes (3) executing the user's user_script.py; in the case of starting, that will also harmlessly from drafter import \*.
-
-If the `do_main` function is called by either `drafter __.py` or `python -m drafter __.py`, then the students' code is taken as an argument and executed, which will eventually reach the start_server call in the students' code.
-If the Drafter module is imported, then the students' code will naturally be executing after we're done importing. Eventually the start_server will be reached.
-
-Key insight from the above: instead of `do_main`, we should instead be doing all the configuration in a new `configuration.py` top-level module. That creates a Runtime that knows what we've decided to do. The `launch.py` handles the actual launching of the server or building of the site, and it will use the Runtime to determine what to do. Then `cli.py` basically just runs a students' code file.
+All three work roughly the same: the package is imported, configuration is processed (from
+`sys.argv`, environment variables, and/or a config file) into the `SystemConfiguration` singleton,
+and then the user's code runs. For (1) and (2), `drafter.cli.main` executes the student's file via
+`runpy.run_path(...)`; for (3) the student's code simply continues executing after the import.
+Either way, execution eventually reaches the `start_server` call. All of this configuration logic
+lives in the top-level `src/drafter/configuration.py` module (`configure_system`,
+`get_system_configuration`); `launch.py` handles the actual launching/building using that
+configuration, and `cli.py` basically just runs the student's file. (The old `do_main`/
+`command_line.py` machinery is deprecated; `command_line.py` survives only as orphaned v1 code.)
 
 1. Bootstrap Phase
-    1. The Drafter library is imported
-    2. The `SystemConfiguration` singleton will be initialized
-        1. Bootstrap configuration is processed including environment variables, command line arguments, and config files. This configuration is used to determine how to proceed with the rest of the launch process, including whether we are in `start_server` mode or `compile_site` mode.
-        2. The rest of the configuration fields (e.g., `ClientServerConfiguration`, `AppServerConfiguration`, `AppBuilderConfiguration`) are created and initialized
-        3. The \_SYSTEM singleton is provided to the rest of the system
+   1. The Drafter library is imported.
+   2. `configure_system()` builds the `SystemConfiguration` (stored in the module-global
+      `_SYSTEM`, accessed via `get_system_configuration()`):
+      1. `BootstrapConfiguration` is processed first (env vars, CLI args, config file); its `mode`
+         determines whether we are in `start_server` or `compile_site` mode.
+      2. The remaining configs are created and merged: `ClientServerConfiguration`,
+         `AppServerConfiguration`, `AppBuilderConfiguration`, and `AppCommonConfiguration`.
 2. Pre-initialization Phase
-    1. The default `ClientServer` is created and assigned to `MAIN_SERVER`
+   1. `MAIN_SERVER` is *lazily* created on first `get_main_server()` call (a `ClientServer` named
+      `"MAIN_SERVER"`).
 3. Pre-Initialized Phase
-    1. If a user runs a Drafter program that has a `start_server` call...
-        1. The user's code is executed naturally
-    2. If the user ran `drafter ___` or `python -m drafter ___`:
-        1. The user's code is executed via `runpy`
+   1. If the user ran their program directly, their code executes naturally.
+   2. If the user ran `drafter ___` or `python -m drafter ___`, their code is executed via `runpy`.
 4. Launch Phase
-    1. We update the system configuration using the arguments to `start_server`.
-    2. If we're in `start_server` mode...
-        1. The `launch.py` script starts up the Starlette server
-        2. If the pre-render flag is set, then we pre-render the initial page.
-        3. The initial True Page gets served to the browser
-        4. The True Page sets up the WebSocket connection back to the App Server
-        5. The True Page sets up the Skulpt/Pyodide environment
-        6. The True Page sets up the RawConfigFileData based on ClientServerConfiguration
-        7. The True Page executes the student's code (go to Initialization).
-    3. If we're in `compile_site` mode...
-        1. The `AppBuilder` generates the static files for the site, including the initial page with pre-rendered content.
-        2. The generated files can then be deployed to any static hosting service.
-        3. When a user visits the site, the True Page sets up the Skulpt/Pyodide environment
-        4. The True Page sets up the RawConfigFileData based on ClientServerConfiguration
-        5. The True Page executes the student's code (go to Initialization).
-5. Initialization Phase
-    1. Drafter is imported
-    2. The `SystemConfiguration` singleton is initialized
-    3. The `MAIN_SERVER` (`ClientServer`) is created.
+   1. `start_server(...)` merges its keyword arguments into the (static) system configuration via
+      `merge_in_args`.
+   2. If we're in `start_server` mode (CPython):
+      1. `serve_app_once` builds and starts the Starlette app (served by uvicorn).
+      2. If `prerender_initial_page` is set (default true), `precompile_server` renders the
+         initial page (see First Page below).
+      3. The initial True Page is served to the browser.
+      4. The True Page sets up the hot-reload WebSocket connection back to the dev server.
+      5. The True Page sets up the Skulpt/Pyodide environment.
+      6. The True Page embeds the launch-time configuration deltas as
+         `window.DRAFTER_MODIFIED_CONFIGURATION` (from `get_system_config_modifications()`,
+         passed to the template as `modified_system`).
+      7. The True Page executes the student's code (go to Initialization).
+   3. If we're in `compile_site` mode:
+      1. `compile_site` generates the static site files, including the pre-rendered initial page.
+      2. The generated files can be deployed to any static hosting service.
+      3. When a user visits the site, steps 4.2.5–4.2.7 happen the same way (minus the WebSocket).
+5. Initialization Phase (now inside Skulpt/Pyodide)
+   1. Drafter is imported.
+   2. The `SystemConfiguration` singleton is initialized (including the embedded modifications).
+   3. The `MAIN_SERVER` (`ClientServer`) is created on first use.
 6. Initialized Phase
-    1. The rest of the students' code is executed, adding routes to the `MAIN_SERVER` as it goes, until it reaches the `start_server` call.
-    2. The `launch.py` script calls `run_client_bridge`
+   1. The rest of the student's code executes, adding routes to the `MAIN_SERVER`, until it reaches
+      `start_server`.
+   2. `launch.py` calls `run_client_bridge` (`src/drafter/bridge/bridger.py`).
 7. Configuring Phase
-    1. The `ClientServer` is configured (`ClientServer.do_configuration`), processing its dynamic configuration (see below).
+   1. The `ClientServer` is configured (`ClientServer.do_configuration`), which copies the default
+      configuration into the current configuration on the `Site` and processes dynamic
+      configuration (see Configuration below).
 8. Rendering Phase
-    1. The `ClientServer` renders the Site (`ClientServer.do_render`):
-    2. The `run_client_bridge` call creates the `ClientBridge`
-    3. The `ClientBridge` sets up the Debug Menu.
-    4. The `ClientBridge` loads the rendered site
-    5. The `ClientBridge` attaches an event handler to the `ClientServer`'s event bus
-    6. The `ClientBridge` attaches event handlers for page interactivity
-    7. The `ClientBridge` sets up page-wide navigation handlers (e.g., `popstate`, `drafter-navigate`)
-    8. The `ClientBridge` sets up a hotkey binding for the Debug Menu to be toggled on/off.
+   1. The `ClientServer` renders the Site (`ClientServer.do_render`).
+   2. `run_client_bridge` creates the `ClientBridge` (resolving the per-instance `DomContext` and
+      registering the server for multi-instance embedding).
+   3. `ClientBridge.setup_site` loads the rendered site and sets up the Debug Menu.
+   4. `run_client_bridge` attaches the bridge's event handler to the `ClientServer`'s event bus
+      (`server.do_listen_for_events(client_bridge.handle_server_event)`).
+   5. `ClientBridge.setup_events` attaches handlers for page interactivity and page-wide navigation
+      (`popstate`, `drafter-navigate`, `drafter-toggle-frame`, `drafter-toggle-debug-mode`,
+      `drafter-evict-persistent`).
+   6. A hotkey binding is registered to toggle the Debug Menu: **Ctrl/Cmd + double-press `Q`**
+      (within 600ms).
 9. Starting Phase
-    1. The `ClientServer` is started (`ClientServer.do_start`):
-    2. The state is updated based on the initial state.
-    3. The router is registered with system routes that are missing
+   1. The `ClientServer` is started (`ClientServer.do_start`).
+   2. The state is initialized from the initial state.
+   3. Missing system routes are registered with the router (`src/drafter/router/system_routes.py`,
+      defaults in `src/drafter/router/defaults/`: about, error, index, reload, reset).
 10. Started Phase
-    1. The `ClientBridge` creates the initial `Request`
-    2. The `ClientBridge` initiates a visit with the initial `Request` to the `ClientServer`
-11. Visiting Phase
-    1. The `ClientServer` gets the route function based on the request
-    2. The `ClientServer` executes the route function and generates a a `Payload`
-        1. The `ClientServer` delegates argument preparation to its `Router`
-        2. Then the `ClientServer` safely executes the route function, catching any exceptions and converting them into `ErrorPage` payloads as needed.
-    3. The `ClientServer` verifies the `Payload`
-    4. The `ClientServer` renders the `Payload` to generate the new HTML body
-    5. The `ClientSerer` formats the `Payload` to generate a string representation for logging/debugging purposes
-    6. The `ClientServer` updates its state based on the `Payload`
-    7. The `ClientServer` generates any messages that need to be sent to the `ClientBridge`
-    8. The `ClientServer` returns a successful response with the information above.
-12. Committing Phase
-    1. The `ClientBridge` receives the `Response` from the `ClientServer`
-    2. The `ClientBridge` removes all the page-specific content currently in place.
-    3. The `ClientBridge` injects "Before" channel content (e.g., styles, scripts) that came with the `Response`.
-    4. The `ClientBridge` updates the page:
-        1. The `ClientBridge` notifies the debug panel of the new route
-        2. The `ClientBridge` updates the body content if any is given
-        3. The `ClientBridge` mounts the navigation handlers
-    5. The `ClientBridge` injects "After" channel content (e.g., styles, scripts) that came with the `Response`.
-    6. If it was a redirect route, then we handle the redirect now.
-        1. We first check to make sure we are not in a loop
-        2. We make a new request from the response
-        3. We send the request, and start over from the top, as we did before.
+    1. The `ClientBridge` creates the initial `Request`.
+    2. The `ClientBridge` initiates a visit with the initial `Request`.
+11. Visiting Phase (`ClientServer.do_visit`)
+    1. The `ClientServer` gets the route function (`get_route`).
+    2. The `ClientServer` executes the route function (`execute_route`) and gets a Payload.
+       1. Argument preparation is delegated to the `Router` (see below).
+       2. The route function is executed safely; exceptions become error responses.
+    3. The `ClientServer` verifies the Payload (`verify_payload`).
+    4. The `ClientServer` renders the Payload to generate the new HTML (`render_payload`).
+    5. The `ClientServer` formats the Payload for logging/debugging/testing (`format_payload`).
+    6. The `ClientServer` updates its state based on the Payload (`handle_state_updates`).
+    7. The `ClientServer` generates messages for the `ClientBridge` (`get_messages`).
+    8. The `ClientServer` resolves the target (`get_target`).
+    9. The `ClientServer` returns a response (`make_success_response`).
+12. Committing Phase - see "Committing Responses" above.
 13. Idle Phase
-    1. The page is now fully loaded, and we are waiting for user interaction.
+    1. The page is fully loaded; we wait for user interaction.
 14. Navigating Phase
-    1. The user interacts with the page such that an event handler is triggered (e.g., clicks a button, presses the back button, triggers a special event handler for a component, etc.)
-    2. The `ClientBridge` prepare a new `Request` object with the relevant information (e.g., route, args, event data)
-    3. The `ClientBridge` sends the `Request` to the `ClientServer` via the connection established by the `ClientBridge` (a "Visit")
+    1. The user triggers an event handler (clicks a button, presses back, a component event fires).
+    2. The `ClientBridge` prepares a new `Request` with the relevant information.
+    3. The `ClientBridge` sends the `Request` to the `ClientServer` (a "Visit").
     4. Go to (11) Visiting Phase.
 
-A complicated substep is the argument preparation:
+The `ClientServer` tracks these phases explicitly in a `ServerPhases` state machine.
 
-1. The `Router` makes a fresh version of the arguments
-2. The `Router` preprocesses the buttons, which are labeled in a special way.
-    1. TODO: Check if this is actually still necessary?
-3. The `Router` inspects the signature of the route function
-4. The `Router` converts hidden form parameters
-5. The `Router` flattens any keyword arguments that are lists
-6. The `Router` injects the current state into the arguments if there is a `state` parameter
-7. The `Router` removes excess arguments
-8. The `Router` converts arguments to their destination types
-9. The `Router` verifies that all expected parameters are present
-10. The `Router` builds a string representation of the arguments for logging/debugging purposes
+### Argument Preparation
 
-### Error and warning Handling
+`Router.prepare_arguments` (`src/drafter/router/routes.py`) runs a five-stage pipeline (the stages
+are named in its docstring and implemented under `src/drafter/router/parameters/`):
 
-Here's when different kinds of errors can occur:
+1. **Collect**: make a fresh copy of the request kwargs, preprocess button presses
+   (`preprocess_button_press` - TODO: check if this is still necessary; it retains a
+   Skulpt-compatibility fallback), and gather the provenance-tagged payload entries
+   (`collect_payload`).
+2. **Normalize**: apply component alias mappings to payload names (`normalize_payload`).
+3. **Bind**: merge payload entries with precedence (`PayloadMerger`), inspect the route function's
+   signature, inject `state` and underscore-prefixed framework dependencies, and apply defaults
+   (`RouteBinder.bind`).
+4. **Convert**: convert bound values to their destination types via the `CONVERTER_REGISTRY`
+   (happens inside binding).
+5. **Diagnose**: `report_diagnostics` raises `ParameterBindingError` for missing or unconvertible
+   parameters and warns about unused or colliding values (diagnostic codes in
+   `router/parameters/diagnostics.py`).
 
-- Core infrastructure during initial entire page load (e.g., Skulpt setup)
-- Route resolution errors (e.g., no matching route, argument parsing errors)
-- Errors during route execution (e.g., exceptions raised in route handlers) in student code
+Finally, `build_argument_representation` produces a string representation of the arguments for
+logging/debugging.
 
-Error severity varies too:
+## History and Navigation
 
-- Errors are things that prevent the page from loading or functioning properly, and should be shown to the user in a friendly way.
-- Warnings are things that might indicate a potential issue or suboptimal code, but don't necessarily prevent the page from functioning.
-- Debug information is more detailed information that is primarily for the developer's benefit and might not be relevant to the user.
+We hijack the browser's back/forward buttons. `BrowserHistory` (`src/drafter/bridge/history.py`)
+pushes History API entries containing `{request_id, url, kwargs}` plus a `?route=` query parameter.
+On `popstate`, the entry is converted back into a `Request("back", url, kwargs, ...)` and replayed
+through the normal visit flow. State history itself is kept in memory on the server side in
+`SiteState` (`current`, `history`, `initial`).
 
-**Open Question**: Is there nuance within errors and warnings? For example, are there "critical" errors that should be shown in an alert popup, while less critical errors can be shown in the debug panel or as a banner on the page?
+Known gaps **[PLANNED]**:
 
-Here are the places that we can show errors to the user:
+- Uploaded files and full form data are not yet restored on back/forward (`TODO: Restore the data dictionary` in `history.py`); uploads live only in memory for the request that carried them.
+- There is no per-tab session ID (e.g., in `sessionStorage`) to restore continuity after the user
+  navigates away to another site and returns.
+- Rather than stuffing state into `pushState` entries, the intended design is a documentId model
+  where entries reference records in localStorage/IndexedDB, with a garbage-collection strategy for
+  old documents. This would also handle data too large for the URL/history entry.
+- A `PersistentStore` abstraction in the ClientBridge (in-memory / localStorage / IndexedDB
+  backends, with server-issued store/retrieve commands) is designed but does not exist. Note: the
+  existing `src/drafter/bridge/persistence.py` is *not* this - see Component Persistence.
 
-- The drafter page content area, where we can show friendly error messages that are styled to fit the site. This is the most common place for errors to be shown, and is where we would show things like "404: Page not found" or "500: Internal server error", as well as any custom error pages that the user might create.
-- The entire page, if Drafter's infrastructure fails to load at all, in a panic dialogue
-- The debug panel, where we can show error events.
-- A hidden dialogue that can be revealed with a hotkey, which shows the full error information including stack traces, request/response dumps, etc. This is important for deployed sites that want to still show some details
-- The browser console, where we can log errors for debugging purposes. This is generally for error details that are more serious and might indicate a bug in the framework itself, rather than just an error in the user's code.
-- An `alert` popup, which can be used for critical errors that require immediate attention. This should be used sparingly, as it can be disruptive to the user experience. Might just be a toast.
-- The original system console
-- A file that gets written to disk
+### The First Page
 
-#### Error Details
+When the server starts up, it creates an initial State. If `prerender_initial_page` is enabled
+(default), `precompile_server` runs `do_render` + `do_start` + a synthetic
+`Request("precompilation", "index", ...)` visit to produce `compiled_body` and `compiled_headers`,
+which are embedded in the generated True Page template so SEO crawlers can see initial content.
+When the `ClientBridge` connects, it immediately requests the index page (unless a specific other
+page was requested via query arguments), which runs on the `ClientServer` to generate the real page.
 
-Some kinds of errors can be given extra details that will provide more help:
+### Component Persistence ("Parking")
 
-- Unknown route should show the list of routes available, and use string distance to find routes that the user might have intended.
-- Missing required parameter should indicate which parameter is missing and what type it should be.
-- Invalid parameter type should indicate the expected type and the received type.
-- Errors during the route should indicate the exact line number and context within the user's code where the error occurred.
+Components marked `data-drafter-persistent` (e.g., timers, audio/video players) are "parked" into
+the hidden `drafter-persist--` div when page content is swapped, and restored when a new page
+includes them again (`src/drafter/bridge/persistence.py`, using `moveBefore` and media-resume
+logic). This lets media keep playing and timers keep running across simulated page loads. The
+debug footer lists parked components with reveal/evict controls, and the `drafter-evict-persistent`
+event evicts them.
 
-### Configuration
+## Error and Warning Handling
 
-1. Bootstrap Phase: BootstrapConfiguration
-2. Pre-initialization Phase: Static ClientServerConfiguration
+Errors are represented by a single canonical dataclass, `ErrorDetails(Exception)`
+(`src/drafter/data/errors.py` - note: plural), with fields `id`, `category`, `message`, `severity`,
+`details`, `traceback`, `context`, `status_code`, `recoverable`. Failures are distinguished by
+stable string ids (e.g., `request.route_not_found`, `request.argument_parsing_failed`,
+`request.route_execution_failed`, `state.type_change`, `site.rendering_failed`,
+`system.response_creation_failed`, `bridge.redirect_loop_detected`) and categories
+(system/request/payload/bridge/config/runtime), not by exception subclasses.
+`envelope_from_exception()` converts arbitrary exceptions.
+
+Where errors can occur:
+
+- Core infrastructure during initial page load (e.g., Pyodide/Skulpt setup).
+- Route resolution (no matching route, argument parsing/binding errors).
+- Route execution (exceptions raised in student code).
+
+Severity varies: **errors** prevent the page from working and are shown to the user in a friendly
+way; **warnings** indicate potential issues but don't prevent functioning; **debug information** is
+for the developer. Errors are attached to the eventual `Response` AND published through telemetry
+(`log_error`). Route/render failures short-circuit `do_visit` and return an error response
+immediately; warnings are accumulated during the visit (via a transient event-bus subscription) and
+attached to both success and error responses.
+
+Error rendering: the system error route (`src/drafter/router/defaults/error.py`) renders a full
+styled error `Page` with a summary, suggested fixes, and a parsed traceback that badges student-code
+frames ("your code") with line numbers and source context. If the error route itself fails,
+`SimpleErrorPage` is the last-resort fallback.
+
+Where errors are shown to the user (implemented):
+
+- The Drafter page content area - friendly, styled error pages (404s, route errors, etc.).
+- The entire page, if Drafter's infrastructure fails to load - the JS engine has a presentation
+  policy matrix (severity × recoverable → render-in-root / modal dialog / log-only) in
+  `js/src/bridge/engine.ts`; critical non-recoverable errors render a panic view into the root.
+- A modal dialog for recoverable errors (`alertDialog`).
+- The debug panel, via the telemetry sink.
+- The browser console (`console.error`, always).
+- The original system console, as a fallback when browser console conversion fails.
+
+**[PLANNED]**: a lightweight toast variant; a dedicated hidden error dialog (hotkey-revealed) that
+dumps full request/response and stack traces on deployed sites (currently the debug panel serves
+this role); writing errors/logs to a file on disk.
+
+### Error Details
+
+- Missing required parameter: names the parameter and route, with a "did you mean" suggestion for
+  close parameter names (via `difflib.get_close_matches` in `router/parameters/binding.py`) or a
+  hint about defaults. Theme names get similar suggestions in `styling/themes.py`.
+- Invalid parameter type: the conversion diagnostics carry the converter's message and hint
+  (including the expected type).
+- Errors during a route: the error page shows the exact line number and source context within the
+  student's code.
+- **[PLANNED]** Unknown route: currently reports "No route found for URL: ..." with generic advice.
+  It should also list the available routes and use string distance to suggest the route the user
+  probably meant (the difflib machinery exists for parameters/themes; it is not yet applied to
+  routes).
+
+## Telemetry
+
+The `EventBus` (`src/drafter/monitor/bus.py`) is a pub/sub system that lets parts of the
+application communicate without tight coupling. Each `ClientServer` instance has its own bus
+(`get_main_event_bus()` returns the main instance's). Topic matching supports a `"*"` wildcard and
+prefix matching; events published with no subscribers are queued (bounded at 500) and replayed when
+a subscriber attaches.
+
+Telemetry records are subclasses of `TelemetryRecord` (`src/drafter/data/telemetry.py`). There is
+deliberately **no envelope type**: each record carries its own `TelemetryMetadata` (source, level,
+auto-incremented id, version, timestamp) and `Correlation` context
+(`src/drafter/data/correlation.py`: causation_id, route, request_id, response_id, dom_id, phase)
+directly. Concrete record types live under `src/drafter/data/details/`: `RequestEvent`,
+`RequestParseEvent`, `ResponseEvent` (including `duration_ms`), `RouteAddedEvent`,
+`UpdatedStateEvent`, `UpdatedConfigurationEvent`, test events, etc. `ErrorRecord` wraps an
+`ErrorDetails`. The TypeScript debug panel mirrors these types in `js/src/debug/telemetry*`.
+
+The audit helpers (`src/drafter/monitor/audit.py` - a module of functions, not a class) publish
+records to the main event bus consistently: `log_error(envelope, source, ...)` for `ErrorDetails`
+and `log_record(record, source, ...)` for any `TelemetryRecord`.
+
+Current subscribers: a transient per-visit warning collector inside `do_visit`, and the
+`ClientBridge` (attached via `do_listen_for_events`), which forwards records to the debug panel.
+
+**[PLANNED]** A `Monitor` with pluggable visualizers (stdout printing, disk logs, analytics) was
+designed and is referenced by commented-out code, but does not exist; `src/drafter/monitor/__init__.py`
+is empty. The debug panel currently fills the "analytics" role.
+
+## Debug Panel
+
+The debug panel is implemented in TypeScript (`js/src/debug/`, assembled in `index.tsx`).
+
+Implemented:
+
+- Header quick links: home, reset state (`--reset`), About page (`--about`), and an edit button that
+  opens a CodeMirror **source editor** ("Edit source and reload", dispatching
+  `drafter-restart-student-code`).
+- Log panel: errors/warnings/info from telemetry, nicely formatted.
+- State panel: a rich typed dump of the current state (primitives, collections, dataclasses, grids,
+  images, cycles).
+- Routes panel: all available routes as a flat list (system routes in a collapsible section).
+- History panel: page load history with request/response dumps (url, action, status, formatted
+  content), pagination, per-request "Revisit", and Clear History. Response timestamps are
+  client wall-clock times.
+- Test panel: displays received test results (total/passed/failed, per-test pass/fail with
+  side-by-side diffs on failure).
+- Config panel: a live configuration override editor persisted to localStorage (see Configuration).
+- Files panel: a browser for the client and host file systems with file preview.
+- Footer: current route/status and the persisted-components list (reveal/evict).
+- Action buttons: Home, Exit Debug, Toggle Frame; the subtle debug-entry button on deployed sites.
+
+**[PLANNED]** (documented intent, not yet built):
+
+- Request/response *duration* display (per-response `duration_ms` exists in telemetry but is not
+  surfaced as "time taken").
+- State save/load to localStorage and download/upload as JSON - header buttons exist in the markup
+  but are not wired up; there is no upload button.
+- Routes displayed as a graph (in addition to the flat list).
+- VCR playback controls over the page-load history, and automatically produced tests from history.
+- An interactive menu for building up good tests, plus a deliberately inconvenient "download
+  regression tests" button (a "once your site is done" activity - we want students to think
+  critically about tests rather than spamming them out).
+- A REPL (the CodeMirror instance currently edits source; a REPL mode is separate).
+- Test production and compile-site buttons.
+
+## Configuration
+
+### Structure
+
+`SystemConfiguration` (`src/drafter/config/system.py`) is a dataclass aggregating five sub-configs:
+
+- `BootstrapConfiguration` (`config/bootstrap.py`) - how we were launched: mode, script path, user
+  directory, config-file location.
+- `ClientServerConfiguration` (`config/client_server.py`) - the site's behavior/appearance; the
+  config that "is" the running site.
+- `AppServerConfiguration` (`config/app_server.py`) - dev-server settings (port, ws_url,
+  serve_adjacent_files, ...).
+- `AppBuilderConfiguration` (`config/app_builder.py`) - static-build settings (output directory,
+  `pyodide_package_style` = build/cdn/pypi, additional_paths, ...).
+- `AppCommonConfiguration` (`config/app_common.py`) - settings shared by server and builder:
+  `engine` (pyodide/skulpt), `pyodide_url`, `system_packages`, `prerender_initial_page`,
+  `mount_drafter_locally`, asset directory, etc.
+
+All extend `BaseConfiguration` (`config/base.py`), which provides the generic machinery:
+`parse_env_variables` (via the `EnvVars` helper), `parse_args`, `load_from_file`, `merge_in_args`,
+`map_from_raw`, `to_json`/`from_json`, and `copy`. The singleton instance is the module-global
+`_SYSTEM` in `src/drafter/configuration.py`, built by `configure_system()` and accessed everywhere
+via `get_system_configuration()`.
+
+### Phases
+
+1. Bootstrap Phase: `BootstrapConfiguration` (its `mode` picks `start_server` vs `compile_site`).
+2. Pre-initialization Phase: static `ClientServerConfiguration`.
 3. Launch Phase:
-    1. AppServerConfiguration or AppBuilderConfiguration
-    2. Dynamic ClientServerConfiguration (if running student code)
-    3. Now can create the actual True Page contents as needed
-    4. Write RawConfigFileData for the True Page
-4. Initialization Phase: Static ClientServerConfiguration
-5. Configuring Phase: Dynamic ClientServerConfiguration
+   1. `AppServerConfiguration` or `AppBuilderConfiguration` (parser selected by mode).
+   2. `start_server(...)` kwargs merged into the static configuration.
+   3. The True Page contents are created as needed.
+   4. The tracked configuration deltas are embedded in the True Page as
+      `window.DRAFTER_MODIFIED_CONFIGURATION` (from `get_system_config_modifications()` /
+      `_MODIFIED_ARGS`), so the client-side run reproduces the launch-time configuration.
+4. Initialization Phase: static `ClientServerConfiguration` (client side, including the embedded
+   modifications).
+5. Configuring Phase: dynamic `ClientServerConfiguration`.
 
-The configuration settings can come from a few different places; here they are in order of precedence (dynamic will override static, and highest will override lower):
+### Sources and Precedence
 
-- "Static" configs:
-    1.  Defaults defined in the code
-    2.  Environment variables (some of which might be query string parameters)
-    3.  Command line arguments
-    4.  A configuration file (provided by either 1. the environment variables, or 2. command line arguments)
-    5.  A raw string of RawConfigFileData provided to the True Page via the template context (essentially the determined configuration at the time of launch)
-- "Dynamic" configs:
-    1.  Imperative configuration functions in the code (e.g., `set_site_title()`)
-    2.  Arguments passed to the `start_server` function
+Static configs (lowest to highest precedence):
 
-At runtime, there are two main sources of configuration information:
+1. Defaults defined in the code.
+2. Environment variables.
+3. Command line arguments.
+4. A configuration file (located via the `DRAFTER_CONFIG_FILE` env var or `--config-file`).
+5. The embedded `DRAFTER_MODIFIED_CONFIGURATION` provided to the True Page via the template context
+   (the determined configuration at the time of launch).
 
-- The "current" configuration, which is stored in the `Site`
-- The "default" configuration, which is stored in the `ClientServer`'s `configuration` field.
+Dynamic configs (override static):
 
-Here's the configuration timeline:
+1. Imperative configuration functions in the code - `set_website_title()`,
+   `set_website_framed()`, `set_website_style()`, `set_website_theme()`, `set_site_information()`,
+   `hide_debug_information()`/`show_debug_information()` (`src/drafter/deploy.py`), all of which
+   route through `ClientServer.reconfigure`.
+2. Browser-side debug overrides: the Config debug panel persists overrides to localStorage
+   (`drafter.debug.configuration-overrides.v1`, merged into the `client_server` sub-config by
+   `js/src/config_overrides.ts`), layered on top of the embedded configuration.
 
-1. When the Drafter module first boots up, its static configuration is determined by merging those config sources together. This becomes the **default configuration** and is stored in the `ClientServer`'s `configuration` field. The **current configuration** will be `None` for now.
-2. Further configs before the server starts will modify the default configuration.
-3. When the `ClientServer` is rendered, the default configuration is copied to become the **current configuration** and stored in the `Site`, which is what is actually used to render the page and control the behavior of the site.
-4. While the `ClientServer` is running, any dynamic configs will modify the current configuration. A boolean keyword parameter `update_default` can be provided to also update the default configuration at the same time if desired.
-5. The user can `reset` the site, which will copy the default configuration back to the current configuration, resetting dynamic changes made AFTER the server started.
+Note that `start_server(...)` keyword arguments are merged into the **static** configuration during
+the Launch Phase (before the server starts), not applied as dynamic reconfiguration.
 
-The `ClientServerConfiguration` dataclass is meant to be isomorphic between the **default** and **current** configurations, so that they can be easily copied back and forth.
+### Default vs. Current Configuration
 
-Separate from this are the interfaces for the various configuration systems, which must map to the `ClientServerConfiguration` in order to actually affect the behavior of the system. For example, environment variables and command line arguments might be very different from the arguments provided to the `start_server` function, but they all need to be translated into the appropriate fields in the `ClientServerConfiguration` dataclass.
+At runtime there are two configuration sources:
 
-The `server.default_configuration` and `server.site.configuration` are not meant to be accessed directly.
-In particular, this is because simply modifying their fields' contents will NOT trigger changes in the
-deployed site.
-You have to call the `reconfigure` method on the `ClientServer` in order to actually trigger any changes.
-Interested parts of the `ClientBridge` can subscribe to configuration change events on the `EventBus` in order to know when to update things like the page title, favicon, etc. whenever the configuration changes.
+- The **default** configuration: `get_system_configuration().client_server`, exposed via
+  `ClientServer.get_default_configuration()`. (The ClientServer does not itself store a
+  `configuration` field.)
+- The **current** configuration: stored privately on the `Site` (`Site._configuration`), exposed via
+  `Site.get_configuration()` / `ClientServer.get_current_configuration()` (both return copies).
 
-The Compilation pipeline is used to build a static version of the site that can be deployed to any static hosting service. It takes the user's code and compiles it into a format that can be run in the browser (e.g., using Skulpt or Pyodide), and also generates the necessary HTML, CSS, and JS files to serve the site. The `AppBuilder` class is responsible for this process, and it uses the same underlying logic as the `AppServer` to ensure that the compiled version of the site behaves consistently with the development version.
+The timeline:
 
-### ClientBridge architecture (current)
+1. When Drafter boots, the merged static configuration becomes the default; the current
+   configuration is `None`.
+2. Configs applied before the server starts modify the default configuration.
+3. During the **Configuring** phase (`do_configuration` → `process_dynamic_configuration`), the
+   default configuration is copied to become the current configuration and stored in the `Site`.
+   That copy is what actually renders the page and controls site behavior.
+4. While running, dynamic reconfiguration modifies the current configuration. `reconfigure` accepts
+   `update_default=True` to also update the default at the same time. Related API:
+   `reconfigure_flip` (toggle a boolean), `get_config_setting`, `update_multiple_configuration`
+   (with special handling for `SITE_INFORMATION_KEYS` and append semantics for the
+   `additional_*_content` lists).
+5. `reset` currently *clears* the current configuration (`Site.reset()` sets it to `None`); whether
+   it should instead copy the default back into the current configuration is an open TODO in
+   `ClientServer.reset`.
 
-The bridge is split into five distinct pieces:
+`ClientServerConfiguration` is isomorphic between default and current - its `copy()` deep-copies
+every field so the two can be copied back and forth safely.
 
-- `ClientBridge`: Orchestrates startup, response handling, debug panel updates, and configuration-driven UI toggles.
-- `SiteRenderer`: Owns DOM setup and updates, including body/fragment replacement and before/after channel content.
-- `NavigationController`: Owns request creation, browser history integration, initial load navigation, and redirect loop protection.
-- `EventManager`: Owns click/submit/custom event wiring, data collection for events, and hotkey registration.
-- `RuntimeAdapter`: Encapsulates runtime-specific behavior (Skulpt/Pyodide interop, event wrapping, form/file handling).
-- `BrowserHistory`: Keeps track of requests through pushstate/popstate
+Do not mutate configuration objects directly - simply modifying fields will NOT trigger changes in
+the deployed site. Call `ClientServer.reconfigure(...)`, which emits an `UpdatedConfigurationEvent`
+on the event bus. The `ClientBridge` subscribes and currently reacts to changes of `framed`,
+`in_debug_mode`, and `enable_subtle_debug_entry`; other keys are logged as unhandled. The page
+title is applied imperatively during site setup. **[PLANNED]**: reacting to more configuration keys
+(e.g., live title updates, favicon - favicon handling does not exist yet at all).
 
-All of this is kicked off in the `run_client_bridge` function, which manages the `ClientBridge` instance.
+## ClientBridge Architecture
 
+The bridge is split into six distinct pieces (`src/drafter/bridge/`):
 
-### File System
+- `ClientBridge` (`client_bridge.py`): orchestrates startup, response handling, debug panel updates,
+  and configuration-driven UI toggles.
+- `SiteRenderer` (`site_renderer.py`): owns DOM setup and updates, including body/fragment
+  replacement, before/after channel content, and frame toggling.
+- `NavigationController` (`navigation.py`): owns request creation, browser history integration,
+  initial-load navigation, and redirect loop protection.
+- `EventManager` (`events.py`): owns click/submit/custom event wiring, data collection for events
+  (including promise-based multi-file uploads), and hotkey registration.
+- `RuntimeAdapter` (`runtime.py`): encapsulates runtime-specific behavior (Skulpt/Pyodide interop,
+  event wrapping, form/file handling).
+- `BrowserHistory` (`history.py`): tracks requests through pushState/popstate.
 
-A key element of Drafter application are file systems. The Host has its own file system that can map directly to the disk, whereas the Client needs a virtual file system.
+Supporting modules: `bridger.py` (the `run_client_bridge` entry function), `context.py`
+(`DomContext` - per-instance window/document so multiple embedded instances don't collide),
+`dom.py` (low-level DOM helpers, including shadow-DOM variants), `persistence.py` (component
+parking, see above), `error_handling.py` (structured bridge error/warning reporting), `log.py`
+(debug/console logging), and `client_stub.py` (a type-checker stub replaced by
+`js/src/bridge/client.ts` in the built bundles).
 
-The Client's file system is a combination of five possible destinations:
-- The in-memory file system
-- The localStorage file system
-- The IndexedDB file system
-- The read-only file system provided by the server (for static assets)
-- The writeable file system provided by the server (managed through a customized module for database-style writing in Firebase)
+## Multi-Instance Embedding and Shadow DOM
 
-The Host's file system is a simpler thing:
-- The actual disk file system
-- The in-memory file system
+Multiple independent Drafter apps can run on one page (used for live examples in documentation).
+`configure_instance` / `register_server` / `instance_root` in `client_server/commands.py` maintain a
+registry of servers, each with its own event bus and `DomContext` (window/document pair). The site
+can render into a shadow DOM (`SITE_HTML_SHADOW_DOM_TEMPLATE`, `drafter-shadow-host--`,
+`use_shadow_dom`) so styles don't leak between instances or into the host page.
 
-Things that the Client file system needs to handle:
-- Reading the student's initial code
-- When the student uses `open` or `import`
-- Pyodide's locally mounted version of the Drafter library and the rest of its standard library
-- Images that the user is linking
-- Files that the user has uploaded, which need to be stored and associated with the current state.
-- More complex push/pop state
-- Official Drafter Assets that are bundled with the site, such as CSS, JS, images
-  - Note that some of these can be linked via a CDN or other solution
+## File System
 
-Things that the Host file system also needs to handle:
-- Writing out logs, errors, and other debug information to disk
-- Reading in the student's code and any relevant assets during development
-- When building, we need to write files to disk
-- When serving, we need to read files from disk in order to serve them to the client
+A key element of Drafter applications is file access. The Host (CPython) has a real disk file
+system; the Client (browser runtime) needs a virtual one.
 
-Rather than trying to catch errors with pushstate/popstate, I think we should probably just use a documentId model where we refer to something stored in localStorage or IndexedDB, and then we can have a garbage collection strategy for cleaning up old documents that are no longer needed. This also allows us to store more complex data structures that might not fit in the URL or be suitable for encoding as query parameters.
+### What is implemented
 
-A key problem is making files available from the Host to the Client. Ideally, we would like it to be trivial for the user to automatically get access to adjacent and nested files, but then also provide a solution for users to explicitly include files as needed. The similar rules should apply for `requirements.txt` and automatically detecting imports (which eventually need to work across all student files).
+- **Custom `open`** (`src/drafter/files/opening.py`): exported via `from drafter import *` and also
+  installed as `builtins.open`.
+  - Host side: relative paths are resolved against the student's main-script directory
+    (`bootstrap.get_user_directory()`, falling back to the current working directory); URLs can be
+    opened directly (fetched into StringIO/BytesIO).
+  - Pyodide side: resolve the instance path → try the Emscripten virtual FS → on FileNotFoundError,
+    fetch the original path from the server via XMLHttpRequest (200 → in-memory file; otherwise
+    FileNotFoundError). Writes go to the virtual FS.
+  - Skulpt side: reads resolve through `Sk.builtinFiles` only (`js/src/skulpt_bridge/ skulpt-tools.ts`), seeded at precompile time. There is no fetch fallback on the Skulpt path.
+- **Imports**:
+  - Host-side execution uses Python's normal import machinery.
+  - Pyodide: a `RemoteFinder` MetaPathFinder (`src/drafter/files/patch_pyodide.py`) fetches student
+    `.py` modules from the server on demand (with `expire_remote_imports` for hot-reload cache
+    invalidation). The Drafter library itself is provided either as a built `drafter-pyodide.zip`,
+    from PyPI via micropip, or from a CDN, depending on `pyodide_package_style`.
+  - Skulpt: imports resolve through the same `builtinFiles` read function (no separate import
+    hook).
+- **Serving adjacent files**: the dev server (when `serve_adjacent_files` is true, the default)
+  mounts the student's directory as static files at `/` (with a path-traversal guard) and exposes a
+  JSON listing endpoint (`__drafter_list_files`). The static build copies assets and configured
+  `additional_paths` globs into the output directory, so relative URLs work identically when
+  deployed. Images are assumed to be available via the server.
+- **Uploads**: uploaded files are read into memory (`RuntimeAdapter.handle_file_upload`) as
+  `{filename, content, type, size}` dicts and injected into the request data.
+- **Native directory mounting**: Pyodide can mount a real local directory via `mountNativeFS`, with
+  the directory handle persisted in IndexedDB (`js/src/pyodide_bridge/directories.ts`).
+- **Debug access**: the Files debug panel browses both the client virtual FS and the host FS.
 
-When the website is:
-- Compiled for deployment, I think we run an operation to make a manifest of all available files (including some concept of an `ignore-list`), and that is provided to the file system.
-- Served from the Local App Server, we can just read from a dynamic endpoint URL that serves files from the disk.
-- Served from a remote server, we read the same endpoint URL but it is actually being served statically.
+Module layout note: the live code is the `src/drafter/files/` **package** (`opening.py`,
+`patch_pyodide.py`). `files/file_system.py` is an empty placeholder for a future unified interface.
+The sibling `src/drafter/files.py` module is orphaned v1 template code (shadowed by the package)
+and should be deleted along with `command_line.py`.
 
-How many file system classes are there, and where do they live? 
-- The ClientBridge definitely needs access to the virtual file system.
-- The debug area definitely needs access to the file system.
-- The student code should be able to access the file system, so we need to be wrapping `open` and handling imports correctly.
-  - We probably just provide our own version of `open`, and as long as they `from drafter import *`, then they get access to it.
-  - Import might not be too bad?
-    - For the Host-side execution, we can just use the normal file system and Python's import machinery.
-    - For the Client-side Pyodide execution, they should be able to use normal imports as long as the files are available in the virtual file system. We just need to make sure that the file system is populated correctly based on the student's code and any relevant assets.
-    - For the Client-side Skulpt execution, we will need to provide a custom import hook that can read from the virtual file system. We basically already do this in BlockPy.
-- The ClientServer needs to access the file system in order to read files, I think?
-  - Either the ClientServer needs to, or the EventBus does. Someone needs to be able to write logs to disk.
-- The Builder definitely needs to be able to write files to the file system during the Compilation process.
-- The AppServer needs to be able to read files from the file system in order to serve them to the Client.
+### [PLANNED] file-system work
 
-How should we handle paths?
-- With absolute paths, I think the default behavior is to tell the student, "Stop using absolute paths that won't work". If they specify a command line flag, they can make them work normally.
-- With relative paths, we should resolve them based on the students' main script location. This is as opposed to the current working directory of the server. This should be configurable explicitly as well, to use either the current working directory or an explicit path.
+- A unified client file-system interface spanning: in-memory, localStorage, IndexedDB, the
+  read-only server assets, and a writeable server backend (e.g., database-style writing through
+  Firebase). Today only the in-memory/virtual FS and the read-only server fetch exist;
+  localStorage/IndexedDB are not file-system backends, and there is no writeable-server or Firebase
+  integration.
+- Write-mode fallbacks (localStorage first, then ask the server, erroring unless the server
+  supports writes).
+- A compile-time **manifest** of all available files (with an ignore-list concept) provided to the
+  client file system, instead of ad-hoc copying. (The closest existing thing is the
+  `skip_extensions` filter when building the pyodide zip.)
+- Absolute-path policy: by default tell the student "stop using absolute paths that won't work,"
+  with a command-line flag to allow them (TODOs exist in `opening.py`); explicit configuration for
+  resolving relative paths against cwd vs. the main script.
+- Associating uploaded files with state and restoring them on back/forward navigation, with a
+  strategy for large files (IndexedDB, prompting re-upload, or substitution).
+- `requirements.txt` handling and automatic import detection across all student files.
+- Deciding who owns file-system access (bridge, debug panel, student code via wrapped `open`,
+  ClientServer for logs, builder for output, app server for serving) behind one interface that can
+  make decisions on the fly from configuration - including during student code execution, not just
+  at launch.
 
+## Serving, Building, and Packaging
 
-Currently, the configuration system only leverages the filesystem immediately before the launch, after the students' code.
-But we need the system to be able to access the filesystem during the students' code execution as well, in order to read files and serve them to the client.
-The file system interface should be able to make these decisions "on the fly" based on the current configuration settings.
+Here are the parts of Drafter that have to be hosted:
 
+- **Drafter Python library**: the core library for CPython, published on PyPI as `drafter` (built
+  with hatchling; see `pyproject.toml`).
+- **JS/CSS assets** (built by tsup from `js/` into `js/dist/`):
+  - `drafter.skulpt.js` - the bundle integrating Drafter with the Skulpt environment.
+  - `drafter.pyodide.js` - the bundle integrating Drafter with the Pyodide environment.
+  - (There is no unified `drafter.js`; the two engine bundles are the entry points.)
+  - `drafter_base.css` - core styling.
+  - `drafter_debug.css` - debug menu styles.
+  - `drafter_deploy.css` - styles for deployed (non-debug) mode.
+  - Themes (registered in `src/drafter/styling/themes.py`): `default`, `none` (special-cased to no
+    stylesheets), `mvp`, `sakura`. Additional theme CSS files are built but not yet registered
+    (skeleton, tacit, simple). **[PLANNED]**: a `dark` theme.
+- **Skulpt libraries** (built into `js/dist/skulpt/` by helper scripts, not part of the default
+  build): `skulpt.js` and `skulpt-stdlib.js` (fetched/copied by `npm run update-skulpt`), and
+  `skulpt-drafter.js` (the Skulpt-precompiled Drafter Python, produced by `npm run precompile`,
+  which already includes `--minify`).
+- **Pyodide**: not vendored. Pyodide core is loaded from a CDN by default
+  (`DEFAULT_PYODIDE_URL`, currently jsdelivr; overridable via `pyodide_url`/`--pyodide-url`), and
+  the Pyodide-compiled Drafter ships as `drafter-pyodide.zip`, via PyPI/micropip, or via CDN
+  depending on `pyodide_package_style`.
+- **Precompiled headers/body**: the pre-rendered initial page content (see The First Page). These
+  are generated at serve/build time by `precompile_server`, not shipped as static build artifacts.
+- **Student assets**: images, additional Python files, CSS, etc., copied/served as described in
+  File System.
 
-### Serving, Building, and Packaging
+### Asset flow
 
-Drafter has a few core pieces, and they must be packaged appropriately to ensure that different instantiations can access what they need.
+Built assets are **not** vendored into the Python source tree. The flow is:
 
-Here are ALL the parts of Drafter that have to be hosted:
-- Drafter Python library: The core Python library compiled for CPython, usually installed through PyPi.
-- Assets: Static files and resources required by the running web application, such as CSS, JavaScript, and images.
-  - `drafter.js`: The main JavaScript file required by the web application, providing the necessary bridges and debug menus.
-  - `drafter.css`: The main CSS file required by the web application, providing core styling.
-  - `drafter_debug.css`: The CSS file providing styles for the debug menus.
-  - `drafter_deploy.css`: The CSS file providing styles for when the application is NOT in debug menu ("deployed").
-  - Themes:
-    - `default.css`: The base theme that most folks will end up using.
-    - `none.css`: An empty theme with no styling.
-    - `dark.css`: A dark theme with appropriate styling for low-light environments.
-- Drafter Skulpt Libraries:
-  - `skulpt.js`: Skulpt's core
-  - `skulpt-stdlib.js`: Skulpt's standard library.
-  - `skulpt-drafter.js`: The Skulpt-compiled version of Drafter.
-  - `drafter.skulpt.js`: The JavaScript file that integrates Drafter with the Skulpt environment.
-- Pyodide Drafter Libraries:
-  - `pyodide.js`: Pyodide itself
-  - Libraries hosted on the Pyodide CDN: External libraries required by the Pyodide environment.
-  - The Pyodide-compiled version of Drafter.
-  - `drafter.pyodide.js`: The JavaScript file that integrates Drafter with the Pyodide environment.
-- Compiled assets: There are some assets that get precompiled during the build process and are shipped with the application.
-  - Precompiled Headers: The CSS/Script content that should be embedded in the final output on page load.
-  - Precompiled Body: The HTML content that should be embedded in the final output on page load.
-- Additional student assets: These are any assets that students need for their site like images, additional python files, css, html, javascript, etc.
+- `js/dist/` is the single build output (`npm run build` → `dist/js` + `dist/css`).
+- At Python package build time, hatchling force-includes `js/dist/` into the wheel as
+  `drafter/assets/` (`pyproject.toml`).
+- At runtime, `pkg_assets_dir()` (`src/drafter/scaffolding/utils.py`) returns the installed
+  `drafter/assets/` directory if it exists (installed-wheel case) or falls back to the repo's
+  `js/dist/` (source-checkout/dev case). The dev server mounts it as static files; the builder
+  copies it into the output directory.
+- The old `js/scripts/sync-dist.mjs` (which copied dist into the source tree) is deprecated and
+  unused; `js/scripts/resolve-assets.mjs` is likewise orphaned.
 
-Serving comes in two flavors: 
-- Developer: When a developer is working locally, they should generally be getting locally compiled versions of these assets.
-- Student: When students are working with Drafter, we want to use the official hosted version of most of the assets.
+Serving comes in two flavors:
 
-Here are the files that we must take responsibility for packaging and publishing:
-- CPython Drafter on PyPi: The current version of the library published on PyPi.
-- Wasm Drafter on PyPi: The current version of the library published on PyPi for WebAssembly.
-- JS Files via NPM:
-  - Skulpt and its associated libraries
-  - `drafter.pyodide.js` and `drafter.skulpt.js`
-  - `drafter.js` and its associated files
+- **Developer**: working locally on Drafter itself, you get the locally compiled `js/dist` assets
+  automatically via the fallback above (`mount_drafter_locally` also exists as a flag).
+- **Student**: students get the assets bundled in the installed wheel. **[PLANNED]**: an official
+  hosted/CDN location for Drafter's own JS/CSS so static builds can link out instead of copying;
+  currently only Pyodide core and some third-party CSS come from CDNs. (The old Skulpt CDN
+  parameters from v1 are still parsed but explicitly ignored with a warning.)
 
-When we merge a new version of Drafter into the main branch, we should launch a github actions workflow to publish new versions of the library to PyPi and NPM as appropriate.
-Note that for skulpt, we will need to make sure the build system has a stable version of the Skulpt library available.
+### CI/CD
 
+Current workflows (`.github/workflows/`):
 
-When serving, we can keep things:
-- In memory
-- In temporary folder
-- On the CDN
+- `test_and_lint.yml`: builds the JS (`npm ci` + `npm run build`, uploading `js/dist` as an
+  artifact), runs jest (non-blocking), lints (ruff + mypy), runs the Python test matrix
+  (3.10–3.14), and builds the package (`uv build`), verifying the wheel contains the bundled
+  assets.
+- `docs.yml`: builds the JS and the MkDocs site and deploys to GitHub Pages on pushes to main.
 
-When building, we need to either:
-- Generate them into the output directory
-- Link to the desired CDN locations
+The Justfile mirrors the local versions of these steps (`just build` = build JS then `uv build`).
+Note that the Skulpt steps (`update-skulpt`, `precompile`) are currently *not* wired into CI or the
+Justfile - only the tsup build runs.
 
+**[PLANNED]** publishing automation: on merging a release to main, a workflow should publish to
+PyPI (`drafter`) and NPM (the `js/` package is `drafter-js-client`, marked publishable but never
+yet published by CI). A separate WebAssembly-targeted PyPI distribution has been discussed but is
+not configured. For Skulpt publishing, the build system will need a stable Skulpt version
+available.
 
-For most of the development process, I've been embedding the generated files into the assets directory. That seems ridiculous now.
-But is there some value in letting the entire Build step not depend on any external internet? Same deal with Student Serving.
-I still think that the assets should not be left into the python source directory. They should be added to the build output directory instead.
+## Known Legacy / Cleanup Targets
 
-CI workflow steps:
-- `cd js && npm install`
-- `npm run build` to build Drafter's JS files (to `js/dist/js` and `js/dist/css`)
-- `npm run update-skulpt` to get a version of skulpt (place in `js/dist/skulpt`)
-- `npm run precompile --minify` for building Drafter in skulpt, must provide either remote URL or local path to Skulpt (place in `js/dist/skulpt`)
-- Make sure all files are `js/dist/`
-- `cd ..` to return to parent directory
-- `uv build`
-- `npm publish`
-- `twine upload dist/*`
+- `src/drafter/command_line.py`: orphaned v1 CLI/builder (self-described as deprecated); nothing
+  imports it via the active entry points.
+- `src/drafter/files.py`: orphaned v1 template constants, shadowed by the `files/` package.
+- `src/drafter/hacks.py`, `src/drafter/app/hacks.py`: transitional patches.
+- The unused `JSON_DECODE_SYMBOL` constant (superseded by `data-transform="json-decode"`).
+- `js/scripts/sync-dist.mjs` and `js/scripts/resolve-assets.mjs` (superseded by the hatchling
+  force-include + `pkg_assets_dir()` fallback).
+- Commented-out `Monitor` wiring in `client_server.py` (pending the Monitor design in Telemetry).
