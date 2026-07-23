@@ -1,12 +1,18 @@
 # Advanced Components
 
-This section is reserved for more advanced Drafter components.
+Advanced components help you build richer pages, work with structured data, and handle file uploads. 
 
-## Status
+Please start with the quick Start and basic components before reading about advanced components
 
-No advanced component pages have been added yet.
+## Pages in this section
 
-## Next steps
+- [Image](image.md)
+- [Table](table.md)
+- [SelectBox](selectbox.md)
 
-- Add component pages here as they are documented.
-- Link each page from the MkDocs navigation once it exists.
+## Subsections
+
+- [Formatting](formatting/index.md)
+- [File Management](filemanagement/index.md)
+
+Use these pages after you are comfortable with the basic components.

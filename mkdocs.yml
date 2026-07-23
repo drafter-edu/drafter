@@ -1,35 +1,49 @@
 site_name: "Drafter Documentation"
 nav:
 - Home: index.md
-- Quickstart: quickstart/quickstart.md
+- Quick Start: quick start new/quickstart_new.md
 - Multiple Examples: multiple_examples.md
 - Component Documentation: 
   - Basic Components:
     - Overview: ComponentDocs/BasicComponents/index.md
-    - Button: ComponentDocs/BasicComponents/button.md
-    - Link: ComponentDocs/BasicComponents/link.md
     - TextBox: ComponentDocs/BasicComponents/textbox.md
     - TextArea: ComponentDocs/BasicComponents/textarea.md
+    - Button: ComponentDocs/BasicComponents/button.md
+    - Link: ComponentDocs/BasicComponents/link.md
     - CheckBox: ComponentDocs/BasicComponents/checkbox.md
-  - Advanced Components: ComponentDocs/AdvancedComponents/index.md
+    - NumberedList: ComponentDocs/BasicComponents/numberedlist.md
+    - BulletedList: ComponentDocs/BasicComponents/bulletedlist.md
+    - Argument: ComponentDocs/BasicComponents/argument.md
+  - Advanced Components:
+    - Overview: ComponentDocs/AdvancedComponents/index.md
+    - Image: ComponentDocs/AdvancedComponents/image.md
+    - Table: ComponentDocs/AdvancedComponents/table.md
+    - SelectBox: ComponentDocs/AdvancedComponents/selectbox.md
+    - Formatting:
+      - Overview: ComponentDocs/AdvancedComponents/formatting/index.md
+      - Div / Row: ComponentDocs/AdvancedComponents/formatting/divrow.md
+      - Span: ComponentDocs/AdvancedComponents/formatting/span.md
+      - Header: ComponentDocs/AdvancedComponents/formatting/header.md
+      - Line Break: ComponentDocs/AdvancedComponents/formatting/linebreak.md
+      - Preformatted Text: ComponentDocs/AdvancedComponents/formatting/preformattedtext.md
+    - File Management:
+      - Overview: ComponentDocs/AdvancedComponents/filemanagement/index.md
+      - Download: ComponentDocs/AdvancedComponents/filemanagement/download.md
+      - FileUpload: ComponentDocs/AdvancedComponents/filemanagement/fileupload.md
   - Specialized Components:
     - Overview: ComponentDocs/SpecializedComponents/index.md
     - Matplotlib: ComponentDocs/SpecializedComponents/matplotlib/index.md
-  - Styling components: ComponentDocs/StylingComponents/index.md
-- Student Guide:
-  - Installation: students/installation.md
-  - Documentation for Students: students/docs.md
-  - HTML: students/html.md
-  - Styling: students/styling.md
-  - Testing: students/testing.md
-  - Deployment: students/deployment.md
-  - More Help: students/help.md
+  - Styling:
+    - Overview: ComponentDocs/StylingComponents/index.md
+    - Themes:
+      - Overview: ComponentDocs/StylingComponents/themes/index.md
+    - Styling Functions: ComponentDocs/StylingComponents/stylingfunctions.md
+    - Keyword Parameters: ComponentDocs/StylingComponents/keywordparameters.md
+    - CSS Style Tags: ComponentDocs/StylingComponents/cssstyletags.md
+    - CSS Classes: ComponentDocs/StylingComponents/cssclasses.md
+    - Adding Website CSS: ComponentDocs/StylingComponents/addingwebsitecss.md
 - Workbook:
   - Overview: workbook/index.md
-  - Part 1 - Cookie Clicker: workbook/part1/cookie.md
-  - Part 2 - Bank Account: workbook/part2/bank.md
-  - Part 3 - Adventure Game: workbook/part3/adventure.md
-  - Part 4 - Store: workbook/part4/store.md
 - Examples:
   - Overview: examples/examples.md
   - Calculator: examples/calculator.md
@@ -37,14 +51,6 @@ nav:
   - Forms: examples/forms.md
   - Login: examples/login.md
   - Nested Data: examples/nested_data.md
-- Reference:
-  - Overview: reference/reference.md
-  - Colors: reference/colors.md
-  - Components: reference/components.md
-  - Fonts: reference/fonts.md
-  - Transition to Flask: reference/flask.md
-- Curious:
-  - Button: Curious/curious.md
 theme:
   name: material
   palette:

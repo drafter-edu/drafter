@@ -1,14 +1,27 @@
 [data-md-color-scheme="default"] {
-    --md-default-bg-color: #c9daea;
+    --md-default-bg-color: #ffffff;
 }
 
 /* Optional: make content cards slightly whiter */
 [data-md-color-scheme="default"] .md-content__inner {
-    background: #bcc5df;
+    background: #ffffff;
     border-radius: 8px;
     padding: 1.5rem;
 }
 
 .md-typeset {
     font-size: 16px;
+}
+
+/* #drafter-site-- {
+    background-color: #c9daea;
+}
+
+.drafter-site-- {
+    background-color: #c9daea;
+} */
+
+.drafter-example {
+    background-color: #f3f4f6;
+    margin-top: 20px;
 }

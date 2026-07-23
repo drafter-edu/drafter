@@ -1,4 +1,10 @@
-A **TextBox** lets the user enter a short line of text.
+A **TextBox** creates a single-line input field for short text. Users can type directly into the field, and the value is sent to the linked route when a button is clicked.
+
+Text boxes are commonly used for values like:
+
+- Names and usernames.
+- Titles or labels.
+- Short answers and search terms.
 
 ## Syntax
 
@@ -12,11 +18,7 @@ TextBox(name, default_value)
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `name` | `str` | The name used to identify the text box when the form is submitted. |
-| `default_value` | `str` *(optional)* | The initial value shown in the text box. |
-
-## Returns
-
-Returns a `TextBox` component that collects a single text value.
+| <code style="white-space: nowrap;">default_value</code> | `str` *(optional)* | The initial value shown in the text box. |
 
 ---
 
@@ -49,7 +51,6 @@ This page collects a name and shows a greeting after submission.
 ---
 
 ## Example 2: Use a default value
-
 ```python drafter
 from drafter import *
 

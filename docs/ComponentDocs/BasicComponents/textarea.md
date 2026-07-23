@@ -1,4 +1,10 @@
-A **TextArea** lets the user enter a longer block of text.
+A **TextArea** creates a multiline input field for longer text. It works like `TextBox`, but gives users more vertical space for editing and writing.
+
+Text areas are commonly used for:
+
+- Comments and feedback.
+- Notes and descriptions.
+- Any response that might span multiple lines.
 
 ## Syntax
 
@@ -13,10 +19,6 @@ TextArea(name, default_value)
 |-----------|------|-------------|
 | `name` | `str` | The name used to identify the text area when the form is submitted. |
 | `default_value` | `str` *(optional)* | The initial text shown in the text area. |
-
-## Returns
-
-Returns a `TextArea` component that collects a multiline text value.
 
 ---
 

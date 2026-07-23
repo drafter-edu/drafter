@@ -1,6 +1,10 @@
-# Checkbox
+A **CheckBox** creates a toggle input for a yes-or-no choice. When selected, it submits `True`; when unselected, it submits `False`.
 
-A checkbox lets the user choose `True` or `False` for a named input.
+Checkboxes are commonly used for options such as:
+
+- Accepting terms or policies.
+- Enabling or disabling a feature.
+- Marking a preference as on or off.
 
 ## Syntax
 
@@ -15,10 +19,6 @@ CheckBox(name, default_value)
 |-----------|------|-------------|
 | `name` | `str` | The name used to store the checkbox value. |
 | `default_value` | `bool` *(optional)* | The initial checked state. |
-
-## Returns
-
-Returns a `CheckBox` component that collects a boolean value.
 
 ---
 
@@ -38,7 +38,7 @@ def index():
 
 @route
 def submit(accept_terms: bool):
-	return Page([f"Accepted: {accept_terms}"])
+	return Page(["Accepted:" + str(accept_terms)])
 
 
 start_server()

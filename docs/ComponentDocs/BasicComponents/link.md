@@ -1,4 +1,9 @@
-A **Link** creates a clickable hyperlink on a page. It is useful for sending the user to another page or to an external URL.
+A **Link** creates a clickable hyperlink on a page. When the user clicks the link, Drafter can either:
+
+- Navigate to another route in your application.
+- Open an external URL outside your application.
+
+Links are commonly used for lightweight navigation, references, and external resources.
 
 ## Syntax
 
@@ -12,10 +17,6 @@ Link(text, url)
 |-----------|------|-------------|
 | `text` | `str` | The text displayed for the link. |
 | `url` | `str` or `function` | The destination URL or route function. |
-
-## Returns
-
-Returns a `Link` component that appears as a normal underlined hyperlink.
 
 ---
 
@@ -55,7 +56,7 @@ from drafter import *
 @route
 def index():
 	return Page([
-		Link("Visit Drafter", "https://drafter-edu.github.io/drafter/")
+		Link("Visit Drafter", "https://drafter-edu.github.io/drafter/contents.html")
 	])
 
 
