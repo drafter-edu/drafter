@@ -1,6 +1,7 @@
 """
 A simple application for managing a bank account.
 """
+
 from drafter import *
 from bakery import assert_equal
 from dataclasses import dataclass
@@ -8,31 +9,33 @@ from dataclasses import dataclass
 
 @dataclass
 class State:
-    """ The state of the bank account app. """
+    """The state of the bank account app."""
 
 
 @route
 def index(state: State) -> Page:
-    """ The main page of the bank account app, showing the balance and options to withdraw or deposit. """
+    """The main page of the bank account app, showing the balance and options to withdraw or deposit."""
+
 
 @route
 def start_withdraw(state: State) -> Page:
-    """ The page for starting a withdrawal. """
+    """The page for starting a withdrawal."""
 
 
 @route
 def finish_withdraw(state: State, amount: int) -> Page:
-    """ The page for finishing a withdrawal. """
+    """The page for finishing a withdrawal."""
 
 
 @route
 def start_deposit(state: State) -> Page:
-    """ The page for starting a deposit. """
+    """The page for starting a deposit."""
 
 
 @route
 def finish_deposit(state: State, amount: int) -> Page:
-    """ The page for finishing a deposit. """
+    """The page for finishing a deposit."""
+
 
 # Check that the index page renders correctly
 assert_equal(

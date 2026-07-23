@@ -21,7 +21,6 @@ drafter my_site.py
 
 """
 
-
 from drafter.cli import main
 
 if __name__ == "__main__":

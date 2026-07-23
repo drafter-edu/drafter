@@ -24,6 +24,7 @@ class AssetBundle:
 # Newline Mode Stack Type Enumeration
 class NewlineMode:
     """Enumeration for newline handling modes during rendering."""
+
     RETAIN = "retain"  # Leave newlines alone
     CONVERT_TO_BR = "convert_to_br"  # Convert newlines to <br> tags
 

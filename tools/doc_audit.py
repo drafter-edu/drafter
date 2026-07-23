@@ -1,12 +1,15 @@
 """AST-based docstring coverage audit for src/drafter."""
+
 import ast
 import json
 from pathlib import Path
 
 ROOT = Path("src")
 
+
 def is_public(name):
     return not name.startswith("_") or name in ("__init__",)
+
 
 def audit_file(path):
     src = path.read_text(encoding="utf-8", errors="replace")
@@ -17,10 +20,14 @@ def audit_file(path):
     stats = {
         "file": str(path).replace("\\", "/"),
         "module_doc": ast.get_docstring(tree) is not None,
-        "classes": 0, "classes_doc": 0,
-        "funcs": 0, "funcs_doc": 0,
-        "methods": 0, "methods_doc": 0,
-        "consts": 0, "consts_doc": 0,
+        "classes": 0,
+        "classes_doc": 0,
+        "funcs": 0,
+        "funcs_doc": 0,
+        "methods": 0,
+        "methods_doc": 0,
+        "consts": 0,
+        "consts_doc": 0,
         "missing": [],
     }
     # top-level constants: Assign/AnnAssign at module level with UPPER or plain names,
@@ -34,8 +41,12 @@ def audit_file(path):
             targets = [node.target.id]
         if targets and any(is_public(t) and t != "__all__" for t in targets):
             stats["consts"] += 1
-            nxt = body[i+1] if i+1 < len(body) else None
-            documented = isinstance(nxt, ast.Expr) and isinstance(nxt.value, ast.Constant) and isinstance(nxt.value.value, str)
+            nxt = body[i + 1] if i + 1 < len(body) else None
+            documented = (
+                isinstance(nxt, ast.Expr)
+                and isinstance(nxt.value, ast.Constant)
+                and isinstance(nxt.value.value, str)
+            )
             if documented:
                 stats["consts_doc"] += 1
             else:
@@ -51,14 +62,22 @@ def audit_file(path):
                     stats["missing"].append(f"class:{node.name}:{node.lineno}")
                 # methods
                 for item in node.body:
-                    if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)) and is_public(item.name) and item.name != "__init__":
+                    if (
+                        isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+                        and is_public(item.name)
+                        and item.name != "__init__"
+                    ):
                         stats["methods"] += 1
                         if ast.get_docstring(item):
                             stats["methods_doc"] += 1
                         else:
-                            stats["missing"].append(f"method:{node.name}.{item.name}:{item.lineno}")
+                            stats["missing"].append(
+                                f"method:{node.name}.{item.name}:{item.lineno}"
+                            )
     for node in body:
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and is_public(node.name):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and is_public(
+            node.name
+        ):
             stats["funcs"] += 1
             if ast.get_docstring(node):
                 stats["funcs_doc"] += 1
@@ -67,6 +86,7 @@ def audit_file(path):
     if not stats["module_doc"]:
         stats["missing"].insert(0, "module:1")
     return stats
+
 
 results = [audit_file(p) for p in sorted(ROOT.rglob("*.py"))]
 print(json.dumps(results, indent=1))

@@ -120,7 +120,7 @@ class FileUpload(FormComponent):
     """
 
     tag = "input"
-    
+
     SELF_CLOSING_TAG = True
 
     ARGUMENTS = [

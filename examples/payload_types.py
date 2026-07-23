@@ -42,8 +42,11 @@ def index(state: State) -> Page:
             ),
             Row(
                 Button("Update Secretly (No Visual Change)", update_secretly),
-                Span("Secret Count (Only in State):", Output("secret_count_output", str(state.secret_count))),
-            )
+                Span(
+                    "Secret Count (Only in State):",
+                    Output("secret_count_output", str(state.secret_count)),
+                ),
+            ),
         ],
     )
 

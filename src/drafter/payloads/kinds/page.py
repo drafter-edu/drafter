@@ -15,7 +15,7 @@ from drafter.router.routes import Router
 class Page(Fragment):
     """
     A page is a full-page response that replaces the entire body content.
-    
+
     Page is a specialized Fragment that uses a default target pointing to the body element.
     This content has two critical parts:
 
@@ -77,6 +77,7 @@ class Page(Fragment):
             )
         else:
             from drafter.components import PageContent
+
             for item in self.content:
                 if not isinstance(item, (str, PageContent)):
                     return VerificationFailure(
@@ -91,7 +92,7 @@ class Page(Fragment):
         # Recursively verify each content chunk
         try:
             for chunk in self.content:
-                if hasattr(chunk, 'verify'):
+                if hasattr(chunk, "verify"):
                     chunk.verify(state, configuration, request)
         except Exception as e:
             return VerificationFailure(
@@ -99,7 +100,7 @@ class Page(Fragment):
                 f"{e}"
             )
         return None
-    
+
     def format_target(self) -> str:
         if self.target != DEFAULT_BODY_TARGET:
             return f", target={format_page_content(self.target)}"

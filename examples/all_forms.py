@@ -1,4 +1,15 @@
-from drafter import start_server, route, Label, TextBox, CheckBox, DateTimeInput, DateInput, TimeInput, Button, Page
+from drafter import (
+    start_server,
+    route,
+    Label,
+    TextBox,
+    CheckBox,
+    DateTimeInput,
+    DateInput,
+    TimeInput,
+    Button,
+    Page,
+)
 from dataclasses import dataclass
 from datetime import date, time, datetime
 
@@ -10,7 +21,8 @@ class State:
     when: datetime
     at_time: time
     birthday: date
-    
+
+
 @route
 def index(state: State) -> Page:
     return Page(
@@ -30,7 +42,8 @@ def index(state: State) -> Page:
             Button("Submit", "process_form"),
         ],
     )
-    
+
+
 @route
 def process_form(
     state: State,
@@ -48,5 +61,4 @@ def process_form(
     return index(state)
 
 
-start_server(State("Bart", True, datetime.now(),
-                   time(13, 30), date(2010, 4, 1)))
+start_server(State("Bart", True, datetime.now(), time(13, 30), date(2010, 4, 1)))

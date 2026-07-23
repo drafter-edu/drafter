@@ -212,7 +212,9 @@ snippets = {
         "paragraph_with_different_content": (
             """Paragraph('Hello World')""",
             """Paragraph('Goodbye World')""",
-            ["In Paragraph content (item 0): Expected 'Goodbye World' but got 'Hello World'"],
+            [
+                "In Paragraph content (item 0): Expected 'Goodbye World' but got 'Hello World'"
+            ],
         ),
         "paragraph_with_extra_content": (
             """Paragraph('Hello World')""",
@@ -234,7 +236,9 @@ snippets = {
         "span_with_different_content": (
             """Span('Hello World')""",
             """Span('Goodbye World')""",
-            ["In Span content (item 0): Expected 'Goodbye World' but got 'Hello World'"],
+            [
+                "In Span content (item 0): Expected 'Goodbye World' but got 'Hello World'"
+            ],
         ),
         "span_with_nested_button": (
             """Span(Button('Click', '/link'))""",
@@ -244,7 +248,9 @@ snippets = {
         "span_with_different_nested_button": (
             """Span(Button('Click', '/link'))""",
             """Span(Button('Do Not Click', '/link'))""",
-            ["In Span content (item 0) Button text: Expected 'Do Not Click' but got 'Click'"],
+            [
+                "In Span content (item 0) Button text: Expected 'Do Not Click' but got 'Click'"
+            ],
         ),
     },
     "lists": {
@@ -310,7 +316,9 @@ snippets = {
         "image_different_url": (
             """Image('https://example.com/image.png')""",
             """Image('https://example.com/other.png')""",
-            ["In Image url: Expected 'https://example.com/other.png' but got 'https://example.com/image.png'"],
+            [
+                "In Image url: Expected 'https://example.com/other.png' but got 'https://example.com/image.png'"
+            ],
         ),
         "image_different_width": (
             """Image('https://example.com/image.png', width=100)""",
@@ -327,7 +335,9 @@ snippets = {
         "section_different_content": (
             """Section('Hello World')""",
             """Section('Goodbye World')""",
-            ["In Section content (item 0): Expected 'Goodbye World' but got 'Hello World'"],
+            [
+                "In Section content (item 0): Expected 'Goodbye World' but got 'Hello World'"
+            ],
         ),
         "article_equal": (
             """Article(Header('Title'), Paragraph('Body text'))""",
@@ -337,7 +347,9 @@ snippets = {
         "article_different_header": (
             """Article(Header('Title'), Paragraph('Body text'))""",
             """Article(Header('Other Title'), Paragraph('Body text'))""",
-            ["In Article content (item 0) Header body: Expected 'Other Title' but got 'Title'"],
+            [
+                "In Article content (item 0) Header body: Expected 'Other Title' but got 'Title'"
+            ],
         ),
         "section_is_not_div": (
             """Div('Hello World')""",

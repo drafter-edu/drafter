@@ -301,9 +301,7 @@ class EventManager:
         site HTML) so the click is handled by this instance's own bridge no
         matter which document (e.g. an iframe) the site renders into.
         """
-        button = self.scope.querySelector(
-            "#" + DRAFTER_TAG_IDS["SUBTLE_DEBUG_ENTRY"]
-        )
+        button = self.scope.querySelector("#" + DRAFTER_TAG_IDS["SUBTLE_DEBUG_ENTRY"])
         if not button:
             return
         wrapped_handler = self.runtime.wrap_event_handler(lambda event: callback())
@@ -370,9 +368,7 @@ class EventManager:
         self.hotkey_events[key] = callback
         if not self.hotkey_listener_ready:
             wrapped_handler = self.runtime.wrap_event_handler(hotkey_handler)
-            self.runtime.context.document.addEventListener(
-                "keydown", wrapped_handler
-            )
+            self.runtime.context.document.addEventListener("keydown", wrapped_handler)
             self.hotkey_listener_ready = True
             debug_log("client.hotkey_listener_registered")
 
@@ -746,9 +742,7 @@ def process_form_data(
         return runtime.promise_data(
             {
                 "values": data,
-                "payload": build_payload_entries(
-                    form_values, base_data, argument_data
-                ),
+                "payload": build_payload_entries(form_values, base_data, argument_data),
             }
         )
 

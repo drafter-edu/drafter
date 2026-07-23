@@ -3,6 +3,7 @@
 
 Click the cookie to get more cookies!
 """
+
 from drafter import *
 from bakery import assert_equal
 from dataclasses import dataclass

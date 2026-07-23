@@ -18,7 +18,9 @@ def index(state: State) -> Page:
             "Current name: " + state.name + "\n",
             "Availability: " + str(state.available) + "\n",
             "Favorite animal: " + state.favorite + "\n",
-            "Poem: ", Pre(state.poem), "\n",
+            "Poem: ",
+            Pre(state.poem),
+            "\n",
             HorizontalRule(),
             Header("Change the Data", 2),
             Text("What is your name?"),
@@ -28,7 +30,9 @@ def index(state: State) -> Page:
             CheckBox("new_availability", state.available),
             "\n",
             Label("Dogs, cats, or capybaras?"),
-            SelectBox("new_animal", ["dogs", "cats", "capybaras", "⭐⭐⭐"], state.favorite),
+            SelectBox(
+                "new_animal", ["dogs", "cats", "capybaras", "⭐⭐⭐"], state.favorite
+            ),
             "\n",
             Label("Write me a poem, please.", "new_poem"),
             TextArea("new_poem", state.poem),

@@ -28,4 +28,3 @@ class InitialSiteData:
     use_shadow_dom: bool = True
     error: bool = False
     framed: bool = True
-

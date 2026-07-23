@@ -208,9 +208,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
             command.append("--shared-runtime")
             # All demos on the site share one assets folder (a sibling of the
             # per-demo output folders), instead of one full copy per demo.
-            command.extend(
-                ["--override-asset-url", f"../{self.SHARED_ASSETS_DIRNAME}"]
-            )
+            command.extend(["--override-asset-url", f"../{self.SHARED_ASSETS_DIRNAME}"])
 
         build_result = subprocess.run(
             command,

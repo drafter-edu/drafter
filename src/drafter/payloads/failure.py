@@ -8,4 +8,5 @@ class VerificationFailure:
     Attributes:
         message: Description of the verification failure.
     """
+
     message: str

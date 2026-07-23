@@ -161,9 +161,7 @@ class TestConverters:
         assert result.value == MapMarker(1.0, 2.0, "Home")
 
     def test_view_from_dict(self):
-        result = convert(
-            {"latitude": 1.0, "longitude": 2.0, "zoom": 13}, MapView
-        )
+        result = convert({"latitude": 1.0, "longitude": 2.0, "zoom": 13}, MapView)
         assert result.ok
         assert result.value == MapView(1.0, 2.0, 13)
 
@@ -228,9 +226,7 @@ class TestAddMarkerHelper:
 
     def test_adds_pin_at_event_location(self):
         element = FakeElement()
-        add_marker = make_add_marker(
-            element, {"latitude": 39.68, "longitude": -75.75}
-        )
+        add_marker = make_add_marker(element, {"latitude": 39.68, "longitude": -75.75})
         add_marker("Home")
         assert json.loads(element.attributes["markers"]) == [
             {"latitude": 39.68, "longitude": -75.75, "label": "Home"}

@@ -10,8 +10,8 @@ from drafter.history.state import SiteState
 
 class RenderError(Exception):
     """Exception raised during component rendering."""
-    pass
 
+    pass
 
 
 @dataclass
@@ -66,7 +66,7 @@ class Renderer:
     def new_line(self):
         """Append a newline to the output."""
         self.parts.append("\n")
-        
+
     def in_convert_newlines_mode(self) -> Optional[bool]:
         """Check if the current rendering mode converts newlines to `<br>`.
 
@@ -75,8 +75,9 @@ class Renderer:
             configuration enables `newlines_to_br`; otherwise a falsy value
             (False, or None when no configuration is set).
         """
-        return (self.newline_mode_stack[-1] != NewlineMode.RETAIN
-                and (self.configuration and self.configuration.newlines_to_br))
+        return self.newline_mode_stack[-1] != NewlineMode.RETAIN and (
+            self.configuration and self.configuration.newlines_to_br
+        )
 
     def render(self, component):
         """Recursively render a component to HTML.

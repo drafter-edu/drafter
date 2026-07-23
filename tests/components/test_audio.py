@@ -175,9 +175,9 @@ class TestAttributeSerialization:
         ]
 
     def test_melody_notes_normalize_to_json_pairs(self):
-        attributes = Melody(
-            ["C4", ("E4", 2), "rest", None], tempo=90
-        ).get_attributes(None)
+        attributes = Melody(["C4", ("E4", 2), "rest", None], tempo=90).get_attributes(
+            None
+        )
         assert json.loads(attributes["notes"]) == [
             ["C4", 1],
             ["E4", 2],

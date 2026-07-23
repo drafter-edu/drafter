@@ -9,6 +9,7 @@ from drafter.client_server.commands import (
     set_main_server,
 )
 
+
 def run_client_bridge(
     system: SystemConfiguration,
     server: ClientServer,
@@ -38,12 +39,12 @@ def run_client_bridge(
     register_server(instance_key, server)
     client_bridge = ClientBridge(configuration, context=context)
     client_bridge.setup_site(rendered_site)
-    
+
     if rendered_site.error:
         return
 
     server.do_listen_for_events(client_bridge.handle_server_event)
-    
+
     def handle_visit(request):
         # Make this instance's server "current" for the duration of the visit so
         # runtime get_main_server() calls (e.g. the default reset route) resolve

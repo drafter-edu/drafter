@@ -9,10 +9,7 @@ class State:
 
 @route
 def index(state: State) -> Page:
-    return Page(state, [
-        "The message is:",
-        state.message
-    ])
+    return Page(state, ["The message is:", state.message])
 
 
 start_server("The original message")

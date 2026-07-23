@@ -383,9 +383,7 @@ class ClientServer:
         if isinstance(tag, str) and tag:
             helpers = COMPONENT_CONTRACT_REGISTRY.helpers_for(tag, request.action)
             if helpers:
-                context = HelperContext(
-                    element=element, values=dict(request.kwargs)
-                )
+                context = HelperContext(element=element, values=dict(request.kwargs))
                 for helper in helpers:
                     dependencies[helper.name] = helper.factory(context)
         dependencies.update(

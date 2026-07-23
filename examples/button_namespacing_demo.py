@@ -4,6 +4,7 @@ This creates a grid of buttons with the same text but different arguments.
 Before the fix, these buttons would have conflicting parameter names.
 After the fix, each button has unique parameter names based on its instance ID.
 """
+
 from drafter import *
 from dataclasses import dataclass
 
@@ -24,16 +25,15 @@ def index(state: State) -> Page:
         f"Total clicks: {state.click_count}",
         HorizontalRule(),
     ]
-    
+
     # Create a 3x3 grid of buttons
     for y in range(3):
         for x in range(3):
-            content.append(Button("Click Me", cell_clicked, [
-                Argument("x", x),
-                Argument("y", y)
-            ]))
+            content.append(
+                Button("Click Me", cell_clicked, [Argument("x", x), Argument("y", y)])
+            )
         content.append(LineBreak())
-    
+
     return Page(state, content)
 
 

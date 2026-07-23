@@ -287,9 +287,7 @@ class TestFileUploadConversion:
 
 class TestLocationConversion:
     def test_from_json_string(self):
-        raw = json.dumps(
-            {"status": "granted", "latitude": 39.68, "longitude": -75.75}
-        )
+        raw = json.dumps({"status": "granted", "latitude": 39.68, "longitude": -75.75})
         result = convert(raw, Location)
         assert result.ok
         assert result.value.status == "granted"
@@ -389,9 +387,7 @@ class TestRouteBinder:
         def greet(name: str):
             return name
 
-        bound, _ = bind(
-            greet, [form_value("name", "x"), form_value("extra", "y")]
-        )
+        bound, _ = bind(greet, [form_value("name", "x"), form_value("extra", "y")])
         warnings = [d for d in bound.diagnostics if d.severity == "warning"]
         assert len(warnings) == 1
         assert warnings[0].code == "unused_request_parameter"
@@ -402,9 +398,7 @@ class TestRouteBinder:
         def flexible(name: str, **rest):
             return name
 
-        bound, _ = bind(
-            flexible, [form_value("name", "x"), form_value("extra", "y")]
-        )
+        bound, _ = bind(flexible, [form_value("name", "x"), form_value("extra", "y")])
         assert bound.diagnostics == ()
         assert bound.kwargs["extra"] == "y"
 

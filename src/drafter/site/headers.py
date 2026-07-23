@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+
 @dataclass
 class CSSLink:
     """Represents a CSS link with optional classes.
@@ -14,7 +15,7 @@ class CSSLink:
 
     def __repr__(self):
         return f"CSSLink(url='{self.url}', classes={self.classes})"
-    
+
     def precompile_to_html(self, with_extra_classes=None) -> str:
         """Precompiles the CSS link to an HTML <link> element string.
 

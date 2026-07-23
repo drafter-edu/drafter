@@ -148,5 +148,7 @@ tests.arguments_outside = """
 tests.files_upload = FileUpload("profile_picture", accept="image/*")
 tests.files_upload = """<input accept="image/*" aria-label="profile_picture" id="profile_picture" name="profile_picture" type="file">"""
 
-tests.files_upload_multiple = FileUpload("documents", accept=[".pdf", ".docx"], multiple=True)
+tests.files_upload_multiple = FileUpload(
+    "documents", accept=[".pdf", ".docx"], multiple=True
+)
 tests.files_upload_multiple = """<input accept=".pdf, .docx" aria-label="documents" id="documents" multiple name="documents" type="file">"""

@@ -8,15 +8,18 @@ def index(state) -> Page:
     go to the page that actually adds the values together. Then, the bottom shows the latest
     result.
     """
-    return Page(state, [
-        "What is the first number?",
-        TextBox("first", state["first_number"]),
-        "What is the second number?",
-        TextBox("second", state["second_number"]),
-        Button("Add", add_page),
-        "The result is",
-        state["result"]
-    ])
+    return Page(
+        state,
+        [
+            "What is the first number?",
+            TextBox("first", state["first_number"]),
+            "What is the second number?",
+            TextBox("second", state["second_number"]),
+            Button("Add", add_page),
+            "The result is",
+            state["result"],
+        ],
+    )
 
 
 @route

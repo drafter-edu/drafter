@@ -5,42 +5,42 @@ from dataclasses import dataclass
 
 @dataclass
 class State:
-    """ The state of the adventure game. """
+    """The state of the adventure game."""
 
 
 @route
 def index(state: State) -> Page:
-    """ The main page of the adventure game, letting the player enter their name. """
+    """The main page of the adventure game, letting the player enter their name."""
 
 
 @route
 def begin(state: State, name: str) -> Page:
-    """ Updates the state with the new player name, then redirects to small_field. """
+    """Updates the state with the new player name, then redirects to small_field."""
 
 
 @route
 def small_field(state: State) -> Page:
-    """ The page for the small field location. """
+    """The page for the small field location."""
 
 
 @route
 def cave(state: State) -> Page:
-    """ The page for the cave location, which has a locked door. """
+    """The page for the cave location, which has a locked door."""
 
 
 @route
 def woods(state: State) -> Page:
-    """ The page for the woods location, which will have a key if the player has not yet picked it up. """
+    """The page for the woods location, which will have a key if the player has not yet picked it up."""
 
 
 @route
 def take_key(state: State) -> Page:
-    """ Updates the state to indicate that the player has picked up the key, then redirects to the woods. """
+    """Updates the state to indicate that the player has picked up the key, then redirects to the woods."""
 
 
 @route
 def ending(state: State) -> Page:
-    """ The victory screen """
+    """The victory screen"""
 
 
 assert_equal(

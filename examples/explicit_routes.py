@@ -2,10 +2,15 @@ from drafter import start_server, Page, Button, add_route
 
 
 def index():
-    return Page(None, ["Hello, World!", 
-                       Button("Second page with Slash", "/second"),
-                       Button("Second page", "second"),
-                       Button("Second page as Function", second)])
+    return Page(
+        None,
+        [
+            "Hello, World!",
+            Button("Second page with Slash", "/second"),
+            Button("Second page", "second"),
+            Button("Second page as Function", second),
+        ],
+    )
 
 
 def second():

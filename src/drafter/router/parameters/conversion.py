@@ -56,11 +56,7 @@ def _accepts_file_upload(target: Any) -> bool:
             return True
     except TypeError:
         return False
-    return (
-        HAS_PILLOW
-        and inspect.isclass(target)
-        and issubclass(target, PILImage.Image)
-    )
+    return HAS_PILLOW and inspect.isclass(target) and issubclass(target, PILImage.Image)
 
 
 def convert_file_upload(ctx: ConversionContext) -> Optional[ConversionResult]:
@@ -180,8 +176,7 @@ def convert_dataclass(ctx: ConversionContext) -> Optional[ConversionResult]:
                 ctx,
                 target,
                 hint=(
-                    f"Provide the fields of {describe_type(target)} as "
-                    f"JSON-like data."
+                    f"Provide the fields of {describe_type(target)} as JSON-like data."
                 ),
             )
     if not isinstance(value, dict):
@@ -258,9 +253,7 @@ def convert_int(ctx: ConversionContext) -> Optional[ConversionResult]:
         return None
     if isinstance(value, str):
         text = value.strip()
-        number_hint = (
-            "Try entering a number, or change the parameter type to str."
-        )
+        number_hint = "Try entering a number, or change the parameter type to str."
         try:
             return ConversionResult(ok=True, value=int(text))
         except ValueError:
@@ -331,9 +324,7 @@ def convert_collection(ctx: ConversionContext) -> Optional[ConversionResult]:
     element_types = tuple(arg for arg in ctx.type_args if arg is not Ellipsis)
     if element_types:
         heterogeneous = (
-            target is tuple
-            and Ellipsis not in ctx.type_args
-            and len(element_types) > 1
+            target is tuple and Ellipsis not in ctx.type_args and len(element_types) > 1
         )
         if heterogeneous:
             if len(items) != len(element_types):

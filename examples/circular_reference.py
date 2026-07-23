@@ -1,13 +1,16 @@
 from drafter import *
 
+
 @dataclass
 class Item:
     name: str
     previously_seen: list
 
+
 @dataclass
 class State:
     items: list[Item]
+
 
 # ...
 

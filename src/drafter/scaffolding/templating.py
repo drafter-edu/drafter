@@ -30,7 +30,6 @@ def render_index_html(
     *,
     system: SystemConfiguration,
     modified_system: dict,
-    
     inline_py: bool,
     user_code: Optional[str],
     python_url: Optional[str],

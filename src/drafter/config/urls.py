@@ -9,9 +9,7 @@ INTERNAL_ROUTES = {
     "LIST_FILES": "__drafter_list_files",
 }
 
-INTERNAL_FILES = {
-    "DRAFTER_PYODIDE_FILE":"drafter-pyodide.zip"
-}
+INTERNAL_FILES = {"DRAFTER_PYODIDE_FILE": "drafter-pyodide.zip"}
 
 
 def determine_assets_url(override_asset_url) -> str:

@@ -185,9 +185,7 @@ class RouteBinder:
             consumed.add(value.name)
             bound_names.add(param.name)
 
-        leftover = [
-            value for name, value in payload.items() if name not in consumed
-        ]
+        leftover = [value for name, value in payload.items() if name not in consumed]
         leftover_names = [value.name for value in leftover]
 
         # Missing is only an error when the parameter has no default.

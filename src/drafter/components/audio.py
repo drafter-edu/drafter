@@ -923,21 +923,16 @@ class Sound(Component):
         """
         _validate_fraction(volume, "volume", "Sound")
         _validate_effects(effects, "Sound")
-        if not isinstance(pan, (int, float)) or isinstance(pan, bool) or not (
-            -1.0 <= pan <= 1.0
-        ):
-            raise ValueError(
-                f"Sound pan must be between -1.0 (left) and 1.0 (right),"
-                f" not {pan!r}."
-            )
         if (
-            not isinstance(speed, (int, float))
-            or isinstance(speed, bool)
-            or speed <= 0
+            not isinstance(pan, (int, float))
+            or isinstance(pan, bool)
+            or not (-1.0 <= pan <= 1.0)
         ):
             raise ValueError(
-                f"Sound speed must be a positive number, not {speed!r}."
+                f"Sound pan must be between -1.0 (left) and 1.0 (right), not {pan!r}."
             )
+        if not isinstance(speed, (int, float)) or isinstance(speed, bool) or speed <= 0:
+            raise ValueError(f"Sound speed must be a positive number, not {speed!r}.")
         if visualize is not None and visualize not in ("waveform", "bars"):
             raise ValueError(
                 f"Sound visualize must be 'waveform', 'bars', or None,"

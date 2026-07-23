@@ -19,6 +19,7 @@ class Request:
             "source_detail" keys. When present, the router prefers these over
             the merged kwargs so it can report where each value came from.
     """
+
     REQUEST_COUNTER: ClassVar[int] = 0
 
     id: int = field(init=False)

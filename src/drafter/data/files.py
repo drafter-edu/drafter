@@ -7,7 +7,8 @@ class DrafterBinaryFile:
     content: bytes
     content_type: str
     size: int
-    
+
+
 @dataclass
 class DrafterTextFile:
     filename: str

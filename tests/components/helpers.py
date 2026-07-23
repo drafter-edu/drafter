@@ -3,6 +3,7 @@ import uuid
 import drafter
 import datetime
 
+
 def eval_drafter_with_source(
     snippet: str,
     approach: str,
@@ -43,7 +44,7 @@ def eval_drafter_with_source(
         lines,
         filename,
     )
-    
+
     drafter_eval_globals = {
         "__builtins__": __builtins__,
         **vars(drafter),

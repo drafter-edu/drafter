@@ -20,11 +20,14 @@ class State:
 
 @route
 def index(state: State):
-    return Page(state, [
-        Div("Hello, world!", classes="fade-in-element"),
-        TextBox("text", state.text),
-        Button("Click me!", "index")
-    ])
+    return Page(
+        state,
+        [
+            Div("Hello, world!", classes="fade-in-element"),
+            TextBox("text", state.text),
+            Button("Click me!", "index"),
+        ],
+    )
 
 
 start_server(State("Type something here"))

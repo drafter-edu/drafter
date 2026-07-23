@@ -4,7 +4,6 @@ Provides functions to validate parameter names and JSON values used in
 component arguments and settings.
 """
 
-
 BASE_PARAMETER_ERROR = (
     """The {component_type} name must be a valid Python identifier name. A string is considered """
     """a valid identifier if it only contains alphanumeric letters (a-z) and (0-9), or """

@@ -6,7 +6,6 @@ management, channel content, redirect detection, history, hotkeys, and telemetry
 Runtime-specific differences (Skulpt vs Pyodide) are delegated to a RuntimeAdapter.
 """
 
-
 from drafter.bridge.events import EventManager
 from drafter.bridge.navigation import NavigationController
 from drafter.bridge.site_renderer import SiteRenderer
@@ -85,9 +84,7 @@ class ClientBridge:
             {
                 "drafter-toggle-frame": lambda event: handle_toggle_frame(),
                 "drafter-toggle-debug-mode": lambda event: handle_debug_mode(),
-                "drafter-evict-persistent": lambda event: self.evict_persistent(
-                    event
-                ),
+                "drafter-evict-persistent": lambda event: self.evict_persistent(event),
                 "drafter-navigate": lambda event: self.navigator.goto(event.detail),
                 "popstate": self.navigator.handle_popstate,
             },

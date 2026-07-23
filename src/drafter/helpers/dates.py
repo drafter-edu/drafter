@@ -1,11 +1,12 @@
 from datetime import datetime, time, date
 from typing import Any
 
+
 def try_convert_datetime(value, target_type) -> tuple[bool, Any]:
     """Convert a value to datetime-like types if possible.
 
     TODO: Allow control over "default" behavior for blank fields. Could raise an error,
-          return None, or use current date/time. Currently just uses the current date/time 
+          return None, or use current date/time. Currently just uses the current date/time
           for missing parts.
 
     Args:

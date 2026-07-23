@@ -270,7 +270,9 @@ class ConverterRegistry:
         return conversion_failure(
             ctx,
             expected,
-            hint="Expected one of: " + ", ".join(repr(option) for option in allowed) + ".",
+            hint="Expected one of: "
+            + ", ".join(repr(option) for option in allowed)
+            + ".",
         )
 
 
