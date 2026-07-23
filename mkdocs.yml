@@ -15,7 +15,22 @@ nav:
   - Specialized Components:
     - Overview: ComponentDocs/SpecializedComponents/index.md
     - Matplotlib: ComponentDocs/SpecializedComponents/matplotlib/index.md
-  - Styling components: ComponentDocs/StylingComponents/index.md
+  - styling:
+    - Overview: ComponentDocs/styling/index.md
+    - Themes:
+      - Overview: ComponentDocs/styling/themes/index.md
+    - Components:
+      - Overview: ComponentDocs/styling/components/index.md
+      - Postion:
+        - Overview: ComponentDocs/styling/components/postion/index.md
+      - Shape:
+        - Overview: ComponentDocs/styling/components/shape/index.md
+      - Text:
+        - Overview: ComponentDocs/styling/components/text/index.md
+      - Color:
+        - Overview: ComponentDocs/styling/components/color/index.md
+    - Css:
+      - Overview: ComponentDocs/styling/Css/index.md
 - Student Guide:
   - Installation: students/installation.md
   - Documentation for Students: students/docs.md
