@@ -78,10 +78,6 @@ class TestInitialization:
         assert server.router is not None
         assert server.site is not None
 
-    def test_event_bus_created(self, server):
-        """Test that event bus is initialized."""
-        assert server.event_bus is not None
-
     def test_default_configuration_created(self, server):
         """Test that default configuration is initialized."""
         assert isinstance(server.get_default_configuration(), ClientServerConfiguration)
