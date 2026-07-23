@@ -33,22 +33,25 @@ nav:
   - Specialized Components:
     - Overview: ComponentDocs/SpecializedComponents/index.md
     - Matplotlib: ComponentDocs/SpecializedComponents/matplotlib/index.md
-  - styling:
-    - Overview: ComponentDocs/styling/index.md
+  - Styling:
+    - Overview: ComponentDocs/Styling/index.md
     - Themes:
-      - Overview: ComponentDocs/styling/themes/index.md
+      - Overview: ComponentDocs/Styling/themes/index.md
     - Components:
-      - Overview: ComponentDocs/styling/components/index.md
+      - Overview: ComponentDocs/Styling/components/index.md
       - Postion:
-        - Overview: ComponentDocs/styling/components/postion/index.md
+        - Overview: ComponentDocs/Styling/components/postion/index.md
       - Shape:
-        - Overview: ComponentDocs/styling/components/shape/index.md
+        - Overview: ComponentDocs/Styling/components/shape/index.md
       - Text:
-        - Overview: ComponentDocs/styling/components/text/index.md
+        - Overview: ComponentDocs/Styling/components/text/index.md
+        - Font / Type: ComponentDocs/Styling/components/text/fonttype/index.md
+        - Size: ComponentDocs/Styling/components/text/size/index.md
+        - Transformations: ComponentDocs/Styling/components/text/transformations/index.md
       - Color:
-        - Overview: ComponentDocs/styling/components/color/index.md
+        - Overview: ComponentDocs/Styling/components/color/index.md
     - Css:
-      - Overview: ComponentDocs/styling/Css/index.md
+      - Overview: ComponentDocs/Styling/Css/index.md
 - Student Guide:
   - Installation: students/installation.md
   - Documentation for Students: students/docs.md
