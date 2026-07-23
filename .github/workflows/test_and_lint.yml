@@ -1,45 +1,113 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
 name: Test and Lint
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, v2-pyodide]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-
+  # The JS bundle (js/dist) is needed by the Python tests, the docs demos,
+  # and the wheel (hatch force-includes js/dist into drafter/assets),
+  # so build it once and share it as an artifact.
+  build-js:
+    name: Build JS assets
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest mypy
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        if [ -f requirements_dev.txt ]; then pip install -r requirements_dev.txt; fi
-    - name: Lint with mypy
-      continue-on-error: true
-      run: |
-        python -m mypy ./drafter/
-    - name: Test with pytest
-      run: |
-        python -m pytest ./tests/
-    - name: Store failures information
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results-${{ matrix.runs-on }}
-        path: |
-          **/tests.test**
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+      - name: Install JS dependencies
+        run: npm ci
+        working-directory: js
+      - name: Build JS bundle
+        run: npm run build
+        working-directory: js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: js-dist
+          path: js/dist/
+          if-no-files-found: error
+
+  test-js:
+    name: JS tests (pyodide)
+    runs-on: ubuntu-latest
+    # TODO: Remove once the known baseline jest failures are fixed
+    # (engine.test.ts error text, timer.test.ts restart, upload-repro,
+    # examples-parity OOM). Until then this job reports but does not block.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+      - name: Install JS dependencies
+        run: npm ci
+        working-directory: js
+      - name: Run jest (pyodide project)
+        run: npm test
+        working-directory: js
+
+  lint:
+    name: Lint (ruff + mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: uv sync --python 3.13
+      - name: Check formatting
+        run: uv run ruff format --check
+      - name: Lint with ruff
+        run: uv run ruff check
+      - name: Type-check with mypy
+        run: uv run mypy --ignore-missing-imports --install-types --non-interactive --package drafter
+
+  test-python:
+    name: Python tests (${{ matrix.python-version }})
+    needs: build-js
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      # Some tests exercise the client-server/compile path, which resolves
+      # assets from js/dist when running from a source checkout.
+      - uses: actions/download-artifact@v4
+        with:
+          name: js-dist
+          path: js/dist
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: uv sync --python ${{ matrix.python-version }}
+      - name: Run pytest
+        run: uv run pytest --verbose --color=yes tests
+
+  build-package:
+    name: Build sdist + wheel
+    needs: build-js
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: js-dist
+          path: js/dist
+      - uses: astral-sh/setup-uv@v6
+      - name: Build distributions
+        run: uv build
+      - name: Check that the wheel bundles the JS assets
+        run: |
+          unzip -l dist/*.whl | grep -q 'drafter/assets/js/drafter.pyodide.js' \
+            || { echo 'Wheel is missing bundled JS assets!'; exit 1; }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: dist/

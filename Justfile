@@ -5,33 +5,65 @@ set quiet
 
 # Default recipe, it's run when just is invoked without a recipe
 default:
-  just --list --unsorted
+    just --list --unsorted
 
 # Sync dev dependencies
 dev-sync:
-    uv sync --all-extras --cache-dir .uv_cache
+    uv sync --all-extras
 
 # Sync production dependencies (excludes dev dependencies)
 prod-sync:
-	uv sync --all-extras --no-dev --cache-dir .uv_cache
+    uv sync --all-extras --no-dev
+
+# Install JS dependencies
+js-install:
+    cd js && npm install
 
 # Install pre commit hooks
 install-hooks:
-	uv run pre-commit install
+    uv run pre-commit install
 
 # Run ruff formatting
 format:
-	uv run ruff format
+    uv run ruff format
 
-# Run ruff linting and mypy type checking
+# Run ruff linting (with fixes) and mypy type checking
 lint:
-	uv run ruff check --fix
-	uv run mypy --ignore-missing-imports --install-types --non-interactive --package drafter
+    uv run ruff check --fix
+    uv run mypy --ignore-missing-imports --install-types --non-interactive --package drafter
 
-# Run tests using pytest
-test:
-	cd js && npm test
-	uv run pytest --verbose --color=yes tests
+# Check format/lint/types without modifying files (mirrors CI)
+check:
+    uv run ruff format --check
+    uv run ruff check
+    uv run mypy --ignore-missing-imports --install-types --non-interactive --package drafter
+
+# Run JS tests (pyodide jest project)
+test-js:
+    cd js && npm test
+
+# Run Python tests
+test-py:
+    uv run pytest --verbose --color=yes tests
+
+# Run all tests
+test: test-js test-py
+
+# Build JS assets into js/dist (needed by the compiler, docs, and packaging)
+build-js:
+    cd js && npm run build
+
+# Build the Python sdist and wheel (bundles js/dist into drafter/assets)
+build: build-js
+    uv build
+
+# Build the documentation site into site/ (demos are compiled from js/dist)
+docs: build-js
+    uv run drafter-docs build
+
+# Serve the documentation locally
+docs-serve:
+    uv run drafter-docs serve
 
 # Run all checks: format, lint, and test
 validate: format lint test
