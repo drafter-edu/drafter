@@ -103,4 +103,4 @@ def seek_filename_by_line(line, missing_value=None):
                 return data[0]
         return missing_value
     except Exception as e:
-        raise Exception(f"Error seeking filename by line: {e}")
+        raise Exception(f"Error seeking filename by line: {e}") from e
