@@ -30,6 +30,7 @@ nav:
   - Components: reference/components.md
   - Fonts: reference/fonts.md
   - Transition to Flask: reference/flask.md
+  - API Reference: reference/api/
 
 theme:
   name: material
@@ -44,9 +45,17 @@ plugins:
     language: python
     output_subdir: drafter-demos
     iframe_height: 430
-#- mkdocstrings
-#- gen-files:
-#    scripts:
-#    - tools/gen_ref_pages.py
-#- literate-nav:
-#    nav_file: SUMMARY.md
+- gen-files:
+    scripts:
+    - tools/gen_ref_pages.py
+- literate-nav:
+    nav_file: SUMMARY.md
+- section-index
+- mkdocstrings:
+    handlers:
+      python:
+        paths: [src]
+        options:
+          docstring_style: google
+          show_source: false
+          merge_init_into_class: true

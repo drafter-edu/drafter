@@ -235,6 +235,7 @@ Every setting can also be provided via environment variables. Boolean variables 
 | Variable             | Used by          | Description                                                                                                                                                                                   |
 | -------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DRAFTER_MKDOCS_DEV` | docs build       | Set to `1` by `drafter-docs --dev`; makes the MkDocs codeblock plugin compile embedded demos with the local package build instead of PyPI.                                                    |
+| `DRAFTER_MKDOCS_API` | docs build       | Set to `1` by `drafter-docs --api`; generates the full per-module API reference (mkdocstrings), which is slow. Omitted builds emit a placeholder API page instead.                            |
 | `SKULPT_DIR`         | JS build scripts | Path to a local Skulpt build; read from a top-level `.env` file by `npm run dev` / `npm run update-skulpt` / `npm run precompile` to copy `skulpt.js` and `skulpt-stdlib.js` into the assets. |
 
 ## Configuration files
@@ -412,6 +413,14 @@ uv run drafter-docs serve --dev
 ```
 
 In dev mode, the MkDocs Drafter codeblock plugin compiles embedded demos with Pyodide package style `build` (local package build) instead of the default `pypi`.
+
+Full API reference:
+
+```powershell
+uv run drafter-docs build --api
+```
+
+Rendering the per-module API reference through mkdocstrings dominates build time, so it is skipped by default and replaced with a placeholder page. Pass `--api` (combinable with `--dev`) when you need the real thing.
 
 ## License
 

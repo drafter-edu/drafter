@@ -279,7 +279,24 @@ plus the optional full-`D`/`DOC` ratchets recorded below.
    `gen-files` + `literate-nav` + `section-index`; `tools/gen_ref_pages.py`
    (rewritten from the stale draft) generates one page per module under
    `reference/api/` (skipping the `typings` stubs), linked from the Reference nav.
-   `docstring_style: google`, `merge_init_into_class: true`.
+   `docstring_style: google`, `merge_init_into_class: true`. Two gotchas hit and
+   fixed on the way, worth remembering:
+   - **Nav-cycle hang**: `router/defaults/index.py` is a module literally named
+     `index`, so its generated page collided with the package's `__init__` page
+     (`index.md`). The same Page object then appeared twice in the nav, and
+     `section-index`'s `on_nav` looped forever — the build hung indefinitely
+     (all section-index versions). `gen_ref_pages.py` now writes literal
+     `index` modules to `index_.md`. Full pipeline builds in ~20s (plus demo
+     compilation).
+   - **"ProperDocs" plugin coupling**: the 2026 releases of the three oprypin
+     nav plugins (gen-files 0.6.x, literate-nav 0.6.3+, section-index 0.3.11+)
+     force-install `properdocs` (an unvetted MkDocs fork), print
+     fork-migration advertisements styled as MkDocs warnings into every build,
+     and cap `mkdocs<=1.6.1`. Do not trust those in-build "switch to
+     ProperDocs" messages — they are ads injected by the plugins, not MkDocs
+     output. `pyproject.toml` pins all three to the last pre-coupling releases
+     (gen-files <0.6, literate-nav <0.6.3, section-index <0.3.11), which keeps
+     `properdocs` out of the lockfile.
 4. **Coverage ratchet — DONE via ruff.** `D1` in CI *is* the presence ratchet
    (docstrings can no longer be deleted without failing lint), and
    `doc_drift.py` ratchets section completeness. `interrogate` is unnecessary;

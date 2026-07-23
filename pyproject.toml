@@ -54,12 +54,16 @@ dev = [
   # Client Server
   "pyodide-py",
   # New Documentation
-  "mkdocs==1.6.1",
+  "properdocs",
   "mkdocs-material",
   "mkdocstrings-python",
-  "mkdocs-gen-files",
-  "mkdocs-literate-nav",
-  "mkdocs-section-index",
+  # The 2026 releases of these three plugins (gen-files 0.6.x, literate-nav
+  # 0.6.3+, section-index 0.3.11+) force-depend on "properdocs", an unvetted
+  # MkDocs fork, print fork-migration advertisements into every build, and cap
+  # mkdocs at <=1.6.1. Pin to the last releases before that coupling.
+  "mkdocs-gen-files<0.6",
+  "mkdocs-literate-nav<0.6.3",
+  "mkdocs-section-index<0.3.11",
   "Pygments",
   "MarkupSafe",
   # Formatting/Linting
