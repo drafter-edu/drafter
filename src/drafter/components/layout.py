@@ -63,8 +63,8 @@ def handle_arguments_compatibility(args, kwargs):
     if "content" in kwargs:
         args.extend(kwargs.pop("content"))
     if "extra_settings" in kwargs:
-        kwargs = kwargs.pop("extra_settings")
-        kwargs.update(kwargs)
+        extra_settings = kwargs.pop("extra_settings")
+        kwargs.update(extra_settings)
     return args, kwargs
 
 
