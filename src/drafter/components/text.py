@@ -88,8 +88,6 @@ class Header(Component):
         ComponentArgument("level", kind="keyword", default_value=1),
     ]
 
-    CONTENT_ARGS = ["body"]
-    DEFAULT_ARGS = {"level": 1}
     RENAME_ATTRS = {"level": ""}
 
     def __init__(self, body: PageContent, level: int = 1, **extra_settings):
