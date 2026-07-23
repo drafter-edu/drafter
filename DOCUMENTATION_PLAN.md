@@ -83,10 +83,17 @@ Style is otherwise consistently Google: only isolated deviations (Sphinx `:class
 
 ### Tooling gaps
 
-- `ruff` runs only `E4/E7/E9/F` — **no docstring rules enforced** (`pyproject.toml:153`).
-- `mkdocstrings-python` is a dev dependency but **commented out** in `mkdocs.yml:47` —
-  docstrings render nowhere.
-- Legacy Sphinx tree in `docsrc/` (conf.py, .rst) coexists with the mkdocs setup.
+All three original gaps are now closed (see Phase 4 for details):
+
+- ~~`ruff` runs only `E4/E7/E9/F`~~ — `select` now includes `D1` repo-wide (with
+  `D107` ignored and `D1` excluded in tests/examples/docs/js/tools via
+  `per-file-ignores`), plus `I`, `B`, `UP`, `RUF100`. Docstring *presence* is
+  CI-enforced; `tools/doc_drift.py` covers drift.
+- ~~`mkdocstrings-python` commented out~~ — re-enabled in `mkdocs.yml` with
+  `gen-files` + `literate-nav` + `section-index`; `tools/gen_ref_pages.py`
+  generates an API Reference section under `reference/api/`.
+- Legacy Sphinx tree in `docsrc/` still exists but is now the only leftover
+  (see Phase 4 item 5 — blocked on migrating workbook starter assets).
 
 ---
 
@@ -233,33 +240,57 @@ Attributes → public functions/methods → constants.
   Attributes, `site/` module docstrings + 6 constants, `helpers/args.py`,
   `helpers/env_vars.py`, `monitor/` module docstrings, `docs/`, `document/`.
 
-### Phase 4 — Enforcement and rendering (keep it fixed) — REMAINING
+### Phase 4 — Enforcement and rendering (keep it fixed)
 
-With Phases 0–3 done, this is the only phase left (plus the Appendix B open bugs
-and their three blocked docstrings). Since coverage is now 100%, the ruff `D`
-rules can be enabled repo-wide immediately rather than per-package.
+**Status: substantially completed 2026-07-23.** Item 1 was resolved by hand (D1
+repo-wide) before this session; items 2–4 landed in this session; item 5 remains,
+plus the optional full-`D`/`DOC` ratchets recorded below.
 
-1. **Ruff pydocstyle rules**: add `"D"` to `select` with
-   `[tool.ruff.lint.pydocstyle] convention = "google"`. Roll out per-package via
-   `per-file-ignores` (start with Tier 1 packages, expand as phases complete) so CI
-   goes green immediately and ratchets.
-2. **Signature-drift checking** — the audit's dominant failure mode is mechanically
-   detectable:
-   - Ruff's preview `DOC` rules (pydoclint port: `DOC101/102/201/501`-family) check
-     Args-vs-signature and Returns/Raises presence; or run `pydoclint` directly with
-     `--style=google`.
-   - Extend the audit script (see below) into `tools/doc_drift.py` for the check ruff
-     doesn't have yet: **Attributes-section vs dataclass-field** comparison — this
-     catches the `Request.button_pressed` class of rot. Wire both into `just lint` and
-     `.github/workflows/test_and_lint.yml`.
-3. **Render the docs**: re-enable `mkdocstrings` in `mkdocs.yml` (already a dep, with
-   `mkdocs-gen-files` + `mkdocs-literate-nav` — clearly the original intent) and
-   generate an API reference section; set
-   `mkdocstrings-python` `docstring_style: google`. Rendering is also the best QA:
-   badly-formed sections become visible immediately.
-4. **Coverage ratchet** (optional): `interrogate --fail-under N` in CI, raising N as
-   phases land; or track via the audit script's totals.
-5. Retire `docsrc/` once mkdocs covers it (per the Phase 0 decision).
+1. **Ruff pydocstyle rules — DONE (narrower than originally proposed).** `select`
+   now carries `D1` (presence rules) repo-wide with `ignore = ["D107"]`, plus
+   `I/B/UP/RUF100`; `per-file-ignores` excludes `D1` for tests/examples/docs/js/
+   tools. `D1` presence rules are convention-independent, so no
+   `[tool.ruff.lint.pydocstyle]` section is needed yet. Getting this config green
+   required fixing 36 violations, including **11 `D105` magic-method docstrings
+   (`__post_init__`/`__repr__`/`__eq__`/`__hash__`) that `tools/doc_audit.py` never
+   counted** — its `is_public` skips dunders — so the "100%" Phase 3 claim was
+   slightly optimistic; it is true now under ruff's definition too.
+   *Optional next ratchet:* full `"D"` with `convention = "google"` currently
+   reports 453 findings (274 auto-fixable; dominated by D212 ×254 and D205 ×101,
+   plus the deliberately-ignored D107 ×33). Mostly mechanical; a session's work.
+2. **Signature-drift checking — DONE.** Findings from evaluation: ruff's preview
+   `DOC` rules do **not** implement the Args-vs-signature checks (pydoclint's
+   `DOC101/102` are still unimplemented in ruff), which was the audit's dominant
+   failure mode. So `tools/doc_drift.py` (new) does both drift checks itself:
+   - **Args-section vs signature** (phantom + missing params, Google style), and
+   - **Attributes-section vs dataclass fields** (accepting PEP-224 string docs
+     after a field, per the CONTRIBUTING conventions), resolving inherited
+     attributes within the package.
+   It is wired into the lint job of `.github/workflows/test_and_lint.yml` (there
+   is no justfile — the earlier `just lint` reference was wrong). Its first run
+   found 23 real findings, all fixed: 8 undocumented `kind` discriminator fields
+   on telemetry event dataclasses, and `Target`'s 15 Sphinx-style `#:` field
+   comments (invisible to griffe) converted to PEP-224 string docs.
+   *Optional next ratchet:* enabling ruff preview `DOC` rules would add
+   DOC201 ×117 (missing Returns), DOC502 ×21, DOC501 ×13, DOC202 ×3, DOC402 ×1.
+   The DOC501/502 (Raises drift) subset is the valuable one; DOC201 is bulk
+   writing, not drift.
+3. **Render the docs — DONE.** `mkdocstrings` re-enabled in `mkdocs.yml` with
+   `gen-files` + `literate-nav` + `section-index`; `tools/gen_ref_pages.py`
+   (rewritten from the stale draft) generates one page per module under
+   `reference/api/` (skipping the `typings` stubs), linked from the Reference nav.
+   `docstring_style: google`, `merge_init_into_class: true`.
+4. **Coverage ratchet — DONE via ruff.** `D1` in CI *is* the presence ratchet
+   (docstrings can no longer be deleted without failing lint), and
+   `doc_drift.py` ratchets section completeness. `interrogate` is unnecessary;
+   `tools/doc_audit.py` remains as a reporting tool.
+5. **Retire `docsrc/` — BLOCKED, now scoped.** `docsrc/` is a legacy Sphinx tree
+   (conf.py, .rst, Makefile) **but** `docsrc/workbook/part*/` holds student
+   starter files (`cookie.py`, `bank.py`, `adventure.py`, `store.py`, images)
+   that four live pages (`docs/workbook/part*/**.md`) tell students to download.
+   To retire: move those assets into `docs/workbook/`, update the four pages'
+   links, then delete the tree and drop the `docsrc/**` ruff per-file-ignore and
+   the `.gitignore` entry. Deliberately not done unilaterally.
 
 ### Suggested sequencing / effort
 
@@ -273,6 +304,15 @@ rules can be enabled repo-wide immediately rather than per-package.
 
 Phases 1–2 should land before Phase 3 bulk-writing (fix-then-fill avoids re-touching
 files), and Phase 4's per-package ratchet can be enabled the moment its package is clean.
+
+### Remaining work (as of 2026-07-23, post-Phase 4)
+
+- The three Appendix B open code bugs and their blocked docstrings
+  (`additional_js`/`additional_scripts`, `check_invalid_external_url`,
+  `monitor/bus.py` topic matching).
+- `docsrc/` retirement (Phase 4 item 5 — asset migration scoped above).
+- Optional ratchets: full `"D"` google-convention set (453 findings, mostly
+  auto-fixable) and ruff preview `DOC501/502` Raises-drift rules (34 findings).
 
 ---
 
@@ -461,6 +501,11 @@ exposed by a docstring/code contradiction. Triage separately:
 The coverage numbers in §1 came from an AST script that checks module/class/
 function/method docstrings and PEP-224-style constant docs. It is checked in as
 `tools/doc_audit.py` (run from the repo root: `python tools/doc_audit.py`, prints JSON
-per file). Phase 4 proposes extending it with Args-vs-signature and
-Attributes-vs-fields drift checks and wiring it into `just lint` and CI. Re-run it
-after each phase to track the ratchet.
+per file). Note its `is_public` skips dunder methods, so ruff `D105` findings are
+invisible to it (see Phase 4 item 1).
+
+The drift checks proposed for Phase 4 now live in `tools/doc_drift.py` (run from
+the repo root: `python tools/doc_drift.py`; exits non-zero on findings). It checks
+Google-style `Args:` sections against function signatures and `Attributes:`
+sections against dataclass fields (PEP-224 string docs count as documentation),
+and runs in CI as the "Check docstring drift" step of the lint job.

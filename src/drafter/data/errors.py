@@ -135,6 +135,7 @@ class ErrorDetails(Exception):
     recoverable: bool = True
 
     def __post_init__(self) -> None:
+        """Initialize the Exception base and validate category, severity, and status."""
         Exception.__init__(self, self.message)
         if self.category not in CATEGORIES:
             raise ValueError(f"Unknown error category: {self.category!r}")

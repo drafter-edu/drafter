@@ -175,6 +175,7 @@ class Text(Component):
         return NotImplemented
 
     def __hash__(self):
+        """Hash by body text, plus any extra settings when present."""
         if self.extra_settings:
             items = tuple(sorted(self.extra_settings.items()))
             return hash((self.body, items))
@@ -253,6 +254,7 @@ class RawHTML(Component):
         self.extra_settings = extra_settings
 
     def __eq__(self, other):
+        """Compare equal to a RawHTML (or plain string) with the same HTML."""
         if isinstance(other, RawHTML):
             return (
                 self.html == other.html and self.extra_settings == other.extra_settings
@@ -262,6 +264,7 @@ class RawHTML(Component):
         return NotImplemented
 
     def __hash__(self):
+        """Hash by HTML string, plus any extra settings when present."""
         if self.extra_settings:
             items = tuple(sorted(self.extra_settings.items()))
             return hash((self.html, items))

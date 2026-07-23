@@ -18,7 +18,6 @@ component) or a list of components (each element is updated).
 # - superscript, subscript
 # - border/margin/padding for individual sides
 
-
 from drafter.components import PageContent, Text
 
 

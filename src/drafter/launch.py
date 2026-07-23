@@ -4,14 +4,12 @@ Provides the start_server() function which routes to either in-browser ClientSer
 or local development AppServer based on execution context.
 """
 
-from typing import Optional
-
 from drafter.client_server.commands import get_main_server
 from drafter.config.engines import EngineType
 from drafter.configuration import get_system_configuration
 from drafter.helpers.utils import is_web
 
-MaybeBoolStr = Optional[bool | str]
+MaybeBoolStr = bool | str | None
 """Type alias for parameters that accept a bool, a string, or None."""
 
 

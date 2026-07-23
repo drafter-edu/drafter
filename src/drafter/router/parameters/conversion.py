@@ -366,7 +366,7 @@ def convert_collection(ctx: ConversionContext) -> ConversionResult | None:
                     ctx.expected_type,
                     hint=f"Expected exactly {len(element_types)} values.",
                 )
-            pairs = list(zip(items, element_types))
+            pairs = list(zip(items, element_types, strict=True))
         else:
             pairs = [(item, element_types[0]) for item in items]
         converted = []

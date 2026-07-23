@@ -39,5 +39,6 @@ class Request:
     raw_payload: list[dict[str, Any]] = field(default_factory=list)
 
     def __post_init__(self):
+        """Assign the next sequential request id."""
         type(self).REQUEST_COUNTER += 1
         self.id = type(self).REQUEST_COUNTER

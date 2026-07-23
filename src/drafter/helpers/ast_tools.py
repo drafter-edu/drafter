@@ -63,7 +63,7 @@ class ExtentGetter(ast.NodeVisitor):
             Start and end line numbers that encompass the provided line.
         """
         lowest, highest = lineno, lineno
-        for node, (start, end) in self.line_map.items():
+        for _node, (start, end) in self.line_map.items():
             if start <= lineno <= end:
                 lowest = min(lowest, start)
                 highest = max(highest, end)

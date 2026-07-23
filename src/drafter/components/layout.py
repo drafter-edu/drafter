@@ -256,6 +256,7 @@ class Row(BlockComponent):
     }
 
     def __eq__(self, other):
+        """Compare equal to any Row or Div with the same content and settings."""
         if isinstance(other, Row):
             return (
                 self.content == other.content

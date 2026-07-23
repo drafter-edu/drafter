@@ -43,6 +43,7 @@ class TelemetryMetadata:
     IDS_COUNTER: ClassVar[int] = 0
 
     def __post_init__(self):
+        """Assign the next sequential id when one was not provided."""
         if self.id == -1:
             type(self).IDS_COUNTER += 1
             self.id = type(self).IDS_COUNTER

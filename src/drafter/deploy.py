@@ -5,7 +5,6 @@ such as debug information visibility, site title, theme, framing, custom
 header/CSS content, and site metadata.
 """
 
-
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import get_main_server
 

@@ -622,9 +622,7 @@ class TimeInput(FormComponent):
 
     DEFAULT_ATTRS = {"type": "time"}
 
-    def __init__(
-        self, name: str, default_value: str | None | time = None, **kwargs
-    ):
+    def __init__(self, name: str, default_value: str | None | time = None, **kwargs):
         validate_parameter_name(name, "TimeInput")
         self.name = name
         self.default_value = (

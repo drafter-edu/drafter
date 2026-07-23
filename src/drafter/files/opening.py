@@ -108,7 +108,7 @@ def open(file_path, mode="r", *args, **kwargs):
                         return io.BytesIO(r)
                     return io.StringIO(req.responseText)
                 else:
-                    raise FileNotFoundError(f"File not found: {actual_path}")
+                    raise FileNotFoundError(f"File not found: {actual_path}") from e
                 # from pyodide.http import pyxhr
 
                 # # If the file is not found, we can try to fetch it via HTTP if it's a relative path

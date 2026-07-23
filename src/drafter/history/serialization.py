@@ -106,9 +106,7 @@ def rehydrate_json(value, new_type):
                     f"Error while restoring state: Could not create {new_type!r} from {value!r}. The element type of the list ({new_type!r}) is not a single type."
                 )
             return [rehydrate_json(v, element_type) for v in value]
-        elif (
-            hasattr(new_type, "__origin__") and new_type.__origin__ is list
-        ):
+        elif hasattr(new_type, "__origin__") and new_type.__origin__ is list:
             return value
     elif isinstance(value, str):
         if HAS_PILLOW and issubclass(new_type, PILImage.Image):
@@ -124,9 +122,7 @@ def rehydrate_json(value, new_type):
                 rehydrate_json(k, key_type): rehydrate_json(v, value_type)
                 for k, v in value.items()
             }
-        elif (
-            hasattr(new_type, "__origin__") and new_type.__origin__ is dict
-        ):
+        elif hasattr(new_type, "__origin__") and new_type.__origin__ is dict:
             return value
         elif is_dataclass(new_type):
             converted = {

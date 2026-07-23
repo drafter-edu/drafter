@@ -116,9 +116,7 @@ def _fallback_move(element: Any, new_parent: Any, reference: Any | None) -> None
             end_move()
 
 
-def move_element(
-    element: Any, new_parent: Any, reference: Any | None = None
-) -> None:
+def move_element(element: Any, new_parent: Any, reference: Any | None = None) -> None:
     """Move an element into new_parent (before reference, or appended).
 
     Uses the atomic ``moveBefore`` API when available so playback, animation,

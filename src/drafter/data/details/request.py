@@ -20,6 +20,7 @@ class RequestEvent(TelemetryRecord):
         kwargs: String representation of the request keyword arguments
         event: String representation of the additional event information
         request_id: Unique identifier for this request
+        kind: Event-type discriminator, always "RequestEvent"
     """
 
     url: str = ""
@@ -79,6 +80,7 @@ class RequestParseEvent(TelemetryRecord):
     Attributes:
         request_id: Unique identifier for this request
         representation: String representation of the parsed request
+        kind: Event-type discriminator, always "RequestParseEvent"
     """
 
     request_id: int = -1
@@ -116,6 +118,7 @@ class ResponseEvent(TelemetryRecord):
         formatted_page_content: The rendered HTML content of the page
             (falls back to the raw response body when no formatted body
             is available)
+        kind: Event-type discriminator, always "ResponseEvent"
     """
 
     status_code: str = STATUS_OK

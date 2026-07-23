@@ -25,7 +25,7 @@ Attribute order should always be consistent, with styles at the end. Generally, 
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, ClassVar, Optional, Union
+from typing import Any, ClassVar
 
 from drafter.components.planning.render_plan import AssetBundle, NewlineMode, RenderPlan
 from drafter.components.utilities.persistence import add_persistence_attributes
@@ -34,13 +34,13 @@ from drafter.components.utilities.validation import (
     validate_parameter_name,
 )
 
-RouteSafeValue = Union[str, int, float, bool]
+RouteSafeValue = str | int | float | bool
 """Type alias for values that are safe to pass in routes (JSON serializable primitives)."""
 
-JsonSafeValue = Union[str, int, float, bool, None, list, dict]
+JsonSafeValue = str | int | float | bool | None | list | dict
 """Type alias for JSON-safe values (primitives, lists, dicts, or None)."""
 
-UrlOrFunction = Union[str, Callable]
+UrlOrFunction = str | Callable
 """Type alias for values that can be either URL strings or callable functions."""
 
 
@@ -80,9 +80,13 @@ class Arguable:
     value: JsonSafeValue
 
 
-ArgumentList = Optional[
-    Arguable | list[Arguable] | list[tuple[str, JsonSafeValue]] | dict[str, JsonSafeValue]
-]
+ArgumentList = (
+    Arguable
+    | list[Arguable]
+    | list[tuple[str, JsonSafeValue]]
+    | dict[str, JsonSafeValue]
+    | None
+)
 """Type alias for flexible argument specification formats."""
 
 
@@ -565,6 +569,7 @@ class Component:
         return None
 
     def __repr__(self):
+        """Represent the component as a constructor-style call with its arguments."""
         class_name = self.__class__.__name__
         arguments = self.get_arguments()
         return f"{class_name}({', '.join(arguments)})"
@@ -625,10 +630,10 @@ class Component:
         return self
 
 
-Content = Union[Component, str]
+Content = Component | str
 """Type alias for page content: a component or string."""
 
-PageContent = Union[Content, list[Content]]
+PageContent = Content | list[Content]
 """Type alias for page content: a content item or list of content items."""
 
 

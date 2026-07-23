@@ -18,6 +18,7 @@ class RouteAddedEvent(TelemetryRecord):
         signature: String rendering of the route function's signature
         is_system_route: Whether the route was registered by the framework
             itself rather than by user code
+        kind: Event-type discriminator, always "RouteAdded"
     """
 
     url: str = ""

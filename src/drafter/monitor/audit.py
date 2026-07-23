@@ -6,7 +6,6 @@ ErrorRecords, and `log_record` for stamping and publishing general
 telemetry records.
 """
 
-
 from drafter.data.correlation import Correlation
 from drafter.data.errors import (
     ErrorDetails,

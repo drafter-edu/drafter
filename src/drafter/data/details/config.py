@@ -15,6 +15,7 @@ class InitialConfigurationEvent(TelemetryRecord):
     Event emitted when the server applies its initial configuration.
 
     Attributes:
+        kind: Event-type discriminator, always "InitialConfiguration"
         config: JSON representation of the full initial configuration
     """
 
@@ -40,6 +41,7 @@ class UpdatedConfigurationEvent(TelemetryRecord):
     Event emitted when a configuration setting is updated.
 
     Attributes:
+        kind: Event-type discriminator, always "UpdatedConfiguration"
         key: Name of the configuration setting that changed
         value: The new value of the setting
         update_default: Whether the default configuration was also updated,

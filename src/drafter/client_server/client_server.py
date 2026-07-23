@@ -10,7 +10,7 @@ the telemetry system.
 
 import time
 from dataclasses import dataclass
-from typing import Any, Literal, Union
+from typing import Any, Literal
 
 from drafter.client_server.context import Scope
 from drafter.components.utilities.contracts import HelperContext
@@ -60,16 +60,16 @@ from drafter.router.routes import Router
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import DRAFTER_TAG_CLASSES, Site
 
-ServerPhases = Union[
-    Literal["initializing"],
-    Literal["initialized"],
-    Literal["configuring"],
-    Literal["rendering"],
-    Literal["starting"],
-    Literal["started"],
-    Literal["visiting"],
-    Literal["committing"],
-    Literal["idle"],
+ServerPhases = Literal[
+    "initializing",
+    "initialized",
+    "configuring",
+    "rendering",
+    "starting",
+    "started",
+    "visiting",
+    "committing",
+    "idle",
 ]
 """The lifecycle phases a ClientServer moves through, from construction
 ("initializing") through startup ("starting", "configuring", "rendering",
@@ -453,7 +453,7 @@ class ClientServer:
                 details=repr(request),
                 status_code=STATUS_BAD_REQUEST,
                 exception=e,
-            )
+            ) from e
         try:
             return route_func(*args, **kwargs), representation
         except Exception as e:
@@ -465,7 +465,7 @@ class ClientServer:
                 details=f"Full call: {representation}\nFull Request: {request!r}",
                 status_code=STATUS_ERROR,
                 exception=e,
-            )
+            ) from e
 
     def verify_payload(
         self, request: Request, payload: Any, configuration: ClientServerConfiguration
@@ -503,7 +503,7 @@ class ClientServer:
                 details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
                 status_code=STATUS_ERROR,
                 exception=e,
-            )
+            ) from e
 
     def render_payload(
         self,
@@ -536,7 +536,7 @@ class ClientServer:
                 details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
                 status_code=STATUS_ERROR,
                 exception=e,
-            )
+            ) from e
 
     def format_payload(
         self,
@@ -571,7 +571,7 @@ class ClientServer:
                 details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
                 status_code=STATUS_ERROR,
                 exception=e,
-            )
+            ) from e
 
     def handle_state_updates(
         self,
@@ -623,7 +623,7 @@ class ClientServer:
                     status_code=STATUS_ERROR,
                     exception=e,
                     source="client_server.handle_state_updates",
-                )
+                ) from e
 
     def start_timer(self):
         """Record the current time as the start of a request."""
@@ -812,7 +812,7 @@ class ClientServer:
                 details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
                 status_code=STATUS_ERROR,
                 exception=e,
-            )
+            ) from e
         return None
 
     def get_messages(
@@ -847,7 +847,7 @@ class ClientServer:
                 details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
                 status_code=STATUS_ERROR,
                 exception=e,
-            )
+            ) from e
 
         return messages
 

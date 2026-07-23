@@ -1,6 +1,5 @@
 """Guarded access to argparse for runtimes that may not provide it."""
 
-
 try:
     import argparse
 

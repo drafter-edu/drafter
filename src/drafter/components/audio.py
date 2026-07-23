@@ -34,7 +34,7 @@ routes can inspect problems without try/except.
 
 import json
 from dataclasses import asdict, dataclass
-from typing import ClassVar, Literal, Union
+from typing import ClassVar, Literal
 
 from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
 from drafter.components.utilities.contracts import (
@@ -74,7 +74,7 @@ _NOTE_SEMITONES = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 REST = "rest"
 """A note that plays silence for its beats in a Melody."""
 
-NoteValue = Union[str, tuple[str, int | float]]
+NoteValue = str | tuple[str, int | float]
 """One item in a Melody's note list: a note name like `"C4"` (or
 `"rest"`), played for one beat, or a `(note, beats)` pair like
 `("C4", 2)`."""

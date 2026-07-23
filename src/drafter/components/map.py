@@ -16,7 +16,6 @@ internet connection; the JavaScript side degrades gracefully offline.
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Union
 
 from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
 from drafter.components.utilities.contracts import (
@@ -82,15 +81,13 @@ class MapView:
     zoom: int
 
 
-CenterValue = Union[MapLocation, tuple, list, str, None]
+CenterValue = MapLocation | tuple | list | str | None
 """The accepted forms for a Map's `center`: a `MapLocation`, a
 `(latitude, longitude)` pair, a `"latitude,longitude"` string, or None
 for the default center (see `_normalize_center`)."""
 
 
-def _normalize_center(
-    center: CenterValue, component_name: str
-) -> MapLocation | None:
+def _normalize_center(center: CenterValue, component_name: str) -> MapLocation | None:
     """Accept a MapLocation, (lat, lng) pair, or "lat,lng" string."""
     if center is None or isinstance(center, MapLocation):
         return center

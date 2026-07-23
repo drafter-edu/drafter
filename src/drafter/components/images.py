@@ -47,9 +47,7 @@ class Image(Component):
         ComponentArgument("height", kind="keyword", default_value=None),
     ]
 
-    def __init__(
-        self, url: str | PILImage.Image, width=None, height=None, **kwargs
-    ):
+    def __init__(self, url: str | PILImage.Image, width=None, height=None, **kwargs):
         """Initialize image component.
 
         Args:

@@ -103,9 +103,7 @@ class Table(Component):
             context,
         )
 
-    def get_tbody_from_dataclass(
-        self, context
-    ) -> tuple[RenderPlan, RenderPlan | None]:
+    def get_tbody_from_dataclass(self, context) -> tuple[RenderPlan, RenderPlan | None]:
         """Generate table body from a dataclass instance.
 
         Args:

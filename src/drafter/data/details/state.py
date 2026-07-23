@@ -16,6 +16,7 @@ class UpdatedStateEvent(TelemetryRecord):
     Event emitted when the server's state changes.
 
     Attributes:
+        kind: Event-type discriminator, always "UpdatedState"
         representation: Recursive representation dict describing the new
             state (see drafter.data.details.recursive_type_describer)
     """

@@ -311,7 +311,7 @@ class RecursiveTypeDescriber:
         rows: list[dict[str, Any]] = []
         types: list[str] = []
         total_complexity = 0
-        for index, item in enumerate(value):
+        for _index, item in enumerate(value):
             child_row = self._walk(item, depth + 1, seen_ids)
             types.append(child_row.get("fullType", child_row.get("type", "unknown")))
             rows.append(child_row)
@@ -339,7 +339,7 @@ class RecursiveTypeDescriber:
         rows: list[dict[str, Any]] = []
         type_flattener = TypeFlattener()
         maximum_complexity = 0
-        for index, item in enumerate(value):
+        for _index, item in enumerate(value):
             child_row = self._walk(item, depth + 1, seen_ids)
             type_flattener.add_type(child_row)
             rows.append(child_row)

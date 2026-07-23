@@ -21,6 +21,7 @@ class CSSLink:
     classes: set[str] = field(default_factory=set)
 
     def __repr__(self):
+        """Represent the link by its URL and CSS classes."""
         return f"CSSLink(url='{self.url}', classes={self.classes})"
 
     def precompile_to_html(self, with_extra_classes=None) -> str:

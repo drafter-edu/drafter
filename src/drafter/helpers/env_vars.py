@@ -1,7 +1,6 @@
 """Selective extraction and typed conversion of environment variables."""
 
 
-
 class EnvVars:
     """Extract and convert values from an environment-like mapping.
 

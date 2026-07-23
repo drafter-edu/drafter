@@ -14,7 +14,6 @@ The router installs the shared cross-component converters into it when
 conversion policy.
 """
 
-
 from drafter.components.utilities.contracts import ComponentContract
 from drafter.data.converter import CONVERTER_REGISTRY, ConverterRegistry
 

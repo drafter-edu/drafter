@@ -4,7 +4,6 @@ Provides functions to load and render Jinja2 templates for the index page,
 supporting multiple Python engines (Skulpt, Pyodide).
 """
 
-
 from jinja2 import Environment, FileSystemLoader, Template
 
 from drafter.config.system import SystemConfiguration

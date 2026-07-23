@@ -40,7 +40,7 @@ def build_zip(
     os.makedirs(os.path.dirname(output_zip), exist_ok=True)
     with zipfile.ZipFile(output_zip, "w", zipfile.ZIP_DEFLATED) as zipf:
         drafter_src = Path("drafter")
-        for root, dirs, files in os.walk(source_dir):
+        for root, _dirs, files in os.walk(source_dir):
             for file in files:
                 file_path = Path(root) / file
                 if skip_extensions and file_path.suffix in skip_extensions:

@@ -48,43 +48,44 @@ class Target:
     data_attribute: str | None = None
     attribute: dict[str, str] | None = None
     nth_child: int | None = None
-    #: Find the nearest ancestor matching the selector
     closest: bool = False
-    #: Constrain the search to elements within the target element
+    """Find the nearest ancestor matching the selector."""
     within: "Target | None" = None
+    """Constrain the search to elements within the target element."""
 
-    #: Whether to modify all matching elements or just the first
     all: bool = False
+    """Whether to modify all matching elements or just the first."""
 
     # Actions
-    #: Indicates that this is a full page load, resetting most content
     is_page_load: bool = False
-    #: Replace the entire node, not just its children
+    """Indicates that this is a full page load, resetting most content."""
     replace: bool = False
-    #: Only remove the matching element
+    """Replace the entire node, not just its children."""
     remove: bool = False
-    #: Set the innerHTML
+    """Only remove the matching element."""
     html: bool = False
-    #: Add content to the end of the element (inside)
+    """Set the innerHTML."""
     append: bool = False
-    #: Add content to the beginning of the element (inside)
+    """Add content to the end of the element (inside)."""
     prepend: bool = False
-    #: Insert content before the element (as a sibling)
+    """Add content to the beginning of the element (inside)."""
     before: bool = False
-    #: Insert content after the element (as a sibling)
+    """Insert content before the element (as a sibling)."""
     after: bool = False
+    """Insert content after the element (as a sibling)."""
 
-    #: Additional HTML attributes to update (must be strings)
     attributes_to_set: dict[str, str] | None = None
-    #: Additional CSS styles to update (must be strings)
+    """Additional HTML attributes to update (must be strings)."""
     styles_to_set: dict[str, str] | None = None
-    #: Class toggles to apply (class name -> whether to add/remove)
+    """Additional CSS styles to update (must be strings)."""
     class_toggles: dict[str, bool] | None = None
+    """Class toggles to apply (class name -> whether to add/remove)."""
 
-    #: If this target fails to find any elements, use the fallback instead
     fallback: "Target | None" = None
+    """If this target fails to find any elements, use the fallback instead."""
 
     def __repr__(self) -> str:
+        """Represent the target by only the fields that were explicitly set."""
         pieces = []
         if self.id:
             pieces.append(f"id='{self.id}'")

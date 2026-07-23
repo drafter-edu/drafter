@@ -7,7 +7,7 @@ python -m drafter
 
 The sys.argv will be something like:
 ```
-['../drafter/__main__.py', 'my_site.py', '--some-flag']
+["../drafter/__main__.py", "my_site.py", "--some-flag"]
 ```
 
 Instead, you probably want to run either your program or the

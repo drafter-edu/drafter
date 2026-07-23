@@ -376,7 +376,7 @@ def compare_sequences(
                 expected=expected,
             )
         )
-    for i, (a, e) in enumerate(zip(actual, expected)):
+    for i, (a, e) in enumerate(zip(actual, expected, strict=False)):
         diff = compare_equal(a, e, settings, path + [PathItem("index", str(i))])
         if diff:
             differences.extend(diff)

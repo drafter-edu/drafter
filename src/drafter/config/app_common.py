@@ -65,6 +65,7 @@ class AppCommonConfiguration(BaseConfiguration):
     site_title: str = "Drafter App Server"
 
     def __post_init__(self):
+        """Populate mutable field defaults after dataclass construction."""
         # Skulpt's dataclass implementation is stricter with mutable defaults, so
         # initialize defaults after construction instead of using a list default.
         if self.system_packages is None:

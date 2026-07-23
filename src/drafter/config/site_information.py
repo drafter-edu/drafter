@@ -6,11 +6,10 @@ set_site_information and shown in the site's information display.
 """
 
 from dataclasses import dataclass, field
-from typing import Union
 
 from drafter.components import PageContent
 
-SiteInformationType = Union[str, list, tuple, PageContent]
+SiteInformationType = str | list | tuple | PageContent
 """Type alias for the values a site information field can hold: a string, a
 list or tuple of entries, or a PageContent component."""
 
