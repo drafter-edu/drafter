@@ -67,7 +67,8 @@ class ClientServerConfiguration(BaseConfiguration):
     additional_script_content: list[str] = field(default_factory=list)
     # Shadow DOM CSS
     use_shadow_dom: bool = False
-    # Root element id, if None then will become
+    # Id of the DOM element the app renders into; also used as the instance
+    # registry key when configure_instance() supplies no explicit instance_id
     root_element_id: str = "drafter-root--"
     # System Routes
     system_routes: dict[str, Optional[Callable]] = field(default_factory=dict)
@@ -340,8 +341,19 @@ class ClientServerConfiguration(BaseConfiguration):
         """
         Updates a specific configuration key with a new value.
 
+        List-valued content keys (e.g., `additional_css_content`) have the
+        value appended rather than replaced; site-information keys are set on
+        the `information` object (created if needed); everything else is
+        assigned directly.
+
         Args:
             key: The configuration key to update (e.g., 'theme', 'in_debug_mode').
+            value: The new value to assign (or append, for list-valued keys).
+
+        Raises:
+            ValueError: If the key is not a known configuration attribute or
+                site-information key, or if a content key's current value is
+                not a list.
         """
         if not hasattr(self, key) and key not in self.SITE_INFORMATION_KEYS:
             # TODO: InvalidConfigurationKeyError

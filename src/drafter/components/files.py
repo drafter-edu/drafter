@@ -14,14 +14,20 @@ from drafter.components.forms import FormComponent
 class Download(Component):
     """Creates a downloadable link for file content.
 
-    Generates a data URL or base64-encoded content for download.
-    Supports both text and PIL Image content.
+    Renders an anchor whose `href` is a data URL built from the content.
+    String content is embedded directly as `data:<content_type>,<content>`.
+    When Pillow is installed, a PIL Image may also be passed (despite the
+    `str` annotation); it is encoded at render time as a base64 PNG data
+    URL, and `content_type` is ignored. Without Pillow, non-string content
+    is not converted and will not produce a usable link.
 
     Attributes:
         text: Display text for the download link.
         filename: Filename for the downloaded file.
-        content: Content to download (string or PIL Image).
-        content_type: MIME type of the content.
+        content: Content to download; a string, or a PIL Image when
+            Pillow is available.
+        content_type: MIME type used for string content; ignored for
+            PIL Images (which always become PNG data URLs).
         tag: The HTML tag name, always 'a'.
     """
 
@@ -110,13 +116,18 @@ class FileUpload(FormComponent):
 
     Attributes:
         name: The form field name for the uploaded file(s).
+        accept: Comma-separated file type filters rendered into the HTML
+            `accept` attribute. Built from the constructor's `accept`
+            argument, which may be a MIME type (e.g., 'image/*'), an
+            extension (e.g., '.jpg'), or an extension without a period
+            (e.g., 'png' — a period is prepended automatically). This
+            attribute only exists on the instance when a non-None accept
+            was given to the constructor.
         tag: The HTML tag name, always 'input'.
 
     Note:
-        The accept field specifies file types allowed for upload.
-        Accepts MIME types (e.g., 'image/*'), extensions (e.g., 'png'),
-        or extensions with period (e.g., '.jpg').
-        With 'multiple' attribute, corresponding parameter is a list of files.
+        With the 'multiple' attribute, the corresponding route parameter
+        is a list of files.
     """
 
     tag = "input"

@@ -250,9 +250,11 @@ def default_error(state, error: ErrorDetails, server: ClientServer):
     Args:
         state: Current application state.
         error: The error that occurred.
+        server: The ClientServer instance, used to include debug information
+            when enabled.
 
     Returns:
-        Page: Page content with error information.
+        Page content with error information.
     """
     friendly_summary = _build_friendly_summary(error)
     fix_steps = _build_fix_steps(error)

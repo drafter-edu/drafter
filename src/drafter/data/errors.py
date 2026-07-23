@@ -4,37 +4,31 @@ This module defines the single normalized error envelope used across the
 Python server lifecycle, the Python bridge runtime, and (via JSON) the
 TypeScript bootstrap/debug UI.
 
-Every failure should ultimately be describable as an :class:`ErrorDetails`:
+Every failure should ultimately be describable as an `ErrorDetails`:
 
-- ``id``: stable, code-like identifier (example: ``request.route_not_found``).
-- ``category``: one of :data:`CATEGORIES`.
-- ``severity``: one of :data:`SEVERITIES`.
-- ``message``: human-safe message.
-- ``details``: developer-focused details.
-- ``traceback``: optional traceback/stack text.
-- ``context``: correlation info (route, request_id, response_id, dom_id, phase).
-- ``status_code``: symbolic, HTTP-name-style status string (one of
-  :data:`STATUSES`); the precise failure is identified by ``id``/``category``.
-- ``recoverable``: whether the application can continue after this error.
-
-Status codes
-------------
+- `id`: stable, code-like identifier (example: `request.route_not_found`).
+- `category`: one of `CATEGORIES`.
+- `severity`: one of `SEVERITIES`.
+- `message`: human-safe message.
+- `details`: developer-focused details.
+- `traceback`: optional traceback/stack text.
+- `context`: correlation info (route, request_id, response_id, dom_id, phase).
+- `status_code`: symbolic, HTTP-name-style status string (one of
+  `STATUSES`); the precise failure is identified by `id`/`category`.
+- `recoverable`: whether the application can continue after this error.
 
 Status codes are a small, fixed set of symbolic strings with coarse
-HTTP-like meaning (see :data:`STATUSES`):
+HTTP-like meaning (see `STATUSES`):
 
-======================  =========================================================
-Status                  Meaning
-======================  =========================================================
-``ok``                  Successful response.
-``bad_request``         The request itself was malformed (e.g. argument parsing).
-``not_found``           No matching route was found.
-``error``               A server-side failure (route execution, payload handling,
-                        bridge, system, config, or runtime error).
-======================  =========================================================
+- `ok`: Successful response.
+- `bad_request`: The request itself was malformed (e.g. argument parsing
+  failed).
+- `not_found`: No matching route was found.
+- `error`: A server-side failure (route execution, payload handling,
+  bridge, system, config, or runtime error).
 
-The fine-grained distinction between failures lives in the envelope ``id``
-(for example ``payload.rendering_failed``) and ``category``; the status is
+The fine-grained distinction between failures lives in the envelope `id`
+(for example `payload.rendering_failed`) and `category`; the status is
 only a coarse outcome bucket used for responses and telemetry display.
 """
 
@@ -77,8 +71,6 @@ SEVERITIES = (
 )
 
 # ---------------------------------------------------------------------------
-# Status-code policy
-# ---------------------------------------------------------------------------
 # Status codes
 # ---------------------------------------------------------------------------
 
@@ -107,15 +99,15 @@ class ErrorDetails(Exception):
     """A container for details about an error, warning, or other negative event.
 
     Attributes:
-        id: Stable, code-like identifier (example: ``request.route_not_found``).
-        category: One of :data:`CATEGORIES`.
+        id: Stable, code-like identifier (example: `request.route_not_found`).
+        category: One of `CATEGORIES`.
         message: Human-safe message.
-        severity: One of :data:`SEVERITIES` (default ``error``).
+        severity: One of `SEVERITIES` (default `error`).
         details: Developer-focused details.
         traceback: Optional traceback/stack text.
         context: Correlation context for the error.
-        status_code: Symbolic status string (one of :data:`STATUSES`);
-            defaults to :data:`STATUS_ERROR`.
+        status_code: Symbolic status string (one of `STATUSES`);
+            defaults to `STATUS_ERROR`.
         recoverable: Whether the application can continue after this error.
     """
 
@@ -176,13 +168,19 @@ def envelope_from_exception(
     Args:
         exception: The exception being normalized.
         error_id: Stable, code-like identifier for this failure.
-        category: One of :data:`CATEGORIES`.
-        message: Human-safe message; defaults to ``str(exception)``.
+        category: One of `CATEGORIES`.
+        message: Human-safe message; defaults to `str(exception)`.
         details: Developer-focused details.
-        severity: One of :data:`SEVERITIES`.
+        severity: One of `SEVERITIES`.
         context: Correlation context.
-        status_code: Symbolic status string; defaults to :data:`STATUS_ERROR`.
+        status_code: Symbolic status string; defaults to `STATUS_ERROR`.
         recoverable: Whether the application can continue after this error.
+
+    Returns:
+        An `ErrorDetails` envelope populated from the exception, with the
+        formatted traceback attached when available. If traceback formatting
+        itself fails, the traceback is silently omitted (set to None) rather
+        than masking the original error.
     """
     try:
         traceback_text: Optional[str] = "".join(
@@ -191,7 +189,9 @@ def envelope_from_exception(
             )
         )
     except Exception:
-        # Some runtimes (e.g., Skulpt) have limited traceback support.
+        # Defensive fallback: traceback formatting can itself fail (e.g., on
+        # exotic exception objects); omit the traceback rather than let a
+        # formatting error mask the original exception.
         traceback_text = None
     return ErrorDetails(
         id=error_id,

@@ -11,6 +11,8 @@ class Theme:
         name: The name identifier for the theme.
         css_paths: List of paths to CSS files that define the theme styling.
         js_paths: List of paths to JavaScript files associated with the theme.
+        metadata: Optional string key/value pairs describing the theme (e.g.,
+            attribution or source information).
     """
 
     name: str

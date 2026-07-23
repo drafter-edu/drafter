@@ -1,7 +1,11 @@
-""" "
-Components for simulating timers that count down or clocks that count up.
+"""Custom-element components for time-based callbacks.
 
-
+Provides the `Timer` component (counts down from a duration, firing an event
+when it finishes and optionally on each tick) and the `Clock` component
+(counts up indefinitely, firing an event on each tick). Both render as custom
+elements (`drafter-timer` and `drafter-clock`) implemented in
+js/src/components/timer.tsx, and register contracts describing the payloads
+of the events they emit.
 """
 
 from dataclasses import dataclass
@@ -138,10 +142,20 @@ class Clock(Component):
 
     Internally uses setInterval to trigger the callback on each tick.
 
+    Note:
+        The `route` field is rendered as the `on_tick` attribute (via
+        `RENAME_ATTRS`), so `route` is effectively an alias for `on_tick`;
+        both trigger the same tick event handling.
+
     Attributes:
-        interval (int): Interval between ticks in milliseconds.
-        route (UrlOrFunction): Function or URL to call on each tick.
-        show (bool): Whether to display the clock. Defaults to True.
+        interval: Interval between ticks in milliseconds.
+        route: Function or URL to call on each tick.
+        show: Whether to display the elapsed time. Defaults to True.
+        controls: Whether to show pause/restart controls. Defaults to False.
+        persistent: Whether the clock keeps running across page transitions.
+            Defaults to False.
+        on_tick: Optional function or URL to call on each tick; alternative
+            keyword spelling of `route`. Defaults to None.
     """
 
     interval: int

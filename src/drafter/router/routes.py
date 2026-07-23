@@ -95,8 +95,11 @@ class Router:
     """Map URL paths to route handler functions and prepare request arguments.
 
     Attributes:
-        routes: Dictionary mapping URL strings to callable handlers.
-        signatures: Dictionary mapping URL strings to RouteSignatureSpec data.
+        routes: Dictionary mapping normalized URL strings to callable handlers.
+        route_functions: Dictionary mapping cleaned function-style names to the
+            same handlers, used for name-based lookup in `get_route`.
+        signatures: Dictionary mapping normalized URL strings to
+            RouteSignatureSpec data.
     """
 
     def __init__(self) -> None:
@@ -140,9 +143,11 @@ class Router:
             url: Route URL path.
             func: Handler function to call for requests to this URL.
 
-        TODO:
-            Handle ignored parameters.
+        Returns:
+            A dict with the registered "url" and the handler's "signature"
+            rendered as a string.
         """
+        # TODO: Handle ignored parameters.
         self.routes[normalize_url(url)] = func
         self.route_functions[clean_url(url)] = func
         self.signatures[normalize_url(url)] = get_signature(func)

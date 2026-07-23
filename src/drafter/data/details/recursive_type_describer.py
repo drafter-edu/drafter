@@ -1,73 +1,48 @@
+"""Recursive description of Python values for the debug UI.
+
+Walks arbitrarily nested Python data (primitives, tuples, lists/sets,
+dicts, dataclasses, and Pillow images) and produces JSON-friendly
+"representation" dictionaries that the client renders as nested tables
+of values and types (e.g., a `list[Dog]` becomes rows of field/value
+pairs; a 2D homogenous list becomes a grid).
+
+Every representation dict has at least:
+
+- `kind`: which shape of representation this is (e.g. `primitive`,
+  `tuple`, `homogenous_linear_collection`, `homogenous_grid`, `dict`,
+  `dataclass`, `cycle_reference`, `max_depth_reached`, `unknown`,
+  `error`).
+- `type`: the value's class name. Collections may also carry
+  `elementType`/`keyType`/`valueType` and a `fullType` such as
+  `list[int]` or `dict[str, int]`.
+- `id`: the `id()` of the value (cycle references instead carry
+  `targetId`, pointing at the already-described object).
+- `complexity`: a rough integer score of how complicated the value is,
+  used to give students meaningful explanations of their state.
+
+Depending on `kind`, a dict also carries the described children:
+`value` for primitives, `elements` for tuples/lists/sets, `rows` for
+2D grids, `entries` (key/value pairs) for dicts, and `fields`
+(name/value pairs) for dataclasses. Cycles are reported as
+`cycle_reference` nodes rather than recursed into, and traversal stops
+at a configurable maximum depth.
 """
-Returns a dictionary with at least the fields: name, type, value
 
-Value is always able to be a single or nested Representation
-
-String/Integer/Boolean/None primitive: Value and Type boxes
-
-List[Primitive]: Two column, value and type. Value is a set of rows.
-Dict[T, Primitive]: Three columns: (Key, Value) in rows, then type column
-Class[Primitives]: Three columns: (Field, Value, Type) in rows
-Dict[Any, Any]: Four columns: (Key, Key Type, Value, Value Type) in rows
-
-List[Union]:  Need to show type per item
-
-- [X] Primitive types: str, int, float, bool, None
-- [X] Homogenous Composite types: list, dict, set, tuple
-- [+] Heterogenous Dataclass types: dataclass, class, namedtuple, dict, TypedDict
-    - [ ] namedtuple
-    - [ ] TypedDict
-    - [ ] class (non-dataclass)
-- [*] Recursive Types: Linked List, Tree Node, Graph Node
-- [ ] Type Unions: Optional, Union
-- [ ] Images (PIL): PIL.Image.Image
-- [ ] Files: pathlib.Path, io.StringIO, io.BytesIO, DrafterFile
-- [ ] Drafter components: Drafter-specific types with custom reprs
-- [ ] Binary data: bytes, bytearray
-- [ ] Functions/Methods: function, method, lambda
-- [ ] Iterator/Generators: iterator, generator, range, enumerate
-- [ ] Meta types: type, module
-- [ ] Literal Types: Literal
-- [ ] Special Types: Any, Never
-- [ ] Exceptions: Exception, BaseException
-
-Also measure complexity to provide meaningful explanations to students.
-(Could be used as a heuristic for when to trigger IndexDB storage of state snapshots.)
-
-When rendering large lists, only show the first N and last N items, with an ellipsis in between.
-
-Examples:
-
-Primitives:
-    str: "Hello World"
-    int: 42
-    float: 3.14
-
-List of Primitives:
-    list[str]: ["apple", "banana", "cherry"]
-    list[int]: [1, 2, 3, 4, 5]
-
-2D List of Primitives: Try to show as a table
-    list[list[int]]: [ [1, 2, 3], [4, 5, 6], [7, 8, 9] ]
-
-
-List of Unions:
-    list[str | int]: [ ("apple", str), (42, int), ("banana", str) ]
-
-Dataclass with Primitives:
-    Dog
-    [name, str, "Fido"]
-    [age, int, 5]
-    [is_good, bool, True]
-
-List of Dataclasses:
-    list[Dog]: [
-        [name, str, "Fido"], [age, int, 5], [is_good, bool, True]
-        [name, str, "Rex"], [age, int, 3], [is_good, bool, False]
-        [name, str, "Spot"], [age, int, 4], [is_good, bool, True]
-    ],
-
-"""
+# Roadmap of value kinds not yet specially handled (they currently fall
+# through to the generic "unknown" repr, or to a structural handler that
+# loses type-specific detail):
+# - namedtuple (described as a plain tuple) and TypedDict (plain dict)
+# - non-dataclass class instances
+# - declared type unions: Optional, Union
+# - files: pathlib.Path, io.StringIO, io.BytesIO,
+#   DrafterBinaryFile/DrafterTextFile
+# - Drafter components (types with custom reprs)
+# - binary data: bytes, bytearray
+# - functions/methods/lambdas; iterators/generators/range/enumerate
+# - meta types (type, module); Literal; Any/Never; exceptions
+# Also planned: truncating large lists to the first/last N items with an
+# ellipsis in between, and using the complexity score as a heuristic for
+# when to trigger IndexDB storage of state snapshots.
 
 from dataclasses import fields, is_dataclass
 from typing import Any
@@ -97,10 +72,6 @@ def first_shared_base(cls1, cls2):
     return None
 
 
-# Adding a list of dogs
-# Then adding a list of cats
-
-
 class TypeFlattener:
     # TODO: Need to handle shared common ancestors, collection types
     # Should also be checking the actual types of things, not just the
@@ -124,14 +95,36 @@ class TypeFlattener:
 
 
 class RecursiveTypeDescriber:
-    """
-    Utility to describe nested Python structures as nested representations.
+    """Describes nested Python values as JSON-friendly representation dicts.
+
+    Recursively walks a value, producing one representation dict per node
+    (see the module docstring for the dict fields). Cycles are reported as
+    `cycle_reference` nodes, and traversal past `max_depth` is reported as
+    `max_depth_reached` nodes.
+
+    Attributes:
+        max_depth: Maximum recursion depth before traversal stops.
     """
 
     def __init__(self, *, max_depth: int = 5) -> None:
         self.max_depth: int = max_depth
 
     def analyze(self, value: Any) -> dict[str, Any]:
+        """Describe a value as a nested representation dict.
+
+        Never raises: any failure during analysis is captured and returned
+        as an `error` representation dict (or a `complete_failure` dict if
+        even the error reporting fails).
+
+        Args:
+            value: The Python value to describe.
+
+        Returns:
+            A representation dict with at least `kind`, `type`, and
+            `complexity` fields; most kinds also carry the value's `id` and
+            kind-specific children such as `value`, `elements`, `rows`,
+            `entries`, or `fields` (see the module docstring).
+        """
         try:
             result = self._walk(value, 0, set())
             return result
@@ -404,4 +397,17 @@ class RecursiveTypeDescriber:
 
 
 def analyze_type(value: Any, max_depth: int = 5) -> dict[str, Any]:
+    """Describe a value as a nested representation dict.
+
+    Convenience wrapper around `RecursiveTypeDescriber.analyze`.
+
+    Args:
+        value: The Python value to describe.
+        max_depth: Maximum recursion depth before traversal stops.
+
+    Returns:
+        A representation dict describing `value`, with at least `kind`,
+        `type`, and `complexity` fields plus kind-specific children (see
+        the module docstring and `RecursiveTypeDescriber.analyze`).
+    """
     return RecursiveTypeDescriber(max_depth=max_depth).analyze(value)

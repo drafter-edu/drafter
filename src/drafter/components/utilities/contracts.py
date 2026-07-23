@@ -4,6 +4,16 @@ from typing import Any, Callable
 
 @dataclass
 class EventPayloadFieldSpec:
+    """One field a component event contributes to the request payload.
+
+    Attributes:
+        name: Canonical payload key routes can declare as a parameter.
+        python_type: The Python type the value arrives as after the
+            bridge decodes the event detail.
+        documentation: Student-facing description of the field, used in
+            docs generation and diagnostics.
+    """
+
     name: str
     python_type: type
     documentation: str
@@ -11,6 +21,22 @@ class EventPayloadFieldSpec:
 
 @dataclass
 class EventPayloadSpec:
+    """The payload one component event promises to deliver.
+
+    Attributes:
+        event_name: The event that fires (matched against a Request's
+            `action`).
+        fields: Fields always present in the event's payload.
+        optional_fields: Fields the event may include but does not
+            guarantee.
+        aliases: Mapping of canonical field name to a list of alternate
+            payload names, e.g. `{"latitude": ["lat"]}`. The contract
+            registry's `alias_map` flattens these into an
+            alternate-to-canonical mapping so the router's normalize
+            stage rewrites incoming keys to canonical names before
+            binding.
+    """
+
     event_name: str
     fields: list[EventPayloadFieldSpec]
     optional_fields: list[EventPayloadFieldSpec] = field(default_factory=list)
@@ -58,10 +84,29 @@ class HelperSpec:
 
 @dataclass
 class ComponentContract:
+    """Everything a component declares about its runtime behavior.
+
+    The Python side defines the contract, the JS implementation of the
+    component must match it, and the contract registry aggregates all
+    contracts at startup so the router can reason globally (payload
+    binding, alias normalization, helper injection, docs generation).
+
+    Attributes:
+        component_name: The Python class name of the component
+            (e.g., "Map").
+        html_tag: The custom element tag the component renders as
+            (lowercase, e.g., "drafter-map"); used to match DOM events
+            back to the contract.
+        emitted_events: One `EventPayloadSpec` per event the component
+            emits, describing the payload each delivers.
+        synthetic_fields: Extra non-form payload field names the
+            component contributes (beyond regular form inputs).
+        provided_helpers: `HelperSpec` callables injected into routes
+            that handle this component's events.
+    """
+
     component_name: str
     html_tag: str
     emitted_events: list[EventPayloadSpec]
-    #: extra non-form fields it contributes
     synthetic_fields: list[str] = field(default_factory=list)
-    #: callables injected into routes handling this component's events
     provided_helpers: list[HelperSpec] = field(default_factory=list)

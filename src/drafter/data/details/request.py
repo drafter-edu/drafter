@@ -17,8 +17,8 @@ class RequestEvent(TelemetryRecord):
     Attributes:
         url: The URL being requested
         action: The action being performed
-        kwargs: Request keyword arguments
-        event: Additional event information
+        kwargs: String representation of the request keyword arguments
+        event: String representation of the additional event information
         request_id: Unique identifier for this request
     """
 
@@ -50,13 +50,12 @@ class RequestEvent(TelemetryRecord):
         )
 
 
+# TODO: Also track argument type changes, unused arguments, unmatched
+#       arguments, and button-namespace usage in RequestParseEvent.
 @dataclass
 class RequestParseEvent(TelemetryRecord):
     """
     Event emitted when a request is parsed.
-
-    TODO: Also track argument type changes, unused arguments, unmatched arguments, etc.
-    TODO: if a button namespace was used,
 
     Files and images get special handling so they can be
     rendered properly in the client, and also in the history.
@@ -92,6 +91,9 @@ class ResponseEvent(TelemetryRecord):
         duration_ms: Time taken to process the request in milliseconds
         response_id: Unique identifier for this response
         request_id: ID of the associated request
+        formatted_page_content: The rendered HTML content of the page
+            (falls back to the raw response body when no formatted body
+            is available)
     """
 
     status_code: str = STATUS_OK

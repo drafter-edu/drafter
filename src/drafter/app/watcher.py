@@ -114,15 +114,21 @@ async def _watch_and_reload(
     system: SystemConfiguration,
     student_path: Path,
 ):
-    """Monitor file changes and broadcast reload events.
+    """Monitor file changes and broadcast reload or restart events.
 
-    Watches the specified paths for any changes and triggers a reload
-    broadcast when changes are detected.
+    Watches all the given paths. When a change falls under a path marked
+    `full_reload=False`, it first attempts a student-restart broadcast
+    carrying the current contents of `student_path`, falling back to a
+    full page reload broadcast if reading or broadcasting fails. Changes
+    anywhere else trigger a full page reload broadcast.
 
     Args:
         hub: ReloadHub instance to broadcast through.
-        watch_paths: List of file paths to monitor.
+        watch_paths: List of paths to monitor; each entry's `full_reload`
+            flag decides between a page reload and a student-code restart.
         system: System configuration (for future use).
+        student_path: Path to the student's main code file, whose
+            contents are sent with student-restart broadcasts.
     """
     # watchfiles supports multiple roots
     watched_student_path = student_path.resolve()

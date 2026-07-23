@@ -248,6 +248,14 @@ class SelectBox(FormComponent):
 class CheckBox(FormComponent):
     """
     A checkbox input component for boolean values.
+
+    Note:
+        Rendering emits an extra hidden input with the same name (and an
+        empty value) before the checkbox, so that the unchecked state is
+        still submitted with the form.
+
+    Attributes:
+        default_value: Whether the checkbox is initially checked.
     """
 
     default_value: bool
@@ -268,7 +276,7 @@ class CheckBox(FormComponent):
         Args:
             name: The form field name.
             default_value: Whether initially checked. Defaults to False.
-            **kwargs (dict): Additional HTML attributes.
+            **kwargs: Additional HTML attributes.
 
         Raises:
             ValueError: If name is not a valid parameter name.
@@ -304,6 +312,11 @@ class RelatedCheckBox(FormComponent):
     """
     A checkbox component that is part of a group of related checkboxes.
     These checkboxes share the same name and are submitted as a list of values.
+
+    Attributes:
+        value: The value this checkbox contributes to the submitted list when
+            checked. Also used as the element's default id (see `get_id`).
+        default_value: Whether the checkbox is initially checked.
     """
 
     default_value: bool
@@ -326,7 +339,7 @@ class RelatedCheckBox(FormComponent):
             name: The form field name.
             value: The value of the checkbox, which will be transformed into a list element
             default_value: Whether initially checked. Defaults to False.
-            **kwargs (dict): Additional HTML attributes.
+            **kwargs: Additional HTML attributes.
 
         Raises:
             ValueError: If name is not a valid parameter name.
@@ -370,7 +383,7 @@ class RadioButtonGroup(FormComponent):
             name: The form field name.
             options: The list of radio button options.
             default_value: The initially selected option. Defaults to None.
-            **kwargs (dict): Additional HTML attributes.
+            **kwargs: Additional HTML attributes.
 
         Raises:
             ValueError: If name is not a valid parameter name.

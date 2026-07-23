@@ -45,6 +45,12 @@ def render_index_html(
     provided values. The assets_url parameter controls how assets are served.
 
     Args:
+        system: System configuration; selects the engine template and is
+            exposed to the template (along with its JSON form and the
+            site title).
+        modified_system: Dict of configuration values that differ from
+            the defaults, made available to the template (an empty dict
+            when falsy).
         inline_py: Whether Python code is inlined in HTML.
         user_code: User Python code to inline (if inline_py=True).
         python_url: URL to load user code from (if inline_py=False).
@@ -52,6 +58,11 @@ def render_index_html(
         assets_url: Asset URL prefix (None for package defaults).
         compiled_body: Pre-rendered HTML body content.
         compiled_headers: Pre-rendered header content.
+        pyodide_drafter_path: Where Pyodide should load the drafter
+            package from — an asset path to a built zip or a pip
+            requirement spec (e.g. `drafter==<version>`); empty to use
+            the default.
+
     Returns:
         Rendered HTML string ready to send to client.
     """

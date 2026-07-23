@@ -14,6 +14,8 @@ class Request:
         kwargs: A dictionary of keyword arguments (form data) sent with the request.
         event: A dictionary of additional event information.
         dom_id: The DOM id of the element that triggered the request, if applicable.
+        button_pressed: The name of the button that submitted the request, or an
+            empty string if no button was involved.
         raw_payload: Optional provenance-tagged payload entries produced by the
             bridge; each entry is a dict with "name", "value", "source", and
             "source_detail" keys. When present, the router prefers these over

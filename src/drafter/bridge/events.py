@@ -656,19 +656,31 @@ def collect_form_data(
     set[str],
     list[Any],
 ]:
-    """
-    Collect raw form values.
+    """Collect raw form values, starting file uploads asynchronously.
 
-    All fields are represented as lists until file uploads complete
-    and cardinality normalization occurs.
+    Builds a FormData snapshot of the form and groups every entry into a
+    list per field name (pre-seeded with all multi-valued field names, so
+    unchecked/empty multi-fields still appear). String values are stored
+    directly; each file entry is stored as a pending-upload placeholder at
+    its original position and replaced with the uploaded file data when
+    its upload promise resolves. All fields are represented as lists until
+    file uploads complete and cardinality normalization occurs (see
+    `normalize_form_data`).
 
     Args:
-        runtime (RuntimeAdapter): _description_
-        form (Any): _description_
-        submitter (Any): _description_
+        runtime: Runtime adapter used to create the FormData object,
+            start file uploads, and chain their promises.
+        form: The form element whose values are being collected.
+        submitter: The element that submitted the form (passed to
+            FormData so its name/value is included), or None.
 
     Returns:
-        tuple[ dict[str, list[Any]], set[str], list[Any], ]: _description_
+        Tuple of (grouped, multiple_names, upload_promises), where
+        `grouped` maps each field name to its list of raw values (file
+        entries still pending until the promises resolve),
+        `multiple_names` is the set of field names that may carry
+        multiple values, and `upload_promises` is a list of promises that
+        must all resolve before `grouped` contains only real values.
     """
     form_data = runtime.create_form_data(form, submitter)
     multiple_names = get_multiple_field_names(form)

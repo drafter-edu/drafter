@@ -76,9 +76,26 @@ class NavigationController:
         button_pressed=None,
         remember=True,
     ):
-        """
-        General purpose function for navigating to a new page by creating
+        """General purpose function for navigating to a new page by creating
         a new request and initiating it.
+
+        Args:
+            url: The route to visit.
+            data: Keyword arguments for the route (becomes the Request's
+                `kwargs`). If it contains the submit-button key, that entry
+                is popped and used as `button_pressed` when none was given.
+            action: The Request action label (e.g. "system", "link",
+                "form"). Defaults to "system".
+            dom_id: DOM id of the element that triggered the navigation;
+                empty string when None.
+            button_pressed: The button that initiated the request. When
+                falsy, it is extracted from `data` via the submit-button
+                key instead.
+            remember: Whether the resulting request should be added to
+                the browser history (passed through to `navigate`).
+
+        Returns:
+            The Response produced by the navigation function.
         """
         button_pressed = button_pressed or extract_button_pressed(data or {})
         request = Request(
@@ -104,9 +121,20 @@ class NavigationController:
         request: Request,
         remember=True,
     ):
-        """
-        Takes a Request and initiates it by invoking the navigation function,
+        """Takes a Request and initiates it by invoking the navigation function,
         while also notifying the BrowserHistory.
+
+        Args:
+            request: The Request to initiate.
+            remember: Whether to add the request to the browser history
+                before dispatching it.
+
+        Returns:
+            The Response produced by the navigation function.
+
+        Raises:
+            RuntimeError: If the navigation function has not been set via
+                `set_navigation_func`.
         """
         if self.navigation_func is None:
             raise RuntimeError("Navigation function not set in ClientBridge.")

@@ -928,10 +928,11 @@ class ClientServer:
         Args:
             url: Route URL path.
             func: Handler function to call for this route.
-
-        TODO:
-            Inspect route function for valid signature.
+            is_system_route: Whether the route is registered by the
+                framework itself rather than user code; recorded on the
+                logged `RouteAddedEvent`.
         """
+        # TODO: Inspect route function for valid signature.
         details = self.router.add_route(url, func)
         log_record(
             RouteAddedEvent(**details, is_system_route=is_system_route),
@@ -943,6 +944,11 @@ class ClientServer:
 
         Args:
             envelope: The error details envelope to display.
+
+        Returns:
+            `InitialSiteData` from the site's error fallback renderer, or,
+            if that renderer itself fails, a minimal hard-coded error page
+            showing both the original envelope and the rendering error.
         """
         try:
             return self.site.render_error_fallback(envelope)

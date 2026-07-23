@@ -89,10 +89,13 @@ class BaseConfiguration:
         """Merge new arguments into configuration.
 
         Args:
-            new_args: Dict of argument names and values.
+            new_args: Dict of argument names and values. None values are ignored.
+            raise_errors: Whether to raise on unknown attribute names; when
+                False, unknown names are silently skipped.
 
         Raises:
-            AttributeError: If unknown configuration attribute provided.
+            AttributeError: If an unknown configuration attribute is provided
+                and `raise_errors` is True.
         """
         for key, value in new_args.items():
             if hasattr(self, key):

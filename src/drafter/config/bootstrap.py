@@ -12,7 +12,9 @@ class BootstrapConfiguration(BaseConfiguration):
     )
     mode: str = "start_server"  # Options: "start_server", "compile_site"
     config_file: Optional[list[str]] = (
-        None  # Semicolon-separated paths to config files, if needed
+        # Paths to config files, if needed. Set via the semicolon-separated
+        # DRAFTER_CONFIG_FILE env var or by repeating the --config-file flag.
+        None
     )
     verbose: bool = False
 

@@ -95,7 +95,7 @@ class Audio(Component):
                 transitions (e.g., background music). Note that browsers
                 require a user interaction before audio can start playing.
                 Defaults to False.
-            **kwargs (dict): Additional HTML attributes and styles.
+            **kwargs: Additional HTML attributes and styles.
         """
         self.src = src
         self.controls = controls
@@ -177,7 +177,7 @@ class Video(Component):
             persistent: Whether the video keeps playing across page
                 transitions. Note that browsers require a user interaction
                 before unmuted media can start playing. Defaults to False.
-            **kwargs (dict): Additional HTML attributes and styles.
+            **kwargs: Additional HTML attributes and styles.
         """
         self.src = src
         self.width = width
@@ -225,7 +225,7 @@ class Canvas(Component):
             canvas_id: ID attribute for the canvas element.
             width: Width in pixels. Defaults to 300.
             height: Height in pixels. Defaults to 150.
-            **kwargs (dict): Additional HTML attributes and styles.
+            **kwargs: Additional HTML attributes and styles.
         """
         self.canvas_id = canvas_id
         self.width = width
@@ -275,7 +275,7 @@ class SVG(Component):
             width (Optional[int]): Optional width attribute.
             height (Optional[int]): Optional height attribute.
             viewBox (Optional[str]): Optional viewBox attribute (e.g., '0 0 100 100').
-            **kwargs (dict): Additional HTML attributes and styles.
+            **kwargs: Additional HTML attributes and styles.
         """
         self.content = content
         self.width = width

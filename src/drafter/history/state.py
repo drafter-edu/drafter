@@ -13,6 +13,10 @@ class SiteState:
 
     Attributes:
         current: The current state of the site, which can be any type.
+        history: Every state set via `update`, in order, including the
+            current one.
+        initial: A deep copy of the first state ever set, used by `reset`.
+        initialized: Whether a first state has been recorded yet.
     """
 
     current: Any = None

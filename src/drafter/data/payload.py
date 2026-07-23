@@ -29,7 +29,22 @@ class PayloadValue:
 
 def describe_source(value: Optional[PayloadValue], fallback_name: str = "") -> str:
     """Student-facing description of where a payload value came from,
-    e.g. ``"the form field 'age'"``."""
+    e.g. ``"the form field 'age'"``.
+
+    Args:
+        value: The payload value to describe, or None if the value's
+            provenance is unknown. Its `source` selects a phrase from
+            `SOURCE_PHRASES` (falling back to "the value"), and its
+            `source_detail`, when present, is appended in parentheses.
+        fallback_name: Name used when `value` is None; produces
+            ``"the value for '<fallback_name>'"``. If empty as well, the
+            generic ``"the request"`` is returned.
+
+    Returns:
+        Human-readable phrase such as ``"the form field 'age'"`` or
+        ``"the event value 'latitude' (drafter-map)"``, suitable for
+        student-facing diagnostics.
+    """
     if value is None:
         if fallback_name:
             return f"the value for '{fallback_name}'"

@@ -160,7 +160,32 @@ def raise_bridge_system_error(
     phase: Optional[str] = None,
     status_code: Optional[str] = None,
 ) -> None:
-    """Log and raise a normalized RuntimeError for bridge system failures."""
+    """Log and raise a normalized RuntimeError for bridge system failures.
+
+    This function always raises: the failure is first reported through
+    `report_bridge_error` (with `recoverable=False`), then a RuntimeError
+    carrying the envelope's message is raised, chained from the normalized
+    originating exception if one was given.
+
+    Args:
+        event_type: Stable, code-like id (e.g. ``client.form_root_missing``).
+        message: Human-safe message; becomes the RuntimeError's message.
+        source: The component/function reporting the failure.
+        details: Developer-focused details.
+        exception: Originating exception or thrown value, if any;
+            normalized and chained as the RuntimeError's cause.
+        request_id: Associated request id, if known.
+        response_id: Associated response id, if known.
+        dom_id: Associated DOM element id, if known.
+        route: Associated route, if known.
+        phase: Bridge lifecycle phase (setup, navigation,
+            channel_execution, event_dispatch).
+        status_code: Symbolic status string; defaults to STATUS_ERROR.
+
+    Raises:
+        RuntimeError: Always, with the logged envelope's message, chained
+            from the normalized originating exception when one was given.
+    """
     normalized_exception = (
         normalize_bridge_exception(exception) if exception is not None else None
     )

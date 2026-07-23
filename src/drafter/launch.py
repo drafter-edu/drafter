@@ -74,10 +74,18 @@ def start_server(
         open_browser: Auto-open browser in dev mode.
         inline_py: Inline code in HTML vs. load via HTTP.
         use_reloader: Enable file watcher and auto-reload.
+        reloader: Deprecated alias for `use_reloader`, kept for
+            compatibility with older versions; used only when
+            `use_reloader` is not given.
+        cdn_skulpt: Deprecated and ignored; passing a value prints a
+            warning.
+        cdn_skulpt_std: Deprecated and ignored; passing a value prints a
+            warning.
+        cdn_skulpt_drafter: Deprecated and ignored; passing a value
+            prints a warning.
+        argv: Command-line argument override passed into the system
+            configuration.
         **extra_configuration: Additional configuration parameters.
-
-    Raises:
-        Various exceptions from ClientServer or AppServer initialization.
     """
     # Handle compatibility for old parameters
     parameters = {}

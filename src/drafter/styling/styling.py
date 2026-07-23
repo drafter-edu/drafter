@@ -1,10 +1,22 @@
+"""Helper functions for styling PageContent components.
+
+Provides convenience wrappers that update a component's CSS styles or HTML
+attributes and return the component, so calls can be chained inline when
+building a page. Includes text styling helpers (`bold`, `italic`,
+`underline`, `strikethrough`, `monospace`, font/size/color changes), layout
+helpers (`float_left`, `float_right`, sizing, border/margin/padding), and
+the general-purpose `update_style` and `update_attr` primitives that the
+other helpers are built on.
+
+Each helper also accepts a plain string (which is wrapped in a new Text
+component) or a list of components (each element is updated).
 """
-TODO:
-- [ ] indent
-- [ ] center
-- [ ] Superscript, subscript
-- [ ] border/margin/padding (all sides)
-"""
+
+# Ideas for additional helpers, not yet implemented:
+# - indent
+# - center
+# - superscript, subscript
+# - border/margin/padding for individual sides
 
 from typing import Union
 from drafter.components import Text, PageContent

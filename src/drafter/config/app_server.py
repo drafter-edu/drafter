@@ -37,7 +37,8 @@ class AppServerConfiguration(BaseConfiguration):
     def get_key() -> str:
         return "app_server"
 
-    # TODO: Additional configuration settings from `scaffolding/index.skulpt.template.html` go here
+    # TODO: Additional configuration settings from the scaffolding index
+    #       templates (e.g., `scaffolding/index.pyodide.template.html`) go here
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
         result = EnvVars(env_vars)

@@ -80,7 +80,7 @@ class RemovePersistent(Component):
         Args:
             target: The key string, id, or component identifying the persisted
                 component to remove.
-            **kwargs (dict): Additional HTML attributes and styles.
+            **kwargs: Additional HTML attributes and styles.
         """
         self.target = target
         self.extra_settings = kwargs

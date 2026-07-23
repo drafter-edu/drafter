@@ -19,9 +19,16 @@ def build_zip(
 ):
     """Build a zip file from the source directory.
 
+    Every file under `source_dir` is stored in the archive nested under a
+    `drafter/` prefix (so the archive unpacks as an importable `drafter`
+    package), and the package's `pyproject.toml` is injected at the
+    archive root.
+
     Args:
         source_dir: Path to the directory to zip.
         output_zip: Path to the output zip file (should end with .zip).
+        skip_extensions: Optional set of file suffixes (including the
+            dot, e.g. `{".pyc", ".log"}`) to exclude from the archive.
     """
     os.makedirs(os.path.dirname(output_zip), exist_ok=True)
     with zipfile.ZipFile(output_zip, "w", zipfile.ZIP_DEFLATED) as zipf:

@@ -119,7 +119,32 @@ def add_style(
     with_class: str = "",
     using_shadow_dom: bool = False,
 ) -> None:
-    """Adds CSS content to the page."""
+    """Adds CSS content to the page.
+
+    In the shadow-DOM branch, a constructed `CSSStyleSheet` (built with the
+    owning window's constructor, since stylesheets can only be adopted by
+    documents from the same realm) is appended to the root's
+    `adoptedStyleSheets`. Otherwise, a `<style>` element is created and
+    appended to the document head.
+
+    Args:
+        root: In the shadow-DOM branch, the shadow root that adopts the
+            stylesheet; otherwise, the node used to resolve the owning
+            document (may be inside an iframe rather than the top page).
+        css: CSS source text to add.
+        is_page_specific: Whether to mark the style element as
+            page-specific so it is cleaned up on navigation. Only applies
+            in the document branch; ignored for adopted stylesheets.
+        with_class: Optional class attribute to set on the style element.
+            Only applies in the document branch.
+        using_shadow_dom: Whether `root` is a shadow root that should
+            adopt a constructed stylesheet instead of receiving a
+            `<style>` element in the document head.
+
+    Returns:
+        The created `<style>` element in the document branch; None in the
+        shadow-DOM branch (the constructed stylesheet is not returned).
+    """
     document = get_document(root)
     if using_shadow_dom:
         # Constructed stylesheets can only be adopted by documents from the
@@ -146,7 +171,24 @@ def add_style(
 def add_link(
     root, css_link: str, is_page_specific: bool = False, with_class: str = ""
 ) -> None:
-    """Adds a link element to the page for CSS files."""
+    """Adds a link element to the page for CSS files.
+
+    Creates a `<link rel="stylesheet">` element and appends it to the head
+    of the document owning `root`. Unlike `add_style`, this has no
+    shadow-DOM branch; use `add_link_to_shadow` to attach a stylesheet
+    link inside a shadow root.
+
+    Args:
+        root: Node used to resolve the owning document (may be inside an
+            iframe rather than the top page).
+        css_link: URL of the CSS file to link.
+        is_page_specific: Whether to mark the link element as
+            page-specific so it is cleaned up on navigation.
+        with_class: Optional class attribute to set on the link element.
+
+    Returns:
+        The created `<link>` element that was appended to the head.
+    """
     document = get_document(root)
     link = document.createElement("link")
     link.setAttribute("type", "text/css")

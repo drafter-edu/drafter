@@ -443,6 +443,13 @@ class Component:
     def get_fields(self) -> tuple[dict[str, Any], dict[str, Any]]:
         """
         Get the fields of the component, suitable for comparison.
+
+        Returns:
+            A tuple of two dicts. The first maps declared argument names (and
+            any unhandled `extra_settings` keys) to their values; the second
+            holds positionally-rendered values keyed as
+            `"{name} (item {index})"` for var-args items and for leading
+            keyword arguments that still render positionally.
         """
         arguments = {}
         positional_arguments = {}

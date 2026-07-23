@@ -30,6 +30,9 @@ class Renderer:
         parts: Accumulated HTML string fragments.
         assets: Collected CSS and JS asset URLs.
         indentation: Spaces per indentation level.
+        newline_mode_stack: Stack of `NewlineMode` values controlling whether
+            newlines in text are converted to `<br>`; components push and pop
+            modes as they are rendered.
     """
 
     def __init__(

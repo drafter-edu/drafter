@@ -14,7 +14,7 @@ def pkg_root() -> Path:
     Returns:
         Path to src/drafter/.
     """
-    # src/drafter/app/utils.py -> src/drafter/
+    # src/drafter/scaffolding/utils.py -> src/drafter/
     return Path(__file__).resolve().parent.parent
 
 
@@ -32,8 +32,17 @@ def pkg_package_root() -> Path:
 def pkg_assets_dir() -> Path:
     """Get the assets directory of the drafter package.
 
+    Prefers the installed location, src/drafter/assets/. When that does
+    not exist (e.g., a development checkout where assets have not been
+    copied into the package), falls back to the repository's js/dist/
+    build output directory.
+
     Returns:
-        Path to src/drafter/assets/.
+        Path to src/drafter/assets/ if it exists, otherwise the js/dist/
+        fallback.
+
+    Raises:
+        FileNotFoundError: If neither directory exists.
     """
     chosen_path = pkg_root() / "assets"
     if os.path.exists(chosen_path):
