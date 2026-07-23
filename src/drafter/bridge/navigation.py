@@ -15,7 +15,7 @@ from drafter.bridge.log import debug_log
 class NavigationController:
     history: BrowserHistory
     navigation_func: Optional[Callable[[Request], Response]] = None
-    redirect_loop_stack: list[str] = field(default_factory=list)
+    redirect_loop_stack: list[str]
 
     def __init__(self, runtime):
         self.history = BrowserHistory(runtime)

@@ -50,7 +50,7 @@ class SiteRenderer:
     root_id: str
     true_root_id: str
     runtime: RuntimeAdapter
-    channel_history: dict[str, set[str]] = field(default_factory=dict)
+    channel_history: dict[str, set[str]]
     debug_panel: Optional[Any] = None
 
     def __init__(self, runtime, root_id, true_root_id, debug_panel=None):

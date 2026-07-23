@@ -143,11 +143,6 @@ def convert_arguments_to_json(arguments, only_validate=False) -> Optional[str]:
                     f"Invalid argument format at index {index}: {item}.\nMust be an Arguable, a (name, value) pair, or a dict with a single key-value pair."
                 )
         return json.dumps(argument_dict) if not only_validate else None
-    elif isinstance(arguments, dict):
-        for key, value in arguments.items():
-            validate_parameter_name(key, "Argument")
-            validate_json_value(value, "Argument")
-        return json.dumps(arguments) if not only_validate else None
     else:
         raise ValueError(
             "The arguments must be an Argument, a list of Argument objects, a list of (name, value) pairs, or a dict of name to value."
