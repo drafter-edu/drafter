@@ -4,7 +4,7 @@ import io
 from typing import Optional, Union
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 from drafter.components.page_content import Component, ComponentArgument
-from drafter.components.links import UrlOrFunction
+from drafter.components.page_content import UrlOrFunction
 from drafter.helpers.urls import check_invalid_external_url, friendly_urls
 
 BASE_IMAGE_FOLDER = "/__images"

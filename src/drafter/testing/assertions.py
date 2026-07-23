@@ -25,7 +25,7 @@ from bakery.assertions import (
     make_type_name,
 )
 from drafter.components.text import Text
-from drafter.payloads.kinds.page import Fragment
+from drafter.payloads.kinds.fragment import Fragment
 from drafter.components.page_content import Component
 from drafter.testing.testing import _bakery_tests, assert_equal
 
