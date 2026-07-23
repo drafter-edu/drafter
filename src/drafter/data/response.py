@@ -4,7 +4,8 @@ the rendered body, status, errors/warnings, and any channel messages.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
+
 from drafter.data.channel import Channel, Message
 from drafter.data.errors import STATUS_OK, ErrorDetails
 from drafter.payloads.payloads import ResponsePayload
@@ -42,9 +43,9 @@ class Response:
     url: str
     status_code: str = STATUS_OK
     message: str = "OK"
-    body: Optional[str] = None
-    target: "Optional[Target]" = None
-    channels: Dict[str, Channel] = field(default_factory=dict)
+    body: str | None = None
+    target: "Target | None" = None
+    channels: dict[str, Channel] = field(default_factory=dict)
     errors: list[ErrorDetails] = field(default_factory=list)
     warnings: list[ErrorDetails] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)

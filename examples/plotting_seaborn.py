@@ -3,13 +3,15 @@ TODO: Currently, it doesn't seem like the seaborn dependency is getting picked u
 by the automatic system?
 """
 
-from drafter import *
 import random
+from dataclasses import dataclass
+
 import matplotlib.pyplot as plt
 
 # import seaborn as sns
 import pandas as pd
-from dataclasses import dataclass
+
+from drafter import *
 
 random.seed(0)
 

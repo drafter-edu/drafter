@@ -7,8 +7,6 @@ multiple concurrent instances can coexist, constructs the ClientBridge, and
 connects the visit/toggle-frame/debug-mode callbacks before starting the site.
 """
 
-from drafter.config.system import SystemConfiguration
-from drafter.config.client_server import ClientServerConfiguration
 from drafter.bridge.client_bridge import ClientBridge
 from drafter.bridge.context import DomContext
 from drafter.client_server.client_server import ClientServer
@@ -17,6 +15,8 @@ from drafter.client_server.commands import (
     register_server,
     set_main_server,
 )
+from drafter.config.client_server import ClientServerConfiguration
+from drafter.config.system import SystemConfiguration
 
 
 def run_client_bridge(

@@ -2,7 +2,6 @@ import argparse
 import json
 from pathlib import Path
 
-
 if __name__ == "__main__":
     drafter_root_directory = Path(__file__).parent.parent
     default_manifest_path = drafter_root_directory / "libs" / "manifest.json"
@@ -36,7 +35,7 @@ if __name__ == "__main__":
                 RAW_FILES[theme][category] = {}
             for filename in filenames:
                 source_path = drafter_root_directory / "libs" / filename
-                with open(source_path, "r") as f:
+                with open(source_path) as f:
                     raw = f.read()
                 RAW_FILES[theme][category][filename] = raw
 

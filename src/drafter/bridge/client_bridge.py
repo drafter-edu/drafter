@@ -6,33 +6,34 @@ management, channel content, redirect detection, history, hotkeys, and telemetry
 Runtime-specific differences (Skulpt vs Pyodide) are delegated to a RuntimeAdapter.
 """
 
-from drafter.bridge.events import EventManager
-from drafter.bridge.navigation import NavigationController
-from drafter.bridge.site_renderer import SiteRenderer
+from collections.abc import Callable
 from dataclasses import dataclass, field
+from typing import Any
+
+from drafter.bridge.context import DomContext
 from drafter.bridge.dom import (
     swap_debug_mode,
     update_subtle_debug_entry,
 )
-from drafter.bridge.log import debug_log, console_log
-from drafter.bridge.persistence import evict_key
 from drafter.bridge.error_handling import (
     raise_bridge_system_error,
     report_bridge_error,
 )
-from drafter.bridge.context import DomContext
+from drafter.bridge.events import EventManager
+from drafter.bridge.log import console_log, debug_log
+from drafter.bridge.navigation import NavigationController
+from drafter.bridge.persistence import evict_key
 from drafter.bridge.runtime import RuntimeAdapter, create_runtime
+from drafter.bridge.site_renderer import SiteRenderer
 from drafter.config.client_server import ClientServerConfiguration
-
-from drafter.data.response import Response
-from drafter.data.request import Request
 from drafter.data.details.config import UpdatedConfigurationEvent
+from drafter.data.request import Request
+from drafter.data.response import Response
 from drafter.data.telemetry import TelemetryRecord
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import (
     DRAFTER_TAG_IDS,
 )
-from typing import Callable, Optional, Any
 
 
 @dataclass
@@ -67,14 +68,14 @@ class ClientBridge:
     site_renderer: SiteRenderer
     navigator: NavigationController
     configuration: ClientServerConfiguration = field(init=False)
-    debug_panel: Optional[Any] = None
+    debug_panel: Any | None = None
     runtime: RuntimeAdapter = field(default_factory=create_runtime)
     site_title: str = "Default Title"
 
     def __init__(
         self,
         configuration: ClientServerConfiguration,
-        context: Optional[DomContext] = None,
+        context: DomContext | None = None,
     ):
         self.context = context if context is not None else DomContext.default()
         self.runtime = create_runtime(self.context)

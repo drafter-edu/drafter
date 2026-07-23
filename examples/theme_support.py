@@ -1,6 +1,6 @@
-from drafter import *
-from datetime import date, time, datetime
+from datetime import date, datetime, time
 
+from drafter import *
 
 set_website_style("mvp")
 

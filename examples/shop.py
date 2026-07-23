@@ -1,5 +1,5 @@
+
 from drafter import *
-from typing import Optional
 
 
 @dataclass
@@ -53,7 +53,7 @@ def break_things(state: State) -> Page:
     raise RuntimeError("This is a broken route for testing purposes.")
 
 
-def find_item(items2: list[Item], name: str) -> Optional[Item]:
+def find_item(items2: list[Item], name: str) -> Item | None:
     for item in items2:
         if item.name == name:
             return item

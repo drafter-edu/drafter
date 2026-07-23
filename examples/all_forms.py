@@ -1,17 +1,18 @@
-from drafter import (
-    start_server,
-    route,
-    Label,
-    TextBox,
-    CheckBox,
-    DateTimeInput,
-    DateInput,
-    TimeInput,
-    Button,
-    Page,
-)
 from dataclasses import dataclass
-from datetime import date, time, datetime
+from datetime import date, datetime, time
+
+from drafter import (
+    Button,
+    CheckBox,
+    DateInput,
+    DateTimeInput,
+    Label,
+    Page,
+    TextBox,
+    TimeInput,
+    route,
+    start_server,
+)
 
 
 @dataclass

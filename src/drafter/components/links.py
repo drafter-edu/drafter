@@ -7,17 +7,8 @@ alias for `Button`.
 """
 
 import json
-from typing import List, Optional
 from dataclasses import dataclass
 
-from drafter.components.utilities.escaping import (
-    make_safe_argument,
-)
-from drafter.constants import SUBMIT_BUTTON_KEY
-from drafter.helpers.urls import (
-    friendly_urls,
-    check_invalid_external_url,
-)
 from drafter.components.page_content import (
     Arguable,
     ArgumentList,
@@ -26,9 +17,17 @@ from drafter.components.page_content import (
     JsonSafeValue,
     UrlOrFunction,
 )
+from drafter.components.utilities.escaping import (
+    make_safe_argument,
+)
 from drafter.components.utilities.validation import (
     validate_json_value,
     validate_parameter_name,
+)
+from drafter.constants import SUBMIT_BUTTON_KEY
+from drafter.helpers.urls import (
+    check_invalid_external_url,
+    friendly_urls,
 )
 
 
@@ -264,7 +263,7 @@ class Button(LinkContent):
 
     text: str
     url: str
-    arguments: Optional[List[Argument]] = None
+    arguments: list[Argument] | None = None
     external: bool = False
 
     tag = "button"

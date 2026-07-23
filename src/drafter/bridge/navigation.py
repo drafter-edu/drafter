@@ -8,14 +8,15 @@ follows redirect responses with loop detection.
 """
 
 import json
-from typing import Callable, Optional, Any
+from collections.abc import Callable
+from typing import Any
 
-from drafter.bridge.history import BrowserHistory
 from drafter.bridge.error_handling import report_bridge_error
-from drafter.constants import SUBMIT_BUTTON_KEY
-from drafter.data.response import Response
-from drafter.data.request import Request
+from drafter.bridge.history import BrowserHistory
 from drafter.bridge.log import debug_log
+from drafter.constants import SUBMIT_BUTTON_KEY
+from drafter.data.request import Request
+from drafter.data.response import Response
 
 
 class NavigationController:
@@ -39,7 +40,7 @@ class NavigationController:
     """
 
     history: BrowserHistory
-    navigation_func: Optional[Callable[[Request], Response]] = None
+    navigation_func: Callable[[Request], Response] | None = None
     redirect_loop_stack: list[str]
 
     def __init__(self, runtime):
@@ -105,7 +106,7 @@ class NavigationController:
     def goto(
         self,
         url: str,
-        data: Optional[dict] = None,
+        data: dict | None = None,
         action="system",
         dom_id=None,
         button_pressed=None,

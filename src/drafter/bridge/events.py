@@ -13,25 +13,27 @@ router can merge by precedence (component arguments > event detail > form
 fields) and report collisions.
 """
 
-from collections import Counter
 import json
 import time
+from collections import Counter
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
-from drafter.bridge.runtime import RuntimeAdapter
-from drafter.data.request import Request
-from drafter.bridge.log import debug_log
+from typing import Any
+
+import js
+from drafter.bridge.dom import (
+    get_attribute_recursively,
+)
 from drafter.bridge.error_handling import (
     raise_bridge_system_error,
     report_bridge_error,
     report_bridge_warning,
 )
+from drafter.bridge.log import debug_log
+from drafter.bridge.runtime import RuntimeAdapter
 from drafter.components.page_content import Component
+from drafter.data.request import Request
 from drafter.site.site import DRAFTER_TAG_IDS
-from drafter.bridge.dom import (
-    get_attribute_recursively,
-)
-import js
 
 DOUBLE_PRESS_THRESHOLD = 600  # milliseconds
 """Maximum gap, in milliseconds, between two presses of a hotkey combination

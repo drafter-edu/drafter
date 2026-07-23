@@ -4,12 +4,12 @@ Defines ClientServerConfiguration dataclass for controlling client-side
 rendering, UI theme, debugging, and asset serving.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Optional, Callable, Union
 
-from drafter.helpers.env_vars import EnvVars
 from drafter.config.base import BaseConfiguration
 from drafter.config.site_information import SiteInformation
+from drafter.helpers.env_vars import EnvVars
 
 
 @dataclass
@@ -47,14 +47,14 @@ class ClientServerConfiguration(BaseConfiguration):
     enable_subtle_debug_entry: bool = False
     enable_audit_logging: bool = True
     site_title: str = "Drafter Application"
-    information: Optional[SiteInformation] = None
+    information: SiteInformation | None = None
     # Parse semicolon-separated format: "URL Text;URL Text;URL;..."
-    external_pages: Optional[list[Union[str, tuple[str, str]]]] = None
+    external_pages: list[str | tuple[str, str]] | None = None
     framed: bool = True
     theme: str = "default"
     deploy_image_path: str = ""
 
-    override_asset_url: Union[bool, str] = False
+    override_asset_url: bool | str = False
     # Literal HTML content
     additional_header_content: list[str] = field(default_factory=list)
     # Raw literal CSS
@@ -71,7 +71,7 @@ class ClientServerConfiguration(BaseConfiguration):
     # registry key when configure_instance() supplies no explicit instance_id
     root_element_id: str = "drafter-root--"
     # System Routes
-    system_routes: dict[str, Optional[Callable]] = field(default_factory=dict)
+    system_routes: dict[str, Callable | None] = field(default_factory=dict)
     # Newlines to <br> conversion
     newlines_to_br: bool = True
     # TODO: Handle the system routes as configuration settings

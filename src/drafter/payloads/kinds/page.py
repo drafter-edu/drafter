@@ -1,15 +1,14 @@
 """The `Page` payload: a full-page response targeting the document body."""
 
 from dataclasses import dataclass
-from typing import Optional
 
 from drafter.config.client_server import ClientServerConfiguration
+from drafter.data.request import Request
 from drafter.history.formatting import format_page_content
 from drafter.history.state import SiteState
+from drafter.payloads.failure import VerificationFailure
 from drafter.payloads.kinds.fragment import Fragment
 from drafter.payloads.target import DEFAULT_BODY_TARGET
-from drafter.payloads.failure import VerificationFailure
-from drafter.data.request import Request
 from drafter.router.routes import Router
 
 
@@ -47,7 +46,7 @@ class Page(Fragment):
         state: SiteState,
         configuration: ClientServerConfiguration,
         request: Request,
-    ) -> Optional[VerificationFailure]:
+    ) -> VerificationFailure | None:
         """
         Verifies that the content of the page is valid. This will check that all links are valid and that
         all components are valid.

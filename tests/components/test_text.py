@@ -1,4 +1,4 @@
-from drafter import Text, RawHTML, Span
+from drafter import RawHTML, Span, Text
 
 
 def test_text_equality():

@@ -15,7 +15,7 @@ route parameter is annotated with it.
 
 import json
 from dataclasses import dataclass
-from typing import Optional, Literal
+from typing import Literal
 
 from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
 from drafter.components.utilities.contracts import (
@@ -29,7 +29,6 @@ from drafter.components.utilities.registry import (
 )
 from drafter.components.utilities.validation import validate_parameter_name
 from drafter.data.converter import ConversionContext, ConversionResult
-
 
 LocationStatus = Literal[
     "unavailable", "prompt", "granted", "denied", "pending", "error"
@@ -55,21 +54,21 @@ class Location:
     """
 
     status: LocationStatus
-    message: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    accuracy: Optional[float] = None
-    altitude: Optional[float] = None
-    heading: Optional[float] = None
-    speed: Optional[float] = None
-    timestamp: Optional[float] = None
+    message: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    accuracy: float | None = None
+    altitude: float | None = None
+    heading: float | None = None
+    speed: float | None = None
+    timestamp: float | None = None
 
 
 def _is_location_type(target) -> bool:
     return target is Location
 
 
-def convert_location(ctx: ConversionContext) -> Optional[ConversionResult]:
+def convert_location(ctx: ConversionContext) -> ConversionResult | None:
     """Convert a JSON string or dict payload into a :class:`Location`."""
     value = ctx.raw_value
     if isinstance(value, Location):
@@ -145,10 +144,10 @@ class CurrentLocation(Component):
     enable_high_accuracy: bool = True
     timeout: int = 10000
     maximum_age: int = 0
-    on_locate: Optional[UrlOrFunction] = None
-    on_error: Optional[UrlOrFunction] = None
-    on_denied: Optional[UrlOrFunction] = None
-    on_timeout: Optional[UrlOrFunction] = None
+    on_locate: UrlOrFunction | None = None
+    on_error: UrlOrFunction | None = None
+    on_denied: UrlOrFunction | None = None
+    on_timeout: UrlOrFunction | None = None
 
     tag = "drafter-current-location"
 
@@ -273,10 +272,10 @@ class CurrentLocation(Component):
         enable_high_accuracy: bool = True,
         timeout: int = 10000,
         maximum_age: int = 0,
-        on_locate: Optional[UrlOrFunction] = None,
-        on_error: Optional[UrlOrFunction] = None,
-        on_denied: Optional[UrlOrFunction] = None,
-        on_timeout: Optional[UrlOrFunction] = None,
+        on_locate: UrlOrFunction | None = None,
+        on_error: UrlOrFunction | None = None,
+        on_denied: UrlOrFunction | None = None,
+        on_timeout: UrlOrFunction | None = None,
         **extra_settings,
     ):
         """Initialize the CurrentLocation component.

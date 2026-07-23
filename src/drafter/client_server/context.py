@@ -6,8 +6,8 @@ request (or response) is currently being processed, usable as a context
 manager so entries are popped automatically.
 """
 
-from typing import Optional
 from dataclasses import dataclass, field
+
 from drafter.data.request import Request
 
 
@@ -37,7 +37,7 @@ class Scope:
         self._objs.append(obj)
         return self
 
-    def pop(self) -> Optional[Request]:
+    def pop(self) -> Request | None:
         """Pop the most recent object from the scope stack.
 
         Returns:
@@ -55,7 +55,7 @@ class Scope:
         """Exit context manager by popping current object."""
         self.pop()
 
-    def get_current(self) -> Optional[Request]:
+    def get_current(self) -> Request | None:
         """Return the current scoped object without removing it.
 
         Returns:

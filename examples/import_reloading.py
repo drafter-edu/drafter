@@ -1,5 +1,6 @@
-from drafter import *
 import import_reloading_friend
+
+from drafter import *
 
 
 @route

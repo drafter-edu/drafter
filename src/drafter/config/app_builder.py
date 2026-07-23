@@ -5,11 +5,10 @@ builds a static version of a site: output locations, 404 handling, zipping,
 Pyodide packaging style, extra files, and shared-runtime embedding.
 """
 
-from typing import Optional
 from dataclasses import dataclass, field
 
-from drafter.helpers.env_vars import EnvVars
 from drafter.config.base import BaseConfiguration
+from drafter.helpers.env_vars import EnvVars
 
 
 @dataclass
@@ -46,7 +45,7 @@ class AppBuilderConfiguration(BaseConfiguration):
 
     warn_missing_info: bool = True
 
-    pyodide_package_style: Optional[str] = "pypi"  # "build", "cdn", or "pypi"
+    pyodide_package_style: str | None = "pypi"  # "build", "cdn", or "pypi"
 
     additional_paths: list[str] = field(default_factory=list)
 

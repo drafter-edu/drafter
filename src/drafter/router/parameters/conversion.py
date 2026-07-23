@@ -18,8 +18,8 @@ import inspect
 import io
 import json
 from dataclasses import replace
-from datetime import datetime, date, time
-from typing import Any, Optional, get_type_hints
+from datetime import date, datetime, time
+from typing import Any, get_type_hints
 
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
 from drafter.data.converter import (
@@ -34,7 +34,6 @@ from drafter.data.converter import (
 )
 from drafter.data.files import DrafterBinaryFile, DrafterTextFile
 from drafter.helpers.dates import try_convert_datetime
-
 
 __all__ = [
     "CONVERTER_REGISTRY",
@@ -59,7 +58,7 @@ def _accepts_file_upload(target: Any) -> bool:
     return HAS_PILLOW and inspect.isclass(target) and issubclass(target, PILImage.Image)
 
 
-def convert_file_upload(ctx: ConversionContext) -> Optional[ConversionResult]:
+def convert_file_upload(ctx: ConversionContext) -> ConversionResult | None:
     """Convert a client file-upload dict (``__file_upload__``) to the target type."""
     value = ctx.raw_value
     if not isinstance(value, dict) or not value.get("__file_upload__"):
@@ -141,7 +140,7 @@ def convert_file_upload(ctx: ConversionContext) -> Optional[ConversionResult]:
     return None
 
 
-def convert_datetime_like(ctx: ConversionContext) -> Optional[ConversionResult]:
+def convert_datetime_like(ctx: ConversionContext) -> ConversionResult | None:
     """Convert ISO-formatted strings to ``datetime``, ``date``, or ``time``.
 
     Delegates to ``try_convert_datetime``; unparseable values fail with a
@@ -168,7 +167,7 @@ def _is_dataclass_type(target: Any) -> bool:
     return isinstance(target, type) and dataclasses.is_dataclass(target)
 
 
-def convert_dataclass(ctx: ConversionContext) -> Optional[ConversionResult]:
+def convert_dataclass(ctx: ConversionContext) -> ConversionResult | None:
     """Build a dataclass from a dict (or JSON string), converting each field."""
     target = ctx.resolved_type
     value = ctx.raw_value
@@ -226,7 +225,7 @@ def convert_dataclass(ctx: ConversionContext) -> Optional[ConversionResult]:
         return conversion_failure(ctx, target)
 
 
-def convert_dataclass_to_dict(ctx: ConversionContext) -> Optional[ConversionResult]:
+def convert_dataclass_to_dict(ctx: ConversionContext) -> ConversionResult | None:
     """Convert a dataclass instance to a plain dict via ``dataclasses.asdict``."""
     value = ctx.raw_value
     if dataclasses.is_dataclass(value) and not isinstance(value, type):
@@ -238,7 +237,7 @@ _TRUE_STRINGS = {"true", "on", "1", "yes", "checked"}
 _FALSE_STRINGS = {"false", "off", "0", "no", ""}
 
 
-def convert_bool(ctx: ConversionContext) -> Optional[ConversionResult]:
+def convert_bool(ctx: ConversionContext) -> ConversionResult | None:
     """Convert checkbox-style strings to bool.
 
     Existing bools pass through. Strings are stripped and lowercased, then
@@ -262,7 +261,7 @@ def convert_bool(ctx: ConversionContext) -> Optional[ConversionResult]:
     return None
 
 
-def convert_int(ctx: ConversionContext) -> Optional[ConversionResult]:
+def convert_int(ctx: ConversionContext) -> ConversionResult | None:
     """Convert numeric strings to int.
 
     Strings are stripped and parsed with ``int``; if that fails, they are
@@ -298,7 +297,7 @@ def convert_int(ctx: ConversionContext) -> Optional[ConversionResult]:
     return None
 
 
-def convert_float(ctx: ConversionContext) -> Optional[ConversionResult]:
+def convert_float(ctx: ConversionContext) -> ConversionResult | None:
     """Convert numeric strings to float.
 
     Strings are stripped and parsed with ``float``; non-numeric strings
@@ -320,7 +319,7 @@ def convert_float(ctx: ConversionContext) -> Optional[ConversionResult]:
     return None
 
 
-def convert_str(ctx: ConversionContext) -> Optional[ConversionResult]:
+def convert_str(ctx: ConversionContext) -> ConversionResult | None:
     """Decode bytes values to str as UTF-8.
 
     Non-UTF-8 bytes fail with a hint to use bytes instead of str; all
@@ -346,7 +345,7 @@ def _is_collection_type(target: Any) -> bool:
     return target in COLLECTION_TYPES
 
 
-def convert_collection(ctx: ConversionContext) -> Optional[ConversionResult]:
+def convert_collection(ctx: ConversionContext) -> ConversionResult | None:
     """Convert to list/tuple/set, wrapping scalars and converting elements."""
     target = ctx.resolved_type
     value = ctx.raw_value

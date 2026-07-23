@@ -4,10 +4,10 @@ for the debug UI.
 """
 
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
-from drafter.data.telemetry import TelemetryRecord
 from drafter.data.details.recursive_type_describer import analyze_type
+from drafter.data.telemetry import TelemetryRecord
 
 
 @dataclass
@@ -21,7 +21,7 @@ class UpdatedStateEvent(TelemetryRecord):
     """
 
     kind: str = "UpdatedState"
-    representation: Optional[dict] = None
+    representation: dict | None = None
 
     def to_json(self) -> dict[str, Any]:
         """

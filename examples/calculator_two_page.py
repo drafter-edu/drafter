@@ -1,5 +1,6 @@
 from bakery import assert_equal
-from drafter import route, start_server, Page, TextBox, Button
+
+from drafter import Button, Page, TextBox, route, start_server
 
 
 @route("index")

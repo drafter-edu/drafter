@@ -3,14 +3,15 @@ DOM manipulation helpers for the bridge module.
 Functions for adding/removing scripts, styles, links, and other DOM elements.
 """
 
+from typing import Any
+
+import js
+from drafter.helpers.utils import is_pyodide
 from drafter.site.site import (
     DRAFTER_TAG_CLASSES,
     DRAFTER_TAG_IDS,
     GLOBAL_DRAFTER_CSS_PATHS,
 )
-from drafter.helpers.utils import is_pyodide
-from typing import Any
-import js
 
 ATTR_PAGE_SPECIFIC = "data-drafter-page-specific"
 """Attribute marking injected elements (scripts, styles, links) as belonging

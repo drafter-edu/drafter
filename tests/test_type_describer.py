@@ -1,5 +1,6 @@
-from drafter.data.details.recursive_type_describer import analyze_type
 from dataclasses import dataclass
+
+from drafter.data.details.recursive_type_describer import analyze_type
 
 
 @dataclass

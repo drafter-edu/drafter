@@ -3,7 +3,7 @@ Correlation is a grouping context for telemetry events and errors.
 """
 
 from dataclasses import dataclass
-from typing import Any, Optional, Dict
+from typing import Any
 
 
 @dataclass
@@ -20,14 +20,14 @@ class Correlation:
         phase: The phase of the event within the request lifecycle (e.g., "initial", "processing", "final").
     """
 
-    causation_id: Optional[int] = None
-    route: Optional[str] = None
-    request_id: Optional[int] = None
-    response_id: Optional[int] = None
-    dom_id: Optional[str] = None
-    phase: Optional[str] = None
+    causation_id: int | None = None
+    route: str | None = None
+    request_id: int | None = None
+    response_id: int | None = None
+    dom_id: str | None = None
+    phase: str | None = None
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         """
         Converts the Correlation instance to a JSON-serializable dictionary.
 

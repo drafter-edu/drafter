@@ -1,7 +1,7 @@
 """The `Download` payload for triggering a file download in the browser."""
 
-from typing import Union
 from dataclasses import dataclass
+
 from drafter.payloads.payloads import ResponsePayload
 
 
@@ -35,4 +35,4 @@ class Download(ResponsePayload):
     file_path: str
     file_name: str
     mime_type: str
-    content: Union[bytes, str]
+    content: bytes | str

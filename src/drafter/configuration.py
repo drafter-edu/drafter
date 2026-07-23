@@ -5,18 +5,18 @@ for determining the mode of operation (e.g., start_server or compile_site)
 and setting up the necessary runtime environment accordingly.
 """
 
-from collections import defaultdict
-import sys
 import os
-from typing import Optional
+import sys
+from collections import defaultdict
+
+from drafter.config.app_builder import AppBuilderConfiguration
+from drafter.config.app_common import AppCommonConfiguration
+from drafter.config.app_server import AppServerConfiguration
+from drafter.config.bootstrap import BootstrapConfiguration
+from drafter.config.client_server import ClientServerConfiguration
+from drafter.config.system import SystemConfiguration
 from drafter.helpers.args import get_argparser
 from drafter.helpers.utils import is_web
-from drafter.config.system import SystemConfiguration
-from drafter.config.bootstrap import BootstrapConfiguration
-from drafter.config.app_builder import AppBuilderConfiguration
-from drafter.config.app_server import AppServerConfiguration
-from drafter.config.app_common import AppCommonConfiguration
-from drafter.config.client_server import ClientServerConfiguration
 
 
 def get_preparser():
@@ -32,7 +32,7 @@ def get_preparser():
     return preparser
 
 
-def get_parser(mode: Optional[str] = None):
+def get_parser(mode: str | None = None):
     """
     Get the CLI argument parser for the specified mode.
     If no mode is specified, it will default to "start_server".

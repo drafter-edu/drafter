@@ -6,18 +6,18 @@ ErrorRecords, and `log_record` for stamping and publishing general
 telemetry records.
 """
 
-from typing import Optional
+
+from drafter.data.correlation import Correlation
 from drafter.data.errors import (
     ErrorDetails,
 )
-from drafter.data.correlation import Correlation
 from drafter.data.telemetry import ErrorRecord, TelemetryMetadata, TelemetryRecord
 
 
 def log_error(
     envelope: ErrorDetails,
     source: str,
-    causation_id: Optional[int] = None,
+    causation_id: int | None = None,
 ) -> ErrorDetails:
     """Emit canonical telemetry for an ErrorDetails as an ErrorRecord.
 
@@ -56,11 +56,11 @@ def log_error(
 def log_record(
     record: TelemetryRecord,
     source: str,
-    causation_id: Optional[int] = None,
-    request_id: Optional[int] = None,
-    response_id: Optional[int] = None,
-    dom_id: Optional[str] = None,
-    route: Optional[str] = None,
+    causation_id: int | None = None,
+    request_id: int | None = None,
+    response_id: int | None = None,
+    dom_id: str | None = None,
+    route: str | None = None,
 ) -> TelemetryRecord:
     """Fill in a record's metadata/correlation and publish it on the main bus.
 

@@ -1,15 +1,15 @@
 """Default "about" route, rendering the configured site information page."""
 
 from drafter.client_server.client_server import ClientServer
-from drafter.payloads.kinds.page import Page
 from drafter.components import (
-    Paragraph,
+    BulletedList,
+    Button,
     Header,
     InlineCode,
     Link,
-    BulletedList,
-    Button,
+    Paragraph,
 )
+from drafter.payloads.kinds.page import Page
 
 
 def default_about(state, _server: ClientServer):

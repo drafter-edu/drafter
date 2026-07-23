@@ -9,7 +9,7 @@ server-side visit lifecycle. Bridge lifecycle ``phase`` tags are ``setup``,
 ``navigation``, ``channel_execution``, and ``event_dispatch``.
 """
 
-from typing import Any, Optional
+from typing import Any
 
 from drafter.data.errors import (
     CATEGORY_BRIDGE,
@@ -38,14 +38,14 @@ def report_bridge_error(
     source: str,
     details: str,
     *,
-    exception: Optional[Any] = None,
-    request_id: Optional[int] = None,
-    response_id: Optional[int] = None,
-    dom_id: Optional[str] = None,
-    route: Optional[str] = None,
-    phase: Optional[str] = None,
+    exception: Any | None = None,
+    request_id: int | None = None,
+    response_id: int | None = None,
+    dom_id: str | None = None,
+    route: str | None = None,
+    phase: str | None = None,
     severity: str = SEVERITY_ERROR,
-    status_code: Optional[str] = None,
+    status_code: str | None = None,
     recoverable: bool = True,
 ) -> ErrorDetails:
     """Build a canonical bridge envelope, emit telemetry, and return the event.
@@ -117,13 +117,13 @@ def report_bridge_warning(
     source: str,
     details: str,
     *,
-    exception: Optional[Any] = None,
-    request_id: Optional[int] = None,
-    response_id: Optional[int] = None,
-    dom_id: Optional[str] = None,
-    route: Optional[str] = None,
-    phase: Optional[str] = None,
-    status_code: Optional[str] = None,
+    exception: Any | None = None,
+    request_id: int | None = None,
+    response_id: int | None = None,
+    dom_id: str | None = None,
+    route: str | None = None,
+    phase: str | None = None,
+    status_code: str | None = None,
 ) -> ErrorDetails:
     """Report a non-fatal bridge issue as a canonical warning.
 
@@ -152,13 +152,13 @@ def raise_bridge_system_error(
     source: str,
     details: str,
     *,
-    exception: Optional[Any] = None,
-    request_id: Optional[int] = None,
-    response_id: Optional[int] = None,
-    dom_id: Optional[str] = None,
-    route: Optional[str] = None,
-    phase: Optional[str] = None,
-    status_code: Optional[str] = None,
+    exception: Any | None = None,
+    request_id: int | None = None,
+    response_id: int | None = None,
+    dom_id: str | None = None,
+    route: str | None = None,
+    phase: str | None = None,
+    status_code: str | None = None,
 ) -> None:
     """Log and raise a normalized RuntimeError for bridge system failures.
 

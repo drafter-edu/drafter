@@ -6,7 +6,8 @@ list, or an unrelated object), or when the state object's type changes
 from one request to the next.
 """
 
-from typing import Optional, Any
+from typing import Any
+
 from drafter.data.request import Request
 from drafter.payloads.payloads import ResponsePayload
 
@@ -56,7 +57,7 @@ def verify_response_payload_type(request: Request, payload: ResponsePayload):
 
 def verify_page_state_history(
     request: Request, updated_state: Any, state_history: list
-) -> Optional[str]:
+) -> str | None:
     """Validate state type consistency with previous state history.
 
     Ensures the new state object has the same type as the most recent

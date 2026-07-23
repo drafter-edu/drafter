@@ -4,13 +4,12 @@ Defines `Image` (and its alias `Picture`), which renders an image element
 from an external URL, a local file path, or a PIL Image object.
 """
 
-from dataclasses import dataclass
 import base64
 import io
-from typing import Optional, Union
+from dataclasses import dataclass
+
+from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
-from drafter.components.page_content import Component, ComponentArgument
-from drafter.components.page_content import UrlOrFunction
 from drafter.helpers.urls import check_invalid_external_url, friendly_urls
 
 BASE_IMAGE_FOLDER = "/__images"
@@ -33,9 +32,9 @@ class Image(Component):
         SELF_CLOSING_TAG: Indicates this is a self-closing tag.
     """
 
-    url: Union[str, PILImage.Image]
-    width: Optional[int]
-    height: Optional[int]
+    url: str | PILImage.Image
+    width: int | None
+    height: int | None
 
     tag = "img"
     SELF_CLOSING_TAG = True
@@ -49,7 +48,7 @@ class Image(Component):
     ]
 
     def __init__(
-        self, url: Union[str, PILImage.Image], width=None, height=None, **kwargs
+        self, url: str | PILImage.Image, width=None, height=None, **kwargs
     ):
         """Initialize image component.
 

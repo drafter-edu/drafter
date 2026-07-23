@@ -5,8 +5,7 @@ exactly which form field, event, or component argument produced it.
 """
 
 from dataclasses import dataclass
-from typing import Any, Literal, Optional
-
+from typing import Any, Literal
 
 PayloadSource = Literal[
     #: Custom component `args`
@@ -45,7 +44,7 @@ class PayloadValue:
     source_detail: str = ""  # e.g., component tag/id, field name, event name
 
 
-def describe_source(value: Optional[PayloadValue], fallback_name: str = "") -> str:
+def describe_source(value: PayloadValue | None, fallback_name: str = "") -> str:
     """Student-facing description of where a payload value came from,
     e.g. ``"the form field 'age'"``.
 

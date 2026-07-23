@@ -5,12 +5,12 @@ such as debug information visibility, site title, theme, framing, custom
 header/CSS content, and site metadata.
 """
 
-from typing import Optional
-from drafter.client_server.commands import get_main_server
+
 from drafter.client_server.client_server import ClientServer
+from drafter.client_server.commands import get_main_server
 
 
-def hide_debug_information(server: Optional[ClientServer] = None):
+def hide_debug_information(server: ClientServer | None = None):
     """
     Hides debug information from the website, so that it will not appear. Useful
     for deployed websites.
@@ -23,7 +23,7 @@ def hide_debug_information(server: Optional[ClientServer] = None):
     server.reconfigure(in_debug_mode=False)
 
 
-def show_debug_information(server: Optional[ClientServer] = None):
+def show_debug_information(server: ClientServer | None = None):
     """
     Shows debug information on the website. Useful for development.
 
@@ -35,7 +35,7 @@ def show_debug_information(server: Optional[ClientServer] = None):
     server.reconfigure(in_debug_mode=True)
 
 
-def set_website_title(title: str, server: Optional[ClientServer] = None):
+def set_website_title(title: str, server: ClientServer | None = None):
     """
     Sets the title of the website, as it appears in the browser tab.
 
@@ -48,7 +48,7 @@ def set_website_title(title: str, server: Optional[ClientServer] = None):
     server.reconfigure(site_title=title)
 
 
-def set_website_framed(framed: bool, server: Optional[ClientServer] = None):
+def set_website_framed(framed: bool, server: ClientServer | None = None):
     """
     Sets whether the website should be framed or not. If you are deploying the website, then
     this would be a common thing to set to False.
@@ -68,7 +68,7 @@ def set_site_information(
     sources,
     planning,
     links,
-    server: Optional[ClientServer] = None,
+    server: ClientServer | None = None,
 ):
     """
     Sets the information about the website, such as the author, description,
@@ -96,7 +96,7 @@ def set_site_information(
     )
 
 
-def get_site_information(server: Optional[ClientServer] = None):
+def get_site_information(server: ClientServer | None = None):
     """
     Gets the information about the website, such as the author, description, sources.
 
@@ -111,7 +111,7 @@ def get_site_information(server: Optional[ClientServer] = None):
     return server.get_config_setting("information")
 
 
-def set_website_style(style: Optional[str], server: Optional[ClientServer] = None):
+def set_website_style(style: str | None, server: ClientServer | None = None):
     """
     Sets the style of the website. This must be the name of a valid theme.
 
@@ -126,7 +126,7 @@ def set_website_style(style: Optional[str], server: Optional[ClientServer] = Non
     server.reconfigure(theme=style)
 
 
-def set_website_theme(theme: Optional[str], server: Optional[ClientServer] = None):
+def set_website_theme(theme: str | None, server: ClientServer | None = None):
     """
     Sets the theme of the website. This must be the name of a valid theme.
 
@@ -141,7 +141,7 @@ def set_website_theme(theme: Optional[str], server: Optional[ClientServer] = Non
     server.reconfigure(theme=theme)
 
 
-def add_website_header(header: str, server: Optional[ClientServer] = None):
+def add_website_header(header: str, server: ClientServer | None = None):
     """
     Adds additional header content to the website. This is useful for adding custom
     CSS or JavaScript to the website, or other arbitrary header tags like meta tags.
@@ -156,7 +156,7 @@ def add_website_header(header: str, server: Optional[ClientServer] = None):
 
 
 def add_website_css(
-    selector: str, css: Optional[str] = None, server: Optional[ClientServer] = None
+    selector: str, css: str | None = None, server: ClientServer | None = None
 ):
     """
     Adds additional CSS content to the website. This is useful for adding custom
@@ -180,7 +180,7 @@ def add_website_css(
         server.reconfigure(additional_style_content=f"{selector} {{{css}}}\n")
 
 
-def deploy_site(image_folder="images", server: Optional[ClientServer] = None):
+def deploy_site(image_folder="images", server: ClientServer | None = None):
     """
     Prepares the website for deployment. Currently this only turns off debug
     information; the `image_folder` argument is accepted for compatibility

@@ -14,8 +14,9 @@ This module is a leaf: it defines only the contract structures, with no
 browser or router imports.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 
 @dataclass

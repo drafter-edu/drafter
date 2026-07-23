@@ -12,12 +12,12 @@ context directly, rather than being wrapped in an envelope.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Optional, Dict
 from datetime import datetime
+from typing import Any, ClassVar
 
-from drafter.version import CURRENT_DRAFTER_VERSION
-from drafter.data.errors import ErrorDetails
 from drafter.data.correlation import Correlation
+from drafter.data.errors import ErrorDetails
+from drafter.version import CURRENT_DRAFTER_VERSION
 
 
 @dataclass
@@ -47,7 +47,7 @@ class TelemetryMetadata:
             type(self).IDS_COUNTER += 1
             self.id = type(self).IDS_COUNTER
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         """
         Converts the TelemetryMetadata instance to a JSON-serializable dictionary.
 
@@ -82,7 +82,7 @@ class TelemetryRecord:
     metadata: TelemetryMetadata = field(default_factory=TelemetryMetadata)
     correlation: Correlation = field(default_factory=Correlation)
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         """
         Converts the TelemetryRecord instance to a JSON-serializable dictionary.
 
@@ -108,9 +108,9 @@ class ErrorRecord(TelemetryRecord):
         error: The canonical error envelope being reported.
     """
 
-    error: Optional[ErrorDetails] = None
+    error: ErrorDetails | None = None
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         """
         Converts the ErrorRecord instance to a JSON-serializable dictionary.
 

@@ -3,8 +3,8 @@ The Request dataclass, describing a single client-to-server interaction
 (a page visit, form submission, or component event).
 """
 
-from typing import Any, ClassVar
 from dataclasses import dataclass, field
+from typing import Any, ClassVar
 
 
 @dataclass

@@ -1,13 +1,14 @@
 import pytest
+
 from drafter import *
-from tests.components.helpers import eval_drafter_with_source
 from drafter.testing.assertions import (
+    ComparisonSettings,
     compare_equal,
     render_difference,
-    ComparisonSettings,
     render_path,
     search_content,
 )
+from tests.components.helpers import eval_drafter_with_source
 
 snippets = {
     "buttons": {

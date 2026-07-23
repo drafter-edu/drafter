@@ -4,9 +4,11 @@
 Click the cookie to get more cookies!
 """
 
-from drafter import *
-from bakery import assert_equal
 from dataclasses import dataclass
+
+from bakery import assert_equal
+
+from drafter import *
 
 
 @dataclass

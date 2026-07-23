@@ -8,27 +8,17 @@ verifies and commits the resulting payloads, and reports errors through
 the telemetry system.
 """
 
-from dataclasses import dataclass
-from typing import Any, Literal, Optional, List, Union
 import time
+from dataclasses import dataclass
+from typing import Any, Literal, Union
 
 from drafter.client_server.context import Scope
+from drafter.components.utilities.contracts import HelperContext
+from drafter.components.utilities.registry import COMPONENT_CONTRACT_REGISTRY
+from drafter.config.client_server import ClientServerConfiguration
 from drafter.configuration import get_system_configuration
 from drafter.data.channel import Message
 from drafter.data.correlation import Correlation
-from drafter.data.errors import (
-    CATEGORY_PAYLOAD,
-    CATEGORY_REQUEST,
-    CATEGORY_SYSTEM,
-    SEVERITY_INFO,
-    STATUS_BAD_REQUEST,
-    STATUS_ERROR,
-    STATUS_NOT_FOUND,
-    ErrorDetails,
-    envelope_from_exception,
-)
-from drafter.history.state import SiteState
-from drafter.monitor.bus import EventBus
 from drafter.data.details.config import (
     InitialConfigurationEvent,
     ResetServerEvent,
@@ -42,24 +32,33 @@ from drafter.data.details.request import (
 )
 from drafter.data.details.routes import RouteAddedEvent
 from drafter.data.details.state import UpdatedStateEvent
-from drafter.data.telemetry import ErrorRecord, TelemetryMetadata
-from drafter.payloads.kinds.error_page import SimpleErrorPage
-from drafter.payloads.payloads import ResponsePayload
+from drafter.data.errors import (
+    CATEGORY_PAYLOAD,
+    CATEGORY_REQUEST,
+    CATEGORY_SYSTEM,
+    SEVERITY_INFO,
+    STATUS_BAD_REQUEST,
+    STATUS_ERROR,
+    STATUS_NOT_FOUND,
+    ErrorDetails,
+    envelope_from_exception,
+)
 from drafter.data.request import Request
 from drafter.data.response import Response
+from drafter.data.telemetry import ErrorRecord, TelemetryMetadata
+from drafter.history.state import SiteState
+from drafter.monitor.audit import log_error, log_record
+from drafter.monitor.bus import EventBus
+from drafter.payloads.kinds.error_page import SimpleErrorPage
+from drafter.payloads.payloads import ResponsePayload
+from drafter.payloads.target import Target
 from drafter.payloads.verification import (
     verify_page_state_history,
     verify_response_payload_type,
 )
-from drafter.components.utilities.contracts import HelperContext
-from drafter.components.utilities.registry import COMPONENT_CONTRACT_REGISTRY
 from drafter.router.routes import Router
-from drafter.monitor.audit import log_error, log_record
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import DRAFTER_TAG_CLASSES, Site
-from drafter.config.client_server import ClientServerConfiguration
-from drafter.payloads.target import Target
-
 
 ServerPhases = Union[
     Literal["initializing"],
@@ -123,7 +122,7 @@ class ClientServer:
         # (e.g. "/instances/demo-1") when several instances share one
         # interpreter. None means the interpreter-wide default. Assigned by
         # run_client_bridge from the configure_instance handoff.
-        self.instance_root: Optional[str] = None
+        self.instance_root: str | None = None
         self.event_bus = EventBus()
 
         server_initialized_event = ServerInitializedEvent(
@@ -305,8 +304,8 @@ class ClientServer:
         request: Request,
         *,
         details: str = "",
-        status_code: Optional[str] = None,
-        exception: Optional[Exception] = None,
+        status_code: str | None = None,
+        exception: Exception | None = None,
         source: str = "client_server.visit",
     ) -> ErrorDetails:
         """Build a canonical envelope for a visit failure and emit telemetry.
@@ -511,7 +510,7 @@ class ClientServer:
         request: Request,
         payload: ResponsePayload,
         configuration: ClientServerConfiguration,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Render a payload to HTML string.
 
         Args:
@@ -665,7 +664,7 @@ class ClientServer:
             route=request.url,
             request_id=request.id,
         )
-        visit_warnings: List[ErrorDetails] = []
+        visit_warnings: list[ErrorDetails] = []
 
         def capture_warning(event):
             if isinstance(event, ErrorRecord) and event.error is not None:
@@ -748,11 +747,11 @@ class ClientServer:
         self,
         request_id: int,
         url: str,
-        body: Optional[str],
+        body: str | None,
         payload: ResponsePayload,
-        messages: List[Message],
-        target: Optional[Target],
-        warnings: Optional[List[ErrorDetails]] = None,
+        messages: list[Message],
+        target: Target | None,
+        warnings: list[ErrorDetails] | None = None,
     ) -> Response:
         """Construct a successful response from request processing results.
 
@@ -788,7 +787,7 @@ class ClientServer:
         request: Request,
         payload: ResponsePayload,
         configuration: ClientServerConfiguration,
-    ) -> "Optional[Target]":
+    ) -> "Target | None":
         """Extract the Target object from a payload.
 
         Args:
@@ -856,7 +855,7 @@ class ClientServer:
         self,
         request: Request,
         envelope: ErrorDetails,
-        warnings: Optional[List[ErrorDetails]] = None,
+        warnings: list[ErrorDetails] | None = None,
     ) -> Response:
         """Construct an error response with appropriate error payload.
 
@@ -982,7 +981,7 @@ class ClientServer:
                 framed=True,
             )
 
-    def do_configuration(self) -> Optional[InitialSiteData]:
+    def do_configuration(self) -> InitialSiteData | None:
         """Apply dynamic configuration to the site.
 
         Returns:
@@ -1082,7 +1081,7 @@ class ClientServer:
         """
         return self.site.get_configuration()
 
-    def get_current_request_id(self) -> Optional[int]:
+    def get_current_request_id(self) -> int | None:
         """Return the ID of the request currently being processed.
 
         Returns:

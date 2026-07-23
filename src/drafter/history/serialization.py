@@ -107,7 +107,7 @@ def rehydrate_json(value, new_type):
                 )
             return [rehydrate_json(v, element_type) for v in value]
         elif (
-            hasattr(new_type, "__origin__") and getattr(new_type, "__origin__") is list
+            hasattr(new_type, "__origin__") and new_type.__origin__ is list
         ):
             return value
     elif isinstance(value, str):
@@ -125,7 +125,7 @@ def rehydrate_json(value, new_type):
                 for k, v in value.items()
             }
         elif (
-            hasattr(new_type, "__origin__") and getattr(new_type, "__origin__") is dict
+            hasattr(new_type, "__origin__") and new_type.__origin__ is dict
         ):
             return value
         elif is_dataclass(new_type):

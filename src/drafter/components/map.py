@@ -14,8 +14,9 @@ internet connection; the JavaScript side degrades gracefully offline.
 """
 
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Optional, Union
+from typing import Union
 
 from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
 from drafter.components.utilities.contracts import (
@@ -89,7 +90,7 @@ for the default center (see `_normalize_center`)."""
 
 def _normalize_center(
     center: CenterValue, component_name: str
-) -> Optional[MapLocation]:
+) -> MapLocation | None:
     """Accept a MapLocation, (lat, lng) pair, or "lat,lng" string."""
     if center is None or isinstance(center, MapLocation):
         return center
@@ -112,7 +113,7 @@ def _normalize_center(
 def _dataclass_converter(dataclass_type):
     """Build a converter turning a JSON string/dict payload into dataclass_type."""
 
-    def convert(ctx: ConversionContext) -> Optional[ConversionResult]:
+    def convert(ctx: ConversionContext) -> ConversionResult | None:
         value = ctx.raw_value
         if isinstance(value, dataclass_type):
             return ConversionResult(ok=True, value=value)
@@ -220,14 +221,14 @@ class Map(Component):
     """
 
     name: str
-    center: Optional[MapLocation] = None
+    center: MapLocation | None = None
     zoom: int = 13
-    markers: Optional[list] = None
+    markers: list | None = None
     height: int = 300
     persistent: bool = False
-    on_click: Optional[UrlOrFunction] = None
-    on_marker_click: Optional[UrlOrFunction] = None
-    on_move: Optional[UrlOrFunction] = None
+    on_click: UrlOrFunction | None = None
+    on_marker_click: UrlOrFunction | None = None
+    on_move: UrlOrFunction | None = None
 
     tag = "drafter-map"
 
@@ -324,12 +325,12 @@ class Map(Component):
         name: str,
         center: CenterValue = None,
         zoom: int = 13,
-        markers: Optional[list] = None,
+        markers: list | None = None,
         height: int = 300,
         persistent: bool = False,
-        on_click: Optional[UrlOrFunction] = None,
-        on_marker_click: Optional[UrlOrFunction] = None,
-        on_move: Optional[UrlOrFunction] = None,
+        on_click: UrlOrFunction | None = None,
+        on_marker_click: UrlOrFunction | None = None,
+        on_move: UrlOrFunction | None = None,
         **extra_settings,
     ):
         """Initialize the Map component.
@@ -359,7 +360,7 @@ class Map(Component):
         self.extra_settings = extra_settings
 
     @staticmethod
-    def _normalize_markers(markers: Optional[list]) -> Optional[list]:
+    def _normalize_markers(markers: list | None) -> list | None:
         if markers is None:
             return None
         normalized = []

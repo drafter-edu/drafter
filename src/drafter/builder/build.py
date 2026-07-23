@@ -5,24 +5,24 @@ Pyodide-installable zip when requested, and copying assets and additional
 user-specified paths into the output directory.
 """
 
-from glob import glob
 import os
-from typing import Optional
 import shutil
 import zipfile
+from glob import glob
 from pathlib import Path
+
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import get_main_server
 from drafter.config.system import SystemConfiguration
-from drafter.config.urls import determine_assets_url, INTERNAL_FILES
+from drafter.config.urls import INTERNAL_FILES, determine_assets_url
 from drafter.configuration import get_system_config_modifications
 from drafter.scaffolding.templating import render_index_html
-from drafter.scaffolding.utils import pkg_assets_dir, pkg_root, pkg_package_root
+from drafter.scaffolding.utils import pkg_assets_dir, pkg_package_root, pkg_root
 from drafter.version import CURRENT_DRAFTER_VERSION
 
 
 def build_zip(
-    source_dir: Path, output_zip: str, skip_extensions: Optional[set[str]] = None
+    source_dir: Path, output_zip: str, skip_extensions: set[str] | None = None
 ):
     """Build a zip file from the source directory.
 

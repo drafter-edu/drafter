@@ -9,10 +9,11 @@ page submits to.
 """
 
 from dataclasses import dataclass
-from datetime import datetime, date, time
-from typing import List, Optional, Union, Any
+from datetime import date, datetime, time
+from typing import Any
+
 from drafter.components.page_content import Component, ComponentArgument, PageContent
-from drafter.components.planning.render_plan import RenderPlan, NewlineMode
+from drafter.components.planning.render_plan import NewlineMode, RenderPlan
 from drafter.components.utilities.validation import validate_parameter_name
 
 
@@ -72,7 +73,7 @@ class Label(Component):
     """
 
     text: str
-    for_id: Union[None, str, FormComponent] = None
+    for_id: None | str | FormComponent = None
     tag = "label"
 
     ARGUMENTS = [
@@ -88,7 +89,7 @@ class Label(Component):
     def __init__(
         self,
         text: str,
-        for_id: Union[None, str, FormComponent] = None,
+        for_id: None | str | FormComponent = None,
         **extra_settings,
     ):
         """Initialize label component.
@@ -115,7 +116,7 @@ class TextBox(FormComponent):
         tag: The HTML tag name, always 'input'.
     """
 
-    default_value: Optional[str]
+    default_value: str | None
     kind: str
 
     tag = "input"
@@ -146,7 +147,7 @@ class TextBox(FormComponent):
     def __init__(
         self,
         name: str,
-        default_value: Optional[Union[str, int, float]] = "",
+        default_value: str | int | float | None = "",
         kind: str = "text",
         **extra_settings,
     ):
@@ -199,7 +200,7 @@ class TextArea(FormComponent):
     def __init__(
         self,
         name: str,
-        default_value: Optional[Union[str, int, float]] = None,
+        default_value: str | int | float | None = None,
         **kwargs,
     ):
         validate_parameter_name(name, "TextArea")
@@ -224,8 +225,8 @@ class SelectBox(FormComponent):
     """
 
     tag = "select"
-    options: List[str]
-    default_value: Optional[str]
+    options: list[str]
+    default_value: str | None
 
     KNOWN_ATTRS = ["name", "multiple", "required", "size"]
     ARGUMENTS = [
@@ -239,8 +240,8 @@ class SelectBox(FormComponent):
     def __init__(
         self,
         name: str,
-        options: List[str],
-        default_value: Optional[str] = None,
+        options: list[str],
+        default_value: str | None = None,
         **kwargs,
     ):
         """Initialize select box component.
@@ -435,7 +436,7 @@ class RadioButtonGroup(FormComponent):
         ```
     """
 
-    options: List[str]
+    options: list[str]
     default_value: str
 
     tag = "div"
@@ -452,8 +453,8 @@ class RadioButtonGroup(FormComponent):
     def __init__(
         self,
         name: str,
-        options: List[str],
-        default_value: Optional[Union[str, int, float]] = None,
+        options: list[str],
+        default_value: str | int | float | None = None,
         **kwargs,
     ):
         """Initialize a group of radio button components.
@@ -526,7 +527,7 @@ class DateTimeInput(FormComponent):
         tag: The HTML tag name, always 'input'.
     """
 
-    default_value: Union[str, None]
+    default_value: str | None
 
     tag = "input"
     SELF_CLOSING_TAG = True
@@ -540,7 +541,7 @@ class DateTimeInput(FormComponent):
     RENAME_ATTRS = {"default_value": "value"}
 
     def __init__(
-        self, name: str, default_value: Union[str, None, datetime] = None, **kwargs
+        self, name: str, default_value: str | None | datetime = None, **kwargs
     ):
         validate_parameter_name(name, "DateTimeInput")
         self.name = name
@@ -565,7 +566,7 @@ class DateInput(FormComponent):
         kwargs: Additional HTML attributes
     """
 
-    default_value: Union[str, None]
+    default_value: str | None
 
     tag = "input"
     SELF_CLOSING_TAG = True
@@ -581,7 +582,7 @@ class DateInput(FormComponent):
     def __init__(
         self,
         name: str,
-        default_value: Union[str, None, datetime, date] = None,
+        default_value: str | None | datetime | date = None,
         **kwargs,
     ):
         validate_parameter_name(name, "DateInput")
@@ -607,7 +608,7 @@ class TimeInput(FormComponent):
         kwargs: Additional HTML attributes
     """
 
-    default_value: Union[str, None]
+    default_value: str | None
 
     tag = "input"
     SELF_CLOSING_TAG = True
@@ -622,7 +623,7 @@ class TimeInput(FormComponent):
     DEFAULT_ATTRS = {"type": "time"}
 
     def __init__(
-        self, name: str, default_value: Union[str, None, time] = None, **kwargs
+        self, name: str, default_value: str | None | time = None, **kwargs
     ):
         validate_parameter_name(name, "TimeInput")
         self.name = name

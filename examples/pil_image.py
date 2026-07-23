@@ -1,8 +1,10 @@
-from drafter import *
-from dataclasses import dataclass
-from PIL import Image as PILImage
-import io
 import base64
+import io
+from dataclasses import dataclass
+
+from PIL import Image as PILImage
+
+from drafter import *
 
 
 @dataclass

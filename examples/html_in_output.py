@@ -1,4 +1,4 @@
-from drafter import route, start_server, Page, Button, assert_equal
+from drafter import Button, Page, assert_equal, route, start_server
 
 
 @route("index")

@@ -5,16 +5,16 @@ two HTML snippets rather than string comparison.
 
 import pytest
 from lxml import html as lxml_html
+
 from drafter import *
 from drafter.payloads.renderer import render
-from tests.components.snippets.simple import tests as simple_tests
 from tests.components.snippets.forms import tests as forms_tests
-from tests.components.snippets.media import tests as media_tests
 from tests.components.snippets.images import tests as images_tests
-from tests.components.snippets.output import tests as output_tests
-from tests.components.snippets.tables import tests as tables_tests
 from tests.components.snippets.links import tests as links_tests
-
+from tests.components.snippets.media import tests as media_tests
+from tests.components.snippets.output import tests as output_tests
+from tests.components.snippets.simple import tests as simple_tests
+from tests.components.snippets.tables import tests as tables_tests
 
 SNIPPETS = {}
 SNIPPETS["simple"] = simple_tests.get_tests()

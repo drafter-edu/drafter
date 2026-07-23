@@ -27,7 +27,6 @@ from drafter.data.errors import (
 )
 from drafter.monitor.audit import log_error
 
-
 # ============================================================================
 # STATUS CODES
 # ============================================================================
@@ -299,8 +298,8 @@ class TestRequestScopedWarnings:
     """Warnings generated during a visit appear in telemetry and response."""
 
     def test_request_scoped_warning_attached_to_response(self, started_server):
-        from drafter.data.request import Request
         from drafter.data.details.request import ResponseEvent
+        from drafter.data.request import Request
         from drafter.payloads.kinds.page import Page
 
         request = Request("click", "warned", {}, {}, "")

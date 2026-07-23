@@ -1,6 +1,5 @@
 """Guarded access to argparse for runtimes that may not provide it."""
 
-from typing import Optional
 
 try:
     import argparse
@@ -10,7 +9,7 @@ except Exception:
     HAVE_ARGPARSE = False
 
 
-def get_argparser() -> "Optional[type[argparse.ArgumentParser]]":
+def get_argparser() -> "type[argparse.ArgumentParser] | None":
     """Return the ArgumentParser class if argparse is available.
 
     Returns:

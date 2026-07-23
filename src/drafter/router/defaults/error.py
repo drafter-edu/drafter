@@ -8,21 +8,20 @@ which lines come from the student's own code.
 
 import re
 from dataclasses import dataclass, field
-from typing import Optional
 
 from drafter.client_server.client_server import ClientServer
-from drafter.payloads.kinds.page import Page
 from drafter.components import (
+    BulletedList,
+    Div,
     Header,
+    InlineCode,
+    Link,
     Paragraph,
     PreformattedText,
     Span,
-    BulletedList,
-    Link,
-    InlineCode,
-    Div,
 )
 from drafter.data.errors import ErrorDetails
+from drafter.payloads.kinds.page import Page
 
 #: Matches CPython frame lines like: File "main.py", line 6, in index
 _TRACEBACK_FRAME_PATTERN = re.compile(
@@ -47,7 +46,7 @@ class _TracebackFrame:
 
     filename: str
     line_number: str
-    function: Optional[str]
+    function: str | None
     code_lines: list[str] = field(default_factory=list)
 
     @property
@@ -162,7 +161,7 @@ def _render_traceback_section(section_text: str) -> list:
     return children
 
 
-def _render_traceback(traceback_text: Optional[str]):
+def _render_traceback(traceback_text: str | None):
     """Render a traceback as structured, styled blocks.
 
     Falls back to plain preformatted text when there is no traceback or the

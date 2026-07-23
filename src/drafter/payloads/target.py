@@ -5,9 +5,9 @@ element(s) to update on the client, and the `DEFAULT_BODY_TARGET` used by
 full `Page` responses.
 """
 
-from drafter.site.site import DRAFTER_TAG_IDS
 from dataclasses import dataclass
-from typing import Optional
+
+from drafter.site.site import DRAFTER_TAG_IDS
 
 
 @dataclass
@@ -41,17 +41,17 @@ class Target:
     """
 
     # Selectors
-    id: Optional[str] = None
-    tag: Optional[str] = None
-    class_name: Optional[str] = None
-    selector: Optional[str] = None
-    data_attribute: Optional[str] = None
-    attribute: Optional[dict[str, str]] = None
-    nth_child: Optional[int] = None
+    id: str | None = None
+    tag: str | None = None
+    class_name: str | None = None
+    selector: str | None = None
+    data_attribute: str | None = None
+    attribute: dict[str, str] | None = None
+    nth_child: int | None = None
     #: Find the nearest ancestor matching the selector
     closest: bool = False
     #: Constrain the search to elements within the target element
-    within: "Optional[Target]" = None
+    within: "Target | None" = None
 
     #: Whether to modify all matching elements or just the first
     all: bool = False
@@ -75,14 +75,14 @@ class Target:
     after: bool = False
 
     #: Additional HTML attributes to update (must be strings)
-    attributes_to_set: Optional[dict[str, str]] = None
+    attributes_to_set: dict[str, str] | None = None
     #: Additional CSS styles to update (must be strings)
-    styles_to_set: Optional[dict[str, str]] = None
+    styles_to_set: dict[str, str] | None = None
     #: Class toggles to apply (class name -> whether to add/remove)
-    class_toggles: Optional[dict[str, bool]] = None
+    class_toggles: dict[str, bool] | None = None
 
     #: If this target fails to find any elements, use the fallback instead
-    fallback: "Optional[Target]" = None
+    fallback: "Target | None" = None
 
     def __repr__(self) -> str:
         pieces = []

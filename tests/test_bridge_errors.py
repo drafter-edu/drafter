@@ -10,14 +10,14 @@ if not hasattr(sys.modules.get("js"), "document"):
     sys.modules["js"] = MagicMock()
 
 from drafter.bridge.error_handling import (
+    raise_bridge_system_error,
     report_bridge_error,
     report_bridge_warning,
-    raise_bridge_system_error,
 )
 from drafter.bridge.history import BrowserHistory
 from drafter.bridge.navigation import NavigationController
 from drafter.client_server.commands import get_main_event_bus
-from drafter.data.errors import CATEGORY_BRIDGE, ErrorDetails, STATUS_ERROR
+from drafter.data.errors import CATEGORY_BRIDGE, STATUS_ERROR, ErrorDetails
 from drafter.data.request import Request
 from drafter.data.response import Response
 

@@ -8,19 +8,19 @@ rendered content.
 
 from dataclasses import dataclass
 from textwrap import indent
-from typing import Any, List, Optional, Union
+from typing import Any
 
-from drafter.components.links import LinkContent
-from drafter.data.channel import Message
-from drafter.config.client_server import ClientServerConfiguration
 from drafter.components import Component
+from drafter.components.links import LinkContent
+from drafter.config.client_server import ClientServerConfiguration
+from drafter.data.channel import Message
 from drafter.data.request import Request
 from drafter.history.formatting import format_page_content
 from drafter.history.state import SiteState
-from drafter.payloads.renderer import render
-from drafter.payloads.payloads import ResponsePayload
-from drafter.payloads.target import Target
 from drafter.payloads.failure import VerificationFailure
+from drafter.payloads.payloads import ResponsePayload
+from drafter.payloads.renderer import render
+from drafter.payloads.target import Target
 from drafter.router.routes import Router
 
 
@@ -43,9 +43,9 @@ class Fragment(ResponsePayload):
 
     state: Any
     content: list
-    target: Optional[Union[Target, str]] = None
-    css: Optional[List[str]] = None
-    js: Optional[List[str]] = None
+    target: Target | str | None = None
+    css: list[str] | None = None
+    js: list[str] | None = None
 
     def __init__(self, state, content=None, target=None, css=None, js=None):
         if content is None:
@@ -84,7 +84,7 @@ class Fragment(ResponsePayload):
 
     def render(
         self, state: SiteState, configuration: ClientServerConfiguration
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Renders the content of the fragment to HTML.
         Users should not call this method directly; it will be called on their behalf by the server.
@@ -208,7 +208,7 @@ class Fragment(ResponsePayload):
                 )
         return messages
 
-    def get_target(self, request: Request) -> Optional[Target]:
+    def get_target(self, request: Request) -> Target | None:
         """
         Gets the target element that this Fragment should be injected into.
         If None, the Fragment will be injected into the requesting element's dom_id.
@@ -256,7 +256,7 @@ class Fragment(ResponsePayload):
         state: SiteState,
         configuration: ClientServerConfiguration,
         request: Request,
-    ) -> Optional[VerificationFailure]:
+    ) -> VerificationFailure | None:
         """
         Verifies that the content of the fragment is a valid list of chunks and
         that any link content (`LinkContent` chunks) points at valid routes.

@@ -3,9 +3,11 @@ Page visit tracking for debugging and history purposes.
 """
 
 import html
-from dataclasses import dataclass, field as dataclass_field
+from collections.abc import Callable
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
 from datetime import datetime
-from typing import Any, Optional, Callable
+from typing import Any
 
 
 @dataclass
@@ -30,10 +32,10 @@ class VisitedPage:
     arguments: str
     status: str
     button_pressed: str = ""
-    original_page_content: Optional[str] = None
+    original_page_content: str | None = None
     old_state: Any = None
     started: datetime = dataclass_field(default_factory=lambda: datetime.now())
-    stopped: Optional[datetime] = None
+    stopped: datetime | None = None
 
     def update(self, new_status, original_page_content=None):
         """

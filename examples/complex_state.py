@@ -2,9 +2,10 @@
 A Drafter example with many complex state types.
 """
 
-from drafter import *
-from PIL import Image as PILImage
 import pandas as pd
+from PIL import Image as PILImage
+
+from drafter import *
 
 
 @dataclass
@@ -95,10 +96,10 @@ STARTING_DATA = State(
     ],
     owner=Person(first_name="Guido", last_name="van Rossum", age=65),
     addresses=ADDRESSES[5:],
-    main_image=PILImage.open(("images/soon-128.png")),
+    main_image=PILImage.open("images/soon-128.png"),
     all_images=[
-        PILImage.open(("images/car_blockpy.gif")),
-        PILImage.open(("images/soon-128.png")),
+        PILImage.open("images/car_blockpy.gif"),
+        PILImage.open("images/soon-128.png"),
     ],
 )
 

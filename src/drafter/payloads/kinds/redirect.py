@@ -1,7 +1,8 @@
 """The `Redirect` payload for navigating the client to another route."""
 
-from typing import Any, Optional
 from dataclasses import dataclass
+from typing import Any
+
 from drafter.payloads.payloads import ResponsePayload
 
 
@@ -25,10 +26,10 @@ class Redirect(ResponsePayload):
     """
 
     target_route: str
-    state_update: Optional[Any]
-    arguments: Optional[dict] = None
+    state_update: Any | None
+    arguments: dict | None = None
 
-    def __init__(self, target_route: str, state_update: Optional[Any] = None, **kwargs):
+    def __init__(self, target_route: str, state_update: Any | None = None, **kwargs):
         self.target_route = target_route
         self.state_update = state_update
         self.arguments = kwargs if kwargs else None
@@ -50,7 +51,7 @@ class Redirect(ResponsePayload):
         """
         return self.state_update is not None, self.state_update
 
-    def get_redirect(self) -> tuple[str, Optional[dict]]:
+    def get_redirect(self) -> tuple[str, dict | None]:
         """Retrieve the redirect destination.
 
         Returns:

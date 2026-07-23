@@ -22,11 +22,12 @@ A Component should always:
 Attribute order should always be consistent, with styles at the end. Generally, this means that they should be alphabetized.
 """
 
-from dataclasses import dataclass
-from typing import List, Union, Any, Optional, ClassVar, Callable
 import json
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Any, ClassVar, Optional, Union
 
-from drafter.components.planning.render_plan import AssetBundle, RenderPlan, NewlineMode
+from drafter.components.planning.render_plan import AssetBundle, NewlineMode, RenderPlan
 from drafter.components.utilities.persistence import add_persistence_attributes
 from drafter.components.utilities.validation import (
     validate_json_value,
@@ -80,17 +81,12 @@ class Arguable:
 
 
 ArgumentList = Optional[
-    Union[
-        Arguable,
-        list[Arguable],
-        list[tuple[str, JsonSafeValue]],
-        dict[str, JsonSafeValue],
-    ]
+    Arguable | list[Arguable] | list[tuple[str, JsonSafeValue]] | dict[str, JsonSafeValue]
 ]
 """Type alias for flexible argument specification formats."""
 
 
-def convert_arguments_to_json(arguments, only_validate=False) -> Optional[str]:
+def convert_arguments_to_json(arguments, only_validate=False) -> str | None:
     """Convert flexible argument formats to JSON-serialized dict.
 
     Accepts multiple formats for specifying arguments:
@@ -415,7 +411,7 @@ class Component:
         """
         return self.tag
 
-    def get_children(self, context) -> List[Any]:
+    def get_children(self, context) -> list[Any]:
         """Build the child content for this component.
 
         The default implementation collects the values of the declared
@@ -446,7 +442,7 @@ class Component:
                     children.append(value)
         return children
 
-    def get_arguments(self) -> List[str]:
+    def get_arguments(self) -> list[str]:
         """Generate arguments for __repr__ to enable round-trip serialization.
 
         Returns arguments in proper order (positional then keyword) to recreate
@@ -553,7 +549,7 @@ class Component:
                 arguments[key] = value
         return arguments, positional_arguments
 
-    def get_assets(self, context) -> Optional[AssetBundle]:
+    def get_assets(self, context) -> AssetBundle | None:
         """Get the CSS and JavaScript assets required by this component.
 
         The default implementation returns None (no assets). Subclasses

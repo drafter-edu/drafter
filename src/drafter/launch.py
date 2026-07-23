@@ -4,14 +4,14 @@ Provides the start_server() function which routes to either in-browser ClientSer
 or local development AppServer based on execution context.
 """
 
-from typing import Optional, Union
+from typing import Optional
+
+from drafter.client_server.commands import get_main_server
+from drafter.config.engines import EngineType
 from drafter.configuration import get_system_configuration
 from drafter.helpers.utils import is_web
-from drafter.config.engines import EngineType
-from drafter.client_server.commands import get_main_server
 
-
-MaybeBoolStr = Optional[Union[bool, str]]
+MaybeBoolStr = Optional[bool | str]
 """Type alias for parameters that accept a bool, a string, or None."""
 
 
@@ -19,31 +19,31 @@ def start_server(
     initial_state=None,
     server=None,
     # ClientServer-specific parameters
-    server_name: Optional[str] = None,
-    in_debug_mode: Optional[bool] = None,
-    framed: Optional[bool] = None,
-    theme: Optional[str] = None,
-    site_title: Optional[str] = None,
-    information: Optional[dict] = None,
+    server_name: str | None = None,
+    in_debug_mode: bool | None = None,
+    framed: bool | None = None,
+    theme: str | None = None,
+    site_title: str | None = None,
+    information: dict | None = None,
     # AppServer-specific parameters
-    verbose: Optional[bool] = None,
+    verbose: bool | None = None,
     asset_directory: MaybeBoolStr = None,
     show_filename_as: MaybeBoolStr = None,
-    engine: Optional[EngineType] = None,
-    port: Optional[int] = None,
-    host: Optional[str] = None,
-    prerender_initial_page: Optional[bool] = None,
-    open_browser: Optional[bool] = None,
-    inline_py: Optional[bool] = None,
-    use_reloader: Optional[bool] = None,
+    engine: EngineType | None = None,
+    port: int | None = None,
+    host: str | None = None,
+    prerender_initial_page: bool | None = None,
+    open_browser: bool | None = None,
+    inline_py: bool | None = None,
+    use_reloader: bool | None = None,
     # Aliases for compatibility with older versions
-    reloader: Optional[bool] = None,
+    reloader: bool | None = None,
     # Unused parameters that we want to keep for compatibility but not actually use
-    cdn_skulpt: Optional[str] = None,
-    cdn_skulpt_std: Optional[str] = None,
-    cdn_skulpt_drafter: Optional[str] = None,
+    cdn_skulpt: str | None = None,
+    cdn_skulpt_std: str | None = None,
+    cdn_skulpt_drafter: str | None = None,
     # Custom overrides
-    argv: Optional[list[str]] = None,
+    argv: list[str] | None = None,
     **extra_configuration,
 ) -> None:
     """Start the Drafter server (web or local development mode).

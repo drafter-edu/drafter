@@ -7,10 +7,11 @@ client message extraction, state updates, redirect handling, and fragment
 targeting. Subclasses override only the parts relevant to their behavior.
 """
 
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+
+from drafter.config.client_server import ClientServerConfiguration
 from drafter.data.channel import Message
 from drafter.data.request import Request
-from drafter.config.client_server import ClientServerConfiguration
 from drafter.history.state import SiteState
 from drafter.payloads.failure import VerificationFailure
 from drafter.router.routes import Router
@@ -29,7 +30,7 @@ class ResponsePayload:
 
     def render(
         self, state: SiteState, configuration: ClientServerConfiguration
-    ) -> Optional[str]:
+    ) -> str | None:
         """Render the payload to HTML for browser display.
 
         Args:
@@ -47,7 +48,7 @@ class ResponsePayload:
         state: SiteState,
         configuration: ClientServerConfiguration,
         request: Request,
-    ) -> Optional[VerificationFailure]:
+    ) -> VerificationFailure | None:
         """Verify payload validity before rendering.
 
         Args:
@@ -115,7 +116,7 @@ class ResponsePayload:
         """
         return False
 
-    def get_redirect(self) -> tuple[str, Optional[dict]]:
+    def get_redirect(self) -> tuple[str, dict | None]:
         """Retrieve redirect target and optional query arguments.
 
         Returns:
@@ -123,7 +124,7 @@ class ResponsePayload:
         """
         return "", None
 
-    def get_target(self, request: Request) -> "Optional[Target]":
+    def get_target(self, request: Request) -> "Target | None":
         """Get the Target for fragment updates.
 
         Args:

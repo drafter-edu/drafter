@@ -1,7 +1,7 @@
 """Default "--reload" route, forcing a full browser page reload."""
 
-from drafter.payloads.kinds.page import Page
 from drafter.components import Header, Paragraph
+from drafter.payloads.kinds.page import Page
 
 
 def default_reload(state):

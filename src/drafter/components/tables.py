@@ -5,7 +5,7 @@ dataclass instances) with an optional header.
 """
 
 from dataclasses import dataclass, fields, is_dataclass
-from typing import Optional
+
 from drafter.components.page_content import (
     Component,
     ComponentArgument,
@@ -14,7 +14,6 @@ from drafter.components.page_content import (
 )
 from drafter.components.planning.render_plan import RenderPlan
 from drafter.history.utils import safe_repr
-
 
 # TODO: Properly handle typecheck of a list of dataclasses, and a single dataclass instance.
 
@@ -38,7 +37,7 @@ class Table(Component):
     """
 
     rows: list[list[Content]]
-    header: Optional[list[Content]] = None
+    header: list[Content] | None = None
 
     tag = "table"
 
@@ -106,7 +105,7 @@ class Table(Component):
 
     def get_tbody_from_dataclass(
         self, context
-    ) -> tuple[RenderPlan, Optional[RenderPlan]]:
+    ) -> tuple[RenderPlan, RenderPlan | None]:
         """Generate table body from a dataclass instance.
 
         Args:
@@ -132,7 +131,7 @@ class Table(Component):
         thead = self.make_head(["Field", "Type", "Current Value"])
         return tbody, thead
 
-    def get_tbody(self, context) -> tuple[RenderPlan, Optional[RenderPlan]]:
+    def get_tbody(self, context) -> tuple[RenderPlan, RenderPlan | None]:
         """Generate table body from row data.
 
         Args:

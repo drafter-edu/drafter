@@ -18,21 +18,22 @@ ignored by default).
 """
 
 from dataclasses import dataclass
-from typing import Any, Optional
-
-from bakery.assertions import (
-    SET_GENERATOR_TYPES,
-    LIST_GENERATOR_TYPES,
-    _normalize_string,
-    make_type_name,
-)
-from drafter.components.text import Text
-from drafter.payloads.kinds.fragment import Fragment
-from drafter.components.page_content import Component
-from drafter.testing.testing import assert_equal
 
 # Number encapsulates bool, int, float, complex, decimal.Decimal, etc.
 from numbers import Number
+from typing import Any
+
+from bakery.assertions import (
+    LIST_GENERATOR_TYPES,
+    SET_GENERATOR_TYPES,
+    _normalize_string,
+    make_type_name,
+)
+
+from drafter.components.page_content import Component
+from drafter.components.text import Text
+from drafter.payloads.kinds.fragment import Fragment
+from drafter.testing.testing import assert_equal
 
 
 @dataclass
@@ -541,7 +542,7 @@ def render_difference(difference: Difference) -> str:
 
 def compare_drafter_types(
     actual, expected, settings, path: list[PathItem]
-) -> Optional[list[Difference]]:
+) -> list[Difference] | None:
     """
     Compare special Drafter types when not enforcing strict styles.
     Returns None if the comparison is not applicable.

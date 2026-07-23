@@ -1,7 +1,7 @@
-from tests.components.snippets._base import TestableComponentSet
-from drafter import *
-from datetime import datetime, date, time
+from datetime import date, datetime, time
 
+from drafter import *
+from tests.components.snippets._base import TestableComponentSet
 
 tests = TestableComponentSet("forms")
 

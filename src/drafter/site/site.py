@@ -8,14 +8,12 @@ templates and the well-known Drafter element ids and classes.
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.config.urls import determine_assets_url
-from drafter.styling.themes import get_theme_system
-from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.headers import CSSLink
-
+from drafter.site.initial_site_data import InitialSiteData
+from drafter.styling.themes import get_theme_system
 
 GLOBAL_DRAFTER_CSS_PATHS = {
     True: CSSLink(url="css/drafter_debug.css", classes={"drafter-debug-css--"}),
@@ -91,7 +89,7 @@ class Site:
         _configuration: Current server configuration instance.
     """
 
-    _configuration: Optional[ClientServerConfiguration] = None
+    _configuration: ClientServerConfiguration | None = None
 
     def set_configuration(self, configuration: ClientServerConfiguration):
         """Set the site's active configuration.

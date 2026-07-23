@@ -6,13 +6,14 @@ enabling live reload during development.
 
 import asyncio
 import json
-from pathlib import Path
-from typing import Any, List, Set
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
-from drafter.config.system import SystemConfiguration
 from starlette.websockets import WebSocket
 from watchfiles import awatch
+
+from drafter.config.system import SystemConfiguration
 
 
 @dataclass
@@ -41,7 +42,7 @@ class ReloadHub:
 
     def __init__(self) -> None:
         """Initialize empty client set and lock."""
-        self._clients: Set[WebSocket] = set()
+        self._clients: set[WebSocket] = set()
         self._lock = asyncio.Lock()
 
     async def register(self, ws: WebSocket) -> None:
@@ -70,7 +71,7 @@ class ReloadHub:
         """
         payload = json.dumps(message)
         async with self._lock:
-            dead: List[WebSocket] = []
+            dead: list[WebSocket] = []
             for ws in self._clients:
                 try:
                     await ws.send_text(payload)

@@ -8,8 +8,9 @@ raised together as a single `ParameterBindingError` so the debug panel
 can explain every problem at once.
 """
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, Literal
+from typing import Literal
 
 # --- Diagnostics API ---
 

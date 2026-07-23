@@ -8,39 +8,38 @@ site frame — all scoped to the instance's own document and root so multiple
 concurrent instances never collide.
 """
 
-from typing import Optional, Any
+from typing import Any
 
-from drafter.site.initial_site_data import InitialSiteData
-from drafter.data.channel import DEFAULT_CHANNEL_AFTER, DEFAULT_CHANNEL_BEFORE, Channel
-from drafter.data.response import Response
-from drafter.bridge.runtime import RuntimeAdapter
-from drafter.bridge.log import debug_log
+import js
+from drafter.bridge.dom import (
+    add_header,
+    add_js,
+    add_link,
+    add_link_to_shadow,
+    add_style,
+    add_style_to_shadow,
+    remove_existing_theme,
+    remove_page_content,
+    replace_html,
+)
 from drafter.bridge.error_handling import (
     raise_bridge_system_error,
     report_bridge_error,
     report_bridge_warning,
 )
-from drafter.site.site import (
-    DRAFTER_TAG_IDS,
-    DRAFTER_TAG_CLASSES,
-    SITE_HTML_SHADOW_DOM_TEMPLATE,
-)
-
-import js
-from drafter.bridge.dom import (
-    add_js,
-    add_style,
-    add_link,
-    add_link_to_shadow,
-    add_style_to_shadow,
-    add_header,
-    remove_page_content,
-    remove_existing_theme,
-    replace_html,
-)
+from drafter.bridge.log import debug_log
 from drafter.bridge.persistence import (
     apply_persistence,
     park_persistent_components,
+)
+from drafter.bridge.runtime import RuntimeAdapter
+from drafter.data.channel import DEFAULT_CHANNEL_AFTER, DEFAULT_CHANNEL_BEFORE, Channel
+from drafter.data.response import Response
+from drafter.site.initial_site_data import InitialSiteData
+from drafter.site.site import (
+    DRAFTER_TAG_CLASSES,
+    DRAFTER_TAG_IDS,
+    SITE_HTML_SHADOW_DOM_TEMPLATE,
 )
 
 
@@ -54,7 +53,7 @@ class SiteRenderer:
     true_root_id: str
     runtime: RuntimeAdapter
     channel_history: dict[str, set[str]]
-    debug_panel: Optional[Any] = None
+    debug_panel: Any | None = None
 
     def __init__(self, runtime, root_id, true_root_id, debug_panel=None):
         self.runtime = runtime
@@ -290,9 +289,9 @@ class SiteRenderer:
 
     def add_channel_content(
         self,
-        channel: Optional[Channel],
+        channel: Channel | None,
         is_page_specific: bool = False,
-        response: Optional[Response] = None,
+        response: Response | None = None,
     ) -> None:
         """
         Processes messages from a channel and adds them to the page.

@@ -1,7 +1,9 @@
-from bakery import assert_equal
-from drafter import *
 from dataclasses import dataclass
+
+from bakery import assert_equal
 from PIL import Image as PILImage
+
+from drafter import *
 
 
 @dataclass

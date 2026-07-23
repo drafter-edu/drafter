@@ -6,7 +6,7 @@ and optional persistence across page transitions), plus `Canvas` and
 """
 
 from dataclasses import dataclass
-from typing import Optional
+
 from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.planning.render_plan import RenderPlan
 
@@ -142,8 +142,8 @@ class Video(Component):
 
     tag = "video"
     src: str
-    width: Optional[int]
-    height: Optional[int]
+    width: int | None
+    height: int | None
     controls: bool
     autoplay: bool
     loop: bool
@@ -167,8 +167,8 @@ class Video(Component):
     def __init__(
         self,
         src: str,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
+        width: int | None = None,
+        height: int | None = None,
         controls: bool = True,
         autoplay: bool = False,
         loop: bool = False,
@@ -271,9 +271,9 @@ class SVG(Component):
     """
 
     content: str
-    width: Optional[int]
-    height: Optional[int]
-    viewBox: Optional[str]
+    width: int | None
+    height: int | None
+    viewBox: str | None
     tag = "svg"
     KNOWN_ATTRS = ["width", "height", "viewBox"]
 
@@ -287,9 +287,9 @@ class SVG(Component):
     def __init__(
         self,
         content: str,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
-        viewBox: Optional[str] = None,
+        width: int | None = None,
+        height: int | None = None,
+        viewBox: str | None = None,
         **kwargs,
     ):
         """Initialize SVG component.

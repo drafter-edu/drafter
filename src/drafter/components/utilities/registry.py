@@ -14,7 +14,6 @@ The router installs the shared cross-component converters into it when
 conversion policy.
 """
 
-from typing import Optional
 
 from drafter.components.utilities.contracts import ComponentContract
 from drafter.data.converter import CONVERTER_REGISTRY, ConverterRegistry
@@ -41,7 +40,7 @@ class ComponentContractRegistry:
         """
         self._contracts[contract.component_name] = contract
 
-    def get(self, component_name: str) -> Optional[ComponentContract]:
+    def get(self, component_name: str) -> ComponentContract | None:
         """Look up a contract by component class name.
 
         Args:

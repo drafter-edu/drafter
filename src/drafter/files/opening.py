@@ -9,20 +9,20 @@ are downloaded into in-memory file objects and relative paths resolve
 against the configured user directory (see `get_drafter_path`).
 """
 
-import pathlib
+import builtins
 import io
 import os
-from typing import Union
+import pathlib
+
 from drafter.configuration import get_system_configuration
 from drafter.helpers.utils import is_pyodide, is_web
-import builtins
 
 _BUILTIN_OPEN = builtins.open
 
 
 def _resolve_instance_path(
-    file_path: Union[str, pathlib.Path, os.PathLike],
-) -> Union[str, pathlib.Path, os.PathLike]:
+    file_path: str | pathlib.Path | os.PathLike,
+) -> str | pathlib.Path | os.PathLike:
     """Resolve a relative path inside the current instance's virtual folder.
 
     When several Drafter instances share one interpreter (each in its own
@@ -150,7 +150,7 @@ def open(file_path, mode="r", *args, **kwargs):
 
 
 def get_drafter_path(
-    path: Union[str, pathlib.Path, os.PathLike],
+    path: str | pathlib.Path | os.PathLike,
 ) -> pathlib.Path:
     """Resolve a path against Drafter's configured user directory.
 

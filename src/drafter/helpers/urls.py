@@ -1,7 +1,7 @@
 """URL manipulation and validation helpers."""
 
 import re
-from urllib.parse import urlencode, urlparse, parse_qs
+from urllib.parse import parse_qs, urlencode, urlparse
 
 
 def merge_url_query_params(url: str, additional_params: dict) -> str:

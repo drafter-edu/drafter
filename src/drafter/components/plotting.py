@@ -4,9 +4,10 @@ Defines `MatPlotLibPlot`, which captures the current Matplotlib figure
 and embeds it in the page as an image or inline SVG.
 """
 
-from dataclasses import dataclass
-import io
 import base64
+import io
+from dataclasses import dataclass
+
 from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.planning.render_plan import RenderPlan
 from drafter.helpers.utils import is_pyodide

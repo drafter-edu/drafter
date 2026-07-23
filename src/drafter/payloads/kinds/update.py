@@ -1,7 +1,8 @@
 """The `Update` payload for changing state without re-rendering the page."""
 
-from typing import Optional, Any
 from dataclasses import dataclass
+from typing import Any
+
 from drafter.payloads.payloads import ResponsePayload
 
 
@@ -31,7 +32,7 @@ class Update(ResponsePayload):
         """
         return True, self.state_update
 
-    def render(self, state, configuration) -> Optional[str]:
+    def render(self, state, configuration) -> str | None:
         """Render nothing; an Update produces no HTML.
 
         Args:

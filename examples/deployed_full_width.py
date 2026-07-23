@@ -1,18 +1,19 @@
-from bakery import assert_equal
 from dataclasses import dataclass
+
+from bakery import assert_equal
+
 from drafter import (
-    route,
-    start_server,
-    Page,
-    TextBox,
     Button,
     LineBreak,
-    hide_debug_information,
-    set_website_title,
-    set_website_framed,
+    Page,
+    TextBox,
     add_website_css,
+    hide_debug_information,
+    route,
+    set_website_framed,
+    set_website_title,
+    start_server,
 )
-
 
 hide_debug_information()
 set_website_title("Calculator")

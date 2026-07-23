@@ -1,6 +1,5 @@
 """Selective extraction and typed conversion of environment variables."""
 
-from typing import Optional
 
 
 class EnvVars:
@@ -24,7 +23,7 @@ class EnvVars:
         self._source = source
         self._result = {}
 
-    def get_string_if_exists(self, source_key: str, target_key: Optional[str] = None):
+    def get_string_if_exists(self, source_key: str, target_key: str | None = None):
         """Store the raw string value for a key if it exists in the source.
 
         Args:
@@ -36,7 +35,7 @@ class EnvVars:
             self._result[target_key or source_key] = self._source[source_key]
 
     def get_string_list_if_exists(
-        self, source_key: str, target_key: Optional[str] = None, delimiter: str = ";"
+        self, source_key: str, target_key: str | None = None, delimiter: str = ";"
     ):
         """Store a delimited value as a list of strings if the key exists.
 
@@ -51,7 +50,7 @@ class EnvVars:
                 delimiter
             )
 
-    def get_bool_if_exists(self, source_key: str, target_key: Optional[str] = None):
+    def get_bool_if_exists(self, source_key: str, target_key: str | None = None):
         """Store a value interpreted as a boolean if the key exists.
 
         The value is truthy when it case-insensitively equals "1", "true",
@@ -69,7 +68,7 @@ class EnvVars:
     def get_int_if_exists(
         self,
         source_key: str,
-        target_key: Optional[str] = None,
+        target_key: str | None = None,
         raise_error: bool = False,
     ):
         """Store a value converted to an integer if the key exists.

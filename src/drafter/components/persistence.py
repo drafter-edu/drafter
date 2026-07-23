@@ -7,7 +7,6 @@ component on a page removes the matching persisted component for good.
 """
 
 from dataclasses import dataclass
-from typing import Union
 
 from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.utilities.persistence import (
@@ -16,7 +15,7 @@ from drafter.components.utilities.persistence import (
 )
 
 
-def resolve_persist_key(target: Union[str, Component]) -> str:
+def resolve_persist_key(target: str | Component) -> str:
     """Resolve a persistence key from a key string, id, or component.
 
     Args:
@@ -67,14 +66,14 @@ class RemovePersistent(Component):
         target: The key string, id, or component identifying what to remove.
     """
 
-    target: Union[str, Component]
+    target: str | Component
 
     tag = "span"
     ARGUMENTS = [
         ComponentArgument("target"),
     ]
 
-    def __init__(self, target: Union[str, Component], **kwargs):
+    def __init__(self, target: str | Component, **kwargs):
         """Initialize the removal marker.
 
         Args:

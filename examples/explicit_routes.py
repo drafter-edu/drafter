@@ -1,4 +1,4 @@
-from drafter import start_server, Page, Button, add_route
+from drafter import Button, Page, add_route, start_server
 
 
 def index():

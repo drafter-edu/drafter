@@ -1,15 +1,15 @@
 from dataclasses import dataclass
+
 from drafter import (
-    route,
-    start_server,
-    Page,
-    TextBox,
     Button,
+    Page,
     SelectBox,
     Table,
+    TextBox,
     hide_debug_information,
+    route,
+    start_server,
 )
-
 
 hide_debug_information()
 

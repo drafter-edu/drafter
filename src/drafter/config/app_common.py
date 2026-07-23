@@ -6,11 +6,11 @@ and Python package loading (including Pyodide specifics).
 """
 
 from dataclasses import dataclass
-from typing import Union, Optional, Literal
+from typing import Literal
 
-from drafter.helpers.env_vars import EnvVars
-from drafter.config.engines import EngineType
 from drafter.config.base import BaseConfiguration
+from drafter.config.engines import EngineType
+from drafter.helpers.env_vars import EnvVars
 
 FalseType = Literal[False]
 """Type alias for the literal value `False`, used in `Union[FalseType, str]`
@@ -48,19 +48,19 @@ class AppCommonConfiguration(BaseConfiguration):
 
     engine: EngineType = "pyodide"
 
-    asset_directory: Union[FalseType, str] = False
-    show_filename_as: Union[FalseType, str] = False
+    asset_directory: FalseType | str = False
+    show_filename_as: FalseType | str = False
     prerender_initial_page: bool = True
 
     mount_drafter_locally: bool = False
     load_packages_automatically: bool = True
 
-    system_packages: Optional[list[str]] = None
-    project_packages: Optional[list[str]] = None
-    pyodide_drafter_path: Optional[str] = None
-    pyodide_url: Optional[str] = DEFAULT_PYODIDE_URL
+    system_packages: list[str] | None = None
+    project_packages: list[str] | None = None
+    pyodide_drafter_path: str | None = None
+    pyodide_url: str | None = DEFAULT_PYODIDE_URL
 
-    override_asset_url: Union[bool, str] = False
+    override_asset_url: bool | str = False
 
     site_title: str = "Drafter App Server"
 

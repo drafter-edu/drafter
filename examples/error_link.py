@@ -1,4 +1,4 @@
-from drafter import route, start_server, Page, Link
+from drafter import Link, Page, route, start_server
 
 
 @route

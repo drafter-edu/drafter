@@ -5,14 +5,14 @@ Defines `Download`, a link that lets the user save generated content
 accepting user file submissions.
 """
 
-from dataclasses import dataclass
 import base64
 import io
-from typing import Union, List
-from drafter.components.page_content import Component, ComponentArgument, PageContent
-from drafter.components.utilities.validation import validate_parameter_name
-from drafter.components.utilities.image_support import HAS_PILLOW
+from dataclasses import dataclass
+
 from drafter.components.forms import FormComponent
+from drafter.components.page_content import Component, ComponentArgument, PageContent
+from drafter.components.utilities.image_support import HAS_PILLOW
+from drafter.components.utilities.validation import validate_parameter_name
 
 # TODO: Properly handle type hints for PILImage, DrafterFile, etc.
 
@@ -150,7 +150,7 @@ class FileUpload(FormComponent):
     KNOWN_ATTRS = ["accept", "capture", "multiple", "required", "type", "name"]
 
     def __init__(
-        self, name: str, accept: Union[str, List[str], None] = None, **extra_settings
+        self, name: str, accept: str | list[str] | None = None, **extra_settings
     ):
         """Initialize file upload component.
 

@@ -1,6 +1,8 @@
-from bakery import assert_equal
 from dataclasses import dataclass
-from drafter import route, start_server, Page, TextBox, Button, LineBreak
+
+from bakery import assert_equal
+
+from drafter import Button, LineBreak, Page, TextBox, route, start_server
 
 
 @dataclass

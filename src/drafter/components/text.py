@@ -5,12 +5,12 @@ Defines `Text` (plain text in a span), `Header` (headings h1-h6),
 (unescaped HTML, for trusted content only), and the generic `HtmlTag`.
 """
 
-from dataclasses import dataclass
 import html
-from typing import List, Optional
+from dataclasses import dataclass
+
 from drafter.components.layout import handle_arguments_compatibility
 from drafter.components.page_content import Component, ComponentArgument, PageContent
-from drafter.components.planning.render_plan import RenderPlan, NewlineMode
+from drafter.components.planning.render_plan import NewlineMode, RenderPlan
 
 
 @dataclass(repr=False)
@@ -57,7 +57,7 @@ class BlockQuote(Component):
         tag: The HTML tag name, always 'blockquote'.
     """
 
-    cite: Optional[str]
+    cite: str | None
     content: list[PageContent]
     tag = "blockquote"
 
@@ -66,7 +66,7 @@ class BlockQuote(Component):
         ComponentArgument("content", kind="var", is_content=True),
     ]
 
-    def __init__(self, cite: Optional[str], *content: PageContent, **extra_settings):
+    def __init__(self, cite: str | None, *content: PageContent, **extra_settings):
         """Initialize blockquote component.
 
         Args:
@@ -208,7 +208,7 @@ class InlineCode(Component):
         tag: The HTML tag name, always 'code'.
     """
 
-    content: List[PageContent]
+    content: list[PageContent]
 
     tag = "code"
     ARGUMENTS = [
@@ -300,7 +300,7 @@ class HtmlTag(Component):
     """
 
     tag: str
-    content: List[PageContent]
+    content: list[PageContent]
 
     ARGUMENTS = [
         ComponentArgument("tag", kind="positional"),

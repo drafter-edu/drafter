@@ -1,7 +1,9 @@
-from drafter import *
 import random
-import matplotlib.pyplot as plt
 from dataclasses import dataclass
+
+import matplotlib.pyplot as plt
+
+from drafter import *
 
 random.seed(0)
 

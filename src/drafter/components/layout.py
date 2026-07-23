@@ -7,8 +7,9 @@ semantic sections such as `Article`, `Nav`, `HeaderContent`), the flexbox
 `Box`, and `P` are also provided.
 """
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import List, Sequence
+
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import RenderPlan
 
@@ -91,7 +92,7 @@ class BlockComponent(Component):
         tag: The HTML tag name.
     """
 
-    content: List[PageContent]
+    content: list[PageContent]
     ARGUMENTS = [
         ComponentArgument("content", kind="var", is_content=True),
     ]

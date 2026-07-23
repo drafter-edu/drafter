@@ -5,6 +5,7 @@ eventually report progress on long-running tasks.
 """
 
 from dataclasses import dataclass
+
 from drafter.payloads.payloads import ResponsePayload
 
 

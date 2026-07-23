@@ -8,8 +8,7 @@ plus helpers for merging, copying, and JSON (de)serialization.
 
 import json
 from dataclasses import dataclass, fields
-from typing import Any, Optional, Literal
-
+from typing import Any, Literal
 
 FalseType = Literal[False]
 """Type alias for the literal value `False`, used in `Union[FalseType, str]`
@@ -50,7 +49,7 @@ class BaseConfiguration:
     def map_from_raw(
         cls,
         parsed_args: dict[str, Any],
-        env_vars: Optional[dict[str, Any]] = None,
+        env_vars: dict[str, Any] | None = None,
         existing_config=None,
     ):
         """Build a configuration instance by layering raw sources in precedence order.
@@ -137,7 +136,7 @@ class BaseConfiguration:
         """
         # if not os.path.isfile(file_path):
         #    raise FileNotFoundError(f"Configuration file not found: {file_path}")
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             return json.load(f)
 
     def merge_in_args(self, new_args: dict, raise_errors=True) -> None:

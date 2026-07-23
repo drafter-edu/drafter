@@ -5,7 +5,9 @@ Provides the `route` decorator and the `add_route` function, both of which
 register a handler function with a server (the main server by default).
 """
 
-from typing import Union, Callable, Optional, TypeVar, overload, cast
+from collections.abc import Callable
+from typing import TypeVar, cast, overload
+
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import get_main_server
 
@@ -17,12 +19,12 @@ T = TypeVar("T", bound=Callable[..., object])
 def route(url: T) -> T: ...
 @overload
 def route(
-    url: Union[str, None] = None, server: Optional[ClientServer] = None
+    url: str | None = None, server: ClientServer | None = None
 ) -> Callable[[T], T]: ...
 def route(
-    url: Union[str, None, T] = None,
-    server: Optional[ClientServer] = None,
-) -> Union[T, Callable[[T], T]]:
+    url: str | None | T = None,
+    server: ClientServer | None = None,
+) -> T | Callable[[T], T]:
     """Register a route handler with the server.
 
     Can be used as a decorator with or without arguments. If url is not
@@ -61,7 +63,7 @@ def route(
 
 
 def add_route(
-    url: str, func: Callable[..., object], server: Optional[ClientServer] = None
+    url: str, func: Callable[..., object], server: ClientServer | None = None
 ):
     """Add a route handler to the server.
 

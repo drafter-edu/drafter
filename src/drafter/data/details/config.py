@@ -4,7 +4,7 @@ reconfiguration, and resets.
 """
 
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from drafter.data.telemetry import TelemetryRecord
 
@@ -19,7 +19,7 @@ class InitialConfigurationEvent(TelemetryRecord):
     """
 
     kind: str = "InitialConfiguration"
-    config: Optional[dict[str, Any]] = None
+    config: dict[str, Any] | None = None
 
     def to_json(self) -> dict[str, Any]:
         """
@@ -47,8 +47,8 @@ class UpdatedConfigurationEvent(TelemetryRecord):
     """
 
     kind: str = "UpdatedConfiguration"
-    key: Optional[str] = None
-    value: Optional[Any] = None
+    key: str | None = None
+    value: Any | None = None
     update_default: bool = False
 
     def to_json(self) -> dict[str, Any]:

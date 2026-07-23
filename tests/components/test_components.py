@@ -1,4 +1,5 @@
 import pytest
+
 from drafter import *
 from drafter.components import plotting as _plotting_components
 from tests.components.helpers import eval_drafter_with_source

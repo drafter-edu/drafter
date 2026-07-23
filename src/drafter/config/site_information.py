@@ -5,8 +5,9 @@ Defines SiteInformation, the metadata students provide about their site
 set_site_information and shown in the site's information display.
 """
 
-from typing import Union
 from dataclasses import dataclass, field
+from typing import Union
+
 from drafter.components import PageContent
 
 SiteInformationType = Union[str, list, tuple, PageContent]

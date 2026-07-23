@@ -1,6 +1,5 @@
-from tests.components.snippets._base import TestableComponentSet
 from drafter import *
-
+from tests.components.snippets._base import TestableComponentSet
 
 tests = TestableComponentSet("output")
 

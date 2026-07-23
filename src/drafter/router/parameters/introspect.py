@@ -9,7 +9,7 @@ route function into a :class:`RouteSignatureSpec` capturing all of that.
 
 import inspect
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -73,7 +73,7 @@ class RouteParamSpec:
             inspect.Parameter.VAR_KEYWORD,
         )
 
-    def describe_annotation(self) -> Optional[str]:
+    def describe_annotation(self) -> str | None:
         """Render the annotation as a short display name.
 
         Returns:
@@ -113,7 +113,7 @@ class RouteSignatureSpec:
         """Names of all parameters, in declaration order."""
         return [param.name for param in self.params]
 
-    def get(self, name: str) -> Optional[RouteParamSpec]:
+    def get(self, name: str) -> RouteParamSpec | None:
         """Look up a parameter spec by name.
 
         Args:

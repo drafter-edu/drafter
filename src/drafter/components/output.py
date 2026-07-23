@@ -5,10 +5,9 @@ Defines `Output` (an output element associated with form fields) and
 """
 
 from dataclasses import dataclass
-from drafter.components.page_content import Component, ComponentArgument
-from drafter.components.forms import FormComponent
-from typing import Union
 
+from drafter.components.forms import FormComponent
+from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.utilities.validation import validate_parameter_name
 
 
@@ -27,7 +26,7 @@ class Output(FormComponent):
 
     name: str
     content: str
-    for_id: Union[None, str, FormComponent] = None
+    for_id: None | str | FormComponent = None
     tag = "output"
     KNOWN_ATTRS = ["for", "name"]
     RENAME_ATTRS = {"for_id": "for"}
@@ -42,7 +41,7 @@ class Output(FormComponent):
         self,
         name: str,
         content: str,
-        for_id: Union[None, str, FormComponent] = None,
+        for_id: None | str | FormComponent = None,
         **kwargs,
     ):
         """Initialize output component.

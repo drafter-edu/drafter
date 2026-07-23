@@ -1,7 +1,7 @@
 """The `SimpleErrorPage` payload for reporting internal server errors."""
 
-from typing import Optional
 from dataclasses import dataclass
+
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.history.state import SiteState
 from drafter.payloads.payloads import ResponsePayload
@@ -21,7 +21,7 @@ class SimpleErrorPage(ResponsePayload):
     message: str
 
     def render(
-        self, state: SiteState, configuration: Optional[ClientServerConfiguration]
+        self, state: SiteState, configuration: ClientServerConfiguration | None
     ) -> str:
         """Render the error as a plain `System Error: ...` string.
 

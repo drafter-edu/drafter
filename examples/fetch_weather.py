@@ -1,5 +1,6 @@
-from drafter import *
 import requests
+
+from drafter import *
 
 
 @dataclass

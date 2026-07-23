@@ -1,7 +1,8 @@
+import datetime
 import linecache
 import uuid
+
 import drafter
-import datetime
 
 
 def eval_drafter_with_source(

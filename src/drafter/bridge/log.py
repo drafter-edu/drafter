@@ -2,8 +2,9 @@
 Logging utilities for the bridge module.
 """
 
-import js
 from typing import Any
+
+import js
 
 
 def debug_log(event_name: str, *args: Any) -> None:

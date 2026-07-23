@@ -4,8 +4,9 @@ Defines the RenderPlan and AssetBundle classes that describe how components
 should be rendered to HTML, CSS, and JavaScript.
 """
 
-from typing import Literal, Optional, Any, Callable
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any, Literal
 
 
 @dataclass
@@ -60,24 +61,24 @@ class RenderPlan:
 
     kind: Literal["tag", "fragment", "emit", "raw"]
     # Common
-    assets: Optional[AssetBundle] = None
+    assets: AssetBundle | None = None
 
     # "tag" specific
-    tag_name: Optional[str] = None
-    attributes: Optional[dict[str, Any]] = None
+    tag_name: str | None = None
+    attributes: dict[str, Any] | None = None
     children: Any = None  #  PageContent | None
     self_closing: bool = False
     collapse_whitespace: bool = False
     newline_mode: str = NewlineMode.CONVERT_TO_BR
     # Attributes that might be on this tag, but are not explicitly handled
-    known_attributes: Optional[list[str]] = None
-    id: Optional[str] = None
+    known_attributes: list[str] | None = None
+    id: str | None = None
 
     # "fragment" specific
     items: Any = None  # PageContent | None
 
     # "emit" specific
-    emitter: Optional[Callable] = None
+    emitter: Callable | None = None
 
     # "raw" specific
-    raw_html: Optional[str] = None
+    raw_html: str | None = None

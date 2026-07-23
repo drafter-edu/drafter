@@ -3,11 +3,12 @@ This file should only be imported by Pyodide.
 It patches the Python import system to allow importing modules from a remote server.
 """
 
-import sys
 import importlib.abc
 import importlib.util
+import sys
 
 from pyodide.http import pyxhr
+
 import js
 
 js.console.log("Patching Python import system to support remote imports...")

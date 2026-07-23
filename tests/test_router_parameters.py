@@ -6,7 +6,7 @@ Collect -> Normalize -> Bind -> Convert -> Diagnose.
 import json
 from dataclasses import dataclass
 from datetime import date, datetime, time
-from typing import Any, List, Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 import pytest
 
@@ -154,13 +154,13 @@ class TestCollectionConversion:
         assert convert("a", list).value == ["a"]
 
     def test_list_elements_converted(self):
-        assert convert(["1", "2"], List[int]).value == [1, 2]
+        assert convert(["1", "2"], list[int]).value == [1, 2]
 
     def test_list_scalar_wrapped_and_converted(self):
-        assert convert("1", List[int]).value == [1]
+        assert convert("1", list[int]).value == [1]
 
     def test_element_failure_reports_index(self):
-        result = convert(["1", "x"], List[int], param_name="scores")
+        result = convert(["1", "x"], list[int], param_name="scores")
         assert not result.ok
         assert "scores[1]" in result.message
 

@@ -9,7 +9,6 @@ of the events they emit.
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
 from drafter.components.utilities.contracts import (
@@ -42,7 +41,7 @@ class Timer(Component):
     controls: bool = False
     persistent: bool = False
     rate: int = 1000
-    on_tick: Optional[UrlOrFunction] = None
+    on_tick: UrlOrFunction | None = None
 
     tag = "drafter-timer"
 
@@ -116,7 +115,7 @@ class Timer(Component):
         controls: bool = False,
         persistent: bool = False,
         rate: int = 1000,
-        on_tick: Optional[UrlOrFunction] = None,
+        on_tick: UrlOrFunction | None = None,
         **kwargs,
     ):
         self.duration = duration
@@ -163,7 +162,7 @@ class Clock(Component):
     show: bool = True
     controls: bool = False
     persistent: bool = False
-    on_tick: Optional[UrlOrFunction] = None
+    on_tick: UrlOrFunction | None = None
 
     tag = "drafter-clock"
 
@@ -219,7 +218,7 @@ class Clock(Component):
         show: bool = True,
         controls: bool = False,
         persistent: bool = False,
-        on_tick: Optional[UrlOrFunction] = None,
+        on_tick: UrlOrFunction | None = None,
         **kwargs,
     ):
         self.interval = interval

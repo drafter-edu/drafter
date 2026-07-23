@@ -22,14 +22,14 @@ skip their teardown/reset during the move; native media elements get their
 playback explicitly resumed.
 """
 
-from typing import Any, Optional
+from typing import Any
 
+from drafter.bridge.error_handling import report_bridge_warning
 from drafter.components.utilities.persistence import (
     PERSIST_EVICT_ATTR,
     PERSIST_FLAG_ATTR,
     PERSIST_KEY_ATTR,
 )
-from drafter.bridge.error_handling import report_bridge_warning
 
 PERSIST_SOFT_CAP = 10
 """Soft cap on simultaneously-parked components; exceeding it usually means an
@@ -50,7 +50,7 @@ def _is_media(element: Any) -> bool:
     return _tag_name(element) in _MEDIA_TAGS
 
 
-def find_parked(parking_area: Any, key: str) -> Optional[Any]:
+def find_parked(parking_area: Any, key: str) -> Any | None:
     """Find the parked element with the given persistence key, if any."""
     for child in list(parking_area.children):
         if child.getAttribute(PERSIST_KEY_ATTR) == key:
@@ -91,7 +91,7 @@ def evict_key(parking_area: Any, key: str) -> bool:
     return True
 
 
-def _fallback_move(element: Any, new_parent: Any, reference: Optional[Any]) -> None:
+def _fallback_move(element: Any, new_parent: Any, reference: Any | None) -> None:
     """Reparent without moveBefore, preserving as much state as possible."""
     begin_move = getattr(element, "_drafterBeginMove", None)
     if begin_move is not None:
@@ -117,7 +117,7 @@ def _fallback_move(element: Any, new_parent: Any, reference: Optional[Any]) -> N
 
 
 def move_element(
-    element: Any, new_parent: Any, reference: Optional[Any] = None
+    element: Any, new_parent: Any, reference: Any | None = None
 ) -> None:
     """Move an element into new_parent (before reference, or appended).
 

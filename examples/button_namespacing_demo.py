@@ -5,8 +5,9 @@ Before the fix, these buttons would have conflicting parameter names.
 After the fix, each button has unique parameter names based on its instance ID.
 """
 
-from drafter import *
 from dataclasses import dataclass
+
+from drafter import *
 
 
 @dataclass

@@ -8,9 +8,11 @@ signatures and prepares handler arguments by running the parameter pipeline
 """
 
 import json
-from typing import Callable, Optional, List, Dict, Any
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
+from drafter.components.utilities.registry import COMPONENT_CONTRACT_REGISTRY
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.constants import SUBMIT_BUTTON_KEY
 from drafter.data.correlation import Correlation
@@ -23,7 +25,6 @@ from drafter.data.request import Request
 from drafter.history.state import SiteState
 from drafter.history.utils import safe_repr
 from drafter.monitor.audit import log_error
-from drafter.components.utilities.registry import COMPONENT_CONTRACT_REGISTRY
 from drafter.router.parameters.binding import PayloadMerger, RouteBinder
 from drafter.router.parameters.collect import collect_payload, normalize_payload
 from drafter.router.parameters.conversion import CONVERTER_REGISTRY
@@ -116,7 +117,7 @@ class Router:
         self.route_functions = {}
         self.signatures = {}
 
-    def get_route(self, url: str) -> Optional[Callable]:
+    def get_route(self, url: str) -> Callable | None:
         """Retrieve the handler function for a given URL.
 
         Args:
@@ -279,8 +280,8 @@ class Router:
     def build_argument_representation(
         self,
         signature: RouteSignatureSpec,
-        args: List[Any],
-        kwargs: Dict[str, Any],
+        args: list[Any],
+        kwargs: dict[str, Any],
     ) -> str:
         """Generate a string representation of function call arguments.
 
@@ -325,7 +326,7 @@ class Router:
             )
         return signature
 
-    def preprocess_button_press(self, request: Request, kwargs: Dict[str, Any]) -> str:
+    def preprocess_button_press(self, request: Request, kwargs: dict[str, Any]) -> str:
         """Extract button metadata from the request.
 
         Reads button_pressed from the Request object (set by the client).

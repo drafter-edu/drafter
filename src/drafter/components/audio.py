@@ -34,7 +34,7 @@ routes can inspect problems without try/except.
 
 import json
 from dataclasses import asdict, dataclass
-from typing import ClassVar, List, Literal, Optional, Tuple, Union
+from typing import ClassVar, Literal, Union
 
 from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
 from drafter.components.utilities.contracts import (
@@ -48,7 +48,6 @@ from drafter.components.utilities.registry import (
 )
 from drafter.components.utilities.validation import validate_parameter_name
 from drafter.data.converter import ConversionContext, ConversionResult
-
 
 WAVEFORMS = ("sine", "square", "triangle", "sawtooth")
 """The oscillator waveform names accepted by `Tone` and `Melody`."""
@@ -75,7 +74,7 @@ _NOTE_SEMITONES = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 REST = "rest"
 """A note that plays silence for its beats in a Melody."""
 
-NoteValue = Union[str, Tuple[str, Union[int, float]]]
+NoteValue = Union[str, tuple[str, int | float]]
 """One item in a Melody's note list: a note name like `"C4"` (or
 `"rest"`), played for one beat, or a `(note, beats)` pair like
 `("C4", 2)`."""
@@ -181,10 +180,10 @@ class AudioLevel:
     """
 
     status: MicrophoneStatus
-    message: Optional[str] = None
-    volume: Optional[float] = None
-    peak_volume: Optional[float] = None
-    pitch: Optional[float] = None
+    message: str | None = None
+    volume: float | None = None
+    peak_volume: float | None = None
+    pitch: float | None = None
 
 
 @dataclass
@@ -204,10 +203,10 @@ class Recording:
     """
 
     status: RecordingStatus
-    message: Optional[str] = None
-    data_url: Optional[str] = None
-    duration: Optional[float] = None
-    size: Optional[int] = None
+    message: str | None = None
+    data_url: str | None = None
+    duration: float | None = None
+    size: int | None = None
 
 
 def _is_audio_level_type(target) -> bool:
@@ -252,12 +251,12 @@ def _convert_json_dataclass(ctx: ConversionContext, dataclass_type, label: str):
     return None
 
 
-def convert_audio_level(ctx: ConversionContext) -> Optional[ConversionResult]:
+def convert_audio_level(ctx: ConversionContext) -> ConversionResult | None:
     """Convert a JSON string or dict payload into an :class:`AudioLevel`."""
     return _convert_json_dataclass(ctx, AudioLevel, "microphone")
 
 
-def convert_recording(ctx: ConversionContext) -> Optional[ConversionResult]:
+def convert_recording(ctx: ConversionContext) -> ConversionResult | None:
     """Convert a JSON string or dict payload into a :class:`Recording`."""
     return _convert_json_dataclass(ctx, Recording, "recording")
 
@@ -380,7 +379,7 @@ def _validate_effects(effects, component_name: str) -> None:
                 )
 
 
-def _serialize_effects(effects: List[AudioEffect]) -> str:
+def _serialize_effects(effects: list[AudioEffect]) -> str:
     return json.dumps([effect.to_config() for effect in effects])
 
 
@@ -411,7 +410,7 @@ class Tone(Component):
         on_error: Function or URL to call if the tone cannot be played.
     """
 
-    pitch: Union[str, int, float]
+    pitch: str | int | float
     duration: int = 500
     waveform: str = "sine"
     volume: float = 0.8
@@ -419,10 +418,10 @@ class Tone(Component):
     release: int = 50
     auto_play: bool = False
     show: bool = True
-    effects: Optional[List[AudioEffect]] = None
-    on_start: Optional[UrlOrFunction] = None
-    on_finish: Optional[UrlOrFunction] = None
-    on_error: Optional[UrlOrFunction] = None
+    effects: list[AudioEffect] | None = None
+    on_start: UrlOrFunction | None = None
+    on_finish: UrlOrFunction | None = None
+    on_error: UrlOrFunction | None = None
 
     tag = "drafter-tone"
 
@@ -516,7 +515,7 @@ class Tone(Component):
 
     def __init__(
         self,
-        pitch: Union[str, int, float],
+        pitch: str | int | float,
         duration: int = 500,
         waveform: str = "sine",
         volume: float = 0.8,
@@ -524,10 +523,10 @@ class Tone(Component):
         release: int = 50,
         auto_play: bool = False,
         show: bool = True,
-        effects: Optional[List[AudioEffect]] = None,
-        on_start: Optional[UrlOrFunction] = None,
-        on_finish: Optional[UrlOrFunction] = None,
-        on_error: Optional[UrlOrFunction] = None,
+        effects: list[AudioEffect] | None = None,
+        on_start: UrlOrFunction | None = None,
+        on_finish: UrlOrFunction | None = None,
+        on_error: UrlOrFunction | None = None,
         **extra_settings,
     ):
         """Initialize the Tone component.
@@ -584,7 +583,7 @@ class Tone(Component):
 COMPONENT_CONTRACT_REGISTRY.register(Tone.CONTRACT)
 
 
-def _normalize_notes(notes) -> List[List]:
+def _normalize_notes(notes) -> list[list]:
     """Validate a Melody note list and normalize it to [note, beats] pairs."""
     if not isinstance(notes, list) or not notes:
         raise ValueError(
@@ -658,16 +657,16 @@ class Melody(Component):
         on_finish: Function or URL to call when the melody finishes.
     """
 
-    notes: List[NoteValue]
-    tempo: Union[int, float] = 120
+    notes: list[NoteValue]
+    tempo: int | float = 120
     waveform: str = "sine"
     volume: float = 0.8
     auto_play: bool = False
     controls: bool = False
     show: bool = True
-    effects: Optional[List[AudioEffect]] = None
-    on_note: Optional[UrlOrFunction] = None
-    on_finish: Optional[UrlOrFunction] = None
+    effects: list[AudioEffect] | None = None
+    on_note: UrlOrFunction | None = None
+    on_finish: UrlOrFunction | None = None
 
     tag = "drafter-melody"
 
@@ -734,16 +733,16 @@ class Melody(Component):
 
     def __init__(
         self,
-        notes: List[NoteValue],
-        tempo: Union[int, float] = 120,
+        notes: list[NoteValue],
+        tempo: int | float = 120,
         waveform: str = "sine",
         volume: float = 0.8,
         auto_play: bool = False,
         controls: bool = False,
         show: bool = True,
-        effects: Optional[List[AudioEffect]] = None,
-        on_note: Optional[UrlOrFunction] = None,
-        on_finish: Optional[UrlOrFunction] = None,
+        effects: list[AudioEffect] | None = None,
+        on_note: UrlOrFunction | None = None,
+        on_finish: UrlOrFunction | None = None,
         **extra_settings,
     ):
         """Initialize the Melody component.
@@ -839,13 +838,13 @@ class Sound(Component):
     pan: float = 0.0
     speed: float = 1.0
     loop: bool = False
-    effects: Optional[List[AudioEffect]] = None
+    effects: list[AudioEffect] | None = None
     auto_play: bool = False
     controls: bool = True
-    visualize: Optional[str] = None
-    on_play: Optional[UrlOrFunction] = None
-    on_finish: Optional[UrlOrFunction] = None
-    on_error: Optional[UrlOrFunction] = None
+    visualize: str | None = None
+    on_play: UrlOrFunction | None = None
+    on_finish: UrlOrFunction | None = None
+    on_error: UrlOrFunction | None = None
 
     tag = "drafter-sound"
 
@@ -928,13 +927,13 @@ class Sound(Component):
         pan: float = 0.0,
         speed: float = 1.0,
         loop: bool = False,
-        effects: Optional[List[AudioEffect]] = None,
+        effects: list[AudioEffect] | None = None,
         auto_play: bool = False,
         controls: bool = True,
-        visualize: Optional[str] = None,
-        on_play: Optional[UrlOrFunction] = None,
-        on_finish: Optional[UrlOrFunction] = None,
-        on_error: Optional[UrlOrFunction] = None,
+        visualize: str | None = None,
+        on_play: UrlOrFunction | None = None,
+        on_finish: UrlOrFunction | None = None,
+        on_error: UrlOrFunction | None = None,
         **extra_settings,
     ):
         """Initialize the Sound component.
@@ -1057,11 +1056,11 @@ class Microphone(Component):
     rate: int = 0
     show: bool = True
     visualize: str = "meter"
-    on_loud: Optional[UrlOrFunction] = None
-    on_quiet: Optional[UrlOrFunction] = None
-    on_level: Optional[UrlOrFunction] = None
-    on_denied: Optional[UrlOrFunction] = None
-    on_error: Optional[UrlOrFunction] = None
+    on_loud: UrlOrFunction | None = None
+    on_quiet: UrlOrFunction | None = None
+    on_level: UrlOrFunction | None = None
+    on_denied: UrlOrFunction | None = None
+    on_error: UrlOrFunction | None = None
 
     tag = "drafter-microphone"
 
@@ -1169,11 +1168,11 @@ class Microphone(Component):
         rate: int = 0,
         show: bool = True,
         visualize: str = "meter",
-        on_loud: Optional[UrlOrFunction] = None,
-        on_quiet: Optional[UrlOrFunction] = None,
-        on_level: Optional[UrlOrFunction] = None,
-        on_denied: Optional[UrlOrFunction] = None,
-        on_error: Optional[UrlOrFunction] = None,
+        on_loud: UrlOrFunction | None = None,
+        on_quiet: UrlOrFunction | None = None,
+        on_level: UrlOrFunction | None = None,
+        on_denied: UrlOrFunction | None = None,
+        on_error: UrlOrFunction | None = None,
         **extra_settings,
     ):
         """Initialize the Microphone component.
@@ -1242,9 +1241,9 @@ class AudioRecorder(Component):
     name: str
     max_duration: int = 30000
     show: bool = True
-    on_record: Optional[UrlOrFunction] = None
-    on_denied: Optional[UrlOrFunction] = None
-    on_error: Optional[UrlOrFunction] = None
+    on_record: UrlOrFunction | None = None
+    on_denied: UrlOrFunction | None = None
+    on_error: UrlOrFunction | None = None
 
     tag = "drafter-audio-recorder"
 
@@ -1315,9 +1314,9 @@ class AudioRecorder(Component):
         name: str,
         max_duration: int = 30000,
         show: bool = True,
-        on_record: Optional[UrlOrFunction] = None,
-        on_denied: Optional[UrlOrFunction] = None,
-        on_error: Optional[UrlOrFunction] = None,
+        on_record: UrlOrFunction | None = None,
+        on_denied: UrlOrFunction | None = None,
+        on_error: UrlOrFunction | None = None,
         **extra_settings,
     ):
         """Initialize the AudioRecorder component.

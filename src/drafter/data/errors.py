@@ -32,9 +32,9 @@ The fine-grained distinction between failures lives in the envelope `id`
 only a coarse outcome bucket used for responses and telemetry display.
 """
 
-from dataclasses import dataclass, field
 import traceback as _traceback_module
-from typing import Any, Dict, Optional
+from dataclasses import dataclass, field
+from typing import Any
 
 from drafter.data.correlation import Correlation
 
@@ -129,9 +129,9 @@ class ErrorDetails(Exception):
     message: str
     severity: str = SEVERITY_ERROR
     details: str = ""
-    traceback: Optional[str] = None
+    traceback: str | None = None
     context: Correlation = field(default_factory=Correlation)
-    status_code: Optional[str] = None
+    status_code: str | None = None
     recoverable: bool = True
 
     def __post_init__(self) -> None:
@@ -145,7 +145,7 @@ class ErrorDetails(Exception):
         elif self.status_code not in STATUSES:
             raise ValueError(f"Unknown status code: {self.status_code!r}")
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         """Converts the ErrorDetails instance to a JSON-serializable dictionary.
 
         Returns:
@@ -175,11 +175,11 @@ def envelope_from_exception(
     error_id: str,
     category: str,
     *,
-    message: Optional[str] = None,
+    message: str | None = None,
     details: str = "",
     severity: str = SEVERITY_ERROR,
-    context: Optional[Correlation] = None,
-    status_code: Optional[str] = None,
+    context: Correlation | None = None,
+    status_code: str | None = None,
     recoverable: bool = True,
 ) -> ErrorDetails:
     """Build a canonical envelope from a raised exception.
@@ -202,7 +202,7 @@ def envelope_from_exception(
         than masking the original error.
     """
     try:
-        traceback_text: Optional[str] = "".join(
+        traceback_text: str | None = "".join(
             _traceback_module.format_exception(
                 type(exception), exception, exception.__traceback__
             )

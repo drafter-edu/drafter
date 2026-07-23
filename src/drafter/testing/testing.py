@@ -7,16 +7,16 @@ Bakery is not installed, a stub `assert_equal` is provided that simply
 prints a warning.
 """
 
+import difflib
 import sys
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Optional
+from typing import Any
 
-import difflib
-from drafter.monitor.audit import log_record
 from drafter.data.details.tests import TestCaseEvent
-from drafter.history.formatting import format_page_content
 from drafter.helpers.ast_tools import get_all_relevant_lines
+from drafter.history.formatting import format_page_content
+from drafter.monitor.audit import log_record
 
 try:
     import bakery
@@ -46,7 +46,7 @@ class BakeryTestCase:
     kind: str
 
 
-def try_getting_full_code(filename: str, lineno: int) -> Optional[str]:
+def try_getting_full_code(filename: str, lineno: int) -> str | None:
     """Retrieve the full multi-line code for a test from source file.
 
     Args:
@@ -57,7 +57,7 @@ def try_getting_full_code(filename: str, lineno: int) -> Optional[str]:
         The full code snippet as a string, or None if retrieval fails.
     """
     try:
-        with open(filename, "r") as f:
+        with open(filename) as f:
             code = f.read()
             return get_all_relevant_lines(lineno, code)
     except Exception:

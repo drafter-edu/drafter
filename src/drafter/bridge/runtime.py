@@ -4,6 +4,9 @@ Encapsulates the JS API differences (e.g. .new() constructors, proxy management)
 so the rest of the bridge code doesn't need to care about the runtime.
 """
 
+from collections.abc import Callable
+from typing import Any
+
 import js
 from drafter.bridge.context import DomContext
 from drafter.bridge.error_handling import (
@@ -11,10 +14,9 @@ from drafter.bridge.error_handling import (
     report_bridge_error,
 )
 from drafter.helpers.utils import is_pyodide
-from typing import Callable, Any, Optional
 
 
-def create_runtime(context: Optional[DomContext] = None) -> "RuntimeAdapter":
+def create_runtime(context: DomContext | None = None) -> "RuntimeAdapter":
     """Factory: returns the correct runtime adapter for the current environment."""
     if is_pyodide():
         return PyodideRuntime(context)
@@ -29,7 +31,7 @@ class RuntimeAdapter:
     instance renders into — which may be an iframe rather than the top page.
     """
 
-    def __init__(self, context: Optional[DomContext] = None):
+    def __init__(self, context: DomContext | None = None):
         self.context = context if context is not None else DomContext.default()
 
     def _window_class(self, name: str) -> Any:
@@ -293,7 +295,7 @@ class SkulptRuntime(RuntimeAdapter):
 class PyodideRuntime(RuntimeAdapter):
     """Runtime adapter for Pyodide — uses .new() constructors and proxy management."""
 
-    def __init__(self, context: Optional[DomContext] = None):
+    def __init__(self, context: DomContext | None = None):
         super().__init__(context)
         from pyodide.ffi import create_proxy, to_js
 

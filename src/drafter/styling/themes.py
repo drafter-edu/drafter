@@ -8,7 +8,6 @@ name, and unknown names get a "did you mean" suggestion via
 `ThemeSystem.suggest_mistake`.
 """
 
-from typing import Optional
 from dataclasses import dataclass, field
 from difflib import get_close_matches
 
@@ -53,7 +52,7 @@ class ThemeSystem:
         """
         self.themes[theme.name] = theme
 
-    def get_theme(self, name: Optional[str]) -> Theme:
+    def get_theme(self, name: str | None) -> Theme:
         """Retrieve a theme by name, with fallback to defaults.
 
         Args:

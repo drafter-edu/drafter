@@ -11,7 +11,6 @@ from drafter.constants import SUBMIT_BUTTON_KEY
 from drafter.data.payload import PayloadValue
 from drafter.data.request import Request
 
-
 #: Sources the bridge is allowed to claim; anything else demotes to form_field.
 _VALID_SOURCES = {"component_argument", "event_detail", "form_field", "framework_meta"}
 

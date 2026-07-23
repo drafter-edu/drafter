@@ -7,11 +7,11 @@ each component's configuration section and provides merging and JSON
 
 from dataclasses import dataclass
 
-from drafter.config.bootstrap import BootstrapConfiguration
 from drafter.config.app_builder import AppBuilderConfiguration
-from drafter.config.app_server import AppServerConfiguration
-from drafter.config.client_server import ClientServerConfiguration
 from drafter.config.app_common import AppCommonConfiguration
+from drafter.config.app_server import AppServerConfiguration
+from drafter.config.bootstrap import BootstrapConfiguration
+from drafter.config.client_server import ClientServerConfiguration
 
 
 @dataclass

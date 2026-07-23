@@ -1,8 +1,10 @@
-from drafter import *
-from dataclasses import dataclass
-from PIL import Image as PILImage
-import io
 import base64
+import io
+from dataclasses import dataclass
+
+from PIL import Image as PILImage
+
+from drafter import *
 
 RAW_SIMPLE_IMAGE = """R0lGODlhDwAPAKECAAAAzMzM/////wAAACwAAAAADwAPAAACIISPeQHsrZ5ModrLl
 N48CXF8m2iQ3YmmKqVlRtW4MLwWACH+H09wdGltaXplZCBieSBVbGVhZCBTbWFydFNhdmVyIQAAOw=="""

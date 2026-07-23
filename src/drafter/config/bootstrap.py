@@ -7,9 +7,9 @@ the server or compile the site, any extra configuration files, and verbosity.
 
 import os
 from dataclasses import dataclass
-from typing import Optional
-from drafter.helpers.env_vars import EnvVars
+
 from drafter.config.base import BaseConfiguration
+from drafter.helpers.env_vars import EnvVars
 
 
 @dataclass
@@ -32,11 +32,11 @@ class BootstrapConfiguration(BaseConfiguration):
         verbose: Whether to enable verbose output.
     """
 
-    path: Optional[str] = (
+    path: str | None = (
         None  # The main entry file for the application (e.g., "my_site.py"). Must be provided SOMEWHERE at SOME POINT.
     )
     mode: str = "start_server"  # Options: "start_server", "compile_site"
-    config_file: Optional[list[str]] = (
+    config_file: list[str] | None = (
         # Paths to config files, if needed. Set via the semicolon-separated
         # DRAFTER_CONFIG_FILE env var or by repeating the --config-file flag.
         None

@@ -5,9 +5,10 @@ asset serving, file reloading, and UI options.
 """
 
 from dataclasses import dataclass
-from drafter.helpers.env_vars import EnvVars
-from drafter.config.urls import INTERNAL_ROUTES
+
 from drafter.config.base import BaseConfiguration
+from drafter.config.urls import INTERNAL_ROUTES
+from drafter.helpers.env_vars import EnvVars
 
 
 @dataclass

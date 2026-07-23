@@ -150,7 +150,7 @@ target-version = "py310"
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # McCabe complexity (`C901`) by default.
-select = ["E4", "E7", "E9", "F"]
+select = ["E4", "E7", "E9", "F", "I", "B", "UP", "RUF100", "D1"]
 ignore = []
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -161,11 +161,12 @@ unfixable = []
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.lint.per-file-ignores]
-"examples/**.py" = ["F403", "F405", "E402"]
-"tests/**.py" = ["F403", "F405"]
-"docs/**/**.py" = ["F403", "F405", "E402"]
-"docsrc/**/**.py" = ["F403", "F405", "E402"]
-"js/**/**.py" = ["F403", "F405", "F821", "E501", "E402"]
+"examples/**.py" = ["F403", "F405", "E402", "D1"]
+"tests/**.py" = ["F403", "F405", "D1", "UP", "B"]
+"docs/**/**.py" = ["F403", "F405", "E402", "D1"]
+"docsrc/**/**.py" = ["F403", "F405", "E402", "D1"]
+"js/**/**.py" = ["F403", "F405", "F821", "E501", "E402", "D1"]
+"tools/**/**.py" = ["F403", "F405", "E402", "D1"]
 
 
 [tool.ruff.format]
@@ -186,7 +187,7 @@ line-ending = "auto"
 #
 # This is currently disabled by default, but it is planned for this
 # to be opt-out in the future.
-docstring-code-format = false
+docstring-code-format = true
 
 # Set the line length limit used when formatting code snippets in
 # docstrings.

@@ -4,10 +4,10 @@ Provides functions to load and render Jinja2 templates for the index page,
 supporting multiple Python engines (Skulpt, Pyodide).
 """
 
-from typing import Optional
-from drafter.config.system import SystemConfiguration
+
 from jinja2 import Environment, FileSystemLoader, Template
 
+from drafter.config.system import SystemConfiguration
 from drafter.scaffolding.utils import pkg_scaffold_dir
 from drafter.site.site import DRAFTER_TAG_IDS
 
@@ -31,10 +31,10 @@ def render_index_html(
     system: SystemConfiguration,
     modified_system: dict,
     inline_py: bool,
-    user_code: Optional[str],
-    python_url: Optional[str],
-    dev_ws_url: Optional[str],
-    assets_url: Optional[str] = None,
+    user_code: str | None,
+    python_url: str | None,
+    dev_ws_url: str | None,
+    assets_url: str | None = None,
     compiled_body: str = "",
     compiled_headers: str = "",
     pyodide_drafter_path: str = "",

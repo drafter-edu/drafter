@@ -6,11 +6,11 @@ recursively convert strings, lists, `Component` instances, and
 recording rendering errors.
 """
 
-from dataclasses import dataclass
-from typing import Optional
 import html
+from dataclasses import dataclass
+
 from drafter.components import Component
-from drafter.components.planning.render_plan import RenderPlan, NewlineMode
+from drafter.components.planning.render_plan import NewlineMode, RenderPlan
 from drafter.components.utilities.attributes import parse_extra_settings
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.history.state import SiteState
@@ -45,8 +45,8 @@ class Renderer:
 
     def __init__(
         self,
-        state: Optional[SiteState] = None,
-        configuration: Optional[ClientServerConfiguration] = None,
+        state: SiteState | None = None,
+        configuration: ClientServerConfiguration | None = None,
     ):
         self.state = state
         self.configuration = configuration
@@ -78,7 +78,7 @@ class Renderer:
         """Append a newline to the output."""
         self.parts.append("\n")
 
-    def in_convert_newlines_mode(self) -> Optional[bool]:
+    def in_convert_newlines_mode(self) -> bool | None:
         """Check if the current rendering mode converts newlines to `<br>`.
 
         Returns:
@@ -195,8 +195,8 @@ class Renderer:
 
 def render(
     component,
-    state: Optional[SiteState] = None,
-    configuration: Optional[ClientServerConfiguration] = None,
+    state: SiteState | None = None,
+    configuration: ClientServerConfiguration | None = None,
 ) -> Renderer:
     """Create a Renderer and render a component hierarchy to HTML.
 

@@ -1,9 +1,11 @@
-from drafter import *
-from dataclasses import dataclass
-from PIL import Image as PILImage
-import io
 import base64
+import io
+from dataclasses import dataclass
+
 from file_handling_external import example_code_2, example_website_2, read_in_route_2
+from PIL import Image as PILImage
+
+from drafter import *
 
 RAW_SIMPLE_IMAGE = """R0lGODlhDwAPAKECAAAAzMzM/////wAAACwAAAAADwAPAAACIISPeQHsrZ5ModrLl
 N48CXF8m2iQ3YmmKqVlRtW4MLwWACH+H09wdGltaXplZCBieSBVbGVhZCBTbWFydFNhdmVyIQAAOw=="""
@@ -17,15 +19,15 @@ class State:
     current_image: PILImage.Image
 
 
-with open("full_state.py", "r", encoding="utf-8") as f:
+with open("full_state.py", encoding="utf-8") as f:
     example_code = f.read()
 
-with open("https://drafter-edu.github.io/drafter/", "r", encoding="utf-8") as f:
+with open("https://drafter-edu.github.io/drafter/", encoding="utf-8") as f:
     example_website = f.read()
 
 
 def read_in_route() -> str:
-    with open("emojis.py", "r", encoding="utf-8") as f:
+    with open("emojis.py", encoding="utf-8") as f:
         return f.read()
 
 

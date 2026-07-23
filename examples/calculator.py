@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from drafter import *
 
+from drafter import *
 
 set_site_information(
     "acbart@udel.edu",

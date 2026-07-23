@@ -1,5 +1,6 @@
-from drafter import *
 from dataclasses import dataclass
+
+from drafter import *
 
 
 @dataclass

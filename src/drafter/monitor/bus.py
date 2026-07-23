@@ -10,8 +10,9 @@ are queued (up to a maximum) for later delivery via
 `process_unprocessed_events`.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, Optional
+
 from drafter.data.telemetry import TelemetryRecord
 
 
@@ -29,7 +30,7 @@ class Subscription:
 
     topic: str
     handler: Callable[[TelemetryRecord], None]
-    filter: Optional[Callable] = None
+    filter: Callable | None = None
     once: bool = False
 
 
@@ -83,7 +84,7 @@ class EventBus:
         self,
         topic: str,
         handler: Callable[[TelemetryRecord], None],
-        filter: Optional[Callable] = None,
+        filter: Callable | None = None,
         once: bool = False,
     ) -> Subscription:
         """

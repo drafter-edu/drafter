@@ -2,28 +2,28 @@
 TODO: These tests are sloppy and should be reviewed and improved
 """
 
-import pytest
 from dataclasses import dataclass
 from unittest.mock import patch
 
+import pytest
+
 from drafter.client_server.client_server import ClientServer
+from drafter.config.client_server import ClientServerConfiguration
 from drafter.data.correlation import Correlation
 from drafter.data.errors import (
     CATEGORY_SYSTEM,
-    STATUS_OK,
-    STATUS_NOT_FOUND,
     STATUS_ERROR,
+    STATUS_NOT_FOUND,
+    STATUS_OK,
     ErrorDetails,
 )
 from drafter.data.request import Request
 from drafter.data.response import Response
+from drafter.history.state import SiteState
+from drafter.payloads.kinds.error_page import SimpleErrorPage
 from drafter.payloads.kinds.page import Page
 from drafter.payloads.kinds.update import Update
-from drafter.payloads.kinds.error_page import SimpleErrorPage
-from drafter.payloads.target import Target, DEFAULT_BODY_TARGET
-from drafter.config.client_server import ClientServerConfiguration
-from drafter.history.state import SiteState
-
+from drafter.payloads.target import DEFAULT_BODY_TARGET, Target
 
 # ============================================================================
 # FIXTURES

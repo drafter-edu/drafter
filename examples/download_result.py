@@ -1,6 +1,7 @@
-from drafter import *
-from dataclasses import dataclass
 import random
+from dataclasses import dataclass
+
+from drafter import *
 
 
 @dataclass

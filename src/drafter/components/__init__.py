@@ -22,73 +22,6 @@ groups are:
   `Melody`, `Sound`, and effect wrappers like `Echo` and `Reverb`
 """
 
-from drafter.components.page_content import PageContent, Component, Content
-from drafter.components.layout import (
-    Div,
-    Span,
-    LineBreak,
-    HorizontalRule,
-    Paragraph,
-    Section,
-    Article,
-    Aside,
-    Main,
-    Nav,
-    HeaderContent,
-    FooterContent,
-    Row,
-    BulletedList,
-    NumberedList,
-    Division,
-    Box,
-)
-from drafter.components.text import (
-    Text,
-    BlockQuote,
-    PreformattedText,
-    Header,
-    Pre,
-    RawHTML,
-    InlineCode,
-    HtmlTag,
-)
-from drafter.components.output import Output, Progress
-from drafter.components.forms import (
-    TextBox,
-    TextArea,
-    SelectBox,
-    CheckBox,
-    RelatedCheckBox,
-    Label,
-    DateTimeInput,
-    DateInput,
-    TimeInput,
-)
-
-from drafter.components.geolocation import CurrentLocation, Location
-from drafter.components.map import (
-    Map,
-    MapLocation,
-    MapMarker,
-    MapView,
-    AddMarkerFunction,
-)
-
-# TODO: Sliders, Autocomplete, RadioButtons
-from drafter.components.tables import Table
-from drafter.components.links import Link, Button, Argument
-
-from drafter.components.images import Image
-from drafter.components.files import Download, FileUpload
-
-from drafter.components.plotting import MatPlotLibPlot
-
-from drafter.components.media import Audio, Video, Canvas, SVG
-
-from drafter.components.timer import Timer, Clock
-
-from drafter.components.persistence import RemovePersistent
-
 from drafter.components.audio import (
     AudioLevel,
     AudioRecorder,
@@ -103,6 +36,66 @@ from drafter.components.audio import (
     Sound,
     Tone,
 )
+from drafter.components.files import Download, FileUpload
+from drafter.components.forms import (
+    CheckBox,
+    DateInput,
+    DateTimeInput,
+    Label,
+    RelatedCheckBox,
+    SelectBox,
+    TextArea,
+    TextBox,
+    TimeInput,
+)
+from drafter.components.geolocation import CurrentLocation, Location
+from drafter.components.images import Image
+from drafter.components.layout import (
+    Article,
+    Aside,
+    Box,
+    BulletedList,
+    Div,
+    Division,
+    FooterContent,
+    HeaderContent,
+    HorizontalRule,
+    LineBreak,
+    Main,
+    Nav,
+    NumberedList,
+    Paragraph,
+    Row,
+    Section,
+    Span,
+)
+from drafter.components.links import Argument, Button, Link
+from drafter.components.map import (
+    AddMarkerFunction,
+    Map,
+    MapLocation,
+    MapMarker,
+    MapView,
+)
+from drafter.components.media import SVG, Audio, Canvas, Video
+from drafter.components.output import Output, Progress
+from drafter.components.page_content import Component, Content, PageContent
+from drafter.components.persistence import RemovePersistent
+from drafter.components.plotting import MatPlotLibPlot
+
+# TODO: Sliders, Autocomplete, RadioButtons
+from drafter.components.tables import Table
+from drafter.components.text import (
+    BlockQuote,
+    Header,
+    HtmlTag,
+    InlineCode,
+    Pre,
+    PreformattedText,
+    RawHTML,
+    Text,
+)
+from drafter.components.timer import Clock, Timer
 
 __all__ = [
     "PageContent",

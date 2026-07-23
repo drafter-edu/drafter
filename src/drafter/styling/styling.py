@@ -18,8 +18,8 @@ component) or a list of components (each element is updated).
 # - superscript, subscript
 # - border/margin/padding for individual sides
 
-from typing import Union
-from drafter.components import Text, PageContent
+
+from drafter.components import PageContent, Text
 
 
 def update_style(component: PageContent, style: str, value: str) -> PageContent:
@@ -255,7 +255,7 @@ def change_background_color(component: PageContent, color: str) -> PageContent:
     return update_style(component, "background-color", color)
 
 
-def change_text_size(component: PageContent, size: Union[str, int]) -> PageContent:
+def change_text_size(component: PageContent, size: str | int) -> PageContent:
     """
     Changes the font size of a component.
 

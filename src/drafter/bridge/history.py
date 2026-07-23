@@ -9,10 +9,10 @@ buttons work, and converts popstate events back into Requests to replay.
 import json
 from typing import Any
 
+from drafter.bridge.error_handling import report_bridge_warning
+from drafter.bridge.log import debug_log
 from drafter.bridge.runtime import RuntimeAdapter
 from drafter.data.request import Request
-from drafter.bridge.log import debug_log
-from drafter.bridge.error_handling import report_bridge_warning
 
 
 class BrowserHistory:

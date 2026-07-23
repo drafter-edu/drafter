@@ -9,11 +9,12 @@ virtual-filesystem root) around dispatch, and passing per-instance context
 from `configure_instance()` to the next bridge run.
 """
 
-from typing import Any, Optional
-from drafter.monitor.bus import EventBus
-from drafter.client_server.client_server import ClientServer
+from typing import Any
 
-MAIN_SERVER: Optional[ClientServer] = None
+from drafter.client_server.client_server import ClientServer
+from drafter.monitor.bus import EventBus
+
+MAIN_SERVER: ClientServer | None = None
 """The default shared ClientServer instance: the "current" server being
 configured or executed right now. Route decorators and start_server() resolve
 through this during code execution, and request handlers set it around
@@ -33,17 +34,17 @@ _SERVER_REGISTRY: dict[str, ClientServer] = {}
 # Holds "window" (the JS window this instance renders into, e.g. an iframe's
 # contentWindow), "instance_id" (the registry key), and "instance_root" (the
 # instance's virtual-filesystem folder).
-_PENDING_INSTANCE_CONTEXT: Optional[dict[str, Any]] = None
+_PENDING_INSTANCE_CONTEXT: dict[str, Any] | None = None
 
 # Virtual-filesystem folder of the instance whose code is currently executing
 # (e.g. "/instances/demo-1"). Relative file paths in student code resolve here
 # so instances sharing one interpreter don't read or write each other's files.
 # Kept in sync by configure_instance() (initial run) and set_main_server()
 # (event dispatch); None means the interpreter-wide default (single instance).
-_CURRENT_INSTANCE_ROOT: Optional[str] = None
+_CURRENT_INSTANCE_ROOT: str | None = None
 
 
-def set_main_server(server: Optional[ClientServer]):
+def set_main_server(server: ClientServer | None):
     """Set the global "current" server reference.
 
     Also points the current instance-root at the server's filesystem folder so
@@ -58,12 +59,12 @@ def set_main_server(server: Optional[ClientServer]):
         _CURRENT_INSTANCE_ROOT = getattr(server, "instance_root", None)
 
 
-def get_current_instance_root() -> Optional[str]:
+def get_current_instance_root() -> str | None:
     """The virtual-filesystem folder of the currently executing instance."""
     return _CURRENT_INSTANCE_ROOT
 
 
-def set_current_instance_root(instance_root: Optional[str]) -> None:
+def set_current_instance_root(instance_root: str | None) -> None:
     """Point relative file resolution at a specific instance folder."""
     global _CURRENT_INSTANCE_ROOT
     _CURRENT_INSTANCE_ROOT = instance_root
@@ -93,7 +94,7 @@ def register_server(instance_key: str, server: ClientServer) -> None:
     set_main_server(server)
 
 
-def get_server_for_root(instance_key: str) -> Optional[ClientServer]:
+def get_server_for_root(instance_key: str) -> ClientServer | None:
     """Look up the server registered for a given instance key.
 
     Args:
@@ -120,7 +121,7 @@ def reset_server_for_root(instance_key: str) -> None:
         MAIN_SERVER = None
 
 
-def consume_pending_instance_context() -> Optional[dict[str, Any]]:
+def consume_pending_instance_context() -> dict[str, Any] | None:
     """Take (and clear) the context left by the last configure_instance() call.
 
     Called by run_client_bridge() when an instance starts, so its ClientBridge
@@ -144,10 +145,10 @@ def get_main_event_bus() -> EventBus:
 
 def configure_instance(
     root_element_id: str,
-    use_shadow_dom: Optional[bool] = None,
+    use_shadow_dom: bool | None = None,
     js_window: Any = None,
-    instance_id: Optional[str] = None,
-    instance_root: Optional[str] = None,
+    instance_id: str | None = None,
+    instance_root: str | None = None,
 ) -> None:
     """Point the next start_server() at a specific root element and DOM mode.
 

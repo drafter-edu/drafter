@@ -19,8 +19,9 @@ A converter is a function taking a :class:`ConversionContext` and returning:
 
 import inspect
 import types
+from collections.abc import Callable
 from dataclasses import dataclass, replace
-from typing import Any, Callable, Literal, Optional, Union, get_args, get_origin
+from typing import Any, Literal, Union, get_args, get_origin
 
 from drafter.data.payload import PayloadValue, describe_source
 
@@ -36,7 +37,7 @@ class ConversionContext:
     param_name: str
     expected_type: Any
     raw_value: Any
-    payload_value: Optional[PayloadValue] = None
+    payload_value: PayloadValue | None = None
     route_name: str = ""
 
     #: The annotation with generics resolved to their origin (List[str] -> list).
@@ -67,7 +68,7 @@ class ConversionResult:
     hint: str = ""
 
 
-ConverterFn = Callable[[ConversionContext], Optional[ConversionResult]]
+ConverterFn = Callable[[ConversionContext], ConversionResult | None]
 """A converter function; it returns None when it does not apply to the given
 value, letting the next registered converter (or the fallback) try instead."""
 
@@ -266,7 +267,7 @@ class ConverterRegistry:
                     return ConversionResult(ok=True, value=ctx.raw_value)
             except TypeError:
                 pass
-        first_failure: Optional[ConversionResult] = None
+        first_failure: ConversionResult | None = None
         for member in non_none:
             result = self._convert_to(ctx, member)
             if result.ok:

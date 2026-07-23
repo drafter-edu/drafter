@@ -50,7 +50,7 @@ Usually, it would be expected that if you're making a component, there would onl
 be one outermost component (rather than a list). But if you want, you can use the
 `RenderPlan(kind="fragment", items=[...])` to achieve this (which is what CheckBox does).
 """
-from drafter.components import PageContent, Component
+from drafter.components import Component, PageContent
 from drafter.components.page_content import ComponentArgument, RenderPlan
 
 

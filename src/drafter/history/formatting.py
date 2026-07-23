@@ -4,10 +4,11 @@ Module for formatting page content as strings.
 Relies on a custom PrettyPrinter to handle special types like Pillow images.
 """
 
+import pprint
+
 from drafter.components.images import HAS_PILLOW, PILImage
 from drafter.helpers.diffing import get_indent_width
 from drafter.history.utils import repr_pil_image
-import pprint
 
 
 class CustomPrettyPrinter(pprint.PrettyPrinter):  # type: ignore

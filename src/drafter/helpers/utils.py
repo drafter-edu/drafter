@@ -1,9 +1,8 @@
 """Runtime platform detection and platform-conditional decorators."""
 
-from typing import Callable
-from functools import wraps
 import sys
-
+from collections.abc import Callable
+from functools import wraps
 
 WEB_RUNTIMES = ("skulpt", "emscripten")
 """sys.platform values that indicate an in-browser Python runtime."""

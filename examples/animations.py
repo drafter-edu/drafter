@@ -1,6 +1,5 @@
 from drafter import *
 
-
 add_website_css("""
 .fade-in-element {
   animation: fadeIn 2s ease-in forwards;

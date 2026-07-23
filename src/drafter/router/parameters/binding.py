@@ -10,7 +10,7 @@ everything that doesn't line up.
 
 import difflib
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from drafter.data.converter import (
     ConversionContext,
@@ -27,7 +27,7 @@ def _capitalize(text: str) -> str:
     return text[0].upper() + text[1:] if text else text
 
 
-def _suggest(name: str, candidates: list[str]) -> Optional[str]:
+def _suggest(name: str, candidates: list[str]) -> str | None:
     matches = difflib.get_close_matches(name, candidates, n=1, cutoff=0.6)
     return matches[0] if matches else None
 
@@ -142,7 +142,7 @@ class RouteBinder:
         *,
         converter_registry: ConverterRegistry,
         state: Any = None,
-        extra_dependencies: Optional[dict[str, Any]] = None,
+        extra_dependencies: dict[str, Any] | None = None,
         route_name: str = "",
     ) -> BoundArguments:
         """Bind a merged payload to a route signature and convert the values.

@@ -6,9 +6,9 @@ state in order for the history/debug panel, and remembers the initial
 state so it can be restored on reset.
 """
 
-from typing import Any
-from dataclasses import dataclass, field
 from copy import deepcopy
+from dataclasses import dataclass, field
+from typing import Any
 
 from drafter.data.errors import CATEGORY_SYSTEM, SEVERITY_WARNING, ErrorDetails
 from drafter.monitor.audit import log_error

@@ -1,9 +1,11 @@
-from drafter import *
-from dataclasses import dataclass
-import random
-import matplotlib.pyplot as plt
-from html import escape
 import json
+import random
+from dataclasses import dataclass
+from html import escape
+
+import matplotlib.pyplot as plt
+
+from drafter import *
 
 print(repr(escape(json.dumps("How's that?"))))
 

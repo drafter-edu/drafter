@@ -4,7 +4,6 @@ styles, and audio) to the client alongside a response's main body.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 
 @dataclass
@@ -23,7 +22,7 @@ class Message:
 
     channel_name: str
     kind: str
-    sigil: Optional[str]
+    sigil: str | None
     content: str
 
 
@@ -38,7 +37,7 @@ class Channel:
     """
 
     name: str
-    messages: List[Message] = field(default_factory=list)
+    messages: list[Message] = field(default_factory=list)
 
 
 DEFAULT_CHANNEL_AUDIO = "audio"
