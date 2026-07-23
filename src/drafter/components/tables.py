@@ -116,7 +116,8 @@ class Table(Component):
                         self.render_td_code(field.name, context),
                         self.render_td_code(field.type.__name__, context),  # type: ignore
                         self.render_td_code(safe_repr(value), context),
-                    ]
+                    ],
+                    context,
                 )
             )
         tbody = RenderPlan(kind="tag", tag_name="tbody", children=tbody_rows)
