@@ -18,6 +18,7 @@ from drafter.client_server.commands import get_main_server
 
 MaybeBoolStr = Optional[Union[bool, str]]
 
+
 def start_server(
     initial_state=None,
     server=None,
@@ -86,62 +87,69 @@ def start_server(
     # Handle compatibility for old parameters
     parameters = {}
     if server_name is not None:
-        parameters['server_name'] = server_name
+        parameters["server_name"] = server_name
     if in_debug_mode is not None:
-        parameters['in_debug_mode'] = in_debug_mode
+        parameters["in_debug_mode"] = in_debug_mode
     if framed is not None:
-        parameters['framed'] = framed
+        parameters["framed"] = framed
     if theme is not None:
-        parameters['theme'] = theme
+        parameters["theme"] = theme
     if site_title is not None:
-        parameters['site_title'] = site_title
+        parameters["site_title"] = site_title
     if information is not None:
-        parameters['information'] = information
+        parameters["information"] = information
     if verbose is not None:
-        parameters['verbose'] = verbose
+        parameters["verbose"] = verbose
     if asset_directory is not None:
-        parameters['asset_directory'] = asset_directory
+        parameters["asset_directory"] = asset_directory
     if show_filename_as is not None:
-        parameters['show_filename_as'] = show_filename_as
+        parameters["show_filename_as"] = show_filename_as
     if engine is not None:
-        parameters['engine'] = engine
+        parameters["engine"] = engine
     if port is not None:
-        parameters['port'] = port
+        parameters["port"] = port
     if host is not None:
-        parameters['host'] = host
+        parameters["host"] = host
     if prerender_initial_page is not None:
-        parameters['prerender_initial_page'] = prerender_initial_page
+        parameters["prerender_initial_page"] = prerender_initial_page
     if open_browser is not None:
-        parameters['open_browser'] = open_browser
+        parameters["open_browser"] = open_browser
     if inline_py is not None:
-        parameters['inline_py'] = inline_py
+        parameters["inline_py"] = inline_py
     if reloader is not None and use_reloader is None:
-        parameters['user_reloader'] = reloader
+        parameters["use_reloader"] = reloader
     elif use_reloader is not None:
-        parameters['user_reloader'] = use_reloader
+        parameters["use_reloader"] = use_reloader
     # Handle deprecated parameters that are no longer used but we want to keep for compatibility
     if cdn_skulpt is not None:
         print("Warning: 'cdn_skulpt' parameter is no longer used and will be ignored.")
     if cdn_skulpt_std is not None:
-        print("Warning: 'cdn_skulpt_std' parameter is no longer used and will be ignored.")
+        print(
+            "Warning: 'cdn_skulpt_std' parameter is no longer used and will be ignored."
+        )
     if cdn_skulpt_drafter is not None:
-        print("Warning: 'cdn_skulpt_drafter' parameter is no longer used and will be ignored.")
+        print(
+            "Warning: 'cdn_skulpt_drafter' parameter is no longer used and will be ignored."
+        )
     # Custom overrides
     if argv is not None:
-        parameters['argv'] = argv
+        parameters["argv"] = argv
     parameters.update(extra_configuration)
-    
+
     system = get_system_configuration()
     system.merge_in_args(parameters)
     server = server or get_main_server()
-    
+
     # Primary dispatch based on execution context
     if is_web():
         from drafter.bridge import run_client_bridge
+
         run_client_bridge(system, server, initial_state)
     elif system.bootstrap.mode == "compile_site":
         from drafter.builder.build import compile_site
+
         compile_site(system, server, initial_state)
     else:
         from drafter.app.app_server import serve_app_once
+
         serve_app_once(system, server, initial_state)

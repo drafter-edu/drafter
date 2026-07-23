@@ -27,17 +27,18 @@ class AppServerConfiguration(BaseConfiguration):
         inline_py: Inline user code in HTML vs. load via HTTP request.
         serve_adjacent_files: Serve files from user directory.
     """
+
     port: int = 8000
     host: str = "localhost"
     use_reloader: bool = True
     open_browser: bool = True
     inline_py: bool = True
     serve_adjacent_files: bool = True
-    
+
     @staticmethod
     def get_key() -> str:
         return "app_server"
-    
+
     # TODO: Additional configuration settings from `scaffolding/index.skulpt.template.html` go here
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
@@ -47,55 +48,49 @@ class AppServerConfiguration(BaseConfiguration):
         result.get_bool_if_exists("DRAFTER_USE_RELOADER", "use_reloader")
         result.get_bool_if_exists("DRAFTER_OPEN_BROWSER", "open_browser")
         result.get_bool_if_exists("DRAFTER_INLINE_PY", "inline_py")
-        result.get_bool_if_exists("DRAFTER_SERVE_ADJACENT_FILES", "serve_adjacent_files")
+        result.get_bool_if_exists(
+            "DRAFTER_SERVE_ADJACENT_FILES", "serve_adjacent_files"
+        )
         return result.as_dict()
-    
+
     @staticmethod
     def extend_parser(parser):
         group = parser.add_argument_group("App Server Configuration")
         group.add_argument(
-            "--port",
-            type=int,
-            default=8000,
-            help="Port number for the server"
+            "--port", type=int, default=8000, help="Port number for the server"
         )
         group.add_argument(
-            "--host",
-            type=str,
-            default="localhost",
-            help="Host address for the server"
+            "--host", type=str, default="localhost", help="Host address for the server"
         )
         group.add_argument(
             "--no-reloader",
             action="store_false",
             dest="use_reloader",
-            help="Disable auto-reloader for code changes"
+            help="Disable auto-reloader for code changes",
         )
         group.add_argument(
             "--no-open-browser",
             action="store_false",
             dest="open_browser",
-            help="Do not automatically open web browser on start"
+            help="Do not automatically open web browser on start",
         )
         group.add_argument(
             "--no-inline-py",
             action="store_false",
             dest="inline_py",
-            help="Do not inline user code in HTML; load via HTTP request instead"
+            help="Do not inline user code in HTML; load via HTTP request instead",
         )
         group.add_argument(
             "--no-serve-adjacent-files",
             action="store_false",
             dest="serve_adjacent_files",
-            help="Do not serve files from user directory"
+            help="Do not serve files from user directory",
         )
         return group
-    
+
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:
         result = {}
-        if parsed_args.get("prerender_initial_page") is not None:
-            result["prerender_initial_page"] = parsed_args["prerender_initial_page"]
         if parsed_args.get("port") is not None:
             result["port"] = parsed_args["port"]
         if parsed_args.get("host") is not None:
@@ -118,5 +113,3 @@ class AppServerConfiguration(BaseConfiguration):
             WebSocket URL constructed from host, port, and internal route.
         """
         return f"ws://{self.host}:{self.port}/{INTERNAL_ROUTES['WS']}"
-
-    

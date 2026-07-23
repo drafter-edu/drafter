@@ -55,7 +55,6 @@ class ClientServerConfiguration(BaseConfiguration):
     deploy_image_path: str = ""
 
     override_asset_url: Union[bool, str] = False
-    newlines_to_br: bool = False
     # Literal HTML content
     additional_header_content: list[str] = field(default_factory=list)
     # Raw literal CSS
