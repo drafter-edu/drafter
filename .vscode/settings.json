@@ -47,5 +47,17 @@
 		"typer",
 		"uvicorn",
 		"watchfiles"
+	],
+	"cSpell.languageSettings": [
+		{
+			"languageId": "pretext",
+			"ignoreRegExpList": []
+		}
+	],
+	"xml.fileAssociations": [
+		{
+			"pattern": "**/source/**.ptx",
+			"systemId": "c:\\Users\\acbar\\.vscode\\extensions\\oscarlevin.pretext-tools-1.1.0\\assets\\schema\\pretext.rng"
+		}
 	]
 }
