@@ -472,7 +472,6 @@ def search_content(
         settings (ComparisonSettings): The settings to use for comparison.
         path (list[PathItem]): The current path within the content, used for tracking nested locations.
     """
-    print("Seeking", path, actual, type(actual))
     # Did we find it?
     differences = compare_equal(actual, needle, settings, path)
     if not differences:

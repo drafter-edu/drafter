@@ -11,7 +11,7 @@ BASE_PARAMETER_ERROR = (
     """a valid identifier if it only contains alphanumeric letters (a-z) and (0-9), or """
     """underscores (_). A valid identifier cannot start with a number, or contain any spaces."""
 )
-BASE_PARAMETER_ERROR = """The {component_type} value must be a JSON-serializable value (str, int, float, bool, None, list, or dict). """
+BASE_VALUE_ERROR = """The {component_type} value must be a JSON-serializable value (str, int, float, bool, None, list, or dict). """
 
 
 def validate_parameter_name(name: str, component_type: str):
@@ -68,7 +68,7 @@ def validate_json_value(value, component_type: str):
     Raises:
         ValueError: If value contains non-JSON-serializable types.
     """
-    base_error = BASE_PARAMETER_ERROR.format(component_type=component_type)
+    base_error = BASE_VALUE_ERROR.format(component_type=component_type)
     if isinstance(value, (str, int, float, bool)) or value is None:
         return
     elif isinstance(value, (list, tuple)):
