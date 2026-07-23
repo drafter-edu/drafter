@@ -16,7 +16,7 @@ from drafter.configuration import get_system_configuration
 from runpy import run_path
 
 def main():
-    """Main CLI entry point that routes to app server or builder based on arguments."""
+    """Main CLI entry point: loads the system configuration and executes the user's main file as `__main__` via `runpy.run_path`."""
     system = get_system_configuration(True)
     
     if system.bootstrap.path is None:

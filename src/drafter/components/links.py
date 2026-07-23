@@ -68,7 +68,7 @@ class Argument(Component, Arguable):
         """Get HTML attributes for the argument input.
 
         Args:
-            context (dict): Rendering context.
+            context: The active Renderer, providing rendering state and configuration.
 
         Returns:
             Dictionary of HTML attributes including encoded name and value.
@@ -206,8 +206,10 @@ class Button(LinkContent):
     Attributes:
         text: The display text for the button.
         url: The target URL or route name.
-        arguments: Optional list of Argument objects to pass to the route.
-        external: Whether the URL is external (auto-detected if not provided).
+        arguments: Optional arguments to pass to the route; a single Arguable,
+            a list of Arguable objects, a list of (name, value) pairs, or a
+            dict of name to value.
+        external: Whether the URL is external (always auto-detected from the URL).
         tag: The HTML tag name, always 'button'.
     """
 
@@ -254,7 +256,7 @@ class Button(LinkContent):
         """Get HTML attributes for the button.
 
         Args:
-            context (dict): Rendering context.
+            context: The active Renderer, providing rendering state and configuration.
 
         Returns:
             Dictionary including submit button data.

@@ -67,8 +67,16 @@ def configure_system(
 ) -> tuple[SystemConfiguration, dict[str, dict]]:
     """
     Configure the Drafter system based on command line arguments,
-    environment variables, and configuration files. This function will create
-    and return a SystemConfiguration object that encapsulates all relevant configurations.
+    environment variables, and configuration files.
+
+    Args:
+        from_cli: Whether this is being invoked from the command line, in
+            which case the script name is excluded from the parsed arguments.
+
+    Returns:
+        A tuple of the constructed SystemConfiguration and a dict mapping
+        each configuration section key to the settings that were modified
+        from their defaults.
     """
     #### Backup original arguments and environment variables
     if from_cli:

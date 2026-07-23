@@ -16,8 +16,15 @@ def default_about(state, _server: ClientServer):
     Displays author, description, sources, planning, and links sections.
     Includes external pages if configured, and a back button.
 
+    Args:
+        state: Current application state, passed through to the returned Page.
+        _server: The running ClientServer; the underscore prefix marks this as
+            a framework-injected parameter, so it is supplied automatically
+            rather than from the request payload.
+
     Returns:
-        str: Complete HTML for the About page.
+        Page: The About page, or a fallback Page explaining how to set site
+        information when none has been configured.
     """
     configuration = _server.get_current_configuration()
     if not configuration.information:

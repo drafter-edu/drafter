@@ -80,7 +80,23 @@ def get_attribute_recursively(element: Any, attribute_name: str) -> list[str]:
 def add_js(
     root, src: str, is_page_specific: bool = False, with_class: str = ""
 ) -> None:
-    """Adds a script to the page."""
+    """Create a script element, execute it, and detach it from the document.
+
+    The script element is appended to the document head (which runs the
+    JavaScript immediately) and then removed right away, so the source does
+    not accumulate in the DOM across renders.
+
+    Args:
+        root: Node used to resolve the owning document (may be inside an
+            iframe rather than the top page).
+        src: JavaScript source code to execute.
+        is_page_specific: Whether to mark the element as page-specific so it
+            would be cleaned up on navigation.
+        with_class: Optional class attribute to set on the element.
+
+    Returns:
+        The (now detached) script element that was executed.
+    """
     document = get_document(root)
     # TODO: Investigate whether this has to be a blob for CSP compliance
     script = document.createElement("script")

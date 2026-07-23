@@ -68,10 +68,12 @@ class Renderer:
         self.parts.append("\n")
         
     def in_convert_newlines_mode(self) -> Optional[bool]:
-        """Check if the current rendering mode converts newlines to <br>.
+        """Check if the current rendering mode converts newlines to `<br>`.
 
         Returns:
-            bool: True if in convert-to-<br> mode, False otherwise.
+            True when the current newline mode is not RETAIN and the
+            configuration enables `newlines_to_br`; otherwise a falsy value
+            (False, or None when no configuration is set).
         """
         return (self.newline_mode_stack[-1] != NewlineMode.RETAIN
                 and (self.configuration and self.configuration.newlines_to_br))

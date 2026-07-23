@@ -72,10 +72,16 @@ class BaseConfiguration:
         return {}
 
     def load_from_file(self, file_path: str) -> dict:
-        """Merge configuration values from a JSON file.
+        """Load configuration values from a JSON file.
+
+        The file's contents are parsed and returned as-is; nothing is merged
+        into this configuration instance.
 
         Args:
             file_path: Path to the JSON configuration file.
+
+        Returns:
+            The parsed contents of the JSON file as a dictionary.
         """
         # if not os.path.isfile(file_path):
         #    raise FileNotFoundError(f"Configuration file not found: {file_path}")

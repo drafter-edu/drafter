@@ -6,7 +6,6 @@ class ExtentGetter(ast.NodeVisitor):
     """Collect line extents for AST nodes in a source tree.
 
     Attributes:
-        extents: Cached extent information if provided externally.
         line_map: Mapping of AST nodes to (start, end) line pairs.
         node_stack: Traversal stack of ancestor nodes used for extent propagation.
     """

@@ -78,7 +78,15 @@ from drafter.history.utils import safe_repr
 
 def first_shared_base(cls1, cls2):
     """
-    Return the first shared base class in the MRO of obj1 and obj2.
+    Return the first shared base class in the MROs of cls1 and cls2.
+
+    Args:
+        cls1: The first class to compare.
+        cls2: The second class to compare.
+
+    Returns:
+        The first class in cls1's MRO that also appears in cls2's MRO,
+        or None if they share no base class.
     """
     mro1 = cls1.__mro__
     mro2 = cls2.__mro__

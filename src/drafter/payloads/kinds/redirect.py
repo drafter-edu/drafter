@@ -16,7 +16,10 @@ class Redirect(ResponsePayload):
 
     Args:
         target_route: The route to redirect to.
-        arguments: Optional arguments to pass to the target route.
+        state_update: Optional new state to apply before redirecting; if None,
+            the state is left unchanged.
+        **kwargs: Any additional keyword arguments are passed to the target
+            route as its arguments (stored in the `arguments` attribute).
     """
 
     target_route: str

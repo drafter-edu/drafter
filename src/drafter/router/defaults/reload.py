@@ -9,7 +9,8 @@ def default_reload(state):
         state: Current application state.
 
     Returns:
-        None: Indicates a page reload.
+        Page: A placeholder "Reloading..." page whose JavaScript immediately
+        triggers a full browser reload via `window.location.reload()`.
     """
     return Page(
         state,

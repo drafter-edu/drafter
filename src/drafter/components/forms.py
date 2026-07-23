@@ -405,17 +405,18 @@ class RadioButtonGroup(FormComponent):
 
 
 @dataclass(repr=False)
+# TODO: Handle __eq__ and __hash__
 class DateTimeInput(FormComponent):
     """
     A datetime-local input component for selecting both date and time.
 
-    TODO: Handle __eq__ and __hash__
-
     Args:
-       Input for selecting dates in YYYY-MM-DD format.
+        name: The name of the form field
+        default_value: Optional default value in ISO 8601 format (YYYY-MM-DDTHH:MM) or a `datetime` object
+        kwargs: Additional HTML attributes
 
     Attributes:
-        default_value: Optional default value in ISO 8601 format or date object.
+        default_value: The default value as an ISO 8601 string, or None.
         tag: The HTML tag name, always 'input'.
     """
 

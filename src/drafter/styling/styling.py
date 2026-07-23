@@ -23,12 +23,17 @@ def update_style(component: PageContent, style: str, value: str) -> PageContent:
     - font-size
 
     Args:
-        component: The component to update
+        component: The component to update. May also be a string (which is
+            wrapped in a new Text component) or a list of components (each
+            element is updated).
         style: The name of the style property to change
         value: The value to set the style property to (should be a string).
 
     Returns:
-        The original component (updates its values)
+        The updated component. If a component was given, the original
+        component is updated in place and returned. If a string was given,
+        a new Text component wrapping it is returned. If a list was given,
+        a new list of the updated elements is returned.
     """
     if isinstance(component, str):
         component = Text(component)
@@ -52,12 +57,17 @@ def update_attr(component: PageContent, attr: str, value: str) -> PageContent:
     - title
 
     Args:
-        component: The component to update
+        component: The component to update. May also be a string (which is
+            wrapped in a new Text component) or a list of components (each
+            element is updated).
         attr: The name of the attribute to change
         value: The value to set the attribute to (should be a string).
 
     Returns:
-        The original component (updates its values)
+        The updated component. If a component was given, the original
+        component is updated in place and returned. If a string was given,
+        a new Text component wrapping it is returned. If a list was given,
+        a new list of the updated elements is returned.
     """
     if isinstance(component, str):
         component = Text(component)

@@ -33,14 +33,37 @@ def _resolve_instance_path(
 def open(file_path, mode="r", *args, **kwargs):
     """
     Opens files for reading or writing, with special handling for web environments.
-    This is a Drafter-specific implementation that abstracts away differences between running in a web context and a standard Python environment.
+
+    This is Drafter's replacement for the built-in `open` (it is installed
+    over `builtins.open` when this module is imported), abstracting away
+    differences between running in a web context and a standard Python
+    environment. In Pyodide, relative paths resolve inside the current
+    instance's virtual folder, and files missing from the virtual
+    filesystem are fetched over HTTP relative to the page URL. Outside the
+    web, `http://`/`https://` paths are downloaded and returned as
+    in-memory file objects, and relative paths resolve against the
+    configured user directory (or the current working directory).
 
     Args:
-        file_path (_type_): The path to the file to open. In a web environment, this could be a virtual path or identifier rather than an actual filesystem path.
-        mode (str, optional): The mode in which to open the file (e.g., "r" for read, "w" for write). Defaults to "r".
-        encoding (str, optional): The encoding to use when opening the file. Defaults to "utf-8".
+        file_path: The path to the file to open. In a web environment, this
+            may be a virtual path resolved inside the instance's folder; it
+            may also be an `http://` or `https://` URL.
+        mode: The mode in which to open the file (e.g., "r" for read,
+            "w" for write). Defaults to "r".
+        *args: Additional positional arguments passed through to the
+            underlying built-in `open`.
+        **kwargs: Additional keyword arguments passed through to the
+            underlying built-in `open` (e.g., `encoding`).
+
     Returns:
-        A file-like object that can be used to read from or write to the specified file path, with behavior adapted to the execution environment.
+        A file-like object for reading from or writing to the given path,
+        with behavior adapted to the execution environment.
+
+    Raises:
+        ValueError: If `file_path` is not a string, `pathlib.Path`, or
+            `os.PathLike`.
+        FileNotFoundError: If the file cannot be found locally or fetched
+            over HTTP.
     """
     if not isinstance(file_path, (str, pathlib.Path, os.PathLike)):
         raise ValueError(

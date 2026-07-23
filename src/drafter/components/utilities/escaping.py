@@ -27,8 +27,8 @@ def make_safe_argument(value):
     """Convert value to HTML-safe JSON string.
 
     Serializes value to JSON and escapes HTML special characters. This function
-    is an alias for make_safe_json_argument() for use in scenarios where you need
-    to safely include arguments in HTML attributes.
+    behaves identically to `make_safe_json_argument`, and is meant for scenarios
+    where you need to safely include arguments in HTML attributes.
 
     Args:
         value: Any JSON-serializable value.

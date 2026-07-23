@@ -22,9 +22,11 @@ class SiteState:
 
     def update(self, new_state: Any) -> None:
         """
-        Updates the current state and appends the previous state to history.
+        Updates the current state and appends the new state to history.
 
-        TODO: Throw a warning if there's a type change.
+        On the first call, the new state is also deep-copied as the initial
+        state. If the type of the new state differs from the most recent
+        state in history, a warning is logged via the audit system.
 
         Args:
             new_state: The new state to set as current.

@@ -72,7 +72,11 @@ class RuntimeAdapter:
         # return js.Promise.all(promises).then(afterwards)
 
     def promise_data(self, data: dict) -> Any:
-        """Return a promise that resolves to the provided data (for async handling)."""
+        """Wrap response data for return to the JS caller.
+
+        The base implementation returns the data unchanged; runtime
+        subclasses may wrap it (e.g. Pyodide returns a resolved JS promise).
+        """
         return data
 
     def thenable(self, promise: Any, afterwards: Callable) -> Any:

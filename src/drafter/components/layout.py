@@ -49,13 +49,16 @@ class HorizontalRule(Component):
 def handle_arguments_compatibility(args, kwargs):
     """Handle legacy Drafter functionality for backward compatibility.
 
-    Supports previously incorrectly rendered components that used explicit
-    'content' and 'extra_settings' kwargs. This functionality may be
-    deprecated in future versions.
+    Supports previously incorrectly rendered components that passed explicit
+    'content' and 'extra_settings' keyword arguments. If present, the items
+    of the 'content' kwarg are appended to the positional arguments, and the
+    entries of the 'extra_settings' kwarg are merged into the remaining
+    keyword arguments (overriding any same-named keys). This functionality
+    may be deprecated in future versions.
 
     Args:
-        args: List of positional arguments.
-        kwargs: Dictionary of keyword arguments.
+        args: List of positional arguments (modified in place).
+        kwargs: Dictionary of keyword arguments (modified in place).
 
     Returns:
         Tuple of (updated_args, updated_kwargs).

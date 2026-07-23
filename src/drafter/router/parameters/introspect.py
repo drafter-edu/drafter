@@ -22,9 +22,11 @@ class RouteParamSpec:
         has_default: Whether the parameter declares a default value.
         default: The default value (meaningless if ``has_default`` is False).
         kind: The inspect parameter kind (positional, keyword-only, variadic).
-        injected: Whether the framework supplies this parameter (state,
-            configuration, request); injected parameters are never required
-            from the request payload.
+        injected: Whether the framework supplies this parameter, determined
+            solely by the name starting with `INJECTED_PARAMETER_PREFIX`
+            (an underscore); injected parameters are never required from the
+            request payload. Note that `state` is matched by a separate
+            name/arity rule during binding and is not marked injected.
         aliases: Alternate payload names that may bind to this parameter.
     """
 

@@ -93,9 +93,6 @@ class ResponsePayload:
     def get_state_updates(self) -> tuple[bool, Any]:
         """Extract state updates to apply after rendering.
 
-        Args:
-            (None)
-
         Returns:
             Tuple of (has_updates: bool, updated_state: Any).
         """
@@ -119,6 +116,10 @@ class ResponsePayload:
 
     def get_target(self, request: Request) -> "Optional[Target]":
         """Get the Target for fragment updates.
+
+        Args:
+            request: Incoming request, which may identify the originating
+                element to target.
 
         Returns:
             Target instance or None: Target object for fragment replacement, or None for full page.

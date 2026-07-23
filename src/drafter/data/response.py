@@ -18,7 +18,7 @@ class Response:
         request_id: The identifier of the request this response corresponds to.
         payload: The payload content to send to the client (usually a Page).
         status_code: The symbolic status of the response (one of
-            :data:`drafter.data.errors.STATUSES`; ``"ok"`` for success).
+            `drafter.data.errors.STATUSES`; `"ok"` for success).
         message: A human-readable message associated with the response.
         url: The URL associated with the response. Could technically be different from the request URL.
         body: The full HTML body of the response, which will be injected directly into the site's frame.
@@ -56,13 +56,13 @@ class Response:
 
     def send(self, message: Message) -> None:
         """
-        Sends a message through the specified channel.
+        Sends a message through its channel, creating the channel if needed.
+
+        The channel is determined by the message's own `channel_name`; the
+        message is appended to that channel's message list.
 
         Args:
-            channel_name: The name of the channel to send the message through.
-            message: The content of the message to send.
-            kind: The kind of message (default is "script").
-            sigil: An optional sigil for special processing.
+            message: The Message instance to send.
         """
         channel_name = message.channel_name
         if channel_name not in self.channels:

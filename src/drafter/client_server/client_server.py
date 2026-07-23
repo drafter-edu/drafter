@@ -73,25 +73,29 @@ class ClientServer:
     The Server can be in one of the following phases:
 
     - initializing: During the initial ClientServer constructor call
-    - initialized: After the constructor has completed, but before the `start` method is called
-    - starting: During the execution of the `start` method
+    - initialized: After the constructor has completed, but before the `do_start` method is called
+    - starting: During the execution of the `do_start` method
     - configuring: During the processing of static and dynamic configuration
     - rendering: During the rendering of the initial site into its HTML meta-structure (NOT the student's page content)
-    - started: After the `start` method has completed, but before the first request is processed
+    - started: After the `do_start` method has completed, but before the first request is processed
     - visiting: After the first request is processed, and the server is fully operational
     - committing: During the process of committing changes or updates from the response.
     - idle: When the server is not processing a request, but is still running and can receive requests. This is the default state of the server after it has started and is waiting for requests.
 
-    TODO: Ability to override ErrorPage rendering with custom error pages.
-
     Attributes:
         custom_name: A custom name for the server, useful for debugging.
+        instance_root: Virtual-filesystem folder this instance's relative
+            paths resolve to when several instances share one interpreter,
+            or None for the interpreter-wide default.
+        event_bus: The EventBus used to publish and subscribe to telemetry events.
+        site: The Site instance describing the outer site structure and configuration.
         router: The Router instance that handles URL routing.
         state: The state information about the student's site.
         response_count: A counter for the number of responses made, used to assign unique IDs.
-        logger: An AuditLogger instance for logging errors, warnings, and info.
-        monitor: A Monitor instance for tracking telemetry data.
-        configuration: The ClientServerConfiguration instance for server settings.
+        requests: A Scope stack tracking the requests currently being processed.
+        start_time: Timestamp recorded by `start_timer` for measuring request duration.
+        phase: The current lifecycle phase of the server (see above).
+        started: Whether `do_start` has completed.
     """
 
     custom_name: str
@@ -148,13 +152,10 @@ class ClientServer:
         self.phase = new_phase
 
     def process_dynamic_configuration(self):
-        """Initialize runtime configuration from defaults with extra updates.
+        """Initialize the runtime configuration from a copy of the defaults.
 
         Separates default and current configurations so runtime changes
         don't affect defaults. Call only during server startup.
-
-        Args:
-            extra_configuration: Configuration overrides to apply.
 
         Returns:
             ClientServerConfiguration: The applied configuration.
@@ -270,11 +271,9 @@ class ClientServer:
     def register_system_routes(self):
         """Register system routes like --error, --about, --reset.
 
-        Args:
-            routes: Mapping of route names to handler callables.
-
-        TODO:
-            Finish implementation.
+        For each system route, uses the handler override from the current
+        configuration's `system_routes` if present, otherwise the default
+        handler. Routes already registered in the router are left alone.
         """
         from drafter.router.system_routes import _SYSTEM_ROUTES
 
@@ -299,17 +298,17 @@ class ClientServer:
         """Build a canonical envelope for a visit failure and emit telemetry.
 
         This is the single path for visit lifecycle failures: the canonical
-        :class:`ErrorDetails` is created first, telemetry is emitted from it,
+        `ErrorDetails` is created first, telemetry is emitted from it,
         and the returned envelope is raised directly.
 
         Args:
-            error_id: Stable, code-like id (e.g. ``request.route_not_found``).
+            error_id: Stable, code-like id (e.g. `request.route_not_found`).
             category: Canonical error category.
             message: Human-safe message.
             request: The request being processed (for correlation context).
             details: Developer-focused details.
             status_code: Symbolic status string; defaults to
-                :data:`STATUS_ERROR`.
+                `STATUS_ERROR`.
             exception: Originating exception, if any (for traceback capture).
             source: The component/function reporting the failure.
 
@@ -966,13 +965,11 @@ class ClientServer:
             )
 
     def do_configuration(self) -> Optional[InitialSiteData]:
-        """Apply dynamic configuration and return initial site data.
-
-        Args:
-            extra_configuration: Configuration overrides to apply.
+        """Apply dynamic configuration to the site.
 
         Returns:
-            Optional[InitialSiteData]: Site HTML and metadata, or error data if configuration fails.
+            Optional[InitialSiteData]: None on success, or fallback error
+            site data if configuration processing fails.
         """
         self.transition("configuring")
         try:
@@ -1048,10 +1045,13 @@ class ClientServer:
         self.event_bus.process_unprocessed_events()
 
     def get_default_configuration(self) -> ClientServerConfiguration:
-        """Return a copy of the default server configuration.
+        """Return the shared default server configuration instance.
+
+        Note that this is the system-wide default configuration itself, not
+        a copy; mutations affect all servers sharing the interpreter.
 
         Returns:
-            ClientServerConfiguration: Default configuration instance.
+            ClientServerConfiguration: The shared default configuration instance.
         """
         system = get_system_configuration()
         return system.client_server
@@ -1079,8 +1079,6 @@ class ClientServer:
         Executes the index route to generate precompiled HTML body and headers.
 
         Args:
-            server: The ClientServer instance.
-            config: AppServer configuration.
             initial_state: Initial application state.
 
         Returns:

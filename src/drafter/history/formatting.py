@@ -1,8 +1,7 @@
 """
 Module for formatting page content as strings.
 
-Relies on a custom PrettyPrinter to handle special types like images.
-Patching this is tricky in Skulpt, so we have some curious fallbacks.
+Relies on a custom PrettyPrinter to handle special types like Pillow images.
 """
 
 from drafter.components.images import HAS_PILLOW, PILImage

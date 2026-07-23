@@ -150,7 +150,9 @@ def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:
     - 'classes': Joined with spaces and mapped to 'class' attribute
     - 'style_*' prefixed keys: Moved to styles dict (prefix removed)
     - 'on_*' prefixed keys: Underscores removed for HTML event handlers
-    - Other keys: Underscores converted to hyphens for CSS properties
+    - All other keys: Underscores converted to hyphens, for both attribute
+      names (e.g., `aria_label` becomes `aria-label`) and CSS property names
+      (e.g., `style_background_color` becomes the `background-color` style)
 
     Args:
         attributes: The attributes dict to remap.

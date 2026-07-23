@@ -34,7 +34,7 @@ def normalize_url(url: str) -> str:
     - Strips leading and trailing whitespace.
     - Strips trailing slashes.
     - Prepends "/" if the URL is non-empty and does not already start with "/".
-    - Converts empty URLs to "index"."
+    - Converts empty URLs to "/index".
     - Single dots are ignored
     - Double dots delete the previous path segment, if any.
     """
@@ -68,7 +68,7 @@ def clean_url(url: str) -> str:
     - Internal slashes are converted to underscores.
     - Single dots are ignored.
     - Double dots delete the previous path segment, if any.
-    - Non-valid characters are removed (only allows alphanumeric, underscores, and underscores).
+    - Non-valid characters are removed (only alphanumeric characters and underscores are kept).
     """
     url = url.strip().strip("/")
 

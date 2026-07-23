@@ -119,6 +119,10 @@ Documenting dead or broken code wastes the effort, so settle these first:
 
 ### Phase 1 — Fix INCORRECT docs (highest value, ~30 findings)
 
+**Status: completed 2026-07-22**, except item 11 (`additional_js`/`additional_scripts`)
+and `helpers/urls.py:check_invalid_external_url`, which stay open until their Appendix B
+code bugs are resolved. Appendix A bullets below have been pruned to remaining work.
+
 Wrong docs are worse than missing docs. Work file-by-file from Appendix A, `[INCORRECT]`
 items first. Worst offenders, in order:
 
@@ -264,29 +268,23 @@ Tags: [INCORRECT] wrong vs code · [STALE] refers to removed/changed architectur
 (Purely *missing* docstrings are counted in §1, not listed here.)
 
 ### components/
-- [ ] `page_content.py` — [STALE] `Component` docstring's defunct
-  `POSITIONAL_ARGS`/`VAR_CONTENT_ARGS`/`DEFAULT_CONTENT_ARGS` list (actual mechanism:
-  `ARGUMENTS: list[ComponentArgument]`); [STALE] module docstring design musings
-  (pre-`RenderPlan`); [INCORRECT] `arguments` param described as "list of Argument
-  objects" vs actual `ArgumentList` forms; [INCOMPLETE] `get_fields` Returns.
-- [ ] `forms.py` — [INCORRECT] `DateTimeInput` mangled Args (pasted from `DateInput`,
-  wrong format claim); [STYLE] TODO in docstring; [INCOMPLETE] `CheckBox` hidden-input
-  behavior, `RelatedCheckBox.value`; [STYLE] `**kwargs (dict)` (also media.py,
-  links.py, persistence.py).
-- [ ] `layout.py` — [INCORRECT] `handle_arguments_compatibility` docstring describes
-  intended merge; code discards kwargs (see Appendix B); [INCOMPLETE] `Row`, list
-  components.
-- [ ] `links.py` — [INCORRECT] `Button` Attributes documents nonexistent `external`
-  param; `context (dict)` mis-typed; [INCOMPLETE] `Link` class docstring.
-- [ ] `plotting.py` — [INCORRECT] `_plan_pyodide` "HTML5 canvas backend" claim;
+- [ ] `page_content.py` — [INCOMPLETE] `get_fields` Returns. (Phase 1 fixed the stale
+  argument-system docs, module docstring, and `arguments` description.)
+- [ ] `forms.py` — [INCOMPLETE] `CheckBox` hidden-input behavior,
+  `RelatedCheckBox.value`; [STYLE] `**kwargs (dict)` (also media.py, links.py,
+  persistence.py). (Phase 1 fixed the `DateTimeInput` Args and docstring TODO.)
+- [ ] `layout.py` — [INCOMPLETE] `Row`, list components. (Phase 1 re-documented the
+  fixed `handle_arguments_compatibility`.)
+- [ ] `links.py` — [INCOMPLETE] `Link` class docstring. (Phase 1 fixed `Button`'s
+  phantom `external` and the `context (dict)` mis-typings.)
+- [x] `plotting.py` — [INCORRECT] `_plan_pyodide` "HTML5 canvas backend" claim;
   [STYLE] missing blank line between sections.
 - [ ] `timer.py` — [STYLE] malformed module docstring `""" "`; [INCOMPLETE] `Clock`
   Attributes missing `controls`/`persistent`/`on_tick` + undocumented
-  `route`→`on_tick` rename; [INCORRECT] `Timer` setTimeout claim (JS uses both).
-- [ ] `text.py` — [STALE] orphaned `Header.CONTENT_ARGS`/`DEFAULT_ARGS` class vars.
-- [ ] `utilities/attributes.py` — [INCOMPLETE] `remap_attr_styles` understates
-  underscore→hyphen scope (applies to attributes, not just CSS).
-- [ ] `utilities/escaping.py` — nit: "alias" that is a duplicated implementation.
+  `route`→`on_tick` rename. (Phase 1 removed the setTimeout implementation claim.)
+- [x] `text.py` — orphaned class vars removed in Phase 0.
+- [x] `utilities/attributes.py` — `remap_attr_styles` underscore→hyphen scope fixed.
+- [x] `utilities/escaping.py` — "alias" wording fixed.
 - [ ] `utilities/contracts.py` — [INCOMPLETE] `EventPayloadFieldSpec`,
   `EventPayloadSpec.aliases` shape, `ComponentContract` undocumented.
 - [ ] `utilities/files.py` — [INCOMPLETE] `FileUpload.accept` (Note instead of
@@ -299,33 +297,31 @@ Tags: [INCORRECT] wrong vs code · [STALE] refers to removed/changed architectur
 ### bridge/ · router/ · payloads/
 - [ ] `bridge/events.py` — [INCOMPLETE] `collect_form_data` literal `_description_`
   placeholders.
-- [ ] `bridge/dom.py` — [INCORRECT] `add_js` omits execute-then-remove + returns
-  element despite `-> None`; [INCOMPLETE] `add_style`/`add_link` one-liners, branch
-  returns contradict annotations.
-- [ ] `bridge/runtime.py` — [INCORRECT] base `promise_data` describes the Pyodide
-  override.
+- [ ] `bridge/dom.py` — [INCOMPLETE] `add_style`/`add_link` one-liners, branch
+  returns contradict annotations. (Phase 1 rewrote `add_js` to describe the
+  execute-then-detach behavior; the `-> None` annotation still contradicts the code.)
+- [x] `bridge/runtime.py` — base `promise_data` rewritten as a base-contract
+  docstring.
 - [ ] `bridge/navigation.py` — [INCOMPLETE] `goto` (6 params undocumented), `navigate`
   missing Raises.
 - [ ] `bridge/error_handling.py` — [INCOMPLETE] `raise_bridge_system_error` (11
   params, always raises, no Args/Raises).
-- [ ] `router/routes.py` — [INCORRECT] `normalize_url` says `"index"`, code returns
-  `"/index"` (+ stray quote); [STYLE] `clean_url` "underscores, and underscores";
-  [INCOMPLETE] `Router` Attributes missing `route_functions`; `add_route` missing
-  Returns.
-- [ ] `router/defaults/about.py` — [INCORRECT] Returns `str` vs actual `Page`; no
-  Args for `state`/`_server`; bottle-era commented block below.
-- [ ] `router/defaults/reload.py` — [INCORRECT] Returns `None` vs actual `Page`.
+- [ ] `router/routes.py` — [INCOMPLETE] `Router` Attributes missing
+  `route_functions`; `add_route` missing Returns. (Phase 1 fixed `normalize_url` and
+  `clean_url` wording.)
+- [x] `router/defaults/about.py` — Returns/Args fixed; bottle-era commented block
+  still in the code (not a doc issue).
+- [x] `router/defaults/reload.py` — Returns fixed.
 - [ ] `router/defaults/error.py` — [INCOMPLETE] `default_error` omits `server` param.
-- [ ] `router/parameters/introspect.py` — [INCORRECT] `RouteParamSpec.injected`
-  parenthetical describes the wrong mechanism.
-- [ ] `payloads/kinds/redirect.py` — [INCORRECT] Args document non-parameter
-  `arguments`; `state_update` + `**kwargs` convention undocumented.
-- [ ] `payloads/payloads.py` — [STYLE] `Args: (None)`; [INCOMPLETE] `get_target`
-  missing `request`.
-- [ ] `payloads/kinds/fragment.py` — [INCORRECT] `verify` overclaims (only
-  `LinkContent` verified).
-- [ ] `payloads/renderer.py` — [INCOMPLETE] Attributes missing `newline_mode_stack`;
-  `in_convert_newlines_mode` Returns vs `Optional[bool]`.
+- [x] `router/parameters/introspect.py` — `injected` description fixed
+  (underscore-prefix rule).
+- [x] `payloads/kinds/redirect.py` — Args rewritten for
+  `target_route`/`state_update`/`**kwargs`.
+- [x] `payloads/payloads.py` — `Args: (None)` removed; `get_target` `request`
+  documented.
+- [x] `payloads/kinds/fragment.py` — `verify` claim narrowed to `LinkContent`.
+- [ ] `payloads/renderer.py` — [INCOMPLETE] Attributes missing `newline_mode_stack`.
+  (Phase 1 fixed `in_convert_newlines_mode` Returns.)
 - [ ] `payloads/kinds/download.py` — [INCOMPLETE] 4 fields undocumented,
   `file_path`-vs-`content` relationship unexplained.
 - [ ] `payloads/kinds/update.py` — [INCOMPLETE] `state_update` undocumented.
@@ -335,69 +331,66 @@ Tags: [INCORRECT] wrong vs code · [STALE] refers to removed/changed architectur
   system_routes.py, kinds/page.py, failure.py, verification.py.
 
 ### data/ · config/ · history/ · site/ · styling/
-- [ ] `data/response.py` — [INCORRECT] `send` Args document retired
-  `(channel_name, message, kind, sigil)` signature; [STYLE] Sphinx roles.
+- [x] `data/response.py` — `send` Args rewritten for the single `message` param;
+  Sphinx roles converted.
 - [ ] `data/request.py` — [INCOMPLETE] `Request` Attributes missing `button_pressed`.
 - [ ] `data/errors.py` — [STYLE] reST underlined sections + grid table + roles;
   [INCOMPLETE] `envelope_from_exception` missing Returns; [STALE] Skulpt comment.
 - [ ] `data/payload.py` — [INCOMPLETE] `describe_source` one-liner.
 - [ ] `data/details/recursive_type_describer.py` — [STYLE] module docstring is a
   design-notes/TODO dump; [STALE] checklist wrong about implemented items and
-  `DrafterFile` naming; [INCORRECT] `first_shared_base` param names (`obj1/obj2` vs
-  `cls1/cls2`); [INCOMPLETE] `RecursiveTypeDescriber.analyze`/`analyze_type`
-  undocumented return shape.
+  `DrafterFile` naming; [INCOMPLETE] `RecursiveTypeDescriber.analyze`/`analyze_type`
+  undocumented return shape. (Phase 1 fixed `first_shared_base` param names.)
 - [ ] `data/details/request.py` — [INCOMPLETE] `ResponseEvent` missing
   `formatted_page_content`; stringified-repr fields not noted; [STYLE] truncated TODO.
-- [ ] `config/system.py` — [STALE] nonexistent "FileSystem interface";
-  [INCOMPLETE] 5 attributes undocumented; [STYLE] missing blank line in `from_json`.
-- [ ] `config/app_builder.py` — [STALE] nonexistent `AppBackendConfig`/"Starlette
-  server"; [STYLE] TODO mid-docstring.
+- [x] `config/system.py` — FileSystem claim removed; Attributes section added for
+  the five fields; `from_json` sectioning fixed.
+- [x] `config/app_builder.py` — false inheritance claim fixed; TODO moved to a
+  comment.
 - [ ] `config/client_server.py` — [INCORRECT] `additional_js_content`/
   `additional_script_content` contradict `InitialSiteData` (see Appendix B);
   [INCOMPLETE] `update_configuration` missing `value` + Raises; [STYLE] truncated
   field comment (`root` element id).
-- [ ] `config/base.py` — [INCORRECT] `load_from_file` "merges" (it doesn't) + no
-  Returns; [INCOMPLETE] `merge_in_args` missing `raise_errors`.
+- [ ] `config/base.py` — [INCOMPLETE] `merge_in_args` missing `raise_errors`.
+  (Phase 1 fixed `load_from_file` wording and added Returns.)
 - [ ] `config/app_server.py` — [STALE] Skulpt scaffolding TODO.
 - [ ] `config/bootstrap.py` — semicolon-split doc only true for env-var form.
 - [ ] `history/state.py` — [INCOMPLETE] `SiteState` missing
-  `history`/`initial`/`initialized`; [STALE] implemented TODO in `update`.
-- [ ] `history/formatting.py` — [STALE] module docstring describes commented-out
-  Skulpt fallbacks (Phase 0 cleanup).
+  `history`/`initial`/`initialized`. (Phase 1 removed the implemented TODO and fixed
+  a wrong claim about which state gets appended to history.)
+- [x] `history/formatting.py` — module docstring updated after the Phase 0 dead-code
+  removal (Skulpt fallback references dropped).
 - [ ] `site/initial_site_data.py` — [INCORRECT] `additional_js`/`additional_scripts`
   semantics (pair of the client_server.py finding).
 - [ ] `site/headers.py` — [INCOMPLETE] `precompile_to_html` missing
   `with_extra_classes`.
-- [ ] `styling/styling.py` — [STYLE] module docstring is a TODO checklist;
-  [INCORRECT] `update_style`/`update_attr` Returns wrong for str/list inputs.
+- [ ] `styling/styling.py` — [STYLE] module docstring is a TODO checklist.
+  (Phase 1 fixed `update_style`/`update_attr` Args/Returns for str/list/component
+  inputs.)
 - [ ] `styling/themes.py` — [INCOMPLETE] `Theme` missing `metadata`.
 - Good shape: data/converter.py (model file), correlation.py, telemetry.py,
   channel.py, details/tests.py, history/{pages,conversion,serialization,utils}.py,
   config/{app_common,app_server,urls}.py, site/site.py, styling/themes.py (rest).
 
 ### app/ · client_server/ · helpers/ · files/ · testing/ · top level · misc
-- [ ] `client_server/client_server.py` — [INCORRECT] phantom Args on
-  `process_dynamic_configuration`, `register_system_routes`, `do_configuration`
-  (also wrong Returns), `precompile_server` (`server`/`config` from former free
-  function); class Attributes list nonexistent `logger`/`monitor`, omit `site`,
-  `event_bus`, `requests`, `start_time`, `phase`, `started`, `instance_root`;
-  `get_default_configuration` false "copy" claim; [INCOMPLETE] `add_route` missing
-  `is_system_route`, `format_simple_site_error` missing Returns; [STYLE] reST roles
-  in `make_visit_error`.
-- [ ] `client_server/context.py` — [INCORRECT] `Scope.pop`/`get_current` typed/doc'd
-  `Request`-only despite Response use.
-- [ ] `testing/assertions.py` — [INCORRECT] module docstring advertises 6 nonexistent
-  functions; `assert_page` fully documented no-op; [STYLE] `Parameters:` list in
-  `assert_state`; [INCOMPLETE] `search_content` Returns (`list[list[PathItem]]`).
-- [ ] `testing/testing.py` — [INCORRECT] `BakeryTestCase.caller` described as a name;
-  holds a code snippet.
-- [ ] `files/opening.py` — [INCORRECT] `open` documents nonexistent `encoding`
-  param; `_type_` placeholder; missing Raises (`ValueError`, `FileNotFoundError`).
+- [ ] `client_server/client_server.py` — [INCOMPLETE] `add_route` missing
+  `is_system_route`, `format_simple_site_error` missing Returns. (Phase 1 fixed all
+  phantom Args, rewrote the class Attributes to the real attribute set, fixed the
+  "copy" claim, and converted the reST roles.)
+- [x] `client_server/context.py` — `Scope.pop`/`get_current` docstrings now cover
+  request-or-response; the `Optional[Request]` type annotations still say `Request`
+  only (code change, deferred).
+- [x] `testing/assertions.py` — module docstring made honest; `assert_page`/
+  `assert_content`/`assert_has` clearly marked as unimplemented stubs (NOT
+  implemented — still silently do nothing); `assert_state` converted to `Args:`;
+  `search_content` Returns added.
+- [x] `testing/testing.py` — `BakeryTestCase.caller` description fixed.
+- [x] `files/opening.py` — `open` docstring rewritten to the real signature and
+  behavior, with Raises (`ValueError` is for an invalid path type, not bad mode).
 - [ ] `helpers/urls.py` — [INCORRECT] `check_invalid_external_url` return contract
-  inverted vs code (see Appendix B).
-- [ ] `helpers/ast_tools.py` — [STALE] `ExtentGetter.extents` documented but unused.
-- [ ] `app/app_server.py` — [INCORRECT] `list_user_files` self-contradictory
-  (files-only vs is_dir flag).
+  inverted vs code (see Appendix B — blocked until the code bug is resolved).
+- [x] `helpers/ast_tools.py` — unused `extents` Attributes entry removed.
+- [x] `app/app_server.py` — `list_user_files` contradiction fixed.
 - [ ] `app/watcher.py` — [INCOMPLETE] `_watch_and_reload` missing `student_path`;
   restart-then-reload fallback undescribed.
 - [ ] `builder/build.py` — [INCOMPLETE] `build_zip` missing `skip_extensions`,
@@ -407,11 +400,10 @@ Tags: [INCORRECT] wrong vs code · [STALE] refers to removed/changed architectur
 - [ ] `scaffolding/utils.py` — [INCOMPLETE] `pkg_assets_dir` fallback + Raises
   undocumented; [STALE] wrong-path comment in `pkg_root`.
 - [ ] `launch.py` — [INCOMPLETE] `start_server` missing 5 params; vacuous Raises.
-- [ ] `configuration.py` — [INCORRECT] `configure_system` return type (tuple, not
-  object); no Args.
-- [ ] `cli.py` — [STALE] `main` "routes to app server or builder" — it doesn't.
-- [ ] `deploy.py` — [STALE] `deploy_site` documents unimplemented production
-  flag/`image_folder`; [STYLE] truncated `set_site_information` summary.
+- [x] `configuration.py` — `configure_system` Returns (tuple) and Args fixed.
+- [x] `cli.py` — `main` docstring describes actual `run_path` behavior.
+- [x] `deploy.py` — `deploy_site` made honest about current behavior;
+  `set_site_information` summary completed.
 - Dead files: `app/missing.py`, `files/file_system.py` (Phase 0). Good shape:
   client_server/commands.py (exemplary), monitor/{audit,bus}.py, docs/*,
   helpers/{dates,diffing,utils}.py, constants.py, version.py, hacks.py.

@@ -229,8 +229,9 @@ class Fragment(ResponsePayload):
         request: Request,
     ) -> Optional[VerificationFailure]:
         """
-        Verifies that the content of the fragment is valid. This will check that all links are valid and that
-        all components are valid.
+        Verifies that the content of the fragment is a valid list of chunks and
+        that any link content (`LinkContent` chunks) points at valid routes.
+        Other component types are not verified.
         This is not meant to be called by the user; it will be called by the server.
 
         Args:

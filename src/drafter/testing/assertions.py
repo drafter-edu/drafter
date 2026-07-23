@@ -1,16 +1,20 @@
 """
-More powerful assertions for testing Drafter sites:
+Assertions and comparison machinery for testing Drafter sites.
 
-- `assert_state` for checking the state directly from a Page
-- `assert_content` for checking the content directly from a Page
-- `assert_has`/`assert_in` for checking if a Page has a specific element or content ANYWHERE
-- `assert_has_regex`/`assert_in_regex` for using regex patterns
-- `assert_attribute`, `assert_style`, and `assert_children` for safely checking specific attributes, styles, and child elements of a Page element
+Currently provides:
 
-All of these can have flags:
+- `assert_state` for checking the state of a Page (or Fragment) against an
+  expected value, delegating to Bakery's `assert_equal`
+- `compare_equal` and its helpers, which recursively compare values
+  (including Drafter components) and report a list of `Difference` objects
+- `search_content` for finding a value anywhere within nested page content
 
-- `strict_styles=False` for controlling whether styles must also match exactly (differences ignored by default)
+The following are unimplemented placeholder stubs that currently do
+nothing: `assert_page`, `assert_content`, and `assert_has`.
 
+Comparison behavior is controlled by `ComparisonSettings` flags such as
+`precision`, `exact_strings`, and `strict_styles` (style differences are
+ignored by default).
 """
 
 from dataclasses import dataclass
@@ -464,13 +468,16 @@ def search_content(
     """
     Search through the `actual` value and look for anything equal to `needle`.
 
-    Returns a list of PathItem objects indicating where matches were found.
-
     Args:
-        actual (Any): The actual content to search through.
-        needle (Any): The value to search for within the actual content.
-        settings (ComparisonSettings): The settings to use for comparison.
-        path (list[PathItem]): The current path within the content, used for tracking nested locations.
+        actual: The actual content to search through.
+        needle: The value to search for within the actual content.
+        settings: The settings to use for comparison.
+        path: The current path within the content, used for tracking nested locations.
+
+    Returns:
+        list[list[PathItem]]: A list of paths, one per match, where each
+        path is the list of PathItems leading to a matching value. Empty
+        if no matches were found.
     """
     # Did we find it?
     differences = compare_equal(actual, needle, settings, path)
@@ -548,24 +555,13 @@ def search_content(
 def assert_page(
     actual, expected, precision=4, exact_strings=False, strict_styles=False
 ):
-    """
-    Assert that the content of a Page matches the expected content.
-    Works basically the same as `assert_equals`, but does not expect the
-    styles to match exactly unless `strict_styles` is True.
-
-    Args:
-        actual (Any): The actual content of the Page.
-        expected (Any): The expected content to compare against.
-        precision (int, optional): The number of decimal places to consider for numerical comparisons. Defaults to 4.
-        exact_strings (bool, optional): Whether to require exact string matches. Defaults to False.
-        strict_styles (bool, optional): Whether to require exact style matches. Defaults to False.
-    """
+    """Unimplemented stub: does nothing. Intended to eventually assert that a Page matches expected content, ignoring style differences by default."""
 
 
 def assert_content(
     actual, expected, precision=4, exact_strings=False, strict_styles=False
 ):
-    pass
+    """Unimplemented stub: does nothing."""
 
 
 def assert_state(
@@ -574,12 +570,12 @@ def assert_state(
     """
     Assert that the state of a Page matches the expected state.
 
-    Parameters:
-    - actual: The actual state of the Page.
-    - expected: The expected state to compare against.
-    - precision: The number of decimal places to consider for numerical comparisons.
-    - exact_strings: Whether to require exact string matches.
-    - strict_styles: Whether to require exact style matches.
+    Args:
+        actual: The actual state of the Page.
+        expected: The expected state to compare against.
+        precision: The number of decimal places to consider for numerical comparisons.
+        exact_strings: Whether to require exact string matches.
+        strict_styles: Whether to require exact style matches.
     """
     if isinstance(actual, Fragment):
         actual = actual.state
@@ -595,4 +591,4 @@ def assert_state(
 
 
 def assert_has(actual, needle, precision=4, exact_strings=False, strict_styles=False):
-    pass
+    """Unimplemented stub: does nothing."""

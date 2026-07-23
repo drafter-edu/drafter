@@ -34,7 +34,7 @@ class Scope:
         """Pop the most recent object from the scope stack.
 
         Returns:
-            Optional[Request]: The popped object or None if empty.
+            The popped object (a request or response) or None if empty.
         """
         if self._objs:
             return self._objs.pop()
@@ -52,7 +52,7 @@ class Scope:
         """Return the current scoped object without removing it.
 
         Returns:
-            Optional[Request]: The most recent object or None if empty.
+            The most recent object (a request or response) or None if empty.
         """
         if self._objs:
             return self._objs[-1]

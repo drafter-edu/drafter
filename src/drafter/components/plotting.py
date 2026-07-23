@@ -72,14 +72,16 @@ class MatPlotLibPlot(Component):
     def _plan_pyodide(self, context) -> RenderPlan:
         """Generate render plan for Pyodide environment.
 
-        Uses Matplotlib's HTML5 canvas backend to get the figure as an HTML string.
+        Saves the figure to an in-memory PNG buffer and embeds it as a
+        base64-encoded `<img>` data URL.
 
         Args:
             context: Rendering context.
+
         Returns:
             RenderPlan with raw HTML for the figure.
         """
-        # In Pyodide, we can use the HTML5 canvas backend to get the figure as HTML
+        # In Pyodide, save the figure to a PNG buffer and embed it as a base64 data URL
         image_data = io.BytesIO()
         settings = self.extra_matplotlib_settings.copy()
         if 'format' not in settings:

@@ -58,19 +58,20 @@ async def index(req) -> Response:
 
 
 async def list_user_files(req) -> Response:
-    """Serve a JSON response listing user files in the user directory.
+    """Serve a JSON response listing entries in the user directory.
 
-    If a path is given, it will be resolved as a subpath of the user directory, and only files within that subpath will be listed.
+    If a path is given, it will be resolved as a subpath of the user directory, and only entries within that subpath will be listed.
 
-    Clearly indicates whether an entry is a file or a folder.
+    Lists both files and directories, with each entry's `is_dir` flag indicating whether it is a folder.
 
-    Does not allow access to files outside the user directory, and only lists files (not directories).
+    Does not allow access to paths outside the user directory.
 
     Args:
         req: Starlette request object.
 
     Returns:
-        JSONResponse with list of user files.
+        JSONResponse with the list of entries, or an error response for
+        invalid or non-directory paths.
     """
     app: Starlette = req.app  # type: ignore
     user_directory: Path = app.state.user_directory

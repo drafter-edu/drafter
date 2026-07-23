@@ -66,7 +66,8 @@ def set_site_information(
     server: Optional[ClientServer] = None,
 ):
     """
-    Sets the information about the website, such as the author, description, sources,
+    Sets the information about the website, such as the author, description,
+    sources, planning information, and related links.
 
     Args:
         author: The author of the website.
@@ -176,11 +177,12 @@ def add_website_css(
 
 def deploy_site(image_folder="images", server: Optional[ClientServer] = None):
     """
-    Deploys the website with the given image folder. This will set the production
-    flag to True and turn off debug information, too.
+    Prepares the website for deployment. Currently this only turns off debug
+    information; the `image_folder` argument is accepted for compatibility
+    but is not yet used.
 
     Args:
-        image_folder: The folder where images are stored.
+        image_folder: The folder where images are stored (currently unused).
         server: The server to configure. If None, uses the main server.
     """
     hide_debug_information(server=server)

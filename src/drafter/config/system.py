@@ -11,10 +11,16 @@ class SystemConfiguration:
     """
     Centralized global object that holds all the configuration settings
     for each of the core components of the Drafter system.
-    
-    Also includes a reference to the FileSystem interface
-    
+
     This should be instantiated as a singleton.
+
+    Attributes:
+        bootstrap: Configuration for the bootstrap process.
+        client_server: Configuration for the client-side server.
+        app_server: Configuration for the application server.
+        app_builder: Configuration for the compilation process that builds
+            a static version of the site.
+        app_common: Configuration shared across the application components.
     """
     bootstrap: BootstrapConfiguration
     client_server: ClientServerConfiguration
@@ -57,6 +63,7 @@ class SystemConfiguration:
         
         Args:
             json_dict: A dictionary containing the configuration data.
+
         Returns:
             An instance of SystemConfiguration populated with the data from the dictionary.
         """

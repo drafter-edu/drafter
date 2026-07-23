@@ -22,18 +22,17 @@ from drafter.components.utilities.validation import validate_parameter_name
 @dataclass(repr=False)
 class Timer(Component):
     """Timer component that simulates a clock ticking down.
-    Provides the ability to call a function when the timer runs out.
-
-    Internally uses setTimeout to trigger the callback when the timer runs out.
+    Provides the ability to call a function when the timer runs out,
+    and optionally on each tick along the way.
 
     Attributes:
-        duration (int): Duration of the timer in milliseconds.
-        on_finish (UrlOrFunction): Function or URL to call when the timer runs out.
-        show (bool): Whether to display the timer. Defaults to True.
-        controls (bool): Whether to show timer controls. Defaults to False.
-        persistent (bool): Whether the timer persists across page transitions. Defaults to False.
-        rate (int): Interval between timer ticks in milliseconds. Defaults to 1000.
-        on_tick (UrlOrFunction, optional): Function or URL to call on each tick. Defaults to None.
+        duration: Duration of the timer in milliseconds.
+        on_finish: Function or URL to call when the timer runs out.
+        show: Whether to display the timer. Defaults to True.
+        controls: Whether to show timer controls. Defaults to False.
+        persistent: Whether the timer persists across page transitions. Defaults to False.
+        rate: Interval between timer ticks in milliseconds. Defaults to 1000.
+        on_tick: Optional function or URL to call on each tick. Defaults to None.
     """
 
     duration: int

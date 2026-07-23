@@ -24,7 +24,8 @@ class BakeryTestCase:
         kwargs: Keyword arguments passed to the test function.
         result: The result or return value from the test function.
         line: The line number in the source file where the test was called.
-        caller: The name or description of the test function/assertion.
+        caller: The source code snippet of the assertion call, extracted
+            from the call stack (or a placeholder if unavailable).
         kind: The type of assertion (e.g., 'assert_equal', 'assert_state').
     """
 

@@ -12,10 +12,8 @@ class AppBuilderConfiguration(BaseConfiguration):
 
     The compilation process will also have access to the current `ClientServerConfiguration`
     to generate the logic on the actual built page. These settings are the ones unique
-    to the compilation process. Note that it also inherits from `AppBackendConfig`, so it also
-    includes all the generic backend settings common to both the Starlette server and the compilation process.
-
-    # TODO: Single file output, whether to use CDN for assets, etc.
+    to the compilation process. Like the other configuration sections, it inherits the
+    generic parsing and merging machinery from `BaseConfiguration`.
 
     Attributes:
         output_directory: Directory to output the built site files.
@@ -31,6 +29,8 @@ class AppBuilderConfiguration(BaseConfiguration):
             fallback. Used for embedding many demos on one page via iframes.
 
     """
+
+    # TODO: Single file output, whether to use CDN for assets, etc.
 
     output_directory: str = "dist"
     output_filename: str = "index.html"

@@ -1,25 +1,25 @@
-"""
+"""Base machinery for page content components.
 
 There are three main types defined here:
-- `Component`: The base class for all content that can be added to a page. It provides methods for verifying the component's state, parsing extra settings into HTML attributes and styles, updating styles and attributes, and rendering the component to HTML.
+- `Component`: The base class for all content that can be added to a page. It provides methods for verifying the component's state, parsing extra settings into HTML attributes and styles, updating styles and attributes, and planning how the component will be rendered.
 - `Content`: A type alias that represents either a `Component` or a string. This allows for flexibility in content representation.
 - `PageContent`: A type alias that represents either a single `Content` item or a list of `Content` items. This allows for multiple pieces of content to be grouped together for a page.
 
 Note that `str` is also considered a valid `Content` type, allowing for simple text content to be used directly without needing to create a `Component` instance.
 
-
-Some HTML elements are actually composed of child elements (e.g., a `<div>` containing multiple `<p>` tags). They might also have dedicated JavaScript and CSS associated with them, that should have their own lifecycle.
-
-To create custom components, you can subclass the `Component` class.
-
-Attribute order should always be consistent, with styles at the end. Generally, this means that they should be alphabetized.
+To create custom components, subclass the `Component` class. A subclass declares
+its constructor parameters via the `ARGUMENTS` class variable (a list of
+`ComponentArgument` entries) and is rendered by calling its `plan` method, which
+returns a `RenderPlan`. The `RenderPlan` captures everything needed to produce
+the final output, not just the HTML tag, attributes, and child content (some
+elements are composed of child elements, e.g., a `<div>` containing multiple
+`<p>` tags), but also any dedicated CSS and JavaScript assets that have their
+own lifecycle.
 
 A Component should always:
-- Have a **extra_settings** kwargs parameter in its constructor to accept extra settings that are stored in `extra_settings` dict
+- Have a `**extra_settings` kwargs parameter in its constructor to accept extra settings that are stored in the `extra_settings` dict
 
-
-Technically, we need the component to return not just its HTML, but also its CSS and JS additions. It might also want to add other messages to the page, such as an instruction to start a timer or something. So our render should really return a more complex structure.
-
+Attribute order should always be consistent, with styles at the end. Generally, this means that they should be alphabetized.
 """
 
 from dataclasses import dataclass
@@ -197,21 +197,20 @@ class Component:
     The DEFAULT_ATTRS dict is used to provide default values for attributes, which can be overridden
     by the extra_settings.
 
-    Types of args:
-    - Positional regular arg: POSITIONAL_ARGS
-    - Variable regular arg: VAR_ARGS
-    - Keyword regular arg (default value): DEFAULT_ARGS
-    - Positional content arg: CONTENT_ARGS
-    - Variable content arg: VAR_CONTENT_ARGS
-    - Keyword content arg (default value): DEFAULT_CONTENT_ARGS
-    - Extra settings (kwargs that get turned into attributes)
+    Each subclass declares its constructor parameters in the `ARGUMENTS` class
+    variable, a list of `ComponentArgument` entries. Each entry records the
+    parameter's name, its kind ("positional", "var", or "keyword" with a default
+    value), whether it represents child content (`is_content`) rather than an
+    attribute, and whether it represents an event route handler (`is_event`).
+    Any extra keyword arguments beyond the declared ones are stored in
+    `extra_settings` and turned into attributes (or styles).
 
     A special extra case is the `arguments` parameter, primarily for Link and Button components, but actually
-    usable by any component. This will be a list of Argument objects that will represent be turned into a special
+    usable by any component. This accepts an `ArgumentList` that will be turned into a special
     `data--drafter-arguments` attribute that will have arguments embedded directly on the element, which will
     then be passed to any events emanating from that element. The obvious use case is for links and buttons, where
     you want arguments to be passed when the link or button is clicked, but it could also be used for other events.
-    - The `arguments` parameter can be either an Argument, a sequence of Argument, a sequence of (name, value) pairs, or a dict of name to value.
+    - The `arguments` parameter can be a single `Arguable`, a sequence of `Arguable` objects, a sequence of (name, value) pairs, or a dict of name to value.
     - The names MUST be valid Python identifiers, and the values can be any JSON-serializable value (but not dataclasses).
     - The `arguments` parameter will be turned into a `data--drafter-arguments` attribute.
     - The value of the `data--drafter-arguments` attribute will be a JSON string.
