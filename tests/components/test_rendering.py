@@ -4,8 +4,6 @@ two HTML snippets rather than string comparison.
 """
 
 import pytest
-import os
-import pathlib
 from lxml import html as lxml_html
 from drafter import *
 from drafter.payloads.renderer import render

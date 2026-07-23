@@ -1,4 +1,3 @@
-from bakery import assert_equal
 from dataclasses import dataclass
 from drafter import route, start_server, Page, TextBox, Button, SelectBox, Table, hide_debug_information
 

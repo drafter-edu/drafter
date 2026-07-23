@@ -1,16 +1,15 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from textwrap import indent
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from drafter.components.links import LinkContent
 from drafter.data.channel import Message
 from drafter.config.client_server import ClientServerConfiguration
-from drafter.constants import RESTORABLE_STATE_KEY
-from drafter.components import Component, PageContent, Link
+from drafter.components import Component
 from drafter.data.request import Request
 from drafter.history.formatting import format_page_content
 from drafter.history.state import SiteState
-from drafter.payloads.renderer import render, Renderer
+from drafter.payloads.renderer import render
 from drafter.payloads.payloads import ResponsePayload
 from drafter.payloads.target import Target
 from drafter.payloads.failure import VerificationFailure
@@ -123,7 +122,7 @@ class Fragment(ResponsePayload):
                 pieces.append(",\n")
             pieces.append("]")
         else:
-            pieces.append(f",\n")
+            pieces.append(",\n")
             pieces.append(indent(format_page_content(self.content), " " * 4))
 
         if self.target is not None:

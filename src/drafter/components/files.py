@@ -4,7 +4,7 @@ import io
 from typing import Union, List
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.utilities.validation import validate_parameter_name
-from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
+from drafter.components.utilities.image_support import HAS_PILLOW
 from drafter.components.forms import FormComponent
 
 # TODO: Properly handle type hints for PILImage, DrafterFile, etc.

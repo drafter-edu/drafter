@@ -1,13 +1,10 @@
 from glob import glob
-import sys
 import os
 from typing import Optional
 import shutil
 import zipfile
 from pathlib import Path
 from drafter.client_server.client_server import ClientServer
-from drafter.config.app_builder import AppBuilderConfiguration
-from drafter.config.client_server import ClientServerConfiguration
 from drafter.client_server.commands import get_main_server
 from drafter.config.system import SystemConfiguration
 from drafter.config.urls import determine_assets_url, INTERNAL_FILES

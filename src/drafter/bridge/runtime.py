@@ -4,17 +4,12 @@ Encapsulates the JS API differences (e.g. .new() constructors, proxy management)
 so the rest of the bridge code doesn't need to care about the runtime.
 """
 
-import json
 import js
 from drafter.bridge.context import DomContext
-from drafter.bridge.log import debug_log
 from drafter.bridge.error_handling import (
     normalize_bridge_exception,
     report_bridge_error,
 )
-from drafter.constants import SUBMIT_BUTTON_KEY
-from drafter.data.request import Request
-from drafter.site.site import DRAFTER_TAG_IDS
 from drafter.helpers.utils import is_pyodide
 from typing import Callable, Any, Optional
 

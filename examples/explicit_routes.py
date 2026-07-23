@@ -1,5 +1,4 @@
-from bakery import assert_equal
-from drafter import route, start_server, Page, Button, add_route
+from drafter import start_server, Page, Button, add_route
 
 
 def index():

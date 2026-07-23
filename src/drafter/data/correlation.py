@@ -4,7 +4,6 @@ Correlation is a grouping context for telemetry events and errors.
 
 from dataclasses import dataclass
 from typing import Any, Optional, Dict
-from datetime import datetime
 
 
 @dataclass

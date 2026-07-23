@@ -1,5 +1,6 @@
 """AST-based docstring coverage audit for src/drafter."""
-import ast, sys, json
+import ast
+import json
 from pathlib import Path
 
 ROOT = Path("src")

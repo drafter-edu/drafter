@@ -1,5 +1,4 @@
 from dataclasses import dataclass, fields, is_dataclass
-import html
 from typing import Optional
 from drafter.components.page_content import (
     Component,

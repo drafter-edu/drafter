@@ -1,12 +1,7 @@
 import json
-import time
-import html
-from dataclasses import dataclass, field
-from typing import Callable, Optional, Any
+from typing import Any
 
 from drafter.bridge.runtime import RuntimeAdapter
-from drafter.constants import SUBMIT_BUTTON_KEY
-from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.bridge.log import debug_log
 from drafter.bridge.error_handling import report_bridge_warning

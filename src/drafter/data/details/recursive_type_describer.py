@@ -73,7 +73,6 @@ from dataclasses import fields, is_dataclass
 from typing import Any
 
 from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
-from drafter.history.utils import safe_repr
 
 
 def first_shared_base(cls1, cls2):

@@ -1,4 +1,4 @@
-from drafter import TextBox, Span, Div, BulletedList, TextArea
+from drafter import TextBox, Span, BulletedList, TextArea
 
 
 def test_textbox_repr():

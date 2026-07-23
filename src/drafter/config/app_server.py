@@ -4,10 +4,8 @@ Defines AppServerConfiguration dataclass for controlling server behavior,
 asset serving, file reloading, and UI options.
 """
 
-from dataclasses import dataclass, fields
-from typing import Optional, Union
+from dataclasses import dataclass
 from drafter.helpers.env_vars import EnvVars
-from drafter.config.engines import EngineType
 from drafter.config.urls import INTERNAL_ROUTES
 from drafter.config.base import BaseConfiguration
 

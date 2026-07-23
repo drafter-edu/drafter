@@ -5,7 +5,6 @@ file watching, and pre-rendering of initial pages.
 """
 
 import asyncio
-from dataclasses import dataclass
 import webbrowser
 from pathlib import Path
 

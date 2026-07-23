@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, List, Dict, Sequence
+from typing import List, Sequence
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import RenderPlan
 

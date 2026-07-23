@@ -1,6 +1,5 @@
 from collections import Counter
 import json
-from operator import mul
 import time
 from dataclasses import dataclass, field
 from typing import Any, Callable

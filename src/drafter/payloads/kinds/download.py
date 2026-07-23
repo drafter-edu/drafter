@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Union
 from dataclasses import dataclass
 from drafter.payloads.payloads import ResponsePayload
 

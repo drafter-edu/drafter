@@ -6,10 +6,9 @@ and setting up the necessary runtime environment accordingly.
 """
 
 from collections import defaultdict
-from pprint import pprint
 import sys
 import os
-from typing import Optional, Any
+from typing import Optional
 from drafter.helpers.args import get_argparser
 from drafter.helpers.utils import is_web
 from drafter.config.system import SystemConfiguration

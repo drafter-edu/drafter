@@ -1,4 +1,3 @@
-from bakery import assert_equal
 from drafter import *
 from dataclasses import dataclass
 

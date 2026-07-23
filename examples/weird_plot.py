@@ -1,9 +1,7 @@
-from PIL import Image as PILImage
 from drafter import *
 from dataclasses import dataclass
 import random
 import matplotlib.pyplot as plt
-from dataclasses import dataclass
 from html import escape
 import json
 

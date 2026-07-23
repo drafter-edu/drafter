@@ -8,7 +8,7 @@ from drafter.site.site import (
     DRAFTER_TAG_IDS,
     GLOBAL_DRAFTER_CSS_PATHS,
 )
-from drafter.helpers.utils import is_skulpt, is_pyodide
+from drafter.helpers.utils import is_pyodide
 from typing import Any
 import js
 

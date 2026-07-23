@@ -1,7 +1,4 @@
 import json
-import time
-import html
-from dataclasses import dataclass, field
 from typing import Callable, Optional, Any
 
 from drafter.bridge.history import BrowserHistory

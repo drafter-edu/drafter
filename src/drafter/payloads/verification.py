@@ -1,10 +1,6 @@
-from dataclasses import dataclass
 from typing import Optional, Any
 from drafter.data.request import Request
 from drafter.payloads.payloads import ResponsePayload
-from drafter.payloads.kinds.page import Page
-from drafter.components import PageContent
-from drafter.payloads.failure import VerificationFailure
 
 
 def verify_response_payload_type(request: Request, payload: ResponsePayload):

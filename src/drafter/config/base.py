@@ -1,10 +1,7 @@
-import os
 import json
-from dataclasses import dataclass, field, fields
-from typing import Any, Union, Optional, Literal
+from dataclasses import dataclass, fields
+from typing import Any, Optional, Literal
 
-from drafter.helpers.utils import seek_filename_by_line
-from drafter.config.engines import EngineType
 
 FalseType = Literal[False]
 

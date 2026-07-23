@@ -55,7 +55,7 @@ def handle_input(state: State, text: str) -> Fragment:
         [
             f"Text: {text or '(empty)'}",
             LineBreak(),
-            f"Last event: input",
+            "Last event: input",
             LineBreak(),
             f"Event count: {state.event_count}",
         ],
@@ -74,7 +74,7 @@ def handle_change(state: State, text: str) -> Fragment:
         [
             f"Text: {text or '(empty)'}",
             LineBreak(),
-            f"Last event: change",
+            "Last event: change",
             LineBreak(),
             f"Event count: {state.event_count}",
         ],
@@ -92,7 +92,7 @@ def handle_focus(state: State) -> Fragment:
         [
             f"Text: {state.text or '(empty)'}",
             LineBreak(),
-            f"Last event: focus",
+            "Last event: focus",
             LineBreak(),
             f"Event count: {state.event_count}",
         ],
@@ -111,7 +111,7 @@ def handle_blur(state: State, text: str) -> Fragment:
         [
             f"Text: {text or '(empty)'}",
             LineBreak(),
-            f"Last event: blur",
+            "Last event: blur",
             LineBreak(),
             f"Event count: {state.event_count}",
         ],

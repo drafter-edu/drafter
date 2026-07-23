@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime, date, time
-import html
 from typing import List, Optional, Union, Any
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import RenderPlan, NewlineMode

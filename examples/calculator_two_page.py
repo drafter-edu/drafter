@@ -1,6 +1,5 @@
 from bakery import assert_equal
-from dataclasses import dataclass
-from drafter import route, start_server, Page, TextBox, Button, Text
+from drafter import route, start_server, Page, TextBox, Button
 
 @route("index")
 def index() -> Page:

@@ -4,7 +4,6 @@ Provides helpers to locate package resources including assets, templates,
 and scaffolding files.
 """
 import os
-import shutil
 from pathlib import Path
 
 

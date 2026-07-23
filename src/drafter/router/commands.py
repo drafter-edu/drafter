@@ -1,8 +1,6 @@
-from typing import Union, Callable, Optional, TypeVar, overload, ParamSpec, cast
-from functools import wraps
+from typing import Union, Callable, Optional, TypeVar, overload, cast
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import get_main_server
-from drafter.router.parameters.introspect import get_signature
 
 T = TypeVar("T", bound=Callable[..., object])
 

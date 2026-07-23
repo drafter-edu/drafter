@@ -1,8 +1,6 @@
 from dataclasses import dataclass
-import html
 from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.forms import FormComponent
-from drafter.components.planning.render_plan import RenderPlan
 from typing import Union
 
 from drafter.components.utilities.validation import validate_parameter_name

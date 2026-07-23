@@ -1,7 +1,6 @@
 from typing import Optional
 from dataclasses import dataclass, field
 from drafter.data.request import Request
-from drafter.data.response import Response
 
 
 @dataclass

@@ -2,7 +2,7 @@ from typing import Optional
 try:
     import argparse
     HAVE_ARGPARSE = True
-except Exception as e:
+except Exception:
     HAVE_ARGPARSE = False
     
     

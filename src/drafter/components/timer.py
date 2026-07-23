@@ -4,19 +4,16 @@ Components for simulating timers that count down or clocks that count up.
 
 """
 
-import json
 from dataclasses import dataclass
-from typing import Optional, Literal
+from typing import Optional
 
 from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
-from drafter.components.planning.render_plan import RenderPlan, AssetBundle
 from drafter.components.utilities.contracts import (
     ComponentContract,
     EventPayloadFieldSpec,
     EventPayloadSpec,
 )
 from drafter.components.utilities.registry import COMPONENT_CONTRACT_REGISTRY
-from drafter.components.utilities.validation import validate_parameter_name
 
 
 @dataclass(repr=False)

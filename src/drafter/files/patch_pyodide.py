@@ -42,7 +42,7 @@ class RemoteFinder(importlib.abc.MetaPathFinder):
             EXTERNAL_IMPORTS.add(fullname)
             return importlib.util.spec_from_loader(fullname, loader)
 
-        except Exception as e:
+        except Exception:
             return None
 
 

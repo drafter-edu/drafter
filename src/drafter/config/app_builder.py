@@ -1,8 +1,7 @@
-from typing import Optional, Union
+from typing import Optional
 from dataclasses import dataclass, field
 
 from drafter.helpers.env_vars import EnvVars
-from drafter.config.engines import EngineType
 from drafter.config.base import BaseConfiguration
 
 

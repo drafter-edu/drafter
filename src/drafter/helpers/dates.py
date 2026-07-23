@@ -1,5 +1,5 @@
 from datetime import datetime, time, date
-from typing import Any, Union, Optional
+from typing import Any
 
 def try_convert_datetime(value, target_type) -> tuple[bool, Any]:
     """Convert a value to datetime-like types if possible.

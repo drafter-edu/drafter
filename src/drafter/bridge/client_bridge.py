@@ -6,26 +6,12 @@ management, channel content, redirect detection, history, hotkeys, and telemetry
 Runtime-specific differences (Skulpt vs Pyodide) are delegated to a RuntimeAdapter.
 """
 
-import json
-import time
-import html
 
 from drafter.bridge.events import EventManager
-from drafter.bridge.history import BrowserHistory
 from drafter.bridge.navigation import NavigationController
 from drafter.bridge.site_renderer import SiteRenderer
 from dataclasses import dataclass, field
 from drafter.bridge.dom import (
-    add_js,
-    add_style,
-    add_link,
-    add_link_to_shadow,
-    add_style_to_shadow,
-    add_header,
-    remove_page_content,
-    remove_existing_theme,
-    replace_html,
-    get_attribute_recursively,
     swap_debug_mode,
     update_subtle_debug_entry,
 )
@@ -39,8 +25,6 @@ from drafter.bridge.context import DomContext
 from drafter.bridge.runtime import RuntimeAdapter, create_runtime
 from drafter.config.client_server import ClientServerConfiguration
 
-from drafter.components.page_content import Component
-from drafter.data.channel import DEFAULT_CHANNEL_AFTER, DEFAULT_CHANNEL_BEFORE, Channel
 from drafter.data.response import Response
 from drafter.data.request import Request
 from drafter.data.details.config import UpdatedConfigurationEvent
@@ -48,8 +32,6 @@ from drafter.data.telemetry import TelemetryRecord
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import (
     DRAFTER_TAG_IDS,
-    DRAFTER_TAG_CLASSES,
-    SITE_HTML_SHADOW_DOM_TEMPLATE,
 )
 from typing import Callable, Optional, Any
 

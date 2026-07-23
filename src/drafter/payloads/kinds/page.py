@@ -1,8 +1,6 @@
 from dataclasses import dataclass
-from textwrap import indent
-from typing import Any, Optional
+from typing import Optional
 
-from drafter.components import Component
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.history.formatting import format_page_content
 from drafter.history.state import SiteState

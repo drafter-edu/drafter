@@ -1,7 +1,4 @@
 import argparse
-import base64
-import gzip
-import os
 import json
 from pathlib import Path
 

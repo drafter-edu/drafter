@@ -1,6 +1,5 @@
 import logging
 from copy import deepcopy
-import uvicorn
 from click import style
 from uvicorn.config import LOGGING_CONFIG
 

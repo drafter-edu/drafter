@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 from drafter.data.channel import Message
 from drafter.data.request import Request
 from drafter.config.client_server import ClientServerConfiguration

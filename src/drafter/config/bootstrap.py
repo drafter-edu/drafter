@@ -1,6 +1,6 @@
 import os
 from dataclasses import dataclass
-from typing import Union, Optional
+from typing import Optional
 from drafter.helpers.env_vars import EnvVars
 from drafter.config.base import BaseConfiguration
 

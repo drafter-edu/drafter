@@ -1,4 +1,3 @@
-from typing import Optional
 import ast
 
 
@@ -46,7 +45,7 @@ class ExtentGetter(ast.NodeVisitor):
         try:
             self.line_map[node] = (node.lineno, node.end_lineno)  # type: ignore
             self.update_parents(node, node.lineno, node.end_lineno)  # type: ignore
-        except Exception as e:
+        except Exception:
             pass  # print(e)
         self.node_stack.append(node)
         ast.NodeVisitor.visit(self, node)

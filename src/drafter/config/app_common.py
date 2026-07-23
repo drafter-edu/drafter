@@ -1,9 +1,7 @@
-import os
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass
 from typing import Union, Optional, Literal
 
 from drafter.helpers.env_vars import EnvVars
-from drafter.helpers.utils import seek_filename_by_line
 from drafter.config.engines import EngineType
 from drafter.config.base import BaseConfiguration
 

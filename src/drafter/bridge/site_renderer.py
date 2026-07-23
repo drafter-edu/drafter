@@ -1,14 +1,9 @@
-import json
-import time
-import html
-from dataclasses import dataclass, field
-from typing import Callable, Optional, Any
+from typing import Optional, Any
 
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.data.channel import DEFAULT_CHANNEL_AFTER, DEFAULT_CHANNEL_BEFORE, Channel
 from drafter.data.response import Response
-from drafter.data.request import Request
-from drafter.bridge.runtime import RuntimeAdapter, create_runtime
+from drafter.bridge.runtime import RuntimeAdapter
 from drafter.bridge.log import debug_log
 from drafter.bridge.error_handling import (
     raise_bridge_system_error,
@@ -32,8 +27,6 @@ from drafter.bridge.dom import (
     remove_page_content,
     remove_existing_theme,
     replace_html,
-    get_attribute_recursively,
-    swap_debug_mode,
 )
 from drafter.bridge.persistence import (
     apply_persistence,

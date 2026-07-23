@@ -4,15 +4,10 @@ Provides the start_server() function which routes to either in-browser ClientSer
 or local development AppServer based on execution context.
 """
 
-import sys
-import os
 from typing import Optional, Union
 from drafter.configuration import get_system_configuration
-from drafter.config.app_builder import AppBuilderConfiguration
-from drafter.config.client_server import ClientServerConfiguration
-from drafter.helpers.utils import is_web, seek_filename_by_line
+from drafter.helpers.utils import is_web
 from drafter.config.engines import EngineType
-from drafter.config.app_server import AppServerConfiguration
 from drafter.client_server.commands import get_main_server
 
 

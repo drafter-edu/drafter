@@ -1,7 +1,5 @@
 from drafter import *
 from dataclasses import dataclass
-import io
-import base64
 
 @dataclass
 class State:

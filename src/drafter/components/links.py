@@ -1,12 +1,9 @@
 import json
-from typing import List, Callable, Union, Optional
+from typing import List, Optional
 from dataclasses import dataclass
-import html
 
-from drafter.components.planning.render_plan import RenderPlan
 from drafter.components.utilities.escaping import (
     make_safe_argument,
-    make_safe_json_argument,
 )
 from drafter.constants import SUBMIT_BUTTON_KEY
 from drafter.helpers.urls import (

@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 from drafter.data.telemetry import TelemetryRecord
-from drafter.history.utils import safe_repr
 from drafter.data.details.recursive_type_describer import analyze_type
 
 

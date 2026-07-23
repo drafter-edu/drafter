@@ -1,11 +1,10 @@
-from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from dataclasses import dataclass
+from typing import Optional
 
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.config.urls import determine_assets_url
 from drafter.styling.themes import get_theme_system
 from drafter.site.initial_site_data import InitialSiteData
-from drafter.config.site_information import SiteInformation
 from drafter.site.headers import CSSLink
 
 

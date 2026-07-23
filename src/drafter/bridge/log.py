@@ -3,7 +3,6 @@ Logging utilities for the bridge module.
 """
 
 import js
-from dataclasses import is_dataclass, asdict
 from typing import Any
 
 
@@ -34,8 +33,8 @@ def debug_log(event_name: str, *args: Any) -> None:
 
 def console_log(event) -> None:
     try:
-        js.console.log(f"[Drafter (Unhandled)]", event)
-    except Exception as e:
+        js.console.log("[Drafter (Unhandled)]", event)
+    except Exception:
         try:
             repr_str = repr(event)
             print(f"[Drafter (Unhandled)] {repr_str}")

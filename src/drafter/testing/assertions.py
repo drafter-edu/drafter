@@ -18,11 +18,9 @@ ignored by default).
 """
 
 from dataclasses import dataclass
-import re
 from typing import Any, Optional
 
 from bakery.assertions import (
-    QUIET,
     SET_GENERATOR_TYPES,
     LIST_GENERATOR_TYPES,
     _normalize_string,
@@ -31,7 +29,7 @@ from bakery.assertions import (
 from drafter.components.text import Text
 from drafter.payloads.kinds.fragment import Fragment
 from drafter.components.page_content import Component
-from drafter.testing.testing import _bakery_tests, assert_equal
+from drafter.testing.testing import assert_equal
 
 # Number encapsulates bool, int, float, complex, decimal.Decimal, etc.
 from numbers import Number

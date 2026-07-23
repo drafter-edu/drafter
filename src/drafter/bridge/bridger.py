@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from drafter.config.system import SystemConfiguration
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.bridge.client_bridge import ClientBridge

@@ -4,7 +4,7 @@ TODO: These tests are sloppy and should be reviewed and improved
 
 import pytest
 from dataclasses import dataclass
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import patch
 
 from drafter.client_server.client_server import ClientServer
 from drafter.data.correlation import Correlation
@@ -18,8 +18,6 @@ from drafter.data.errors import (
 from drafter.data.request import Request
 from drafter.data.response import Response
 from drafter.payloads.kinds.page import Page
-from drafter.payloads.kinds.fragment import Fragment
-from drafter.payloads.kinds.redirect import Redirect
 from drafter.payloads.kinds.update import Update
 from drafter.payloads.kinds.error_page import SimpleErrorPage
 from drafter.payloads.target import Target, DEFAULT_BODY_TARGET

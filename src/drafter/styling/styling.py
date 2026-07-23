@@ -7,8 +7,7 @@ TODO:
 """
 
 from typing import Union
-from drafter.components import PageContent, Text, PageContent
-from drafter.components.layout import Div
+from drafter.components import Text, PageContent
 
 
 def update_style(component: PageContent, style: str, value: str) -> PageContent:
