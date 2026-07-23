@@ -509,7 +509,7 @@ def render_path(path: list[PathItem]) -> str:
             else:
                 message.append(f"{path_item.name}")
         elif path_item.kind == "children":
-            message.append(f"{path_item.name} children'")
+            message.append(f"{path_item.name} children")
         elif path_item.kind == "key":
             message.append(f"'{path_item.name}'")
         elif path_item.kind == "item":

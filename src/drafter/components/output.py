@@ -113,14 +113,11 @@ class Progress(Component):
         self.max = max
         self.extra_settings = kwargs
 
-    def attributes(self, context) -> dict:
+    def get_attributes(self, context) -> dict:
         """Build HTML attributes with numerically formatted value and max.
 
         Formats `value` (and `max`, when present) via `format_number` so
-        that whole numbers render without a trailing decimal point. Note
-        that this method is named `attributes` rather than
-        `get_attributes`, so the default rendering pipeline does not
-        invoke it; it must be called explicitly.
+        that whole numbers render without a trailing decimal point.
 
         Args:
             context: Rendering context.

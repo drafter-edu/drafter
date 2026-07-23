@@ -439,13 +439,13 @@ exposed by a docstring/code contradiction. Triage separately:
 - [X] Minor: `page_content.py:convert_arguments_to_json` unreachable duplicate dict
     branch; `bridge/navigation.py:18` + `site_renderer.py:53` use
     `field(default_factory=...)` in non-dataclass class bodies.
-
-- [ ] `components/output.py:Progress.attributes` — the method is named `attributes`
+- [X] `components/output.py:Progress.attributes` — the method is named `attributes`
    rather than `get_attributes`, so the rendering pipeline never calls it: Progress
    values render without the documented `format_number` formatting. (Found during
    Phase 3 Tier 1; its docstring documents the dead-code status.)
-- [ ] `testing/assertions.py:render_path` — the `children` branch emits a stray
+- [X] `testing/assertions.py:render_path` — the `children` branch emits a stray
    trailing quote (`children'`) in rendered paths.
+
 - [ ] `helpers/urls.py:check_invalid_external_url` — returns `"is a valid external url"`
    for valid and `""` for invalid; docstring promises the opposite contract.
 - [ ] `monitor/bus.py:64` — `subscription.topic.startswith(event.kind)` looks reversed;
