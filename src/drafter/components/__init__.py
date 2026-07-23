@@ -42,6 +42,13 @@ from drafter.components.forms import (
 )
 
 from drafter.components.geolocation import CurrentLocation, Location
+from drafter.components.map import (
+    Map,
+    MapLocation,
+    MapMarker,
+    MapView,
+    AddMarkerFunction,
+)
 
 # TODO: Sliders, Autocomplete, RadioButtons
 from drafter.components.tables import Table
@@ -112,6 +119,11 @@ __all__ = [
     "TimeInput",
     "CurrentLocation",
     "Location",
+    "Map",
+    "MapLocation",
+    "MapMarker",
+    "MapView",
+    "AddMarkerFunction",
     "Progress",
     "Output",
     "Table",

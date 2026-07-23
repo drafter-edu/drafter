@@ -7,6 +7,12 @@ const sharedConfig = {
 	setupFilesAfterEnv: ["<rootDir>/src/__tests__/setup.ts"],
 	moduleNameMapper: {
 		"^pyodide$": "<rootDir>/src/test-utils/pyodide-shim.ts",
+		// Leaflet needs real layout; components built on it are tested
+		// against the recording shim instead.
+		"^leaflet$": "<rootDir>/src/test-utils/leaflet-shim.ts",
+		// CSS is imported as text for shadow-root injection (tsup loader);
+		// tests get an empty string instead of the real stylesheet.
+		"\\.css$": "<rootDir>/src/test-utils/css-stub.ts",
 		"^(\\.{1,2}/.*)\\.js$": "$1",
 	},
 	transform: {
@@ -43,6 +49,7 @@ const config: Config = {
 				"**/__tests__/timer.test.ts",
 				"**/__tests__/clock.test.ts",
 				"**/__tests__/audio.test.ts",
+				"**/__tests__/map.test.ts",
 				"**/__tests__/media.test.ts",
 				"**/__tests__/persistence.test.ts",
 			],

@@ -221,8 +221,16 @@ class Router:
         # Stage 5: Diagnose.
         self.report_diagnostics(request, merge_diagnostics + bound.diagnostics)
 
+        # Injected framework values (server, helpers like Map's add_marker)
+        # are not part of the student-visible call: including them would make
+        # the recorded representation un-evaluable in the debug panel.
+        representable_kwargs = {
+            key: value
+            for key, value in bound.kwargs.items()
+            if key not in extra_dependencies
+        }
         representation = self.build_argument_representation(
-            signature, list(bound.args), bound.kwargs
+            signature, list(bound.args), representable_kwargs
         )
         return list(bound.args), dict(bound.kwargs), representation
 

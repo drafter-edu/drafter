@@ -33,6 +33,10 @@ export default defineConfig([
 		outExtension({ format }) {
 			return { js: ".js" }; // for iife this yields dist/drafter.js
 		},
+		// Third-party component CSS (e.g. Leaflet's) is imported as a
+		// string and injected into the component's shadow root, since
+		// document-level stylesheets can't reach shadow-DOM content.
+		loader: { ".css": "text" },
 		esbuildOptions(options) {
 			options.jsx = "automatic";
 			options.jsxImportSource = "jsx-dom";
@@ -52,6 +56,7 @@ export default defineConfig([
 		outExtension({ format }) {
 			return { js: ".js" }; // for iife this yields dist/drafter.js
 		},
+		loader: { ".css": "text" },
 		esbuildOptions(options) {
 			options.jsx = "automatic";
 			options.jsxImportSource = "jsx-dom";

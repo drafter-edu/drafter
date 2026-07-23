@@ -41,6 +41,8 @@ from drafter.payloads.verification import (
     verify_page_state_history,
     verify_response_payload_type,
 )
+from drafter.components.utilities.contracts import HelperContext
+from drafter.components.utilities.registry import COMPONENT_CONTRACT_REGISTRY
 from drafter.router.routes import Router
 from drafter.monitor.audit import log_error, log_record
 from drafter.site.initial_site_data import InitialSiteData
@@ -367,14 +369,34 @@ class ClientServer:
     ) -> dict[str, Any]:
         """Get extra dependencies to inject into route handlers.
 
+        Alongside the fixed framework values, the component that emitted the
+        event may contribute helpers declared in its contract (e.g. Map's
+        ``add_marker``); those are materialized here from the live element
+        that triggered the request. Framework values are added last so a
+        component helper can never shadow them.
+
         Returns:
             dict: Mapping of dependency names to instances.
         """
-        return {
-            "_server": self,
-            "_configuration": configuration,
-            "_request": request,
-        }
+        dependencies: dict[str, Any] = {}
+        element = request.button_pressed
+        tag = getattr(element, "tagName", None) if element is not None else None
+        if isinstance(tag, str) and tag:
+            helpers = COMPONENT_CONTRACT_REGISTRY.helpers_for(tag, request.action)
+            if helpers:
+                context = HelperContext(
+                    element=element, values=dict(request.kwargs)
+                )
+                for helper in helpers:
+                    dependencies[helper.name] = helper.factory(context)
+        dependencies.update(
+            {
+                "_server": self,
+                "_configuration": configuration,
+                "_request": request,
+            }
+        )
+        return dependencies
 
     def execute_route(
         self,

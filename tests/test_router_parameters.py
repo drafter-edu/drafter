@@ -620,6 +620,21 @@ class TestRouterPipeline:
         args, kwargs, _ = self.prepare(router, request)
         assert kwargs == {"name": "x"}
 
+    def test_injected_dependencies_bind_but_stay_out_of_representation(self):
+        def add_stop(state, x: int, add_marker):
+            return x
+
+        helper = lambda label="": None  # noqa: E731
+
+        router = self.make_router(add_stop)
+        request = Request("pin", "test", {"x": "5"}, {})
+        args, kwargs, representation = self.prepare(
+            router, request, state="STATE", deps={"add_marker": helper}
+        )
+        assert kwargs["add_marker"] is helper
+        assert kwargs["x"] == 5
+        assert representation == "add_stop('STATE', 5)"
+
     def test_state_injection_still_works(self):
         def index(state):
             return state

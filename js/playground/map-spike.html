@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Drafter — Map Component Spike</title>
+    <style>
+			body {
+				font-family: system-ui, Arial, sans-serif;
+				margin: 0;
+				background: #f5f7fb;
+				color: #222;
+			}
+			header {
+				padding: 16px 24px;
+				background: #fff;
+				border-bottom: 1px solid #ddd;
+			}
+			header h1 {
+				margin: 0 0 4px;
+				font-size: 20px;
+			}
+			#status {
+				color: #555;
+				font-size: 14px;
+			}
+			.panel {
+				background: #fff;
+				border: 1px solid #ddd;
+				border-radius: 12px;
+				margin: 20px 24px;
+				padding: 6px;
+				max-width: 720px;
+			}
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Drafter — Map Component Spike (Leaflet in shadow DOM)</h1>
+      <div id="status">Booting Pyodide…</div>
+    </header>
+    <div class="panel">
+      <div id="drafter-root--map"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js"></script>
+    <script src="__drafter_assets/js/drafter.pyodide.js"></script>
+    <script>
+			window.DRAFTER_MODIFIED_CONFIGURATION = {};
+
+			// Exercises the real Map component end to end: markers as
+			// dataclasses, on_click wiring, the MapLocation converter, and
+			// the injected add_marker helper (live pin, no page re-render).
+			const MAP_APP = `
+from drafter import *
+hide_debug_information()
+
+@dataclass
+class State:
+    stops: list
+
+@route
+def index(state: State):
+    markers = [
+        MapMarker(stop.latitude, stop.longitude, f"Stop {i + 1}")
+        for i, stop in enumerate(state.stops)
+    ]
+    return Page(state, [
+        "Click the map to add a stop!",
+        Map("spot",
+            center=MapLocation(39.68, -75.75),
+            markers=markers,
+            height=360,
+            on_click=add_stop),
+        f"You have {len(state.stops)} stops.",
+    ])
+
+@route
+def add_stop(state: State, spot: MapLocation, add_marker):
+    state.stops.append(spot)
+    add_marker(f"Stop {len(state.stops)}")
+    return Update(state)
+
+start_server(State([]))
+`;
+
+			const status = document.getElementById("status");
+			const setStatus = (msg) => (status.textContent = msg);
+
+			(async () => {
+				try {
+					setStatus("Loading Pyodide…");
+					await window.Drafter.setupPyodide({
+						pyodideUrl:
+							"https://cdn.jsdelivr.net/pyodide/v0.29.0/full/",
+						systemPackages: [],
+					});
+
+					setStatus("Mounting Drafter…");
+					await window.Drafter.mountDrafterRemote(
+						"__drafter_assets/drafter-pyodide.zip",
+					);
+					await window.Drafter.patchPythonFeatures();
+
+					setStatus("Starting map instance…");
+					await window.Drafter.createDrafterInstance({
+						rootElementId: "drafter-root--map",
+						useShadowDom: true,
+						inlineCode: MAP_APP,
+					});
+					setStatus("Ready");
+				} catch (error) {
+					console.error(error);
+					setStatus("Error: " + (error?.message || error));
+				}
+			})();
+    </script>
+  </body>
+</html>

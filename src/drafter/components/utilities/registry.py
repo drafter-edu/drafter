@@ -65,5 +65,26 @@ class ComponentContractRegistry:
             for name in contract.synthetic_fields
         )
 
+    def helpers_for(self, html_tag: str, event_name: str) -> tuple:
+        """The helpers the component with this tag provides for this event.
+
+        Args:
+            html_tag: Tag name of the element that emitted the event (any
+                case; DOM tagName is uppercase).
+            event_name: The event that fired (a Request's ``action``).
+
+        Returns:
+            Tuple of :class:`HelperSpec` entries whose ``events`` include
+            the event (or that apply to every event).
+        """
+        tag = (html_tag or "").lower()
+        return tuple(
+            helper
+            for contract in self._contracts.values()
+            if contract.html_tag == tag
+            for helper in contract.provided_helpers
+            if not helper.events or event_name in helper.events
+        )
+
 
 COMPONENT_CONTRACT_REGISTRY = ComponentContractRegistry()
