@@ -35,12 +35,33 @@ class AppServerConfiguration(BaseConfiguration):
 
     @staticmethod
     def get_key() -> str:
+        """Return the key identifying this configuration section.
+
+        Returns:
+            The string "app_server".
+        """
         return "app_server"
 
     # TODO: Additional configuration settings from the scaffolding index
     #       templates (e.g., `scaffolding/index.pyodide.template.html`) go here
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
+        """Extract development server settings from environment variables.
+
+        Reads DRAFTER_PORT, DRAFTER_HOST, DRAFTER_USE_RELOADER,
+        DRAFTER_OPEN_BROWSER, DRAFTER_INLINE_PY, and
+        DRAFTER_SERVE_ADJACENT_FILES.
+
+        Args:
+            env_vars: A dictionary of environment variables.
+
+        Returns:
+            A dictionary of server configuration values that were present.
+
+        Raises:
+            ValueError: If DRAFTER_PORT is set but cannot be parsed as an
+                integer.
+        """
         result = EnvVars(env_vars)
         result.get_int_if_exists("DRAFTER_PORT", "port", raise_error=True)
         result.get_string_if_exists("DRAFTER_HOST", "host")
@@ -54,6 +75,19 @@ class AppServerConfiguration(BaseConfiguration):
 
     @staticmethod
     def extend_parser(parser):
+        """Add development server arguments to the command line parser.
+
+        Adds the "App Server Configuration" group with --port and --host
+        (which have argparse defaults, unlike most other options), plus the
+        negative flags --no-reloader, --no-open-browser, --no-inline-py, and
+        --no-serve-adjacent-files, which store False on their fields.
+
+        Args:
+            parser: An argparse.ArgumentParser instance to extend.
+
+        Returns:
+            The "App Server Configuration" argument group that was added.
+        """
         group = parser.add_argument_group("App Server Configuration")
         group.add_argument(
             "--port", type=int, default=8000, help="Port number for the server"
@@ -89,6 +123,17 @@ class AppServerConfiguration(BaseConfiguration):
 
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:
+        """Extract development server settings from parsed command line arguments.
+
+        All values are copied when they are not None (rather than merely
+        truthy), so False values from the --no-* flags are preserved.
+
+        Args:
+            parsed_args: A dictionary of parsed command line arguments.
+
+        Returns:
+            A dictionary of server configuration values that were provided.
+        """
         result = {}
         if parsed_args.get("port") is not None:
             result["port"] = parsed_args["port"]

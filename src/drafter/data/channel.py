@@ -1,3 +1,8 @@
+"""
+Channels and messages for sending auxiliary content (such as scripts,
+styles, and audio) to the client alongside a response's main body.
+"""
+
 from dataclasses import dataclass, field
 from typing import List, Optional
 
@@ -37,10 +42,14 @@ class Channel:
 
 
 DEFAULT_CHANNEL_AUDIO = "audio"
+"""Channel carrying audio content for the client to play."""
 DEFAULT_CHANNEL_BEFORE = "before"
+"""Channel whose messages are injected before the page content is rendered."""
 DEFAULT_CHANNEL_AFTER = "after"
+"""Channel whose messages are injected after the page content is rendered."""
 DEFAULT_CHANNELS = [
     DEFAULT_CHANNEL_AUDIO,
     DEFAULT_CHANNEL_BEFORE,
     DEFAULT_CHANNEL_AFTER,
 ]
+"""The channel names that Drafter itself uses when building responses."""

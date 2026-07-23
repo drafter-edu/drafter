@@ -1,3 +1,10 @@
+"""Text components for displaying written content.
+
+Defines `Text` (plain text in a span), `Header` (headings h1-h6),
+`Pre`/`PreformattedText`, `BlockQuote`, `InlineCode`, `RawHTML`
+(unescaped HTML, for trusted content only), and the generic `HtmlTag`.
+"""
+
 from dataclasses import dataclass
 import html
 from typing import List, Optional
@@ -36,6 +43,7 @@ class Pre(Component):
 
 
 PreformattedText = Pre
+"""Alias for `Pre`."""
 
 
 @dataclass(repr=False)
@@ -174,6 +182,15 @@ class Text(Component):
             return hash(self.body)
 
     def plan(self, context) -> RenderPlan:
+        """Plan the text for rendering.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            A raw RenderPlan with the HTML-escaped body when there are no
+            extra settings; otherwise a full span tag RenderPlan.
+        """
         if not self.extra_settings:
             return RenderPlan(
                 kind="raw",
@@ -252,6 +269,15 @@ class RawHTML(Component):
             return hash(self.html)
 
     def plan(self, context) -> RenderPlan:
+        """Plan the raw HTML for rendering, without escaping.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            A raw RenderPlan with the HTML as-is when there are no extra
+            settings; otherwise a div tag RenderPlan wrapping the raw HTML.
+        """
         if not self.extra_settings:
             return RenderPlan(
                 kind="raw",

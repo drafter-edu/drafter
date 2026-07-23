@@ -1,3 +1,18 @@
+"""Browser event wiring and form-data collection for the bridge.
+
+The :class:`EventManager` attaches the DOM listeners that turn browser
+activity into router dispatches: delegated click navigation (``data-nav`` /
+``data-call``), form submission, per-component event handlers declared via
+the ``data--drafter-handlers`` attribute, global window events, and
+double-press hotkeys. The module-level functions gather everything a
+dispatch needs from the DOM — form values (including asynchronous file
+uploads), custom event details, and component argument attributes — and
+package them into the ``{"values": ..., "payload": ...}`` envelope that
+handlers pass to the router, with per-value provenance entries so the
+router can merge by precedence (component arguments > event detail > form
+fields) and report collisions.
+"""
+
 from collections import Counter
 import json
 import time
@@ -19,16 +34,62 @@ from drafter.bridge.dom import (
 import js
 
 DOUBLE_PRESS_THRESHOLD = 600  # milliseconds
+"""Maximum gap, in milliseconds, between two presses of a hotkey combination
+for them to count as a double press and trigger the hotkey's callback."""
+
 DRAFTER_PAGE_LOADED_EVENT = "drafter-page-loaded"
+"""Name of the custom window event dispatched after each page render,
+carrying the route, request id, and response id in its detail."""
 
 # Set on an element once its per-element handlers are attached. Persisted
 # components survive page swaps with their listeners intact, so re-mounting on
 # a later page load would dispatch every event twice (and leak listeners).
 HANDLERS_MOUNTED_ATTR = "data-drafter-handlers-mounted"
+"""Attribute set on an element once its per-element handlers are attached.
+
+Persisted components survive page swaps with their listeners intact, so
+re-mounting on a later page load would dispatch every event twice (and leak
+listeners); this marker lets ``mount_event_handlers`` skip them.
+"""
 
 
 @dataclass
 class EventManager:
+    """Manages the DOM event listeners for one Drafter instance.
+
+    Mounts navigation click/submit delegation, per-component event handlers,
+    global window events, and hotkeys, wrapping every callback through the
+    runtime adapter so proxies are created and cleaned up correctly. Lookups
+    for the instance's inner-frame elements (BODY/FORM) are scoped so that
+    concurrent instances on the same page don't find each other's elements.
+
+    Attributes:
+        runtime: Runtime adapter used to wrap, clean up, and chain the
+            event handlers and their promises.
+
+        click_handler: The currently mounted (wrapped) delegated click
+            handler on the body element, or None before mounting.
+
+        submit_handler: The currently mounted (wrapped) submit handler on
+            the form element, or None before mounting.
+
+        listeners: Wrapped window-level listeners keyed by event name, kept
+            so re-registration can remove and clean up the old handler.
+
+        hotkey_events: Callbacks keyed by lowercase key name, triggered on
+            a double press of Ctrl/Meta plus that key.
+
+        last_press_time: Timestamp in milliseconds of the last qualifying
+            hotkey press, used to detect double presses.
+
+        hotkey_listener_ready: Whether the shared keydown listener backing
+            all hotkeys has been attached to the document.
+
+        scope: Node that inner-frame lookups (BODY/FORM) are scoped to;
+            defaults to the instance's document and is replaced with the
+            instance's shadow root via set_scope().
+    """
+
     runtime: RuntimeAdapter
     click_handler: Any = None
     submit_handler: Any = None
@@ -151,6 +212,27 @@ class EventManager:
             element.setAttribute(HANDLERS_MOUNTED_ATTR, "true")
 
     def mount_navigation(self, do_navigation: Callable):
+        """Mount the delegated click and form-submit listeners for navigation.
+
+        Attaches a click handler to the instance's body element that
+        intercepts clicks on elements carrying data-nav or data-call and
+        turns them into "link" requests, and a submit handler on the
+        instance's form element that turns submissions into "form" requests
+        (resolving the target URL from the submitter's formaction, the
+        form's action, or the current location). Previously mounted click
+        handlers are removed and cleaned up first, and per-component event
+        handlers are (re)mounted via mount_event_handlers. Both handlers
+        collect event/form/argument data, wait for any pending file-upload
+        promises, then invoke the navigation callback.
+
+        Args:
+            do_navigation: Callback invoked with the built Request to
+                perform the route dispatch.
+
+        Raises:
+            RuntimeError: If the instance's form root element cannot be
+                found (via raise_bridge_system_error).
+        """
         debug_log("client.mount_navigation")
         # Get the body element (scoped to this instance's shadow root)
         root = self.scope.querySelector("#" + DRAFTER_TAG_IDS["BODY"])
@@ -314,6 +396,16 @@ class EventManager:
         event_handlers: dict[str, Callable[[Any], Any]],
         key_handlers: dict[str, Callable[[], None]],
     ) -> None:
+        """Register global window event listeners and hotkey callbacks.
+
+        Args:
+            event_handlers: Mapping from window event name to the handler
+                to invoke; each is wrapped and attached to the window,
+                replacing any previously registered handler for that name.
+
+            key_handlers: Mapping from key combination (e.g. "ctrl+d") to
+                the callback triggered on a double press of that hotkey.
+        """
         debug_log("client.setup_events")
 
         # Global events
@@ -327,6 +419,18 @@ class EventManager:
     def dispatch_page_loaded(
         self, route: str, request_id: int, response_id: int
     ) -> None:
+        """Dispatch the drafter-page-loaded custom event on the window.
+
+        Fired after a page render so external code (e.g. tests or embedding
+        hosts) can observe that a route finished loading.
+
+        Args:
+            route: Name of the route that was rendered.
+
+            request_id: Identifier of the request that produced the page.
+
+            response_id: Identifier of the response that was rendered.
+        """
         detail = {
             "route": route,
             "requestId": request_id,
@@ -374,6 +478,18 @@ class EventManager:
 
 
 def get_single_checkbox_names(form: Any) -> set[str]:
+    """Get the names of checkbox fields that appear exactly once in a form.
+
+    Single checkboxes are special-cased by normalize_form_data: when
+    unchecked they submit no value at all, so their absence is coerced to
+    False rather than being omitted.
+
+    Args:
+        form: The form element whose controls are inspected.
+
+    Returns:
+        Set of field names belonging to exactly one checkbox input.
+    """
     checkbox_counts: Counter[str] = Counter()
 
     for element in form.elements:
@@ -483,6 +599,27 @@ def json_decode_form_value(
     *,
     element: Any,
 ) -> Any:
+    """JSON-decode a form field value, falling back to the raw value.
+
+    Applied to fields whose element carries data-transform="json-decode"
+    (e.g. JSON-encoded component arguments). List values are decoded
+    item by item; non-string items (e.g. file uploads) are passed through
+    unchanged. A value that fails to decode is reported as a bridge
+    warning and returned as-is.
+
+    Args:
+        key: Name of the form field, used in the warning message.
+
+        value: The submitted value, or list of values, to decode.
+
+        element: The form control the value came from, used to attribute
+            the warning to a DOM id.
+
+    Returns:
+        The decoded value(s), or the original value(s) where decoding
+        was skipped or failed.
+    """
+
     def decode_one(item: Any) -> Any:
         # Files and other non-string values are not JSON-decoded.
         if not isinstance(item, str):
@@ -509,6 +646,18 @@ def json_decode_form_value(
 
 
 def apply_form_transforms(form: Any, form_values: dict[str, Any]) -> None:
+    """Apply declared data-transform decodings to collected form values.
+
+    Walks the form's controls and, for each field present in form_values
+    whose element declares data-transform="json-decode", replaces the
+    value with its JSON-decoded form in place. Each field name is
+    processed at most once.
+
+    Args:
+        form: The form element whose controls declare the transforms.
+
+        form_values: Mapping of collected form values, modified in place.
+    """
     processed_names: set[str] = set()
 
     for element in form.elements:
@@ -716,6 +865,20 @@ def collect_form_data(
 def ensure_uploads_resolved(
     grouped: dict[str, list[Any]],
 ) -> None:
+    """Verify that no pending file-upload placeholders remain.
+
+    collect_form_data stores a placeholder for each file entry until its
+    upload promise commits the real data; this is called after all upload
+    promises should have resolved, as a sanity check before the values
+    are normalized.
+
+    Args:
+        grouped: Mapping from field name to its list of collected values.
+
+    Raises:
+        RuntimeError: If any field still contains an unresolved
+            file-upload placeholder.
+    """
     for key, values in grouped.items():
         for index, value in enumerate(values):
             if value is _PENDING_UPLOAD:
@@ -731,6 +894,34 @@ def process_form_data(
     base_data: dict[str, Any],
     argument_data: dict[str, Any],
 ) -> list[Any]:
+    """Collect and finalize a form's data into an event-data envelope.
+
+    Collects the form's raw values (starting any file uploads), then —
+    once all upload promises have resolved — normalizes cardinality,
+    applies declared data-transform decodings, and merges values by
+    precedence (component arguments > event detail > form fields). The
+    result is wrapped as a {"values": ..., "payload": ...} envelope where
+    payload carries per-value provenance entries.
+
+    Args:
+        runtime: Runtime adapter used to build the FormData object and
+            chain the upload/finalization promises.
+
+        form: The form element whose data is being collected.
+
+        submitter: The element that submitted the form, or None.
+
+        base_data: Values taken from the triggering event's detail.
+
+        argument_data: Values taken from component argument attributes.
+
+    Returns:
+        Single-element list whose entry resolves to the envelope: the
+        wrapped envelope itself when there are no uploads, otherwise a
+        promise chain that finalizes after all uploads complete. Callers
+        pass this list to runtime.finish_promises and read the envelope
+        from the last resolved entry.
+    """
     grouped, multiple_names, upload_promises = collect_form_data(
         runtime, form, submitter
     )

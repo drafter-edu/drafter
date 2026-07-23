@@ -49,6 +49,17 @@ class ConversionContext:
 
 @dataclass
 class ConversionResult:
+    """The outcome of one conversion attempt.
+
+    Attributes:
+        ok: Whether the conversion succeeded.
+        value: The converted value, when `ok` is True.
+        error_code: Stable, code-like identifier for the failure
+            (e.g. `conversion_failed`), when `ok` is False.
+        message: Student-facing description of the failure.
+        hint: Student-facing suggestion for fixing the failure.
+    """
+
     ok: bool
     value: Any = None
     error_code: str = ""
@@ -56,16 +67,16 @@ class ConversionResult:
     hint: str = ""
 
 
-#: A converter returns None when it does not apply to the given value,
-#: letting the next registered converter (or the fallback) try instead.
 ConverterFn = Callable[[ConversionContext], Optional[ConversionResult]]
+"""A converter function; it returns None when it does not apply to the given
+value, letting the next registered converter (or the fallback) try instead."""
 
 
 #: Origins that represent a union annotation (typing.Union and PEP 604 `X | Y`).
 _UNION_ORIGINS = {Union, getattr(types, "UnionType", Union)}
 
-#: Plain collection types the collection converter handles.
 COLLECTION_TYPES = (list, tuple, set, frozenset)
+"""Plain collection types the collection converter handles."""
 
 
 def describe_type(expected_type: Any) -> str:
@@ -116,6 +127,16 @@ def conversion_failure(
 
 @dataclass
 class RegisteredConverter:
+    """One converter entry in a ConverterRegistry.
+
+    Attributes:
+        applies_to: Predicate over the resolved target type; the converter
+            only runs when this returns True.
+        convert: The converter function itself.
+        priority: Ordering within the registry; lower numbers run earlier.
+        name: Human-readable name for debugging.
+    """
+
     applies_to: Callable[[Any], bool]
     convert: ConverterFn
     priority: int
@@ -276,7 +297,7 @@ class ConverterRegistry:
         )
 
 
-#: The shared registry the router uses. Components register component-specific
-#: converters into it at import time; the shared cross-component converters
-#: are installed by drafter.router.parameters.conversion when the router loads.
 CONVERTER_REGISTRY = ConverterRegistry()
+"""The shared registry the router uses. Components register component-specific
+converters into it at import time; the shared cross-component converters
+are installed by drafter.router.parameters.conversion when the router loads."""

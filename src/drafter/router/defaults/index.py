@@ -1,3 +1,5 @@
+"""Default index route, shown when the app defines no index page of its own."""
+
 from drafter.components import Header, Paragraph
 from drafter.payloads.kinds.page import Page
 

@@ -1,3 +1,13 @@
+"""
+The ClientServer: Drafter's in-browser request/response engine.
+
+Defines the `ClientServer` class, which owns the site, router, state, and
+event bus for one running application instance. It handles configuration
+and startup, dispatches visits through the router to route functions,
+verifies and commits the resulting payloads, and reports errors through
+the telemetry system.
+"""
+
 from dataclasses import dataclass
 from typing import Any, Literal, Optional, List, Union
 import time
@@ -62,6 +72,10 @@ ServerPhases = Union[
     Literal["committing"],
     Literal["idle"],
 ]
+"""The lifecycle phases a ClientServer moves through, from construction
+("initializing") through startup ("starting", "configuring", "rendering",
+"started") to request handling ("visiting", "committing", "idle"). See the
+ClientServer docstring for what each phase means."""
 
 
 @dataclass

@@ -37,6 +37,33 @@ from typing import Callable, Optional, Any
 
 @dataclass
 class ClientBridge:
+    """Coordinates the browser side of a running Drafter instance.
+
+    Owns the DOM rendering (SiteRenderer), navigation (NavigationController),
+    event wiring (EventManager), and the optional debug panel for one
+    instance, delegating runtime-specific operations to a RuntimeAdapter.
+    Constructed with only a configuration and an optional DomContext; the
+    collaborators are built from those.
+
+    Attributes:
+        site_renderer: Renders and updates this instance's DOM.
+
+        navigator: Initiates requests and manages redirects and history.
+
+        configuration: The client/server configuration for this instance.
+
+        debug_panel: The JS debug panel component, once set up (None before
+            setup or if setup failed).
+
+        runtime: Adapter for runtime-specific (Skulpt vs Pyodide) operations.
+
+        site_title: The site's title, as last set by set_site_title.
+
+        context: The DomContext (window/document) this instance renders into.
+
+        events: Manages DOM event listeners and hotkeys for this instance.
+    """
+
     site_renderer: SiteRenderer
     navigator: NavigationController
     configuration: ClientServerConfiguration = field(init=False)
@@ -60,6 +87,19 @@ class ClientBridge:
         self.debug_panel = None
 
     def setup_site(self, initial_site_data: InitialSiteData) -> None:
+        """Build the initial site DOM and prepare instance-scoped machinery.
+
+        Sets the site title, has the SiteRenderer construct the site frame
+        from the initial site data, updates the subtle production debug-entry
+        button's visibility, scopes the EventManager's element lookups to the
+        renderer's scope (shadow root or root element) so concurrent
+        instances never resolve each other's elements, and sets up the debug
+        panel.
+
+        Args:
+            initial_site_data: The rendered initial site (HTML, title,
+                assets, and flags) produced by the server's render phase.
+        """
         self.set_site_title(initial_site_data.site_title)
         self.site_renderer.setup(initial_site_data)
         update_subtle_debug_entry(
@@ -79,6 +119,21 @@ class ClientBridge:
         handle_toggle_frame: Callable,
         handle_debug_mode: Callable,
     ) -> None:
+        """Install the navigation function and register DOM event handlers.
+
+        Wires `handle_visit` into the NavigationController, registers the
+        Drafter custom events (toggle-frame, toggle-debug-mode,
+        evict-persistent, navigate) and the browser popstate event, binds the
+        "Q" hotkey to debug-mode toggling, and mounts the subtle production
+        debug-entry button.
+
+        Args:
+            handle_visit: Callback that performs a full visit for a Request
+                and returns its Response; used for all navigation.
+            handle_toggle_frame: Callback that flips the site frame
+                configuration.
+            handle_debug_mode: Callback that flips debug mode.
+        """
         self.navigator.set_navigation_func(handle_visit)
         self.events.setup_events(
             {
@@ -175,6 +230,25 @@ class ClientBridge:
     def handle_response(
         self, response: Response, callback: Callable[[Request], Response]
     ) -> bool:
+        """Commit a server Response to the DOM (the Committing Phase).
+
+        Clears the previous page's page-specific content, applies the
+        response's "before" channel, refreshes the navigation function and
+        the debug panel's route, and updates the site body. When the DOM was
+        updated, re-mounts navigation handlers and (for full page loads)
+        dispatches the page-loaded event. Finally applies the "after"
+        channel and, if the payload is a redirect, follows it via the
+        NavigationController.
+
+        Args:
+            response: The Response produced by visiting a route.
+            callback: The visit function to use for subsequent navigation
+                (including any redirect this response triggers).
+
+        Returns:
+            True if the site DOM was updated (and event handlers were
+            re-registered), False otherwise.
+        """
         self.site_renderer.remove_page_specific_content()
         self.site_renderer.apply_before_channel(response)
         self.navigator.set_navigation_func(callback)
@@ -196,6 +270,23 @@ class ClientBridge:
 
     ### Event Handling
     def handle_server_event(self, event_data: TelemetryRecord) -> bool:
+        """Process a telemetry event published by the server.
+
+        Configuration-update events are applied directly: "framed" toggles
+        the site frame, while "in_debug_mode" and "enable_subtle_debug_entry"
+        update the configuration and refresh the debug CSS and subtle
+        debug-entry button. Every event (including configuration updates) is
+        then forwarded to the debug panel; events the panel does not handle
+        are logged to the console.
+
+        Args:
+            event_data: The telemetry record published on the server's
+                event bus.
+
+        Returns:
+            True if the debug panel handled the event, False otherwise
+            (including when the event could not be converted to JSON).
+        """
         try:
             event = event_data.to_json()
             debug_log("client.handle_event", event)
@@ -246,6 +337,16 @@ class ClientBridge:
     ### Specialized Helpers
 
     def set_site_title(self, title: str) -> None:
+        """Set the site title, updating the document and debug panel.
+
+        The browser document's <title> is only changed when this instance is
+        the primary one (rendering into the default root id); secondary
+        instances sharing a document must not fight over it. The debug
+        panel's header title is always updated when the panel exists.
+
+        Args:
+            title: The new site title.
+        """
         self.site_title = title
         # Only the primary instance (the default root) owns its document's
         # <title>; secondary instances sharing a document must not fight over

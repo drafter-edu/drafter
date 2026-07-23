@@ -86,6 +86,17 @@ class RemovePersistent(Component):
         self.extra_settings = kwargs
 
     def get_attributes(self, context) -> dict:
+        """Build the eviction marker's attributes.
+
+        Args:
+            context: The render context, passed through to extra-settings
+                handling.
+
+        Returns:
+            An attribute dictionary carrying the resolved persistence key
+            in the eviction attribute, plus `hidden` so the marker is
+            invisible.
+        """
         attributes = {
             PERSIST_EVICT_ATTR: resolve_persist_key(self.target),
             "hidden": True,

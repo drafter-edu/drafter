@@ -1,3 +1,19 @@
+"""Dataclasses describing the Python-JS component contract.
+
+Each interactive component declares a `ComponentContract`: the custom
+element tag it renders as, the events it emits (as `EventPayloadSpec`
+entries built from `EventPayloadFieldSpec` fields), any synthetic payload
+fields it contributes beyond form inputs, and the helper callables
+(`HelperSpec`, built from a `HelperContext`) it offers to routes handling
+its events. The JS implementation of each component must match its
+declared contract; the sibling `registry` module aggregates all contracts
+at startup so the router can reason globally about binding, aliases, and
+helper injection.
+
+This module is a leaf: it defines only the contract structures, with no
+browser or router imports.
+"""
+
 from dataclasses import dataclass, field
 from typing import Any, Callable
 

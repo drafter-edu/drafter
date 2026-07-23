@@ -1,3 +1,10 @@
+"""Configuration shared by the Drafter app server and site builder.
+
+Defines AppCommonConfiguration, which holds settings common to both serving
+and compiling a site: the execution engine, asset locations, page prerendering,
+and Python package loading (including Pyodide specifics).
+"""
+
 from dataclasses import dataclass
 from typing import Union, Optional, Literal
 
@@ -6,10 +13,15 @@ from drafter.config.engines import EngineType
 from drafter.config.base import BaseConfiguration
 
 FalseType = Literal[False]
+"""Type alias for the literal value `False`, used in `Union[FalseType, str]`
+annotations where a field is either disabled (`False`) or holds a string."""
 
 DEFAULT_SYSTEM_PACKAGES = ["bakery", "matplotlib", "pillow"]
+"""Default Python packages loaded into the execution engine for student sites."""
+
 # "https://cdn.jsdelivr.net/pyodide/v0.29.0/debug/"
 DEFAULT_PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/"
+"""Default CDN URL that Pyodide is loaded from."""
 
 
 @dataclass
@@ -60,10 +72,28 @@ class AppCommonConfiguration(BaseConfiguration):
 
     @staticmethod
     def get_key() -> str:
+        """Return the key identifying this configuration section.
+
+        Returns:
+            The string "app_common".
+        """
         return "app_common"
 
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
+        """Extract common app settings from environment variables.
+
+        Reads the DRAFTER_-prefixed variables for the engine, prerendering,
+        asset directory, filename display, local mounting, Pyodide Drafter
+        path, asset URL override, site title, automatic package loading, and
+        the semicolon-separated project/system package lists.
+
+        Args:
+            env_vars: A dictionary of environment variables.
+
+        Returns:
+            A dictionary of common app configuration values that were present.
+        """
         result = EnvVars(env_vars)
         result.get_string_if_exists("DRAFTER_ENGINE", "engine")
         result.get_bool_if_exists(
@@ -92,6 +122,19 @@ class AppCommonConfiguration(BaseConfiguration):
 
     @staticmethod
     def extend_parser(parser):
+        """Add common app arguments to the command line parser.
+
+        Adds the "App Common Configuration" group with options such as
+        --engine, --prerender-initial-page, --asset-directory, --site-title,
+        --project-packages, --system-packages, --pyodide-url, and
+        --pyodide-drafter-path.
+
+        Args:
+            parser: An argparse.ArgumentParser instance to extend.
+
+        Returns:
+            The "App Common Configuration" argument group that was added.
+        """
         group = parser.add_argument_group("App Common Configuration")
         group.add_argument(
             "--engine",
@@ -159,6 +202,17 @@ class AppCommonConfiguration(BaseConfiguration):
 
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:
+        """Extract common app settings from parsed command line arguments.
+
+        The --project-packages and --system-packages values are split on
+        semicolons into lists.
+
+        Args:
+            parsed_args: A dictionary of parsed command line arguments.
+
+        Returns:
+            A dictionary of common app configuration values that were provided.
+        """
         result = {}
         if parsed_args.get("engine"):
             result["engine"] = parsed_args["engine"]

@@ -1,3 +1,8 @@
+"""
+The Response dataclass, describing what the server sends back to the client:
+the rendered body, status, errors/warnings, and any channel messages.
+"""
+
 from dataclasses import dataclass, field
 from typing import Dict, Optional, TYPE_CHECKING
 from drafter.data.channel import Channel, Message

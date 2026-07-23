@@ -1,3 +1,9 @@
+"""
+Provenance-tagged request payload values: each value the client sends is
+tagged with where it came from, so that diagnostics can tell students
+exactly which form field, event, or component argument produced it.
+"""
+
 from dataclasses import dataclass
 from typing import Any, Literal, Optional
 
@@ -9,18 +15,30 @@ PayloadSource = Literal[
     "form_field",  # form inputs
     "framework_meta",  # request metadata injected by framework
 ]
+"""The provenance of a payload value: a custom component argument, a
+CustomEvent detail, a form input, or framework-injected request metadata."""
 
-#: Student-facing phrases for each payload source, used in diagnostics.
 SOURCE_PHRASES: dict[str, str] = {
     "component_argument": "the component argument",
     "event_detail": "the event value",
     "form_field": "the form field",
     "framework_meta": "the framework value",
 }
+"""Student-facing phrases for each payload source, used in diagnostics."""
 
 
 @dataclass
 class PayloadValue:
+    """One request value tagged with its provenance.
+
+    Attributes:
+        name: The parameter name the value is bound to.
+        value: The raw value sent by the client.
+        source: Where the value came from (one of the PayloadSource options).
+        source_detail: Extra provenance detail, such as the component
+            tag/id, field name, or event name.
+    """
+
     name: str
     value: Any
     source: PayloadSource

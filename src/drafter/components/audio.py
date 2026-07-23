@@ -51,23 +51,34 @@ from drafter.data.converter import ConversionContext, ConversionResult
 
 
 WAVEFORMS = ("sine", "square", "triangle", "sawtooth")
+"""The oscillator waveform names accepted by `Tone` and `Melody`."""
 
 VISUALIZATIONS = ("meter", "waveform", "bars")
+"""The live visualization styles a `Microphone` can draw; `Sound` supports
+the "waveform" and "bars" subset."""
 
 MicrophoneStatus = Literal[
     "unavailable", "prompt", "pending", "granted", "denied", "error"
 ]
+"""The permission/availability states an `AudioLevel`'s `status` field can
+report, mirroring the microphone permission workflow."""
+
 RecordingStatus = Literal[
     "unavailable", "prompt", "recording", "granted", "denied", "error"
 ]
+"""The permission/recording states a `Recording`'s `status` field can
+report."""
 
 #: Semitone offset of each letter name from C within an octave.
 _NOTE_SEMITONES = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 
-#: A note that plays silence for its beats in a Melody.
 REST = "rest"
+"""A note that plays silence for its beats in a Melody."""
 
 NoteValue = Union[str, Tuple[str, Union[int, float]]]
+"""One item in a Melody's note list: a note name like `"C4"` (or
+`"rest"`), played for one beat, or a `(note, beats)` pair like
+`("C4", 2)`."""
 
 
 def note_to_frequency(note: str) -> float:
@@ -555,6 +566,15 @@ class Tone(Component):
         self.extra_settings = extra_settings
 
     def get_attributes(self, context) -> dict:
+        """Extend the base attributes by JSON-encoding the effects list.
+
+        Args:
+            context: The render context passed through to the base class.
+
+        Returns:
+            The attribute dictionary, with `effects` serialized for the
+            `<drafter-tone>` custom element.
+        """
         attributes = super().get_attributes(context)
         if isinstance(attributes.get("effects"), list):
             attributes["effects"] = _serialize_effects(attributes["effects"])
@@ -763,6 +783,19 @@ class Melody(Component):
         self.extra_settings = extra_settings
 
     def get_attributes(self, context) -> dict:
+        """Extend the base attributes with normalized, JSON-encoded data.
+
+        The note list is normalized to `[note, beats]` pairs and the
+        effects list is serialized, since the `<drafter-melody>` custom
+        element parses both from JSON strings.
+
+        Args:
+            context: The render context passed through to the base class.
+
+        Returns:
+            The attribute dictionary with `notes` and `effects`
+            JSON-encoded.
+        """
         attributes = super().get_attributes(context)
         attributes["notes"] = json.dumps(_normalize_notes(self.notes))
         if isinstance(attributes.get("effects"), list):
@@ -953,6 +986,15 @@ class Sound(Component):
         self.extra_settings = extra_settings
 
     def get_attributes(self, context) -> dict:
+        """Extend the base attributes by JSON-encoding the effects list.
+
+        Args:
+            context: The render context passed through to the base class.
+
+        Returns:
+            The attribute dictionary, with `effects` serialized for the
+            `<drafter-sound>` custom element.
+        """
         attributes = super().get_attributes(context)
         if isinstance(attributes.get("effects"), list):
             attributes["effects"] = _serialize_effects(attributes["effects"])

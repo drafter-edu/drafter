@@ -1,3 +1,12 @@
+"""Integration with the Bakery testing library.
+
+Importing this module patches Bakery (when installed) so that every
+`assert_equal` call is recorded as a `BakeryTestCase` and emitted as a
+`TestCaseEvent` for display in Drafter's debug and testing panels. When
+Bakery is not installed, a stub `assert_equal` is provided that simply
+prints a warning.
+"""
+
 import sys
 from dataclasses import dataclass
 from functools import wraps
@@ -56,6 +65,9 @@ def try_getting_full_code(filename: str, lineno: int) -> Optional[str]:
 
 
 DEFAULT_STACK_DEPTH = 7
+"""Default number of frames to look back in the call stack when locating
+the source line of an assertion call, if no line matching the target
+string was found."""
 
 
 def get_line_code(target, depth=DEFAULT_STACK_DEPTH):
@@ -109,6 +121,20 @@ class BakeryTests:
         self.tests = []
 
     def wrap_get_line_code(self, original_function):
+        """Replace Bakery's `get_line_code` with Drafter's implementation.
+
+        The returned wrapper ignores the original function and its
+        arguments entirely, delegating to this module's `get_line_code` to
+        search the call stack for a line starting with `assert_`.
+
+        Args:
+            original_function: Bakery's original `get_line_code`, used only
+                for its metadata (via `functools.wraps`).
+
+        Returns:
+            The replacement function.
+        """
+
         @wraps(original_function)
         def new_function(*args, **kwargs):
             # line, code = original_function(*args, **kwargs)
@@ -118,6 +144,21 @@ class BakeryTests:
         return new_function
 
     def track_bakery_tests(self, original_function):
+        """Wrap a Bakery assertion so that each call is recorded and reported.
+
+        The returned wrapper captures the calling source line, runs the
+        original assertion, appends a `BakeryTestCase` to `self.tests`, and
+        emits a `TestCaseEvent` (errors during emission are printed rather
+        than raised).
+
+        Args:
+            original_function: The assertion function (e.g., Bakery's
+                `assert_equal`) to instrument.
+
+        Returns:
+            The instrumented function, or `original_function` unchanged
+            when Bakery is not installed.
+        """
         if bakery is None:
             return original_function
 

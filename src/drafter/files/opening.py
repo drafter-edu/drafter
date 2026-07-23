@@ -1,3 +1,14 @@
+"""Drafter's replacement for the built-in `open`.
+
+Importing this module installs the `open` function defined here over
+`builtins.open`. The replacement adapts file access to the execution
+environment: in Pyodide, relative paths resolve inside the current
+instance's virtual folder and missing files are fetched over HTTP
+relative to the page URL; outside the web, `http://`/`https://` paths
+are downloaded into in-memory file objects and relative paths resolve
+against the configured user directory (see `get_drafter_path`).
+"""
+
 import pathlib
 import io
 import os
@@ -141,6 +152,21 @@ def open(file_path, mode="r", *args, **kwargs):
 def get_drafter_path(
     path: Union[str, pathlib.Path, os.PathLike],
 ) -> pathlib.Path:
+    """Resolve a path against Drafter's configured user directory.
+
+    Absolute paths are returned unchanged (as a `pathlib.Path`). Relative
+    paths are joined onto the user directory from the system
+    configuration's bootstrap settings; when no user directory is
+    configured (the setting is False), the current working directory is
+    used instead.
+
+    Args:
+        path: The path to resolve; a string, `pathlib.Path`, or
+            `os.PathLike`.
+
+    Returns:
+        pathlib.Path: The resolved path.
+    """
     system = get_system_configuration()
     user_directory = system.bootstrap.get_user_directory()
     actual_path = pathlib.Path(path)

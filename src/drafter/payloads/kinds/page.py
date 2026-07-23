@@ -1,3 +1,5 @@
+"""The `Page` payload: a full-page response targeting the document body."""
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -102,6 +104,12 @@ class Page(Fragment):
         return None
 
     def format_target(self) -> str:
+        """Format the target for history display, omitting the default.
+
+        Returns:
+            str: A `, target=...` snippet, or an empty string when the
+            target is the default body target.
+        """
         if self.target != DEFAULT_BODY_TARGET:
             return f", target={format_page_content(self.target)}"
         return ""

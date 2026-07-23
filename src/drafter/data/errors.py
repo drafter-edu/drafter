@@ -43,11 +43,17 @@ from drafter.data.correlation import Correlation
 # ---------------------------------------------------------------------------
 
 CATEGORY_SYSTEM = "system"
+"""Internal system failure."""
 CATEGORY_REQUEST = "request"
+"""Request handling failure (routing, argument parsing)."""
 CATEGORY_PAYLOAD = "payload"
+"""Payload rendering or handling failure."""
 CATEGORY_BRIDGE = "bridge"
+"""Python/JavaScript bridge failure."""
 CATEGORY_CONFIG = "config"
+"""Configuration failure."""
 CATEGORY_RUNTIME = "runtime"
+"""Runtime failure while executing user code."""
 
 CATEGORIES = (
     CATEGORY_SYSTEM,
@@ -57,11 +63,16 @@ CATEGORIES = (
     CATEGORY_CONFIG,
     CATEGORY_RUNTIME,
 )
+"""All valid error categories."""
 
 SEVERITY_INFO = "info"
+"""Informational event, not a failure."""
 SEVERITY_WARNING = "warning"
+"""Recoverable problem worth surfacing."""
 SEVERITY_ERROR = "error"
+"""Failure of the current operation."""
 SEVERITY_CRITICAL = "critical"
+"""Failure the application cannot recover from."""
 
 SEVERITIES = (
     SEVERITY_INFO,
@@ -69,19 +80,20 @@ SEVERITIES = (
     SEVERITY_ERROR,
     SEVERITY_CRITICAL,
 )
+"""All valid error severities."""
 
 # ---------------------------------------------------------------------------
 # Status codes
 # ---------------------------------------------------------------------------
 
-#: Successful response.
 STATUS_OK = "ok"
-#: The request itself was malformed (e.g. argument parsing failed).
+"""Successful response."""
 STATUS_BAD_REQUEST = "bad_request"
-#: No matching route was found.
+"""The request itself was malformed (e.g. argument parsing failed)."""
 STATUS_NOT_FOUND = "not_found"
-#: A server-side failure (route execution, payload, bridge, system, etc.).
+"""No matching route was found."""
 STATUS_ERROR = "error"
+"""A server-side failure (route execution, payload, bridge, system, etc.)."""
 
 STATUSES = (
     STATUS_OK,
@@ -89,6 +101,7 @@ STATUSES = (
     STATUS_NOT_FOUND,
     STATUS_ERROR,
 )
+"""All valid symbolic status codes."""
 
 
 # ---------------------------------------------------------------------------
@@ -133,6 +146,12 @@ class ErrorDetails(Exception):
             raise ValueError(f"Unknown status code: {self.status_code!r}")
 
     def to_json(self) -> Dict[str, Any]:
+        """Converts the ErrorDetails instance to a JSON-serializable dictionary.
+
+        Returns:
+            A dictionary representation of the envelope, with the correlation
+            context serialized via its own `to_json`.
+        """
         return {
             "id": self.id,
             "category": self.category,

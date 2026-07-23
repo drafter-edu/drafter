@@ -82,6 +82,9 @@ class MapView:
 
 
 CenterValue = Union[MapLocation, tuple, list, str, None]
+"""The accepted forms for a Map's `center`: a `MapLocation`, a
+`(latitude, longitude)` pair, a `"latitude,longitude"` string, or None
+for the default center (see `_normalize_center`)."""
 
 
 def _normalize_center(
@@ -179,6 +182,10 @@ def _make_add_marker(context: HelperContext):
 
 
 AddMarkerFunction = Callable[[str], None]
+"""The type of the `add_marker` helper injected into routes handling Map
+events: annotate a route parameter named `add_marker` with this, then
+call it with an optional label to pin the event's location on the live
+map (see `_make_add_marker`)."""
 
 
 @dataclass(repr=False)
@@ -371,6 +378,19 @@ class Map(Component):
         return normalized
 
     def get_attributes(self, context) -> dict:
+        """Extend the base attributes with DOM-ready center/marker strings.
+
+        Converts the `center` MapLocation to a `"lat,lng"` string and the
+        `markers` list to JSON (dropping either when None), and derives
+        the persistence key from the form field name alone so updating a
+        persistent map's markers does not evict the parked element.
+
+        Args:
+            context: The render context passed through to the base class.
+
+        Returns:
+            The attribute dictionary for the `<drafter-map>` element.
+        """
         attributes = super().get_attributes(context)
         # The dataclass values must reach the DOM as strings the custom
         # element can parse: "lat,lng" for center, JSON for markers.

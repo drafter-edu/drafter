@@ -13,6 +13,8 @@ from typing import Any
 import js
 
 ATTR_PAGE_SPECIFIC = "data-drafter-page-specific"
+"""Attribute marking injected elements (scripts, styles, links) as belonging
+to the current page only, so they are removed on the next navigation."""
 
 
 def get_document(node: Any) -> Any:
@@ -68,6 +70,20 @@ def replace_html(tag: Any, html_content: str, is_fragment: bool = False) -> None
 
 
 def get_attribute_recursively(element: Any, attribute_name: str) -> list[str]:
+    """Collect an attribute's values from an element and all its ancestors.
+
+    Walks up the parentElement chain starting at the element itself,
+    recording the attribute's value on every element that has it.
+
+    Args:
+        element: The DOM element to start from.
+        attribute_name: The attribute to look up on each element.
+
+    Returns:
+        The attribute values found, ordered innermost (the element itself)
+        to outermost ancestor. Empty if no element in the chain has the
+        attribute.
+    """
     current_element = element
     attributes = []
     while current_element:
@@ -283,6 +299,17 @@ def _swap_asset_href(current_href: str, from_path: str, to_path: str) -> str:
 
 
 def swap_debug_mode(root):
+    """Toggle the global Drafter stylesheet between debug and non-debug.
+
+    Finds the existing debug or non-debug <link> under the root (by its
+    Drafter tag class) and swaps it to the other variant, rewriting its href
+    in place (preserving any path prefix) and exchanging its class. Does
+    nothing if neither link is present.
+
+    Args:
+        root: Node to search for the stylesheet link (a document, shadow
+            root, or element supporting querySelector).
+    """
     debug_css = GLOBAL_DRAFTER_CSS_PATHS[True].url
     non_debug_css = GLOBAL_DRAFTER_CSS_PATHS[False].url
     existing_debug_link = root.querySelector(f"link.{DRAFTER_TAG_CLASSES['DEBUG_CSS']}")

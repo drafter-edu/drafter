@@ -1,3 +1,9 @@
+"""Output components for displaying computed results and progress.
+
+Defines `Output` (an output element associated with form fields) and
+`Progress` (an HTML5 progress bar).
+"""
+
 from dataclasses import dataclass
 from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.forms import FormComponent
@@ -108,6 +114,20 @@ class Progress(Component):
         self.extra_settings = kwargs
 
     def attributes(self, context) -> dict:
+        """Build HTML attributes with numerically formatted value and max.
+
+        Formats `value` (and `max`, when present) via `format_number` so
+        that whole numbers render without a trailing decimal point. Note
+        that this method is named `attributes` rather than
+        `get_attributes`, so the default rendering pipeline does not
+        invoke it; it must be called explicitly.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            Dictionary of HTML attributes with formatted value and max.
+        """
         attributes = super().get_attributes(context)
         attributes["value"] = format_number(self.value)
         if "max" in attributes:

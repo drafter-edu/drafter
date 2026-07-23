@@ -34,12 +34,30 @@ class ComponentContractRegistry:
         self._contracts: dict[str, ComponentContract] = {}
 
     def register(self, contract: ComponentContract) -> None:
+        """Add (or replace) a contract, keyed by its component name.
+
+        Args:
+            contract: The contract the component declares.
+        """
         self._contracts[contract.component_name] = contract
 
     def get(self, component_name: str) -> Optional[ComponentContract]:
+        """Look up a contract by component class name.
+
+        Args:
+            component_name: The Python class name (e.g., "Map").
+
+        Returns:
+            The registered contract, or None if the name is unknown.
+        """
         return self._contracts.get(component_name)
 
     def all(self) -> tuple[ComponentContract, ...]:
+        """Every registered contract, in registration order.
+
+        Returns:
+            Tuple of all `ComponentContract` entries.
+        """
         return tuple(self._contracts.values())
 
     def alias_map(self) -> dict[str, str]:
@@ -88,3 +106,6 @@ class ComponentContractRegistry:
 
 
 COMPONENT_CONTRACT_REGISTRY = ComponentContractRegistry()
+"""The shared registry instance: each component module registers its
+CONTRACT here at import time, and the router queries it for alias maps,
+synthetic fields, and event helpers."""

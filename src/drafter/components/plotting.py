@@ -1,3 +1,9 @@
+"""Plotting components for embedding charts in pages.
+
+Defines `MatPlotLibPlot`, which captures the current Matplotlib figure
+and embeds it in the page as an image or inline SVG.
+"""
+
 from dataclasses import dataclass
 import io
 import base64

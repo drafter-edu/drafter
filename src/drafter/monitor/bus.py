@@ -1,3 +1,15 @@
+"""
+The event bus used for telemetry across the system.
+
+Defines `Subscription` and `EventBus`. Publishers emit TelemetryRecords;
+subscribers register a topic string (with "*" matching every record), an
+optional filter, and a handler. A record is dispatched to a subscription
+when its topic relates to the record's kind (see `EventBus.process_event`
+for the exact comparison). While no subscribers exist, published records
+are queued (up to a maximum) for later delivery via
+`process_unprocessed_events`.
+"""
+
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 from drafter.data.telemetry import TelemetryRecord
@@ -91,6 +103,12 @@ class EventBus:
         return subscription
 
     def process_unprocessed_events(self):
+        """Deliver queued events to the current subscribers.
+
+        Runs every queued event through every subscription (subject to the
+        usual topic and filter checks). The queue is not cleared, so events
+        remain available for subscribers added later.
+        """
         for subscription in self.subscribers:
             for event in self.unprocessed_events:
                 self.process_event(event, subscription)

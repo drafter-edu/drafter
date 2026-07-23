@@ -1,3 +1,13 @@
+"""Form input components for collecting user data.
+
+Defines `FormComponent` (the shared base class for named form fields) and
+the concrete inputs students place on pages: `TextBox`, `TextArea`,
+`SelectBox`, `CheckBox`, `RelatedCheckBox`, `RadioButtonGroup`, `Label`,
+and the date/time inputs (`DateTimeInput`, `DateInput`, `TimeInput`).
+Each field's `name` becomes a parameter of the route that the enclosing
+page submits to.
+"""
+
 from dataclasses import dataclass
 from datetime import datetime, date, time
 from typing import List, Optional, Union, Any
@@ -150,6 +160,18 @@ class TextBox(FormComponent):
 
 @dataclass(repr=False)
 class TextArea(FormComponent):
+    """Multi-line text input field for longer user input.
+
+    Attributes:
+        default_value: The initial text shown in the text area.
+        tag: The HTML tag name, always 'textarea'.
+
+    Example:
+        ```python
+        TextArea("essay", "Type your essay here...")
+        ```
+    """
+
     tag = "textarea"
     default_value: str
 
@@ -188,6 +210,19 @@ class TextArea(FormComponent):
 
 @dataclass(repr=False)
 class SelectBox(FormComponent):
+    """Dropdown selection field for choosing one option from a list.
+
+    Attributes:
+        options: The list of option values to choose from.
+        default_value: The initially selected option, or an empty string.
+        tag: The HTML tag name, always 'select'.
+
+    Example:
+        ```python
+        SelectBox("flavor", ["vanilla", "chocolate", "strawberry"])
+        ```
+    """
+
     tag = "select"
     options: List[str]
     default_value: Optional[str]
@@ -226,6 +261,16 @@ class SelectBox(FormComponent):
         self.extra_settings = kwargs
 
     def get_children(self, context) -> list[PageContent | RenderPlan]:
+        """Build an `option` RenderPlan for each entry in `options`.
+
+        The option matching `default_value` gets the `selected` attribute.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            List of RenderPlan objects, one per option.
+        """
         children = []
         for option in self.options:
             option_attrs: dict[str, Any] = {"value": option}
@@ -287,6 +332,18 @@ class CheckBox(FormComponent):
         self.extra_settings = kwargs
 
     def plan(self, context) -> RenderPlan:
+        """Plan the checkbox along with its hidden companion input.
+
+        Emits a hidden input with the same name (and an empty value) before
+        the checkbox itself, so that the unchecked state is still submitted
+        with the form.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            A fragment RenderPlan containing the hidden input and checkbox.
+        """
         # Hidden input for unchecked state
         hidden_plan = RenderPlan(
             kind="tag",
@@ -351,11 +408,33 @@ class RelatedCheckBox(FormComponent):
         self.extra_settings = kwargs
 
     def get_id(self) -> str:
+        """Get the identifier for this checkbox.
+
+        Returns:
+            The element ID or, by default, the checkbox's value (so that
+            related checkboxes sharing a name still have distinct ids).
+        """
         return self.extra_settings.get("id", self.value)
 
 
 @dataclass(repr=False)
 class RadioButtonGroup(FormComponent):
+    """A group of radio buttons for choosing exactly one option from a list.
+
+    Renders a `div` containing one radio `input` per option, all sharing
+    the same form field name so that a single value is submitted.
+
+    Attributes:
+        options: The list of radio button options.
+        default_value: The initially selected option, or an empty string.
+        tag: The HTML tag name, always 'div'.
+
+    Example:
+        ```python
+        RadioButtonGroup("size", ["small", "medium", "large"], default_value="medium")
+        ```
+    """
+
     options: List[str]
     default_value: str
 
@@ -395,6 +474,16 @@ class RadioButtonGroup(FormComponent):
         self.extra_settings = kwargs
 
     def get_children(self, context) -> list[PageContent | RenderPlan]:
+        """Build a radio `input` RenderPlan for each entry in `options`.
+
+        The option matching `default_value` gets the `checked` attribute.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            List of RenderPlan objects, one per option.
+        """
         children = []
         for option in self.options:
             option_attrs: dict[str, Any] = {"value": option}
@@ -413,6 +502,11 @@ class RadioButtonGroup(FormComponent):
         return children
 
     def get_id(self) -> str:
+        """Get the identifier for this radio button group.
+
+        Returns:
+            The element ID or, by default, the group's default value.
+        """
         return self.extra_settings.get("id", self.default_value)
 
 

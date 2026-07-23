@@ -30,6 +30,12 @@ class RequestEvent(TelemetryRecord):
     kind: str = "RequestEvent"
 
     def to_json(self) -> dict[str, Any]:
+        """
+        Converts the RequestEvent instance to a JSON-serializable dictionary.
+
+        Returns:
+            A dictionary representation of the event.
+        """
         return {
             **super().to_json(),
             "url": self.url,
@@ -41,6 +47,16 @@ class RequestEvent(TelemetryRecord):
 
     @classmethod
     def from_request(cls, request) -> "RequestEvent":
+        """
+        Builds a RequestEvent summarizing the given request.
+
+        Args:
+            request: The Request to summarize; its kwargs and event dicts
+                are captured as string representations.
+
+        Returns:
+            A new RequestEvent populated from the request.
+        """
         return cls(
             url=request.url,
             action=request.action,
@@ -70,6 +86,12 @@ class RequestParseEvent(TelemetryRecord):
     kind: str = "RequestParseEvent"
 
     def to_json(self) -> dict[str, Any]:
+        """
+        Converts the RequestParseEvent instance to a JSON-serializable dictionary.
+
+        Returns:
+            A dictionary representation of the event.
+        """
         return {
             **super().to_json(),
             "request_id": self.request_id,
@@ -108,6 +130,12 @@ class ResponseEvent(TelemetryRecord):
     kind: str = "ResponseEvent"
 
     def to_json(self) -> dict[str, Any]:
+        """
+        Converts the ResponseEvent instance to a JSON-serializable dictionary.
+
+        Returns:
+            A dictionary representation of the event.
+        """
         return {
             **super().to_json(),
             "status_code": self.status_code,
@@ -125,6 +153,18 @@ class ResponseEvent(TelemetryRecord):
     def from_response(
         cls, response, formatted_body: str, duration_ms: float
     ) -> "ResponseEvent":
+        """
+        Builds a ResponseEvent summarizing the given response.
+
+        Args:
+            response: The Response to summarize.
+            formatted_body: The rendered HTML page content; the raw
+                response body is used instead when this is empty.
+            duration_ms: Time taken to process the request in milliseconds.
+
+        Returns:
+            A new ResponseEvent populated from the response.
+        """
         return cls(
             status_code=response.status_code,
             payload_type=type(response.payload).__name__,

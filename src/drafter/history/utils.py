@@ -13,6 +13,7 @@ from drafter.helpers.utils import is_pyodide, is_skulpt
 
 
 TOO_LONG_VALUE_THRESHOLD = 256
+"""String length above which values are wrapped in an expandable span."""
 
 
 def make_value_expandable(value):
@@ -57,6 +58,20 @@ def is_generator(iterable):
 
 
 def image_to_bytes(value):
+    """Serialize a PIL Image to PNG bytes.
+
+    Only supported in the Skulpt and Pyodide browser environments (both
+    currently use the same in-memory save path).
+
+    Args:
+        value: A PIL Image object to serialize.
+
+    Returns:
+        The PNG-encoded bytes of the image.
+
+    Raises:
+        RuntimeError: If running outside a supported environment.
+    """
     if is_skulpt():
         with io.BytesIO() as output:
             value.save(output, format="PNG")

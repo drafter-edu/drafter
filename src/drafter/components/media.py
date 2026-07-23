@@ -1,11 +1,17 @@
+"""Media components for embedding audio, video, and graphics.
+
+Defines `Audio` and `Video` (HTML5 media elements with deferred autoplay
+and optional persistence across page transitions), plus `Canvas` and
+`SVG` for drawing graphics.
+"""
+
 from dataclasses import dataclass
 from typing import Optional
 from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.planning.render_plan import RenderPlan
 
-#: Custom element (js/src/components/media.tsx) that defers autoplay until
-#: the drafter-page-loaded event fires.
 AUTOPLAY_WRAPPER_TAG = "drafter-media"
+"""Custom element (js/src/components/media.tsx) that defers autoplay until the drafter-page-loaded event fires."""
 
 
 def _plan_with_deferred_autoplay(component: Component, context) -> RenderPlan:
@@ -106,6 +112,15 @@ class Audio(Component):
         self.extra_settings = kwargs
 
     def plan(self, context) -> RenderPlan:
+        """Plan the audio element, deferring any autoplay.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            The audio tag RenderPlan, wrapped in a `drafter-media` element
+            when autoplay is requested.
+        """
         return _plan_with_deferred_autoplay(self, context)
 
 
@@ -190,6 +205,15 @@ class Video(Component):
         self.extra_settings = kwargs
 
     def plan(self, context) -> RenderPlan:
+        """Plan the video element, deferring any autoplay.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            The video tag RenderPlan, wrapped in a `drafter-media` element
+            when autoplay is requested.
+        """
         return _plan_with_deferred_autoplay(self, context)
 
 
@@ -284,6 +308,15 @@ class SVG(Component):
         self.extra_settings = kwargs
 
     def get_children(self, context) -> list:
+        """Get the SVG's child content.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            A single raw RenderPlan when the content is a string;
+            otherwise the content unchanged.
+        """
         if isinstance(self.content, str):
             return [RenderPlan(kind="raw", raw_html=self.content)]
         return self.content

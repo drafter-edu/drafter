@@ -73,6 +73,16 @@ def first_shared_base(cls1, cls2):
 
 
 class TypeFlattener:
+    """Collects the element types seen in a collection and flattens them
+    into a single classification.
+
+    Used while describing lists, sets, and dicts to decide whether a
+    collection is homogenous (one element type), a union of types, or empty.
+
+    Attributes:
+        _types: The set of type-name strings recorded so far.
+    """
+
     # TODO: Need to handle shared common ancestors, collection types
     # Should also be checking the actual types of things, not just the
     # string representation
@@ -80,12 +90,28 @@ class TypeFlattener:
         self._types: set[str] = set()
 
     def add_type(self, representation: dict):
+        """
+        Records the type of one described element.
+
+        Args:
+            representation: A representation dict for the element; its
+                `fullType` (or, failing that, `type`) field is recorded.
+        """
         full_type = representation.get(
             "fullType", representation.get("type", "unknown")
         )
         self._types.add(full_type)
 
     def flatten(self) -> tuple[str, list[str]]:
+        """
+        Flattens the recorded types into a single classification.
+
+        Returns:
+            A tuple of a kind and a list of type names: ("homogenous",
+            [the single type]) when exactly one type was recorded,
+            ("union", sorted types) when several were, or ("none", [])
+            when no elements were recorded.
+        """
         if len(self._types) == 1:
             return "homogenous", [self._types.pop()]
         elif len(self._types) > 1:
@@ -136,6 +162,16 @@ class RecursiveTypeDescriber:
 
     @staticmethod
     def value_type(value: Any) -> str:
+        """
+        Best-effort class name of a value.
+
+        Args:
+            value: The value whose class name to look up.
+
+        Returns:
+            The value's class name, falling back to `type(value)` when the
+            value's own attribute access fails.
+        """
         try:
             return value.__class__.__name__
         except Exception:

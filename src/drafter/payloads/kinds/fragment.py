@@ -1,3 +1,11 @@
+"""The `Fragment` payload: partial-page content injected into a target element.
+
+`Fragment` is the workhorse payload — `Page` builds on it. It carries a
+state value, a list of content chunks (strings and components), an
+optional injection `Target`, and optional CSS/JS to apply alongside the
+rendered content.
+"""
+
 from dataclasses import dataclass
 from textwrap import indent
 from typing import Any, List, Optional, Union
@@ -67,6 +75,11 @@ class Fragment(ResponsePayload):
                     )
 
     def get_state_updates(self) -> tuple[bool, Any]:
+        """Report the fragment's state as an update.
+
+        Returns:
+            Tuple of (True, the fragment's state).
+        """
         return True, self.state
 
     def render(
@@ -101,6 +114,11 @@ class Fragment(ResponsePayload):
         return content.flatten()
 
     def format_target(self) -> str:
+        """Format the fragment's target for history display.
+
+        Returns:
+            str: A `, target=...` snippet for the formatted payload.
+        """
         return f", target={format_page_content(self.target)}"
 
     def format(
@@ -148,6 +166,18 @@ class Fragment(ResponsePayload):
         state: SiteState,
         configuration: ClientServerConfiguration,
     ) -> list[Message]:
+        """Build client messages carrying this fragment's CSS and JS.
+
+        CSS entries become `style` messages on the `before` channel; JS
+        entries become `script` messages on the `after` channel.
+
+        Args:
+            state: Current application state (unused).
+            configuration: Server configuration (unused).
+
+        Returns:
+            list[Message]: The style and script messages, possibly empty.
+        """
         # Add CSS as style messages in the "before" channel
         messages = []
         if self.css:

@@ -45,24 +45,115 @@ class RuntimeAdapter:
     def create_debug_panel(
         self, debug_id: str, client_bridge: Any, scope: Any = None
     ) -> Any:
+        """Instantiate the JS DebugPanel class for this instance.
+
+        Abstracts constructor invocation across runtimes. The base
+        implementation calls the constructor directly, resolving the class
+        from the instance's window with a global fallback.
+
+        Args:
+            debug_id: DOM id of the debug panel container element.
+
+            client_bridge: The client bridge object handed to the panel.
+
+            scope: Node the panel should scope its lookups to, or None.
+
+        Returns:
+            The constructed DebugPanel JS object.
+        """
         return self._window_class("DebugPanel")(debug_id, client_bridge, scope)
 
     def create_url(self, href: str) -> Any:
+        """Construct a JS URL object from an href string.
+
+        Abstracts constructor invocation across runtimes; the base
+        implementation calls js.URL directly.
+
+        Args:
+            href: The URL string to parse.
+
+        Returns:
+            The constructed JS URL object.
+        """
         return js.URL(href)
 
     def create_form_data(self, form: Any, submitter: Any = None) -> Any:
+        """Construct a JS FormData snapshot of a form.
+
+        Abstracts constructor invocation across runtimes; the base
+        implementation calls js.FormData directly.
+
+        Args:
+            form: The form element to snapshot.
+
+            submitter: The element that submitted the form (so its
+                name/value is included), or None.
+
+        Returns:
+            The constructed JS FormData object.
+        """
         return js.FormData(form, submitter)
 
     def convert_to_js(self, obj: Any) -> Any:
+        """Convert a Python object to its JS representation.
+
+        Abstracts Python-to-JS value conversion for data handed to JS
+        APIs. The base implementation is a passthrough that returns the
+        object unchanged.
+
+        Args:
+            obj: The Python object to convert.
+
+        Returns:
+            The object in a form JS callers can consume.
+        """
         return obj
 
     def wrap_event_handler(self, handler: Callable) -> Any:
+        """Prepare a Python callable for use as a JS event listener.
+
+        Abstracts proxy creation for callbacks handed to addEventListener
+        and similar APIs. The base implementation is a passthrough that
+        returns the handler unchanged.
+
+        Args:
+            handler: The Python callable to wrap.
+
+        Returns:
+            The listener object to register with JS (here, the handler
+            itself).
+        """
         return handler
 
     def cleanup_event_handler(self, handler: Any) -> None:
+        """Release runtime resources held by a wrapped event handler.
+
+        Abstracts proxy destruction after a listener produced by
+        wrap_event_handler is removed. The base implementation is a no-op.
+
+        Args:
+            handler: The wrapped handler previously returned by
+                wrap_event_handler.
+        """
         pass
 
     def finish_promises(self, promises: list[Any], afterwards: Callable) -> Any:
+        """Run a callback once every pending promise has resolved.
+
+        Abstracts Promise.all-style chaining across runtimes. The base
+        implementation assumes the entries are already-resolved values and
+        invokes the callback synchronously with the list itself.
+
+        Args:
+            promises: The pending promises (or resolved values) to wait
+                on.
+
+            afterwards: Callback invoked with the list of resolved values.
+
+        Returns:
+            The callback's result (or, in async runtimes, a promise for
+            it).
+        """
         return afterwards(promises)
         # return js.Promise.all(promises).then(afterwards)
 
@@ -75,9 +166,44 @@ class RuntimeAdapter:
         return data
 
     def thenable(self, promise: Any, afterwards: Callable) -> Any:
+        """Chain a callback onto a single promise.
+
+        Abstracts .then() chaining across runtimes. The base
+        implementation assumes the value is already resolved and invokes
+        the callback synchronously with it.
+
+        Args:
+            promise: The promise (or resolved value) to chain onto.
+
+            afterwards: Callback invoked with the resolved value.
+
+        Returns:
+            The callback's result (or, in async runtimes, the chained
+            promise).
+        """
         return afterwards(promise)
 
     def handle_file_upload(self, file: Any, data: dict, key: str):
+        """Read an uploaded JS File and record its contents under a key.
+
+        Abstracts the asynchronous file read across runtimes. Builds a
+        file-data dict (filename, content bytes, type, size, and a
+        ``__file_upload__`` marker) and stores it at data[key], appending
+        to a list when the key already holds a value. The base
+        implementation reads the buffer synchronously and returns a
+        zero-argument callable that yields the updated mapping.
+
+        Args:
+            file: The JS File object to read.
+
+            data: Mapping the file-data dict is written into.
+
+            key: Form field name to store the file data under.
+
+        Returns:
+            A completion handle for the read — here a callable returning
+            the mapping; async runtimes return a promise instead.
+        """
         buffer = file.arrayBuffer()
         raw_bytes = js.Uint8Array(buffer)
         content = bytes(raw_bytes)
@@ -101,15 +227,60 @@ class RuntimeAdapter:
         return return_data
 
     def history_push_state(self, state: dict, title: str, url: str) -> None:
+        """Push an entry onto the instance window's history.
+
+        Abstracts the state-dict conversion needed before handing it to
+        the History API. The base implementation passes the dict through
+        unconverted.
+
+        Args:
+            state: State object to associate with the history entry.
+
+            title: Title argument for pushState (ignored by browsers).
+
+            url: URL of the new history entry.
+        """
         self.context.window.history.pushState(state, title, url)
 
     def history_replace_state(self, state: dict, title: str, url: str) -> None:
+        """Replace the instance window's current history entry.
+
+        Abstracts the state-dict conversion needed before handing it to
+        the History API. The base implementation passes the dict through
+        unconverted.
+
+        Args:
+            state: State object to associate with the history entry.
+
+            title: Title argument for replaceState (ignored by browsers).
+
+            url: URL that replaces the current history entry.
+        """
         self.context.window.history.replaceState(state, title, url)
 
     def create_custom_event(self, name: str, detail: dict) -> Any:
+        """Construct a JS CustomEvent carrying a detail payload.
+
+        Abstracts constructor invocation and detail conversion across
+        runtimes; the base implementation calls js.CustomEvent directly
+        with the Python dict.
+
+        Args:
+            name: The event type name.
+
+            detail: Payload placed on the event's detail property.
+
+        Returns:
+            The constructed JS CustomEvent object.
+        """
         return js.CustomEvent(name, {"detail": detail})
 
     def dispatch_window_event(self, event: Any) -> None:
+        """Dispatch an event on the instance's window.
+
+        Args:
+            event: The JS event object to dispatch.
+        """
         self.context.window.dispatchEvent(event)
 
 
@@ -134,23 +305,40 @@ class PyodideRuntime(RuntimeAdapter):
     def create_debug_panel(
         self, debug_id: str, client_bridge: Any, scope: Any = None
     ) -> Any:
+        """Pyodide-specific: constructs the DebugPanel via .new()."""
         return self._window_class("DebugPanel").new(debug_id, client_bridge, scope)
 
     def create_url(self, href: str) -> Any:
+        """Pyodide-specific: constructs the URL via js.URL.new()."""
         return js.URL.new(href)
 
     def create_form_data(self, form: Any, submitter: Any = None) -> Any:
+        """Pyodide-specific: constructs the FormData via js.FormData.new()."""
         return js.FormData.new(form, submitter)
 
     def convert_to_js(self, obj: Any) -> Any:
+        """Pyodide-specific: converts via pyodide.ffi.to_js.
+
+        Uses create_pyproxies=False so nested Python objects are converted
+        to plain JS values rather than PyProxies that would need explicit
+        destruction.
+        """
         return self._to_js(obj, create_pyproxies=False)
 
     def wrap_event_handler(self, handler: Callable) -> Any:
+        """Pyodide-specific: wraps the handler in a persistent PyProxy.
+
+        The proxy (from pyodide.ffi.create_proxy) is retained in
+        self._proxies to prevent garbage collection while the listener is
+        registered and to enable cleanup_event_handler to release it.
+        """
         proxy = self._create_proxy(handler)
         self._proxies.append(proxy)
         return proxy
 
     def cleanup_event_handler(self, handler: Any) -> None:
+        """Pyodide-specific: destroys the PyProxy and drops the retained
+        reference from self._proxies."""
         if handler is not None and hasattr(handler, "destroy"):
             handler.destroy()
         if handler in self._proxies:
@@ -169,6 +357,13 @@ class PyodideRuntime(RuntimeAdapter):
         raise RuntimeError(envelope.message) from normalized_error
 
     def finish_promises(self, promises: list[Any], afterwards: Callable) -> Any:
+        """Pyodide-specific: chains the callback on a real js.Promise.all.
+
+        The promises are copied into a JS Array (not passed as a PyProxy
+        list), failures are routed through _handle_promise_failure, and
+        the resulting chain is returned as a persistent proxy so it can be
+        handed back to JS safely.
+        """
         # Promise.all must receive a real JS array. Passing the Python list
         # directly makes JS iterate a PyProxy, yielding *borrowed* proxies
         # that are destroyed once iteration finishes -- but Promise.all calls
@@ -195,9 +390,20 @@ class PyodideRuntime(RuntimeAdapter):
         return self._create_proxy(js.Promise.resolve(data))
 
     def thenable(self, promise: Any, afterwards: Callable) -> Any:
+        """Pyodide-specific: chains via promise.then(), returning the
+        chained promise as a persistent proxy so JS can consume it after
+        the call returns."""
         return self._create_proxy(promise.then(afterwards))
 
     def handle_file_upload(self, file: Any, data: dict, key: str) -> Any:
+        """Pyodide-specific: reads the file asynchronously via its
+        arrayBuffer() promise.
+
+        Metadata (name, type, size) is read eagerly because the File may
+        be a borrowed proxy destroyed after the call; the buffer promise
+        is chained to build the file-data dict, and the chain is returned
+        as a persistent proxy for use with thenable/finish_promises.
+        """
         # Read metadata eagerly: `file` may be a borrowed proxy (e.g. yielded
         # by a FormData iterator) that is destroyed once iteration finishes,
         # so it must not be touched inside the async callback below.
@@ -227,12 +433,20 @@ class PyodideRuntime(RuntimeAdapter):
         return self._create_proxy(buffer.then(on_buffer_ready))
 
     def history_push_state(self, state: dict, title: str, url: str) -> None:
+        """Pyodide-specific: converts the state dict with to_js before
+        calling pushState, since the History API cannot store PyProxies."""
         self.context.window.history.pushState(self._to_js(state), title, url)
 
     def history_replace_state(self, state: dict, title: str, url: str) -> None:
+        """Pyodide-specific: converts the state dict with to_js before
+        calling replaceState, since the History API cannot store
+        PyProxies."""
         self.context.window.history.replaceState(self._to_js(state), title, url)
 
     def create_custom_event(self, name: str, detail: dict) -> Any:
+        """Pyodide-specific: constructs the event via js.CustomEvent.new(),
+        converting the options dict with to_js (create_pyproxies=False) so
+        the detail payload is plain JS data."""
         return js.CustomEvent.new(
             name,
             self._to_js({"detail": detail}, create_pyproxies=False),

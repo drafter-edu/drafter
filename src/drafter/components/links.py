@@ -1,3 +1,11 @@
+"""Navigation components for moving between pages.
+
+Defines `Link` and `Button` (both built on `LinkContent`), which navigate
+to another route or an external URL when clicked, and `Argument`, a hidden
+input for passing extra values to the target route. `SubmitButton` is an
+alias for `Button`.
+"""
+
 import json
 from typing import List, Optional
 from dataclasses import dataclass
@@ -140,6 +148,21 @@ class LinkContent(Component):
         return attributes
 
     def verify(self, router, state, configuration, request):
+        """Verify that the URL points to a real page or a valid external URL.
+
+        Args:
+            router: The route router instance.
+            state: The current page state.
+            configuration: The site configuration.
+            request: The current request object.
+
+        Returns:
+            None if the URL is a known route or a valid external URL.
+
+        Raises:
+            ValueError: If the URL is neither a known route nor a valid
+                external URL.
+        """
         if not router.has_route(self.url):
             invalid_external_url_reason = check_invalid_external_url(self.url)
             if invalid_external_url_reason == "is a valid external url":
@@ -156,6 +179,27 @@ class LinkContent(Component):
 
 @dataclass(repr=False)
 class Link(LinkContent):
+    """Renders a clickable link that navigates to another page.
+
+    The target can be a route function (the usual case), the name of a
+    route, or an external URL (auto-detected from the text of the URL).
+    Extra values can be passed to the target route via the `arguments`
+    keyword, given as a single `Argument`, a list of `Argument` objects,
+    a list of (name, value) pairs, or a dict of name to value.
+
+    Attributes:
+        text: The display text for the link.
+        url: The target URL or route name (functions are converted to
+            their names).
+        external: Whether the URL is external to the site.
+        tag: The HTML tag name, always 'a'.
+
+    Example:
+        ```python
+        Link("About", about_page)
+        ```
+    """
+
     text: str
     url: str
     external: bool = False
@@ -188,6 +232,14 @@ class Link(LinkContent):
             self.extra_settings["arguments"] = arguments
 
     def get_attributes(self, context) -> dict:
+        """Get HTML attributes for the link.
+
+        Args:
+            context: The active Renderer, providing rendering state and configuration.
+
+        Returns:
+            Dictionary including the submit button name and data-submit-button value.
+        """
         # TODO: Handle external links correctly
         # TODO: Handle the configuration setting that blocks external links
         attributes = super().get_attributes(context)
@@ -265,3 +317,4 @@ class Button(LinkContent):
 
 
 SubmitButton = Button
+"""Alias for `Button`."""

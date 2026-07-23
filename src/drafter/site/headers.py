@@ -1,3 +1,10 @@
+"""
+Header asset descriptions for the initial site page.
+
+Currently defines `CSSLink`, a stylesheet reference (URL plus CSS classes)
+that can be precompiled into an HTML <link> element.
+"""
+
 from dataclasses import dataclass, field
 
 

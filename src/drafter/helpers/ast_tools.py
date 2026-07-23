@@ -1,3 +1,5 @@
+"""AST utilities for locating the full line extent of code around a line."""
+
 import ast
 
 

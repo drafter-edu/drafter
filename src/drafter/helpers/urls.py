@@ -1,3 +1,5 @@
+"""URL manipulation and validation helpers."""
+
 import re
 from urllib.parse import urlencode, urlparse, parse_qs
 
@@ -61,6 +63,7 @@ def friendly_urls(url: str) -> str:
 URL_REGEX = (
     r"^(?:http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[-\w\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$"
 )
+"""Regular expression matching absolute http/https URLs with a hostname."""
 
 
 def is_valid_url(url: str) -> bool:

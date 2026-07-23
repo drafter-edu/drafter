@@ -1,3 +1,13 @@
+"""Visual themes for Drafter sites.
+
+Defines the `Theme` and `ThemeSystem` dataclasses and initializes the
+shared `theme_system` instance with the built-in themes ("default",
+"none", "mvp", and "sakura"). Each theme names the CSS (and optionally
+JavaScript) assets that style a site; `set_website_style` selects one by
+name, and unknown names get a "did you mean" suggestion via
+`ThemeSystem.suggest_mistake`.
+"""
+
 from typing import Optional
 from dataclasses import dataclass, field
 from difflib import get_close_matches
@@ -85,6 +95,9 @@ class ThemeSystem:
 
 # Initialize the theme system with default themes
 theme_system = ThemeSystem()
+"""The shared ThemeSystem instance, preloaded below with the built-in
+themes ("default", "none", "mvp", and "sakura"). Access it through
+`get_theme_system` rather than importing it directly."""
 theme_system.register_theme(
     Theme(
         name="default",

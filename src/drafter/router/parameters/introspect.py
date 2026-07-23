@@ -40,6 +40,11 @@ class RouteParamSpec:
 
     @property
     def required(self) -> bool:
+        """Whether the request must supply this parameter.
+
+        Injected and variadic parameters are never required; otherwise a
+        parameter is required exactly when it has no default value.
+        """
         if self.injected:
             return False
         if self.is_variadic:
@@ -48,6 +53,7 @@ class RouteParamSpec:
 
     @property
     def is_variadic(self) -> bool:
+        """Whether this parameter is ``*args`` or ``**kwargs``."""
         return self.kind in (
             inspect.Parameter.VAR_POSITIONAL,
             inspect.Parameter.VAR_KEYWORD,
@@ -55,6 +61,7 @@ class RouteParamSpec:
 
     @property
     def has_annotation(self) -> bool:
+        """Whether this parameter declares a type annotation."""
         return self.annotation is not inspect.Parameter.empty
 
     @property
@@ -67,6 +74,12 @@ class RouteParamSpec:
         )
 
     def describe_annotation(self) -> Optional[str]:
+        """Render the annotation as a short display name.
+
+        Returns:
+            The annotation's ``__name__`` (falling back to ``str()``), or
+            None if the parameter has no annotation.
+        """
         if not self.has_annotation:
             return None
         if hasattr(self.annotation, "__name__"):
@@ -97,9 +110,19 @@ class RouteSignatureSpec:
 
     @property
     def parameter_names(self) -> list[str]:
+        """Names of all parameters, in declaration order."""
         return [param.name for param in self.params]
 
     def get(self, name: str) -> Optional[RouteParamSpec]:
+        """Look up a parameter spec by name.
+
+        Args:
+            name: Parameter name to find.
+
+        Returns:
+            The matching RouteParamSpec, or None if no parameter has
+            that name.
+        """
         for param in self.params:
             if param.name == name:
                 return param
@@ -121,8 +144,9 @@ class RouteSignatureSpec:
         return f"{self.function_name}({', '.join(parts)})"
 
 
-#: Parameters with these names are supplied by the framework, not the request.
 INJECTED_PARAMETER_PREFIX = "_"
+"""Parameters whose names start with this prefix are marked as injected:
+supplied by the framework rather than required from the request payload."""
 
 
 def get_signature(func) -> RouteSignatureSpec:

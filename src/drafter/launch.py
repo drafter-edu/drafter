@@ -12,6 +12,7 @@ from drafter.client_server.commands import get_main_server
 
 
 MaybeBoolStr = Optional[Union[bool, str]]
+"""Type alias for parameters that accept a bool, a string, or None."""
 
 
 def start_server(

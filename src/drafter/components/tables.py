@@ -1,3 +1,9 @@
+"""Table components for displaying rows of data.
+
+Defines `Table`, which renders an HTML table from lists of rows (or
+dataclass instances) with an optional header.
+"""
+
 from dataclasses import dataclass, fields, is_dataclass
 from typing import Optional
 from drafter.components.page_content import (

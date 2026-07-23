@@ -1,3 +1,5 @@
+"""The `Redirect` payload for navigating the client to another route."""
+
 from typing import Any, Optional
 from dataclasses import dataclass
 from drafter.payloads.payloads import ResponsePayload
@@ -32,10 +34,26 @@ class Redirect(ResponsePayload):
         self.arguments = kwargs if kwargs else None
 
     def is_redirect(self) -> bool:
+        """Identify this payload as a redirect.
+
+        Returns:
+            bool: Always True.
+        """
         return True
 
     def get_state_updates(self) -> tuple[bool, Any]:
+        """Report the optional state update carried by the redirect.
+
+        Returns:
+            Tuple of (has_update, new_state); has_update is True only when
+            a state_update was provided.
+        """
         return self.state_update is not None, self.state_update
 
     def get_redirect(self) -> tuple[str, Optional[dict]]:
+        """Retrieve the redirect destination.
+
+        Returns:
+            Tuple of (target_route, arguments dict or None).
+        """
         return self.target_route, self.arguments

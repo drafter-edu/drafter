@@ -34,6 +34,8 @@ from drafter.data.converter import ConversionContext, ConversionResult
 LocationStatus = Literal[
     "unavailable", "prompt", "granted", "denied", "pending", "error"
 ]
+"""The permission/availability states a `Location`'s `status` field can
+report, mirroring the browser geolocation permission workflow."""
 
 
 @dataclass

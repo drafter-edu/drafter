@@ -1,8 +1,16 @@
+"""
+Student-facing commands for registering routes.
+
+Provides the `route` decorator and the `add_route` function, both of which
+register a handler function with a server (the main server by default).
+"""
+
 from typing import Union, Callable, Optional, TypeVar, overload, cast
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import get_main_server
 
 T = TypeVar("T", bound=Callable[..., object])
+"""Type variable for a decorated route handler, preserving its exact type."""
 
 
 @overload

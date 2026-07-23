@@ -1,3 +1,12 @@
+"""
+Rendering of the outer site HTML frame.
+
+Defines the `Site` class, which holds the active configuration and renders
+the fixed page structure (header, body, footer, debug panel) plus its CSS
+and JS asset references into an `InitialSiteData`, along with the HTML
+templates and the well-known Drafter element ids and classes.
+"""
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -12,8 +21,12 @@ GLOBAL_DRAFTER_CSS_PATHS = {
     True: CSSLink(url="css/drafter_debug.css", classes={"drafter-debug-css--"}),
     False: CSSLink(url="css/drafter_deploy.css", classes={"drafter-non-debug-css--"}),
 }
+"""Global Drafter stylesheet per debug mode: True maps to the debug CSS,
+False to the deploy CSS."""
 
 BUILT_IN_ADDITIONAL_CSS_PATHS = [CSSLink(url="css/diff2html.min.css")]
+"""Stylesheets always included in addition to the global Drafter CSS."""
+
 DRAFTER_TAG_IDS = {
     "ROOT": "drafter-root--",
     "SHADOW_HOST": "drafter-shadow-host--",
@@ -29,6 +42,8 @@ DRAFTER_TAG_IDS = {
     "PADDING_V": "drafter-padding-v--",
     "PADDING_H": "drafter-padding-h--",
 }
+"""Well-known element ids of the site frame structure, keyed by role.
+The trailing double hyphen marks them as Drafter-internal."""
 
 DRAFTER_TAG_CLASSES = {
     "THEME": "drafter-theme--",
@@ -36,6 +51,8 @@ DRAFTER_TAG_CLASSES = {
     "NON_DEBUG_CSS": "drafter-non-debug-css--",
     "PRECOMPILE_HEADERS": "drafter-precompiled-headers--",
 }
+"""Well-known CSS class names used to tag Drafter-managed elements,
+keyed by role."""
 
 SITE_HTML_TEMPLATE = f"""
 <div id="{DRAFTER_TAG_IDS["SITE"]}" class="{DRAFTER_TAG_IDS["SITE"]}">
@@ -56,8 +73,14 @@ SITE_HTML_TEMPLATE = f"""
     <button id="{DRAFTER_TAG_IDS["SUBTLE_DEBUG_ENTRY"]}" class="{DRAFTER_TAG_IDS["SUBTLE_DEBUG_ENTRY"]}" type="button" title="Enter debug mode" aria-label="Enter debug mode" {{subtle_debug_attrs}}>debug</button>
 </div>
 """
+"""The site frame HTML: form, header/body/footer, padding, debug panel, and
+the subtle debug-entry button. Contains `{initial_body_content}` and
+`{subtle_debug_attrs}` placeholders filled in by `str.format` at render
+time."""
 
 SITE_HTML_SHADOW_DOM_TEMPLATE = f'<div id="{DRAFTER_TAG_IDS["SHADOW_HOST"]}"></div>'
+"""Host element the site frame is mounted inside when shadow DOM isolation
+is enabled."""
 
 
 @dataclass
@@ -147,6 +170,18 @@ class Site:
         ]
 
     def render_error_fallback(self, envelope) -> InitialSiteData:
+        """Render a minimal error page for failures during site setup.
+
+        Used when the normal render path cannot run; fills the site frame
+        with the error envelope's details, disables the subtle debug entry,
+        and attaches only the global debug CSS.
+
+        Args:
+            envelope: ErrorDetails describing the system error to display.
+
+        Returns:
+            InitialSiteData for the fallback error page, with error=True.
+        """
         site_html = SITE_HTML_TEMPLATE.format(
             initial_body_content=f"""
             <div>

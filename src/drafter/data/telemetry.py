@@ -111,6 +111,13 @@ class ErrorRecord(TelemetryRecord):
     error: Optional[ErrorDetails] = None
 
     def to_json(self) -> Dict[str, Any]:
+        """
+        Converts the ErrorRecord instance to a JSON-serializable dictionary.
+
+        Returns:
+            A dictionary representation of the ErrorRecord, with the error
+            envelope serialized (or None when no error is attached).
+        """
         return {
             **super().to_json(),
             "error": self.error.to_json() if self.error is not None else None,

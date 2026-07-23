@@ -83,6 +83,11 @@ BASELINE_ATTRS = [
     "value",
     "writingsuggestions",
 ]
+"""Global HTML attributes accepted on any component, including aria-*,
+inline event handler, and microdata attributes. In
+`parse_extra_settings`, a setting whose remapped name is not in this
+list, not in the component's own known attributes, and not a `data-*`
+attribute is treated as a CSS style instead."""
 
 BOOLEAN_ATTRS = [
     "disabled",
@@ -106,10 +111,16 @@ BOOLEAN_ATTRS = [
     "autocomplete",
     "inert",
 ]
+"""HTML boolean attributes. When one of these has a truthy value it is
+rendered bare (e.g. `disabled` rather than `disabled="True"`); when
+falsy it is omitted from the output entirely."""
 
 # All strings are case insensitive
 # Doubles as checking the valid values for certain attributes
 DEFAULT = object()
+"""Sentinel key marking an attribute's default value inside each
+`ATTRIBUTE_ENUMERATIONS` entry."""
+
 ATTRIBUTE_ENUMERATIONS = {
     "autocapitalize": {
         DEFAULT: "sentences",
@@ -141,6 +152,11 @@ ATTRIBUTE_ENUMERATIONS = {
         "false": "false",
     },
 }
+"""Attributes whose values are restricted to an enumeration. Each inner
+dict maps every accepted Python value (strings, booleans, None) to the
+canonical HTML value to render, with the `DEFAULT` sentinel recording
+the attribute's default. `parse_extra_settings` raises ValueError for a
+value not present in the attribute's mapping."""
 
 
 def remap_attr_styles(attributes: dict) -> tuple[dict, dict]:

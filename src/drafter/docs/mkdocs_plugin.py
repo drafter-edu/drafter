@@ -18,12 +18,14 @@ from mkdocs.config import config_options
 from mkdocs.plugins import BasePlugin
 
 LOGGER = logging.getLogger("mkdocs.plugins.drafter_codeblocks")
+"""Logger for the Drafter code block MkDocs plugin."""
 
 # Match fenced code blocks with optional language/info string.
 FENCE_RE = re.compile(
     r"```(?P<info>[^\n]*)\n(?P<code>.*?)\n```",
     flags=re.DOTALL,
 )
+"""Regular expression matching fenced code blocks with an optional info string."""
 
 
 class DrafterCodeBlockPlugin(BasePlugin):
@@ -64,6 +66,18 @@ class DrafterCodeBlockPlugin(BasePlugin):
         self._pages_with_demos: set[str] = set()
 
     def on_config(self, config):
+        """Prepare build state when the MkDocs configuration is loaded.
+
+        Resolves docs/site directories, creates the demo output directory
+        and a temporary build directory, clears per-build caches, and
+        determines the pyodide package style (honoring DRAFTER_MKDOCS_DEV).
+
+        Args:
+            config: The MkDocs configuration object.
+
+        Returns:
+            The (unmodified) MkDocs configuration object.
+        """
         self._docs_dir = Path(config["docs_dir"]).resolve()
         self._site_dir = Path(config["site_dir"]).resolve()
         self._site_output_dir = self._site_dir / self.config["output_subdir"]
@@ -75,6 +89,22 @@ class DrafterCodeBlockPlugin(BasePlugin):
         return config
 
     def on_page_markdown(self, markdown, /, *, page, config, files):
+        """Replace marked Drafter code fences with embedded demo iframes.
+
+        Each fenced block whose info string carries the configured marker is
+        compiled into a standalone demo site and replaced by an iframe
+        (optionally preceded by the original source block). Blocks that fail
+        to build are left intact with a warning note appended.
+
+        Args:
+            markdown: Raw markdown source of the page.
+            page: The MkDocs page being processed.
+            config: The MkDocs configuration object.
+            files: The MkDocs files collection.
+
+        Returns:
+            The transformed markdown for the page.
+        """
         block_counter = {"value": 0}
 
         def replace_block(match: re.Match[str]) -> str:
@@ -137,6 +167,11 @@ class DrafterCodeBlockPlugin(BasePlugin):
         return host_script + page_html
 
     def on_post_build(self, *, config):
+        """Clean up the temporary build directory after the site is built.
+
+        Args:
+            config: The MkDocs configuration object.
+        """
         if self._temp_root and self._temp_root.exists():
             shutil.rmtree(self._temp_root, ignore_errors=True)
 

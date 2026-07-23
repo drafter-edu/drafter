@@ -1,3 +1,11 @@
+"""
+Default error route, rendering a student-friendly error page.
+
+Presents a plain-language summary and fix suggestions, plus technical
+details including a traceback parsed into styled frames that highlight
+which lines come from the student's own code.
+"""
+
 import re
 from dataclasses import dataclass, field
 from typing import Optional

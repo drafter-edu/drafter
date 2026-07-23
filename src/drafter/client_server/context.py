@@ -1,3 +1,11 @@
+"""
+Scope tracking for in-flight requests and responses.
+
+Provides the `Scope` stack that the ClientServer uses to know which
+request (or response) is currently being processed, usable as a context
+manager so entries are popped automatically.
+"""
+
 from typing import Optional
 from dataclasses import dataclass, field
 from drafter.data.request import Request

@@ -1,3 +1,10 @@
+"""Compile Drafter applications into static sites.
+
+Handles rendering the main HTML page, packaging the Drafter source as a
+Pyodide-installable zip when requested, and copying assets and additional
+user-specified paths into the output directory.
+"""
+
 from glob import glob
 import os
 from typing import Optional
@@ -44,6 +51,21 @@ def build_zip(
 
 
 def iter_additional_paths(pattern: str, base_dir: Path):
+    """Resolve a glob pattern for additional paths to include in a build.
+
+    Relative patterns are resolved against the given base directory;
+    absolute patterns are used as-is. Recursive globs (`**`) are supported.
+    Prints a warning when the pattern matches nothing.
+
+    Args:
+        pattern: Glob pattern (absolute or relative) identifying files or
+            directories to include.
+        base_dir: Directory that relative patterns are resolved against,
+            typically the directory containing the user's main file.
+
+    Returns:
+        List of Path objects for every match; empty when nothing matched.
+    """
     path = Path(pattern)
 
     # Resolve relative globs relative to the app/user file directory

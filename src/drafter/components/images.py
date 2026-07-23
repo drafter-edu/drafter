@@ -1,3 +1,9 @@
+"""Image components for displaying pictures on pages.
+
+Defines `Image` (and its alias `Picture`), which renders an image element
+from an external URL, a local file path, or a PIL Image object.
+"""
+
 from dataclasses import dataclass
 import base64
 import io
@@ -8,6 +14,7 @@ from drafter.components.page_content import UrlOrFunction
 from drafter.helpers.urls import check_invalid_external_url, friendly_urls
 
 BASE_IMAGE_FOLDER = "/__images"
+"""URL prefix under which local (non-external) image paths are served."""
 
 
 @dataclass(repr=False)
@@ -169,3 +176,4 @@ class Image(Component):
 
 
 Picture = Image
+"""Alias for `Image`."""

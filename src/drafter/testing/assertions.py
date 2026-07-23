@@ -37,6 +37,16 @@ from numbers import Number
 
 @dataclass
 class ComparisonSettings:
+    """Flags controlling how `compare_equal` matches values.
+
+    Attributes:
+        precision: Number of decimal places used when comparing floats.
+        exact_strings: Whether strings must match exactly; when False,
+            strings are normalized (via Bakery) before comparison.
+        strict_styles: Whether style/class attributes of Drafter components
+            participate in comparisons; when False they are ignored.
+    """
+
     precision: int = 4
     exact_strings: bool = False
     strict_styles: bool = False
@@ -44,12 +54,31 @@ class ComparisonSettings:
 
 @dataclass
 class PathItem:
+    """One step in the path from a compared root value to a nested value.
+
+    Attributes:
+        kind: The kind of step (e.g., `index`, `key`, `set`, `item`,
+            `attributes`, `positional`, `keys`, `children`), used by
+            `render_path` to phrase the location.
+        name: The label for the step, such as the index, key, or component
+            name.
+    """
+
     kind: str
     name: str
 
 
 @dataclass
 class Difference:
+    """A single mismatch found while comparing two values.
+
+    Attributes:
+        path: The PathItems leading from the root values to the mismatch.
+        message: Human-readable description of the mismatch.
+        actual: The actual value at the mismatch site.
+        expected: The expected value at the mismatch site.
+    """
+
     path: list[PathItem]
     message: str
     actual: Any
@@ -57,6 +86,17 @@ class Difference:
 
 
 def ignore_styles(attributes: dict) -> dict:
+    """Filter style-related entries out of a component attribute mapping.
+
+    Removes the `style` key, any key starting with `style`, and the
+    `class`/`classes` keys, so that comparisons ignore presentation.
+
+    Args:
+        attributes: Attribute mapping from a component.
+
+    Returns:
+        dict: A new mapping without style- and class-related entries.
+    """
     return {
         key: value
         for key, value in attributes.items()
@@ -132,6 +172,17 @@ def compare_equal(
 def compare_unrelated_types(
     actual, expected, settings, path: list[PathItem]
 ) -> list[Difference]:
+    """Report a mismatch between values of unrelated types.
+
+    Args:
+        actual: The actual value.
+        expected: The expected value.
+        settings: The comparison settings (unused).
+        path: The path to the current element being compared.
+
+    Returns:
+        list[Difference]: A single Difference describing the type mismatch.
+    """
     return [
         Difference(
             path,
@@ -145,6 +196,18 @@ def compare_unrelated_types(
 def compare_anything(
     actual, expected, settings, path: list[PathItem]
 ) -> list[Difference]:
+    """Compare two values with plain equality as the fallback comparison.
+
+    Args:
+        actual: The actual value.
+        expected: The expected value.
+        settings: The comparison settings (unused).
+        path: The path to the current element being compared.
+
+    Returns:
+        list[Difference]: Empty if `actual == expected`, otherwise a single
+        Difference reporting the mismatch.
+    """
     if actual == expected:
         return []
     else:
@@ -161,6 +224,21 @@ def compare_anything(
 def compare_numbers(
     actual, expected, settings, path: list[PathItem]
 ) -> list[Difference]:
+    """Compare two same-type numbers for exact equality.
+
+    Used for non-float numbers (ints, bools, Decimals, etc.); floats go
+    through `compare_floats` instead.
+
+    Args:
+        actual: The actual number.
+        expected: The expected number.
+        settings: The comparison settings (unused).
+        path: The path to the current element being compared.
+
+    Returns:
+        list[Difference]: Empty if equal, otherwise a single Difference
+        reporting the mismatch.
+    """
     if actual == expected:
         return []
     else:
@@ -177,6 +255,21 @@ def compare_numbers(
 def compare_floats(
     actual, expected, settings, path: list[PathItem]
 ) -> list[Difference]:
+    """Compare two floats within a precision-based tolerance.
+
+    The values are considered equal when their absolute difference is
+    below `10 ** -settings.precision`.
+
+    Args:
+        actual: The actual float.
+        expected: The expected float.
+        settings: The comparison settings; `precision` sets the tolerance.
+        path: The path to the current element being compared.
+
+    Returns:
+        list[Difference]: Empty if within tolerance, otherwise a single
+        Difference reporting the mismatch.
+    """
     error = 10 ** (-settings.precision)
     if abs(actual - expected) < error:
         return []
@@ -194,6 +287,23 @@ def compare_floats(
 def compare_strings(
     actual, expected, settings, path: list[PathItem]
 ) -> list[Difference]:
+    """Compare two strings (or bytes values).
+
+    When `settings.exact_strings` is set, the values must be exactly
+    equal; otherwise both sides are normalized with Bakery's
+    `_normalize_string` before comparison.
+
+    Args:
+        actual: The actual string or bytes.
+        expected: The expected string or bytes.
+        settings: The comparison settings; `exact_strings` controls
+            normalization.
+        path: The path to the current element being compared.
+
+    Returns:
+        list[Difference]: Empty if the strings match, otherwise a single
+        Difference reporting the mismatch.
+    """
     if settings.exact_strings:
         if actual == expected:
             return []
@@ -221,6 +331,15 @@ def compare_strings(
 
 
 def write_different_lengths_message(actual_length: int, expected_length: int) -> str:
+    """Build the message reporting a sequence length mismatch.
+
+    Args:
+        actual_length: Length of the actual sequence.
+        expected_length: Length of the expected sequence.
+
+    Returns:
+        str: A "Too many items" or "Too few items" message.
+    """
     if actual_length > expected_length:
         return f"Too many items ({actual_length} > {expected_length})"
     else:
@@ -230,6 +349,22 @@ def write_different_lengths_message(actual_length: int, expected_length: int) ->
 def compare_sequences(
     actual, expected, settings, path: list[PathItem]
 ) -> list[Difference]:
+    """Compare two lists or tuples element by element.
+
+    Reports a length mismatch (if any), then compares elements pairwise up
+    to the shorter length, with each element recorded under an `index`
+    path step.
+
+    Args:
+        actual: The actual sequence.
+        expected: The expected sequence.
+        settings: The comparison settings.
+        path: The path to the current element being compared.
+
+    Returns:
+        list[Difference]: All differences found; empty if the sequences
+        match.
+    """
     differences = []
     if len(actual) != len(expected):
         differences.append(
@@ -248,6 +383,21 @@ def compare_sequences(
 
 
 def compare_sets(actual, expected, settings, path: list[PathItem]) -> list[Difference]:
+    """Compare two sets (or frozenset values) by mutual containment.
+
+    Every element of `actual` must compare equal to some element of
+    `expected`, and vice versa; each unmatched element produces an
+    "Item ... not found" Difference under a `set` path step.
+
+    Args:
+        actual: The actual set.
+        expected: The expected set.
+        settings: The comparison settings.
+        path: The path to the current element being compared.
+
+    Returns:
+        list[Difference]: All differences found; empty if the sets match.
+    """
     differences = []
     for a in actual:
         diff = compare_contains(a, expected, settings, path + [PathItem("set", str(a))])
@@ -263,6 +413,18 @@ def compare_sets(actual, expected, settings, path: list[PathItem]) -> list[Diffe
 def compare_contains(
     item, collection, settings, path: list[PathItem]
 ) -> list[Difference]:
+    """Check that an item compares equal to at least one collection element.
+
+    Args:
+        item: The value to look for.
+        collection: The iterable to search through.
+        settings: The comparison settings.
+        path: The path to the current element being compared.
+
+    Returns:
+        list[Difference]: Empty if some element matches, otherwise a single
+        "Item ... not found" Difference.
+    """
     for e in collection:
         diff = compare_equal(item, e, settings, path + [PathItem("item", str(e))])
         if not diff:
@@ -280,6 +442,22 @@ def compare_contains(
 def compare_mappings(
     actual, expected, settings, path: list[PathItem]
 ) -> list[Difference]:
+    """Compare two dictionaries by their keys, then their values.
+
+    First compares the key sets (returning only those differences if the
+    keys disagree); when the keys match, compares each pair of values
+    under a `key` path step.
+
+    Args:
+        actual: The actual mapping.
+        expected: The expected mapping.
+        settings: The comparison settings.
+        path: The path to the current element being compared.
+
+    Returns:
+        list[Difference]: The key differences, or all value differences;
+        empty if the mappings match.
+    """
     actual_keys = set(actual.keys())
     expected_keys = set(expected.keys())
     differences = compare_sets(
@@ -298,6 +476,19 @@ def compare_mappings(
 
 
 def render_path(path: list[PathItem]) -> str:
+    """Format a Difference path as a human-readable location phrase.
+
+    Walks the PathItems in order, merging `attributes` and `positional`
+    steps with the step that follows them, quoting `key`/`item`/`set`
+    names, prefixing `index` steps with the word "index", and joining the
+    resulting pieces with spaces.
+
+    Args:
+        path: The PathItems leading to the mismatch.
+
+    Returns:
+        str: The formatted location phrase.
+    """
     message = []
     remaining_parts = path[:]
     while remaining_parts:
@@ -333,6 +524,15 @@ def render_path(path: list[PathItem]) -> str:
 
 
 def render_difference(difference: Difference) -> str:
+    """Format a Difference as a human-readable message.
+
+    Args:
+        difference: The Difference to render.
+
+    Returns:
+        str: The difference's message, prefixed with "In <path>: " when
+        the difference has a non-empty path.
+    """
     if not difference.path:
         return difference.message
     path = render_path(difference.path)
@@ -426,6 +626,22 @@ def compare_drafter_types(
 def compare_positional(
     actual, expected, settings, path: list[PathItem]
 ) -> list[Difference]:
+    """Compare the positional-argument mappings of two components.
+
+    Reports missing and unexpected extra keys first (returning only those
+    differences if any exist); otherwise compares each shared value under
+    a `key` path step.
+
+    Args:
+        actual: Mapping of the actual component's positional arguments.
+        expected: Mapping of the expected component's positional arguments.
+        settings: The comparison settings.
+        path: The path to the current element being compared.
+
+    Returns:
+        list[Difference]: The key differences, or all value differences;
+        empty if the mappings match.
+    """
     differences = []
     actual_keys = set(actual.keys())
     expected_keys = set(expected.keys())

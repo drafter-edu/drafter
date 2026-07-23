@@ -106,6 +106,25 @@ async def list_user_files(req) -> Response:
 def make_app(
     system: SystemConfiguration, server: ClientServer, initial_state
 ) -> Starlette:
+    """Build the Starlette application for the development server.
+
+    Assembles routes for the index page, the live-reload websocket, static
+    assets, and (optionally) user file serving/listing; sets up file watch
+    paths; and optionally prerenders the initial page via the client server.
+    The configuration, paths, reload hub, and prerendered content are stored
+    on the application's state.
+
+    Args:
+        system: System configuration controlling paths, asset serving, and
+            prerendering behavior.
+        server: Client server used to precompile the initial page when
+            prerendering is enabled.
+        initial_state: Initial application state passed to the client server
+            for prerendering.
+
+    Returns:
+        Configured Starlette application ready to be served by uvicorn.
+    """
     # Determine paths
     user_directory = Path(system.bootstrap.get_user_directory()).resolve()
 
@@ -168,6 +187,27 @@ def serve_app_once(
     server: ClientServer,
     initial_state,
 ):
+    """Run the development server until it exits.
+
+    Validates that a main user file is configured, performs prerendering
+    configuration if enabled, builds the Starlette app via make_app, and
+    serves it with uvicorn alongside a background file watcher that triggers
+    live reloads. Optionally opens a web browser once the server has had a
+    moment to bind. Blocks until the server stops; a KeyboardInterrupt is
+    swallowed for a clean shutdown.
+
+    Args:
+        system: System configuration controlling server host/port, browser
+            opening, prerendering, and file paths.
+        server: Client server used for prerendering configuration and
+            initial page compilation.
+        initial_state: Initial application state passed along for
+            prerendering.
+
+    Returns:
+        None. Prints an error message and returns early if the main user
+        file path is missing or prerendering configuration fails.
+    """
     if system.bootstrap.path is None:
         print(
             "Error: Cannot start server because the path to the main user file is not specified."

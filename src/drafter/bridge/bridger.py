@@ -1,3 +1,12 @@
+"""
+Client-side entry point that wires a ClientServer to the browser via a ClientBridge.
+
+This is the top of the in-browser lifecycle: it drives the server through its
+configuration and initial-render phases, registers the server instance so
+multiple concurrent instances can coexist, constructs the ClientBridge, and
+connects the visit/toggle-frame/debug-mode callbacks before starting the site.
+"""
+
 from drafter.config.system import SystemConfiguration
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.bridge.client_bridge import ClientBridge
@@ -15,6 +24,30 @@ def run_client_bridge(
     server: ClientServer,
     initial_state,
 ):
+    """Wire a ClientServer to the browser DOM and start the site.
+
+    Runs the full client startup sequence: drives the server's configuration
+    phase (falling back to an error site if configuration produced error
+    data), renders the initial site, adopts any pending embedding context
+    (iframe window, instance key, instance filesystem root) from
+    configure_instance, registers the server under its instance key,
+    and builds a ClientBridge for the resulting DOM context. It then
+    subscribes the bridge to server telemetry events, defines the
+    visit/toggle-frame/debug-mode callbacks (each of which first marks this
+    server as the "current" instance so global lookups resolve correctly),
+    installs them as event handlers, starts the server with the initial
+    state, and issues the initial request.
+
+    Returns early, without wiring events or starting, if the initial render
+    reported an error.
+
+    Args:
+        system: The system-level configuration for this deployment
+            (currently unused here; accepted for signature stability).
+        server: The ClientServer instance to run and register.
+        initial_state: The initial application state passed to the server's
+            start phase.
+    """
     # Configuration Phase
     # TODO: We need to revisit this
     possible_error_data = server.do_configuration()

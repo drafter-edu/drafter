@@ -37,6 +37,12 @@ class TestCaseEvent(TelemetryRecord):
     kind: str = "TestCaseEvent"
 
     def to_json(self) -> dict[str, Any]:
+        """
+        Converts the TestCaseEvent instance to a JSON-serializable dictionary.
+
+        Returns:
+            A dictionary representation of the event.
+        """
         return {
             **super().to_json(),
             "line": self.line,

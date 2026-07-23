@@ -9,7 +9,14 @@ BASE_PARAMETER_ERROR = (
     """a valid identifier if it only contains alphanumeric letters (a-z) and (0-9), or """
     """underscores (_). A valid identifier cannot start with a number, or contain any spaces."""
 )
+"""Error message template for invalid component names, formatted with the
+`component_type` and prefixed to the specific reason by
+`validate_parameter_name`."""
+
 BASE_VALUE_ERROR = """The {component_type} value must be a JSON-serializable value (str, int, float, bool, None, list, or dict). """
+"""Error message template for non-JSON-serializable component values,
+formatted with the `component_type` and prefixed to the specific reason
+by `validate_json_value`."""
 
 
 def validate_parameter_name(name: str, component_type: str):

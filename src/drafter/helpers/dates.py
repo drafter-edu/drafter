@@ -1,3 +1,5 @@
+"""Conversion helpers for datetime, date, and time values."""
+
 from datetime import datetime, time, date
 from typing import Any
 

@@ -1,3 +1,12 @@
+"""Layout components for structuring and grouping page content.
+
+Defines block-level grouping elements (`Div`, `Span`, `Paragraph`, and
+semantic sections such as `Article`, `Nav`, `HeaderContent`), the flexbox
+`Row` helper, list components (`NumberedList`, `BulletedList`), and the
+`LineBreak` and `HorizontalRule` spacing elements. The aliases `Division`,
+`Box`, and `P` are also provided.
+"""
+
 from dataclasses import dataclass
 from typing import List, Sequence
 from drafter.components.page_content import Component, ComponentArgument, PageContent
@@ -211,12 +220,32 @@ class FooterContent(BlockComponent):
 
 
 Division = Div
+"""Alias for `Div`."""
+
 Box = Div
+"""Alias for `Div`."""
 
 P = Paragraph
+"""Alias for `Paragraph`."""
 
 
 class Row(BlockComponent):
+    """A `Div` that lays out its content horizontally using flexbox.
+
+    Renders a `div` styled with `display: flex`, `flex-direction: row`,
+    and vertically centered items. Its custom `__eq__` treats a `Row` as
+    equal to a plain `Div` with the same content and settings.
+
+    Attributes:
+        content: List of page content items to arrange in a row.
+        tag: The HTML tag name, always 'div'.
+
+    Example:
+        ```python
+        Row("Name:", TextBox("name"))
+        ```
+    """
+
     tag = "div"
 
     DEFAULT_ATTRS = {
@@ -253,6 +282,18 @@ class _HtmlList(Component):
 
 @dataclass(repr=False)
 class NumberedList(_HtmlList):
+    """Renders a numbered (ordered) list with one list item per entry.
+
+    Attributes:
+        items: List of page content items, each rendered as a list item.
+        tag: The HTML tag name, always 'ol'.
+
+    Example:
+        ```python
+        NumberedList(["First", "Second", "Third"])
+        ```
+    """
+
     tag = "ol"
 
     def __init__(self, items: Sequence[PageContent], **extra_settings):
@@ -263,6 +304,18 @@ class NumberedList(_HtmlList):
 
 @dataclass(repr=False)
 class BulletedList(_HtmlList):
+    """Renders a bulleted (unordered) list with one list item per entry.
+
+    Attributes:
+        items: List of page content items, each rendered as a list item.
+        tag: The HTML tag name, always 'ul'.
+
+    Example:
+        ```python
+        BulletedList(["Apples", "Bananas", "Cherries"])
+        ```
+    """
+
     tag = "ul"
 
     def __init__(self, items: Sequence[PageContent], **extra_settings):

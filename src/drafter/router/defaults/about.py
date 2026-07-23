@@ -1,3 +1,5 @@
+"""Default "about" route, rendering the configured site information page."""
+
 from drafter.client_server.client_server import ClientServer
 from drafter.payloads.kinds.page import Page
 from drafter.components import (

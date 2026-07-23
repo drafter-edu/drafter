@@ -1,3 +1,11 @@
+"""
+The data container describing the initial page sent to the browser.
+
+Defines `InitialSiteData`, which bundles the site frame HTML, title, and
+asset lists (CSS, JS, styles, scripts, headers) that the JS bootstrap uses
+to set up the page before any route content renders.
+"""
+
 from dataclasses import dataclass, field
 
 

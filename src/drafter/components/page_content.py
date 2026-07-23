@@ -150,6 +150,18 @@ def convert_arguments_to_json(arguments, only_validate=False) -> Optional[str]:
 
 
 def repr_arg(key: str, value: Any) -> str:
+    """Represent an argument value for use in a component's `__repr__`.
+
+    Callable event handler values (keys starting with 'on') are rendered
+    as their bare function name; everything else uses `repr`.
+
+    Args:
+        key: The argument name.
+        value: The argument value.
+
+    Returns:
+        The string representation of the value.
+    """
     if key.startswith("on"):
         if callable(value):
             return value.__name__
@@ -265,6 +277,19 @@ class Component:
     EXTRA_SUPPORTED_EVENTS: ClassVar[list[str]] = []
 
     def plan(self, context) -> RenderPlan:
+        """Produce the RenderPlan describing how to render this component.
+
+        The default implementation delegates to `_plan_tag`, building a
+        single tag plan from `get_tag`, `get_attributes`, `get_children`,
+        and `get_assets`. Subclasses override this when they need a
+        different structure (e.g., raw output or multiple elements).
+
+        Args:
+            context: The active Renderer, providing rendering state and configuration.
+
+        Returns:
+            A RenderPlan capturing the tag, attributes, children, and assets.
+        """
         return self._plan_tag(context)
 
     def _plan_tag(
@@ -329,6 +354,23 @@ class Component:
         return attributes
 
     def get_attributes(self, context) -> dict:
+        """Build the HTML attributes for this component.
+
+        The default implementation starts from `DEFAULT_ATTRS`, adds each
+        declared non-content argument (renamed via `RENAME_ATTRS`, skipping
+        keyword arguments still at their default values), folds in
+        `extra_settings` (converting `arguments` and `on_*` event handlers
+        into their `data--drafter-*` attributes), and finally adds
+        persistence attributes for `PERSISTABLE` components. Subclasses
+        override this to add or adjust attributes, usually calling
+        `super().get_attributes(context)` first.
+
+        Args:
+            context: The active Renderer, providing rendering state and configuration.
+
+        Returns:
+            Dictionary mapping HTML attribute names to values.
+        """
         attributes = {}
         event_handlers = {}
         # Default attributes that should always be included, unless overridden by extra_settings
@@ -359,9 +401,34 @@ class Component:
         return attributes
 
     def get_tag(self, context) -> str:
+        """Get the HTML tag name for this component.
+
+        The default implementation returns the class-level `tag`.
+        Subclasses override this when the tag depends on the component's
+        state (e.g., `Header` chooses h1-h6 based on its level).
+
+        Args:
+            context: The active Renderer, providing rendering state and configuration.
+
+        Returns:
+            The HTML tag name.
+        """
         return self.tag
 
     def get_children(self, context) -> List[Any]:
+        """Build the child content for this component.
+
+        The default implementation collects the values of the declared
+        arguments marked `is_content`, flattening var-args arguments and
+        skipping None values. Subclasses override this to construct
+        derived child elements (e.g., option or list-item RenderPlans).
+
+        Args:
+            context: The active Renderer, providing rendering state and configuration.
+
+        Returns:
+            List of child content items (Components, strings, or RenderPlans).
+        """
         children = []
         for argument in self.ARGUMENTS:
             if not argument.is_content:
@@ -487,6 +554,18 @@ class Component:
         return arguments, positional_arguments
 
     def get_assets(self, context) -> Optional[AssetBundle]:
+        """Get the CSS and JavaScript assets required by this component.
+
+        The default implementation returns None (no assets). Subclasses
+        override this to bundle dedicated stylesheets or scripts with
+        their rendered output.
+
+        Args:
+            context: The active Renderer, providing rendering state and configuration.
+
+        Returns:
+            An AssetBundle of required assets, or None if there are none.
+        """
         return None
 
     def __repr__(self):

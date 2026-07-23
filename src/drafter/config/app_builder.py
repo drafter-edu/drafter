@@ -1,3 +1,10 @@
+"""Configuration for the Drafter static site builder.
+
+Defines AppBuilderConfiguration, which controls the compilation process that
+builds a static version of a site: output locations, 404 handling, zipping,
+Pyodide packaging style, extra files, and shared-runtime embedding.
+"""
+
 from typing import Optional
 from dataclasses import dataclass, field
 
@@ -47,10 +54,27 @@ class AppBuilderConfiguration(BaseConfiguration):
 
     @staticmethod
     def get_key() -> str:
+        """Return the key identifying this configuration section.
+
+        Returns:
+            The string "app_builder".
+        """
         return "app_builder"
 
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
+        """Extract app builder settings from environment variables.
+
+        Reads the DRAFTER_-prefixed variables for output directory/filename,
+        404 creation, zipping, missing-info warnings, additional paths
+        (semicolon-separated), Pyodide package style, and shared runtime.
+
+        Args:
+            env_vars: A dictionary of environment variables.
+
+        Returns:
+            A dictionary of app builder configuration values that were present.
+        """
         result = EnvVars(env_vars)
         result.get_string_if_exists("DRAFTER_OUTPUT_DIRECTORY", "output_directory")
         result.get_string_if_exists("DRAFTER_OUTPUT_FILENAME", "output_filename")
@@ -69,6 +93,18 @@ class AppBuilderConfiguration(BaseConfiguration):
 
     @staticmethod
     def extend_parser(parser):
+        """Add app builder arguments to the command line parser.
+
+        Adds the "App Builder Configuration" group with options such as
+        --output-directory, --output-filename, --create-404, --zip-output,
+        --additional-paths, --pyodide-package-style, and --shared-runtime.
+
+        Args:
+            parser: An argparse.ArgumentParser instance to extend.
+
+        Returns:
+            The "App Builder Configuration" argument group that was added.
+        """
         group = parser.add_argument_group("App Builder Configuration")
         group.add_argument(
             "--output-directory",
@@ -116,6 +152,16 @@ class AppBuilderConfiguration(BaseConfiguration):
 
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:
+        """Extract app builder settings from parsed command line arguments.
+
+        The --additional-paths value is split on semicolons into a list.
+
+        Args:
+            parsed_args: A dictionary of parsed command line arguments.
+
+        Returns:
+            A dictionary of app builder configuration values that were provided.
+        """
         result = {}
         if parsed_args.get("output_directory"):
             result["output_directory"] = parsed_args["output_directory"]

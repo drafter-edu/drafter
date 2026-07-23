@@ -142,6 +142,12 @@ def convert_file_upload(ctx: ConversionContext) -> Optional[ConversionResult]:
 
 
 def convert_datetime_like(ctx: ConversionContext) -> Optional[ConversionResult]:
+    """Convert ISO-formatted strings to ``datetime``, ``date``, or ``time``.
+
+    Delegates to ``try_convert_datetime``; unparseable values fail with a
+    hint to use an ISO format, and unhandled value/target combinations
+    defer to the next converter.
+    """
     try:
         outcome, converted = try_convert_datetime(ctx.raw_value, ctx.resolved_type)
     except ValueError:
@@ -221,6 +227,7 @@ def convert_dataclass(ctx: ConversionContext) -> Optional[ConversionResult]:
 
 
 def convert_dataclass_to_dict(ctx: ConversionContext) -> Optional[ConversionResult]:
+    """Convert a dataclass instance to a plain dict via ``dataclasses.asdict``."""
     value = ctx.raw_value
     if dataclasses.is_dataclass(value) and not isinstance(value, type):
         return ConversionResult(ok=True, value=dataclasses.asdict(value))
@@ -232,6 +239,14 @@ _FALSE_STRINGS = {"false", "off", "0", "no", ""}
 
 
 def convert_bool(ctx: ConversionContext) -> Optional[ConversionResult]:
+    """Convert checkbox-style strings to bool.
+
+    Existing bools pass through. Strings are stripped and lowercased, then
+    matched against the truthy set ("true", "on", "1", "yes", "checked")
+    and the falsy set ("false", "off", "0", "no", and the empty string);
+    any other string fails with a hint to use a checkbox or true/false
+    value. Non-string, non-bool values defer to the next converter.
+    """
     value = ctx.raw_value
     if isinstance(value, bool):
         return ConversionResult(ok=True, value=value)
@@ -248,6 +263,14 @@ def convert_bool(ctx: ConversionContext) -> Optional[ConversionResult]:
 
 
 def convert_int(ctx: ConversionContext) -> Optional[ConversionResult]:
+    """Convert numeric strings to int.
+
+    Strings are stripped and parsed with ``int``; if that fails, they are
+    parsed as floats and accepted only when the result is a whole number.
+    Decimal values fail with a hint to use float instead, and non-numeric
+    strings fail with a hint to enter a number or use str. Bools and
+    non-string values defer to the next converter.
+    """
     value = ctx.raw_value
     if isinstance(value, bool):
         return None
@@ -276,6 +299,12 @@ def convert_int(ctx: ConversionContext) -> Optional[ConversionResult]:
 
 
 def convert_float(ctx: ConversionContext) -> Optional[ConversionResult]:
+    """Convert numeric strings to float.
+
+    Strings are stripped and parsed with ``float``; non-numeric strings
+    fail with a hint to enter a number or use str. Bools and non-string
+    values defer to the next converter.
+    """
     value = ctx.raw_value
     if isinstance(value, bool):
         return None
@@ -292,6 +321,11 @@ def convert_float(ctx: ConversionContext) -> Optional[ConversionResult]:
 
 
 def convert_str(ctx: ConversionContext) -> Optional[ConversionResult]:
+    """Decode bytes values to str as UTF-8.
+
+    Non-UTF-8 bytes fail with a hint to use bytes instead of str; all
+    other values defer to the registry's default string handling.
+    """
     value = ctx.raw_value
     if isinstance(value, bytes):
         try:

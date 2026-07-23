@@ -1,3 +1,12 @@
+"""
+The Router that maps URLs to handler functions.
+
+Defines URL normalization helpers (`normalize_url`, `clean_url`) and the
+`Router` class, which stores registered routes with their introspected
+signatures and prepares handler arguments by running the parameter pipeline
+(collect, normalize, bind, convert, diagnose) over each incoming request.
+"""
+
 import json
 from typing import Callable, Optional, List, Dict, Any
 from dataclasses import dataclass

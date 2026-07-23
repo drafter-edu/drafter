@@ -1,12 +1,25 @@
+"""
+Module-level commands for tracking the current ClientServer instance.
+
+This module owns the "current server" pointer that the `route` decorator and
+`start_server()` resolve through, plus the registry and handoff machinery
+that let several application instances share one interpreter: registering
+servers by instance key, switching the current server (and its
+virtual-filesystem root) around dispatch, and passing per-instance context
+from `configure_instance()` to the next bridge run.
+"""
+
 from typing import Any, Optional
 from drafter.monitor.bus import EventBus
 from drafter.client_server.client_server import ClientServer
 
-# The "current" server: the one being configured/executed right now. Route
-# decorators and start_server() resolve through this during code execution, and
-# request handlers set it around dispatch (see bridger.handle_visit) so runtime
-# get_main_server() calls resolve to the correct instance.
 MAIN_SERVER: Optional[ClientServer] = None
+"""The default shared ClientServer instance: the "current" server being
+configured or executed right now. Route decorators and start_server() resolve
+through this during code execution, and request handlers set it around
+dispatch (see bridger.handle_visit) so runtime get_main_server() calls
+resolve to the correct instance. None until first needed; get_main_server()
+creates it on demand."""
 
 # Registry of all live servers, keyed by instance key: the instance_id passed
 # to configure_instance() when given, otherwise the root_element_id. Iframe

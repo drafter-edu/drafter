@@ -31,10 +31,10 @@ from drafter.components.utilities.persistence import (
 )
 from drafter.bridge.error_handling import report_bridge_warning
 
-#: Soft cap on simultaneously-parked components; exceeding it usually means an
-#: app is accidentally minting a new key per visit (e.g., interpolating state
-#: into a src), so surface a warning instead of growing silently.
 PERSIST_SOFT_CAP = 10
+"""Soft cap on simultaneously-parked components; exceeding it usually means an
+app is accidentally minting a new key per visit (e.g., interpolating state
+into a src), so surface a warning instead of growing silently."""
 
 _MEDIA_TAGS = ("audio", "video")
 

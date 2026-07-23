@@ -182,6 +182,12 @@ blocked on open Appendix B code bugs and gaps that are purely *missing* docstrin
 
 ### Phase 3 — Fill MISSING docs, by audience tier (~450 docstrings)
 
+**Status: COMPLETED 2026-07-23 — all tiers.** Every public module, class, function,
+method, and top-level constant in src/ is documented: modules 157/157,
+classes 176/176, functions 218/218, methods 324/324, constants 101/101
+(`python tools/doc_audit.py` reports zero missing; @overload stubs are correctly
+exempt per D418).
+
 Work highest-audience-value first. Within each file: module docstring → class +
 Attributes → public functions/methods → constants.
 
@@ -227,7 +233,11 @@ Attributes → public functions/methods → constants.
   Attributes, `site/` module docstrings + 6 constants, `helpers/args.py`,
   `helpers/env_vars.py`, `monitor/` module docstrings, `docs/`, `document/`.
 
-### Phase 4 — Enforcement and rendering (keep it fixed)
+### Phase 4 — Enforcement and rendering (keep it fixed) — REMAINING
+
+With Phases 0–3 done, this is the only phase left (plus the Appendix B open bugs
+and their three blocked docstrings). Since coverage is now 100%, the ruff `D`
+rules can be enabled repo-wide immediately rather than per-package.
 
 1. **Ruff pydocstyle rules**: add `"D"` to `select` with
    `[tool.ruff.lint.pydocstyle] convention = "google"`. Roll out per-package via
@@ -278,10 +288,10 @@ Tags: [INCORRECT] wrong vs code · [STALE] refers to removed/changed architectur
 - [x] `forms.py` — `DateTimeInput` Args, docstring TODO, `CheckBox` hidden-input
   Note, `RelatedCheckBox.value`/`default_value`, and `**kwargs (dict)` style (also
   fixed in media.py, persistence.py) all done.
-- [ ] `layout.py` — `Row` and the list components still need docstrings (Phase 3).
+- [x] `layout.py` — `Row` and the list components documented in Phase 3.
   (`handle_arguments_compatibility` re-documented in Phase 1.)
-- [ ] `links.py` — `Link` class docstring still missing (Phase 3). (Phase 1 fixed
-  `Button`'s phantom `external` and the `context (dict)` mis-typings.)
+- [x] `links.py` — `Link` class documented in Phase 3; Phase 1 fixed `Button`'s
+  phantom `external` and the `context (dict)` mis-typings.
 - [x] `plotting.py` — [INCORRECT] `_plan_pyodide` "HTML5 canvas backend" claim;
   [STYLE] missing blank line between sections.
 - [x] `timer.py` — module docstring rewritten; `Clock` Attributes completed with the
@@ -322,9 +332,9 @@ Tags: [INCORRECT] wrong vs code · [STALE] refers to removed/changed architectur
 - [x] `payloads/kinds/fragment.py` — `verify` claim narrowed to `LinkContent`.
 - [x] `payloads/renderer.py` — `newline_mode_stack` added to Attributes;
   `in_convert_newlines_mode` Returns fixed.
-- [ ] `payloads/kinds/download.py` — [INCOMPLETE] 4 fields undocumented,
-  `file_path`-vs-`content` relationship unexplained (Phase 3).
-- [ ] `payloads/kinds/update.py` — [INCOMPLETE] `state_update` undocumented (Phase 3).
+- [x] `payloads/kinds/download.py` — all fields and the `file_path`-vs-`content`
+  relationship documented in Phase 3, with an Example.
+- [x] `payloads/kinds/update.py` — `state_update` documented in Phase 3.
 - Dead file: `bridge/client_stub.py` (Phase 0). Good shape: bridge/persistence.py,
   context.py, history.py, log.py, client_bridge.py, site_renderer.py, all of
   router/parameters/ (binding, collect, conversion, diagnostics), commands.py,
@@ -430,6 +440,12 @@ exposed by a docstring/code contradiction. Triage separately:
     branch; `bridge/navigation.py:18` + `site_renderer.py:53` use
     `field(default_factory=...)` in non-dataclass class bodies.
 
+- [ ] `components/output.py:Progress.attributes` — the method is named `attributes`
+   rather than `get_attributes`, so the rendering pipeline never calls it: Progress
+   values render without the documented `format_number` formatting. (Found during
+   Phase 3 Tier 1; its docstring documents the dead-code status.)
+- [ ] `testing/assertions.py:render_path` — the `children` branch emits a stray
+   trailing quote (`children'`) in rendered paths.
 - [ ] `helpers/urls.py:check_invalid_external_url` — returns `"is a valid external url"`
    for valid and `""` for invalid; docstring promises the opposite contract.
 - [ ] `monitor/bus.py:64` — `subscription.topic.startswith(event.kind)` looks reversed;

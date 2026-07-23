@@ -7,6 +7,19 @@ from typing import Any
 
 
 def debug_log(event_name: str, *args: Any) -> None:
+    """Log a named bridge debug event to the browser console.
+
+    Arguments are converted to real JS objects (via pyodide's to_js) so the
+    console shows inspectable values rather than proxies. If console logging
+    fails (e.g. destroyed PyProxies or unconvertible values), falls back to
+    print with stringified arguments, and finally to printing just the event
+    name. Never raises.
+
+    Args:
+        event_name: Dotted identifier for the event (e.g.
+            "client.add_to_history").
+        *args: Arbitrary values to log alongside the event name.
+    """
     # First try logging using console.log
     try:
         # Explicitly try to convert each argument to an actual JS object instead of a proxy
@@ -32,6 +45,15 @@ def debug_log(event_name: str, *args: Any) -> None:
 
 
 def console_log(event) -> None:
+    """Log an unhandled event to the browser console.
+
+    Used as the last resort for server events that nothing else handled.
+    Falls back to printing the event's repr if console logging fails, and to
+    a diagnostic print if even that fails. Never raises.
+
+    Args:
+        event: The unhandled event to log.
+    """
     try:
         js.console.log("[Drafter (Unhandled)]", event)
     except Exception:

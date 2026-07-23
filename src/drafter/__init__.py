@@ -1,3 +1,23 @@
+"""Drafter: a friendly web framework for students learning Python.
+
+Drafter turns plain Python functions into interactive websites: routes
+(functions decorated with `@route`) take the current state and return a
+`Page` of components, and `start_server(state)` launches the site. This
+package root re-exports everything a student application needs, so a
+single `from drafter import *` provides:
+
+- The `route` decorator, `start_server`, and the `Page`, `Fragment`,
+  `Update`, and `Redirect` payload types.
+- All page components, from basic content (`Text`, `Header`, `Image`,
+  `Table`) and form inputs (`TextBox`, `Button`, `SelectBox`) to richer
+  widgets (`Map`, `CurrentLocation`, `Timer`, and the audio family such
+  as `Tone`, `Melody`, and `Sound`).
+- Styling helpers (`bold`, `change_color`, `update_style`, ...) and site
+  configuration functions (`set_website_title`, `set_website_style`, ...).
+- Testing and convenience utilities such as `assert_equal`, `dataclass`,
+  and `open`.
+"""
+
 # Provide dataclass decorator for users' convenience
 from dataclasses import dataclass
 

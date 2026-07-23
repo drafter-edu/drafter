@@ -1,3 +1,27 @@
+"""Re-exports the Drafter component API from its submodules.
+
+This package gathers every component into a single import location, so
+that `from drafter.components import ...` works for all of them. The main
+groups are:
+
+- Base machinery: `Component`, `Content`, `PageContent`
+- Layout: `Div`, `Span`, `Row`, `BulletedList`, `NumberedList`, semantic
+  sections, and spacing elements
+- Text: `Text`, `Header`, `Pre`, `BlockQuote`, `InlineCode`, `RawHTML`
+- Forms: `TextBox`, `TextArea`, `SelectBox`, `CheckBox`, `Label`, and
+  date/time inputs
+- Navigation: `Link`, `Button`, `Argument`
+- Media and graphics: `Image`, `Audio`, `Video`, `Canvas`, `SVG`,
+  `MatPlotLibPlot`
+- Data display: `Table`, `Output`, `Progress`
+- Files: `Download`, `FileUpload`
+- Location and maps: `CurrentLocation`, `Location`, `Map` and its markers
+  and views
+- Timing and persistence: `Timer`, `Clock`, `RemovePersistent`
+- Audio recording and effects: `Microphone`, `AudioRecorder`, `Tone`,
+  `Melody`, `Sound`, and effect wrappers like `Echo` and `Reverb`
+"""
+
 from drafter.components.page_content import PageContent, Component, Content
 from drafter.components.layout import (
     Div,

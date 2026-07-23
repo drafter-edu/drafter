@@ -8,8 +8,13 @@ INTERNAL_ROUTES = {
     "ASSETS": "__drafter_assets",
     "LIST_FILES": "__drafter_list_files",
 }
+"""Reserved URL paths served by Drafter itself: the live-reload WebSocket
+("WS"), static assets ("ASSETS"), and the file listing endpoint
+("LIST_FILES")."""
 
 INTERNAL_FILES = {"DRAFTER_PYODIDE_FILE": "drafter-pyodide.zip"}
+"""Reserved filenames used internally, such as the zipped Drafter package
+loaded into Pyodide."""
 
 
 def determine_assets_url(override_asset_url) -> str:

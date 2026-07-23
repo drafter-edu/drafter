@@ -1,3 +1,10 @@
+"""Top-level aggregation of all Drafter configuration sections.
+
+Defines SystemConfiguration, the centralized object that holds one instance of
+each component's configuration section and provides merging and JSON
+(de)serialization across all of them.
+"""
+
 from dataclasses import dataclass
 
 from drafter.config.bootstrap import BootstrapConfiguration

@@ -1,3 +1,13 @@
+"""
+Rendering of the site's DOM for a single client instance.
+
+The SiteRenderer builds the initial site (optionally inside a shadow root),
+applies response bodies to their targets while parking/restoring persistent
+components, injects channel content (scripts and styles), and manages the
+site frame — all scoped to the instance's own document and root so multiple
+concurrent instances never collide.
+"""
+
 from typing import Optional, Any
 
 from drafter.site.initial_site_data import InitialSiteData
@@ -74,6 +84,7 @@ class SiteRenderer:
         return self.document.getElementById(self.root_id)
 
     def get_root(self):
+        """The root node for content injection; alias for get_scope."""
         return self.get_scope()
 
     def get_parking_area(self):
@@ -99,6 +110,25 @@ class SiteRenderer:
         return None
 
     def setup(self, initial_site_data: InitialSiteData) -> None:
+        """Build the initial site DOM inside this instance's root element.
+
+        If the initial site data carries an error, renders the fallback
+        error site instead. Otherwise, clears any previously-injected theme
+        assets, inserts the site HTML — inside a freshly attached shadow
+        root when shadow DOM is enabled, directly into the root element
+        otherwise — injects the additional CSS, styles, JS, and headers,
+        records the resulting node as the scope for all later inner-frame
+        lookups, and hides the frame if the site is configured unframed.
+
+        Args:
+            initial_site_data: The rendered initial site (HTML, assets, and
+                flags) produced by the server's render phase.
+
+        Raises:
+            RuntimeError: If constructing the site container fails for any
+                reason (raised via raise_bridge_system_error after the
+                failure is reported through telemetry).
+        """
         if initial_site_data.error:
             return self._setup_error_site(initial_site_data)
 
@@ -231,6 +261,13 @@ class SiteRenderer:
         remove_page_content(self.get_root())
 
     def apply_before_channel(self, response: Response) -> None:
+        """Apply the response's default "before" channel as page-specific
+        content (intended to run before the body update).
+
+        Args:
+            response: The response whose "before" channel, if any, should
+                be applied.
+        """
         self.add_channel_content(
             response.channels.get(DEFAULT_CHANNEL_BEFORE),
             is_page_specific=True,
@@ -238,6 +275,13 @@ class SiteRenderer:
         )
 
     def apply_after_channel(self, response: Response) -> None:
+        """Apply the response's default "after" channel as page-specific
+        content (intended to run after the body update).
+
+        Args:
+            response: The response whose "after" channel, if any, should
+                be applied.
+        """
         self.add_channel_content(
             response.channels.get(DEFAULT_CHANNEL_AFTER),
             is_page_specific=True,
@@ -306,6 +350,13 @@ class SiteRenderer:
     ### Frame
 
     def toggle_frame(self) -> None:
+        """Toggle visibility of the site frame within this instance's scope.
+
+        Flips the hidden class on the frame pieces (vertical/horizontal
+        padding, header, and footer) and flips the frame-hidden class on the
+        body element, so the body can restyle itself when the frame is
+        absent.
+        """
         FRAME_PIECES = ",".join(
             f".{DRAFTER_TAG_IDS[key]}"
             for key in ["PADDING_V", "PADDING_H", "HEADER", "FOOTER"]

@@ -1,3 +1,10 @@
+"""Targets describing where and how payload content is applied in the DOM.
+
+Defines the `Target` dataclass, which fragments use to identify the
+element(s) to update on the client, and the `DEFAULT_BODY_TARGET` used by
+full `Page` responses.
+"""
+
 from drafter.site.site import DRAFTER_TAG_IDS
 from dataclasses import dataclass
 from typing import Optional
@@ -5,6 +12,34 @@ from typing import Optional
 
 @dataclass
 class Target:
+    """Describes which DOM element(s) a payload's content applies to, and how.
+
+    The selector fields (`id`, `tag`, `class_name`, `selector`,
+    `data_attribute`, `attribute`, and `nth_child`) are combined by
+    `to_selector` into a single CSS selector identifying the element(s) to
+    act on, with the search optionally modified by `closest`, `within`,
+    and `all`. The action flags (`is_page_load`, `replace`, `remove`,
+    `html`, `append`, `prepend`, `before`, and `after`) then choose how
+    the rendered content is applied to the matched element(s), while
+    `attributes_to_set`, `styles_to_set`, and `class_toggles` describe
+    additional mutations to perform. If no elements match, the `fallback`
+    target (when set) is used instead.
+
+    Attributes:
+        id: HTML id of the element to match (rendered as `#id`).
+        tag: Tag name of the element to match (e.g., `div`).
+        class_name: Class name(s) to match; multiple classes may be
+            separated by whitespace.
+        selector: Explicit CSS selector. If it contains combinators or
+            commas it is used verbatim as the whole selector; otherwise it
+            serves as a base that the other selector fields are appended to.
+        data_attribute: Data attribute to match, given as `data-x` or
+            `data-x='value'`.
+        attribute: Mapping of attribute names to required values, each
+            rendered as an `[name='value']` selector part.
+        nth_child: Appends an `:nth-child(n)` clause to the selector.
+    """
+
     # Selectors
     id: Optional[str] = None
     tag: Optional[str] = None
@@ -176,3 +211,9 @@ class Target:
 DEFAULT_BODY_TARGET = Target(
     id=DRAFTER_TAG_IDS["BODY"], replace=False, is_page_load=True
 )
+"""The Target used by full `Page` responses.
+
+Matches Drafter's body element by its id, marks the response as a full
+page load, and replaces the body's contents rather than the element
+itself.
+"""

@@ -11,6 +11,15 @@ def is_public(name):
     return not name.startswith("_") or name in ("__init__",)
 
 
+def is_overload(node):
+    """Whether a function is an @overload stub (which must not have a docstring)."""
+    return any(
+        (isinstance(d, ast.Name) and d.id == "overload")
+        or (isinstance(d, ast.Attribute) and d.attr == "overload")
+        for d in node.decorator_list
+    )
+
+
 def audit_file(path):
     src = path.read_text(encoding="utf-8", errors="replace")
     try:
@@ -66,6 +75,7 @@ def audit_file(path):
                         isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
                         and is_public(item.name)
                         and item.name != "__init__"
+                        and not is_overload(item)
                     ):
                         stats["methods"] += 1
                         if ast.get_docstring(item):
@@ -75,8 +85,10 @@ def audit_file(path):
                                 f"method:{node.name}.{item.name}:{item.lineno}"
                             )
     for node in body:
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and is_public(
-            node.name
+        if (
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and is_public(node.name)
+            and not is_overload(node)
         ):
             stats["funcs"] += 1
             if ast.get_docstring(node):

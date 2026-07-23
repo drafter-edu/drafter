@@ -1,3 +1,5 @@
+"""The `VerificationFailure` record produced when a payload fails verification."""
+
 from dataclasses import dataclass
 
 

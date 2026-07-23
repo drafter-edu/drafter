@@ -1,3 +1,12 @@
+"""The `ResponsePayload` base class defining the contract for all payloads.
+
+Every value returned from a route is expected to be a `ResponsePayload`.
+The base class provides no-op defaults for the full payload lifecycle:
+rendering to HTML, pre-render verification, history-panel formatting,
+client message extraction, state updates, redirect handling, and fragment
+targeting. Subclasses override only the parts relevant to their behavior.
+"""
+
 from typing import Any, Optional, TYPE_CHECKING
 from drafter.data.channel import Message
 from drafter.data.request import Request

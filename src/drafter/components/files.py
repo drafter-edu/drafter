@@ -1,3 +1,10 @@
+"""File components for downloading and uploading files.
+
+Defines `Download`, a link that lets the user save generated content
+(text or PIL images) as a file, and `FileUpload`, a form input for
+accepting user file submissions.
+"""
+
 from dataclasses import dataclass
 import base64
 import io

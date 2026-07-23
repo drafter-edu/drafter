@@ -1,3 +1,11 @@
+"""Validation helpers for route return values.
+
+These functions produce student-friendly error messages when a route
+returns something other than a proper `Page` payload (None, a string, a
+list, or an unrelated object), or when the state object's type changes
+from one request to the next.
+"""
+
 from typing import Optional, Any
 from drafter.data.request import Request
 from drafter.payloads.payloads import ResponsePayload

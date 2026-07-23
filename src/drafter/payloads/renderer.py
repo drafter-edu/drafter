@@ -1,3 +1,11 @@
+"""Rendering of component hierarchies into HTML strings.
+
+Provides the `Renderer` class and the `render` convenience function, which
+recursively convert strings, lists, `Component` instances, and
+`RenderPlan` objects into indented HTML while collecting CSS/JS assets and
+recording rendering errors.
+"""
+
 from dataclasses import dataclass
 from typing import Optional
 import html

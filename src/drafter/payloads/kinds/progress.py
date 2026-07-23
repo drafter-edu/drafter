@@ -1,3 +1,9 @@
+"""Placeholder for the unfinished `Progress` payload.
+
+The `Progress` class is a stub with no behavior yet; it is intended to
+eventually report progress on long-running tasks.
+"""
+
 from dataclasses import dataclass
 from drafter.payloads.payloads import ResponsePayload
 

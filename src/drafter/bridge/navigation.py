@@ -1,3 +1,12 @@
+"""
+Navigation control for the bridge: initiating requests and following redirects.
+
+The NavigationController turns navigation triggers (links, form submissions,
+system events, browser back/forward) into Requests, dispatches them through
+the installed navigation function, records them in BrowserHistory, and
+follows redirect responses with loop detection.
+"""
+
 import json
 from typing import Callable, Optional, Any
 
@@ -10,6 +19,25 @@ from drafter.bridge.log import debug_log
 
 
 class NavigationController:
+    """Creates and dispatches Requests for all forms of navigation.
+
+    Holds the navigation function (the bridge's visit callback) and invokes
+    it for initial page loads, user navigation, popstate replays, and
+    redirects, keeping the BrowserHistory in sync and aborting redirect
+    loops.
+
+    Attributes:
+        history: The BrowserHistory that mirrors requests into the
+            browser's history stack.
+
+        navigation_func: The callback that performs a visit for a Request
+            and returns its Response; None until set_navigation_func is
+            called.
+
+        redirect_loop_stack: Reprs of the redirect payloads currently being
+            followed, used to detect redirect loops.
+    """
+
     history: BrowserHistory
     navigation_func: Optional[Callable[[Request], Response]] = None
     redirect_loop_stack: list[str]
@@ -20,11 +48,18 @@ class NavigationController:
         self.navigation_func = None
 
     def set_navigation_func(self, func: Callable[[Request], Response]) -> None:
+        """Install the callback used to perform visits.
+
+        Args:
+            func: Callback that takes a Request, performs the visit, and
+                returns the resulting Response.
+        """
         self.navigation_func = func
 
     ### Redirect Handling
 
     def clear_redirect_stack(self) -> None:
+        """Empty the redirect loop-detection stack."""
         self.redirect_loop_stack.clear()
 
     def handle_redirect(
@@ -109,10 +144,27 @@ class NavigationController:
         return self.navigate(request, remember)
 
     def do_initial_request(self):
+        """Issue the initial "page_load" request for the index route.
+
+        The initial request is not added to the browser history, since the
+        browser already has an entry for the page itself.
+
+        Returns:
+            The Response produced by the navigation function.
+        """
         initial_request = Request("page_load", "index", {}, {}, "")
         return self.navigate(initial_request, remember=False)
 
     def handle_popstate(self, event: Any):
+        """Replay a browser back/forward navigation.
+
+        Converts the popstate event into a Request via the BrowserHistory
+        and dispatches it without adding a new history entry (the browser
+        already moved within its stack).
+
+        Args:
+            event: The popstate event from the browser.
+        """
         request = self.history.convert_popstate_to_request(event)
         self.navigate(request, False)
 
@@ -146,6 +198,22 @@ class NavigationController:
 
 
 def extract_button_pressed(data: dict) -> str:
+    """Pop and decode the pressed submit button from form data.
+
+    If the submit-button key is present, its entry is removed from `data`
+    (mutating the dict). Multi-value form entries (lists) are unwrapped to
+    their first element, and string values are JSON-decoded when possible so
+    the original button value round-trips; values that are not valid JSON
+    are used as-is.
+
+    Args:
+        data: The form data dictionary; its submit-button entry, if any, is
+            removed.
+
+    Returns:
+        The pressed button's value as a string, or an empty string when no
+        submit-button entry was present.
+    """
     button_pressed = ""
     if SUBMIT_BUTTON_KEY in data:
         button_value = data.pop(SUBMIT_BUTTON_KEY)

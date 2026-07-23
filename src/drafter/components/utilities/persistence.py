@@ -29,8 +29,11 @@ the server-side render pipeline and the client-side bridge.
 import json
 
 PERSIST_KEY_ATTR = "data-drafter-persist-key"
+"""Attribute holding a component's stable persistence identity."""
 PERSIST_FLAG_ATTR = "data-drafter-persistent"
+"""Attribute set to "true" when a component was created with persistent=True."""
 PERSIST_EVICT_ATTR = "data-drafter-persist-evict"
+"""Attribute marking an explicit removal request for a parked component."""
 
 #: Attributes that must not influence a component's persistence identity.
 _IDENTITY_EXCLUDED_ATTRS = {

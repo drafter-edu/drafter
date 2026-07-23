@@ -1,3 +1,11 @@
+"""
+Audit helpers for publishing telemetry onto the main event bus.
+
+Provides `log_error` for reporting canonical ErrorDetails envelopes as
+ErrorRecords, and `log_record` for stamping and publishing general
+telemetry records.
+"""
+
 from typing import Optional
 from drafter.data.errors import (
     ErrorDetails,

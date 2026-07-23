@@ -71,6 +71,24 @@ class PayloadMerger:
     def merge(
         self, values: list[PayloadValue], route_name: str = ""
     ) -> tuple[dict[str, PayloadValue], tuple[RouteDiagnostic, ...]]:
+        """Merge payload values so each name maps to exactly one value.
+
+        When two values share a name, the one from the higher-precedence
+        source (per `PRECEDENCE`; unknown sources rank last) is kept. Ties
+        in precedence keep the earlier value. A `payload_collision` warning
+        diagnostic is emitted for each collision where the kept and dropped
+        values actually differ (values that fail equality comparison are
+        treated as differing).
+
+        Args:
+            values: Collected payload values, each carrying its name,
+                value, and source provenance.
+            route_name: Name of the target route, used in diagnostics.
+
+        Returns:
+            Tuple of (merged dict mapping each name to its winning
+            PayloadValue, tuple of warning diagnostics for collisions).
+        """
         rank = {source: index for index, source in enumerate(self.PRECEDENCE)}
         merged: dict[str, PayloadValue] = {}
         diagnostics: list[RouteDiagnostic] = []
@@ -127,6 +145,46 @@ class RouteBinder:
         extra_dependencies: Optional[dict[str, Any]] = None,
         route_name: str = "",
     ) -> BoundArguments:
+        """Bind a merged payload to a route signature and convert the values.
+
+        Binding proceeds in stages:
+
+        1. State injection: the first parameter receives `state` positionally
+           when it is literally named "state", or when the function expects
+           exactly one more parameter than the request supplied and nothing
+           else (injected dependency or payload value) can fill it.
+        2. Framework dependencies from `extra_dependencies` bind by exact
+           parameter name and win over request data.
+        3. Payload values bind to the remaining parameters by name, then by
+           each parameter's declared aliases.
+        4. Missing required parameters (no default, not injected) produce
+           `missing_required_parameter` error diagnostics, with a
+           did-you-mean hint against the leftover payload names.
+        5. Leftover payload keys flow into **kwargs when the function
+           accepts var-keyword arguments; otherwise each produces an
+           `unused_request_parameter` warning (framework metadata is
+           silently ignored).
+        6. Bound payload-derived values are converted through the converter
+           registry; failures produce `conversion_failed` error diagnostics.
+           Injected values (state, dependencies) pass through untouched.
+
+        Args:
+            signature: Introspected signature of the target route function.
+            payload: Merged payload mapping each name to one PayloadValue.
+            converter_registry: Registry used to convert bound values to
+                the parameters' annotated types.
+            state: Current application state, injected when the signature
+                expects it.
+            extra_dependencies: Framework-supplied values bound by exact
+                parameter name.
+            route_name: Name used in diagnostics; defaults to the
+                signature's function name.
+
+        Returns:
+            BoundArguments with the positional args, converted kwargs,
+            all diagnostics, the set of consumed payload keys, and the
+            conversion records for the debug panel.
+        """
         route_name = route_name or signature.function_name
         extra_dependencies = extra_dependencies or {}
         diagnostics: list[RouteDiagnostic] = []

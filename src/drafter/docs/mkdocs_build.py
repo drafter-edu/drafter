@@ -24,6 +24,14 @@ def _strip_dev_flag(argv: list[str]) -> tuple[list[str], bool]:
 
 
 def main() -> int:
+    """Run mkdocs with forwarded arguments, honoring the --dev flag.
+
+    Strips --dev from the command line and, when present, sets
+    DRAFTER_MKDOCS_DEV=1 in the environment of the spawned mkdocs process.
+
+    Returns:
+        Exit code of the mkdocs subprocess.
+    """
     forwarded_args, dev_mode = _strip_dev_flag(sys.argv[1:])
     env = os.environ.copy()
     if dev_mode:

@@ -81,10 +81,30 @@ class ClientServerConfiguration(BaseConfiguration):
 
     @staticmethod
     def get_key() -> str:
+        """Return the key identifying this configuration section.
+
+        Returns:
+            The string "client_server".
+        """
         return "client_server"
 
     @staticmethod
     def parse_env_variables(env_vars: dict) -> dict:
+        """Extract client server settings from environment variables.
+
+        Reads the DRAFTER_-prefixed variables for the server name, debug mode,
+        subtle debug entry, audit logging, site title, framing, theme, deploy
+        image path, asset URL override, Shadow DOM, root element id, newline
+        conversion, and the semicolon-separated lists for external pages and
+        additional header/style/CSS/JS/script content.
+
+        Args:
+            env_vars: A dictionary of environment variables.
+
+        Returns:
+            A dictionary of client server configuration values that were
+            present.
+        """
         result = EnvVars(env_vars)
         result.get_string_if_exists("DRAFTER_SERVER_NAME", "server_name")
         result.get_bool_if_exists("DRAFTER_IN_DEBUG_MODE", "in_debug_mode")
@@ -124,6 +144,21 @@ class ClientServerConfiguration(BaseConfiguration):
 
     @staticmethod
     def extend_parser(parser):
+        """Add client server arguments to the command line parser.
+
+        Adds the "Client Server Configuration" group. Several flags are named
+        for the opposite of their field: --production disables
+        `in_debug_mode`, and --no-frame disables `framed`. Other options
+        include --theme, --subtle-debug-entry, --audit-logging,
+        --external-pages, the --additional-*-content options,
+        --use-shadow-dom, --root-element-id, and --newlines-to-br.
+
+        Args:
+            parser: An argparse.ArgumentParser instance to extend.
+
+        Returns:
+            The "Client Server Configuration" argument group that was added.
+        """
         group = parser.add_argument_group("Client Server Configuration")
         group.add_argument(
             "--server-name",
@@ -209,6 +244,20 @@ class ClientServerConfiguration(BaseConfiguration):
 
     @staticmethod
     def parse_args(parsed_args: dict) -> dict:
+        """Extract client server settings from parsed command line arguments.
+
+        Note the inversions: --production sets `in_debug_mode` to False, and
+        --no-frame sets `framed` to False. Semicolon-separated options
+        (external pages and the additional content lists) are split into lists
+        with each entry stripped of surrounding whitespace.
+
+        Args:
+            parsed_args: A dictionary of parsed command line arguments.
+
+        Returns:
+            A dictionary of client server configuration values that were
+            provided.
+        """
         result = {}
         if parsed_args.get("server_name"):
             result["server_name"] = parsed_args["server_name"]
@@ -266,6 +315,16 @@ class ClientServerConfiguration(BaseConfiguration):
         return result
 
     def to_json(self) -> dict:
+        """Serialize this configuration to a JSON-serializable dictionary.
+
+        Unlike the base implementation, this handles fields that are not
+        directly serializable: `information` becomes its `to_json` dictionary
+        (or None), and `system_routes` is reduced to a list of route names,
+        since the handler callables cannot be serialized.
+
+        Returns:
+            A dictionary representation of this configuration.
+        """
         return {
             "server_name": self.server_name,
             "in_debug_mode": self.in_debug_mode,

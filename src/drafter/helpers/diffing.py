@@ -1,8 +1,15 @@
+"""HTML diff generation for comparing test output strings."""
+
 import difflib
 
 DIFF_INDENT_WIDTH = 1
+"""Default number of spaces used for tab expansion in diff tables."""
+
 DIFF_WRAP_WIDTH = 60
+"""Default column width at which diff output lines are wrapped."""
+
 differ = difflib.HtmlDiff(tabsize=DIFF_INDENT_WIDTH, wrapcolumn=DIFF_WRAP_WIDTH)
+"""Module-level HtmlDiff instance used to generate diff tables."""
 
 
 def change_diff_settings(indent_width=1, wrap_width=60):

@@ -1,15 +1,47 @@
+"""Base class and shared machinery for Drafter configuration sections.
+
+Defines `BaseConfiguration`, the dataclass all configuration sections inherit
+from. It provides the generic pipeline for building a configuration from
+dataclass defaults, environment variables, and parsed command line arguments,
+plus helpers for merging, copying, and JSON (de)serialization.
+"""
+
 import json
 from dataclasses import dataclass, fields
 from typing import Any, Optional, Literal
 
 
 FalseType = Literal[False]
+"""Type alias for the literal value `False`, used in `Union[FalseType, str]`
+annotations where a field is either disabled (`False`) or holds a string."""
 
 
 @dataclass
 class BaseConfiguration:
+    """Base dataclass for a section of the Drafter system configuration.
+
+    Subclasses declare their settings as dataclass fields (whose defaults form
+    the lowest-precedence layer) and override the hook methods `get_key`,
+    `parse_env_variables`, `extend_parser`, and `parse_args`. The
+    `map_from_raw` classmethod then assembles an instance by layering values
+    with the precedence: dataclass defaults < environment variables < parsed
+    command line arguments.
+    """
+
     @staticmethod
     def get_key() -> str:
+        """Return the key identifying this configuration section.
+
+        The key names the section in serialized `SystemConfiguration`
+        dictionaries (e.g., "bootstrap", "app_server").
+
+        Returns:
+            The unique string key for this configuration section.
+
+        Raises:
+            NotImplementedError: Always, in this base implementation;
+                subclasses must override this method.
+        """
         raise NotImplementedError(
             "Subclasses must implement get_key method to return their configuration key."
         )
@@ -21,6 +53,29 @@ class BaseConfiguration:
         env_vars: Optional[dict[str, Any]] = None,
         existing_config=None,
     ):
+        """Build a configuration instance by layering raw sources in precedence order.
+
+        This is the central precedence-defining pipeline for all configuration
+        sections. The starting point is either a fresh instance (dataclass
+        defaults) or a copy of `existing_config`. Environment variables, if
+        given, are filtered through `parse_env_variables` and merged on top of
+        that base. Finally, command line arguments are filtered through
+        `parse_args` and merged last, so they win. The resulting precedence is:
+        defaults (or existing config) < environment variables < command line
+        arguments. Both merges ignore unknown keys and `None` values, and
+        `existing_config` itself is never mutated.
+
+        Args:
+            parsed_args: Dictionary of parsed command line arguments (e.g.,
+                `vars()` of an argparse namespace).
+            env_vars: Optional dictionary of environment variables; when
+                omitted or empty, the environment layer is skipped.
+            existing_config: Optional configuration instance to use (copied)
+                as the base instead of a default-constructed one.
+
+        Returns:
+            A new configuration instance with all sources merged in.
+        """
         if existing_config is None:
             config = cls()
         else:
@@ -118,10 +173,23 @@ class BaseConfiguration:
                     setattr(self, field.name, value)
 
     def to_json(self) -> dict:
+        """Serialize this configuration to a dictionary.
+
+        Returns:
+            A dictionary mapping each dataclass field name to its current value.
+        """
         return {field.name: getattr(self, field.name) for field in fields(self)}
 
     @classmethod
     def from_json(cls, data: dict):
+        """Construct a configuration instance from a dictionary.
+
+        Args:
+            data: Dictionary of field names to values, as produced by `to_json`.
+
+        Returns:
+            A new instance of this configuration class.
+        """
         return cls(**data)
 
     def copy(self):

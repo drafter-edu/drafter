@@ -1,9 +1,21 @@
+"""
+Structured diagnostics for the parameter pipeline.
+
+The merge and bind stages report everything that goes wrong (or is merely
+suspicious) as `RouteDiagnostic` values instead of raising immediately.
+The router then partitions them: warnings are logged, and errors are
+raised together as a single `ParameterBindingError` so the debug panel
+can explain every problem at once.
+"""
+
 from dataclasses import dataclass
 from typing import Iterable, Literal
 
 # --- Diagnostics API ---
 
 Severity = Literal["info", "warning", "error"]
+"""How serious a diagnostic is; only "error" aborts the request."""
+
 DiagCode = Literal[
     "missing_required_parameter",
     "unused_request_parameter",
@@ -11,10 +23,24 @@ DiagCode = Literal[
     "conversion_failed",
     "payload_collision",
 ]
+"""Stable machine-readable codes identifying each kind of diagnostic."""
 
 
 @dataclass
 class RouteDiagnostic:
+    """One problem (or observation) found while binding route parameters.
+
+    Attributes:
+        severity: How serious the diagnostic is (info, warning, or error).
+        code: Stable machine-readable code identifying the kind of problem.
+        route_name: Name of the route function being bound.
+        message: Student-facing description of what went wrong.
+        parameter: Name of the parameter or payload key involved, if any.
+        source: Payload source the value came from (e.g. form_field), if any.
+        hint: Student-facing suggestion for how to fix the problem.
+        related: Names of other parameters or payload keys involved.
+    """
+
     severity: Severity
     code: DiagCode
     route_name: str

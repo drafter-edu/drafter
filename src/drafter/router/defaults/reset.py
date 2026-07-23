@@ -1,3 +1,5 @@
+"""Default "--reset" route, resetting site state and redirecting to index."""
+
 from drafter.client_server.commands import get_main_server
 from drafter.payloads.kinds.redirect import Redirect
 

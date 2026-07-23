@@ -1,3 +1,11 @@
+"""
+Tracking of the student's site state over time.
+
+Defines `SiteState`, which wraps the current state value, records every
+state in order for the history/debug panel, and remembers the initial
+state so it can be restored on reset.
+"""
+
 from typing import Any
 from dataclasses import dataclass, field
 from copy import deepcopy
