@@ -78,8 +78,8 @@ class RawFiles:
         f.write("""
 
 def extract(text):
-    return gzip.decompress(b64decode(text)).decode()    
-    
+    return gzip.decompress(b64decode(text)).decode()
+
 CACHED_DECOMPRESSED = {}
 def get_raw_files(theme):
     if theme in CACHED_DECOMPRESSED:

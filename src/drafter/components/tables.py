@@ -10,6 +10,9 @@ from drafter.components.planning.render_plan import RenderPlan
 from drafter.history.utils import safe_repr
 
 
+# TODO: Properly handle typecheck of a list of dataclasses, and a single dataclass instance.
+
+
 @dataclass(repr=False)
 class Table(Component):
     """Renders an HTML table from row data and optional header.

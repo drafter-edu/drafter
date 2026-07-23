@@ -17,7 +17,7 @@ def index(state: State) -> Page:  # type: ignore
         [
             Header("Welcome to my site!"),
             "You are not logged in.",
-            Button("Log in", ask_login),
+            Button("Log in", ask_login),  # pyright: ignore[reportUndefinedVariable]
         ],
     )
 
