@@ -113,6 +113,7 @@ __all__ = [
     "TextArea",
     "SelectBox",
     "CheckBox",
+    "RelatedCheckBox",
     "Label",
     "DateTimeInput",
     "DateInput",

@@ -107,8 +107,6 @@ class Target:
         Returns:
             CSS selector string that can be used with querySelectorAll.
         """
-        parts = []
-
         # If the user supplied an explicit selector string, treat it as a base.
         base = self.selector.strip() if self.selector else ""
 

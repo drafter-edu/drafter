@@ -161,9 +161,11 @@ unfixable = []
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.lint.per-file-ignores]
-"examples/**.py" = ["F403", "F405"]
+"examples/**.py" = ["F403", "F405", "E402"]
 "tests/**.py" = ["F403", "F405"]
-"docs/examples/**.py" = ["F403", "F405"]
+"docs/**/**.py" = ["F403", "F405", "E402"]
+"docsrc/**/**.py" = ["F403", "F405", "E402"]
+"js/**/**.py" = ["F403", "F405", "F821", "E501", "E402"]
 
 
 [tool.ruff.format]

@@ -7,7 +7,6 @@ from drafter.helpers.utils import is_pyodide
 
 try:
     import matplotlib.pyplot as plt
-    import matplotlib
 
     _has_matplotlib = True
 except ImportError as e:
@@ -27,6 +26,7 @@ class MatPlotLibPlot(Component):
         close_automatically: Whether to close the figure after rendering.
         tag: The HTML tag name, always 'img'.
     """
+
     extra_matplotlib_settings: dict
     close_automatically: bool
 
@@ -68,7 +68,7 @@ class MatPlotLibPlot(Component):
         if "bbox_inches" not in extra_matplotlib_settings:
             extra_matplotlib_settings["bbox_inches"] = "tight"
         self.close_automatically = close_automatically
-        
+
     def _plan_pyodide(self, context) -> RenderPlan:
         """Generate render plan for Pyodide environment.
 
@@ -84,13 +84,13 @@ class MatPlotLibPlot(Component):
         # In Pyodide, save the figure to a PNG buffer and embed it as a base64 data URL
         image_data = io.BytesIO()
         settings = self.extra_matplotlib_settings.copy()
-        if 'format' not in settings:
-            settings['format'] = 'png'
+        if "format" not in settings:
+            settings["format"] = "png"
         plt.savefig(image_data, **settings)  # type: ignore
         decoded_image_data = base64.b64encode(image_data.getvalue()).decode("utf-8")
         return RenderPlan(
             kind="raw",
-            raw_html=f'<img src="data:image/png;base64,{decoded_image_data}" />'
+            raw_html=f'<img src="data:image/png;base64,{decoded_image_data}" />',
         )
 
     def plan(self, context) -> RenderPlan:

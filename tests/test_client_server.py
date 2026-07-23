@@ -132,7 +132,7 @@ class TestConfiguration:
 
     def test_do_configuration(self, server: ClientServer):
         """Test do_configuration method."""
-        result = server.do_configuration()
+        server.do_configuration()
         assert server.phase == "configuring"
 
 

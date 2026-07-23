@@ -3,3 +3,11 @@ from drafter.payloads.kinds.fragment import Fragment
 from drafter.payloads.kinds.redirect import Redirect
 from drafter.payloads.kinds.update import Update
 from drafter.payloads.payloads import ResponsePayload
+
+__all__ = [
+    "Page",
+    "Fragment",
+    "Redirect",
+    "Update",
+    "ResponsePayload",
+]

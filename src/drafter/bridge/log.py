@@ -24,7 +24,7 @@ def debug_log(event_name: str, *args: Any) -> None:
             for arg in args:
                 try:
                     safe_args.append(str(arg))
-                except:
+                except Exception:
                     safe_args.append("<unprintable>")
             print(f"[Drafter Client*] {event_name}: ", *safe_args)
         except Exception as e:

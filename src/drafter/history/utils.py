@@ -3,7 +3,6 @@ Utility functions for the Drafter history module.
 """
 
 import html
-import json
 import base64
 import io
 from dataclasses import fields, is_dataclass
@@ -93,8 +92,9 @@ def repr_pil_image(value):
         try:
             image_data = base64.b64encode(image_to_bytes(value)).decode("latin1")
             image_src = f"data:image/png;base64,{image_data}"
-            escaped_data = json.dumps(image_data)
-            full_call = f'Image.open(io.BytesIO(base64.b64decode({escaped_data}.encode("latin1"))))'
+            # TODO: Figure out if we need the full call anywhere
+            # escaped_data = json.dumps(image_data)
+            # full_call = f'Image.open(io.BytesIO(base64.b64decode({escaped_data}.encode("latin1"))))'
             return f"<img src='{image_src}' alt='PIL Image' />"
         except Exception as e:
             return f"<strong>Error displaying image: {e}</strong>"

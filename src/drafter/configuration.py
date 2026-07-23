@@ -102,7 +102,7 @@ def configure_system(
     preparser = get_preparser()
     if preparser is not None:
         # Preparse known arguments to determine mode
-        parsed_pre, unknown_args = preparser.parse_known_args(original_arguments)
+        parsed_pre, _unknown_args = preparser.parse_known_args(original_arguments)
         parsed_args = BootstrapConfiguration.parse_args(vars(parsed_pre))
         bootstrap_config.merge_in_args(parsed_args, raise_errors=False)
         modified_args[bootstrap_config.get_key()].update(parsed_args)
@@ -138,9 +138,9 @@ def configure_system(
     # Parsing only happens in CLI contexts, not browser contexts
     parser = get_parser(bootstrap_config.mode)
     if parser is not None:
-        parsed, unknown_args = parser.parse_known_args(original_arguments)
+        parsed, _unknown_args = parser.parse_known_args(original_arguments)
     else:
-        parsed, unknown_args = None, original_arguments
+        parsed, _unknown_args = None, original_arguments
 
     #### Populate All Other Configurations
     # Merge configurations in order of priority:

@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 
 # Handle configuration if needed
-import drafter.configuration
+from drafter.configuration import get_system_configuration
 
 from drafter.version import CURRENT_DRAFTER_VERSION
 
@@ -132,6 +132,7 @@ from drafter.launch import start_server
 
 
 __all__ = [
+    "get_system_configuration",
     "dataclass",
     "open",
     "get_drafter_path",
