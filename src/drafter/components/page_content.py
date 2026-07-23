@@ -25,7 +25,7 @@ Attribute order should always be consistent, with styles at the end. Generally, 
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Union
 
 from drafter.components.planning.render_plan import AssetBundle, NewlineMode, RenderPlan
 from drafter.components.utilities.persistence import add_persistence_attributes
@@ -630,10 +630,10 @@ class Component:
         return self
 
 
-Content = Component | str
+Content = Union[Component, str]
 """Type alias for page content: a component or string."""
 
-PageContent = Content | list[Content]
+PageContent = Union[Content, list[Content]]
 """Type alias for page content: a content item or list of content items."""
 
 
