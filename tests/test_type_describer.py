@@ -704,11 +704,6 @@ def test_max_depth_representation():
     }
 
 
-def test_simple_error_representation():
-    # TODO: Create a scenario that triggers an error during analysis
-    pass
-
-
 def test_major_error_representation():
     class BadClass:
         def __repr__(self):
