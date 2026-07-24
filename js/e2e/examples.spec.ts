@@ -1,8 +1,8 @@
 // Suite A of JS_TESTING_PLAN.md: run every runnable example in a real
 // browser. Batches share one page (one Pyodide boot); each batch gets a
-// fresh page so memory is reclaimed by the OS between batches. This replaces
-// the jest examples-parity suite's role as the broad "does every example
-// run" net (the jest partitions remain until this suite is proven in CI).
+// fresh page so memory is reclaimed by the OS between batches. This is the
+// broad "does every example run" net (it replaced the deleted jest
+// examples-parity partitions once this suite went green in CI).
 
 import { test, expect } from "playwright/test";
 import * as fs from "node:fs";
@@ -21,10 +21,9 @@ declare global {
 const EXAMPLES_DIR = path.resolve(__dirname, "..", "..", "examples");
 const BATCH_SIZE = 8;
 
-// The browser harness can run far more than the jest/jsdom one (see
-// js/src/__tests__/pyodide/examples-parity-suite.ts): pillow is installed,
-// real layout exists, and initial renders of upload forms work. Skips that
-// remain are annotated with why.
+// The browser harness can run far more than the jest/jsdom one could:
+// pillow is installed, real layout exists, and initial renders of upload
+// forms work. Skips that remain are annotated with why.
 const SKIP_EXAMPLES = [
 	// Coupled two-file example; the harness writes a single main.py per run.
 	"import_reloading.py",
