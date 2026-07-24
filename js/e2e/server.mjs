@@ -14,7 +14,7 @@
 // (or `npm run playground:build`) so dist/ and the drafter zip exist.
 
 import http from "node:http";
-import { createReadStream, existsSync, statSync } from "node:fs";
+import { createReadStream, existsSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -82,6 +82,17 @@ if (!existsSync(path.join(jsRoot, "dist", "js", "drafter.pyodide.js"))) {
 if (!existsSync(ZIP_PATH)) {
 	missing.push(
 		"playground/__drafter_assets/drafter-pyodide.zip (run `node playground/build-playground.mjs`)",
+	);
+}
+// The pyodide npm package ships no wheels; they're cached on demand. A fresh
+// checkout must prefetch them or the browser 404s on /pyodide/micropip-*.whl.
+if (
+	!readdirSync(path.join(jsRoot, "node_modules", "pyodide")).some(
+		(name) => name.startsWith("micropip-") && name.endsWith(".whl"),
+	)
+) {
+	missing.push(
+		"node_modules/pyodide/micropip-*.whl (run `node e2e/prefetch-pyodide-packages.mjs`)",
 	);
 }
 if (missing.length > 0) {

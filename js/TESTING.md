@@ -37,6 +37,11 @@ phase status live in [`../JS_TESTING_PLAN.md`](../JS_TESTING_PLAN.md).
   you invoke `npx playwright test` directly after changing Python code,
   rebuild it yourself — a stale zip shows up as baffling PythonErrors.
   Changing TS code requires `npm run build` (the harness serves `dist/`).
+- **The pyodide npm package ships no wheels.** The e2e server serves
+  `node_modules/pyodide/` as `/pyodide/`, but micropip/pillow wheels only
+  exist there as a download cache. `npm run test:e2e` runs
+  `e2e/prefetch-pyodide-packages.mjs` to populate it; on a fresh checkout
+  without that step the boot dies with "No module named 'micropip'".
 
 ## E2e layout
 
