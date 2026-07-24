@@ -35,12 +35,19 @@ test("boots Pyodide in the browser and runs an interactive counter app", async (
 }) => {
 	const consoleErrors: string[] = [];
 	page.on("console", (message) => {
-		if (message.type() === "error") {
+		// Network failures are tracked (and filtered) by the response
+		// listener below, which has the URL; the console duplicate doesn't.
+		if (
+			message.type() === "error" &&
+			!message.text().startsWith("Failed to load resource")
+		) {
 			consoleErrors.push(message.text());
 		}
 	});
 	page.on("response", (response) => {
-		if (response.status() >= 400) {
+		// Pyodide's import machinery probes for missing modules as .py files
+		// relative to the page; those 404s are expected fallbacks, not bugs.
+		if (response.status() >= 400 && !response.url().endsWith(".py")) {
 			consoleErrors.push(`${response.status()} ${response.url()}`);
 		}
 	});

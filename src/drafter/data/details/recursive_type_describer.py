@@ -47,7 +47,10 @@ at a configurable maximum depth.
 from dataclasses import fields, is_dataclass
 from typing import Any
 
-from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
+# PILImage is imported by value for annotations only; runtime checks use the
+# module so late Pillow installs (refresh_pillow_support) are observed.
+from drafter.components.utilities import image_support
+from drafter.components.utilities.image_support import PILImage
 
 
 def first_shared_base(cls1, cls2):
@@ -290,7 +293,7 @@ class RecursiveTypeDescriber:
             return self._visit_dict(value, depth, new_seen_ids)
 
         # Pillow image
-        if HAS_PILLOW and isinstance(value, PILImage.Image):
+        if image_support.HAS_PILLOW and isinstance(value, image_support.PILImage.Image):
             return self._visit_pillow_image(value)
 
         # Primitive or other object: record leaf

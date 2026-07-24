@@ -5,7 +5,7 @@ JSON serialization and deserialization for state persistence.
 import io
 from dataclasses import fields, is_dataclass
 
-from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
+from drafter.components.utilities import image_support
 
 
 def image_to_bytes(value):
@@ -33,7 +33,7 @@ def bytes_to_image(value):
     Returns:
         A PIL Image object
     """
-    return PILImage.open(io.BytesIO(value))
+    return image_support.PILImage.open(io.BytesIO(value))
 
 
 def dehydrate_json(value, seen=None):
@@ -74,7 +74,7 @@ def dehydrate_json(value, seen=None):
         return {
             f.name: dehydrate_json(getattr(value, f.name), seen) for f in fields(value)
         }
-    elif HAS_PILLOW and isinstance(value, PILImage.Image):
+    elif image_support.HAS_PILLOW and isinstance(value, image_support.PILImage.Image):
         return image_to_bytes(value).decode("latin1")
     raise ValueError(
         f"Error while serializing state: The {value!r} is not a int, str, float, bool, list, or dataclass."
@@ -109,7 +109,9 @@ def rehydrate_json(value, new_type):
         elif hasattr(new_type, "__origin__") and new_type.__origin__ is list:
             return value
     elif isinstance(value, str):
-        if HAS_PILLOW and issubclass(new_type, PILImage.Image):
+        if image_support.HAS_PILLOW and issubclass(
+            new_type, image_support.PILImage.Image
+        ):
             return bytes_to_image(value.encode("latin1"))
         return value
     elif isinstance(value, (int, float, bool)) or value is None:

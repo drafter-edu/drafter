@@ -9,7 +9,7 @@ def index():
         [
             "Hey look at this image!",
             Link(Image("https://picsum.photos/200/300"), "https://example.com"),
-            Image("victory.png"),
+            Image("images/soon-128.png"),
         ]
     )
 
@@ -20,7 +20,7 @@ assert_equal(
         [
             "Hey look at this image!",
             Link(Image("https://picsum.photos/200/300"), "https://example.com"),
-            Image("victory.png"),
+            Image("images/soon-128.png"),
         ]
     ),
 )

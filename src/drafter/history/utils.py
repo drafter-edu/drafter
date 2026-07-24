@@ -8,7 +8,7 @@ import io
 from dataclasses import fields, is_dataclass
 from typing import Any
 
-from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
+from drafter.components.utilities import image_support
 from drafter.helpers.utils import is_pyodide, is_skulpt
 
 TOO_LONG_VALUE_THRESHOLD = 256
@@ -172,7 +172,7 @@ def safe_repr(value: Any, handled=None, escape=True):
         args_repr = ", ".join(safe_repr(v, handled, escape) for v in value)
         return f"{value.__class__.__name__}({{{args_repr}}})"
 
-    if HAS_PILLOW and isinstance(value, PILImage.Image):
+    if image_support.HAS_PILLOW and isinstance(value, image_support.PILImage.Image):
         return repr_pil_image(value)
 
     # Fallback for other types

@@ -21,7 +21,7 @@ from dataclasses import replace
 from datetime import date, datetime, time
 from typing import Any, get_type_hints
 
-from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
+from drafter.components.utilities import image_support
 from drafter.data.converter import (
     COLLECTION_TYPES,
     CONVERTER_REGISTRY,
@@ -55,7 +55,11 @@ def _accepts_file_upload(target: Any) -> bool:
             return True
     except TypeError:
         return False
-    return HAS_PILLOW and inspect.isclass(target) and issubclass(target, PILImage.Image)
+    return (
+        image_support.HAS_PILLOW
+        and inspect.isclass(target)
+        and issubclass(target, image_support.PILImage.Image)
+    )
 
 
 def convert_file_upload(ctx: ConversionContext) -> ConversionResult | None:
@@ -120,11 +124,15 @@ def convert_file_upload(ctx: ConversionContext) -> ConversionResult | None:
             ),
         )
 
-    if HAS_PILLOW and inspect.isclass(target) and issubclass(target, PILImage.Image):
+    if (
+        image_support.HAS_PILLOW
+        and inspect.isclass(target)
+        and issubclass(target, image_support.PILImage.Image)
+    ):
         if not content:
             return ConversionResult(ok=True, value=None)
         try:
-            image = PILImage.open(io.BytesIO(content))
+            image = image_support.PILImage.open(io.BytesIO(content))
             image.filename = filename
             return ConversionResult(ok=True, value=image)
         except Exception:

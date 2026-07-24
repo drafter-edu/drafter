@@ -9,11 +9,13 @@ import io
 from dataclasses import dataclass
 
 from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
-from drafter.components.utilities.image_support import HAS_PILLOW, PILImage
-from drafter.helpers.urls import check_invalid_external_url, friendly_urls
 
-BASE_IMAGE_FOLDER = "/__images"
-"""URL prefix under which local (non-external) image paths are served."""
+# PILImage is imported by value for annotations only; runtime checks go
+# through the module so refresh_pillow_support() (late micropip installs)
+# is observed.
+from drafter.components.utilities import image_support
+from drafter.components.utilities.image_support import PILImage
+from drafter.helpers.urls import check_invalid_external_url, friendly_urls
 
 
 @dataclass(repr=False)
@@ -60,7 +62,6 @@ class Image(Component):
         self.width = width
         self.height = height
         self.extra_settings = kwargs
-        self.base_image_folder = BASE_IMAGE_FOLDER
 
     def open(self, *args, **kwargs):
         """Open an image file using PIL.
@@ -75,11 +76,11 @@ class Image(Component):
         Raises:
             ImportError: If Pillow is not installed.
         """
-        if not HAS_PILLOW:
+        if not image_support.HAS_PILLOW:
             raise ImportError(
                 "Pillow is not installed. Please install it to use this feature."
             )
-        return PILImage.open(*args, **kwargs)
+        return image_support.PILImage.open(*args, **kwargs)
 
     def new(self, *args, **kwargs):
         """Create a new image using PIL.
@@ -94,11 +95,11 @@ class Image(Component):
         Raises:
             ImportError: If Pillow is not installed.
         """
-        if not HAS_PILLOW:
+        if not image_support.HAS_PILLOW:
             raise ImportError(
                 "Pillow is not installed. Please install it to use this feature."
             )
-        return PILImage.new(*args, **kwargs)
+        return image_support.PILImage.new(*args, **kwargs)
 
     def _handle_pil_image(self, image):
         """Convert a PIL Image to a base64-encoded data URL.
@@ -110,7 +111,7 @@ class Image(Component):
             Tuple of (was_pil, processed_url) where was_pil indicates
             if the input was a PIL image.
         """
-        if not HAS_PILLOW or isinstance(image, str):
+        if not image_support.HAS_PILLOW or isinstance(image, str):
             return False, image
 
         # print("Handling PIL image.", image)
@@ -166,7 +167,6 @@ class Image(Component):
                 # Ensure we have a leading slash
                 if not url_processed.startswith("/"):
                     url_processed = "/" + url_processed
-                url_processed = self.base_image_folder + url_processed
             attributes["src"] = url_processed
 
         return attributes

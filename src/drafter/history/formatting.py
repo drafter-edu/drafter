@@ -6,7 +6,7 @@ Relies on a custom PrettyPrinter to handle special types like Pillow images.
 
 import pprint
 
-from drafter.components.images import HAS_PILLOW, PILImage
+from drafter.components.utilities import image_support
 from drafter.helpers.diffing import get_indent_width
 from drafter.history.utils import repr_pil_image
 
@@ -32,7 +32,9 @@ class CustomPrettyPrinter(pprint.PrettyPrinter):  # type: ignore
             Tuple of (formatted string, whether it is readable by eval,
             whether recursion was detected), per the pprint contract.
         """
-        if HAS_PILLOW and isinstance(object, PILImage.Image):
+        if image_support.HAS_PILLOW and isinstance(
+            object, image_support.PILImage.Image
+        ):
             return repr_pil_image(object), True, False
         return pprint.PrettyPrinter.format(self, object, context, maxlevels, level)
 

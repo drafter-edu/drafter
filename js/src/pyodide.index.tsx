@@ -174,7 +174,7 @@ async function resetPyodideRuntime(
 	clearDrafterSiteRoot(rootElementId, targetDocument ?? document);
 }
 
-function interruptActiveRun() {
+export function interruptActiveRun() {
 	const pyodide = (window as any).pyodide;
 	if (pyodide === undefined) {
 		return;
@@ -449,6 +449,25 @@ export async function setupPyodide(options: PyodideSettings, verbose = false) {
 				"Pyodide loaded successfully. Environment Variables:",
 				window.pyodide?._module?.ENV,
 			);
+			// Arm the interrupt buffer up front (when cross-origin isolation
+			// allows): registering it mid-execution makes the first
+			// interruptActiveRun unreliable.
+			if (
+				typeof SharedArrayBuffer !== "undefined" &&
+				typeof Atomics !== "undefined" &&
+				typeof window.pyodide.setInterruptBuffer === "function"
+			) {
+				const interruptWindow =
+					window as WindowWithDrafterInterruptBuffer;
+				if (!interruptWindow.__drafterInterruptBuffer) {
+					interruptWindow.__drafterInterruptBuffer = new Int32Array(
+						new SharedArrayBuffer(4),
+					);
+				}
+				window.pyodide.setInterruptBuffer(
+					interruptWindow.__drafterInterruptBuffer,
+				);
+			}
 			// Load micropip
 			verboseLog("Loading micropip...");
 			await window.pyodide.loadPackage("micropip");

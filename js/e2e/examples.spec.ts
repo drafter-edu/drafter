@@ -45,13 +45,6 @@ const SKIP_EXAMPLES = [
 	"complex_state.py",
 	// Calls unittest.main() at module level, which sys.exit()s the runner.
 	"unittest_full_state.py",
-	// These three render a real Drafter error page ("could not turn your
-	// page result into something it can display") even in a real browser
-	// with pillow installed — suspected image/upload rendering bug worth
-	// investigating, tracked in JS_TESTING_PLAN.md.
-	"file_upload.py",
-	"handle_image_upload.py",
-	"pil_image.py",
 ];
 const INTENTIONAL_ERROR_EXAMPLES = [
 	"error_non_string_page.py",

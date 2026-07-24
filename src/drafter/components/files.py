@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 from drafter.components.forms import FormComponent
 from drafter.components.page_content import Component, ComponentArgument, PageContent
-from drafter.components.utilities.image_support import HAS_PILLOW
+from drafter.components.utilities import image_support
 from drafter.components.utilities.validation import validate_parameter_name
 
 # TODO: Properly handle type hints for PILImage, DrafterFile, etc.
@@ -89,7 +89,7 @@ class Download(Component):
         Returns:
             Tuple of (was_pil, processed_url).
         """
-        if not HAS_PILLOW or isinstance(image, str):
+        if not image_support.HAS_PILLOW or isinstance(image, str):
             return False, image
 
         image_data = io.BytesIO()

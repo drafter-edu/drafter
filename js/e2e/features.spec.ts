@@ -57,6 +57,84 @@ test("file upload round-trips real file content through a route", async ({
 	);
 });
 
+const RUNAWAY_APP = `
+import asyncio
+from drafter import *
+
+# Yielding infinite loop: never reaches start_server, but keeps the event
+# loop responsive so the interrupt can be delivered from JS.
+async def spin():
+    while True:
+        await asyncio.sleep(0.01)
+
+await spin()
+
+start_server()
+`;
+
+const AFTER_INTERRUPT_APP = `
+from drafter import *
+hide_debug_information()
+
+@route
+def index(state):
+    return Page(state, ["Recovered after interrupt"])
+
+start_server()
+`;
+
+test("interruptActiveRun stops a runaway app and the runtime stays usable", async ({
+	page,
+}) => {
+	await page.goto("/harness.html");
+
+	const outcome = await page.evaluate(async (code) => {
+		await window.bootRuntime();
+		// Deliberately NOT awaited: this run spins forever until interrupted.
+		const runaway = (
+			window as unknown as {
+				Drafter: {
+					runStudentCode: (options: {
+						code: string;
+						presentErrors: boolean;
+					}) => Promise<unknown>;
+					interruptActiveRun: () => void;
+				};
+			}
+		).Drafter;
+		const running = runaway
+			.runStudentCode({ code, presentErrors: false })
+			.then(
+				() => "resolved",
+				(error: unknown) => `rejected: ${String(error).slice(0, 1500)}`,
+			);
+		// Give the loop time to start spinning, then interrupt. Re-signal
+		// periodically (like a user mashing stop) until the run settles.
+		await new Promise((resolve) => setTimeout(resolve, 500));
+		runaway.interruptActiveRun();
+		const nag = setInterval(() => runaway.interruptActiveRun(), 500);
+		// Never hang the test: report if the interrupt failed to land.
+		const timeout = new Promise<string>((resolve) =>
+			setTimeout(() => resolve("still-running-after-interrupt"), 10000),
+		);
+		const result = await Promise.race([running, timeout]);
+		clearInterval(nag);
+		return result;
+	}, RUNAWAY_APP);
+	console.log("interrupt outcome:", outcome.slice(0, 400));
+
+	expect(outcome).toContain("rejected");
+	expect(outcome).toContain("KeyboardInterrupt");
+
+	// The interpreter survives: a normal app runs afterwards.
+	await page.evaluate(async (code) => {
+		await window.runExample(code);
+	}, AFTER_INTERRUPT_APP);
+	await expect(page.locator("#drafter-root--")).toContainText(
+		"Recovered after interrupt",
+	);
+});
+
 const GEOLOCATION_APP = `
 from drafter import *
 hide_debug_information()
