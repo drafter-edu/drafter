@@ -14,8 +14,8 @@ emitted so the nav entry in mkdocs.yml still resolves.
 import os
 from pathlib import Path
 
-from tqdm import tqdm
 import mkdocs_gen_files
+from tqdm import tqdm
 
 if os.getenv("DRAFTER_MKDOCS_API", "").strip().lower() not in {
     "1",
