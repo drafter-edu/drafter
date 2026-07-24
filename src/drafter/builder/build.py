@@ -7,10 +7,10 @@ user-specified paths into the output directory.
 
 import os
 import shutil
-from typing import Optional, Union
 import zipfile
 from glob import glob
 from pathlib import Path
+from typing import Optional, Union
 
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import get_main_server

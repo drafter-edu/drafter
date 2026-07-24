@@ -18,11 +18,8 @@ component) or a list of components (each element is updated).
 # - superscript, subscript
 # - border/margin/padding for individual sides
 
-from collections.abc import Sequence
-from typing import TypeVar, Union, overload
 
-from drafter.components import Component, PageContent, Text
-from drafter.components.page_content import Content
+from drafter.components import PageContent
 from drafter.styling.generics import update_style
 
 
