@@ -39,20 +39,33 @@ const sharedConfig = {
 };
 
 const config: Config = {
+	// Recycle a worker between test files once it holds this much memory.
+	// Defense in depth only: pyodide integration files must NOT share a
+	// process at all (leftover render loops from one file spike the heap
+	// mid-file in later ones, which this limit cannot catch), so
+	// scripts/run-integration-tests.mjs runs each of them in its own Jest
+	// process. Ignored under --runInBand.
+	workerIdleMemoryLimit: "1GB",
 	projects: [
 		{
+			// Fast unit/component tests: jsdom only, no Pyodide runtime.
+			...sharedConfig,
+			displayName: "unit",
+			testMatch: [
+				// Everything directly in __tests__/ (components, engine, brokers)
+				"**/__tests__/*.test.{ts,tsx}",
+				"**/__tests__/transpiler/**/*.test.{ts,tsx}",
+			],
+		},
+		{
+			// Integration tests against a real Pyodide interpreter. The custom
+			// environment boots Pyodide per test file when loadPyodide is set.
 			...sharedConfig,
 			displayName: "pyodide",
-			testMatch: [
-				"**/__tests__/pyodide/**/*.test.{ts,tsx}",
-				"**/__tests__/engine.test.ts",
-				"**/__tests__/timer.test.ts",
-				"**/__tests__/clock.test.ts",
-				"**/__tests__/audio.test.ts",
-				"**/__tests__/map.test.ts",
-				"**/__tests__/media.test.ts",
-				"**/__tests__/persistence.test.ts",
-			],
+			testEnvironmentOptions: {
+				loadPyodide: true,
+			},
+			testMatch: ["**/__tests__/pyodide/**/*.test.{ts,tsx}"],
 		},
 		{
 			...sharedConfig,

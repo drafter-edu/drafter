@@ -24,6 +24,11 @@ function stringify(text: string): string {
 		}
 		return `"""${text}"""`;
 	}
+	// Match Python's repr convention: single quotes when the text contains
+	// double quotes (but no single quotes), avoiding escaped quotes.
+	if (text.includes('"') && !text.includes("'")) {
+		return `'${text.replace(/\\/g, "\\\\")}'`;
+	}
 	return JSON.stringify(text);
 }
 

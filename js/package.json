@@ -16,9 +16,10 @@
 		"precompile": "node scripts/precompile-python.mjs --minify",
 		"precompile:watch": "chokidar \"../src/drafter/**/*.py\" \"./src/bridge/**/*.ts\" -d 200 --initial -c \"node scripts/precompile-python.mjs\"",
 		"dev": "node scripts/update-skulpt.mjs && tsup --watch",
-		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects pyodide",
+		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects unit",
+		"test:integration": "node scripts/run-integration-tests.mjs",
 		"test:skulpt": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects skulpt",
-		"test:all": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects pyodide,skulpt",
+		"test:all": "npm test && npm run test:integration && npm run test:skulpt",
 		"test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
 		"playground:build": "npm run build && node playground/build-playground.mjs",
 		"playground": "npm run playground:build && python -m http.server 8777 --directory playground"

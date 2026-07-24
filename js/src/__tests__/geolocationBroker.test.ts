@@ -10,7 +10,7 @@ import {
 import {
 	geolocationBroker,
 	resetGeolocationBrokerForTests,
-} from "../../components/geolocationBroker";
+} from "../components/geolocationBroker";
 
 type SuccessCallback = (position: GeolocationPosition) => void;
 type ErrorCallback = (error: GeolocationPositionError) => void;

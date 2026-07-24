@@ -8,9 +8,16 @@ import {
 } from "@jest/globals";
 
 import "../components/geolocation";
+import { resetGeolocationBrokerForTests } from "../components/geolocationBroker";
 
 type SuccessCallback = (position: unknown) => void;
 type ErrorCallback = (error: unknown) => void;
+
+// The component reaches the geolocation API through the broker's promise
+// chain, so state lands a few microtasks after the native callback fires.
+function flushMicrotasks(): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, 0));
+}
 
 const ERROR_CODES = {
 	PERMISSION_DENIED: 1,
@@ -23,6 +30,7 @@ describe("drafter-current-location", () => {
 
 	beforeEach(() => {
 		document.body.innerHTML = "";
+		resetGeolocationBrokerForTests();
 		getCurrentPosition = jest.fn();
 		Object.defineProperty(window.navigator, "geolocation", {
 			configurable: true,
@@ -94,7 +102,7 @@ describe("drafter-current-location", () => {
 		expect(element.hidden).toBe(false);
 	});
 
-	test("stores the position and emits locate when permission is granted", () => {
+	test("stores the position and emits locate when permission is granted", async () => {
 		const element = createComponent({
 			name: "spot",
 			"show-coordinates": "true",
@@ -120,6 +128,7 @@ describe("drafter-current-location", () => {
 			},
 			timestamp: 1234567890,
 		});
+		await flushMicrotasks();
 
 		const stored = getStoredLocation(element);
 		expect(stored).toEqual({
@@ -158,7 +167,7 @@ describe("drafter-current-location", () => {
 		});
 	});
 
-	test("maps a permission error to the denied state", () => {
+	test("maps a permission error to the denied state", async () => {
 		const element = createComponent({ name: "spot" });
 		const locateListener = jest.fn();
 		const errorListener = jest.fn();
@@ -169,6 +178,7 @@ describe("drafter-current-location", () => {
 
 		(element.querySelector("button") as HTMLButtonElement).click();
 		resolvePosition().fail({ code: 1, ...ERROR_CODES });
+		await flushMicrotasks();
 
 		expect(getStoredLocation(element)).toEqual({
 			status: "denied",
@@ -183,7 +193,7 @@ describe("drafter-current-location", () => {
 		expect(deniedListener).toHaveBeenCalledTimes(1);
 	});
 
-	test("maps a timeout to the error state", () => {
+	test("maps a timeout to the error state", async () => {
 		const element = createComponent({ name: "spot" });
 		const errorListener = jest.fn();
 		const timeoutListener = jest.fn();
@@ -192,6 +202,7 @@ describe("drafter-current-location", () => {
 
 		(element.querySelector("button") as HTMLButtonElement).click();
 		resolvePosition().fail({ code: 3, ...ERROR_CODES });
+		await flushMicrotasks();
 
 		expect(getStoredLocation(element)).toEqual({
 			status: "error",

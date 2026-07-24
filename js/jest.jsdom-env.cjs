@@ -28,7 +28,14 @@ class DrafterJSDOMEnvironment extends JSDOMEnvironment {
 	constructor(config, context) {
 		super(config, context);
 
-		this.testPath = context && context.testPath ? context.testPath : "";
+		// Pyodide is only booted for projects that opt in explicitly (the
+		// "pyodide" integration project sets this). Unit tests get plain jsdom.
+		const envOptions =
+			(config &&
+				config.projectConfig &&
+				config.projectConfig.testEnvironmentOptions) ||
+			{};
+		this.loadPyodide = Boolean(envOptions.loadPyodide);
 
 		for (const name of GLOBALS_TO_COPY) {
 			if (
@@ -37,6 +44,15 @@ class DrafterJSDOMEnvironment extends JSDOMEnvironment {
 			) {
 				this.global[name] = globalThis[name];
 			}
+		}
+
+		// When Node runs with --expose-gc (the integration npm scripts do),
+		// let long-running suites trigger collection between tests.
+		if (
+			typeof this.global.gc === "undefined" &&
+			typeof globalThis.gc === "function"
+		) {
+			this.global.gc = globalThis.gc.bind(globalThis);
 		}
 	}
 
@@ -50,7 +66,7 @@ class DrafterJSDOMEnvironment extends JSDOMEnvironment {
 		// loader on the jsdom global. `jsglobals` is pointed at the jsdom global
 		// so Drafter's Python bridge (`import js; js.document`) renders into the
 		// test DOM.
-		if (this.testPath.includes("pyodide")) {
+		if (this.loadPyodide) {
 			const path = require("path");
 			const { loadPyodide } = await import("pyodide");
 			const jsGlobal = this.global;

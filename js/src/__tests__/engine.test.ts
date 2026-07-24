@@ -33,7 +33,8 @@ describe("reportSystemError presentation policy", () => {
 		});
 
 		const root = document.getElementById("drafter-root--");
-		expect(root?.textContent).toContain("Drafter System Error");
+		expect(root?.querySelector(".drafter-system-error")).not.toBeNull();
+		expect(root?.textContent).toContain("Something Went Wrong");
 		expect(root?.textContent).toContain("Error setting up Pyodide");
 	});
 
@@ -49,7 +50,7 @@ describe("reportSystemError presentation policy", () => {
 		});
 
 		const root = document.getElementById("drafter-root--");
-		expect(root?.textContent).not.toContain("Drafter System Error");
+		expect(root?.querySelector(".drafter-system-error")).toBeNull();
 	});
 
 	test("warnings only go to the debug panel sink", () => {
@@ -65,7 +66,7 @@ describe("reportSystemError presentation policy", () => {
 		});
 
 		const root = document.getElementById("drafter-root--");
-		expect(root?.textContent).not.toContain("Drafter System Error");
+		expect(root?.querySelector(".drafter-system-error")).toBeNull();
 		expect(received).toHaveLength(1);
 		expect(received[0].metadata.level).toBe("warning");
 		expect(received[0].error.severity).toBe("warning");

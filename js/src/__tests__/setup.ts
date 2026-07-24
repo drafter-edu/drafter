@@ -21,6 +21,17 @@ Object.defineProperty(window, "showDirectoryPicker", {
 	writable: true,
 });
 
+// jsdom has no ResizeObserver; the map component observes its container.
+if (typeof globalThis.ResizeObserver === "undefined") {
+	class StubResizeObserver {
+		observe() {}
+		unobserve() {}
+		disconnect() {}
+	}
+	(globalThis as { ResizeObserver?: unknown }).ResizeObserver =
+		StubResizeObserver;
+}
+
 // Mock DecompressionStream if needed
 
 // globalThis.DecompressionStream = class {

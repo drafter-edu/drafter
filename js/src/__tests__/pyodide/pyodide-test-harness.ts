@@ -58,9 +58,14 @@ export async function resetPyodideDrafterRuntime() {
 		return;
 	}
 
+	// Tear down the previous run's server AND its bridge (event listeners,
+	// debug panel, navigation handlers). set_main_server(None) alone leaves
+	// the old bridge listening, so every past run re-renders on each event —
+	// across dozens of examples that compounds into an OOM.
 	await pyodide.runPythonAsync(
 		[
-			"from drafter.client_server.commands import set_main_server",
+			"from drafter.client_server.commands import reset_server_for_root, set_main_server",
+			'reset_server_for_root("drafter-root--")',
 			"set_main_server(None)",
 		].join("\n"),
 	);

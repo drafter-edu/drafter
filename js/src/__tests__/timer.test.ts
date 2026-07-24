@@ -127,6 +127,18 @@ describe("drafter-timer", () => {
 		timer.setAttribute("rate", "500");
 		expect(getLabel(timer).textContent).toBe("0:05");
 
+		const tickListener = jest.fn();
+		timer.addEventListener("tick", tickListener);
+
+		// The interval now fires at the new 500ms rate; with 4.5s remaining the
+		// countdown label still rounds up to the next whole second.
+		jest.advanceTimersByTime(500);
+		expect(tickListener).toHaveBeenCalledTimes(1);
+		expect(
+			(tickListener.mock.calls[0][0] as CustomEvent).detail.remaining,
+		).toBe(4500);
+		expect(getLabel(timer).textContent).toBe("0:05");
+
 		jest.advanceTimersByTime(500);
 		expect(getLabel(timer).textContent).toBe("0:04");
 	});

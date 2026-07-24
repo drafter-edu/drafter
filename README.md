@@ -377,11 +377,12 @@ Other useful JS scripts (run from `js/`): `npm run build` (production build), `n
 
 ### Run tests
 
-- JS tests (Pyodide project is the default; use `test:skulpt` or `test:all` for the rest):
+- JS tests (fast unit tests are the default; `test:integration` runs the real-Pyodide suites serially with a large heap, `test:skulpt` the Skulpt suites, `test:all` everything):
 
     ```powershell
     cd js
     npm run test
+    npm run test:integration
     ```
 
 - Python tests (uses uv env):

@@ -38,16 +38,20 @@ check:
     uv run ruff check
     uv run mypy --ignore-missing-imports --install-types --non-interactive --package drafter
 
-# Run JS tests (pyodide jest project)
+# Run JS unit tests (fast, no Pyodide)
 test-js:
     cd js && npm test
+
+# Run JS integration tests (real Pyodide, serial, large heap)
+test-js-integration:
+    cd js && npm run test:integration
 
 # Run Python tests
 test-py:
     uv run pytest --verbose --color=yes tests
 
 # Run all tests
-test: test-js test-py
+test: test-js test-js-integration test-py
 
 # Build JS assets into js/dist (needed by the compiler, docs, and packaging)
 build-js:

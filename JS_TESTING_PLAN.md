@@ -216,7 +216,7 @@ apps and drive them like a student would:
 
 | Phase | Work | Exit criterion |
 |-------|------|----------------|
-| 0 | Jest project split; un-orphan transpiler tests; memory flags (`maxWorkers`, `workerIdleMemoryLimit`); move misplaced unit tests out of `pyodide/` | `npm test` green locally without OOM; unit tier isolated |
+| 0 ✅ | Jest project split (`unit`/`pyodide`/`skulpt`, Pyodide boot now opt-in via `testEnvironmentOptions`); un-orphaned transpiler + geolocation tests; moved broker test out of `pyodide/`; OOM root-caused and fixed twice over — the harness reset now uses the real bridge teardown (`reset_server_for_root`, was `set_main_server(None)` only, leaving every past example's listeners re-rendering), and `scripts/run-integration-tests.mjs` runs each pyodide file in its own Jest process because leftover timer/animation render loops from one file otherwise OOM later files mid-run; examples-parity sharded into 6 partition files; fixed engine/timer baseline failures, geolocation async drift, transpiler quote style (pulled forward from Phase 2). Remaining known failure: `upload-repro` only (Phase 4) | `npm test` green locally without OOM; unit tier isolated ✅ (81/81 unit, 12/13 integration files) |
 | 1 | Tier 1 pure unit tests (transpiler expansion, engine, config, brokers, base element, execution chain, telemetry adapters) | `js-unit` CI job added and blocking |
 | 2 | Tier 2 gaps (debug panel, dialogs, error rendering, event contracts) + fix engine/timer baseline failures | Zero known-failing tests in unit tier |
 | 3 | Playwright bootstrap (config, COOP/COEP harness server, page objects) + Suite A examples migration; delete `pyodide.examples-parity.test.ts` | Examples run green in e2e; OOM suite deleted; `continue-on-error` removed |

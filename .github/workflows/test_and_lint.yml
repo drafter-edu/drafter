@@ -33,11 +33,11 @@ jobs:
           if-no-files-found: error
 
   test-js:
-    name: JS tests (pyodide)
+    name: JS tests (unit + pyodide integration)
     runs-on: ubuntu-latest
     # TODO: Remove once the known baseline jest failures are fixed
-    # (engine.test.ts error text, timer.test.ts restart, upload-repro,
-    # examples-parity OOM). Until then this job reports but does not block.
+    # (engine.test.ts error text, timer.test.ts restart, upload-repro).
+    # Until then this job reports but does not block. See JS_TESTING_PLAN.md.
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -49,8 +49,15 @@ jobs:
       - name: Install JS dependencies
         run: npm ci
         working-directory: js
-      - name: Run jest (pyodide project)
+      - name: Run jest (unit project)
         run: npm test
+        working-directory: js
+      - name: Run jest (pyodide integration project)
+        # scripts/run-integration-tests.mjs runs each pyodide file in its own
+        # Jest process: Pyodide WASM memory is never reclaimed and leftover
+        # render loops from one file otherwise OOM later files
+        # (JS_TESTING_PLAN.md Phase 3 replaces this with a Playwright suite).
+        run: npm run test:integration
         working-directory: js
 
   lint:
