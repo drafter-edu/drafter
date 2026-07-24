@@ -74,6 +74,43 @@ jobs:
         run: npm run test:integration
         working-directory: js
 
+  test-js-e2e:
+    name: JS e2e tests (Playwright)
+    needs: build-js
+    runs-on: ubuntu-latest
+    # TODO: Flip to blocking after the first green CI run proves the suite,
+    # then delete the jest examples-parity partitions (JS_TESTING_PLAN.md
+    # Phase 3).
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: js-dist
+          path: js/dist
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+      - name: Install JS dependencies
+        run: npm ci
+        working-directory: js
+      - name: Install Playwright chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: js
+      - name: Run Playwright e2e suites
+        # Rebuilds the drafter zip from src/drafter (needs python on PATH),
+        # then boots real Pyodide in Chromium against the built bundle.
+        run: npm run test:e2e
+        working-directory: js
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: js/test-results/
+          if-no-files-found: ignore
+
   lint:
     name: Lint (ruff + mypy)
     runs-on: ubuntu-latest

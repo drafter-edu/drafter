@@ -21,41 +21,37 @@ declare global {
 const EXAMPLES_DIR = path.resolve(__dirname, "..", "..", "examples");
 const BATCH_SIZE = 8;
 
-// Kept in sync with js/src/__tests__/pyodide/examples-parity-suite.ts.
-// Several of these (file uploads, plotting, PIL) are browser-feasible and
-// should be un-skipped as dedicated e2e feature specs are added.
+// The browser harness can run far more than the jest/jsdom one (see
+// js/src/__tests__/pyodide/examples-parity-suite.ts): pillow is installed,
+// real layout exists, and initial renders of upload forms work. Skips that
+// remain are annotated with why.
 const SKIP_EXAMPLES = [
+	// Coupled two-file example; the harness writes a single main.py per run.
 	"import_reloading.py",
 	"import_reloading_friend.py",
-	"file_upload.py",
-	"file_upload_testing.py",
-	"handle_image_upload.py",
-	"pil_image.py",
-	"bulleted_list_weirdness.py",
-	"button_arguments.py",
-	"calculator_features.py",
-	"calculator_two_page.py",
-	"deployed_full_width.py",
-	"dict_state.py",
-	"error_link.py",
-	"error_missing_page.py",
-	"explicit_routes.py",
+	// Needs the requests package / live network access from Python.
 	"fetch_weather.py",
+	// Need host filesystem integration (showDirectoryPicker flows).
 	"file_handling.py",
 	"file_handling_external.py",
-	"fun_style.py",
+	// Need matplotlib/seaborn (large micropip installs; revisit as a
+	// dedicated plotting spec with its own boot).
 	"plotting.py",
 	"plotting_seaborn.py",
-	"simplest.py",
-	"simple_image.py",
-	"simple_ring.py",
-	"successful_link.py",
-	"table.py",
-	"todo_list.py",
-	"unittest_full_state.py",
 	"weird_plot.py",
-	"complex_state.py",
+	// Intentionally never calls start_server, so nothing renders.
 	"no_start.py",
+	// Needs pandas (large micropip install).
+	"complex_state.py",
+	// Calls unittest.main() at module level, which sys.exit()s the runner.
+	"unittest_full_state.py",
+	// These three render a real Drafter error page ("could not turn your
+	// page result into something it can display") even in a real browser
+	// with pillow installed — suspected image/upload rendering bug worth
+	// investigating, tracked in JS_TESTING_PLAN.md.
+	"file_upload.py",
+	"handle_image_upload.py",
+	"pil_image.py",
 ];
 const INTENTIONAL_ERROR_EXAMPLES = [
 	"error_non_string_page.py",

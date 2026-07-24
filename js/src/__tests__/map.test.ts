@@ -167,3 +167,193 @@ describe("drafter-map", () => {
 		expect(shim.created.maps).toHaveLength(1);
 	});
 });
+
+describe("drafter-map (extended)", () => {
+	beforeEach(() => {
+		document.body.innerHTML = "";
+		shim.__reset();
+		(globalThis as { ResizeObserver?: unknown }).ResizeObserver =
+			StubResizeObserver;
+	});
+
+	afterEach(() => {
+		document.body.innerHTML = "";
+	});
+
+	function createComponent(
+		attributes: Record<string, string> = { name: "spot" },
+	): HTMLElement {
+		const element = document.createElement("drafter-map");
+		for (const [name, value] of Object.entries(attributes)) {
+			element.setAttribute(name, value);
+		}
+		document.body.appendChild(element);
+		return element;
+	}
+
+	function lastMap() {
+		const map = shim.created.maps.at(-1);
+		if (!map) {
+			throw new Error("No Leaflet map was created");
+		}
+		return map;
+	}
+
+	function getHiddenInput(element: HTMLElement): HTMLInputElement {
+		const input = element.querySelector('input[type="hidden"]');
+		if (!(input instanceof HTMLInputElement)) {
+			throw new Error("Hidden input was not rendered");
+		}
+		return input;
+	}
+
+	test("center update recenters in place, keeping the current zoom", () => {
+		const element = createComponent({ name: "spot", center: "10,20" });
+		expect(lastMap().zoom).toBe(13);
+
+		element.setAttribute("center", "30,40");
+		expect(shim.created.maps).toHaveLength(1);
+		expect(lastMap().center).toEqual([30, 40]);
+		expect(lastMap().zoom).toBe(13);
+	});
+
+	test("center update uses the zoom attribute when one is present", () => {
+		const element = createComponent({
+			name: "spot",
+			center: "10,20",
+			zoom: "5",
+		});
+		element.setAttribute("center", "30,40");
+		expect(lastMap().center).toEqual([30, 40]);
+		expect(lastMap().zoom).toBe(5);
+	});
+
+	test("zoom update calls setZoom without rebuilding the map", () => {
+		const element = createComponent({ name: "spot", center: "10,20" });
+		element.setAttribute("zoom", "7");
+		expect(shim.created.maps).toHaveLength(1);
+		expect(lastMap().zoom).toBe(7);
+	});
+
+	test("height update resizes the host and invalidates the map size", () => {
+		const element = createComponent({ name: "spot" });
+		expect(element.style.height).toBe("300px");
+		const before = lastMap().invalidateCount;
+
+		element.setAttribute("height", "450");
+		expect(element.style.height).toBe("450px");
+		expect(lastMap().invalidateCount).toBe(before + 1);
+
+		// A non-numeric height falls back to the 300px default.
+		element.setAttribute("height", "banana");
+		expect(element.style.height).toBe("300px");
+	});
+
+	test("a malformed center falls back to 0,0 but still counts as centered", () => {
+		// parseCenter tolerates junk by returning the default center, while
+		// the zoom default check only asks whether the attribute is PRESENT —
+		// so a junk center still selects the "centered" zoom of 13. Asserted
+		// as the actual behavior.
+		createComponent({ name: "spot", center: "1,banana" });
+		expect(lastMap().center).toEqual([0, 0]);
+		expect(lastMap().zoom).toBe(13);
+
+		shim.__reset();
+		createComponent({ name: "spot", center: "1,2,3" });
+		expect(lastMap().center).toEqual([0, 0]);
+	});
+
+	test("bad marker JSON is tolerated and clears previously-drawn markers", () => {
+		const element = createComponent({
+			name: "spot",
+			markers: JSON.stringify([{ latitude: 1, longitude: 2 }]),
+		});
+		const group = shim.created.layerGroups.at(-1)!;
+		expect(group.layers).toHaveLength(1);
+
+		// Malformed JSON parses to no markers, which wipes the layer group.
+		element.setAttribute("markers", "{oops");
+		expect(group.layers).toHaveLength(0);
+
+		// Entries without finite coordinates are filtered out; valid ones stay.
+		element.setAttribute(
+			"markers",
+			JSON.stringify([
+				{ latitude: 5, longitude: 6 },
+				{ latitude: "x", longitude: 6 },
+				{ label: "no coords" },
+				null,
+			]),
+		);
+		expect(group.layers).toHaveLength(1);
+		expect(group.layers[0].latlng).toEqual([5, 6]);
+	});
+
+	test("marker updates reuse the same map and layer group (diff, not rebuild)", () => {
+		const element = createComponent({
+			name: "spot",
+			markers: JSON.stringify([{ latitude: 1, longitude: 2 }]),
+		});
+		element.setAttribute(
+			"markers",
+			JSON.stringify([{ latitude: 3, longitude: 4 }]),
+		);
+		expect(shim.created.maps).toHaveLength(1);
+		expect(shim.created.layerGroups).toHaveLength(1);
+	});
+
+	test("name update renames the hidden form field in place", () => {
+		const element = createComponent({ name: "spot" });
+		element.setAttribute("name", "location");
+		expect(getHiddenInput(element).name).toBe("location");
+
+		element.removeAttribute("name");
+		expect(getHiddenInput(element).name).toBe("");
+	});
+
+	test("marker clicks fill the hidden form field with the marker payload", () => {
+		const element = createComponent({
+			name: "spot",
+			markers: JSON.stringify([{ latitude: 1, longitude: 2, label: "A" }]),
+		});
+		shim.created.layerGroups.at(-1)!.layers[0].fire("click", {});
+		expect(JSON.parse(getHiddenInput(element).value)).toEqual({
+			latitude: 1,
+			longitude: 2,
+			label: "A",
+		});
+	});
+
+	test("detach disconnects the resize observer; reattach builds a fresh map", () => {
+		const observers: Array<{ disconnects: number }> = [];
+		class RecordingResizeObserver {
+			disconnects = 0;
+			constructor() {
+				observers.push(this);
+			}
+			observe(): void {}
+			unobserve(): void {}
+			disconnect(): void {
+				this.disconnects += 1;
+			}
+		}
+		(globalThis as { ResizeObserver?: unknown }).ResizeObserver =
+			RecordingResizeObserver;
+
+		const element = createComponent({ name: "spot" });
+		const firstMap = lastMap();
+		expect(observers).toHaveLength(1);
+
+		element.remove();
+		expect(firstMap.removed).toBe(true);
+		expect(observers[0].disconnects).toBe(1);
+
+		// Reattaching is a full rebuild: a second Leaflet map and observer.
+		document.body.appendChild(element);
+		expect(shim.created.maps).toHaveLength(2);
+		expect(lastMap()).not.toBe(firstMap);
+		expect(lastMap().removed).toBe(false);
+		expect(observers).toHaveLength(2);
+		expect(getHiddenInput(element).name).toBe("spot");
+	});
+});
