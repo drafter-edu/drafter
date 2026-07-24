@@ -414,12 +414,12 @@ class EventManager:
         debug_log("client.setup_events")
 
         # Global events
-        for event_name, handler in event_handlers.items():
-            self._register_event(event_name, handler)
+        for event_name, event_handler in event_handlers.items():
+            self._register_event(event_name, event_handler)
 
         # Keyboard events
-        for key_combo, handler in key_handlers.items():
-            self._register_hotkey(key_combo, handler)
+        for key_combo, key_handler in key_handlers.items():
+            self._register_hotkey(key_combo, key_handler)
 
     def dispatch_page_loaded(
         self, route: str, request_id: int, response_id: int

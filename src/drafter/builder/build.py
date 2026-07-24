@@ -7,6 +7,7 @@ user-specified paths into the output directory.
 
 import os
 import shutil
+from typing import Optional, Union
 import zipfile
 from glob import glob
 from pathlib import Path
@@ -135,7 +136,7 @@ def compile_site(
     dest_assets_dir = output_directory / assets_url
     # TODO: Handle if assets_url is a CDN or external URL (in which case we wouldn't copy assets locally)
 
-    pyodide_drafter_path = ""
+    pyodide_drafter_path: Optional[Union[str, Path]] = ""
     if system.app_builder.pyodide_package_style == "build":
         # if system.app_common.engine != "pyodide":
         #     raise ValueError("pyodide_package_style can only be set to 'build' if the engine is 'pyodide'.")

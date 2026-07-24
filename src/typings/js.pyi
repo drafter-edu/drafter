@@ -37,7 +37,6 @@ class Location(Protocol):
     pathname: str
     search: str
 
-@runtime_checkable
 class URL:
     def __init__(self, url: str) -> None: ...
     def toString(self) -> str: ...

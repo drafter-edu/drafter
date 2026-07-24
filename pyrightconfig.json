@@ -1,4 +1,4 @@
 {
-    "extraPaths": ["src/drafter/typings"],
-    "reportWildcardImportFromLibrary": "none"
+	"extraPaths": ["src/typings"],
+	"reportWildcardImportFromLibrary": "none"
 }

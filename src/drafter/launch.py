@@ -4,6 +4,8 @@ Provides the start_server() function which routes to either in-browser ClientSer
 or local development AppServer based on execution context.
 """
 
+from typing import Any
+
 from drafter.client_server.commands import get_main_server
 from drafter.components.utilities.image_support import refresh_pillow_support
 from drafter.config.engines import EngineType
@@ -93,7 +95,7 @@ def start_server(
     refresh_pillow_support()
 
     # Handle compatibility for old parameters
-    parameters = {}
+    parameters: dict[str, Any] = {}
     if server_name is not None:
         parameters["server_name"] = server_name
     if in_debug_mode is not None:

@@ -565,8 +565,10 @@ def compare_drafter_types(
 
     do_comparison = False
     component_name = "Unknown"
-    actual_attributes, actual_positional = {}, {}
-    expected_attributes, expected_positional = {}, {}
+    actual_attributes: dict[str, Any] = {}
+    actual_positional: dict[str, Any] = {}
+    expected_attributes: dict[str, Any] = {}
+    expected_positional: dict[str, Any] = {}
 
     if isinstance(actual, Text) and isinstance(expected, str):
         do_comparison = True
