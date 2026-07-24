@@ -18,6 +18,7 @@
 		"dev": "node scripts/update-skulpt.mjs && tsup --watch",
 		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects unit",
 		"test:integration": "node scripts/run-integration-tests.mjs",
+		"test:e2e": "node playground/build-playground.mjs && playwright test",
 		"test:skulpt": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects skulpt",
 		"test:all": "npm test && npm run test:integration && npm run test:skulpt",
 		"test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
