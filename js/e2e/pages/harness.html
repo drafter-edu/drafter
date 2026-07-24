@@ -66,6 +66,20 @@
 				});
 				setStatus("example done");
 			};
+
+			// Full-instance path (registers the drafter-restart-student-code
+			// listener, so the debug-panel editor's Run button works).
+			window.runInstance = async function runInstance(code) {
+				await window.bootRuntime();
+				await window.resetDrafter();
+				setStatus("starting instance");
+				const instance = await window.Drafter.createDrafterInstance({
+					rootElementId: "drafter-root--",
+					inlineCode: code,
+				});
+				window.__drafterInstance = instance;
+				setStatus("instance running");
+			};
 		</script>
 	</body>
 </html>

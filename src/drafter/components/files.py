@@ -51,7 +51,11 @@ class Download(Component):
         ComponentArgument("content_type", kind="keyword", default_value="text/plain"),
     ]
 
-    RENAME_ATTRS = {"filename": "download"}
+    # download/href must be declared known or the attribute pipeline treats
+    # them as CSS style properties; content/content_type are payload fields,
+    # not attributes.
+    KNOWN_ATTRS = ["download", "href"]
+    RENAME_ATTRS = {"filename": "download", "content": "", "content_type": ""}
 
     def __init__(
         self,

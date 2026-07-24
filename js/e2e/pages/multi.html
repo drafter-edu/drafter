@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Drafter e2e multi-instance harness</title>
+	</head>
+	<body>
+		<div id="status">idle</div>
+		<div id="drafter-root--a"></div>
+		<div id="drafter-root--b"></div>
+		<script src="/pyodide/pyodide.js"></script>
+		<script src="/assets/js/drafter.pyodide.js"></script>
+		<script>
+			// Two shadow-DOM instances on one shared Pyodide runtime — the same
+			// shape the docs embeds and playground use.
+			window.DRAFTER_MODIFIED_CONFIGURATION = {};
+			const status = document.getElementById("status");
+
+			const COUNTER_APP = (title) => `
+from drafter import *
+hide_debug_information()
+
+@dataclass
+class State:
+    count: int
+
+@route
+def index(state: State):
+    return Page(state, [
+        "${title}",
+        f"Count: {state.count}",
+        Button("Increment", increment),
+    ])
+
+@route
+def increment(state: State):
+    state.count += 1
+    return index(state)
+
+start_server(State(0))
+`;
+
+			window.bootInstances = async function bootInstances() {
+				status.textContent = "booting";
+				await window.Drafter.setupPyodide({
+					pyodideUrl: "/pyodide/",
+					systemPackages: [],
+				});
+				await window.Drafter.mountDrafterRemote("/drafter-pyodide.zip");
+				await window.Drafter.patchPythonFeatures();
+				window.__instances = await Promise.all([
+					window.Drafter.createDrafterInstance({
+						rootElementId: "drafter-root--a",
+						useShadowDom: true,
+						instanceId: "instance-a",
+						inlineCode: COUNTER_APP("Counter A"),
+					}),
+					window.Drafter.createDrafterInstance({
+						rootElementId: "drafter-root--b",
+						useShadowDom: true,
+						instanceId: "instance-b",
+						inlineCode: COUNTER_APP("Counter B"),
+					}),
+				]);
+				status.textContent = "ready";
+			};
+		</script>
+	</body>
+</html>

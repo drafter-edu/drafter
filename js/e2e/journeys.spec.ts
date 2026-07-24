@@ -11,6 +11,7 @@ declare global {
 	interface Window {
 		bootRuntime: () => Promise<void>;
 		runExample: (code: string, presentErrors?: boolean) => Promise<void>;
+		runInstance: (code: string) => Promise<void>;
 	}
 }
 
@@ -112,4 +113,39 @@ test("multi-page app: navigation updates state and pages restore on back/forward
 	await expect(root).toContainText("Second page");
 	await page.goForward();
 	await expect(root).toContainText("Home page");
+});
+
+const EDITABLE_APP = (marker: string) => `
+from drafter import *
+
+@route
+def index(state):
+    return Page(state, ["${marker}"])
+
+start_server()
+`;
+
+test("editor journey: edit code in the debug panel and Run restarts the app", async ({
+	page,
+}) => {
+	await page.goto("/harness.html");
+	// The full-instance path registers the restart listener the editor needs.
+	await page.evaluate(async (code) => {
+		await window.runInstance(code);
+	}, EDITABLE_APP("Version One"));
+
+	const root = page.locator("#drafter-root--");
+	await expect(root).toContainText("Version One");
+
+	await page.locator(".drafter-edit-button").click();
+	await expect(page.getByText("Edit Source Code")).toBeVisible();
+
+	const editor = page.locator(".cm-content");
+	await editor.click();
+	await page.keyboard.press("Control+a");
+	await page.keyboard.insertText(EDITABLE_APP("Version Two"));
+	await page.getByRole("button", { name: "Run", exact: true }).click();
+
+	await expect(root).toContainText("Version Two");
+	await expect(root).not.toContainText("Version One");
 });
