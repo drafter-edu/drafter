@@ -1,0 +1,27 @@
+{
+	"kind": "TestCaseEvent",
+	"metadata": {
+		"source": "testing.track_bakery_tests",
+		"level": "info",
+		"id": 22,
+		"version": "2.0.0b10",
+		"timestamp": "2026-07-23T10:15:32.100456"
+	},
+	"correlation": {
+		"causation_id": null,
+		"route": null,
+		"request_id": null,
+		"response_id": null,
+		"dom_id": null,
+		"phase": null
+	},
+	"line": 57,
+	"caller": "assert_equal(index(State(0)), Page(State(0), ['Goodbye']))",
+	"passed": false,
+	"given": "Page(state=State(score=0), content=['Hello'])",
+	"expected": "Page(state=State(score=0), content=['Goodbye'])",
+	"given_formatted": "Page\n  content = ['Hello']",
+	"expected_formatted": "Page\n  content = ['Goodbye']",
+	"diff_html": "--- Test Expected\n+++ Actually Returned\n@@ -1,2 +1,2 @@\n Page\n-  content = ['Hello']\n+  content = ['Goodbye']\n",
+	"assertion_kind": "assert_equal"
+}

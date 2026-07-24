@@ -1,0 +1,27 @@
+{
+	"kind": "TestCaseEvent",
+	"metadata": {
+		"source": "testing.track_bakery_tests",
+		"level": "info",
+		"id": 21,
+		"version": "2.0.0b10",
+		"timestamp": "2026-07-23T10:15:32.000123"
+	},
+	"correlation": {
+		"causation_id": null,
+		"route": null,
+		"request_id": null,
+		"response_id": null,
+		"dom_id": null,
+		"phase": null
+	},
+	"line": 42,
+	"caller": "assert_equal(index(State(0)), Page(State(0), ['Hello']))",
+	"passed": true,
+	"given": "Page(state=State(score=0), content=['Hello'])",
+	"expected": "Page(state=State(score=0), content=['Hello'])",
+	"given_formatted": "Page\n  state = State(score=0)\n  content = ['Hello']",
+	"expected_formatted": "Page\n  state = State(score=0)\n  content = ['Hello']",
+	"diff_html": "",
+	"assertion_kind": "assert_equal"
+}

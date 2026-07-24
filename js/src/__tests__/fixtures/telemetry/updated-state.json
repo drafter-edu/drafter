@@ -1,0 +1,73 @@
+{
+	"kind": "UpdatedState",
+	"metadata": {
+		"source": "client_server.handle_state_updates",
+		"level": "info",
+		"id": 15,
+		"version": "2.0.0b10",
+		"timestamp": "2026-07-23T10:15:31.240500"
+	},
+	"correlation": {
+		"causation_id": null,
+		"route": "index",
+		"request_id": 1,
+		"response_id": null,
+		"dom_id": null,
+		"phase": null
+	},
+	"representation": {
+		"kind": "dataclass",
+		"type": "State",
+		"id": 139912345678016,
+		"complexity": 23,
+		"fields": [
+			{
+				"name": "name",
+				"value": {
+					"kind": "primitive",
+					"value": "'Ada'",
+					"type": "str",
+					"id": 139912345678080,
+					"complexity": 1
+				}
+			},
+			{
+				"name": "score",
+				"value": {
+					"kind": "primitive",
+					"value": "5",
+					"type": "int",
+					"id": 9793248,
+					"complexity": 1
+				}
+			},
+			{
+				"name": "items",
+				"value": {
+					"kind": "homogenous_linear_collection",
+					"type": "list",
+					"elementType": "str",
+					"fullType": "list[str]",
+					"elements": [
+						{
+							"kind": "primitive",
+							"value": "'apple'",
+							"type": "str",
+							"id": 139912345678144,
+							"complexity": 1
+						},
+						{
+							"kind": "primitive",
+							"value": "'bread'",
+							"type": "str",
+							"id": 139912345678208,
+							"complexity": 1
+						}
+					],
+					"id": 139912345678272,
+					"complexity": 11
+				}
+			}
+		]
+	}
+}

@@ -1,0 +1,36 @@
+{
+	"kind": "request.route_not_found",
+	"metadata": {
+		"source": "client_server.visit",
+		"level": "error",
+		"id": 40,
+		"version": "2.0.0b10",
+		"timestamp": "2026-07-23T10:15:34.500000"
+	},
+	"correlation": {
+		"causation_id": null,
+		"route": "missing_page",
+		"request_id": 4,
+		"response_id": null,
+		"dom_id": null,
+		"phase": null
+	},
+	"error": {
+		"id": "request.route_not_found",
+		"category": "request",
+		"severity": "error",
+		"message": "The route 'missing_page' was not found.",
+		"details": "KeyError: 'missing_page'",
+		"traceback": "Traceback (most recent call last):\n  File \"client_server.py\", line 662, in visit\nKeyError: 'missing_page'",
+		"context": {
+			"causation_id": null,
+			"route": "missing_page",
+			"request_id": 4,
+			"response_id": null,
+			"dom_id": null,
+			"phase": null
+		},
+		"status_code": "not_found",
+		"recoverable": true
+	}
+}

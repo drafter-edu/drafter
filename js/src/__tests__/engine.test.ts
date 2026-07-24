@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from "@jest/globals";
+import { afterAll, afterEach, describe, expect, jest, test } from "@jest/globals";
 
 import {
 	normalizeSystemError,
@@ -7,9 +7,24 @@ import {
 	type ErrorTelemetryRecord,
 } from "../bridge/engine";
 
+// reportSystemError always mirrors to console.error; keep test output clean.
+const consoleErrorSpy = jest
+	.spyOn(console, "error")
+	.mockImplementation(() => {});
+
 afterEach(() => {
+	// Close any dialog opened by dialog-presented reports so its symbolicId
+	// registration does not leak into the next test.
+	document
+		.querySelectorAll<HTMLButtonElement>(".drafter-dialog-close")
+		.forEach((button) => button.click());
 	setSystemErrorSink(null);
 	document.body.innerHTML = "";
+	consoleErrorSpy.mockClear();
+});
+
+afterAll(() => {
+	consoleErrorSpy.mockRestore();
 });
 
 describe("system error helpers", () => {

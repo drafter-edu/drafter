@@ -33,7 +33,7 @@ initializeRuntimeConfigurationOverrides();
 
 const DRAFTER_CONFIG_FILENAME = "/_drafter_config.json";
 
-function toVirtualStudentPath(studentFilename?: string): string {
+export function toVirtualStudentPath(studentFilename?: string): string {
 	const rawFilename = (studentFilename ?? "main.py").trim() || "main.py";
 	return rawFilename.startsWith("/") ? rawFilename : `/${rawFilename}`;
 }

@@ -1,0 +1,23 @@
+{
+	"kind": "RequestEvent",
+	"metadata": {
+		"source": "client_server.visit",
+		"level": "info",
+		"id": 11,
+		"version": "2.0.0b10",
+		"timestamp": "2026-07-23T10:15:31.200145"
+	},
+	"correlation": {
+		"causation_id": null,
+		"route": "index",
+		"request_id": 1,
+		"response_id": null,
+		"dom_id": null,
+		"phase": null
+	},
+	"url": "index",
+	"action": "click",
+	"kwargs": "{'name': 'Ada'}",
+	"event": "{'button_pressed': 'submit'}",
+	"request_id": 1
+}

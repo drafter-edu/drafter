@@ -1,0 +1,21 @@
+{
+	"kind": "RouteAdded",
+	"metadata": {
+		"source": "client_server.add_route",
+		"level": "info",
+		"id": 3,
+		"version": "2.0.0b10",
+		"timestamp": "2026-07-23T10:15:30.123456"
+	},
+	"correlation": {
+		"causation_id": null,
+		"route": null,
+		"request_id": null,
+		"response_id": null,
+		"dom_id": null,
+		"phase": null
+	},
+	"url": "index",
+	"signature": "index(state: State) -> Page",
+	"is_system_route": false
+}

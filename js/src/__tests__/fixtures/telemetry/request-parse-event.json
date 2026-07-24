@@ -1,0 +1,20 @@
+{
+	"kind": "RequestParseEvent",
+	"metadata": {
+		"source": "client_server.execute_route",
+		"level": "info",
+		"id": 12,
+		"version": "2.0.0b10",
+		"timestamp": "2026-07-23T10:15:31.201377"
+	},
+	"correlation": {
+		"causation_id": null,
+		"route": "index",
+		"request_id": 1,
+		"response_id": null,
+		"dom_id": null,
+		"phase": null
+	},
+	"request_id": 1,
+	"representation": "index(state=State(score=0), name='Ada')"
+}
