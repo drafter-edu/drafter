@@ -227,12 +227,14 @@ class SelectBox(FormComponent):
     tag = "select"
     options: list[str]
     default_value: str | None
+    allow_missing: bool
 
     KNOWN_ATTRS = ["name", "multiple", "required", "size"]
     ARGUMENTS = [
         ComponentArgument("name"),
         ComponentArgument("options"),
         ComponentArgument("default_value", kind="keyword", default_value=None),
+        ComponentArgument("allow_missing", kind="keyword", default_value=False),
     ]
 
     RENAME_ATTRS = {"default_value": "", "options": ""}
@@ -242,6 +244,7 @@ class SelectBox(FormComponent):
         name: str,
         options: list[str],
         default_value: str | None = None,
+        allow_missing: bool = False,
         **kwargs,
     ):
         """Initialize select box component.
@@ -253,13 +256,23 @@ class SelectBox(FormComponent):
             **kwargs: Additional HTML attributes.
 
         Raises:
-            ValueError: If name is not a valid parameter name.
+            ValueError: If name is not a valid parameter name or if default_value is not in options.
         """
         validate_parameter_name(name, "SelectBox")
         self.name = name
         self.options = [str(option) for option in options]
         self.default_value = str(default_value) if default_value is not None else ""
+        self.allow_missing = allow_missing
         self.extra_settings = kwargs
+        # Validate that default_value is in options, or raise ValueError
+        if (
+            not self.allow_missing
+            and self.default_value
+            and self.default_value not in self.options
+        ):
+            raise ValueError(
+                f"default_value '{self.default_value}' is not in options {self.options}"
+            )
 
     def get_children(self, context) -> list[PageContent | RenderPlan]:
         """Build an `option` RenderPlan for each entry in `options`.

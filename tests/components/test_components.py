@@ -110,6 +110,7 @@ snippets = {
     "selectbox": {
         "simple": """SelectBox('color', ['red', 'green', 'blue'])""",
         "with_default": """SelectBox('size', ['small', 'medium', 'large'], 'medium')""",
+        "missing_default_allowed": """SelectBox('size', ['small', 'medium', 'large'], 'x-large', allow_missing=True)""",
         "with_style": """SelectBox('country', ['USA', 'Canada', 'Mexico'], style_width='200px')""",
         "with_attributes": """SelectBox('category', ['A', 'B', 'C'], id='cat-select', required=True)""",
     },
