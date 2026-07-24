@@ -17,6 +17,7 @@
 		"precompile:watch": "chokidar \"../src/drafter/**/*.py\" \"./src/bridge/**/*.ts\" -d 200 --initial -c \"node scripts/precompile-python.mjs\"",
 		"dev": "node scripts/update-skulpt.mjs && tsup --watch",
 		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects unit",
+		"test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects unit --coverage",
 		"test:integration": "node scripts/run-integration-tests.mjs",
 		"test:e2e": "node playground/build-playground.mjs && node e2e/prefetch-pyodide-packages.mjs && playwright test",
 		"test:skulpt": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects skulpt",

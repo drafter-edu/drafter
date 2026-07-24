@@ -45,8 +45,10 @@ jobs:
       - name: Install JS dependencies
         run: npm ci
         working-directory: js
-      - name: Run jest (unit project)
-        run: npm test
+      - name: Run jest (unit project, with coverage thresholds)
+        # coverageThreshold in jest.config.ts fails this step if coverage
+        # regresses below the ratchet.
+        run: npm run test:coverage
         working-directory: js
 
   test-js-integration:

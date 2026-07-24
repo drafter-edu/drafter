@@ -61,6 +61,31 @@ phase status live in [`../JS_TESTING_PLAN.md`](../JS_TESTING_PLAN.md).
   iframe embeds — the docs editable-demo shape: shared runtime, per-iframe
   documents, restart/detach), `smoke.spec.ts`.
 
+## Coverage
+
+- `npm run test:coverage` runs the unit tier with coverage over **all of
+  `src/`** (not just imported files — see `collectCoverageFrom` in
+  `jest.config.ts`, which must stay at the top level: Jest silently ignores
+  coverage options inside a project config).
+- `coverageThreshold` is a **ratchet**: it sits a few points below the
+  measured baseline so regressions fail CI while normal churn passes. Raise
+  it as coverage grows; never lower it to make a failing build pass. CI's
+  `test-js-unit` job runs the coverage gate.
+
+## Flakes
+
+- Playwright runs with `retries: 0` locally (flakes surface loudly) and
+  `retries: 1` in CI, keeping a trace of the failed attempt
+  (`test-results/**/trace.zip`, viewable with `npx playwright show-trace`).
+- A test that fails intermittently is either a test bug or a product bug —
+  don't wrap it in retry loops or widen timeouts to make it pass. The two
+  flakes found so far were both product bugs (unreliable first interrupt
+  from lazy buffer registration; interrupt orphaning the run when the
+  signal lands in the event loop's callback machinery).
+- The pyodide integration harness logs `[harness] heapUsed before reset`
+  per test to stderr; a heap trend that climbs steeply or a 6GB spike is
+  the render-storm/leaked-listener class (see JS_TESTING_PLAN.md).
+
 ## Conventions
 
 - `import { describe, expect, test, jest } from "@jest/globals";` and tab
@@ -70,9 +95,11 @@ phase status live in [`../JS_TESTING_PLAN.md`](../JS_TESTING_PLAN.md).
 - Mock at the broker/API boundary (`audioBroker`, `geolocationBroker`,
   `MediaRecorder`, the leaflet shim in `src/test-utils/`) rather than deep
   internals.
-- Tests that document a suspected production bug assert the *current*
-  behavior with a comment saying so — fixing the bug should flip a clearly
-  labeled test, not silently pass.
+- If a test documents a suspected production bug (rather than fixing it),
+  assert the *current* behavior with a comment saying so — fixing the bug
+  should flip a clearly labeled test, not silently pass. (The original
+  batch of ~15 such bugs was fixed in July 2026; the pattern remains for
+  future finds.)
 - Telemetry fixtures in `src/__tests__/fixtures/telemetry/` mirror the
   Python emitters' `to_json()` shapes; the fixtures README records where
   each was derived from. Update both sides together.

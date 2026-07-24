@@ -30,15 +30,32 @@ const sharedConfig = {
 		"**/__tests__/**/*.test.{ts,tsx}",
 		"**/__tests__/**/*.test.{js,jsx}",
 	],
-	collectCoverageFrom: [
-		"src/**/*.{ts,tsx}",
-		"!src/**/*.d.ts",
-		"!src/**/__tests__/**",
-	],
 	testTimeout: 30000,
 };
 
 const config: Config = {
+	// Coverage options are global-only in Jest — inside a project config they
+	// are silently ignored (which previously made coverage count only files
+	// the tests happened to import).
+	collectCoverageFrom: [
+		"src/**/*.{ts,tsx}",
+		"!src/**/*.d.ts",
+		"!src/**/__tests__/**",
+		// Test doubles aren't product code.
+		"!src/test-utils/**",
+	],
+	// Ratchet: set a few points below the measured baseline (2026-07:
+	// 82.6/72.9/84.9/82.9 across all of src) so regressions fail CI but
+	// normal churn doesn't. Raise these as coverage grows; never lower them
+	// to make a failing build pass.
+	coverageThreshold: {
+		global: {
+			statements: 80,
+			branches: 70,
+			functions: 82,
+			lines: 80,
+		},
+	},
 	// Recycle a worker between test files once it holds this much memory.
 	// Defense in depth only: pyodide integration files must NOT share a
 	// process at all (leftover render loops from one file spike the heap
