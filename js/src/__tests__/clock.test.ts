@@ -200,24 +200,36 @@ describe("drafter-clock (extended)", () => {
 		expect(ticks).toHaveLength(ticksBeforeRemoval);
 	});
 
-	test("a clock added after page-loaded waits for the NEXT page-loaded event", () => {
-		// Same reachable behavior as the timer: connectedCallback resets
-		// pageLoadedForCurrentView, so a late-attached clock stays parked
-		// until another drafter-page-loaded event fires.
+	test("a clock added after page-loaded starts without another page-loaded event", () => {
+		// The module remembers that the current view already loaded, so a
+		// late-inserted clock starts on its own (on the next task, letting a
+		// pending persistence adoption or page-loaded event win first).
 		pageLoaded();
 		const clock = buildClock({ interval: "1000" });
 
 		jest.advanceTimersByTime(3000);
-		expect(getLabel(clock).textContent).toBe("0:00");
+		expect(getLabel(clock).textContent).toBe("0:03");
 
-		pageLoaded();
 		jest.advanceTimersByTime(2000);
-		expect(getLabel(clock).textContent).toBe("0:02");
+		expect(getLabel(clock).textContent).toBe("0:05");
 	});
 
-	test("setting the persistent attribute mid-run restarts the clock", () => {
-		// SUSPECTED DEAD CODE: like the timer, isPersistent() is never called;
-		// changing "persistent" simply falls through to the restart branch.
+	test("a late-inserted clock removed before its deferred start never ticks", () => {
+		pageLoaded();
+		const clock = buildClock({ interval: "1000" });
+		const ticks = collectDetails(clock, "tick");
+
+		// Removed (e.g., replaced by persistence adoption) before the next
+		// task runs: the deferred start must be cancelled.
+		clock.remove();
+		jest.advanceTimersByTime(3000);
+		expect(ticks).toHaveLength(0);
+	});
+
+	test("setting the persistent attribute mid-run does not restart the clock", () => {
+		// Changing "persistent" only re-syncs the data-drafter-persistent
+		// parking flag (read by the bridge's persistence machinery); the
+		// clock keeps running untouched.
 		const clock = buildClock({ interval: "1000" });
 		pageLoaded();
 
@@ -225,7 +237,15 @@ describe("drafter-clock (extended)", () => {
 		expect(getLabel(clock).textContent).toBe("0:02");
 
 		clock.setAttribute("persistent", "true");
-		expect(getLabel(clock).textContent).toBe("0:00");
+		expect(getLabel(clock).textContent).toBe("0:02");
+		expect(clock.getAttribute("data-drafter-persistent")).toBe("true");
+
+		jest.advanceTimersByTime(1000);
+		expect(getLabel(clock).textContent).toBe("0:03");
+
+		clock.setAttribute("persistent", "false");
+		expect(clock.hasAttribute("data-drafter-persistent")).toBe(false);
+		expect(getLabel(clock).textContent).toBe("0:03");
 	});
 
 	test("a persistence move keeps the clock running", () => {

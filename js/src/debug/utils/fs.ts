@@ -2,7 +2,9 @@ export function getAllClientFiles() {
 	if (window.DRAFTER_ENGINE === "skulpt") {
 		return Object.keys(Sk.builtinFiles["files"]);
 	} else if (window.DRAFTER_ENGINE === "pyodide") {
-		return pyodide.FS.readdir("/").filter((name: string) => name !== ".");
+		return pyodide.FS.readdir("/").filter(
+			(name: string) => name !== "." && name !== "..",
+		);
 	} else {
 		console.error("Unknown DRAFTER_ENGINE:", window.DRAFTER_ENGINE);
 		return [];

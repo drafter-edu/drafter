@@ -86,6 +86,7 @@ function buildEnvelope(
 		details: `${error.name}: ${error.message}`,
 		traceback: error.stack ?? null,
 		context: {
+			causation_id: context.causation_id ?? null,
 			route: context.route ?? null,
 			request_id: context.request_id ?? null,
 			response_id: context.response_id ?? null,

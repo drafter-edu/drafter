@@ -283,28 +283,51 @@ describe("drafter-timer (extended)", () => {
 		expect(finishes).toHaveLength(0);
 	});
 
-	test("a timer added after page-loaded waits for the NEXT page-loaded event", () => {
-		// connectedCallback resets pageLoadedForCurrentView to false, so an
-		// element attached after drafter-page-loaded has already fired cannot
-		// know the page is loaded: it stays parked until the next page-loaded
-		// event. This is the actual reachable behavior (a late-inserted timer
-		// on an already-loaded page never starts on its own).
+	test("a timer added after page-loaded starts without another page-loaded event", () => {
+		// The module remembers that the current view already loaded, so a
+		// late-inserted timer starts on its own (on the next task, letting a
+		// pending persistence adoption or page-loaded event win first).
 		pageLoaded();
 		const timer = buildTimer({ duration: "3000", rate: "1000" });
 
-		jest.advanceTimersByTime(2000);
 		expect(getLabel(timer).textContent).toBe("0:03");
-
-		pageLoaded();
 		jest.advanceTimersByTime(1000);
+		expect(getLabel(timer).textContent).toBe("0:02");
+
+		jest.advanceTimersByTime(1000);
+		expect(getLabel(timer).textContent).toBe("0:01");
+	});
+
+	test("a late-inserted timer removed before its deferred start never ticks", () => {
+		pageLoaded();
+		const timer = buildTimer({ duration: "3000", rate: "1000" });
+		const ticks = collectDetails(timer, "tick");
+
+		// Removed (e.g., replaced by persistence adoption) before the next
+		// task runs: the deferred start must be cancelled.
+		timer.remove();
+		jest.advanceTimersByTime(3000);
+		expect(ticks).toHaveLength(0);
+	});
+
+	test("a page-loaded event beats the deferred start and starts the timer once", () => {
+		pageLoaded();
+		const timer = buildTimer({ duration: "3000", rate: "1000" });
+		const ticks = collectDetails(timer, "tick");
+
+		// The next view finishes loading before the fallback task runs.
+		pageLoaded();
+		expect(ticks).toHaveLength(1);
+
+		jest.advanceTimersByTime(1000);
+		expect(ticks).toHaveLength(2);
 		expect(getLabel(timer).textContent).toBe("0:02");
 	});
 
-	test("setting the persistent attribute mid-run restarts the timer", () => {
-		// SUSPECTED DEAD CODE: isPersistent() is defined but never called, so
-		// "persistent" has no bespoke behavior. Because it is observed, any
-		// change falls into the attributeChangedCallback catch-all and
-		// restarts the countdown — asserted here as the actual behavior.
+	test("setting the persistent attribute mid-run does not restart the timer", () => {
+		// Changing "persistent" only re-syncs the data-drafter-persistent
+		// parking flag (read by the bridge's persistence machinery); the
+		// countdown keeps running untouched.
 		const timer = buildTimer({ duration: "3000", rate: "1000" });
 		pageLoaded();
 
@@ -312,9 +335,15 @@ describe("drafter-timer (extended)", () => {
 		expect(getLabel(timer).textContent).toBe("0:02");
 
 		timer.setAttribute("persistent", "true");
-		expect(getLabel(timer).textContent).toBe("0:03");
-		jest.advanceTimersByTime(1000);
 		expect(getLabel(timer).textContent).toBe("0:02");
+		expect(timer.getAttribute("data-drafter-persistent")).toBe("true");
+
+		jest.advanceTimersByTime(1000);
+		expect(getLabel(timer).textContent).toBe("0:01");
+
+		timer.setAttribute("persistent", "false");
+		expect(timer.hasAttribute("data-drafter-persistent")).toBe(false);
+		expect(getLabel(timer).textContent).toBe("0:01");
 	});
 
 	test("a persistence move keeps the timer running", () => {

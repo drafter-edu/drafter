@@ -30,13 +30,27 @@ export class DrafterHTMLElement extends HTMLElement {
 
 	protected getHandlers(): Record<string, string> {
 		const handlers = this.getAttribute(DRAFTER_EVENT_HANDLER);
-		return handlers ? JSON.parse(handlers) : {};
+		if (!handlers) {
+			return {};
+		}
+		try {
+			return JSON.parse(handlers);
+		} catch (error) {
+			console.warn(
+				`Invalid JSON in ${DRAFTER_EVENT_HANDLER} attribute:`,
+				error,
+			);
+			return {};
+		}
 	}
 
 	protected getNumberAttribute(name: string, defaultValue: number): number {
 		const rawValue = this.getAttribute(name);
-		const parsedValue =
-			rawValue === null ? defaultValue : parseInt(rawValue, 10);
+		if (rawValue === null) {
+			return defaultValue;
+		}
+
+		const parsedValue = parseInt(rawValue, 10);
 		if (!Number.isFinite(parsedValue)) {
 			return defaultValue;
 		}

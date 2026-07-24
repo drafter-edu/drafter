@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Drafter e2e iframe-host harness</title>
+		<style>
+			iframe {
+				width: 400px;
+				height: 300px;
+				border: 1px solid #888;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="status">idle</div>
+		<iframe id="frame-a" src="/embed-frame.html"></iframe>
+		<iframe id="frame-b" src="/embed-frame.html"></iframe>
+		<script src="/pyodide/pyodide.js"></script>
+		<script src="/assets/js/drafter.pyodide.js"></script>
+		<script>
+			// Host page for the iframe embedding tests: one shared Pyodide
+			// runtime (DrafterHost) in the top-level page, with each iframe's
+			// app rendering into its own document — the exact shape the
+			// documentation's editable demos use.
+			window.DRAFTER_MODIFIED_CONFIGURATION = {};
+			const status = document.getElementById("status");
+
+			const COUNTER_APP = (title) => `
+from drafter import *
+hide_debug_information()
+
+@dataclass
+class State:
+    count: int
+
+@route
+def index(state: State):
+    return Page(state, [
+        "${title}",
+        f"Count: {state.count}",
+        Button("Increment", increment),
+    ])
+
+@route
+def increment(state: State):
+    state.count += 1
+    return index(state)
+
+start_server(State(0))
+`;
+
+			const frameReady = (frame) =>
+				new Promise((resolve) => {
+					const probe = () => {
+						const win = frame.contentWindow;
+						if (win && typeof win.registerWithHost === "function") {
+							resolve(win);
+							return;
+						}
+						setTimeout(probe, 25);
+					};
+					probe();
+				});
+
+			window.bootEmbeds = async function bootEmbeds() {
+				status.textContent = "booting";
+				const [winA, winB] = await Promise.all([
+					frameReady(document.getElementById("frame-a")),
+					frameReady(document.getElementById("frame-b")),
+				]);
+				// Sequential like real embeds registering as they load; the
+				// host serializes runtime access either way.
+				await winA.registerWithHost(COUNTER_APP("Counter A"), "embed-a");
+				await winB.registerWithHost(COUNTER_APP("Counter B"), "embed-b");
+				status.textContent = "ready";
+			};
+
+			window.restartEmbed = function restartEmbed(instanceId, code) {
+				return window.Drafter.getHost().restart(instanceId, code);
+			};
+
+			window.detachEmbed = function detachEmbed(instanceId) {
+				return window.Drafter.getHost().detach(instanceId);
+			};
+
+			window.hostHas = function hostHas(instanceId) {
+				return window.Drafter.getHost().has(instanceId);
+			};
+		</script>
+	</body>
+</html>

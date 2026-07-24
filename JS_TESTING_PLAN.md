@@ -232,15 +232,19 @@ Phases 1–2 and 3 are independent and can proceed in parallel.
 - No cross-browser matrix initially (Chromium only; Firefox/WebKit later if wanted).
 
 
-## Documented known issues
+## Documented known issues — ALL FIXED (2026-07-24 bug-fix round)
 
-The tests surfaced 13 suspected production bugs, documented in test comments rather than fixed (each test asserts current behavior, so fixing a bug will flip a clearly-labeled test). The ones I'd triage first:
+Every suspected production bug the tests surfaced is now fixed, and the previously bug-documenting tests were flipped to assert the correct behavior:
 
-- Transpiler double-stringifies `<textarea>` content and `<option>` text (students get literal quote characters in their values), leaks extra Button target attrs, silently drops non-numeric width/height, and emits invalid Python for leading-zero numeric attributes (data_code=007).
-- getHandlers() on the base element throws an uncaught SyntaxError on malformed handler JSON instead of falling back to {}.
-- DebugPanel.handleEvent throws clear out of the adapter on events referencing unknown request ids.
-- Type drift between the TS telemetry union and Python emitters: PageVisitEvent appears to be dead, fullType is required in TS but never emitted by Python, and Python's error context carries fields TS doesn't declare.
-- Smaller: wordWrap leading blank line, .. not filtered in the pyodide file listing, negative defaults clamped to 0 in getNumberAttribute.
-- file_upload.py, handle_image_upload.py, and pil_image.py render a real Drafter error page ("could not turn your page result into something it can display") even in a genuine browser with pillow installed — this is an image/upload result-rendering bug, not a jsdom limitation as the old skip list assumed.
-- The persistent attribute on timers/clocks doesn't persist — it restarts them. isPersistent() is dead code; the attribute falls into the attributeChangedCallback catch-all. (The move-protocol persistence path does work.)
-- Timers/clocks inserted into an already-loaded page never start until the next drafter-page-loaded event.
+- **Transpiler** (`js/src/services/transpiler/compiler.ts`): textarea/option double-stringification, Button target-attr leak (all target keys consumed), non-numeric width/height pass through as string kwargs instead of vanishing (also fixed in handleSvg), leading-zero numerics emit strings instead of invalid Python. One round-trip fixture updated.
+- **Base element / utils**: getHandlers() falls back to {} + console.warn on malformed JSON; getNumberAttribute returns negative caller defaults as-is; wordWrap no leading blank line; "." and ".." filtered from the pyodide file listing.
+- **DebugPanel**: handleEvent no longer throws on unknown request ids (warn + return false; record still reaches the event log); **bonus fix**: setHeaderTitle no longer wipes the header toolbar (was assigning innerHTML; now updates only the title span).
+- **Telemetry drift**: dead PageVisitEvent removed; fullType made optional only where Python truly never emits it (class instances, unions) — kept required for tuple/linear/grid/dict where Python does emit it; `causation_id` added to the TS error-context (and JS-built envelopes now emit it) to match Python's Correlation.to_json().
+- **PIL trio** — fixed earlier in Phase 4 (HAS_PILLOW refresh).
+- **Timer/Clock**: `persistent` attribute no longer restarts the element — it syncs the parking flag via the formerly-dead isPersistent(); late-inserted timers/clocks start on their own (module-level page-loaded flag + one-task-deferred start, cancelled on removal so the parking/adoption move protocol is untouched — pyodide.persistence integration test still green).
+- **Dialogs**: Escape closes only the topmost dialog (open-dialog stack).
+- **Enhancements**: expandable no longer sticks when content itself ends in "..." (tracks an expanded flag instead of sniffing textContent).
+- **Map**: malformed `center` falls back to the whole-world default view instead of getting the with-center zoom.
+- **Interrupt reliability** (found by the e2e interrupt spec flaking ~1-in-6): the SharedArrayBuffer signal is only checked while Python bytecode runs — if it lands in the WebLoop's own callback machinery, the run's wakeup dies, the coroutine is orphaned, the promise never settles, and the runtime work queue is bricked behind it (diagnosed live: healthy interpreter + pending eval_code_async tasks + unconsumed signal). Fix in `pyodide.index.tsx`: `scheduleInterruptEscalation` — if the signal sits unconsumed after a 1s grace, clear it and cancel the orphaned tasks (run settles with CancelledError; callers accept KeyboardInterrupt|CancelledError); plus runs clear any stale stop-signal at start so a previous run's interrupt can't kill the next run at compile time. Verified 8/8 repeats.
+
+Remaining documented-but-deliberate items (design questions, not bugs — still noted in test comments): unwired header hot buttons (save/load/download/toggle/close), renderRepresentation's missing class/union cases (Python never emits those kinds today), nested duplicate debug-panel div, HistoryPanel Revisit TODO, transpiler `<title>` consumption, handlers-JSON shape validation, media.tsx sharing the old late-insertion limitation (not user-facing the way timers are).

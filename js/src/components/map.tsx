@@ -46,13 +46,14 @@ const OSM_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const OSM_ATTRIBUTION =
 	'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
-function parseCenter(raw: string | null): [number, number] {
+/** Returns the parsed center, or null when the attribute is missing or malformed. */
+function parseCenter(raw: string | null): [number, number] | null {
 	if (!raw) {
-		return DEFAULT_CENTER;
+		return null;
 	}
 	const parts = raw.split(",").map((part) => Number(part.trim()));
 	if (parts.length !== 2 || parts.some((n) => !Number.isFinite(n))) {
-		return DEFAULT_CENTER;
+		return null;
 	}
 	return [parts[0], parts[1]];
 }
@@ -125,12 +126,12 @@ class DrafterMap extends DrafterHTMLElement {
 		if (this.container === null) {
 			return;
 		}
+		// A missing OR malformed center both fall back to the whole-world view.
+		const center = parseCenter(this.getAttribute("center"));
 		const defaultZoom =
-			this.getAttribute("center") === null
-				? DEFAULT_ZOOM_WORLD
-				: DEFAULT_ZOOM_WITH_CENTER;
+			center === null ? DEFAULT_ZOOM_WORLD : DEFAULT_ZOOM_WITH_CENTER;
 		const map = L.map(this.container, {
-			center: parseCenter(this.getAttribute("center")),
+			center: center ?? DEFAULT_CENTER,
 			zoom: this.getNumberAttribute("zoom", defaultZoom),
 		});
 		L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION }).addTo(map);
@@ -215,7 +216,7 @@ class DrafterMap extends DrafterHTMLElement {
 			this.input.name = newValue ?? "";
 		} else if (name === "center") {
 			this.map.setView(
-				parseCenter(newValue),
+				parseCenter(newValue) ?? DEFAULT_CENTER,
 				this.getNumberAttribute("zoom", this.map.getZoom()),
 			);
 		} else if (name === "zoom") {

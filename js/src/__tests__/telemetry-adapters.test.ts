@@ -27,7 +27,6 @@ import type {
 	RequestEvent,
 	RequestParseEvent,
 	ResponseEvent,
-	PageVisitEvent,
 } from "../debug/telemetry/requests";
 import type { TestCaseEvent } from "../debug/telemetry/tests";
 import type {
@@ -216,45 +215,58 @@ describe("RequestEvent / RequestParseEvent / ResponseEvent", () => {
 		expect(container().textContent).toContain("🔴");
 	});
 
-	test("malformed: RequestParseEvent for an unknown request id throws", () => {
-		// Current production behavior: handleEvent has no error handling, so
-		// the HistoryPanel's lookup failure propagates to the caller (the
-		// Python bridge wraps it in client.handle_debug_event_failed).
+	test("malformed: RequestParseEvent for an unknown request id is ignored", () => {
+		// The panel tolerates events referencing requests it never saw (e.g.
+		// after a panel restart): the history panel warns, handleEvent reports
+		// the event as unhandled, and nothing propagates to the Python
+		// bridge's error-reporting path.
 		const panel = createPanel();
 		const fixture: RequestParseEvent = {
 			...(REQUEST_PARSE_EVENT as RequestParseEvent),
 			request_id: 999,
 		};
 
-		expect(() => panel.handleEvent(fixture)).toThrow(
-			"Corresponding request 999 not found for parse event.",
+		expect(panel.handleEvent(fixture)).toBe(false);
+
+		expect(consoleWarnSpy).toHaveBeenCalledWith(
+			expect.stringContaining("request 999 not found for parse event"),
 		);
+		// The record still reaches the event log.
+		expect(
+			container().querySelector(".drafter-log-info-item")?.textContent,
+		).toContain("RequestParseEvent");
 	});
 
-	test("malformed: ResponseEvent for an unknown request id throws", () => {
+	test("malformed: ResponseEvent for an unknown request id is ignored", () => {
 		const panel = createPanel();
 		const fixture: ResponseEvent = {
 			...(RESPONSE_EVENT as ResponseEvent),
 			request_id: 999,
 		};
 
-		expect(() => panel.handleEvent(fixture)).toThrow(
-			"Corresponding request 999 not found for response ID 2.",
+		expect(panel.handleEvent(fixture)).toBe(false);
+
+		expect(consoleWarnSpy).toHaveBeenCalledWith(
+			expect.stringContaining(
+				"request 999 not found for response ID 2",
+			),
 		);
+		expect(
+			container().querySelector(".drafter-log-info-item")?.textContent,
+		).toContain("ResponseEvent");
 	});
 });
 
-describe("PageVisitEvent", () => {
-	test("is declared as a TypedRecord but has no adapter case", () => {
-		// PageVisitEvent exists in the TS discriminated union
-		// (js/src/debug/telemetry/requests.ts) but no Python code emits it
-		// and DebugPanel.handleEvent has no case for it: it falls through to
-		// the default branch (handled=false) and only reaches the event log.
+describe("PageVisitEvent (removed dead kind)", () => {
+	test("a legacy PageVisitEvent record falls through to the log only", () => {
+		// PageVisitEvent was removed from the TS discriminated union: no
+		// Python code ever emitted it. A record with that kind is now just an
+		// unknown record: unhandled by the switch, but still logged.
 		const panel = createPanel();
 
-		expect(panel.handleEvent(PAGE_VISIT_EVENT as PageVisitEvent)).toBe(
-			false,
-		);
+		expect(
+			panel.handleEvent(PAGE_VISIT_EVENT as unknown as TelemetryRecord),
+		).toBe(false);
 
 		// metadata.level "info" routes it to the log panel's info renderer.
 		const logItem = container().querySelector(".drafter-log-info-item");

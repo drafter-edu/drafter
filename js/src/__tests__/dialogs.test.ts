@@ -423,18 +423,21 @@ describe("multiple dialogs and stacking", () => {
 		).toBe("Second");
 	});
 
-	// Observed behavior (documented, not "fixed" here): every open dialog with
-	// closeOnEscape registers its own document-level keydown listener, so a
-	// single Escape press closes ALL open dialogs, not just the topmost one.
-	// If topmost-only behavior is desired, that would be a production change.
-	test("Escape closes every open dialog that allows it", async () => {
+	test("Escape closes only the topmost open dialog", async () => {
 		const first = showDialog({ title: "A" });
 		const second = showDialog({ title: "B" });
 
 		pressEscape();
 
-		await expect(first).resolves.toBeUndefined();
 		await expect(second).resolves.toBeUndefined();
+		expect(getDialogs()).toHaveLength(1);
+		expect(
+			getDialogs()[0].querySelector(".drafter-dialog-title")?.textContent,
+		).toBe("A");
+
+		pressEscape();
+
+		await expect(first).resolves.toBeUndefined();
 		expect(getDialogs()).toHaveLength(0);
 	});
 });

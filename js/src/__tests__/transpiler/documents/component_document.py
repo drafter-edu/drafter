@@ -47,7 +47,7 @@ line 2"""),
                             "documents", accept=[".pdf", ".docx"], multiple=True
                         ),
                         Argument("token", "abc123"),
-                        TextArea("bio", default_value='"Hello there"', rows=3, cols=20),
+                        TextArea("bio", default_value="Hello there", rows=3, cols=20),
                         SelectBox("color", ["red", "blue"], default_value="blue"),
                         Output("result", "Ready", for_id="username"),
                         Progress(0.75, max=1),

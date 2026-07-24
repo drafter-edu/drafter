@@ -8,7 +8,9 @@ export function wordWrap(str: string, maxWidth: number): string {
 
 		// Check if adding the next word exceeds the max width
 		if ((currentLine + word).length > maxWidth) {
-			lines.push(currentLine.trim());
+			if (currentLine.trim()) {
+				lines.push(currentLine.trim());
+			}
 			currentLine = word + " ";
 		} else {
 			currentLine += word + " ";

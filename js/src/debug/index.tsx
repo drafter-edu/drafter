@@ -271,10 +271,10 @@ export class DebugPanel {
 				this.historyPanel?.addRequest(typed);
 				break;
 			case "RequestParseEvent":
-				this.historyPanel?.addRequestParse(typed);
+				handled = this.historyPanel?.addRequestParse(typed) ?? false;
 				break;
 			case "ResponseEvent":
-				this.historyPanel?.addResponse(typed);
+				handled = this.historyPanel?.addResponse(typed) ?? false;
 				break;
 			case "UpdatedState":
 				this.statePanel?.renderState(typed.representation);

@@ -201,38 +201,45 @@ export class HistoryPanel extends Panel {
 			});
 	}
 
-	public addRequestParse(parseEvent: RequestParseEvent): void {
+	public addRequestParse(parseEvent: RequestParseEvent): boolean {
 		const requestEventElement = this.historyItems
 			.find((el) => el.dataset.requestId === "" + parseEvent.request_id)
 			?.querySelector(".drafter-history-request-url");
 
-		if (requestEventElement) {
-			const parseElement = (
-				<span class="request-parse-event">
-					<code>{parseEvent.representation}</code>
-				</span>
+		if (!requestEventElement) {
+			// An event may reference a request this panel never saw (e.g. after
+			// a panel restart). Ignore it rather than throwing back into the
+			// bridge's error-reporting path.
+			console.warn(
+				`DebugPanel: Corresponding request ${parseEvent.request_id} not found for parse event; ignoring.`,
 			);
-
-			requestEventElement.appendChild(parseElement);
-		} else {
-			throw new Error(
-				`DebugPanel: Corresponding request ${parseEvent.request_id} not found for parse event.`,
-			);
+			return false;
 		}
+
+		const parseElement = (
+			<span class="request-parse-event">
+				<code>{parseEvent.representation}</code>
+			</span>
+		);
+
+		requestEventElement.appendChild(parseElement);
+		return true;
 	}
 
-	public addResponse(response: ResponseEvent): void {
+	public addResponse(response: ResponseEvent): boolean {
 		const requestEventElement = this.historyItems.find(
 			(el) => el.dataset.requestId === "" + response.request_id,
 		);
 
-		if (requestEventElement) {
-			requestEventElement.classList.add("has-response");
-		} else {
-			throw new Error(
-				`DebugPanel: Corresponding request ${response.request_id} not found for response ID ${response.response_id}.`,
+		if (!requestEventElement) {
+			// See addRequestParse: unknown request ids are ignored, not thrown.
+			console.warn(
+				`DebugPanel: Corresponding request ${response.request_id} not found for response ID ${response.response_id}; ignoring.`,
 			);
+			return false;
 		}
+
+		requestEventElement.classList.add("has-response");
 		// Choose a red marker, green marker, or yellow marker based on errors/warnings
 		const marker = response.has_errors
 			? "🔴"
@@ -256,6 +263,7 @@ export class HistoryPanel extends Panel {
 			</div>
 		);
 
-		requestEventElement?.appendChild(responseElement);
+		requestEventElement.appendChild(responseElement);
+		return true;
 	}
 }

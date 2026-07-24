@@ -28,13 +28,10 @@ describe("wordWrap", () => {
 			"one two\nthree four",
 		],
 		[
-			// Current behavior quirk: a first word longer than the width
-			// pushes the (empty) current line first, yielding a leading
-			// blank line.
-			"single overlong first word produces a leading blank line",
+			"single overlong first word stays on the first line",
 			"supercalifragilistic",
 			5,
-			"\nsupercalifragilistic",
+			"supercalifragilistic",
 		],
 		[
 			"overlong word forces a break before it",
@@ -154,10 +151,9 @@ describe("fs helpers", () => {
 			]);
 		});
 
-		test("pyodide: filters '.' from readdir results", () => {
+		test("pyodide: filters '.' and '..' from readdir results", () => {
 			usePyodide({ "main.py": "print('hi')" });
-			// Note current behavior: only "." is filtered out, ".." is kept.
-			expect(getAllClientFiles()).toEqual(["..", "main.py"]);
+			expect(getAllClientFiles()).toEqual(["main.py"]);
 		});
 
 		test("unknown engine: logs an error and returns []", () => {

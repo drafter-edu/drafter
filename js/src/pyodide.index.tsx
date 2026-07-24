@@ -200,6 +200,10 @@ export function interruptActiveRun() {
 
 			if (stateWindow.__drafterInterruptBuffer) {
 				Atomics.store(stateWindow.__drafterInterruptBuffer, 0, 2);
+				scheduleInterruptEscalation(
+					stateWindow.__drafterInterruptBuffer,
+					pyodide,
+				);
 			}
 		}
 	} catch (error) {
@@ -208,6 +212,52 @@ export function interruptActiveRun() {
 			error,
 		);
 	}
+}
+
+let interruptEscalationTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * The interrupt signal is only checked while Python bytecode is executing.
+ * If it instead lands inside the event loop's own callback machinery (a
+ * timer wakeup, a future's done-callback), that callback dies, the run's
+ * coroutine is left suspended on a future nobody will ever complete, and no
+ * Python ever runs again — so the signal sits unconsumed forever, the run's
+ * promise never settles, and the runtime work queue is bricked behind it.
+ *
+ * Escalation closes that race: if the signal is still unconsumed after a
+ * grace period (proof the loop went idle instead of raising into the run),
+ * clear it and cancel the orphaned tasks directly so the run settles with
+ * CancelledError. Callers treating "interrupted" should accept both
+ * KeyboardInterrupt and CancelledError.
+ */
+function scheduleInterruptEscalation(buffer: Int32Array, pyodide: any) {
+	if (interruptEscalationTimer !== null) {
+		return;
+	}
+	interruptEscalationTimer = setTimeout(() => {
+		interruptEscalationTimer = null;
+		if (Atomics.load(buffer, 0) !== 2) {
+			// Consumed: the normal interrupt path delivered KeyboardInterrupt.
+			return;
+		}
+		// Clear the signal first so the cancel snippet below (and the next
+		// legitimate run) is not itself killed at compile time.
+		Atomics.store(buffer, 0, 0);
+		pyodide
+			.runPythonAsync(
+				[
+					"import asyncio",
+					"for _drafter_task in asyncio.all_tasks() - {asyncio.current_task()}:",
+					"    _drafter_task.cancel()",
+				].join("\n"),
+			)
+			.catch((error: unknown) => {
+				console.warn(
+					"[Drafter AppServer Scaffolding] Interrupt escalation failed:",
+					error,
+				);
+			});
+	}, 1000);
 }
 
 async function fetchStudentCode(pythonUrl?: string): Promise<string> {
@@ -649,6 +699,16 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 		throw new Error(
 			"Pyodide is not initialized. Call setupPyodide() first.",
 		);
+	}
+
+	// A stale stop-signal aimed at the PREVIOUS run (e.g. a user mashing the
+	// stop button as the run settled) must not kill this run at compile time.
+	const interruptWindow = window as WindowWithDrafterInterruptBuffer;
+	if (
+		interruptWindow.__drafterInterruptBuffer &&
+		typeof Atomics !== "undefined"
+	) {
+		Atomics.store(interruptWindow.__drafterInterruptBuffer, 0, 0);
 	}
 
 	// Only reconfigure when an instance is explicitly requested (the

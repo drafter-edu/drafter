@@ -249,18 +249,17 @@ describe("drafter-map (extended)", () => {
 		expect(element.style.height).toBe("300px");
 	});
 
-	test("a malformed center falls back to 0,0 but still counts as centered", () => {
-		// parseCenter tolerates junk by returning the default center, while
-		// the zoom default check only asks whether the attribute is PRESENT —
-		// so a junk center still selects the "centered" zoom of 13. Asserted
-		// as the actual behavior.
+	test("a malformed center falls back to the default world view", () => {
+		// A center that fails to parse is treated the same as a missing one:
+		// the map falls back entirely to the whole-world default view.
 		createComponent({ name: "spot", center: "1,banana" });
 		expect(lastMap().center).toEqual([0, 0]);
-		expect(lastMap().zoom).toBe(13);
+		expect(lastMap().zoom).toBe(2);
 
 		shim.__reset();
 		createComponent({ name: "spot", center: "1,2,3" });
 		expect(lastMap().center).toEqual([0, 0]);
+		expect(lastMap().zoom).toBe(2);
 	});
 
 	test("bad marker JSON is tolerated and clears previously-drawn markers", () => {

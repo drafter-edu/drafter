@@ -159,13 +159,9 @@ describe("images and media", () => {
 		expect(code).toContain('Image("cat.png", alt="A cat")');
 	});
 
-	test("non-numeric width/height are silently dropped (current behavior)", () => {
-		// SUSPECTED BUG: popAttr removes width from the attribute map even
-		// when readNumeric rejects the value, so "50%" is lost entirely
-		// instead of being passed through as a kwarg.
+	test("non-numeric width/height pass through as string kwargs", () => {
 		const code = compile('<img src="cat.png" width="50%">');
-		expect(code).toContain('Image("cat.png")');
-		expect(code).not.toContain("width");
+		expect(code).toContain('Image("cat.png", width="50%")');
 	});
 
 	test("<audio> maps to Audio with src", () => {
@@ -329,15 +325,9 @@ describe("textarea", () => {
 		);
 	});
 
-	test("textarea content becomes default_value (double-stringified, current behavior)", () => {
-		// SUSPECTED BUG: walkChildren() already stringifies the text child,
-		// and handleTextArea stringifies the joined result again, so the
-		// default value ends up wrapped in literal quote characters:
-		// default_value='"hello world"' instead of default_value="hello world".
+	test("textarea content becomes default_value", () => {
 		const code = compile('<textarea name="notes">hello world</textarea>');
-		expect(code).toContain(
-			"TextArea(\"notes\", default_value='\"hello world\"')",
-		);
+		expect(code).toContain('TextArea("notes", default_value="hello world")');
 	});
 
 	test("textarea name falls back to id, then to 'textarea'", () => {
@@ -349,15 +339,11 @@ describe("textarea", () => {
 });
 
 describe("select", () => {
-	test("select maps to SelectBox with option text (double-stringified, current behavior)", () => {
-		// SUSPECTED BUG: when an <option> has no value attribute, the option
-		// text has already been stringified by walkChildren(), and
-		// handleSelect stringifies it again, producing '"Red"' (literal
-		// quotes inside the Python string) instead of "Red".
+	test("select maps to SelectBox with option text", () => {
 		const code = compile(
 			'<select name="color"><option>Red</option><option>Green</option></select>',
 		);
-		expect(code).toContain("SelectBox(\"color\", ['\"Red\"', '\"Green\"'])");
+		expect(code).toContain('SelectBox("color", ["Red", "Green"])');
 	});
 
 	test("option value attributes take precedence over text", () => {
@@ -368,14 +354,12 @@ describe("select", () => {
 	});
 
 	test("selected option becomes default_value", () => {
-		// The valued option ("r") is emitted cleanly; the unvalued option is
-		// double-stringified (see suspected bug above).
 		const code = compile(
 			'<select name="color"><option value="r" selected>Red</option>' +
 				"<option>Green</option></select>",
 		);
 		expect(code).toContain(
-			"SelectBox(\"color\", [\"r\", '\"Green\"'], default_value=\"r\")",
+			'SelectBox("color", ["r", "Green"], default_value="r")',
 		);
 	});
 
@@ -440,14 +424,12 @@ describe("links and buttons", () => {
 		expect(code).toContain('Button("Send", "/submit")');
 	});
 
-	test("data-nav takes precedence; other target attrs remain as kwargs (current behavior)", () => {
-		// popFirstAttr stops at the first matching key (data-nav), so the
-		// remaining target attributes (href/formaction) are NOT consumed and
-		// pass through as ordinary kwargs.
+	test("data-nav takes precedence; other target attrs are consumed", () => {
 		const code = compile(
 			'<button data-nav="page_a" formaction="/b">Go</button>',
 		);
-		expect(code).toContain('Button("Go", "page_a", formaction="/b")');
+		expect(code).toContain('Button("Go", "page_a")');
+		expect(code).not.toContain("formaction");
 	});
 });
 
@@ -564,12 +546,12 @@ describe("literal generation", () => {
 		expect(code).toContain("data_n=-5");
 	});
 
-	test("leading-zero numeric attributes are emitted verbatim (current behavior)", () => {
-		// SUSPECTED BUG: pythonLiteral's numeric regex accepts "007" and
-		// emits it verbatim, but 007 is a SyntaxError in Python 3 (leading
-		// zeros are not permitted in decimal integer literals).
+	test("leading-zero numeric attributes are emitted as strings", () => {
+		// 007 would be a SyntaxError in Python 3 (leading zeros are not
+		// permitted in decimal integer literals), so it must stay a string.
 		const code = compile('<div data-code="007">x</div>');
-		expect(code).toContain("data_code=007");
+		expect(code).toContain('data_code="007"');
+		expectValidPython(code);
 	});
 
 	test("true/false attribute strings become True/False", () => {

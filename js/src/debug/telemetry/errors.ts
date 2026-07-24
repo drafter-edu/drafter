@@ -28,6 +28,7 @@ export type SystemErrorStatus = "ok" | "bad_request" | "not_found" | "error";
 export type SystemErrorPresentation = "auto" | "root" | "dialog" | "log";
 
 export interface SystemErrorCorrelation {
+	causation_id?: number;
 	route?: string;
 	request_id?: number;
 	response_id?: number;
@@ -44,6 +45,7 @@ export interface ErrorDetailsJson {
 	details: string;
 	traceback: string | null;
 	context: {
+		causation_id: number | null;
 		route: string | null;
 		request_id: number | null;
 		response_id: number | null;

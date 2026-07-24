@@ -30,14 +30,3 @@ export interface ResponseEvent extends TelemetryRecord {
 	request_id: number;
 	formatted_page_content: string;
 }
-
-export interface PageVisitEvent extends TelemetryRecord {
-	kind: "PageVisitEvent";
-	url: string;
-	function_name: string;
-	arguments: string;
-	status_code: number;
-	duration_ms: number;
-	timestamp: string;
-	button_pressed: string;
-}

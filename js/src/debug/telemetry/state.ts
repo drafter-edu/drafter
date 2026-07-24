@@ -90,14 +90,19 @@ export interface ClassInstanceRepresentation extends Representation {
 		name: string;
 		value: SpecificRepresentation;
 	}>;
-	fullType: string;
+	// The Python describer (_visit_class_instance in
+	// src/drafter/data/details/recursive_type_describer.py) does not emit
+	// fullType for class/dataclass nodes.
+	fullType?: string;
 }
 
 export interface UnionRepresentation extends Representation {
 	kind: "union";
 	type: "union";
 	options: Array<SpecificRepresentation>;
-	fullType: string;
+	// The Python describer does not yet emit "union" nodes at all (see its
+	// roadmap comment), so fullType cannot be relied on.
+	fullType?: string;
 }
 
 export interface EmptyDict extends Representation {

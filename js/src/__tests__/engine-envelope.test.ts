@@ -108,6 +108,7 @@ describe("envelope shape (via the telemetry sink)", () => {
 			recoverable: true,
 			error: thrown,
 			context: {
+				causation_id: 6,
 				route: "index",
 				request_id: 7,
 				response_id: 8,
@@ -125,6 +126,7 @@ describe("envelope shape (via the telemetry sink)", () => {
 		expect(envelope.details).toBe("RangeError: out of range");
 		expect(envelope.traceback).toBe(thrown.stack);
 		expect(envelope.context).toEqual({
+			causation_id: 6,
 			route: "index",
 			request_id: 7,
 			response_id: 8,
@@ -145,6 +147,7 @@ describe("envelope shape (via the telemetry sink)", () => {
 		expect(envelope.recoverable).toBe(false);
 		expect(envelope.status_code).toBe("error");
 		expect(envelope.context).toEqual({
+			causation_id: null,
 			route: null,
 			request_id: null,
 			response_id: null,
@@ -187,6 +190,7 @@ describe("envelope shape (via the telemetry sink)", () => {
 		);
 
 		expect(received[0].error.context).toEqual({
+			causation_id: null,
 			route: "index",
 			request_id: 3,
 			response_id: null,

@@ -24,9 +24,6 @@
  *
  * Notes on current production behavior discovered while writing these
  * tests (documented, not fixed, per task rules):
- *   - DebugPanel.setHeaderTitle replaces the ENTIRE header bar innerHTML,
- *     destroying all the hot buttons the DebugHeaderBar rendered
- *     (suspected bug; see the setHeaderTitle test).
  *   - The header hot buttons save/load/download/toggle/close have no click
  *     handlers anywhere in the JS layer (only home/reset/about are wired by
  *     DebugPanel.attachEventHandlers, and edit by DebugHeaderBar). The
@@ -516,7 +513,7 @@ describe("action button events", () => {
 });
 
 describe("setHeaderTitle / setRoute", () => {
-	test("setHeaderTitle replaces the whole header bar content", () => {
+	test("setHeaderTitle updates the title and keeps the hot buttons", () => {
 		const panel = createPanel();
 		const header = document.querySelector(
 			".drafter-header--",
@@ -525,12 +522,23 @@ describe("setHeaderTitle / setRoute", () => {
 
 		panel.setHeaderTitle("My Cool Site");
 
-		expect(header.innerHTML).toBe("<span>My Cool Site</span>");
-		// SUSPECTED BUG: DebugHeaderBar.setTitle assigns headerElement
-		// .innerHTML, wiping out the entire hot-button toolbar (home, reset,
-		// about, edit, save, load, download, toggle, close) that the
-		// constructor rendered. Documented, not fixed.
-		expect(header.querySelector(".drafter-home-button")).toBeNull();
+		expect(
+			header.querySelector(".drafter-header-title")?.textContent,
+		).toBe("My Cool Site");
+		// The hot-button toolbar rendered by the constructor survives.
+		for (const cls of [
+			"drafter-home-button",
+			"drafter-reset-button",
+			"drafter-about-button",
+			"drafter-edit-button",
+			"drafter-save-button",
+			"drafter-load-button",
+			"drafter-download-button",
+			"drafter-toggle-button",
+			"drafter-close-button",
+		]) {
+			expect(header.querySelector(`.${cls}`)).not.toBeNull();
+		}
 	});
 
 	test("setRoute updates the footer route display", () => {

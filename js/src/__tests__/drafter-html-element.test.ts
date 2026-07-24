@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from "@jest/globals";
+import { afterEach, describe, expect, jest, test } from "@jest/globals";
 
 import { DrafterHTMLElement } from "../components/drafterHTMLElement";
 
@@ -130,11 +130,11 @@ describe("getNumberAttribute", () => {
 		expect(element.readNumber("count", 0)).toBe(0);
 	});
 
-	test("absent attribute with a negative default is clamped to 0", () => {
-		// Documents actual behavior: the Math.max(value, 0) floor applies to
-		// the default as well, so a negative default can never be returned.
+	test("absent attribute with a negative default returns it as-is", () => {
+		// Only parsed attribute values are clamped to 0; a caller-supplied
+		// default is returned unchanged.
 		const element = makeElement();
-		expect(element.readNumber("count", -3)).toBe(0);
+		expect(element.readNumber("count", -3)).toBe(-3);
 	});
 
 	test.each([
@@ -190,12 +190,17 @@ describe("getHandlers", () => {
 		});
 	});
 
-	test("invalid JSON throws (errors are NOT swallowed)", () => {
-		// Documents actual behavior: getHandlers calls JSON.parse without a
-		// try/catch, so a malformed attribute propagates a SyntaxError to the
-		// component that asked for its handlers.
-		const element = makeElement({ "data--drafter-handlers": "{oops" });
-		expect(() => element.readHandlers()).toThrow(SyntaxError);
+	test("invalid JSON warns and falls back to an empty mapping", () => {
+		const warnSpy = jest
+			.spyOn(console, "warn")
+			.mockImplementation(() => {});
+		try {
+			const element = makeElement({ "data--drafter-handlers": "{oops" });
+			expect(element.readHandlers()).toEqual({});
+			expect(warnSpy).toHaveBeenCalled();
+		} finally {
+			warnSpy.mockRestore();
+		}
 	});
 
 	test("non-object JSON is returned as-is without validation", () => {

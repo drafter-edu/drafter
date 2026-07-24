@@ -167,13 +167,9 @@ describe("enhanceExpandables", () => {
 		expect(expandable.textContent).toBe(LONG_TEXT);
 	});
 
-	// Suspected production quirk (documented, not fixed): the toggle decides
-	// expanded-vs-collapsed by checking `textContent.endsWith("...")`. If the
-	// FULL content itself ends with "...", clicking while expanded matches the
-	// collapsed branch's check and the element re-expands to the same full
-	// text, so it can never collapse again. This test pins the current
-	// (buggy-looking) behavior so a future fix will be noticed.
-	test("full content ending in '...' gets stuck expanded (current behavior)", () => {
+	// The toggle tracks its expanded state explicitly, so full content that
+	// itself ends with "..." still collapses correctly.
+	test("full content ending in '...' still toggles both ways", () => {
 		const trickyText = "c".repeat(120) + "...";
 		document.body.innerHTML = `<span class="expandable">${trickyText}</span>`;
 		enhanceExpandables();
@@ -183,14 +179,11 @@ describe("enhanceExpandables", () => {
 		) as HTMLElement;
 		expect(expandable.textContent).toBe("c".repeat(100) + "...");
 
-		// First click expands (truncated text ends with "...").
 		expandable.click();
 		expect(expandable.textContent).toBe(trickyText);
 
-		// Second click SHOULD collapse, but the full text also ends with
-		// "...", so the handler re-assigns the full content instead.
 		expandable.click();
-		expect(expandable.textContent).toBe(trickyText);
+		expect(expandable.textContent).toBe("c".repeat(100) + "...");
 	});
 
 	test("multiple expandables toggle independently", () => {

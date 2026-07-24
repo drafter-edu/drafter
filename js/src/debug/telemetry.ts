@@ -7,7 +7,6 @@ import type {
 	RequestEvent,
 	RequestParseEvent,
 	ResponseEvent,
-	PageVisitEvent,
 } from "./telemetry/requests";
 import type { RouteAddedEvent } from "./telemetry/routes";
 import type { UpdatedStateEvent } from "./telemetry/state";
@@ -25,7 +24,6 @@ export type TypedRecord =
 	| RequestEvent
 	| RequestParseEvent
 	| ResponseEvent
-	| PageVisitEvent
 	| TestCaseEvent
 	| InitialConfigurationEvent
 	| UpdatedConfigurationEvent;

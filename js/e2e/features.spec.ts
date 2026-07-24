@@ -124,7 +124,11 @@ test("interruptActiveRun stops a runaway app and the runtime stays usable", asyn
 	console.log("interrupt outcome:", outcome.slice(0, 400));
 
 	expect(outcome).toContain("rejected");
-	expect(outcome).toContain("KeyboardInterrupt");
+	// KeyboardInterrupt is the normal delivery; CancelledError is the
+	// escalation path (the signal landed in the event loop's own callback
+	// machinery, and the orphaned run was cancelled instead — see
+	// scheduleInterruptEscalation in pyodide.index.tsx).
+	expect(outcome).toMatch(/KeyboardInterrupt|CancelledError/);
 
 	// The interpreter survives: a normal app runs afterwards.
 	await page.evaluate(async (code) => {

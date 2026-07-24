@@ -32,14 +32,18 @@ export function enhanceExpandables() {
         let expandable = expandables[i] as HTMLElement;
         let content = expandable.textContent;
         if (content.length > 100) {
+            // Track expansion explicitly rather than sniffing for a trailing
+            // "...", which would misfire when the content itself ends in "...".
+            let expanded = false;
             expandable.textContent = content.slice(0, 100) + "...";
             expandable.style.cursor = "pointer";
             expandable.addEventListener("click", function () {
-                if (expandable.textContent.endsWith("...")) {
-                    expandable.textContent = content;
-                } else {
+                if (expanded) {
                     expandable.textContent = content.slice(0, 100) + "...";
+                } else {
+                    expandable.textContent = content;
                 }
+                expanded = !expanded;
             });
         }
     }

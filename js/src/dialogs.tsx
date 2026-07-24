@@ -53,6 +53,9 @@ export interface DialogOptions<T = unknown> {
 
 let dialogStack = 0;
 
+/** Open dialog elements in opening order; the last entry is the topmost. */
+const openDialogElements: HTMLDivElement[] = [];
+
 /** Internal record kept for every open dialog that has a symbolicId. */
 interface TrackedDialog {
 	updateContent: (content: string | HTMLElement | ReactElement) => void;
@@ -208,6 +211,10 @@ export function showDialog<T = unknown>(
 			if (symbolicId !== undefined) {
 				openDialogs.delete(symbolicId);
 			}
+			const stackIndex = openDialogElements.indexOf(dialog);
+			if (stackIndex !== -1) {
+				openDialogElements.splice(stackIndex, 1);
+			}
 			document.removeEventListener("keydown", onKeyDown);
 			backdrop.remove();
 			dialog.remove();
@@ -217,6 +224,10 @@ export function showDialog<T = unknown>(
 
 		const onKeyDown = (event: KeyboardEvent) => {
 			if (event.key === "Escape" && closeOnEscape) {
+				// Only the topmost open dialog responds to Escape.
+				if (openDialogElements.at(-1) !== dialog) {
+					return;
+				}
 				event.preventDefault();
 				close(undefined, "escape");
 			}
@@ -306,6 +317,7 @@ export function showDialog<T = unknown>(
 
 		document.body.appendChild(backdrop);
 		document.body.appendChild(dialog);
+		openDialogElements.push(dialog);
 		document.addEventListener("keydown", onKeyDown);
 
 		const autoFocusElement = dialog.querySelector(

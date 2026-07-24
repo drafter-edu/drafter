@@ -290,12 +290,14 @@ class DrafterCompiler {
 			.map((child) => this.serializeNodeAsHtml(child))
 			.join("");
 		const parsed = this.parseAttrs(node);
-		const width = this.readNumeric(
-			this.popAttr(parsed.attributes, "width"),
-		);
-		const height = this.readNumeric(
-			this.popAttr(parsed.attributes, "height"),
-		);
+		const width = this.readNumeric(parsed.attributes.width);
+		if (width !== undefined) {
+			this.popAttr(parsed.attributes, "width");
+		}
+		const height = this.readNumeric(parsed.attributes.height);
+		if (height !== undefined) {
+			this.popAttr(parsed.attributes, "height");
+		}
 		const viewBox =
 			this.popAttr(parsed.attributes, "viewBox") ||
 			this.popAttr(parsed.attributes, "viewbox");
@@ -499,7 +501,7 @@ class DrafterCompiler {
 			this.popAttr(parsed.attributes, "name") ||
 			this.popAttr(parsed.attributes, "id") ||
 			"textarea";
-		const defaultValue = this.walkChildren(node).join("");
+		const defaultValue = this.rawTextContent(node);
 		const args = [stringify(name)];
 		if (defaultValue.trim().length > 0) {
 			args.push(`default_value=${stringify(defaultValue.trim())}`);
@@ -529,7 +531,7 @@ class DrafterCompiler {
 				continue;
 			}
 			const optionAttrs = child.attrs || {};
-			const optionText = this.walkChildren(child).join(" ").trim();
+			const optionText = this.rawTextContent(child).trim();
 			const value = optionAttrs.value || optionText;
 			options.push(stringify(String(value)));
 			if (Object.prototype.hasOwnProperty.call(optionAttrs, "selected")) {
@@ -699,10 +701,9 @@ class DrafterCompiler {
 		];
 
 		for (const key of spec.numericAttrs || []) {
-			const numeric = this.readNumeric(
-				this.popAttr(parsed.attributes, key),
-			);
+			const numeric = this.readNumeric(parsed.attributes[key]);
 			if (numeric !== undefined) {
+				this.popAttr(parsed.attributes, key);
 				args.push(`${key}=${numeric}`);
 			}
 		}
@@ -783,6 +784,13 @@ class DrafterCompiler {
 		return node.text || "";
 	}
 
+	private rawTextContent(node: TreeNode): string {
+		return (node.children || [])
+			.filter((child) => child.type === "text")
+			.map((child) => this.walkText(child))
+			.join("");
+	}
+
 	private makeSingleContent(parts: string[]): string {
 		if (parts.length === 0) {
 			return stringify("");
@@ -816,13 +824,14 @@ class DrafterCompiler {
 	}
 
 	private popFirstAttr(attrs: Props, keys: string[]): string | undefined {
+		let result: string | undefined;
 		for (const key of keys) {
 			const value = this.popAttr(attrs, key);
-			if (value !== undefined) {
-				return value;
+			if (result === undefined && value !== undefined) {
+				result = value;
 			}
 		}
-		return undefined;
+		return result;
 	}
 
 	private readNumeric(value: string | undefined): number | undefined {
@@ -886,7 +895,9 @@ function pythonLiteral(
 	if (value === "false") {
 		return "False";
 	}
-	if (/^-?\d+(\.\d+)?$/.test(value)) {
+	// Leading zeros (e.g. "007") are excluded: they are a SyntaxError in
+	// Python 3 decimal integer literals, so such values stay strings.
+	if (/^-?(0|[1-9]\d*)(\.\d+)?$/.test(value)) {
 		return value;
 	}
 	return stringify(value);

@@ -7,6 +7,29 @@ type ClockState = "running" | "paused";
 const DEFAULT_RATE = 1000;
 const DEFAULT_DURATION = 1000;
 
+/**
+ * Attribute the parking machinery (drafter.bridge.persistence) uses to select
+ * elements that survive simulated page reloads. Mirrors PERSIST_FLAG_ATTR in
+ * src/drafter/components/utilities/persistence.py.
+ */
+const PERSIST_FLAG_ATTR = "data-drafter-persistent";
+
+/**
+ * Whether the drafter-page-loaded event has already fired for the view that
+ * is currently in the DOM. Tracked at module level (with a listener that is
+ * registered at import time) so a timer or clock inserted into an
+ * already-loaded page can start right away instead of waiting for a
+ * page-loaded event that will never come. The flag is cleared when a timer
+ * or clock is genuinely torn down (a real disconnect, not a persistence
+ * move), which is what happens to a view's elements when navigation replaces
+ * the page content — the next view's elements then wait for their own
+ * page-loaded event.
+ */
+let pageLoadedForCurrentView = false;
+window.addEventListener(DRAFTER_PAGE_LOADED_EVENT, () => {
+	pageLoadedForCurrentView = true;
+});
+
 class Timer extends DrafterHTMLElement {
 	static get observedAttributes() {
 		return ["duration", "rate", "show", "controls", "persistent"];
@@ -21,10 +44,9 @@ class Timer extends DrafterHTMLElement {
 	private toggleButton: HTMLButtonElement | null = null;
 	private restartButton: HTMLButtonElement | null = null;
 	private waitingForPageLoad = false;
-	private pageLoadedForCurrentView = false;
+	private startFallbackId: number | null = null;
 
 	private handlePageLoaded = (_event: Event): void => {
-		this.pageLoadedForCurrentView = true;
 		if (!this.isConnected || !this.waitingForPageLoad) {
 			return;
 		}
@@ -69,6 +91,11 @@ class Timer extends DrafterHTMLElement {
 		if (this.intervalId !== null) {
 			window.clearInterval(this.intervalId);
 			this.intervalId = null;
+		}
+
+		if (this.startFallbackId !== null) {
+			window.clearTimeout(this.startFallbackId);
+			this.startFallbackId = null;
 		}
 	}
 
@@ -262,17 +289,53 @@ class Timer extends DrafterHTMLElement {
 		this.updateControls();
 	}
 
-	private initializeTimer(preferPersistedState: boolean): void {
+	private startSoon(): void {
+		// The current view has already loaded, so no page-loaded event is
+		// guaranteed to arrive and start this element (it was inserted into
+		// an already-loaded page). Start on the next task instead of
+		// synchronously: an element inserted while a new page render is
+		// still in progress may be replaced by its parked persistent twin
+		// (or receive the new view's page-loaded event) first, and must not
+		// tick mid-render. The fallback is cancelled by clearTimers on
+		// disconnect, restart, or an earlier page-loaded start.
+		this.waitingForPageLoad = true;
+		this.startedAt = null;
+		this.updateDisplay();
+		this.updateControls();
+		this.startFallbackId = window.setTimeout(() => {
+			this.startFallbackId = null;
+			if (this.waitingForPageLoad) {
+				this.waitingForPageLoad = false;
+				this.beginRunning();
+			}
+		}, 0);
+	}
+
+	private syncPersistenceFlag(): void {
+		// Parking (drafter.bridge.persistence) selects the elements that
+		// survive page reloads via the data-drafter-persistent attribute;
+		// keep it in sync so runtime changes to `persistent` gate parking.
+		// A persistence change must not restart the running timer.
+		if (this.isPersistent()) {
+			this.setAttribute(PERSIST_FLAG_ATTR, "true");
+		} else {
+			this.removeAttribute(PERSIST_FLAG_ATTR);
+		}
+	}
+
+	private initializeTimer(startImmediately: boolean): void {
 		this.clearTimers();
 
 		this.resetState();
 
 		this.renderStructure();
 		if (this.state === "running") {
-			if (this.pageLoadedForCurrentView) {
+			if (!pageLoadedForCurrentView) {
+				this.waitForPageLoadThenStart();
+			} else if (startImmediately) {
 				this.beginRunning();
 			} else {
-				this.waitForPageLoadThenStart();
+				this.startSoon();
 			}
 		} else {
 			this.updateDisplay();
@@ -285,12 +348,11 @@ class Timer extends DrafterHTMLElement {
 			// Persistence move in progress: keep running state untouched.
 			return;
 		}
-		this.pageLoadedForCurrentView = false;
 		window.addEventListener(
 			DRAFTER_PAGE_LOADED_EVENT,
 			this.handlePageLoaded,
 		);
-		this.initializeTimer(true);
+		this.initializeTimer(false);
 	}
 
 	attributeChangedCallback(
@@ -312,7 +374,12 @@ class Timer extends DrafterHTMLElement {
 			return;
 		}
 
-		this.initializeTimer(false);
+		if (name === "persistent") {
+			this.syncPersistenceFlag();
+			return;
+		}
+
+		this.initializeTimer(true);
 	}
 
 	disconnectedCallback() {
@@ -320,6 +387,10 @@ class Timer extends DrafterHTMLElement {
 			// Persistence move in progress: keep running state untouched.
 			return;
 		}
+		// A real teardown, which is what happens to a view's elements when
+		// navigation replaces the page content: the next view must wait for
+		// its own page-loaded event.
+		pageLoadedForCurrentView = false;
 		window.removeEventListener(
 			DRAFTER_PAGE_LOADED_EVENT,
 			this.handlePageLoaded,
@@ -345,10 +416,9 @@ class DrafterClock extends DrafterHTMLElement {
 	private toggleButton: HTMLButtonElement | null = null;
 	private restartButton: HTMLButtonElement | null = null;
 	private waitingForPageLoad = false;
-	private pageLoadedForCurrentView = false;
+	private startFallbackId: number | null = null;
 
 	private handlePageLoaded = (_event: Event): void => {
-		this.pageLoadedForCurrentView = true;
 		if (!this.isConnected || !this.waitingForPageLoad) {
 			return;
 		}
@@ -384,6 +454,11 @@ class DrafterClock extends DrafterHTMLElement {
 		if (this.intervalId !== null) {
 			window.clearInterval(this.intervalId);
 			this.intervalId = null;
+		}
+
+		if (this.startFallbackId !== null) {
+			window.clearTimeout(this.startFallbackId);
+			this.startFallbackId = null;
 		}
 	}
 
@@ -532,17 +607,50 @@ class DrafterClock extends DrafterHTMLElement {
 		this.updateControls();
 	}
 
-	private initializeClock(preferPersistedState: boolean): void {
+	private startSoon(): void {
+		// See Timer.startSoon: the current view has already loaded, so start
+		// on the next task rather than synchronously, letting persistence
+		// adoption (or the new view's page-loaded event) win first. The
+		// fallback is cancelled by clearIntervalTimer on disconnect,
+		// restart, or an earlier page-loaded start.
+		this.waitingForPageLoad = true;
+		this.startedAt = null;
+		this.updateDisplay();
+		this.updateControls();
+		this.startFallbackId = window.setTimeout(() => {
+			this.startFallbackId = null;
+			if (this.waitingForPageLoad) {
+				this.waitingForPageLoad = false;
+				this.beginRunning();
+			}
+		}, 0);
+	}
+
+	private syncPersistenceFlag(): void {
+		// Parking (drafter.bridge.persistence) selects the elements that
+		// survive page reloads via the data-drafter-persistent attribute;
+		// keep it in sync so runtime changes to `persistent` gate parking.
+		// A persistence change must not restart the running clock.
+		if (this.isPersistent()) {
+			this.setAttribute(PERSIST_FLAG_ATTR, "true");
+		} else {
+			this.removeAttribute(PERSIST_FLAG_ATTR);
+		}
+	}
+
+	private initializeClock(startImmediately: boolean): void {
 		this.clearIntervalTimer();
 
 		this.resetState();
 
 		this.renderStructure();
 		if (this.state === "running") {
-			if (this.pageLoadedForCurrentView) {
+			if (!pageLoadedForCurrentView) {
+				this.waitForPageLoadThenStart();
+			} else if (startImmediately) {
 				this.beginRunning();
 			} else {
-				this.waitForPageLoadThenStart();
+				this.startSoon();
 			}
 		} else {
 			this.updateDisplay();
@@ -555,12 +663,11 @@ class DrafterClock extends DrafterHTMLElement {
 			// Persistence move in progress: keep running state untouched.
 			return;
 		}
-		this.pageLoadedForCurrentView = false;
 		window.addEventListener(
 			DRAFTER_PAGE_LOADED_EVENT,
 			this.handlePageLoaded,
 		);
-		this.initializeClock(true);
+		this.initializeClock(false);
 	}
 
 	attributeChangedCallback(
@@ -582,7 +689,12 @@ class DrafterClock extends DrafterHTMLElement {
 			return;
 		}
 
-		this.initializeClock(false);
+		if (name === "persistent") {
+			this.syncPersistenceFlag();
+			return;
+		}
+
+		this.initializeClock(true);
 	}
 
 	disconnectedCallback() {
@@ -590,6 +702,10 @@ class DrafterClock extends DrafterHTMLElement {
 			// Persistence move in progress: keep running state untouched.
 			return;
 		}
+		// A real teardown, which is what happens to a view's elements when
+		// navigation replaces the page content: the next view must wait for
+		// its own page-loaded event.
+		pageLoadedForCurrentView = false;
 		window.removeEventListener(
 			DRAFTER_PAGE_LOADED_EVENT,
 			this.handlePageLoaded,

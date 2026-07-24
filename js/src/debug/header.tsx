@@ -18,7 +18,9 @@ export class DebugHeaderBar {
 	}
 
 	private createHeaderBar() {
-		const title = <span>{t("app.title")}</span>;
+		const title = (
+			<span class="drafter-header-title">{t("app.title")}</span>
+		);
 		const hotButtons = this.createHotButtons();
 		return (
 			<div className="drafter-header-bar">
@@ -79,6 +81,13 @@ export class DebugHeaderBar {
 	}
 
 	public setTitle(title: string) {
-		this.headerElement.innerHTML = `<span>${title}</span>`;
+		// Only update the title span; replacing the header's innerHTML would
+		// destroy the hot-button toolbar rendered by the constructor.
+		const titleElement = this.headerElement.querySelector(
+			".drafter-header-title",
+		);
+		if (titleElement) {
+			titleElement.textContent = title;
+		}
 	}
 }

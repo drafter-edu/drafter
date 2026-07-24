@@ -57,7 +57,9 @@ phase status live in [`../JS_TESTING_PLAN.md`](../JS_TESTING_PLAN.md).
   fresh page; skips are annotated with reasons), `journeys.spec.ts` (form
   round-trip, navigation/history, editor edit-and-run), `features.spec.ts`
   (upload, interrupt, geolocation, download), `embed.spec.ts`
-  (multi-instance isolation), `smoke.spec.ts`.
+  (same-page shadow-DOM instances), `embed-iframe.spec.ts` (DrafterHost
+  iframe embeds — the docs editable-demo shape: shared runtime, per-iframe
+  documents, restart/detach), `smoke.spec.ts`.
 
 ## Conventions
 
