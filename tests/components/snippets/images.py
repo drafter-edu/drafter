@@ -6,22 +6,22 @@ tests = TestableComponentSet("images")
 # Image tests
 tests.image_simple = Image("path/to/image.png", id="img1")
 tests.image_simple = """
-<img id="img1" src="/__images/path/to/image.png">
+<img id="img1" src="/path/to/image.png">
 """
 
 tests.image_with_width = Image("photo.jpg", width=400, id="img2")
 tests.image_with_width = """
-<img id="img2" src="/__images/photo.jpg" width="400">
+<img id="img2" src="/photo.jpg" width="400">
 """
 
 tests.image_with_dimensions = Image("pic.png", width=300, height=200, id="img3")
 tests.image_with_dimensions = """
-<img height="200" id="img3" src="/__images/pic.png" width="300">
+<img height="200" id="img3" src="/pic.png" width="300">
 """
 
 tests.image_with_alt = Image("logo.svg", alt="Company Logo", id="img4")
 tests.image_with_alt = """
-<img alt="Company Logo" id="img4" src="/__images/logo.svg">
+<img alt="Company Logo" id="img4" src="/logo.svg">
 """
 
 # Tests with external URLs
