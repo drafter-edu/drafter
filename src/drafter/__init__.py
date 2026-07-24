@@ -122,6 +122,7 @@ from drafter.files.opening import get_drafter_path, open
 from drafter.launch import start_server
 from drafter.payloads import Fragment, Page, Redirect, Update
 from drafter.router.commands import add_route, route
+from drafter.styling.generics import update_attr, update_style
 from drafter.styling.styling import (
     bold,
     change_background_color,
@@ -143,8 +144,6 @@ from drafter.styling.styling import (
     small_font,
     strikethrough,
     underline,
-    update_attr,
-    update_style,
 )
 from drafter.testing import assert_equal
 from drafter.version import CURRENT_DRAFTER_VERSION

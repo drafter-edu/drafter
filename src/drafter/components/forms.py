@@ -272,7 +272,7 @@ class SelectBox(FormComponent):
         Returns:
             List of RenderPlan objects, one per option.
         """
-        children = []
+        children: list[PageContent | RenderPlan] = []
         for option in self.options:
             option_attrs: dict[str, Any] = {"value": option}
             if option == self.default_value:
@@ -485,7 +485,7 @@ class RadioButtonGroup(FormComponent):
         Returns:
             List of RenderPlan objects, one per option.
         """
-        children = []
+        children: list[PageContent | RenderPlan] = []
         for option in self.options:
             option_attrs: dict[str, Any] = {"value": option}
             if option == self.default_value:

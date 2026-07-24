@@ -206,7 +206,7 @@ class Table(Component):
         Returns:
             List of RenderPlan objects for table structure.
         """
-        children = []
+        children: list[PageContent | RenderPlan] = []
 
         tbody, thead = self.get_tbody(context)
 

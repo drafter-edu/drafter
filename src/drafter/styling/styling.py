@@ -18,75 +18,12 @@ component) or a list of components (each element is updated).
 # - superscript, subscript
 # - border/margin/padding for individual sides
 
-from drafter.components import PageContent, Text
+from collections.abc import Sequence
+from typing import TypeVar, Union, overload
 
-
-def update_style(component: PageContent, style: str, value: str) -> PageContent:
-    """
-    Updates the style of a component, returning the component (allowing you to chain calls).
-    The ``style`` property should match the CSS property name.
-    Remember to include units in the ``value`` if they are expected!
-
-    Example style properties include:
-    - color
-    - background-color
-    - font-size
-
-    Args:
-        component: The component to update. May also be a string (which is
-            wrapped in a new Text component) or a list of components (each
-            element is updated).
-        style: The name of the style property to change
-        value: The value to set the style property to (should be a string).
-
-    Returns:
-        The updated component. If a component was given, the original
-        component is updated in place and returned. If a string was given,
-        a new Text component wrapping it is returned. If a list was given,
-        a new list of the updated elements is returned.
-    """
-    if isinstance(component, str):
-        component = Text(component)
-    # TODO: Consider this approach
-    if isinstance(component, list):
-        modified = []
-        for i in range(len(component)):
-            modified.append(update_style(component[i], style, value))
-        return modified
-    return component.update_style(style, value)
-
-
-def update_attr(component: PageContent, attr: str, value: str) -> PageContent:
-    """
-    Updates the attribute of a component, returning the component (allowing you to chain calls).
-    The ``attr`` property should match the HTML attribute name.
-
-    Example attributes include:
-    - id
-    - class
-    - title
-
-    Args:
-        component: The component to update. May also be a string (which is
-            wrapped in a new Text component) or a list of components (each
-            element is updated).
-        attr: The name of the attribute to change
-        value: The value to set the attribute to (should be a string).
-
-    Returns:
-        The updated component. If a component was given, the original
-        component is updated in place and returned. If a string was given,
-        a new Text component wrapping it is returned. If a list was given,
-        a new list of the updated elements is returned.
-    """
-    if isinstance(component, str):
-        component = Text(component)
-    if isinstance(component, list):
-        modified = []
-        for i in range(len(component)):
-            modified.append(update_attr(component[i], attr, value))
-        return modified
-    return component.update_attr(attr, value)
+from drafter.components import Component, PageContent, Text
+from drafter.components.page_content import Content
+from drafter.styling.generics import update_style
 
 
 def float_right(component: PageContent) -> PageContent:

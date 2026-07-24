@@ -5,7 +5,7 @@ handling, allowing graceful degradation if PIL is not installed.
 """
 
 try:
-    from PIL import Image as PILImage
+    from PIL import Image as PILImage  # type: ignore
 
     HAS_PILLOW = True
 except ImportError as e:

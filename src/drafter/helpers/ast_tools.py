@@ -70,7 +70,7 @@ class ExtentGetter(ast.NodeVisitor):
         return lowest, highest
 
 
-_cache = {}
+_cache: dict[str, ExtentGetter] = {}
 
 
 def get_all_relevant_lines(lineno: int, code: str) -> str:

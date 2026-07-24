@@ -87,7 +87,7 @@ def configure_system(
     environment_variables = dict(os.environ)
 
     #### Keep track of changed settings for when we deploy
-    modified_args = defaultdict(dict)
+    modified_args: dict[str, dict] = defaultdict(dict)
 
     ##### Bootstrap configuration processing
     bootstrap_config = BootstrapConfiguration()

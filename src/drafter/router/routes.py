@@ -50,7 +50,7 @@ def normalize_url(url: str) -> str:
     """
     url = url.strip()
 
-    segments = []
+    segments: list[str] = []
     for segment in url.split("/"):
         if segment in ("", "."):
             continue
@@ -82,7 +82,7 @@ def clean_url(url: str) -> str:
     """
     url = url.strip().strip("/")
 
-    segments = []
+    segments: list[str] = []
     for segment in url.split("/"):
         if segment in ("", "."):
             continue
@@ -113,9 +113,9 @@ class Router:
     """
 
     def __init__(self) -> None:
-        self.routes = {}
-        self.route_functions = {}
-        self.signatures = {}
+        self.routes: dict[str, Callable] = {}
+        self.route_functions: dict[str, Callable] = {}
+        self.signatures: dict[str, RouteSignatureSpec] = {}
 
     def get_route(self, url: str) -> Callable | None:
         """Retrieve the handler function for a given URL.

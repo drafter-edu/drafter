@@ -77,16 +77,20 @@ class Page(Fragment):
                 f"Make sure you return a Page object with the new state and the list of strings/content objects."
             )
         else:
-            from drafter.components import PageContent
+            from drafter.components.page_content import (
+                validate_page_content,
+            )
 
             for item in self.content:
-                if not isinstance(item, (str, PageContent)):
+                is_valid, error_message = validate_page_content(item)
+                if not is_valid:
                     return VerificationFailure(
                         f"The server did not return a valid Page() object from {original_function}.\n"
                         f"Instead of a list of strings or content objects, the content field was:\n"
                         f" {self.content!r}\n"
                         f"One of those items is not a string or a content object. Instead, it was:\n"
                         f" {item!r}\n"
+                        f"Validation error: {error_message}\n"
                         f"Make sure you return a Page object with the new state and the list of strings/content objects."
                     )
 

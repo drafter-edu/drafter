@@ -8,6 +8,7 @@ recording rendering errors.
 
 import html
 from dataclasses import dataclass
+from typing import Optional
 
 from drafter.components import Component
 from drafter.components.planning.render_plan import NewlineMode, RenderPlan
@@ -50,11 +51,11 @@ class Renderer:
     ):
         self.state = state
         self.configuration = configuration
-        self.errors = []
-        self.component_stack = []
+        self.errors: list[RenderError] = []
+        self.component_stack: list[Optional[str]] = []
         self.depth = 0
-        self.parts = []
-        self.assets = {"css": set(), "js": set()}
+        self.parts: list[str] = []
+        self.assets: dict[str, set[str]] = {"css": set(), "js": set()}
         self.indentation = 2
         self.newline_mode_stack = [NewlineMode.CONVERT_TO_BR]
 
@@ -86,7 +87,7 @@ class Renderer:
             configuration enables `newlines_to_br`; otherwise a falsy value
             (False, or None when no configuration is set).
         """
-        return self.newline_mode_stack[-1] != NewlineMode.RETAIN and (
+        return self.newline_mode_stack[-1] != NewlineMode.RETAIN and bool(
             self.configuration and self.configuration.newlines_to_br
         )
 

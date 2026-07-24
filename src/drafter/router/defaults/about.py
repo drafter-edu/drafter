@@ -9,6 +9,7 @@ from drafter.components import (
     Link,
     Paragraph,
 )
+from drafter.components.page_content import PageContent
 from drafter.payloads.kinds.page import Page
 
 
@@ -43,7 +44,7 @@ def default_about(state, _server: ClientServer):
 
     # Build the about page content
     information = configuration.information
-    content_parts = []
+    content_parts: list[PageContent] = []
     site_parts = list(information.get_parts())
 
     for title, content in site_parts:

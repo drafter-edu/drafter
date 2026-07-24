@@ -137,9 +137,16 @@ def _dataclass_converter(dataclass_type):
     return convert
 
 
+def _create_predicate_function(_map_type):
+    def predicate(target, _cls=_map_type):
+        return target is _cls
+
+    return predicate
+
+
 for _map_type in (MapLocation, MapMarker, MapView):
     CONVERTER_REGISTRY.register_predicate(
-        (lambda target, _cls=_map_type: target is _cls),
+        _create_predicate_function(_map_type),
         _dataclass_converter(_map_type),
         priority=20,
         name=_map_type.__name__,

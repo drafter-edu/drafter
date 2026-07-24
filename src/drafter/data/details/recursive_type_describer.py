@@ -50,7 +50,7 @@ from typing import Any
 # PILImage is imported by value for annotations only; runtime checks use the
 # module so late Pillow installs (refresh_pillow_support) are observed.
 from drafter.components.utilities import image_support
-from drafter.components.utilities.image_support import PILImage
+from drafter.components.utilities.image_support import PILImage  # type: ignore
 
 
 def first_shared_base(cls1, cls2):
@@ -86,11 +86,13 @@ class TypeFlattener:
         _types: The set of type-name strings recorded so far.
     """
 
+    _types: set[str]
+
     # TODO: Need to handle shared common ancestors, collection types
     # Should also be checking the actual types of things, not just the
     # string representation
     def __init__(self):
-        self._types: set[str] = set()
+        self._types = set()
 
     def add_type(self, representation: dict):
         """
@@ -293,13 +295,13 @@ class RecursiveTypeDescriber:
             return self._visit_dict(value, depth, new_seen_ids)
 
         # Pillow image
-        if image_support.HAS_PILLOW and isinstance(value, image_support.PILImage.Image):
+        if image_support.HAS_PILLOW and isinstance(value, image_support.PILImage.Image):  # type: ignore
             return self._visit_pillow_image(value)
 
         # Primitive or other object: record leaf
         return self._visit_unknown(value)
 
-    def _visit_pillow_image(self, value: PILImage.Image):
+    def _visit_pillow_image(self, value: PILImage.Image):  # type: ignore
         return {
             "kind": "pillow_image",
             "type": self.value_type(value),

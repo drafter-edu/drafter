@@ -7,7 +7,7 @@ import importlib.abc
 import importlib.util
 import sys
 
-from pyodide.http import pyxhr
+from pyodide.http import pyxhr  # type: ignore
 
 import js
 

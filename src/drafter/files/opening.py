@@ -178,4 +178,4 @@ def get_drafter_path(
     return actual_path
 
 
-builtins.open = open
+builtins.open = open  # type: ignore[assignment]  # intentional monkey patch

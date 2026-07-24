@@ -1008,6 +1008,7 @@ class ClientServer:
             InitialConfigurationEvent(config=configuration.to_json()),
             "client_server.do_configuration",
         )
+        return None
 
     def do_render(self) -> InitialSiteData:
         """Render the initial site HTML framing structure.
@@ -1113,11 +1114,11 @@ class ClientServer:
         # TODO: Extract compiled body and headers
         body = response.body or "Error during precompilation."
         headers = initial_site.additional_css
-        headers = "\n".join(
+        compiled_headers = "\n".join(
             [
                 header.precompile_to_html({DRAFTER_TAG_CLASSES["PRECOMPILE_HEADERS"]})
                 for header in headers
             ]
         )
 
-        return body, headers
+        return body, compiled_headers

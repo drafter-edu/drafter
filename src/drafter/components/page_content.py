@@ -23,7 +23,7 @@ Attribute order should always be consistent, with styles at the end. Generally, 
 """
 
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Any, ClassVar, Union
 
@@ -633,8 +633,27 @@ class Component:
 Content = Union[Component, str]
 """Type alias for page content: a component or string."""
 
-PageContent = Union[Content, list[Content]]
+PageContent = Union[Content, Sequence[Content]]
 """Type alias for page content: a content item or list of content items."""
+
+
+def normalize_page_content(content: PageContent) -> list[Content]:
+    """Normalize PageContent to a list of Content items.
+
+    Args:
+        content: The PageContent to normalize.
+
+    Returns:
+        A list of Content items (Component or str).
+    """
+    if isinstance(content, (Component, str)):
+        return [content]
+    elif isinstance(content, Sequence):
+        return list(content)
+    else:
+        raise ValueError(
+            f"Invalid PageContent: expected Component, str, or a sequence of these, but got {type(content).__name__}."
+        )
 
 
 def validate_page_content(content: Any) -> tuple[bool, str]:
@@ -649,7 +668,14 @@ def validate_page_content(content: Any) -> tuple[bool, str]:
     """
     if isinstance(content, (Component, str)):
         return True, ""
-    elif isinstance(content, list):
+    # Prevent string-like binary objects (especially empty ones) from being
+    # treated as valid empty sequences:
+    elif isinstance(content, (bytes, bytearray, memoryview)):
+        return (
+            False,
+            f"Invalid PageContent: expected Component, str, or a sequence of these, but got binary data instead ({type(content).__name__}).",
+        )
+    elif isinstance(content, Sequence):
         for index, item in enumerate(content):
             if not isinstance(item, (Component, str)):
                 return (
@@ -660,5 +686,5 @@ def validate_page_content(content: Any) -> tuple[bool, str]:
     else:
         return (
             False,
-            f"Invalid PageContent: expected Component, str, or list thereof, got {type(content).__name__}.",
+            f"Invalid PageContent: expected Component, str, a list of Component or string, but instead got {type(content).__name__}.",
         )

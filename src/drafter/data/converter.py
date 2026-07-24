@@ -165,8 +165,12 @@ class ConverterRegistry:
         name: str = "",
     ) -> None:
         """Register a converter for one exact target type."""
+
+        def applies_to(resolved: Any, _target=target_type) -> bool:
+            return resolved is target_type
+
         self.register_predicate(
-            lambda resolved, _target=target_type: resolved is _target,
+            applies_to,
             converter,
             priority=priority,
             name=name or f"{describe_type(target_type)} converter",
