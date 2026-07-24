@@ -12,6 +12,7 @@ from drafter.bridge.context import DomContext
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import (
     consume_pending_instance_context,
+    register_instance_cleanup,
     register_server,
     set_main_server,
 )
@@ -76,7 +77,16 @@ def run_client_bridge(
     if rendered_site.error:
         return
 
-    server.do_listen_for_events(client_bridge.handle_server_event)
+    subscription = server.do_listen_for_events(client_bridge.handle_server_event)
+
+    # Whoever wires an instance to the browser unwires it: when this instance
+    # is discarded (reset_server_for_root), remove the bridge's
+    # window/document listeners and stop routing bus events into its dead DOM.
+    def teardown_instance() -> None:
+        client_bridge.teardown()
+        server.event_bus.unsubscribe(subscription)
+
+    register_instance_cleanup(instance_key, teardown_instance)
 
     def handle_visit(request):
         # Make this instance's server "current" for the duration of the visit so

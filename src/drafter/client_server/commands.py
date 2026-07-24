@@ -9,6 +9,7 @@ virtual-filesystem root) around dispatch, and passing per-instance context
 from `configure_instance()` to the next bridge run.
 """
 
+from collections.abc import Callable
 from typing import Any
 
 from drafter.client_server.client_server import ClientServer
@@ -27,6 +28,13 @@ creates it on demand."""
 # embedded instances all use the same (default) root id in their own documents,
 # so the root id alone cannot distinguish them within the shared interpreter.
 _SERVER_REGISTRY: dict[str, ClientServer] = {}
+
+# Teardown callbacks registered alongside servers, keyed the same way. The
+# composition root that wires an instance to the browser (run_client_bridge)
+# registers a callback here that undoes that wiring — removing the bridge's
+# window/document listeners and its event-bus subscription — so the server
+# itself never needs to know about the bridge. Run by reset_server_for_root.
+_INSTANCE_CLEANUPS: dict[str, Callable[[], None]] = {}
 
 # Context handed over by the most recent configure_instance() call, consumed by
 # the next run_client_bridge(). Execution of configure -> student code is
@@ -106,17 +114,45 @@ def get_server_for_root(instance_key: str) -> ClientServer | None:
     return _SERVER_REGISTRY.get(instance_key)
 
 
+def register_instance_cleanup(instance_key: str, cleanup: Callable[[], None]) -> None:
+    """Register a callback that disconnects an instance from the browser.
+
+    Called by the composition root (run_client_bridge) with a closure that
+    tears down the instance's ClientBridge and unsubscribes its event-bus
+    handler. reset_server_for_root() runs and forgets the callback when the
+    instance is discarded. Registering again for the same key replaces the
+    previous callback (a re-run instance re-wires from scratch).
+
+    Args:
+        instance_key: The instance's key (instance_id or root_element_id).
+        cleanup: Zero-argument callable undoing the instance's browser wiring.
+    """
+    _INSTANCE_CLEANUPS[instance_key] = cleanup
+
+
 def reset_server_for_root(instance_key: str) -> None:
     """Forget the server registered for a given instance key.
 
-    Clears the current-server pointer too if it referenced this instance, so a
-    stale server is never left as the default.
+    Fully disconnects the discarded instance from the browser by running its
+    registered cleanup callback (removing the bridge's window/document event
+    listeners and its event-bus subscription), so events can never again
+    reach a bridge whose DOM has been destroyed. Clears the current-server
+    pointer too if it referenced this instance, so a stale server is never
+    left as the default.
 
     Args:
         instance_key: The instance's key (instance_id or root_element_id).
     """
     global MAIN_SERVER
     server = _SERVER_REGISTRY.pop(instance_key, None)
+    cleanup = _INSTANCE_CLEANUPS.pop(instance_key, None)
+    if cleanup is not None:
+        try:
+            cleanup()
+        except Exception:
+            # Cleanup is best-effort: a partially torn-down instance must not
+            # prevent it from being forgotten and replaced.
+            pass
     if server is not None and MAIN_SERVER is server:
         MAIN_SERVER = None
 

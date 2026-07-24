@@ -109,6 +109,9 @@ class EventManager:
         self.hotkey_events = {}
         self.last_press_time = 0
         self.hotkey_listener_ready = False
+        # The wrapped keydown listener backing all hotkeys, kept so teardown
+        # can remove it from the document and release its proxy.
+        self.hotkey_listener: Any = None
         # The node inner-frame lookups (BODY/FORM) are scoped to. Defaults to
         # the instance's document (the iframe's document for embedded
         # instances); set to the instance's shadow root by set_scope() so
@@ -475,8 +478,48 @@ class EventManager:
         if not self.hotkey_listener_ready:
             wrapped_handler = self.runtime.wrap_event_handler(hotkey_handler)
             self.runtime.context.document.addEventListener("keydown", wrapped_handler)
+            self.hotkey_listener = wrapped_handler
             self.hotkey_listener_ready = True
             debug_log("client.hotkey_listener_registered")
+
+    def teardown(self) -> None:
+        """Remove this manager's window/document listeners and release them.
+
+        Called when the instance is torn down (e.g. before its code is re-run
+        by the in-browser editor). Without this, the old instance's global
+        listeners survive its DOM and keep routing events into its dead
+        bridge. Element-level listeners (click/submit/component handlers) die
+        with the instance's DOM and need no removal here; their proxies are
+        released so the runtime does not retain them.
+        """
+        window = self.runtime.context.window
+        for event_name, handler in list(self.listeners.items()):
+            try:
+                window.removeEventListener(event_name, handler)
+            except Exception:
+                # The window may already be gone (e.g. a removed iframe).
+                pass
+            self.runtime.cleanup_event_handler(handler)
+        self.listeners.clear()
+
+        if self.hotkey_listener is not None:
+            try:
+                self.runtime.context.document.removeEventListener(
+                    "keydown", self.hotkey_listener
+                )
+            except Exception:
+                pass
+            self.runtime.cleanup_event_handler(self.hotkey_listener)
+            self.hotkey_listener = None
+        self.hotkey_listener_ready = False
+        self.hotkey_events.clear()
+
+        for handler in (self.click_handler, self.submit_handler):
+            if handler is not None:
+                self.runtime.cleanup_event_handler(handler)
+        self.click_handler = None
+        self.submit_handler = None
+        debug_log("client.event_manager_teardown")
 
 
 def get_single_checkbox_names(form: Any) -> set[str]:

@@ -86,6 +86,12 @@ class ClientBridge:
         self.navigator = NavigationController(self.runtime)
         self.events = EventManager(self.runtime)
         self.debug_panel = None
+        # Re-entrancy guard for _handle_debug_events: reporting a debug-panel
+        # failure publishes an error event on the same bus this bridge
+        # subscribes to, which would otherwise re-enter the same failing
+        # panel forever (an unbounded synchronous recursion that freezes the
+        # tab). While True, incoming events are not forwarded to the panel.
+        self._forwarding_debug_event = False
 
     def setup_site(self, initial_site_data: InitialSiteData) -> None:
         """Build the initial site DOM and prepare instance-scoped machinery.
@@ -187,40 +193,73 @@ class ClientBridge:
             )
 
     def _handle_debug_events(self, event: dict) -> bool:
-        try:
-            js_event = self.runtime.convert_to_js(event)
-        except Exception as e:
-            report_bridge_error(
-                "client.convert_event_to_js",
-                f"Error converting event to JS: {repr(e)}",
-                "bridge.client_bridge.handle_server_event",
-                f"Exception: {repr(e)}",
-                exception=e,
-                phase="event_dispatch",
-            )
+        if self._forwarding_debug_event:
+            # This event was published while we were already forwarding one
+            # to the debug panel (i.e. while reporting that the forward
+            # failed). Forwarding it too would re-enter the same failing
+            # panel and recurse without bound, so drop it here; the caller
+            # logs unhandled events to the console.
             return False
-        if self.debug_panel:
+        self._forwarding_debug_event = True
+        try:
             try:
-                handled = self.debug_panel.handleEvent(js_event)
-                return handled
+                js_event = self.runtime.convert_to_js(event)
             except Exception as e:
-                raise_bridge_system_error(
-                    "client.handle_debug_event_failed",
-                    "Failed to handle debug panel event",
-                    "bridge.client_bridge._handle_debug_events",
-                    f"Event: {repr(event)}",
+                report_bridge_error(
+                    "client.convert_event_to_js",
+                    f"Error converting event to JS: {repr(e)}",
+                    "bridge.client_bridge.handle_server_event",
+                    f"Exception: {repr(e)}",
                     exception=e,
                     phase="event_dispatch",
                 )
-        else:
-            raise_bridge_system_error(
-                "client.no_debug_panel",
-                "No debug panel is available to handle telemetry event",
-                "bridge.client_bridge._handle_debug_events",
-                f"Event: {repr(event)}",
-                phase="event_dispatch",
+                return False
+            if self.debug_panel:
+                try:
+                    handled = self.debug_panel.handleEvent(js_event)
+                    return handled
+                except Exception as e:
+                    raise_bridge_system_error(
+                        "client.handle_debug_event_failed",
+                        "Failed to handle debug panel event",
+                        "bridge.client_bridge._handle_debug_events",
+                        f"Event: {repr(event)}",
+                        exception=e,
+                        phase="event_dispatch",
+                    )
+            else:
+                raise_bridge_system_error(
+                    "client.no_debug_panel",
+                    "No debug panel is available to handle telemetry event",
+                    "bridge.client_bridge._handle_debug_events",
+                    f"Event: {repr(event)}",
+                    phase="event_dispatch",
+                )
+            return False
+        finally:
+            self._forwarding_debug_event = False
+
+    def teardown(self) -> None:
+        """Disconnect this bridge from the browser so a successor can replace it.
+
+        Removes the EventManager's window/document listeners and drops the
+        debug panel reference. Called when the instance is being discarded
+        (reset before an editor-driven re-run, or embed detach); without it,
+        the old bridge's global listeners keep routing browser events into a
+        bridge whose DOM no longer exists.
+        """
+        try:
+            self.events.teardown()
+        except Exception as e:
+            report_bridge_error(
+                "client.bridge_teardown_failed",
+                "Failed to remove a torn-down bridge's event listeners",
+                "bridge.client_bridge.teardown",
+                f"Exception: {repr(e)}",
+                exception=e,
+                phase="setup",
             )
-        return False
+        self.debug_panel = None
 
     def _notify_debug_panel(self, response_url: str):
         if self.debug_panel:

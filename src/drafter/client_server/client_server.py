@@ -48,7 +48,7 @@ from drafter.data.response import Response
 from drafter.data.telemetry import ErrorRecord, TelemetryMetadata
 from drafter.history.state import SiteState
 from drafter.monitor.audit import log_error, log_record
-from drafter.monitor.bus import EventBus
+from drafter.monitor.bus import EventBus, Subscription
 from drafter.payloads.kinds.error_page import SimpleErrorPage
 from drafter.payloads.payloads import ResponsePayload
 from drafter.payloads.target import Target
@@ -1051,15 +1051,20 @@ class ClientServer:
         """Transition the server to the idle phase, allowing it to receive requests."""
         self.transition("idle")
 
-    def do_listen_for_events(self, handler: Any) -> None:
+    def do_listen_for_events(self, handler: Any) -> Subscription:
         """Subscribe a handler to all events on the event bus.
 
         Args:
             handler: Callable to invoke on any event.
+
+        Returns:
+            The bus subscription, so the caller that wired the handler can
+            unsubscribe it when the instance is discarded.
         """
         # self.monitor.register_listener(handler)
-        self.event_bus.subscribe("*", handler)
+        subscription = self.event_bus.subscribe("*", handler)
         self.event_bus.process_unprocessed_events()
+        return subscription
 
     def get_default_configuration(self) -> ClientServerConfiguration:
         """Return the shared default server configuration instance.

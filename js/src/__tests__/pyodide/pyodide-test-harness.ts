@@ -58,6 +58,18 @@ export async function resetPyodideDrafterRuntime() {
 		return;
 	}
 
+	// Heap forensics: a leaked bridge listener compounds renders quadratically
+	// and only blows up on slow machines (CI), so always log the trend.
+	const gc = (globalThis as { gc?: () => void }).gc;
+	if (gc) {
+		gc();
+	}
+	process.stderr.write(
+		`[harness] heapUsed before reset: ${Math.round(
+			process.memoryUsage().heapUsed / 1024 / 1024,
+		)}MB\n`,
+	);
+
 	// Tear down the previous run's server AND its bridge (event listeners,
 	// debug panel, navigation handlers). set_main_server(None) alone leaves
 	// the old bridge listening, so every past run re-renders on each event —

@@ -902,6 +902,26 @@ export class DrafterHost {
 		return handle;
 	}
 
+	/** Whether an embed with this id is currently attached and runnable. */
+	has(instanceId: string): boolean {
+		return this.instances.has(instanceId);
+	}
+
+	/**
+	 * Restart an attached embed, optionally with new code. This is how
+	 * external editors (e.g. the documentation's editable demos) push updated
+	 * code into an embed running in the shared runtime.
+	 */
+	async restart(instanceId: string, code?: string): Promise<void> {
+		const handle = this.instances.get(instanceId);
+		if (!handle) {
+			throw new Error(
+				`No Drafter embed is attached with id "${instanceId}".`,
+			);
+		}
+		await handle.restart(code);
+	}
+
 	/** Stop an embed and forget its server in the shared interpreter. */
 	async detach(instanceId: string): Promise<void> {
 		const handle = this.instances.get(instanceId);

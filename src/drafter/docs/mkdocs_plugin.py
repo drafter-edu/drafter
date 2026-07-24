@@ -49,6 +49,10 @@ class DrafterCodeBlockPlugin(BasePlugin):
         # iframe only keeps HTML/CSS encapsulated; the parent page hosts the
         # (expensive) Python runtime and every demo attaches to it.
         ("shared_runtime", config_options.Type(bool, default=True)),
+        # Adds a pencil button to each demo's source block that swaps it for
+        # an editor whose run button pushes the edited code into the live
+        # demo below. Requires shared_runtime and show_source.
+        ("editable", config_options.Type(bool, default=True)),
     )
 
     # All demos on a page share one copy of the JS/CSS assets (and the parent
@@ -164,7 +168,21 @@ class DrafterCodeBlockPlugin(BasePlugin):
         )
         bundle_url = self._relative_url_for_page(page.url, bundle_path)
         host_script = f'<script src="{html.escape(bundle_url)}"></script>\n'
-        return host_script + page_html
+        return host_script + self._editor_assets_html() + page_html
+
+    def _editor_assets_html(self) -> str:
+        """Inline the editable-demo script/styles, or "" when disabled.
+
+        The editor needs the source block visible (to attach its pencil
+        button to) and the shared runtime host (whose ``restart`` mechanism
+        it uses to push edited code into the demo's live instance).
+        """
+        if not (self.config["editable"] and self.config["show_source"]):
+            return ""
+        assets_dir = Path(__file__).resolve().parent
+        css = (assets_dir / "embed_editor.css").read_text(encoding="utf-8")
+        js = (assets_dir / "embed_editor.js").read_text(encoding="utf-8")
+        return f"<style>\n{css}</style>\n<script>\n{js}</script>\n"
 
     def on_post_build(self, *, config):
         """Clean up the temporary build directory after the site is built.
