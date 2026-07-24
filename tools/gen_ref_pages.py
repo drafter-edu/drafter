@@ -17,7 +17,12 @@ from pathlib import Path
 from tqdm import tqdm
 import mkdocs_gen_files
 
-if os.getenv("DRAFTER_MKDOCS_API", "").strip().lower() not in {"1", "true", "yes", "on"}:
+if os.getenv("DRAFTER_MKDOCS_API", "").strip().lower() not in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}:
     with mkdocs_gen_files.open("reference/api/index.md", "w") as fd:
         fd.write(
             "# API Reference\n\n"
