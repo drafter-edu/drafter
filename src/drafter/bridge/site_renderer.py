@@ -10,7 +10,6 @@ concurrent instances never collide.
 
 from typing import Any
 
-import js
 from drafter.bridge.dom import (
     add_header,
     add_js,
@@ -18,9 +17,11 @@ from drafter.bridge.dom import (
     add_link_to_shadow,
     add_style,
     add_style_to_shadow,
+    insert_html_before,
     remove_existing_theme,
     remove_page_content,
     replace_html,
+    reuse_theme_link_prefix,
 )
 from drafter.bridge.error_handling import (
     raise_bridge_system_error,
@@ -135,44 +136,71 @@ class SiteRenderer:
 
         try:
             true_root = self.document.getElementById(self.true_root_id)
-            remove_existing_theme(true_root, DRAFTER_TAG_CLASSES["THEME"])
             remove_existing_theme(true_root, DRAFTER_TAG_CLASSES["PRECOMPILE_HEADERS"])
 
-            if initial_site_data.use_shadow_dom:
-                true_root.innerHTML = SITE_HTML_SHADOW_DOM_TEMPLATE
-                # Scope to this instance's root: the shadow-host id is shared, so a
-                # global getElementById would return the first instance's host.
-                shadow_host = true_root.querySelector(
-                    "#" + DRAFTER_TAG_IDS["SHADOW_HOST"]
+            # The stylesheet links this render needs, as (url, class attribute)
+            # pairs in cascade order. Where a previous run of this instance
+            # left links connected, the matching prefix is reused in place
+            # instead of recreated: a link that never leaves the DOM never
+            # refetches its CSS (dev servers often serve it uncacheable).
+            wanted_css = []
+            for css in initial_site_data.additional_css:
+                css_url = css.url if hasattr(css, "url") else css
+                css_classes = " ".join(css.classes) if hasattr(css, "classes") else ""
+                wanted_css.append(
+                    (css_url, f"{DRAFTER_TAG_CLASSES['THEME']} {css_classes}".strip())
                 )
-                if not shadow_host:
-                    raise ValueError("Shadow host element not found in the document.")
-                shadow_root = shadow_host.attachShadow({"mode": "open"})
-                shadow_root.innerHTML = initial_site_data.site_html
+
+            reused_links = 0
+            if initial_site_data.use_shadow_dom:
+                # Head-level theme links can only be left over from a previous
+                # non-shadow run of this instance; this never touches links
+                # scoped inside the shadow root.
+                remove_existing_theme(true_root, DRAFTER_TAG_CLASSES["THEME"])
+
+                shadow_root = self._find_existing_shadow_root(true_root)
+                if shadow_root is None:
+                    true_root.innerHTML = SITE_HTML_SHADOW_DOM_TEMPLATE
+                    # Scope to this instance's root: the shadow-host id is shared, so a
+                    # global getElementById would return the first instance's host.
+                    shadow_host = true_root.querySelector(
+                        "#" + DRAFTER_TAG_IDS["SHADOW_HOST"]
+                    )
+                    if not shadow_host:
+                        raise ValueError(
+                            "Shadow host element not found in the document."
+                        )
+                    shadow_root = shadow_host.attachShadow({"mode": "open"})
+                    shadow_root.innerHTML = initial_site_data.site_html
+                else:
+                    reused_links = self._rebuild_shadow_content(
+                        shadow_root, initial_site_data.site_html, wanted_css
+                    )
                 root = shadow_root
 
-                for css in initial_site_data.additional_css:
-                    css_url = css.url if hasattr(css, "url") else css
-                    css_classes = (
-                        " ".join(css.classes) if hasattr(css, "classes") else ""
-                    )
-                    classes = f"{DRAFTER_TAG_CLASSES['THEME']} {css_classes}".strip()
+                for css_url, classes in wanted_css[reused_links:]:
                     add_link_to_shadow(shadow_root, css_url, with_class=classes)
                 for style in initial_site_data.additional_style:
-                    js.console.log("Adding", style, shadow_root)
                     add_style_to_shadow(
                         shadow_root, style, with_class=DRAFTER_TAG_CLASSES["THEME"]
                     )
             else:
+                # Reuse the head's still-wanted theme links across runs,
+                # removing only theme scripts and the stale link tail.
+                existing_links = list(
+                    self.document.querySelectorAll(
+                        f"link.{DRAFTER_TAG_CLASSES['THEME']}"
+                    )
+                )
+                remove_existing_theme(
+                    true_root, DRAFTER_TAG_CLASSES["THEME"], scripts_only=True
+                )
+                reused_links = reuse_theme_link_prefix(existing_links, wanted_css)
+
                 true_root.innerHTML = initial_site_data.site_html
                 root = true_root
 
-                for css in initial_site_data.additional_css:
-                    css_url = css.url if hasattr(css, "url") else css
-                    css_classes = (
-                        " ".join(css.classes) if hasattr(css, "classes") else ""
-                    )
-                    classes = f"{DRAFTER_TAG_CLASSES['THEME']} {css_classes}".strip()
+                for css_url, classes in wanted_css[reused_links:]:
                     add_link(root, css_url, with_class=classes)
                 for style in initial_site_data.additional_style:
                     add_style(root, style, with_class=DRAFTER_TAG_CLASSES["THEME"])
@@ -198,6 +226,61 @@ class SiteRenderer:
                 exception=e,
                 phase="setup",
             )
+
+    def _find_existing_shadow_root(self, true_root):
+        """The shadow root left behind by a previous run of this instance.
+
+        Every run builds a fresh SiteRenderer, so reuse detection must be
+        DOM-based: a surviving shadow host inside the root element means the
+        previous run rendered here with shadow DOM enabled.
+
+        Args:
+            true_root: This instance's root element (may be None).
+
+        Returns:
+            The previous run's shadow root, or None if there is nothing to
+            reuse (first run, prior error site, or prior non-shadow run).
+        """
+        if true_root is None:
+            return None
+        shadow_host = true_root.querySelector("#" + DRAFTER_TAG_IDS["SHADOW_HOST"])
+        if not shadow_host:
+            return None
+        shadow_root = getattr(shadow_host, "shadowRoot", None)
+        return shadow_root if shadow_root else None
+
+    def _rebuild_shadow_content(self, shadow_root, site_html, wanted_css) -> int:
+        """Replace a surviving shadow root's content, reusing its theme links.
+
+        The still-wanted prefix of stylesheet <link> elements stays connected
+        while everything else (old site frame, injected styles, stale links)
+        is removed, and the new site HTML is inserted before the kept links.
+        Keeping the links connected avoids refetching their CSS on every
+        editor-driven restart (and the flash of unstyled content that comes
+        with it).
+
+        Args:
+            shadow_root: The previous run's shadow root to render into.
+            site_html: The new site frame HTML.
+            wanted_css: (url, class attribute) pairs in cascade order.
+
+        Returns:
+            The number of links reused; the caller creates the rest.
+        """
+        theme_class = DRAFTER_TAG_CLASSES["THEME"]
+        existing_links = list(shadow_root.querySelectorAll(f"link.{theme_class}"))
+        reused_links = reuse_theme_link_prefix(existing_links, wanted_css)
+        kept_links = existing_links[:reused_links]
+
+        for child in list(shadow_root.children):
+            tag = (getattr(child, "tagName", "") or "").lower()
+            if tag == "link" and child.classList.contains(theme_class):
+                continue
+            child.remove()
+        insert_html_before(
+            shadow_root, site_html, kept_links[0] if kept_links else None
+        )
+        return reused_links
 
     def update_site(self, response: Response) -> bool:
         """

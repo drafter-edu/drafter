@@ -221,6 +221,58 @@ def add_link(
     return link
 
 
+def reuse_theme_link_prefix(existing_links, wanted_css) -> int:
+    """Keep the longest prefix of connected links matching the wanted list.
+
+    Compares already-connected stylesheet ``<link>`` elements against the
+    wanted ``(url, class attribute)`` pairs in order. Links in the matching
+    prefix stay in the DOM untouched apart from a class refresh — a link
+    that never disconnects never refetches its stylesheet, which matters
+    behind dev servers that serve CSS without cache headers (every refetch
+    is a real network round trip there, and it can stall for up to a minute
+    when livereload long-polls occupy all of the browser's connections to
+    the host). Links after the first mismatch are removed; the caller
+    creates the remaining wanted links, preserving cascade order.
+
+    Args:
+        existing_links: Currently connected theme <link> elements, in DOM
+            order.
+        wanted_css: (url, class attribute value) pairs, in cascade order.
+
+    Returns:
+        How many wanted links are already connected (the prefix length).
+    """
+    reused = 0
+    for link, (url, classes) in zip(existing_links, wanted_css):
+        if link.getAttribute("href") != url:
+            break
+        if classes:
+            link.setAttribute("class", classes)
+        reused += 1
+    for link in existing_links[reused:]:
+        link.remove()
+    return reused
+
+
+def insert_html_before(root, html_content: str, anchor) -> None:
+    """Insert parsed HTML into a root without touching its other children.
+
+    Parses the markup in an inert ``<template>`` (matching innerHTML
+    semantics: scripts do not execute) and moves the resulting nodes in a
+    single insertBefore, so existing children — notably already-loaded
+    stylesheet links — never disconnect.
+
+    Args:
+        root: Element or shadow root receiving the content.
+        html_content: HTML markup to parse.
+        anchor: Child of root to insert before; None appends at the end.
+    """
+    document = get_document(root)
+    template = document.createElement("template")
+    template.innerHTML = html_content
+    root.insertBefore(template.content, anchor)
+
+
 def add_link_to_shadow(shadow_root, css_link: str, with_class: str = "") -> None:
     """Adds a link element to the shadow DOM for CSS files."""
     link = get_document(shadow_root).createElement("link")
@@ -274,10 +326,20 @@ def remove_page_content(root) -> None:
         element.remove()
 
 
-def remove_existing_theme(root, theme_class: str) -> None:
-    """Removes existing theme-related link and style elements from the document head."""
+def remove_existing_theme(root, theme_class: str, scripts_only: bool = False) -> None:
+    """Removes existing theme-related link and script elements from the document head.
+
+    Args:
+        root: Node used to resolve the owning document.
+        theme_class: Class name tagging the theme elements to remove.
+        scripts_only: Remove only the theme <script> elements, sparing the
+            stylesheet links (used when the caller reuses connected links
+            across runs to avoid refetching their CSS).
+    """
     document = get_document(root)
-    elements = list(document.querySelectorAll(f"link.{theme_class}"))
+    elements = (
+        [] if scripts_only else list(document.querySelectorAll(f"link.{theme_class}"))
+    )
     elements.extend(document.querySelectorAll(f"script.{theme_class}"))
 
     # TODO: For shadowdom need to find the pseudo-head
