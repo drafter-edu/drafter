@@ -17,7 +17,10 @@ FalseType = Literal[False]
 annotations where a field is either disabled (`False`) or holds a string."""
 
 DEFAULT_SYSTEM_PACKAGES = ["bakery", "pillow"]
-"""Default Python packages loaded into the execution engine for student sites."""
+"""Default Python packages loaded into the execution engine for student sites.
+
+Matplotlib is intentionally not preloaded; it is installed on demand when
+student code imports it or uses the `MatPlotLibPlot` component."""
 
 # "https://cdn.jsdelivr.net/pyodide/v0.29.0/debug/"
 DEFAULT_PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/"

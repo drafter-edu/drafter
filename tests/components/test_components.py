@@ -310,7 +310,7 @@ snippets = {
     },
 }
 
-if _plotting_components._has_matplotlib:
+if _plotting_components.has_matplotlib():
     # TODO: AI-generated, investigate later
     snippets["matplotlibplot"] = {
         "simple": """MatPlotLibPlot()""",

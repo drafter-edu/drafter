@@ -12,13 +12,33 @@ from drafter.components.planning.render_plan import RenderPlan
 from drafter.data.images import Picture, bytes_to_data_url
 from drafter.helpers.utils import is_pyodide
 
-try:
-    import matplotlib.pyplot as plt
+_plt = None
 
-    _has_matplotlib = True
-except ImportError as e:
-    _has_matplotlib = False
-    print(e)
+
+def _get_pyplot():
+    """Import matplotlib.pyplot on first use, caching the module.
+
+    In the browser, matplotlib is not preloaded: it is installed if the student
+    explicitly requires it or imports it in their top-level code.
+    Importing at use time rather than at module load time means such
+    late installs are still picked up.
+
+    Returns:
+        The matplotlib.pyplot module, or None if matplotlib is unavailable.
+    """
+    global _plt
+    if _plt is None:
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            return None
+        _plt = plt
+    return _plt
+
+
+def has_matplotlib() -> bool:
+    """Whether matplotlib is importable, attempting the import if needed."""
+    return _get_pyplot() is not None
 
 
 @dataclass(repr=False)
@@ -62,7 +82,7 @@ class MatPlotLibPlot(Component):
         Raises:
             ImportError: If Matplotlib is not installed.
         """
-        if not _has_matplotlib:
+        if not has_matplotlib():
             raise ImportError(
                 "Matplotlib is not installed. Please install it to use this feature."
             )
@@ -89,6 +109,7 @@ class MatPlotLibPlot(Component):
         image_data = io.BytesIO()
         settings = self.extra_matplotlib_settings.copy()
         settings["format"] = "png"
+        plt = _get_pyplot()
         plt.savefig(image_data, **settings)  # type: ignore
         return Picture.from_bytes(image_data.getvalue(), mime_type="image/png")
 
@@ -105,6 +126,7 @@ class MatPlotLibPlot(Component):
             RenderPlan with raw HTML for the figure.
         """
         # In Pyodide, save the figure to a PNG buffer and embed it as a base64 data URL
+        plt = _get_pyplot()
         image_data = io.BytesIO()
         settings = self.extra_matplotlib_settings.copy()
         if "format" not in settings:
@@ -132,6 +154,7 @@ class MatPlotLibPlot(Component):
             return self._plan_pyodide(context)
         else:
             # Handle image processing
+            plt = _get_pyplot()
             image_data = io.BytesIO()
             plt.savefig(image_data, **self.extra_matplotlib_settings)  # type: ignore
             if self.close_automatically:

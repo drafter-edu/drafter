@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.0] - 2026-07-24
 
 -   Complete rewrite of the entire system. Deployment now happens through Skulpt or Pyodide, with no backend server required.
+-   Matplotlib is no longer preloaded in the browser; it is installed on demand when student code imports it or uses `MatPlotLibPlot`.
 -   New component system, with better attribute handling and more components.
 -   More sophisticated architecture for handling state, navigation, and rendering.
 -   Improved error handling and debugging tools.

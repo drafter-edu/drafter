@@ -3,7 +3,7 @@
  *
  * 1) Load Pyodide
  *   1) Load micropip
- *   2) Load system dependencies (e.g., Bakery, MatPlotLib, Pillow)
+ *   2) Load system dependencies (e.g., Bakery, Pillow)
  *   3) Write the Drafter configuration file
  * 2) Mount Drafter (locally or from remote)
  * 3) Apply Drafter's patches
@@ -637,6 +637,13 @@ export async function setupEnvironment(options: DrafterInitOptions) {
 				options.code,
 			);
 			console.log("Loaded packages:", loadedPackages);
+			// Matplotlib is not preloaded, and MatPlotLibPlot needs it even
+			// when the scanned module never imports matplotlib itself (e.g.,
+			// the plotting happens in an imported helper module). loadPackage
+			// skips packages that are already loaded.
+			if (/\bMatPlotLibPlot\b/.test(options.code ?? "")) {
+				await pyodide.loadPackage("matplotlib");
+			}
 		} catch (error) {
 			throw reportSystemError({
 				id: "runtime.package_load_failed",

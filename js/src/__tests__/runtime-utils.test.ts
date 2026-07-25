@@ -166,11 +166,13 @@ type AnyWindow = Window & {
 describe("setupEnvironment package handling", () => {
 	let install: jest.Mock<(pkg: string) => Promise<void>>;
 	let loadPackagesFromImports: jest.Mock<(code: string) => Promise<string[]>>;
+	let loadPackage: jest.Mock<(pkg: string) => Promise<void>>;
 
 	beforeEach(() => {
 		install = jest.fn(async (_pkg: string) => {});
 		loadPackagesFromImports = jest.fn(async (_code: string) => []);
-		(window as AnyWindow).pyodide = { loadPackagesFromImports };
+		loadPackage = jest.fn(async (_pkg: string) => {});
+		(window as AnyWindow).pyodide = { loadPackagesFromImports, loadPackage };
 		(window as AnyWindow).micropip = { install };
 	});
 
@@ -236,6 +238,23 @@ describe("setupEnvironment package handling", () => {
 		expect(loadPackagesFromImports).toHaveBeenCalledTimes(1);
 		expect(loadPackagesFromImports).toHaveBeenCalledWith("import math");
 		expect(install).not.toHaveBeenCalled();
+		expect(loadPackage).not.toHaveBeenCalled();
+	});
+
+	test("MatPlotLibPlot usage in code loads matplotlib", async () => {
+		await setupEnvironment({
+			code: "from drafter import *\nMatPlotLibPlot()",
+			loadPackagesAutomatically: true,
+		});
+		expect(loadPackage).toHaveBeenCalledTimes(1);
+		expect(loadPackage).toHaveBeenCalledWith("matplotlib");
+	});
+
+	test("MatPlotLibPlot is not loaded without automatic package loading", async () => {
+		await setupEnvironment({
+			code: "MatPlotLibPlot()",
+		});
+		expect(loadPackage).not.toHaveBeenCalled();
 	});
 
 	test("does nothing when neither package option is set", async () => {
