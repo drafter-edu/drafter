@@ -438,6 +438,9 @@ different options.
     * `simple`: Check out <https://simplecss.org/> for more information.
     * `skeleton`: A simple, clean theme. Check <http://getskeleton.com/> for more information.
     * `tacit`: Check out <https://yegor256.github.io/tacit/> for more information.
+    * `98`: A retro Windows 98 look, based on <https://jdan.github.io/98.css/>.
+    * `xp`: A retro Windows XP look, based on <https://botoxparty.github.io/XP.css/>.
+    * `7`: A retro Windows 7 look, based on <https://khang-nd.github.io/7.css/>.
     * `none`: Disables the default theme, allowing you to style everything yourself.
 
 ```python

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 -   Ported the `simple`, `skeleton`, and `tacit` classless themes from Drafter v1; all built-in themes now scope their layout to the Drafter frame so the debug panel is unaffected.
+-   Ported the retro Windows themes (`98`, `xp`, `7`) from Drafter v1 as classless themes: the page now renders as a period-appropriate window on the desktop, with all element styling scoped to the Drafter body so the debug panel is unaffected.
 -   Fixed the `sakura` theme squeezing the whole page (including the debug panel) instead of just the site content.
 -   Added table styling to the `default` theme.
 

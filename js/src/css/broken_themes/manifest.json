@@ -22,30 +22,6 @@
         "skeleton.css"
     ]
   },
-  "98": {
-    "metadata": {
-      "credit": "<a href='http://www.98.css' target='_blank'>98.css</a> by <code>jdan</code>"
-    },
-    "styles": [
-        "98.css"
-    ]
-  },
-  "XP": {
-    "metadata": {
-      "credit": "<a href='http://botoxparty.github.io/XP.css/' target='_blank'>XP.css</a> by <code>botoxparty</code>"
-    },
-    "styles": [
-        "XP.css"
-    ]
-  },
-  "7": {
-    "metadata": {
-      "credit": "<a href='http://khang-nd.github.io/7.css/' target='_blank'>7.css</a> by <code>khang-nd</code>"
-    },
-    "styles": [
-        "7.css"
-    ]
-  },
   "mvp": {
     "metadata": {
       "credit": "<a href='http://andybrewer.github.io/mvp/' target='_blank'>MVP.css</a> by <code>andybrewer</code>"

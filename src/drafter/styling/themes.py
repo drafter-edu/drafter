@@ -2,7 +2,8 @@
 
 Defines the `Theme` and `ThemeSystem` dataclasses and initializes the
 shared `theme_system` instance with the built-in themes ("default",
-"none", "mvp", "sakura", "simple", "skeleton", and "tacit"). Each theme
+"none", "mvp", "sakura", "simple", "skeleton", "tacit", and the retro
+Windows themes "98", "xp", and "7"). Each theme
 names the CSS (and optionally
 JavaScript) assets that style a site; `set_website_style` selects one by
 name, and unknown names get a "did you mean" suggestion via
@@ -96,9 +97,9 @@ class ThemeSystem:
 # Initialize the theme system with default themes
 theme_system = ThemeSystem()
 """The shared ThemeSystem instance, preloaded below with the built-in
-themes ("default", "none", "mvp", "sakura", "simple", "skeleton", and
-"tacit"). Access it through `get_theme_system` rather than importing it
-directly."""
+themes ("default", "none", "mvp", "sakura", "simple", "skeleton",
+"tacit", "98", "xp", and "7"). Access it through `get_theme_system`
+rather than importing it directly."""
 theme_system.register_theme(
     Theme(
         name="default",
@@ -158,6 +159,42 @@ theme_system.register_theme(
         metadata={
             "credit": "Skeleton by Dave Gamache",
             "url": "http://getskeleton.com/",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="98",
+        css_paths=["css/98.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Based on 98.css by jdan",
+            "url": "https://jdan.github.io/98.css/",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="xp",
+        css_paths=["css/xp.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Based on XP.css by botoxparty",
+            "url": "https://botoxparty.github.io/XP.css/",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="7",
+        css_paths=["css/7.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Based on 7.css by khang-nd",
+            "url": "https://khang-nd.github.io/7.css/",
         },
     )
 )

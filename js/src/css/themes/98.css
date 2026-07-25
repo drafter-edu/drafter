@@ -1,0 +1,460 @@
+/* Windows 98 theme for Drafter.
+ * Based on 98.css by jdan: https://github.com/jdan/98.css
+ *
+ * Ported for Drafter as a classless theme: the upstream class-based
+ * window chrome (.window, .title-bar, .window-body) is remapped onto the
+ * Drafter frame classes (.drafter-frame--, .drafter-body--) so the page
+ * itself renders as a Windows 98 window sitting on the teal desktop.
+ * All element rules are nested under .drafter-body-- (the default-theme
+ * approach) so the debug panel is unaffected. The upstream hidden-input
+ * checkbox/radio hack is dropped (it requires an adjacent <label>);
+ * native controls with an accent-color are used instead.
+ */
+
+body {
+	margin: 0;
+	height: 100dvh;
+	box-sizing: border-box;
+	background-color: #008080;
+}
+
+/* The frame is the "window": silver raised bevel on the desktop. */
+.drafter-frame-- {
+	max-width: 820px;
+	margin: 24px auto;
+	box-sizing: border-box;
+	background: silver;
+	box-shadow:
+		inset -1px -1px #0a0a0a,
+		inset 1px 1px #dfdfdf,
+		inset -2px -2px grey,
+		inset 2px 2px #fff;
+	padding: 3px;
+}
+
+/* Decorative title bar. */
+.drafter-frame--::before {
+	content: "";
+	display: block;
+	height: 22px;
+	background: linear-gradient(90deg, navy, #1084d0);
+}
+
+.drafter-body-- {
+	box-sizing: border-box;
+	padding: 16px;
+	font-family:
+		"Microsoft Sans Serif", "MS Sans Serif", Tahoma, Arial, sans-serif;
+	-webkit-font-smoothing: none;
+	font-size: 14px;
+	line-height: 1.5;
+	color: #222;
+
+	h1 {
+		font-size: 2.5em;
+	}
+
+	h2 {
+		font-size: 2em;
+	}
+
+	h3 {
+		font-size: 1.6em;
+	}
+
+	h4 {
+		font-size: 1.3em;
+	}
+
+	a {
+		color: #00f;
+	}
+
+	a:focus {
+		outline: 1px dotted #00f;
+	}
+
+	button,
+	input[type="submit"],
+	input[type="reset"] {
+		font-family: inherit;
+		font-size: 1em;
+		border: none;
+		border-radius: 0;
+		box-sizing: border-box;
+		background: silver;
+		color: #222;
+		box-shadow:
+			inset -1px -1px #0a0a0a,
+			inset 1px 1px #fff,
+			inset -2px -2px grey,
+			inset 2px 2px #dfdfdf;
+		min-height: 28px;
+		min-width: 90px;
+		padding: 0 16px;
+		margin: 0.5em 0.25em;
+	}
+
+	button:not(:disabled):active,
+	input[type="submit"]:not(:disabled):active,
+	input[type="reset"]:not(:disabled):active {
+		box-shadow:
+			inset -1px -1px #fff,
+			inset 1px 1px #0a0a0a,
+			inset -2px -2px #dfdfdf,
+			inset 2px 2px grey;
+		padding-top: 2px;
+	}
+
+	button:focus,
+	input[type="submit"]:focus,
+	input[type="reset"]:focus {
+		outline: 1px dotted #000;
+		outline-offset: -4px;
+	}
+
+	button:disabled,
+	input[type="submit"]:disabled,
+	input[type="reset"]:disabled {
+		color: grey;
+		text-shadow: 1px 1px 0 #fff;
+	}
+
+	/* Sunken white fields (everything except buttons/checkables). */
+	input:not(
+		[type="checkbox"],
+		[type="radio"],
+		[type="submit"],
+		[type="reset"],
+		[type="button"],
+		[type="range"],
+		[type="file"]
+	),
+	select,
+	textarea {
+		font-family: inherit;
+		font-size: 1em;
+		border: none;
+		border-radius: 0;
+		background-color: #fff;
+		box-shadow:
+			inset -1px -1px #fff,
+			inset 1px 1px grey,
+			inset -2px -2px #dfdfdf,
+			inset 2px 2px #0a0a0a;
+		box-sizing: border-box;
+		padding: 4px 6px;
+		margin: 0.5em 0.25em;
+		vertical-align: middle;
+	}
+
+	input:not(
+			[type="checkbox"],
+			[type="radio"],
+			[type="submit"],
+			[type="reset"],
+			[type="button"],
+			[type="range"],
+			[type="file"]
+		):is(:disabled, :read-only),
+	textarea:disabled {
+		background-color: silver;
+	}
+
+	input[type="checkbox"],
+	input[type="radio"] {
+		accent-color: navy;
+		margin: 0.5em 0.35em;
+		vertical-align: middle;
+	}
+
+	fieldset {
+		border: 2px groove #dfdfdf;
+		margin: 0.5em 0.25em;
+		padding: 10px;
+	}
+
+	legend {
+		background: silver;
+		padding: 0 4px;
+	}
+
+	hr {
+		border: 0;
+		border-top: 1px solid grey;
+		border-bottom: 1px solid #fff;
+	}
+
+	pre {
+		background: #fff;
+		box-shadow:
+			inset -1px -1px #fff,
+			inset 1px 1px grey,
+			inset -2px -2px #dfdfdf,
+			inset 2px 2px #0a0a0a;
+		display: block;
+		margin: 0.5em 0.25em;
+		padding: 12px 8px;
+		overflow-x: auto;
+	}
+
+	table {
+		border-collapse: collapse;
+		background-color: #fff;
+		border: 1px solid grey;
+		margin: 0.5em 0.25em 1em;
+		text-align: left;
+	}
+
+	th,
+	td {
+		padding: 4px 10px;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	th {
+		background: silver;
+		font-weight: 400;
+		box-shadow:
+			inset -1px -1px #0a0a0a,
+			inset 1px 1px #fff,
+			inset -2px -2px grey,
+			inset 2px 2px #dfdfdf;
+	}
+
+	caption {
+		font-weight: 700;
+		margin-bottom: 0.25em;
+	}
+
+	drafter-timer {
+		display: inline-block;
+		margin: 0.25em 0.25em;
+		padding: 0.25em 1em;
+		background-color: silver;
+		box-shadow:
+			inset -1px -1px #dfdfdf,
+			inset 1px 1px grey;
+		text-align: center;
+		width: fit-content;
+	}
+
+	/* Deferred-autoplay wrapper around <audio>/<video>; must never affect
+	   layout, so the wrapped media element renders exactly as if bare. */
+	drafter-media {
+		display: contents;
+	}
+
+	drafter-tone[hidden],
+	drafter-melody[hidden],
+	drafter-sound[hidden],
+	drafter-microphone[hidden],
+	drafter-audio-recorder[hidden] {
+		display: none !important;
+	}
+
+	drafter-tone,
+	drafter-melody {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5em;
+
+		.drafter-audio-status {
+			min-width: 1.5em;
+			color: navy;
+		}
+	}
+
+	drafter-sound {
+		display: inline-flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.25em;
+		vertical-align: middle;
+
+		audio {
+			vertical-align: middle;
+		}
+	}
+
+	.drafter-audio-visualizer {
+		display: block;
+		width: 300px;
+		height: 60px;
+		background-color: #000;
+		box-shadow:
+			inset -1px -1px #fff,
+			inset 1px 1px grey;
+	}
+
+	drafter-microphone,
+	drafter-audio-recorder {
+		display: block;
+		margin: 1rem 0;
+		padding: 1rem;
+		border: 2px groove #dfdfdf;
+		background-color: silver;
+
+		.drafter-microphone-status,
+		.drafter-recorder-status {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 0.5rem;
+			text-align: center;
+
+			p {
+				margin: 0;
+			}
+		}
+
+		.drafter-microphone-spinner {
+			width: 32px;
+			height: 32px;
+			border: 3px solid #dfdfdf;
+			border-top: 3px solid navy;
+			border-radius: 50%;
+			animation: drafter-geolocation-spin 1s linear infinite;
+		}
+
+		.drafter-microphone-meter {
+			width: 100%;
+			max-width: 300px;
+			height: 20px;
+			background-color: #fff;
+			box-shadow:
+				inset -1px -1px #fff,
+				inset 1px 1px grey,
+				inset -2px -2px #dfdfdf,
+				inset 2px 2px #0a0a0a;
+			overflow: hidden;
+		}
+
+		.drafter-microphone-meter-fill {
+			height: 100%;
+			width: 0%;
+			background-color: navy;
+			transition: width 0.05s linear;
+		}
+
+		.drafter-microphone-meter-loud {
+			background-color: #c00000;
+		}
+
+		.drafter-microphone-live-message {
+			font-size: 0.875em;
+			color: #444;
+		}
+
+		.drafter-microphone-error-icon {
+			font-size: 2em;
+		}
+
+		.drafter-microphone-error-message {
+			font-weight: 700;
+			color: #c00000;
+		}
+
+		.drafter-microphone-help-link {
+			background: none;
+			border: none;
+			box-shadow: none;
+			min-height: 0;
+			min-width: 0;
+			color: #00f;
+			font-size: 0.875em;
+			text-decoration: underline;
+			padding: 0;
+			margin: 0;
+		}
+
+		.drafter-recorder-elapsed {
+			font-family: monospace;
+			color: #c00000;
+			font-weight: 700;
+		}
+	}
+
+	drafter-current-location {
+		display: block;
+		margin: 1rem 0;
+		padding: 1rem;
+		border: 2px groove #dfdfdf;
+		background-color: silver;
+
+		.drafter-geolocation-status {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 0.5rem;
+			text-align: center;
+
+			p {
+				margin: 0;
+			}
+		}
+
+		.drafter-geolocation-help {
+			font-size: 0.875em;
+			color: #444;
+		}
+
+		.drafter-geolocation-spinner {
+			width: 32px;
+			height: 32px;
+			border: 3px solid #dfdfdf;
+			border-top: 3px solid navy;
+			border-radius: 50%;
+			animation: drafter-geolocation-spin 1s linear infinite;
+		}
+
+		.drafter-geolocation-success-icon {
+			font-size: 2em;
+			color: #008000;
+		}
+
+		.drafter-geolocation-success-message {
+			font-weight: 700;
+			color: #008000;
+		}
+
+		.drafter-geolocation-error-icon {
+			font-size: 2em;
+		}
+
+		.drafter-geolocation-error-message {
+			font-weight: 700;
+			color: #c00000;
+		}
+
+		.drafter-geolocation-coords {
+			font-family: monospace;
+			font-size: 0.875em;
+			color: #222;
+		}
+
+		.drafter-geolocation-help-link {
+			background: none;
+			border: none;
+			box-shadow: none;
+			min-height: 0;
+			min-width: 0;
+			color: #00f;
+			font-size: 0.875em;
+			text-decoration: underline;
+			padding: 0;
+			margin: 0;
+		}
+	}
+}
+
+@keyframes drafter-geolocation-spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
