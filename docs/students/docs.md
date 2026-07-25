@@ -62,15 +62,17 @@ This file is organized into the following sections:
 
               Image(url, width, height)
 
-    An image to be displayed on the page. Usually needs to be a complete URL, including the `http://` or `https://`.
+    An image to be displayed on the page. The source can be a complete URL (including the `http://` or `https://`),
+    a filename, or a `Picture` value (see [Working with Images](pictures.md)).
     Note that some websites may not allow you to use their images on your website, so be careful; you may want to
     rehost the image somewhere more reliable.
 
     If you know the exact size of the image, you can specify it with the `width` and `height` parameters. Otherwise,
     the page may resize while the image is being loaded.
 
-- **url**: The URL of the image, or filename of the image as a string (in quotes) if it is in the same folder as the code.
-  - Type: `str`
+- **url**: The URL of the image, the filename of the image as a string (in quotes) if it is in the same folder as
+                the code, or a `Picture` value (e.g., from a file upload or the camera).
+  - Type: `str | Picture`
 - **width**: The width of the image, in pixels. Defaults to `None`, which will use the image's default width.
   - Type: `int`
 - **height**: The height of the image, in pixels. Defaults to `None`, which will use the image's default height.
@@ -361,10 +363,9 @@ You can find a list of common MIME types [here](https://developer.mozilla.org/en
 
     Be mindful of the target type of the parameter. If the file is regular text, then the parameter should be a `str`;
     if the file is binary data, then the parameter should be a `bytes`.
-    If you are accepting an image (e.g., `FileUpload("new_image", "image/*")`), then you can use the `PIL` library to
-    convert the image to a format that can be displayed on the page. If you can trust the user to upload only images,
-    then you can make the parameter a `PIL.Image` object; otherwise you should leave the parameter as a `bytes`
-    and convert the image to a displayable format in the route.
+    If you are accepting an image (e.g., `FileUpload("new_image", "image/*")`), then make the parameter a `Picture`
+    and Drafter will convert the upload for you (see [Working with Images](pictures.md)). If no file is chosen, a
+    `Picture` parameter produces a friendly error; annotate it as `Picture | None` to receive `None` instead.
 
     The `accept` parameter is a string representing the file types that the user can upload. This should be a comma-separated
     list of MIME types, such as `"image/*,.pdf"`. If no `accept` is given, then the user can upload any file type.

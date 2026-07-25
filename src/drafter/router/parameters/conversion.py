@@ -21,7 +21,8 @@ from dataclasses import replace
 from datetime import date, datetime, time
 from typing import Any, get_type_hints
 
-from drafter.components.utilities import image_support
+from PIL import Image as PILImage
+
 from drafter.data.converter import (
     COLLECTION_TYPES,
     CONVERTER_REGISTRY,
@@ -30,9 +31,11 @@ from drafter.data.converter import (
     ConverterRegistry,
     conversion_failure,
     describe_type,
+    missing_value_failure,
     preview_value,
 )
 from drafter.data.files import DrafterBinaryFile, DrafterTextFile
+from drafter.data.images import Picture, decode_data_url
 from drafter.helpers.dates import try_convert_datetime
 
 __all__ = [
@@ -55,11 +58,7 @@ def _accepts_file_upload(target: Any) -> bool:
             return True
     except TypeError:
         return False
-    return (
-        image_support.HAS_PILLOW
-        and inspect.isclass(target)
-        and issubclass(target, image_support.PILImage.Image)
-    )
+    return inspect.isclass(target) and issubclass(target, PILImage.Image)
 
 
 def convert_file_upload(ctx: ConversionContext) -> ConversionResult | None:
@@ -124,15 +123,12 @@ def convert_file_upload(ctx: ConversionContext) -> ConversionResult | None:
             ),
         )
 
-    if (
-        image_support.HAS_PILLOW
-        and inspect.isclass(target)
-        and issubclass(target, image_support.PILImage.Image)
-    ):
+    if inspect.isclass(target) and issubclass(target, PILImage.Image):
+        # Back-compat: PIL annotations still work, but docs teach Picture.
         if not content:
             return ConversionResult(ok=True, value=None)
         try:
-            image = image_support.PILImage.open(io.BytesIO(content))
+            image = PILImage.open(io.BytesIO(content))
             image.filename = filename
             return ConversionResult(ok=True, value=image)
         except Exception:
@@ -144,6 +140,174 @@ def convert_file_upload(ctx: ConversionContext) -> ConversionResult | None:
                     f"file is not an image, or the parameter type is "
                     f"inappropriate?"
                 ),
+            )
+    return None
+
+
+def _is_picture_type(target: Any) -> bool:
+    return target is Picture
+
+
+def _camera_status_hint(value: dict, target: Any) -> str:
+    status = value.get("status", "unknown")
+    message = value.get("message") or ""
+    detail = f" ({message})" if message else ""
+    return (
+        f"The camera did not provide a photo (status: {status}{detail}). "
+        f"Annotate the parameter as Photo to inspect the status, or as "
+        f"{describe_type(target)} | None to receive None instead."
+    )
+
+
+def convert_picture(ctx: ConversionContext) -> ConversionResult | None:
+    """Convert any supported image payload to a :class:`Picture`.
+
+    Accepts file-upload dicts, camera-style dicts (with a ``data_url``),
+    data URL / URL / path strings, raw bytes, PIL images, ``Photo``
+    envelopes, and existing Pictures. Empty uploads and photo-less camera
+    payloads fail with a missing-value error, which union conversion turns
+    into None for ``Picture | None`` annotations.
+    """
+    value = ctx.raw_value
+    if isinstance(value, Picture):
+        return ConversionResult(ok=True, value=value)
+    if isinstance(value, PILImage.Image):
+        return ConversionResult(ok=True, value=Picture(value))
+
+    if isinstance(value, str):
+        stripped = value.strip()
+        if not stripped:
+            return missing_value_failure(ctx, Picture)
+        if stripped.startswith("{"):
+            try:
+                value = json.loads(stripped)
+            except json.JSONDecodeError:
+                return conversion_failure(ctx, Picture)
+        elif stripped.startswith("data:"):
+            try:
+                return ConversionResult(ok=True, value=Picture.from_data_url(stripped))
+            except Exception:
+                return conversion_failure(
+                    ctx,
+                    Picture,
+                    hint="The data URL could not be decoded as an image.",
+                )
+        elif stripped.startswith(("http://", "https://")):
+            return ConversionResult(ok=True, value=Picture.from_url(stripped))
+        else:
+            try:
+                return ConversionResult(ok=True, value=Picture(stripped))
+            except Exception as error:
+                return conversion_failure(
+                    ctx,
+                    Picture,
+                    hint=f"Could not open {stripped!r} as an image: {error}",
+                )
+
+    if isinstance(value, (bytes, bytearray)):
+        try:
+            return ConversionResult(ok=True, value=Picture.from_bytes(bytes(value)))
+        except Exception:
+            return conversion_failure(
+                ctx,
+                Picture,
+                hint="The binary data could not be decoded as an image.",
+            )
+
+    if isinstance(value, dict):
+        if value.get("__file_upload__"):
+            content = value.get("content", b"")
+            filename = value.get("filename", None)
+            if not content:
+                return missing_value_failure(
+                    ctx,
+                    Picture,
+                    hint=(
+                        "No file was chosen. Did you mean to make the "
+                        "parameter optional (Picture | None)?"
+                    ),
+                )
+            try:
+                return ConversionResult(
+                    ok=True,
+                    value=Picture.from_bytes(
+                        content, filename=filename, mime_type=value.get("type")
+                    ),
+                )
+            except Exception:
+                return conversion_failure(
+                    ctx,
+                    Picture,
+                    hint=(
+                        f"Could not open {filename!r} as an image. Perhaps "
+                        f"the file is not an image?"
+                    ),
+                )
+        if "data_url" in value:
+            data_url = value.get("data_url")
+            if not data_url:
+                return missing_value_failure(
+                    ctx, Picture, hint=_camera_status_hint(value, Picture)
+                )
+            try:
+                return ConversionResult(ok=True, value=Picture.from_data_url(data_url))
+            except Exception:
+                return conversion_failure(
+                    ctx,
+                    Picture,
+                    hint="The captured photo could not be decoded as an image.",
+                )
+
+    # A Photo (or compatible camera envelope) converts to its image.
+    if hasattr(value, "status") and hasattr(value, "data_url"):
+        if not value.data_url:
+            return missing_value_failure(
+                ctx,
+                Picture,
+                hint=_camera_status_hint(
+                    {"status": value.status, "message": value.message}, Picture
+                ),
+            )
+        try:
+            return ConversionResult(ok=True, value=Picture(value))
+        except Exception:
+            return conversion_failure(
+                ctx,
+                Picture,
+                hint="The captured photo could not be decoded as an image.",
+            )
+    return None
+
+
+def convert_camera_bytes(ctx: ConversionContext) -> ConversionResult | None:
+    """Convert camera-style payloads to raw encoded image bytes.
+
+    Lets ``bytes`` annotations work for :class:`Camera` fields the same way
+    they already do for uploads: a camera dict (or bare data URL string)
+    becomes the decoded PNG bytes. Payloads without a photo fail with a
+    missing-value error (None for ``bytes | None`` annotations).
+    """
+    value = ctx.raw_value
+    if isinstance(value, str) and value.startswith("data:"):
+        try:
+            data, _ = decode_data_url(value)
+            return ConversionResult(ok=True, value=data)
+        except ValueError:
+            return conversion_failure(
+                ctx, bytes, hint="The data URL could not be decoded."
+            )
+    if isinstance(value, dict) and "data_url" in value and "content" not in value:
+        data_url = value.get("data_url")
+        if not data_url:
+            return missing_value_failure(
+                ctx, bytes, hint=_camera_status_hint(value, bytes)
+            )
+        try:
+            data, _ = decode_data_url(data_url)
+            return ConversionResult(ok=True, value=data)
+        except ValueError:
+            return conversion_failure(
+                ctx, bytes, hint="The captured photo could not be decoded."
             )
     return None
 
@@ -401,6 +565,10 @@ def register_shared_converters(registry: ConverterRegistry) -> None:
     registry.register_predicate(
         _accepts_file_upload, convert_file_upload, priority=10, name="file upload"
     )
+    registry.register_predicate(
+        _is_picture_type, convert_picture, priority=20, name="Picture"
+    )
+    registry.register(bytes, convert_camera_bytes, priority=30, name="camera bytes")
     for target in (datetime, date, time):
         registry.register(target, convert_datetime_like, priority=20)
     registry.register(dict, convert_dataclass_to_dict, priority=40)

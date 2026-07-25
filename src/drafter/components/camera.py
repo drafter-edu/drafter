@@ -16,9 +16,7 @@ Failures become ``status`` values rather than exceptions, so routes can
 inspect problems without try/except.
 """
 
-import json
 from dataclasses import dataclass
-from typing import Literal
 
 from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
 from drafter.components.utilities.contracts import (
@@ -28,85 +26,12 @@ from drafter.components.utilities.contracts import (
 )
 from drafter.components.utilities.registry import (
     COMPONENT_CONTRACT_REGISTRY,
-    CONVERTER_REGISTRY,
 )
 from drafter.components.utilities.validation import validate_parameter_name
-from drafter.data.converter import ConversionContext, ConversionResult
 
 FACING_MODES = ("user", "environment")
 """Which camera a `Camera` prefers: "user" (front/selfie) or
 "environment" (rear/world-facing)."""
-
-PhotoStatus = Literal[
-    "unavailable", "prompt", "pending", "live", "granted", "denied", "error"
-]
-"""The permission/capture states a `Photo`'s `status` field can report,
-mirroring the camera permission workflow."""
-
-
-@dataclass
-class Photo:
-    """A captured photo from a :class:`Camera` component.
-
-    The ``data_url`` can be handed directly to
-    :class:`~drafter.components.images.Image` to display the photo, or to
-    :class:`~drafter.components.files.Download` to let the user save it.
-
-    Attributes:
-        status: Current permission/capture state.
-        message: Optional descriptive message about the status.
-        data_url: The captured photo as a PNG data URL (None if nothing
-            has been captured).
-        width: Width of the captured photo in pixels (None if unavailable).
-        height: Height of the captured photo in pixels (None if unavailable).
-    """
-
-    status: PhotoStatus
-    message: str | None = None
-    data_url: str | None = None
-    width: int | None = None
-    height: int | None = None
-
-
-def _is_photo_type(target) -> bool:
-    return target is Photo
-
-
-def convert_photo(ctx: ConversionContext) -> ConversionResult | None:
-    """Convert a JSON string or dict payload into a :class:`Photo`."""
-    value = ctx.raw_value
-    if isinstance(value, Photo):
-        return ConversionResult(ok=True, value=value)
-    if isinstance(value, str):
-        try:
-            value = json.loads(value)
-        except json.JSONDecodeError as error:
-            # An unparseable photo is a status, not a crash: routes can
-            # inspect the error without students needing try/except.
-            return ConversionResult(
-                ok=True,
-                value=Photo(
-                    status="error",
-                    message=f"Failed to parse photo data: {error}",
-                ),
-            )
-    if isinstance(value, dict):
-        try:
-            return ConversionResult(ok=True, value=Photo(**value))
-        except TypeError as error:
-            return ConversionResult(
-                ok=True,
-                value=Photo(
-                    status="error",
-                    message=f"Failed to parse photo data: {error}",
-                ),
-            )
-    return None
-
-
-CONVERTER_REGISTRY.register_predicate(
-    _is_photo_type, convert_photo, priority=20, name="Photo"
-)
 
 
 @dataclass(repr=False)
@@ -117,10 +42,12 @@ class Camera(Component):
     :class:`~drafter.components.geolocation.CurrentLocation`: it shows an
     "Enable camera" prompt, and once permission is granted it displays a
     live preview with a "Take photo" button. The captured photo is kept in
-    a hidden form field (named ``name``) as a PNG data URL, so a route
-    parameter with the same name annotated as :class:`Photo` receives the
-    converted value. Display a photo by passing its ``data_url`` to
-    :class:`~drafter.components.images.Image`.
+    a hidden form field (named ``name``), so a route parameter with the
+    same name receives the converted value: annotate it as
+    :class:`~drafter.data.images.Picture` (or ``bytes``) to get just the
+    image, or as :class:`Photo` to get the full envelope including the
+    permission ``status``. Display a photo by passing the `Picture` (or
+    the Photo's ``data_url``) to :class:`~drafter.components.images.Image`.
 
     Visual states:
     - prompt: Shows "Enable camera" button when permission not yet requested

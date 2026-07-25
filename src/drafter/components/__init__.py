@@ -37,7 +37,8 @@ from drafter.components.audio import (
     Sound,
     Tone,
 )
-from drafter.components.camera import Camera, Photo
+from drafter.components.camera import Camera
+from drafter.components.data.photo import Photo
 from drafter.components.files import Download, FileUpload
 from drafter.components.forms import (
     CheckBox,

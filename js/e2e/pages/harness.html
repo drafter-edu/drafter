@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Drafter e2e harness</title>
-	</head>
-	<body>
-		<div id="status">idle</div>
-		<div id="drafter-root--"></div>
-		<script src="/pyodide/pyodide.js"></script>
-		<script src="/assets/js/drafter.pyodide.js"></script>
-		<script>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Drafter e2e harness</title>
+  </head>
+  <body>
+    <div id="status">idle</div>
+    <div id="drafter-root--"></div>
+    <script src="/pyodide/pyodide.js"></script>
+    <script src="/assets/js/drafter.pyodide.js"></script>
+    <script>
 			// Test harness API driven from Playwright via page.evaluate:
 			//   await bootRuntime()      — boot Pyodide + mount local drafter (once)
 			//   await runExample(code)   — reset the runtime, run a student app
@@ -29,6 +29,7 @@
 							pyodideUrl: "/pyodide/",
 							systemPackages: [],
 						});
+            await window.micropip.install("pillow");
 						setStatus("mounting drafter");
 						await window.Drafter.mountDrafterRemote(
 							"/drafter-pyodide.zip",
@@ -36,7 +37,6 @@
 						await window.Drafter.patchPythonFeatures();
 						setStatus("installing example dependencies");
 						await window.micropip.install("bakery");
-						await window.micropip.install("pillow");
 						setStatus("ready");
 					})();
 				}
@@ -80,6 +80,6 @@
 				window.__drafterInstance = instance;
 				setStatus("instance running");
 			};
-		</script>
-	</body>
+    </script>
+  </body>
 </html>

@@ -34,10 +34,10 @@ at a configurable maximum depth.
 # - namedtuple (described as a plain tuple) and TypedDict (plain dict)
 # - non-dataclass class instances
 # - declared type unions: Optional, Union
-# - files: pathlib.Path, io.StringIO, io.BytesIO,
-#   DrafterBinaryFile/DrafterTextFile
+# - files: pathlib.Path, io.StringIO, io.BytesIO
+#   (DrafterBinaryFile/DrafterTextFile are dataclasses; their bytes
+#   content now previews via the `bytes` kind)
 # - Drafter components (types with custom reprs)
-# - binary data: bytes, bytearray
 # - functions/methods/lambdas; iterators/generators/range/enumerate
 # - meta types (type, module); Literal; Any/Never; exceptions
 # Also planned: truncating large lists to the first/last N items with an
@@ -47,10 +47,9 @@ at a configurable maximum depth.
 from dataclasses import fields, is_dataclass
 from typing import Any
 
-# PILImage is imported by value for annotations only; runtime checks use the
-# module so late Pillow installs (refresh_pillow_support) are observed.
-from drafter.components.utilities import image_support
-from drafter.components.utilities.image_support import PILImage  # type: ignore
+from PIL import Image as PILImage
+
+from drafter.data.images import Picture, sniff_image_mime, thumbnail_data_url
 
 
 def first_shared_base(cls1, cls2):
@@ -294,20 +293,74 @@ class RecursiveTypeDescriber:
         if isinstance(value, dict):
             return self._visit_dict(value, depth, new_seen_ids)
 
-        # Pillow image
-        if image_support.HAS_PILLOW and isinstance(value, image_support.PILImage.Image):  # type: ignore
-            return self._visit_pillow_image(value)
+        # Images (Picture values and raw PIL images)
+        if isinstance(value, (Picture, PILImage.Image)):
+            return self._visit_image(value)
+
+        # Binary data
+        if isinstance(value, (bytes, bytearray)):
+            return self._visit_bytes(value)
 
         # Primitive or other object: record leaf
         return self._visit_unknown(value)
 
-    def _visit_pillow_image(self, value: PILImage.Image):  # type: ignore
+    def _visit_image(self, value):
+        """Describe a Picture or PIL image as an `image` node.
+
+        The `value` field carries a small thumbnail data URL (or the backing
+        URL for an unloaded URL Picture, which is never fetched here) so the
+        client can render a preview without shipping full-size pixels.
+        """
+        filename = (
+            value.filename
+            if isinstance(value, Picture)
+            else getattr(value, "filename", None)
+        )
+        width = height = None
+        mime = None
+        if isinstance(value, Picture) and not value.is_loaded():
+            preview = value.url
+        else:
+            try:
+                preview = thumbnail_data_url(value)
+                width, height = value.width, value.height
+                mime = (
+                    value.mime_type
+                    if isinstance(value, Picture)
+                    else f"image/{(value.format or 'png').lower()}"
+                )
+            except Exception:
+                preview = None
         return {
-            "kind": "pillow_image",
+            "kind": "image",
             "type": self.value_type(value),
             "id": id(value),
-            "complexity": 1,
-            "value": getattr(value, "filename", None),
+            "complexity": 5,
+            "value": preview,
+            "filename": filename or None,
+            "width": width,
+            "height": height,
+            "mime": mime,
+        }
+
+    def _visit_bytes(self, value):
+        """Describe bytes/bytearray: length, short hex preview, and — when
+        the magic numbers say the payload is an image — a thumbnail."""
+        data = bytes(value)
+        thumbnail = None
+        if sniff_image_mime(data):
+            try:
+                thumbnail = thumbnail_data_url(Picture(data))
+            except Exception:
+                thumbnail = None
+        return {
+            "kind": "bytes",
+            "type": self.value_type(value),
+            "id": id(value),
+            "complexity": 2,
+            "length": len(data),
+            "preview": data[:16].hex(" "),
+            "thumbnail": thumbnail,
         }
 
     def _visit_tuple(

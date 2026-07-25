@@ -2,14 +2,13 @@
 Utility functions for the Drafter history module.
 """
 
-import base64
 import html
-import io
 from dataclasses import fields, is_dataclass
 from typing import Any
 
-from drafter.components.utilities import image_support
-from drafter.helpers.utils import is_pyodide, is_skulpt
+from PIL import Image as PILImage
+
+from drafter.data.images import Picture, thumbnail_data_url
 
 TOO_LONG_VALUE_THRESHOLD = 256
 """String length above which values are wrapped in an expandable span."""
@@ -56,65 +55,35 @@ def is_generator(iterable):
     return hasattr(iterable, "__iter__") and not hasattr(iterable, "__len__")
 
 
-def image_to_bytes(value):
-    """Serialize a PIL Image to PNG bytes.
+def repr_image(value):
+    """
+    Creates an HTML thumbnail representation of a Picture or PIL Image.
 
-    Only supported in the Skulpt and Pyodide browser environments (both
-    currently use the same in-memory save path).
+    Always embeds a small data-URL thumbnail (a filename alone is usually
+    not a resolvable URL, e.g. for uploaded files), captioned with the
+    filename when one is known.
 
     Args:
-        value: A PIL Image object to serialize.
+        value: A `Picture` or PIL Image object.
 
     Returns:
-        The PNG-encoded bytes of the image.
-
-    Raises:
-        RuntimeError: If running outside a supported environment.
+        HTML img tag string.
     """
-    if is_skulpt():
-        with io.BytesIO() as output:
-            value.save(output, format="PNG")
-            return output.getvalue()
-    elif is_pyodide():
-        with io.BytesIO() as output:
-            value.save(output, format="PNG")
-            return output.getvalue()
-    else:
-        raise RuntimeError("Unsupported environment for image_to_bytes")
-
-
-def repr_pil_image(value):
-    """
-    Creates an HTML representation of a PIL Image.
-
-    Args:
-        value: A PIL Image object
-
-    Returns:
-        HTML img tag string
-    """
-    filename = value.filename if hasattr(value, "filename") else None
-    if not filename:
-        # Encode image as base64 data URI
-        # image_data = io.BytesIO()
-        # value.save(image_data, format="PNG")
-        # image_data.seek(0)
-        # encoded = base64.b64encode(image_data.getvalue()).decode("latin1")
-        # image_src = f"data:image/png;base64,{encoded}"
-        if not value:
-            return "<strong>Empty Image</strong>"
-        try:
-            image_data = base64.b64encode(image_to_bytes(value)).decode("latin1")
-            image_src = f"data:image/png;base64,{image_data}"
-            # TODO: Figure out if we need the full call anywhere
-            # escaped_data = json.dumps(image_data)
-            # full_call = f'Image.open(io.BytesIO(base64.b64decode({escaped_data}.encode("latin1"))))'
-            return f"<img src='{image_src}' alt='PIL Image' />"
-        except Exception as e:
-            return f"<strong>Error displaying image: {e}</strong>"
-    else:
-        # Reference by filename
-        return f"<img src='{filename}' alt='Image.open({filename!r})' />"
+    try:
+        if isinstance(value, Picture) and not value.is_loaded():
+            # Unloaded URL-backed Picture: show the URL without fetching.
+            url = html.escape(value.url or "", quote=True)
+            return f"<img src='{url}' alt='{url}' />"
+        filename = (
+            value.filename
+            if isinstance(value, Picture)
+            else getattr(value, "filename", None)
+        )
+        label = html.escape(str(filename), quote=True) if filename else "Image"
+        image_src = thumbnail_data_url(value)
+        return f"<img src='{image_src}' alt='{label}' title='{label}' />"
+    except Exception as e:
+        return f"<strong>Error displaying image: {e}</strong>"
 
 
 def safe_repr(value: Any, handled=None, escape=True):
@@ -172,8 +141,8 @@ def safe_repr(value: Any, handled=None, escape=True):
         args_repr = ", ".join(safe_repr(v, handled, escape) for v in value)
         return f"{value.__class__.__name__}({{{args_repr}}})"
 
-    if image_support.HAS_PILLOW and isinstance(value, image_support.PILImage.Image):
-        return repr_pil_image(value)
+    if isinstance(value, (Picture, PILImage.Image)):
+        return repr_image(value)
 
     # Fallback for other types
     if escape:

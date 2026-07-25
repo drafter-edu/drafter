@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<title>Drafter e2e embedded frame</title>
-	</head>
-	<body>
-		<div id="drafter-root--"></div>
-		<script src="/assets/js/drafter.pyodide.js"></script>
-		<script>
+  <head>
+    <meta charset="utf-8" />
+    <title>Drafter e2e embedded frame</title>
+  </head>
+  <body>
+    <div id="drafter-root--"></div>
+    <script src="/assets/js/drafter.pyodide.js"></script>
+    <script>
 			// The docs-embed shape: the iframe loads only the (cheap, cached)
 			// JS bundle — defining the custom elements in THIS document — and
 			// registers itself with the parent page's shared DrafterHost
@@ -26,10 +26,10 @@
 					bootSettings: {
 						pyodideUrl: "/pyodide/",
 						drafterPath: "/drafter-pyodide.zip",
-						systemPackages: [],
+						systemPackages: ["pillow",],
 					},
 				});
 			};
-		</script>
-	</body>
+    </script>
+  </body>
 </html>

@@ -1,40 +1,41 @@
 """Image components for displaying pictures on pages.
 
-Defines `Image` (and its alias `Picture`), which renders an image element
-from an external URL, a local file path, or a PIL Image object.
+Defines `Image`, which renders an image element from a `Picture` value,
+an external URL, a local file path, raw image bytes, or a PIL image.
+The `Picture` value type itself lives in `drafter.data.images`; a
+`Picture` placed directly in page content is automatically wrapped in an
+`Image` component.
 """
 
-import base64
-import io
+import warnings
 from dataclasses import dataclass
 
-from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
+from PIL import Image as PILImage
 
-# PILImage is imported by value for annotations only; runtime checks go
-# through the module so refresh_pillow_support() (late micropip installs)
-# is observed.
-from drafter.components.utilities import image_support
-from drafter.components.utilities.image_support import PILImage
+from drafter.components.data.photo import Photo
+from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
+from drafter.data.images import Picture, bytes_to_data_url, sniff_image_mime
 from drafter.helpers.urls import check_invalid_external_url, friendly_urls, is_data_url
 
 
 @dataclass(repr=False)
 class Image(Component):
-    """Renders an image element with support for local paths and PIL images.
+    """Renders an image element from a value or a URL.
 
-    Supports external URLs, local file paths, and PIL Image objects
-    (when Pillow is installed). PIL images are automatically converted
-    to base64-encoded data URLs.
+    Accepts a `Picture` value, an external URL, a local file path, a data
+    URL, raw image bytes, or a PIL Image object. Values (Pictures, bytes,
+    PIL images) are converted to base64-encoded data URLs at render time;
+    URL-backed Pictures and plain URL/path strings render as URLs.
 
     Attributes:
-        url: The image URL, local path, or PIL Image object.
+        url: The image source: URL, local path, Picture, bytes, or PIL Image.
         width: Optional width in pixels.
         height: Optional height in pixels.
         tag: The HTML tag name, always 'img'.
         SELF_CLOSING_TAG: Indicates this is a self-closing tag.
     """
 
-    url: str | PILImage.Image
+    url: str | bytes | Picture | PILImage.Image | Photo
     width: int | None
     height: int | None
 
@@ -49,11 +50,18 @@ class Image(Component):
         ComponentArgument("height", kind="keyword", default_value=None),
     ]
 
-    def __init__(self, url: str | PILImage.Image, width=None, height=None, **kwargs):
+    def __init__(
+        self,
+        url: str | bytes | Picture | PILImage.Image | Photo,
+        width=None,
+        height=None,
+        **kwargs,
+    ):
         """Initialize image component.
 
         Args:
-            url: The image URL, local file path, or PIL Image object.
+            url: The image source: URL, local file path, data URL,
+                `Picture`, raw image bytes, or PIL Image object.
             width: Optional width in pixels.
             height: Optional height in pixels.
             **kwargs: Additional HTML attributes (e.g., alt text).
@@ -64,7 +72,7 @@ class Image(Component):
         self.extra_settings = kwargs
 
     def open(self, *args, **kwargs):
-        """Open an image file using PIL.
+        """Open an image file using PIL. Deprecated: use ``Picture(...)``.
 
         Args:
             *args: Positional arguments for PIL Image.open().
@@ -72,18 +80,16 @@ class Image(Component):
 
         Returns:
             A PIL Image object.
-
-        Raises:
-            ImportError: If Pillow is not installed.
         """
-        if not image_support.HAS_PILLOW:
-            raise ImportError(
-                "Pillow is not installed. Please install it to use this feature."
-            )
-        return image_support.PILImage.open(*args, **kwargs)
+        warnings.warn(
+            "Image.open() is deprecated; use Picture(filename) instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return PILImage.open(*args, **kwargs)
 
     def new(self, *args, **kwargs):
-        """Create a new image using PIL.
+        """Create a new image using PIL. Deprecated: use ``Picture.new(...)``.
 
         Args:
             *args: Positional arguments for PIL Image.new().
@@ -91,37 +97,13 @@ class Image(Component):
 
         Returns:
             A new PIL Image object.
-
-        Raises:
-            ImportError: If Pillow is not installed.
         """
-        if not image_support.HAS_PILLOW:
-            raise ImportError(
-                "Pillow is not installed. Please install it to use this feature."
-            )
-        return image_support.PILImage.new(*args, **kwargs)
-
-    def _handle_pil_image(self, image):
-        """Convert a PIL Image to a base64-encoded data URL.
-
-        Args:
-            image: A PIL Image object or string.
-
-        Returns:
-            Tuple of (was_pil, processed_url) where was_pil indicates
-            if the input was a PIL image.
-        """
-        if not image_support.HAS_PILLOW or isinstance(image, str):
-            return False, image
-
-        # print("Handling PIL image.", image)
-        image_data = io.BytesIO()
-        image.save(image_data, format="PNG")
-        image_data.seek(0)
-        figure = base64.b64encode(image_data.getvalue()).decode("utf-8")
-        # figure = base64.b64encode(image["content"])
-        figure = f"data:image/png;base64,{figure}"
-        return True, figure
+        warnings.warn(
+            "Image.new() is deprecated; use Picture.new(width, height) instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return PILImage.new(*args, **kwargs)
 
     def _handle_url(self, url: UrlOrFunction, external=None) -> tuple[str, bool]:
         """Process URL, converting functions to names and handling internal routes.
@@ -151,22 +133,40 @@ class Image(Component):
         """
         attributes = super().get_attributes(context)
 
-        if is_data_url(self.url):
-            attributes["src"] = self.url
-            return attributes
-
+        source = self.url
         try:
-            was_pil, url = self._handle_pil_image(self.url)
+            if isinstance(source, PILImage.Image):
+                source = Picture(source)
+            elif isinstance(source, (bytes, bytearray)):
+                mime = sniff_image_mime(bytes(source))
+                if mime:
+                    attributes["src"] = bytes_to_data_url(bytes(source), mime)
+                    return attributes
+                source = Picture(bytes(source))
+
+            if isinstance(source, Photo) and source.picture is not None:
+                source = source.picture
+
+            if isinstance(source, Picture):
+                if "alt" not in attributes and source.filename:
+                    attributes["alt"] = source.filename
+                if source.url is not None:
+                    # URL-backed and unmodified: let the browser fetch it.
+                    attributes["src"] = source.url
+                else:
+                    attributes["src"] = source.to_data_url()
+                return attributes
         except Exception as e:
-            # Return an error message
             if "alt" not in attributes:
                 attributes["alt"] = "Error loading image: " + str(e)
             return attributes
 
-        if was_pil:
-            attributes["src"] = url
-        else:
-            url_processed, external = self._handle_url(self.url)  # type: ignore
+        if not isinstance(source, Photo) and is_data_url(source):
+            attributes["src"] = source
+            return attributes
+
+        if not isinstance(source, Photo):
+            url_processed, external = self._handle_url(source)
             if not external:
                 # Ensure we have a leading slash
                 if not url_processed.startswith("/"):
@@ -174,7 +174,3 @@ class Image(Component):
             attributes["src"] = url_processed
 
         return attributes
-
-
-Picture = Image
-"""Alias for `Image`."""

@@ -7,7 +7,6 @@ or local development AppServer based on execution context.
 from typing import Any
 
 from drafter.client_server.commands import get_main_server
-from drafter.components.utilities.image_support import refresh_pillow_support
 from drafter.config.engines import EngineType
 from drafter.configuration import get_system_configuration
 from drafter.helpers.utils import is_web
@@ -92,11 +91,6 @@ def start_server(
             configuration.
         **extra_configuration: Additional configuration parameters.
     """
-    # In the browser, drafter is imported before micropip installs optional
-    # packages like Pillow; by the time student code reaches start_server,
-    # they are in place, so re-check now.
-    refresh_pillow_support()
-
     # Handle compatibility for old parameters
     parameters: dict[str, Any] = {}
     if server_name is not None:

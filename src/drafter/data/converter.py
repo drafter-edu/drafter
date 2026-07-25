@@ -72,6 +72,12 @@ ConverterFn = Callable[[ConversionContext], ConversionResult | None]
 """A converter function; it returns None when it does not apply to the given
 value, letting the next registered converter (or the fallback) try instead."""
 
+MISSING_VALUE_ERROR_CODE = "missing_value"
+"""Failure code for "the value is absent" (e.g. an empty file upload or a
+denied camera). Union conversion treats it specially: when the annotation
+also allows None (``Picture | None``), the parameter becomes None instead
+of failing."""
+
 
 #: Origins that represent a union annotation (typing.Union and PEP 604 `X | Y`).
 _UNION_ORIGINS = {Union, getattr(types, "UnionType", Union)}
@@ -122,6 +128,33 @@ def conversion_failure(
         or (
             f"Try providing a valid {expected_name}, or change the "
             f"parameter's type annotation."
+        ),
+    )
+
+
+def missing_value_failure(
+    ctx: ConversionContext, expected_type: Any, hint: str = ""
+) -> ConversionResult:
+    """Build the student-facing error for an absent value.
+
+    Used when the client submitted "nothing" for a parameter (no file
+    chosen, no photo captured). For a plain annotation this surfaces as a
+    friendly failure; when the annotation is a union that allows None
+    (``Picture | None``), union conversion turns it into None instead.
+    """
+    expected_name = describe_type(expected_type)
+    message = (
+        f"Parameter '{ctx.param_name}' expects {expected_name} but no value "
+        f"was provided by {describe_source(ctx.payload_value, ctx.param_name)}."
+    )
+    return ConversionResult(
+        ok=False,
+        error_code=MISSING_VALUE_ERROR_CODE,
+        message=message,
+        hint=hint
+        or (
+            f"Make the parameter optional ({expected_name} | None) if it is "
+            f"okay for no value to be provided."
         ),
     )
 
@@ -276,6 +309,10 @@ class ConverterRegistry:
             result = self._convert_to(ctx, member)
             if result.ok:
                 return result
+            if result.error_code == MISSING_VALUE_ERROR_CODE and type(None) in members:
+                # The value is absent and the annotation allows None: an
+                # optional parameter simply receives None.
+                return ConversionResult(ok=True, value=None)
             if first_failure is None:
                 first_failure = result
         return first_failure or conversion_failure(ctx, expected)

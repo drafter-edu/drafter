@@ -1053,42 +1053,87 @@ describe("state panel representation rendering", () => {
 		expect(rep?.textContent).toContain("Recovery error: repr also failed");
 	});
 
-	test("pillow_image with data renders an <img>", () => {
+	test("image with data renders an <img> and caption", () => {
 		const dataUri =
 			"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAA";
 		const content = renderRep({
-			kind: "pillow_image",
-			type: "PIL.Image.Image",
+			kind: "image",
+			type: "Picture",
 			value: dataUri,
+			filename: "dog.png",
+			width: 640,
+			height: 480,
+			mime: "image/png",
 			id: 12,
-			complexity: 1,
+			complexity: 5,
 		});
 		const img = content.querySelector(
-			".drafter-debug-rep-pillow-image img",
+			".drafter-debug-rep-image img",
 		) as HTMLImageElement;
 		expect(img).not.toBeNull();
 		expect(img.getAttribute("src")).toBe(dataUri);
 		expect(
-			content.querySelector(".drafter-debug-rep-pillow-image")
+			content.querySelector(".drafter-debug-rep-image-caption")
 				?.textContent,
-		).toContain("PIL.Image.Image");
+		).toBe("dog.png — 640×480 — PNG");
+		expect(
+			content.querySelector(".drafter-debug-rep-image")?.textContent,
+		).toContain("Picture");
 	});
 
-	test("pillow_image without data renders a placeholder", () => {
+	test("image without data renders a placeholder", () => {
 		const content = renderRep({
-			kind: "pillow_image",
-			type: "PIL.Image.Image",
+			kind: "image",
+			type: "Picture",
 			value: null,
+			filename: null,
+			width: null,
+			height: null,
+			mime: null,
 			id: 13,
-			complexity: 1,
+			complexity: 5,
 		});
 		expect(
-			content.querySelector(".drafter-debug-rep-pillow-image img"),
+			content.querySelector(".drafter-debug-rep-image img"),
 		).toBeNull();
 		expect(
-			content.querySelector(".drafter-debug-rep-pillow-image")
-				?.textContent,
+			content.querySelector(".drafter-debug-rep-image")?.textContent,
 		).toContain("Image not available");
+	});
+
+	test("bytes renders length and hex preview", () => {
+		const content = renderRep({
+			kind: "bytes",
+			type: "bytes",
+			length: 11,
+			preview: "68 65 6c 6c 6f 20 77 6f 72 6c 64",
+			thumbnail: null,
+			id: 15,
+			complexity: 2,
+		});
+		const rep = content.querySelector(".drafter-debug-rep-bytes");
+		expect(rep?.textContent).toContain("68 65 6c 6c 6f");
+		expect(rep?.textContent).toContain("bytes (11 bytes)");
+		expect(rep?.querySelector("img")).toBeNull();
+	});
+
+	test("image bytes render a thumbnail", () => {
+		const dataUri =
+			"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAA";
+		const content = renderRep({
+			kind: "bytes",
+			type: "bytes",
+			length: 2048,
+			preview: "89 50 4e 47 0d 0a 1a 0a",
+			thumbnail: dataUri,
+			id: 16,
+			complexity: 2,
+		});
+		const img = content.querySelector(
+			".drafter-debug-rep-bytes img",
+		) as HTMLImageElement;
+		expect(img).not.toBeNull();
+		expect(img.getAttribute("src")).toBe(dataUri);
 	});
 
 	test("unknown representation renders type and value", () => {

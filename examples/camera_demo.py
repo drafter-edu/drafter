@@ -41,7 +41,7 @@ def process_photo(state, snapshot: Photo):
         content.extend(
             [
                 Paragraph(f"Size: {snapshot.width}x{snapshot.height} pixels"),
-                Image(snapshot.data_url),
+                Image(snapshot),
             ]
         )
     elif snapshot.status == "denied":

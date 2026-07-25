@@ -220,21 +220,60 @@ function renderRepresentation(rep: SpecificRepresentation) {
 					</div>
 				</div>
 			);
-		case "pillow_image":
+		case "image": {
+			const dimensions =
+				rep.width != null && rep.height != null
+					? `${rep.width}×${rep.height}`
+					: "";
+			const format = rep.mime
+				? rep.mime.replace("image/", "").toUpperCase()
+				: "";
+			const caption = [rep.filename, dimensions, format]
+				.filter(Boolean)
+				.join(" — ");
 			return (
-				<div class="drafter-debug-rep-pillow-image drafter-debug-rep-row">
-					<div class="drafter-debug-rep-pillow-image-type drafter-debug-rep-cell">
+				<div class="drafter-debug-rep-image drafter-debug-rep-row">
+					<div class="drafter-debug-rep-image-preview drafter-debug-rep-cell">
 						{rep.value ? (
 							<img
 								src={rep.value}
-								class="drafter-debug-rep-pillow-image-value"
+								alt={rep.filename ?? rep.type}
+								class="drafter-debug-rep-image-value"
 							/>
 						) : (
 							<span>Image not available</span>
 						)}
+						{caption ? (
+							<div class="drafter-debug-rep-image-caption">
+								{caption}
+							</div>
+						) : null}
 					</div>
-					<div class="drafter-debug-rep-pillow-image-type drafter-debug-rep-cell">
+					<div class="drafter-debug-rep-image-type drafter-debug-rep-cell">
 						{rep.type}
+					</div>
+				</div>
+			);
+		}
+		case "bytes":
+			return (
+				<div class="drafter-debug-rep-bytes drafter-debug-rep-row">
+					<div class="drafter-debug-rep-bytes-value drafter-debug-rep-cell">
+						{rep.thumbnail ? (
+							<img
+								src={rep.thumbnail}
+								alt={rep.type}
+								class="drafter-debug-rep-image-value"
+							/>
+						) : null}
+						<code class="drafter-debug-rep-bytes-preview">
+							{rep.preview}
+							{rep.length > 16 ? " …" : ""}
+						</code>
+					</div>
+					<div class="drafter-debug-rep-bytes-type drafter-debug-rep-cell">
+						{rep.type} ({rep.length}{" "}
+						{rep.length === 1 ? "byte" : "bytes"})
 					</div>
 				</div>
 			);

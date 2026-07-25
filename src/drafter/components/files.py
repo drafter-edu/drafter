@@ -1,20 +1,19 @@
 """File components for downloading and uploading files.
 
 Defines `Download`, a link that lets the user save generated content
-(text or PIL images) as a file, and `FileUpload`, a form input for
+(text, bytes, or images) as a file, and `FileUpload`, a form input for
 accepting user file submissions.
 """
 
-import base64
-import io
 from dataclasses import dataclass
+from typing import Union
+
+from PIL import Image as PILImage
 
 from drafter.components.forms import FormComponent
 from drafter.components.page_content import Component, ComponentArgument, PageContent
-from drafter.components.utilities import image_support
 from drafter.components.utilities.validation import validate_parameter_name
-
-# TODO: Properly handle type hints for PILImage, DrafterFile, etc.
+from drafter.data.images import Picture, bytes_to_data_url, sniff_image_mime
 
 
 @dataclass(repr=False)
@@ -23,25 +22,25 @@ class Download(Component):
 
     Renders an anchor whose `href` is a data URL built from the content.
     String content is embedded directly as `data:<content_type>,<content>`.
-    When Pillow is installed, a PIL Image may also be passed (despite the
-    `str` annotation); it is encoded at render time as a base64 PNG data
-    URL, and `content_type` is ignored. Without Pillow, non-string content
-    is not converted and will not produce a usable link.
+    A `Picture` or PIL Image is encoded at render time as a base64 data
+    URL using the picture's own MIME type (PNG for PIL images), and
+    `content_type` is ignored. Raw bytes are base64-encoded with the
+    given `content_type` (or a sniffed image type).
 
     Attributes:
         text: Display text for the download link.
         filename: Filename for the downloaded file.
-        content: Content to download; a string, or a PIL Image when
-            Pillow is available.
-        content_type: MIME type used for string content; ignored for
-            PIL Images (which always become PNG data URLs).
+        content: Content to download; a string, bytes, `Picture`, or
+            PIL Image.
+        content_type: MIME type used for string/bytes content; ignored
+            for Pictures and PIL Images.
         tag: The HTML tag name, always 'a'.
     """
 
     tag = "a"
     text: PageContent
     filename: str
-    content: str
+    content: Union[str, bytes, Picture, PILImage.Image]
     content_type: str = "text/plain"
 
     ARGUMENTS = [
@@ -61,7 +60,7 @@ class Download(Component):
         self,
         text: PageContent,
         filename: str,
-        content: str,
+        content: Union[str, bytes, Picture, PILImage.Image],
         content_type: str = "text/plain",
         **kwargs,
     ):
@@ -70,7 +69,8 @@ class Download(Component):
         Args:
             text: Display text for the link.
             filename: Filename for the downloaded file.
-            content: Content to download as string or PIL Image.
+            content: Content to download as string, bytes, `Picture`, or
+                PIL Image.
             content_type: MIME type of the content. Defaults to 'text/plain'.
             **kwargs: Additional HTML attributes.
         """
@@ -80,25 +80,6 @@ class Download(Component):
         self.content_type = content_type
         self.extra_settings = kwargs
 
-    def _handle_pil_image(self, image):
-        """Convert PIL Image to base64-encoded data URL.
-
-        Args:
-            image: PIL Image object or string.
-
-        Returns:
-            Tuple of (was_pil, processed_url).
-        """
-        if not image_support.HAS_PILLOW or isinstance(image, str):
-            return False, image
-
-        image_data = io.BytesIO()
-        image.save(image_data, format="PNG")
-        image_data.seek(0)
-        figure = base64.b64encode(image_data.getvalue()).decode("utf-8")
-        figure = f"data:image/png;base64,{figure}"
-        return True, figure
-
     def get_attributes(self, context) -> dict:
         """Get HTML attributes for the download link.
 
@@ -106,14 +87,19 @@ class Download(Component):
             context: Rendering context.
 
         Returns:
-            Dictionary including href with data URL or PIL image data.
+            Dictionary including href with the content as a data URL.
         """
         attributes = super().get_attributes(context)
-        was_pil, url = self._handle_pil_image(self.content)
-        if was_pil:
-            attributes["href"] = url
+        content = self.content
+        if isinstance(content, PILImage.Image):
+            content = Picture(content)
+        if isinstance(content, Picture):
+            attributes["href"] = content.to_data_url()
+        elif isinstance(content, (bytes, bytearray)):
+            mime = sniff_image_mime(bytes(content)) or self.content_type
+            attributes["href"] = bytes_to_data_url(bytes(content), mime)
         else:
-            attributes["href"] = f"data:{self.content_type},{self.content}"
+            attributes["href"] = f"data:{self.content_type},{self.content!s}"
         return attributes
 
 

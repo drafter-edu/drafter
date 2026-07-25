@@ -719,3 +719,82 @@ def test_major_error_representation():
         "new_error_message": "Bad repr!",
         "complexity": 0,
     }
+
+
+def test_image_representation():
+    from drafter.data.images import Picture
+
+    picture = Picture.new(4, 3, "red")
+    picture.filename = "dog.png"
+    result = analyze_type(picture)
+    assert result["kind"] == "image"
+    assert result["type"] == "Picture"
+    assert result["filename"] == "dog.png"
+    assert result["width"] == 4 and result["height"] == 3
+    assert result["mime"] == "image/png"
+    assert result["value"].startswith("data:image/png;base64,")
+    assert result["complexity"] == 5
+
+
+def test_pil_image_representation():
+    from PIL import Image as PILImage
+
+    image = PILImage.new("RGB", (2, 2), "blue")
+    result = analyze_type(image)
+    assert result["kind"] == "image"
+    assert result["type"] == "Image"
+    assert result["value"].startswith("data:image/png;base64,")
+
+
+def test_unloaded_url_picture_does_not_fetch():
+    from drafter.data.images import Picture
+
+    picture = Picture("https://example.com/dog.png")
+    result = analyze_type(picture)
+    assert result["kind"] == "image"
+    assert result["value"] == "https://example.com/dog.png"
+    assert result["width"] is None and result["height"] is None
+    assert not picture.is_loaded()
+
+
+def test_image_thumbnail_is_capped():
+    import base64
+
+    from drafter.data.images import Picture
+
+    result = analyze_type(Picture.new(2048, 2048))
+    payload = result["value"].split(",", 1)[1]
+    # A 2048x2048 image must ship as a small thumbnail, not full pixels.
+    assert len(base64.b64decode(payload)) < 50_000
+
+
+def test_bytes_representation():
+    value = b"hello world"
+    result = analyze_type(value)
+    assert result["kind"] == "bytes"
+    assert result["type"] == "bytes"
+    assert result["length"] == 11
+    assert result["preview"].startswith("68 65 6c 6c 6f")
+    assert result["thumbnail"] is None
+
+
+def test_image_bytes_get_thumbnail():
+    from drafter.data.images import Picture
+
+    data = Picture.new(4, 4, "green").to_bytes()
+    result = analyze_type(data)
+    assert result["kind"] == "bytes"
+    assert result["thumbnail"].startswith("data:image/png;base64,")
+
+
+def test_binary_file_content_previews_as_bytes():
+    from drafter.data.files import DrafterBinaryFile
+    from drafter.data.images import Picture
+
+    data = Picture.new(4, 4, "green").to_bytes()
+    upload = DrafterBinaryFile("dog.png", data, "image/png", len(data))
+    result = analyze_type(upload)
+    assert result["kind"] == "dataclass"
+    fields_by_name = {field["name"]: field["value"] for field in result["fields"]}
+    assert fields_by_name["content"]["kind"] == "bytes"
+    assert fields_by_name["content"]["thumbnail"] is not None

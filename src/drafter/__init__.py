@@ -12,6 +12,9 @@ single `from drafter import *` provides:
   `Table`) and form inputs (`TextBox`, `Button`, `SelectBox`) to richer
   widgets (`Map`, `CurrentLocation`, `Timer`, and the audio family such
   as `Tone`, `Melody`, and `Sound`).
+- Data value types for route parameters and state: `Picture` for images,
+  `DrafterTextFile`/`DrafterBinaryFile` for uploads, and `Photo` for
+  camera captures.
 - Styling helpers (`bold`, `change_color`, `update_style`, ...) and site
   configuration functions (`set_website_title`, `set_website_style`, ...).
 - Testing and convenience utilities such as `assert_equal`, `dataclass`,
@@ -105,6 +108,7 @@ from drafter.components import (
 # Handle configuration if needed
 from drafter.configuration import get_system_configuration
 from drafter.data.files import DrafterBinaryFile, DrafterTextFile
+from drafter.data.images import Picture
 from drafter.deploy import (
     add_website_css,
     add_website_header,
@@ -241,6 +245,7 @@ __all__ = [
     "Button",
     "Argument",
     "Image",
+    "Picture",
     "Download",
     "FileUpload",
     "MatPlotLibPlot",

@@ -129,10 +129,28 @@ export interface UpdatedStateEvent extends TelemetryRecord {
 	representation: SpecificRepresentation;
 }
 
-export interface PillowImageRepresentation extends Representation {
-	kind: "pillow_image";
+export interface ImageRepresentation extends Representation {
+	kind: "image";
 	type: string;
+	/**
+	 * Preview source: a small thumbnail data URL, the backing URL for an
+	 * unloaded URL-backed Picture, or null when no preview is available.
+	 */
 	value: string | null;
+	filename: string | null;
+	width: number | null;
+	height: number | null;
+	mime: string | null;
+}
+
+export interface BytesRepresentation extends Representation {
+	kind: "bytes";
+	type: string;
+	length: number;
+	/** Short space-separated hex preview of the first bytes. */
+	preview: string;
+	/** Thumbnail data URL when the bytes are a recognized image. */
+	thumbnail: string | null;
 }
 
 export type SpecificRepresentation =
@@ -152,4 +170,5 @@ export type SpecificRepresentation =
 	| UnionRepresentation
 	| EmptyDict
 	| Dict
-	| PillowImageRepresentation;
+	| ImageRepresentation
+	| BytesRepresentation;

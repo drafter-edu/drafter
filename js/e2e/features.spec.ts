@@ -169,9 +169,9 @@ test.describe("geolocation", () => {
 
 		// Permission is already granted, so the component's permissions-API
 		// check auto-requests the position without a click.
-		await expect(
-			page.locator(".drafter-geolocation-coords"),
-		).toContainText("39.680000, -75.750000");
+		await expect(page.locator(".drafter-geolocation-coords")).toContainText(
+			"39.680000, -75.750000",
+		);
 	});
 });
 
@@ -207,5 +207,7 @@ test("Download component produces a real browser download", async ({
 	for await (const chunk of stream) {
 		chunks.push(chunk as Buffer);
 	}
-	expect(Buffer.concat(chunks).toString("utf-8")).toBe("downloaded content");
+	expect(Buffer.concat(chunks).toString("utf-8")).toBe(
+		"'downloaded content'",
+	);
 });

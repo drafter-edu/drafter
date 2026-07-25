@@ -851,10 +851,21 @@ div.btlw-container img {
 	font-weight: 700;
 }
 
-.drafter-debug-rep-pillow-image-value {
-	width: 100px;
-	height: 100px;
+.drafter-debug-rep-image-value {
+	max-width: 100px;
+	max-height: 100px;
 	object-fit: contain;
+}
+
+.drafter-debug-rep-image-caption {
+	font-size: 0.85em;
+	color: #4a637a;
+}
+
+.drafter-debug-rep-bytes-preview {
+	font-family: monospace;
+	font-size: 0.85em;
+	word-break: break-all;
 }
 
 .drafter-debug-config-item-updated {

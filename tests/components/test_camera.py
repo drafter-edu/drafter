@@ -5,7 +5,8 @@ import json
 
 import pytest
 
-from drafter.components.camera import Camera, Photo
+from drafter.components.camera import Camera
+from drafter.components.data.photo import Photo
 from drafter.components.utilities.registry import COMPONENT_CONTRACT_REGISTRY
 from drafter.data.converter import ConversionContext
 
@@ -81,6 +82,7 @@ class TestContractRegistered:
 
     def test_capture_event_in_contract(self):
         contract = COMPONENT_CONTRACT_REGISTRY.get("Camera")
+        assert contract is not None
         event_names = {event.event_name for event in contract.emitted_events}
         assert event_names == {"capture", "denied", "error"}
 

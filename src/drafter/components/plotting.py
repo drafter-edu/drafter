@@ -4,12 +4,12 @@ Defines `MatPlotLibPlot`, which captures the current Matplotlib figure
 and embeds it in the page as an image or inline SVG.
 """
 
-import base64
 import io
 from dataclasses import dataclass
 
 from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.planning.render_plan import RenderPlan
+from drafter.data.images import Picture, bytes_to_data_url
 from drafter.helpers.utils import is_pyodide
 
 try:
@@ -76,6 +76,22 @@ class MatPlotLibPlot(Component):
             extra_matplotlib_settings["bbox_inches"] = "tight"
         self.close_automatically = close_automatically
 
+    def to_picture(self) -> Picture:
+        """Capture the current Matplotlib figure as a `Picture`.
+
+        Renders the current figure to PNG with this component's settings
+        (without closing it), so the chart can be stored in state,
+        manipulated, or offered as a download.
+
+        Returns:
+            The rendered chart as a Picture.
+        """
+        image_data = io.BytesIO()
+        settings = self.extra_matplotlib_settings.copy()
+        settings["format"] = "png"
+        plt.savefig(image_data, **settings)  # type: ignore
+        return Picture.from_bytes(image_data.getvalue(), mime_type="image/png")
+
     def _plan_pyodide(self, context) -> RenderPlan:
         """Generate render plan for Pyodide environment.
 
@@ -94,10 +110,10 @@ class MatPlotLibPlot(Component):
         if "format" not in settings:
             settings["format"] = "png"
         plt.savefig(image_data, **settings)  # type: ignore
-        decoded_image_data = base64.b64encode(image_data.getvalue()).decode("utf-8")
+        data_url = bytes_to_data_url(image_data.getvalue(), "image/png")
         return RenderPlan(
             kind="raw",
-            raw_html=f'<img src="data:image/png;base64,{decoded_image_data}" />',
+            raw_html=f'<img src="{data_url}" />',
         )
 
     def plan(self, context) -> RenderPlan:
@@ -124,9 +140,7 @@ class MatPlotLibPlot(Component):
 
             attrs = {}
             if self.extra_matplotlib_settings["format"] == "png":
-                figure = base64.b64encode(image_data.getvalue()).decode("utf-8")
-                figure = f"data:image/png;base64,{figure}"
-                attrs["src"] = figure
+                attrs["src"] = bytes_to_data_url(image_data.getvalue(), "image/png")
             elif self.extra_matplotlib_settings["format"] == "svg":
                 figure = image_data.read().decode()
                 # For SVG, we return the raw HTML

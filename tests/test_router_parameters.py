@@ -285,6 +285,159 @@ class TestFileUploadConversion:
         assert result.ok and isinstance(result.value, DrafterBinaryFile)
 
 
+def png_upload(filename="dog.png"):
+    import io
+
+    from PIL import Image as PILImage
+
+    output = io.BytesIO()
+    PILImage.new("RGB", (4, 3), "red").save(output, format="PNG")
+    return upload(output.getvalue(), filename=filename, mimetype="image/png")
+
+
+class TestPictureConversion:
+    def make_data_url(self):
+        from drafter.data.images import Picture, bytes_to_data_url
+
+        return bytes_to_data_url(Picture.new(2, 2, "blue").to_bytes(), "image/png")
+
+    def test_upload_to_picture(self):
+        from drafter.data.images import Picture
+
+        result = convert(png_upload(), Picture)
+        assert result.ok
+        assert isinstance(result.value, Picture)
+        assert result.value.filename == "dog.png"
+        assert (result.value.width, result.value.height) == (4, 3)
+
+    def test_upload_to_pil_still_works(self):
+        from PIL import Image as PILImage
+
+        result = convert(png_upload(), PILImage.Image)
+        assert result.ok
+        assert isinstance(result.value, PILImage.Image)
+
+    def test_non_image_upload_fails_helpfully(self):
+        from drafter.data.images import Picture
+
+        result = convert(upload(b"just text", filename="notes.txt"), Picture)
+        assert not result.ok
+        assert "notes.txt" in result.hint
+
+    def test_empty_upload_fails_for_bare_picture(self):
+        from drafter.data.images import Picture
+
+        result = convert(upload(b"", filename=""), Picture, param_name="photo")
+        assert not result.ok
+        assert result.error_code == "missing_value"
+        assert "optional" in result.hint.lower()
+
+    def test_empty_upload_becomes_none_for_optional_picture(self):
+        from typing import Optional
+
+        from drafter.data.images import Picture
+
+        result = convert(upload(b"", filename=""), Optional[Picture])
+        assert result.ok and result.value is None
+
+    def test_camera_dict_to_picture(self):
+        from drafter.data.images import Picture
+
+        result = convert(
+            {"status": "granted", "data_url": self.make_data_url()}, Picture
+        )
+        assert result.ok
+        assert isinstance(result.value, Picture)
+        assert (result.value.width, result.value.height) == (2, 2)
+
+    def test_denied_camera_fails_for_bare_picture(self):
+        from drafter.data.images import Picture
+
+        result = convert(
+            {"status": "denied", "message": "no camera", "data_url": None}, Picture
+        )
+        assert not result.ok
+        assert result.error_code == "missing_value"
+        assert "denied" in result.hint
+
+    def test_denied_camera_becomes_none_for_optional_picture(self):
+        from drafter.data.images import Picture
+
+        result = convert({"status": "denied", "data_url": None}, Picture | None)
+        assert result.ok and result.value is None
+
+    def test_data_url_string_to_picture(self):
+        from drafter.data.images import Picture
+
+        result = convert(self.make_data_url(), Picture)
+        assert result.ok and result.value.width == 2
+
+    def test_url_string_to_lazy_picture(self):
+        from drafter.data.images import Picture
+
+        result = convert("https://example.com/dog.png", Picture)
+        assert result.ok
+        assert not result.value.is_loaded()
+        assert result.value.url == "https://example.com/dog.png"
+
+    def test_photo_to_picture(self):
+        from drafter.components.data.photo import Photo
+        from drafter.data.images import Picture
+
+        photo = Photo(status="granted", data_url=self.make_data_url())
+        result = convert(photo, Picture)
+        assert result.ok and isinstance(result.value, Picture)
+
+    def test_picture_passes_through(self):
+        from drafter.data.images import Picture
+
+        picture = Picture.new(2, 2)
+        result = convert(picture, Picture)
+        assert result.ok and result.value is picture
+
+    def test_photo_picture_property(self):
+        from drafter.components.data.photo import Photo
+
+        photo = Photo(status="granted", data_url=self.make_data_url())
+        assert photo.picture is not None
+        assert photo.picture.width == 2
+        assert photo.picture is photo.picture  # cached
+        assert Photo(status="denied").picture is None
+
+
+class TestCameraBytesConversion:
+    def make_data_url(self):
+        from drafter.data.images import Picture, bytes_to_data_url
+
+        return bytes_to_data_url(Picture.new(2, 2, "blue").to_bytes(), "image/png")
+
+    def test_camera_dict_to_bytes(self):
+        from drafter.data.images import sniff_image_mime
+
+        result = convert({"status": "granted", "data_url": self.make_data_url()}, bytes)
+        assert result.ok
+        assert sniff_image_mime(result.value) == "image/png"
+
+    def test_data_url_string_to_bytes(self):
+        from drafter.data.images import sniff_image_mime
+
+        result = convert(self.make_data_url(), bytes)
+        assert result.ok
+        assert sniff_image_mime(result.value) == "image/png"
+
+    def test_denied_camera_fails_for_bare_bytes(self):
+        result = convert({"status": "denied", "data_url": None}, bytes)
+        assert not result.ok
+        assert result.error_code == "missing_value"
+
+    def test_denied_camera_becomes_none_for_optional_bytes(self):
+        result = convert({"status": "denied", "data_url": None}, bytes | None)
+        assert result.ok and result.value is None
+
+    def test_upload_to_bytes_still_works(self):
+        assert convert(upload(b"data"), bytes).value == b"data"
+
+
 class TestLocationConversion:
     def test_from_json_string(self):
         raw = json.dumps({"status": "granted", "latitude": 39.68, "longitude": -75.75})

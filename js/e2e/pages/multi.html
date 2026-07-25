@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<title>Drafter e2e multi-instance harness</title>
-	</head>
-	<body>
-		<div id="status">idle</div>
-		<div id="drafter-root--a"></div>
-		<div id="drafter-root--b"></div>
-		<script src="/pyodide/pyodide.js"></script>
-		<script src="/assets/js/drafter.pyodide.js"></script>
-		<script>
+  <head>
+    <meta charset="utf-8" />
+    <title>Drafter e2e multi-instance harness</title>
+  </head>
+  <body>
+    <div id="status">idle</div>
+    <div id="drafter-root--a"></div>
+    <div id="drafter-root--b"></div>
+    <script src="/pyodide/pyodide.js"></script>
+    <script src="/assets/js/drafter.pyodide.js"></script>
+    <script>
 			// Two shadow-DOM instances on one shared Pyodide runtime — the same
 			// shape the docs embeds and playground use.
 			window.DRAFTER_MODIFIED_CONFIGURATION = {};
@@ -44,7 +44,7 @@ start_server(State(0))
 				status.textContent = "booting";
 				await window.Drafter.setupPyodide({
 					pyodideUrl: "/pyodide/",
-					systemPackages: [],
+					systemPackages: ["pillow"],
 				});
 				await window.Drafter.mountDrafterRemote("/drafter-pyodide.zip");
 				await window.Drafter.patchPythonFeatures();
@@ -64,6 +64,6 @@ start_server(State(0))
 				]);
 				status.textContent = "ready";
 			};
-		</script>
-	</body>
+    </script>
+  </body>
 </html>

@@ -11,9 +11,11 @@ from textwrap import indent
 from typing import Any
 
 from drafter.components import Component
+from drafter.components.images import Image
 from drafter.components.links import LinkContent
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.data.channel import Message
+from drafter.data.images import Picture
 from drafter.data.request import Request
 from drafter.history.formatting import format_page_content
 from drafter.history.state import SiteState
@@ -56,7 +58,11 @@ class Fragment(ResponsePayload):
         self.css = css
         self.js = js
 
-        if isinstance(content, (str, Component)):
+        if isinstance(content, Picture):
+            # A Picture value displays as an Image component, the same way
+            # strings display as text.
+            self.content = [Image(content)]
+        elif isinstance(content, (str, Component)):
             # If the content is a single string, convert it to a list with that string as the only element.
             self.content = [content]
         elif not isinstance(content, list):
@@ -66,7 +72,11 @@ class Fragment(ResponsePayload):
                 f" Found {incorrect_type} instead."
             )
         else:
-            for index, chunk in enumerate(content):
+            self.content = [
+                Image(chunk) if isinstance(chunk, Picture) else chunk
+                for chunk in content
+            ]
+            for index, chunk in enumerate(self.content):
                 if not isinstance(chunk, (str, Component)):
                     incorrect_type = type(chunk).__name__
                     raise ValueError(

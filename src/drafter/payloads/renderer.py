@@ -11,9 +11,11 @@ from dataclasses import dataclass
 from typing import Optional
 
 from drafter.components import Component
+from drafter.components.images import Image
 from drafter.components.planning.render_plan import NewlineMode, RenderPlan
 from drafter.components.utilities.attributes import parse_extra_settings
 from drafter.config.client_server import ClientServerConfiguration
+from drafter.data.images import Picture
 from drafter.history.state import SiteState
 
 
@@ -116,6 +118,9 @@ class Renderer:
                 self.write(escaped)
             else:
                 self.write(html.escape(component))
+        elif isinstance(component, Picture):
+            # A Picture value nested anywhere in content displays as an Image.
+            self.render(Image(component))
         elif isinstance(component, list):
             for child_index, child in enumerate(component):
                 self.component_stack.append(f"[{child_index}]")
