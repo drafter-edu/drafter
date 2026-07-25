@@ -365,7 +365,9 @@ class ClientBridge:
             elif event.get("key") == "page_transition":
                 self.configuration.page_transition = str(event.get("value"))
             elif event.get("key") == "page_transition_duration":
-                self.configuration.page_transition_duration = float(event.get("value"))
+                self.configuration.page_transition_duration = float(
+                    event.get("value") or 0.0
+                )
             else:
                 report_bridge_error(
                     "client.unhandled_config_update",
