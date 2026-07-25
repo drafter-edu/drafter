@@ -217,6 +217,7 @@ class SelectBox(FormComponent):
         options: The list of option values to choose from.
         default_value: The initially selected option, or an empty string.
         tag: The HTML tag name, always 'select'.
+        allow_missing: Whether to allow a default value not in options.
 
     Example:
         ```python
@@ -253,6 +254,7 @@ class SelectBox(FormComponent):
             name: The form field name.
             options: List of option values to display.
             default_value: Optional initially selected value.
+            allow_missing: Whether to allow a default value not in options.
             **kwargs: Additional HTML attributes.
 
         Raises:

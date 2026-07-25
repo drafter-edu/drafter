@@ -32,6 +32,11 @@ lint:
     uv run ruff check --fix
     uv run mypy --ignore-missing-imports --install-types --non-interactive --package drafter
 
+check-docs:
+    uv run python tools/doc_drift.py
+
+
+
 # Check format/lint/types without modifying files (mirrors CI)
 check:
     uv run ruff format --check
@@ -70,4 +75,4 @@ docs-serve:
     uv run drafter-docs serve
 
 # Run all checks: format, lint, and test
-validate: format lint test
+validate: format lint check-docs test

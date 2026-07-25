@@ -328,9 +328,7 @@ class TestShadowLinkReuse:
         assert get_shadow_root(document) is shadow
         assert second.scope is shadow
         second_links = theme_links(shadow)
-        assert [id(link) for link in second_links] == [
-            id(link) for link in first_links
-        ]
+        assert [id(link) for link in second_links] == [id(link) for link in first_links]
         # Never detached = the browser never refetches their stylesheets.
         assert all(link.detach_count == 0 for link in second_links)
         assert len(document.created_links) == 2
@@ -394,9 +392,7 @@ class TestHeadLinkReuse:
         make_renderer(document).setup(make_site_data(use_shadow_dom=False))
 
         second_links = theme_links(document.head)
-        assert [id(link) for link in second_links] == [
-            id(link) for link in first_links
-        ]
+        assert [id(link) for link in second_links] == [id(link) for link in first_links]
         assert all(link.detach_count == 0 for link in second_links)
         assert len(document.created_links) == 2
 

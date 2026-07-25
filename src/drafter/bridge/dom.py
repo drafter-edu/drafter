@@ -243,7 +243,7 @@ def reuse_theme_link_prefix(existing_links, wanted_css) -> int:
         How many wanted links are already connected (the prefix length).
     """
     reused = 0
-    for link, (url, classes) in zip(existing_links, wanted_css):
+    for link, (url, classes) in zip(existing_links, wanted_css, strict=False):
         if link.getAttribute("href") != url:
             break
         if classes:

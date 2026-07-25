@@ -70,7 +70,5 @@ class TestConsoleModeCli:
         parser = make_parser()
         parsed, _ = parser.parse_known_args(["--console-mode", "devtools"])
         config = ClientServerConfiguration()
-        config.merge_in_args(
-            ClientServerConfiguration.parse_args(vars(parsed)), False
-        )
+        config.merge_in_args(ClientServerConfiguration.parse_args(vars(parsed)), False)
         assert config.console_mode == "devtools"
