@@ -16,7 +16,7 @@ FalseType = Literal[False]
 """Type alias for the literal value `False`, used in `Union[FalseType, str]`
 annotations where a field is either disabled (`False`) or holds a string."""
 
-DEFAULT_SYSTEM_PACKAGES = ["bakery", "matplotlib", "pillow"]
+DEFAULT_SYSTEM_PACKAGES = ["bakery", "pillow"]
 """Default Python packages loaded into the execution engine for student sites."""
 
 # "https://cdn.jsdelivr.net/pyodide/v0.29.0/debug/"
