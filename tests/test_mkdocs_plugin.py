@@ -86,3 +86,87 @@ def test_no_injection_without_demos():
     page = make_page()
     html = plugin.on_page_content("<p>body</p>", page=page, config={}, files=None)
     assert html == "<p>body</p>"
+
+
+def test_hl_lines_param_passes_through_to_source_fence():
+    plugin = make_plugin()
+    page = make_page()
+    markdown = '```python drafter hl_lines="2-4 7"\ncode\n```\n'
+    result = run_page_markdown(plugin, page, markdown)
+    assert '```python hl_lines="2-4 7"\ncode\n```' in result
+    assert "<iframe" in result
+
+
+def test_hl_lines_accepts_commas_and_bare_values():
+    plugin = make_plugin()
+    page = make_page()
+    markdown = "```python drafter hl_lines=2,4-6\ncode\n```\n"
+    result = run_page_markdown(plugin, page, markdown)
+    assert '```python hl_lines="2 4-6"\ncode\n```' in result
+
+
+def test_height_param_sets_demo_iframe_height():
+    plugin = make_plugin(iframe_height=430)
+    page = make_page()
+    markdown = "```python drafter height=300\ncode\n```\n"
+    result = run_page_markdown(plugin, page, markdown)
+    assert "min-height: 300px" in result
+    assert "min-height: 430px" not in result
+    assert "```python\ncode\n```" in result
+    assert "height=300" not in result
+    assert "<iframe" in result
+
+
+def test_height_param_accepts_css_lengths():
+    plugin = make_plugin()
+    page = make_page()
+    markdown = "```python drafter height=20em\ncode\n```\n"
+    result = run_page_markdown(plugin, page, markdown)
+    assert "min-height: 20em" in result
+
+
+def test_iframe_height_config_used_without_height_param():
+    plugin = make_plugin(iframe_height=430)
+    page = make_page()
+    result = run_page_markdown(plugin, page)
+    assert "min-height: 430px" in result
+
+
+def test_invalid_params_fall_back_to_defaults():
+    plugin = make_plugin(iframe_height=430)
+    page = make_page()
+    markdown = "```python drafter hl_lines=abc height=tall\ncode\n```\n"
+    result = run_page_markdown(plugin, page, markdown)
+    assert "hl_lines" not in result
+    assert "min-height: 430px" in result
+    assert "```python\ncode\n```" in result
+    assert "<iframe" in result
+
+
+def test_params_on_plain_fence_apply_without_demo():
+    plugin = make_plugin()
+    page = make_page()
+    markdown = '```python hl_lines="2" height=150\nprint("hi")\n```\n'
+    result = run_page_markdown(plugin, page, markdown)
+    assert "<iframe" not in result
+    assert not plugin._pages_with_demos
+    # height only applies to demos; it is stripped from plain fences.
+    assert "height" not in result.replace("hl_lines", "")
+    assert '```python hl_lines="2"\nprint("hi")\n```' in result
+
+
+def test_plain_fence_without_params_untouched():
+    plugin = make_plugin()
+    page = make_page()
+    markdown = '```text some info\ntitle="x"\n```\n'
+    result = run_page_markdown(plugin, page, markdown)
+    assert result == markdown
+
+
+def test_unknown_params_preserved_on_source_fence():
+    plugin = make_plugin()
+    page = make_page()
+    markdown = '```python drafter title="Example" height=100\ncode\n```\n'
+    result = run_page_markdown(plugin, page, markdown)
+    assert '```python title="Example"\ncode\n```' in result
+    assert "min-height: 100px" in result

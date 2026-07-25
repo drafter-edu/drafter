@@ -32,6 +32,11 @@ nav:
   - Transition to Flask: reference/flask.md
   - API Reference: reference/api/
 
+markdown_extensions:
+# hl_lines support on fences (used by the drafter-codeblocks plugin).
+- pymdownx.highlight
+- pymdownx.superfences
+
 theme:
   name: material
   palette:

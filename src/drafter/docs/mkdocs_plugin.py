@@ -1,4 +1,17 @@
-"""MkDocs plugin for embedding runnable Drafter apps from fenced code blocks."""
+"""MkDocs plugin for embedding runnable Drafter apps from fenced code blocks.
+
+The fence info line may carry optional parameters (on drafter blocks and
+plain code fences alike)::
+
+    ```python drafter hl_lines="2-4 7" height=300
+    ...
+    ```
+
+``hl_lines`` highlights the given lines/ranges in the rendered source block
+(via pymdownx.highlight) and ``height`` sets the embedded demo iframe's
+height, overriding the plugin's ``iframe_height`` option for that block
+(bare numbers are pixels; CSS lengths like ``20em`` also work).
+"""
 
 from __future__ import annotations
 
@@ -26,6 +39,23 @@ FENCE_RE = re.compile(
     flags=re.DOTALL,
 )
 """Regular expression matching fenced code blocks with an optional info string."""
+
+# Match key=value parameters in a fence info string (values may be quoted).
+PARAM_RE = re.compile(
+    r"""(?P<key>[A-Za-z_][\w-]*)=(?P<value>"[^"]*"|'[^']*'|\S+)"""
+)
+"""Regular expression matching ``key=value`` parameters in a fence info string."""
+
+# Parameters the plugin understands on a fence info line, e.g.
+# ```python drafter hl_lines="2-4 7" height=300
+KNOWN_PARAMS = frozenset({"hl_lines", "height"})
+"""Fence parameters handled by this plugin (all others pass through untouched)."""
+
+HL_LINES_TOKEN_RE = re.compile(r"^\d+(-\d+)?$")
+"""A single hl_lines entry: a line number or an inclusive ``start-end`` range."""
+
+CSS_LENGTH_RE = re.compile(r"^\d+(\.\d+)?(px|em|rem|vh|vw|%)$")
+"""CSS lengths accepted for the ``height`` parameter (bare integers mean px)."""
 
 
 class DrafterCodeBlockPlugin(BasePlugin):
@@ -115,7 +145,20 @@ class DrafterCodeBlockPlugin(BasePlugin):
             info = match.group("info").strip()
             code = match.group("code")
 
+            params, info = self._extract_block_params(info)
+
             if not self._is_drafter_block(info):
+                if params:
+                    # Plain fences still get hl_lines support; height only
+                    # applies to demo iframes.
+                    if "height" in params:
+                        LOGGER.warning(
+                            "Ignoring height=%s on a non-drafter code block "
+                            "in %s; height only applies to embedded demos.",
+                            params["height"],
+                            page.file.src_uri,
+                        )
+                    return self._apply_block_params(info, code, params)
                 return match.group(0)
 
             block_counter["value"] += 1
@@ -126,7 +169,11 @@ class DrafterCodeBlockPlugin(BasePlugin):
             try:
                 demo_rel_path = self._build_demo(code, demo_id)
                 iframe_src = self._relative_url_for_page(page.url, demo_rel_path)
-                iframe_html = self._build_iframe_html(demo_id, iframe_src)
+                iframe_html = self._build_iframe_html(
+                    demo_id,
+                    iframe_src,
+                    height=self._normalized_height(params.get("height")),
+                )
             except Exception as exc:  # pragma: no cover - only on build failures
                 LOGGER.warning(
                     "Failed to compile Drafter code block in %s: %s",
@@ -140,7 +187,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
                 return f"{match.group(0)}{failure}"
 
             if self.config["show_source"]:
-                source_block = self._build_source_block(info, code)
+                source_block = self._build_source_block(info, code, params)
                 return f"{source_block}\n\n{iframe_html}"
             return iframe_html
 
@@ -291,9 +338,75 @@ class DrafterCodeBlockPlugin(BasePlugin):
             return "build"
         return str(self.config["pyodide_package_style"])
 
-    def _build_source_block(self, info: str, code: str) -> str:
-        source_info = self._normalized_source_info(info)
+    def _extract_block_params(self, info: str) -> tuple[dict[str, str], str]:
+        """Pull known ``key=value`` parameters out of a fence info string.
+
+        Returns the recognized parameters (values unquoted) and the info
+        string with those parameters removed; unrecognized ``key=value``
+        pairs are left in place for downstream markdown extensions.
+        """
+        params: dict[str, str] = {}
+
+        def strip_param(match: re.Match[str]) -> str:
+            key = match.group("key").lower()
+            if key not in KNOWN_PARAMS:
+                return match.group(0)
+            params[key] = match.group("value").strip("\"'")
+            return ""
+
+        remaining = PARAM_RE.sub(strip_param, info)
+        return params, " ".join(remaining.split())
+
+    def _apply_block_params(self, source_info: str, code: str, params: dict[str, str]) -> str:
+        """Rebuild a fence with a normalized ``hl_lines`` re-emitted on it.
+
+        Used both for the source block of a demo and for plain fences that
+        carried recognized parameters (which must be stripped either way so
+        they don't confuse pymdownx). ``height`` is handled by the caller
+        (it only applies to demo iframes) and is ignored here.
+        """
+        hl_lines = self._normalized_hl_lines(params.get("hl_lines"))
+        if hl_lines:
+            source_info = f'{source_info} hl_lines="{hl_lines}"'.strip()
         return f"```{source_info}\n{code}\n```"
+
+    def _normalized_hl_lines(self, value: str | None) -> str | None:
+        """Validate an hl_lines value, normalizing commas to spaces.
+
+        Accepts line numbers and inclusive ranges (``2``, ``2-4``) separated
+        by spaces or commas, matching what pymdownx.highlight understands.
+        """
+        if value is None:
+            return None
+        tokens = [token for token in value.replace(",", " ").split() if token]
+        if tokens and all(HL_LINES_TOKEN_RE.match(token) for token in tokens):
+            return " ".join(tokens)
+        LOGGER.warning(
+            "Ignoring invalid hl_lines value %r in fenced code block "
+            "(expected line numbers or ranges like '2 4-6').",
+            value,
+        )
+        return None
+
+    def _normalized_height(self, value: str | None) -> str | None:
+        """Validate a height value, defaulting bare integers to pixels."""
+        if value is None:
+            return None
+        if value.isdigit():
+            return f"{value}px"
+        if CSS_LENGTH_RE.match(value):
+            return value
+        LOGGER.warning(
+            "Ignoring invalid height value %r in fenced code block "
+            "(expected a CSS length like 300, 300px, or 20em).",
+            value,
+        )
+        return None
+
+    def _build_source_block(self, info: str, code: str, params: dict[str, str]) -> str:
+        return self._apply_block_params(
+            self._normalized_source_info(info), code, params
+        )
 
     def _normalized_source_info(self, info: str) -> str:
         marker = self.config["marker"].lower()
@@ -337,17 +450,22 @@ class DrafterCodeBlockPlugin(BasePlugin):
 
         return posixpath.relpath(target.as_posix(), start=page_dir)
 
-    def _build_iframe_html(self, demo_id: str, iframe_src: str) -> str:
+    def _build_iframe_html(
+        self, demo_id: str, iframe_src: str, height: str | None = None
+    ) -> str:
         title = html.escape(f"Drafter Demo {demo_id}")
         src = html.escape(iframe_src)
-        height = int(self.config["iframe_height"])
         style_parts = [
             "width: 100%",
             "border: 1px solid #c6c6c6",
             "border-radius: 8px",
         ]
-        if height > 0:
-            style_parts.append(f"min-height: {height}px")
+        if height is None:
+            default_height = int(self.config["iframe_height"])
+            if default_height > 0:
+                height = f"{default_height}px"
+        if height:
+            style_parts.append(f"min-height: {height}")
         style_value = "; ".join(style_parts) + ";"
         return (
             '<div class="drafter-demo" data-drafter-demo="'
