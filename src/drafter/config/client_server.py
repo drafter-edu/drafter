@@ -22,6 +22,11 @@ class ClientServerConfiguration(BaseConfiguration):
     Attributes:
         server_name: Internal server identifier.
         in_debug_mode: Enable debug mode with debug panel.
+        console_mode: Where captured print() output (and the Python REPL)
+            appears: "auto" shows a console in the site footer in debug mode
+            only, "hover" shows a floating console box (also in production),
+            "toast" shows each printed line briefly as a corner toast, and
+            "devtools" only mirrors output to the browser devtools console.
         enable_subtle_debug_entry: Show a subtle production-only control to enter debug mode.
         enable_audit_logging: Enable audit logging of requests/responses.
         site_title: Title displayed in the UI.
@@ -44,6 +49,7 @@ class ClientServerConfiguration(BaseConfiguration):
 
     server_name: str = "MAIN_SERVER"
     in_debug_mode: bool = True
+    console_mode: str = "auto"
     enable_subtle_debug_entry: bool = False
     enable_audit_logging: bool = True
     site_title: str = "Drafter Application"
@@ -108,6 +114,7 @@ class ClientServerConfiguration(BaseConfiguration):
         result = EnvVars(env_vars)
         result.get_string_if_exists("DRAFTER_SERVER_NAME", "server_name")
         result.get_bool_if_exists("DRAFTER_IN_DEBUG_MODE", "in_debug_mode")
+        result.get_string_if_exists("DRAFTER_CONSOLE_MODE", "console_mode")
         result.get_bool_if_exists(
             "DRAFTER_ENABLE_SUBTLE_DEBUG_ENTRY", "enable_subtle_debug_entry"
         )
@@ -169,6 +176,17 @@ class ClientServerConfiguration(BaseConfiguration):
             "--production",
             action="store_true",
             help="Enable production mode (disables debug mode and debug panel)",
+        )
+        group.add_argument(
+            "--console-mode",
+            type=str,
+            choices=["auto", "hover", "toast", "devtools"],
+            help=(
+                "Where captured print() output appears: 'auto' (footer "
+                "console in debug mode only), 'hover' (floating console box, "
+                "also in production), 'toast' (temporary corner toasts), or "
+                "'devtools' (browser devtools console only)"
+            ),
         )
         group.add_argument(
             "--subtle-debug-entry",
@@ -263,6 +281,8 @@ class ClientServerConfiguration(BaseConfiguration):
             result["server_name"] = parsed_args["server_name"]
         if parsed_args.get("production"):
             result["in_debug_mode"] = False
+        if parsed_args.get("console_mode"):
+            result["console_mode"] = parsed_args["console_mode"]
         if parsed_args.get("subtle_debug_entry"):
             result["enable_subtle_debug_entry"] = True
         if parsed_args.get("audit_logging"):
@@ -328,6 +348,7 @@ class ClientServerConfiguration(BaseConfiguration):
         return {
             "server_name": self.server_name,
             "in_debug_mode": self.in_debug_mode,
+            "console_mode": self.console_mode,
             "enable_subtle_debug_entry": self.enable_subtle_debug_entry,
             "enable_audit_logging": self.enable_audit_logging,
             "site_title": self.site_title,
@@ -357,6 +378,7 @@ class ClientServerConfiguration(BaseConfiguration):
         """
         return ClientServerConfiguration(
             in_debug_mode=self.in_debug_mode,
+            console_mode=self.console_mode,
             enable_subtle_debug_entry=self.enable_subtle_debug_entry,
             enable_audit_logging=self.enable_audit_logging,
             site_title=self.site_title,

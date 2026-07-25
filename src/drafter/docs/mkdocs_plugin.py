@@ -41,9 +41,7 @@ FENCE_RE = re.compile(
 """Regular expression matching fenced code blocks with an optional info string."""
 
 # Match key=value parameters in a fence info string (values may be quoted).
-PARAM_RE = re.compile(
-    r"""(?P<key>[A-Za-z_][\w-]*)=(?P<value>"[^"]*"|'[^']*'|\S+)"""
-)
+PARAM_RE = re.compile(r"""(?P<key>[A-Za-z_][\w-]*)=(?P<value>"[^"]*"|'[^']*'|\S+)""")
 """Regular expression matching ``key=value`` parameters in a fence info string."""
 
 # Parameters the plugin understands on a fence info line, e.g.
@@ -357,7 +355,9 @@ class DrafterCodeBlockPlugin(BasePlugin):
         remaining = PARAM_RE.sub(strip_param, info)
         return params, " ".join(remaining.split())
 
-    def _apply_block_params(self, source_info: str, code: str, params: dict[str, str]) -> str:
+    def _apply_block_params(
+        self, source_info: str, code: str, params: dict[str, str]
+    ) -> str:
         """Rebuild a fence with a normalized ``hl_lines`` re-emitted on it.
 
         Used both for the source block of a demo and for plain fences that

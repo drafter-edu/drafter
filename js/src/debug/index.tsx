@@ -16,6 +16,7 @@ import type { Panel } from "./panels/panel";
 import { intersperse } from "./utils/lists";
 import { ConfigPanel } from "./panels/config";
 import { FilesPanel } from "./panels/files";
+import { attachPrinterConsole } from "../console/printer";
 
 export class DebugPanel {
 	private static instanceCounter = 0;
@@ -110,6 +111,12 @@ export class DebugPanel {
 
 		this.panels.forEach((p) => p.initialize());
 		this.attachEventHandlers();
+
+		// Mount the printer console (captured print output + Python REPL)
+		// into this instance's footer. The debug panel is constructed exactly
+		// once per instance run — including in production mode, where the
+		// hover/toast console modes still need a mount point.
+		attachPrinterConsole(this.root);
 
 		// Receive TypeScript-side system errors (boot/runtime failures) so
 		// they appear in the event log alongside Python telemetry.

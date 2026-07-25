@@ -146,3 +146,189 @@
 .drafter-persist--[hidden] {
 	display: none !important;
 }
+
+/* Printer console: captured print() output plus an interactive Python REPL.
+   Lives in the base stylesheet because the "hover" and "toast" console modes
+   must also work in production (deploy) styling. */
+.drafter-printer-console {
+	background-color: #1e1e1e;
+	color: #d4d4d4;
+	border: 1px solid #3c3c3c;
+	border-radius: 6px;
+	font-family: "Consolas", "Monaco", "Courier New", monospace;
+	font-size: 0.85rem;
+	font-weight: normal;
+	text-align: left;
+}
+
+.drafter-printer-console[hidden] {
+	display: none !important;
+}
+
+.drafter-printer-console-footer {
+	margin: 0.5em 1em 0.5em 0;
+}
+
+.drafter-printer-console-hover {
+	position: fixed;
+	left: 50%;
+	bottom: 0.75rem;
+	transform: translateX(-50%);
+	width: min(640px, calc(100vw - 2rem));
+	z-index: 9998;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.drafter-printer-console-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 4px 8px;
+	background-color: #2d2d2d;
+	border-bottom: 1px solid #3c3c3c;
+	border-radius: 6px 6px 0 0;
+}
+
+.drafter-printer-console-title {
+	flex: 1 1 auto;
+	font-weight: bold;
+	color: #cccccc;
+	font-size: 0.8rem;
+	letter-spacing: 0.03em;
+}
+
+.drafter-printer-console-header button {
+	flex: 0 0 auto;
+	font-size: 0.75rem;
+	font-family: inherit;
+	padding: 1px 8px;
+	border: 1px solid #555;
+	border-radius: 4px;
+	background-color: #3c3c3c;
+	color: #d4d4d4;
+	cursor: pointer;
+}
+
+.drafter-printer-console-header button:hover {
+	background-color: #505050;
+}
+
+.drafter-printer-console-output {
+	max-height: 12rem;
+	overflow-y: auto;
+	padding: 6px 8px;
+	white-space: pre-wrap;
+	word-break: break-word;
+	line-height: 1.45;
+}
+
+.drafter-printer-console-output:empty::before {
+	content: "(no output yet)";
+	color: #6e6e6e;
+	font-style: italic;
+}
+
+.drafter-printer-console-entry.drafter-printer-console-stderr,
+.drafter-printer-console-entry.drafter-printer-console-error {
+	color: #f48771;
+}
+
+.drafter-printer-console-entry.drafter-printer-console-echo {
+	color: #6a9955;
+}
+
+.drafter-printer-console-entry.drafter-printer-console-result {
+	color: #9cdcfe;
+}
+
+.drafter-printer-console-entry.drafter-printer-console-info {
+	color: #808080;
+	font-style: italic;
+}
+
+.drafter-printer-console-input-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 4px 8px;
+	border-top: 1px solid #3c3c3c;
+}
+
+.drafter-printer-console-prompt {
+	flex: 0 0 auto;
+	color: #4ec9b0;
+	font-weight: bold;
+}
+
+.drafter-printer-console-input {
+	flex: 1 1 auto;
+	min-width: 0;
+	background: transparent;
+	border: none;
+	outline: none;
+	color: #d4d4d4;
+	font-family: inherit;
+	font-size: inherit;
+	padding: 2px 0;
+}
+
+.drafter-printer-console-input::placeholder {
+	color: #6e6e6e;
+}
+
+.drafter-printer-console-input:disabled {
+	opacity: 0.5;
+}
+
+/* Toast console mode: each printed line appears briefly in the corner. */
+.drafter-printer-toasts {
+	position: fixed;
+	right: 1rem;
+	bottom: 1rem;
+	z-index: 10000;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.5rem;
+	pointer-events: none;
+}
+
+.drafter-printer-toast {
+	max-width: min(420px, calc(100vw - 2rem));
+	background-color: rgba(30, 30, 30, 0.92);
+	color: #d4d4d4;
+	border: 1px solid #3c3c3c;
+	border-left: 3px solid #4ec9b0;
+	border-radius: 6px;
+	padding: 6px 10px;
+	font-family: "Consolas", "Monaco", "Courier New", monospace;
+	font-size: 0.85rem;
+	white-space: pre-wrap;
+	word-break: break-word;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	animation: drafter-printer-toast-in 160ms ease-out;
+}
+
+.drafter-printer-toast.drafter-printer-console-stderr,
+.drafter-printer-toast.drafter-printer-console-error {
+	border-left-color: #f48771;
+	color: #f4b3a6;
+}
+
+@keyframes drafter-printer-toast-in {
+	from {
+		opacity: 0;
+		transform: translateY(0.5rem);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@media print {
+	.drafter-printer-console,
+	.drafter-printer-toasts {
+		display: none !important;
+	}
+}

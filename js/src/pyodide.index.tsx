@@ -25,6 +25,8 @@ import {
 	initializeRuntimeConfigurationOverrides,
 	syncWindowConfigurationOverrides,
 } from "./config_overrides";
+import { getPrinterConsole } from "./console/printer";
+export { attachPrinterConsole, getPrinterConsole } from "./console/printer";
 export { clearDrafterSiteRoot, reportSystemError } from "./bridge/engine";
 export * from "./common.index";
 
@@ -499,6 +501,18 @@ export async function setupPyodide(options: PyodideSettings, verbose = false) {
 				"Pyodide loaded successfully. Environment Variables:",
 				window.pyodide?._module?.ENV,
 			);
+			// Route Python print()/stderr into the printer console instead of
+			// Pyodide's default devtools sink (the console still mirrors every
+			// line to devtools, so nothing is lost in any mode).
+			const printerConsole = getPrinterConsole();
+			window.pyodide.setStdout({
+				batched: (line: string) =>
+					printerConsole.recordOutput("stdout", `${line}\n`),
+			});
+			window.pyodide.setStderr({
+				batched: (line: string) =>
+					printerConsole.recordOutput("stderr", `${line}\n`),
+			});
 			// Arm the interrupt buffer up front (when cross-origin isolation
 			// allows): registering it mid-execution makes the first
 			// interruptActiveRun unreliable.

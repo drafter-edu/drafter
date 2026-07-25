@@ -9,6 +9,7 @@ nav:
   - HTML: students/html.md
   - Styling: students/styling.md
   - Testing: students/testing.md
+  - Printing and the Console: students/console.md
   - Deployment: students/deployment.md
   - More Help: students/help.md
 - Workbook:

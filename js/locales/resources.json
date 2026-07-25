@@ -45,7 +45,14 @@
 			"footer.persisted.evict": "Remove",
 			"footer.persisted.evict.tooltip": "Stop and discard this persisted component",
 			"footer.persisted.reveal": "Reveal",
-			"footer.persisted.reveal.tooltip": "Show/hide the persisted components in the footer"
+			"footer.persisted.reveal.tooltip": "Show/hide the persisted components in the footer",
+			"console.title": "Console",
+			"console.toggle.tooltip": "Show/hide the printed output console",
+			"console.clear": "Clear",
+			"console.clear.tooltip": "Clear the console output",
+			"console.hide": "Hide",
+			"console.hide.tooltip": "Hide the console until new output is printed or it is toggled back on",
+			"console.input.placeholder": "Type Python code and press Enter"
 		}
 	},
 	"es": {
@@ -68,7 +75,14 @@
 			"icon.exit_debug": "🚪",
 			"button.exit_debug": "Producción",
 			"icon.close": "❌",
-			"button.close": "Cerrar"
+			"button.close": "Cerrar",
+			"console.title": "Consola",
+			"console.toggle.tooltip": "Mostrar/ocultar la consola de salida impresa",
+			"console.clear": "Limpiar",
+			"console.clear.tooltip": "Borrar la salida de la consola",
+			"console.hide": "Ocultar",
+			"console.hide.tooltip": "Ocultar la consola hasta que se imprima nueva salida o se vuelva a activar",
+			"console.input.placeholder": "Escribe código Python y presiona Enter"
 		}
 	}
 }
