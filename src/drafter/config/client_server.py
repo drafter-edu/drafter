@@ -45,6 +45,11 @@ class ClientServerConfiguration(BaseConfiguration):
         system_routes: Dict mapping route names to handler callables.
         external_pages: List of external page links (URL or (URL, Text) tuples).
         newlines_to_br: Whether to convert newlines to <br> tags in text content.
+        page_transition: Visual transition applied to the page body on
+            navigation: "none" disables transitions, "fade" fades the new
+            page in from transparent, and any CSS color (e.g. "black",
+            "white", "#004488") fades the new page in from that color.
+        page_transition_duration: Length of the page transition in seconds.
     """
 
     server_name: str = "MAIN_SERVER"
@@ -80,8 +85,11 @@ class ClientServerConfiguration(BaseConfiguration):
     system_routes: dict[str, Callable | None] = field(default_factory=dict)
     # Newlines to <br> conversion
     newlines_to_br: bool = True
+    # Page navigation transition: "none", "fade", or a CSS color to fade in from
+    page_transition: str = "none"
+    # Page transition length in seconds
+    page_transition_duration: float = 0.5
     # TODO: Handle the system routes as configuration settings
-    # TODO: Config setting to show white flash on navigation, also to control behavior
     # TODO: Config setting to add spinner to buttons
     # TODO: Config setting to forbid external links
 
@@ -147,6 +155,10 @@ class ClientServerConfiguration(BaseConfiguration):
         result.get_bool_if_exists("DRAFTER_USE_SHADOW_DOM", "use_shadow_dom")
         result.get_string_if_exists("DRAFTER_ROOT_ELEMENT_ID", "root_element_id")
         result.get_bool_if_exists("DRAFTER_NEWLINES_TO_BR", "newlines_to_br")
+        result.get_string_if_exists("DRAFTER_PAGE_TRANSITION", "page_transition")
+        result.get_float_if_exists(
+            "DRAFTER_PAGE_TRANSITION_DURATION", "page_transition_duration"
+        )
         return result.as_dict()
 
     @staticmethod
@@ -258,6 +270,19 @@ class ClientServerConfiguration(BaseConfiguration):
             action="store_true",
             help="Whether to convert newlines to <br> tags in text content",
         )
+        group.add_argument(
+            "--page-transition",
+            type=str,
+            help=(
+                "Visual transition on page navigation: 'none', 'fade', or a "
+                "CSS color to fade the new page in from (e.g. 'black')"
+            ),
+        )
+        group.add_argument(
+            "--page-transition-duration",
+            type=float,
+            help="Length of the page transition in seconds",
+        )
         return group
 
     @staticmethod
@@ -332,6 +357,10 @@ class ClientServerConfiguration(BaseConfiguration):
             result["root_element_id"] = parsed_args["root_element_id"]
         if parsed_args.get("newlines_to_br"):
             result["newlines_to_br"] = True
+        if parsed_args.get("page_transition"):
+            result["page_transition"] = parsed_args["page_transition"]
+        if parsed_args.get("page_transition_duration") is not None:
+            result["page_transition_duration"] = parsed_args["page_transition_duration"]
         return result
 
     def to_json(self) -> dict:
@@ -367,6 +396,8 @@ class ClientServerConfiguration(BaseConfiguration):
             "system_routes": list(self.system_routes.keys()),
             "external_pages": self.external_pages,
             "newlines_to_br": self.newlines_to_br,
+            "page_transition": self.page_transition,
+            "page_transition_duration": self.page_transition_duration,
         }
 
     def copy(self) -> "ClientServerConfiguration":
@@ -398,6 +429,8 @@ class ClientServerConfiguration(BaseConfiguration):
             override_asset_url=self.override_asset_url,
             external_pages=list(self.external_pages) if self.external_pages else None,
             newlines_to_br=self.newlines_to_br,
+            page_transition=self.page_transition,
+            page_transition_duration=self.page_transition_duration,
         )
 
     def update_multiple_configuration(self, **kwargs):

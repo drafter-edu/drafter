@@ -332,3 +332,51 @@
 		display: none !important;
 	}
 }
+
+/* Page transitions: opt-in via set_page_transition(). The bridge restarts
+   these animations on the body container after each navigation swap. */
+.drafter-page-transition-fade-- {
+	animation: drafter-page-transition-fade-in
+		var(--drafter-page-transition-duration, 0.5s) ease-out;
+}
+
+@keyframes drafter-page-transition-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.drafter-page-transition-veil-- {
+	position: relative;
+}
+
+.drafter-page-transition-veil--::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 100;
+	pointer-events: none;
+	background-color: var(--drafter-page-transition-color, #000);
+	opacity: 0;
+	animation: drafter-page-transition-veil-out
+		var(--drafter-page-transition-duration, 0.5s) ease-out;
+}
+
+@keyframes drafter-page-transition-veil-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.drafter-page-transition-fade--,
+	.drafter-page-transition-veil--::after {
+		animation: none;
+	}
+}

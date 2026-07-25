@@ -140,6 +140,40 @@ def set_website_theme(theme: str | None, server: ClientServer | None = None):
     server.reconfigure(theme=theme)
 
 
+def set_page_transition(
+    transition: str | None = "fade",
+    duration: float | None = None,
+    server: ClientServer | None = None,
+):
+    """
+    Sets a site-wide visual transition that plays whenever the user navigates
+    between pages. By default, pages change instantly; this setting makes the
+    new page fade in instead.
+
+    The transition can be:
+
+    - `"fade"` (or `"transparent"`): the new page fades in from transparent.
+    - A CSS color such as `"black"`, `"white"`, or `"#004488"`: the new page
+      fades in from a solid veil of that color.
+    - `"none"` (or `None`): disables the transition again.
+
+    Args:
+        transition: The transition style ("fade", "none", or a CSS color).
+        duration: How long the transition lasts, in seconds. If not given,
+            the current duration (0.5 seconds by default) is kept.
+        server: The server to configure. If None, uses the main server.
+    """
+    if server is None:
+        server = get_main_server()
+    if transition is None:
+        transition = "none"
+    elif transition == "transparent":
+        transition = "fade"
+    server.reconfigure(page_transition=transition)
+    if duration is not None:
+        server.reconfigure(page_transition_duration=float(duration))
+
+
 def add_website_header(header: str, server: ClientServer | None = None):
     """
     Adds additional header content to the website. This is useful for adding custom

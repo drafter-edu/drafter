@@ -6,6 +6,7 @@ from file_handling_external import example_code_2, example_website_2, read_in_ro
 from PIL import Image as PILImage
 
 from drafter import *
+from drafter import FileUpload
 
 RAW_SIMPLE_IMAGE = """R0lGODlhDwAPAKECAAAAzMzM/////wAAACwAAAAADwAPAAACIISPeQHsrZ5ModrLl
 N48CXF8m2iQ3YmmKqVlRtW4MLwWACH+H09wdGltaXplZCBieSBVbGVhZCBTbWFydFNhdmVyIQAAOw=="""
@@ -82,10 +83,13 @@ def index(state: State) -> Page:
 
 @route
 def update_data(
-    state: State, new_text: str, new_bits: bytes, new_image: PILImage.Image
+    state: State,
+    new_text: DrafterTextFile,
+    new_bits: DrafterBinaryFile,
+    new_image: PILImage.Image,
 ) -> Page:
-    state.current_text = new_text
-    state.current_bits = str(new_bits)
+    state.current_text = new_text.content
+    state.current_bits = str(new_bits.content)
     state.current_image = new_image
     return index(state)
 

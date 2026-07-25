@@ -102,12 +102,14 @@ from drafter.components import (
 
 # Handle configuration if needed
 from drafter.configuration import get_system_configuration
+from drafter.data.files import DrafterBinaryFile, DrafterTextFile
 from drafter.deploy import (
     add_website_css,
     add_website_header,
     deploy_site,
     get_site_information,
     hide_debug_information,
+    set_page_transition,
     set_site_information,
     set_website_framed,
     set_website_style,
@@ -168,6 +170,8 @@ __all__ = [
     "get_system_configuration",
     "dataclass",
     "open",
+    "DrafterTextFile",
+    "DrafterBinaryFile",
     "get_drafter_path",
     "Page",
     "Fragment",
@@ -257,6 +261,7 @@ __all__ = [
     "set_website_title",
     "set_website_framed",
     "set_website_style",
+    "set_page_transition",
     "add_website_header",
     "add_website_css",
     "set_site_information",

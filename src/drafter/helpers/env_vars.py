@@ -93,6 +93,35 @@ class EnvVars:
                 if raise_error:
                     raise
 
+    def get_float_if_exists(
+        self,
+        source_key: str,
+        target_key: str | None = None,
+        raise_error: bool = False,
+    ):
+        """Store a value converted to a float if the key exists.
+
+        Values that cannot be converted are silently skipped unless
+        raise_error is set.
+
+        Args:
+            source_key: Key to look up in the source mapping.
+            target_key: Key to store the value under in the result; defaults
+                to source_key when not provided.
+            raise_error: Whether to re-raise the conversion error instead of
+                skipping the value.
+
+        Raises:
+            ValueError: If the value is not a valid float and raise_error
+                is True.
+        """
+        if source_key in self._source:
+            try:
+                self._result[target_key or source_key] = float(self._source[source_key])
+            except ValueError:
+                if raise_error:
+                    raise
+
     def as_dict(self):
         """Return the values accumulated by the get_* methods.
 

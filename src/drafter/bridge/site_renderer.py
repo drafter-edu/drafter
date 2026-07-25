@@ -43,6 +43,11 @@ from drafter.site.site import (
     SITE_HTML_SHADOW_DOM_TEMPLATE,
 )
 
+PAGE_TRANSITION_FADE_CLASS = "drafter-page-transition-fade--"
+"""Class that fades the page body in from transparent (see drafter_base.css)."""
+PAGE_TRANSITION_VEIL_CLASS = "drafter-page-transition-veil--"
+"""Class that fades the page body in from a solid color veil."""
+
 
 class SiteRenderer:
     """
@@ -332,6 +337,56 @@ class SiteRenderer:
                 return True
 
         return False
+
+    def apply_page_transition(self, transition: str, duration: float) -> None:
+        """Play the configured navigation transition on the page body.
+
+        Restarts a CSS animation on the (persistent) body container after
+        its children have been swapped: "fade" fades the new page in from
+        transparent, while any other non-"none" value is treated as a CSS
+        color the new page fades in from (via an overlay veil). The
+        animation classes and keyframes live in drafter_base.css; failures
+        are reported but never block navigation.
+
+        Args:
+            transition: "none" (or empty) to do nothing, "fade", or a CSS
+                color such as "black" or "#004488".
+            duration: Animation length in seconds.
+        """
+        if not transition or transition == "none":
+            return
+        scope = self.get_scope()
+        if scope is None:
+            return
+        element = scope.querySelector("#" + DRAFTER_TAG_IDS["BODY"])
+        if element is None:
+            return
+        try:
+            element.classList.remove(
+                PAGE_TRANSITION_FADE_CLASS, PAGE_TRANSITION_VEIL_CLASS
+            )
+            # The body container survives navigation (only its children are
+            # replaced), so the animation must be restarted: reading
+            # offsetWidth forces a reflow between removing and re-adding the
+            # class.
+            getattr(element, "offsetWidth", None)
+            element.style.setProperty(
+                "--drafter-page-transition-duration", f"{duration}s"
+            )
+            if transition == "fade":
+                element.classList.add(PAGE_TRANSITION_FADE_CLASS)
+            else:
+                element.style.setProperty("--drafter-page-transition-color", transition)
+                element.classList.add(PAGE_TRANSITION_VEIL_CLASS)
+        except Exception as e:
+            report_bridge_error(
+                "client.page_transition_failed",
+                "Failed to apply the page transition",
+                "bridge.site_renderer.apply_page_transition",
+                f"Transition: {transition!r}; duration: {duration!r}",
+                exception=e,
+                phase="navigation",
+            )
 
     ### Channel Content
 
