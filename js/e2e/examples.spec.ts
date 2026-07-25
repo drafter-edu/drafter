@@ -44,6 +44,7 @@ const SKIP_EXAMPLES = [
 	"complex_state.py",
 	// Calls unittest.main() at module level, which sys.exit()s the runner.
 	"unittest_full_state.py",
+	"testing_example.py",
 ];
 const INTENTIONAL_ERROR_EXAMPLES = [
 	"error_non_string_page.py",
