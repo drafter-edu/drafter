@@ -2,7 +2,7 @@ from datetime import date, datetime, time
 
 from drafter import *
 
-set_website_style("mvp")
+set_website_style("default")
 
 
 @dataclass

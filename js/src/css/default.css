@@ -74,6 +74,43 @@ body {
 		margin-right: 10px;
 	}
 
+	table {
+		border-collapse: separate;
+		border-spacing: 0;
+		margin: 0.5em 0.25em 1em;
+		border: 1px solid #ccc;
+		border-radius: 5px;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+		overflow: hidden;
+	}
+
+	th,
+	td {
+		padding: 8px 14px;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	th {
+		background-color: #3e3e9e;
+		color: white;
+		font-weight: 600;
+	}
+
+	tr:not(:last-child) > td,
+	tr:not(:last-child) > th {
+		border-bottom: 1px solid #ddd;
+	}
+
+	tbody tr:nth-child(even) {
+		background-color: #f4f4fb;
+	}
+
+	caption {
+		font-weight: 600;
+		margin-bottom: 0.25em;
+	}
+
 	drafter-timer {
 		display: inline-block;
 		margin: 0.25em 0.25em;

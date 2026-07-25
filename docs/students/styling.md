@@ -373,7 +373,7 @@ def index(state: State) -> Page:
 
 Don't forget to include the `STYLE` constant in every page that uses the `quit-button` class.
 
-If you are using the default theme (`skeleton`), then you may need to be more specific with your CSS selectors.
+If you are using the default theme (`default`), then you may need to be more specific with your CSS selectors.
 For example, if you want to style a button, you may need to use the following CSS:
 
 ```css
@@ -423,22 +423,21 @@ directly after your imports for clarity.
 
 ## Changing Themes
 
-Drafter ships with a default theme called `skeleton`. You can change the theme by using the
-`set_website_style` function. There are currently a few different options.
+Drafter ships with a default theme called `default`. You can change the theme by using the
+`set_website_style` function. All of the themes are "classless", meaning they style your page
+without requiring you to add CSS classes to your components. There are currently a few
+different options.
 
 ### `set_website_style(style: str)`
 
     Sets the website style to the specified theme. The theme must be one of the following:
 
-    * `skeleton`: The default theme, which is a simple, clean theme that does not require additional CSS classes. Check <http://getskeleton.com/> for more information.
-    * `mvp`: Check out <http://andybrewer.github.io/mvp/> for more information.
+    * `default`: The default theme, a simple, clean theme designed for Drafter.
+    * `mvp`: Check out <https://andybrewer.github.io/mvp/> for more information.
     * `sakura`: Check out <https://oxal.org/projects/sakura/> for more information.
     * `simple`: Check out <https://simplecss.org/> for more information.
+    * `skeleton`: A simple, clean theme. Check <http://getskeleton.com/> for more information.
     * `tacit`: Check out <https://yegor256.github.io/tacit/> for more information.
-    * `98`: A theme based on Windows 98. Check out <https://www.98.css> for more information.
-    * `XP`: A theme based on Windows XP. Check out <http://botoxparty.github.io/XP.css/> for more information.
-    * `7`: A theme based on Windows 7. Check out <http://khang-nd.github.io/7.css/> for more information.
-    * `bootstrap`: A more complex theme that requires additional CSS classes to style components.
     * `none`: Disables the default theme, allowing you to style everything yourself.
 
 ```python

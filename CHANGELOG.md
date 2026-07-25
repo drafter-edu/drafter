@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+-   Ported the `simple`, `skeleton`, and `tacit` classless themes from Drafter v1; all built-in themes now scope their layout to the Drafter frame so the debug panel is unaffected.
+-   Fixed the `sakura` theme squeezing the whole page (including the debug panel) instead of just the site content.
+-   Added table styling to the `default` theme.
+
 ## [2.0.0] - 2026-07-24
 
 -   Complete rewrite of the entire system. Deployment now happens through Skulpt or Pyodide, with no backend server required.

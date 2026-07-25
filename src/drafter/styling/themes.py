@@ -2,7 +2,8 @@
 
 Defines the `Theme` and `ThemeSystem` dataclasses and initializes the
 shared `theme_system` instance with the built-in themes ("default",
-"none", "mvp", and "sakura"). Each theme names the CSS (and optionally
+"none", "mvp", "sakura", "simple", "skeleton", and "tacit"). Each theme
+names the CSS (and optionally
 JavaScript) assets that style a site; `set_website_style` selects one by
 name, and unknown names get a "did you mean" suggestion via
 `ThemeSystem.suggest_mistake`.
@@ -95,8 +96,9 @@ class ThemeSystem:
 # Initialize the theme system with default themes
 theme_system = ThemeSystem()
 """The shared ThemeSystem instance, preloaded below with the built-in
-themes ("default", "none", "mvp", and "sakura"). Access it through
-`get_theme_system` rather than importing it directly."""
+themes ("default", "none", "mvp", "sakura", "simple", "skeleton", and
+"tacit"). Access it through `get_theme_system` rather than importing it
+directly."""
 theme_system.register_theme(
     Theme(
         name="default",
@@ -117,6 +119,10 @@ theme_system.register_theme(
         name="mvp",
         css_paths=["css/mvp.css"],
         js_paths=[],
+        metadata={
+            "credit": "MVP.css by andybrewer",
+            "url": "https://andybrewer.github.io/mvp/",
+        },
     )
 )
 
@@ -125,6 +131,46 @@ theme_system.register_theme(
         name="sakura",
         css_paths=["css/sakura.css"],
         js_paths=[],
+        metadata={
+            "credit": "Sakura by oxal",
+            "url": "https://oxal.org/projects/sakura/",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="simple",
+        css_paths=["css/simple.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Simple.css by kevquirk",
+            "url": "https://simplecss.org/",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="skeleton",
+        css_paths=["css/skeleton.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Skeleton by Dave Gamache",
+            "url": "http://getskeleton.com/",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="tacit",
+        css_paths=["css/tacit.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Tacit by yegor256",
+            "url": "https://yegor256.github.io/tacit/",
+        },
     )
 )
 
