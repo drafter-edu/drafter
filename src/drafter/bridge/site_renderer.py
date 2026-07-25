@@ -265,16 +265,12 @@ class SiteRenderer:
         wanted_css = self._as_wanted_css(additional_css)
         theme_class = DRAFTER_TAG_CLASSES["THEME"]
         if self.use_shadow_dom:
-            existing_links = list(
-                self.scope.querySelectorAll(f"link.{theme_class}")
-            )
+            existing_links = list(self.scope.querySelectorAll(f"link.{theme_class}"))
             reused_links = reuse_theme_link_prefix(existing_links, wanted_css)
             for css_url, classes in wanted_css[reused_links:]:
                 add_link_to_shadow(self.scope, css_url, with_class=classes)
         else:
-            existing_links = list(
-                self.document.querySelectorAll(f"link.{theme_class}")
-            )
+            existing_links = list(self.document.querySelectorAll(f"link.{theme_class}"))
             reused_links = reuse_theme_link_prefix(existing_links, wanted_css)
             for css_url, classes in wanted_css[reused_links:]:
                 add_link(self.scope, css_url, with_class=classes)

@@ -21,6 +21,7 @@ import pytest
 if not hasattr(sys.modules.get("js"), "document"):
     sys.modules["js"] = MagicMock()
 
+from drafter.bridge.bridger import build_server_hooks
 from drafter.bridge.client_bridge import ClientBridge
 from drafter.bridge.snapshot import (
     deserialize_state_snapshot,
@@ -183,12 +184,19 @@ class TestDeserializeSnapshot:
         assert deserialize_state_snapshot('{"score": 1}', None) == {"score": 1}
 
 
-def make_bridge_stand_in():
-    """ClientBridge.save/load_state_snapshot only touch navigator and
-    site_title, so a minimal stand-in works."""
+def make_bridge_stand_in(server):
+    """ClientBridge.save/load_state_snapshot only touch the navigator, the
+    site title, and the injected server hooks (built here the same way
+    bridger builds them), so a minimal stand-in works."""
     navigator = MagicMock()
     navigator.last_request = None
-    return SimpleNamespace(navigator=navigator, site_title="Test Site")
+    hooks = build_server_hooks(server, MagicMock(), MagicMock(), MagicMock())
+    return SimpleNamespace(
+        navigator=navigator,
+        site_title="Test Site",
+        hooks=hooks,
+        _require_hooks=lambda: hooks,
+    )
 
 
 class TestSaveStateSnapshot:
@@ -196,7 +204,7 @@ class TestSaveStateSnapshot:
         self, captured_events, fresh_server
     ):
         fresh_server.state.update(GameState(score=7, name="Dot"))
-        bridge = make_bridge_stand_in()
+        bridge = make_bridge_stand_in(fresh_server)
         bridge.navigator.last_request = Request("form", "guess", {"answer": 4}, {}, "")
         event = SimpleNamespace(detail=SimpleNamespace(reason="save", slot="slot-2"))
 
@@ -215,7 +223,7 @@ class TestSaveStateSnapshot:
 
     def test_defaults_before_any_request(self, captured_events, fresh_server):
         fresh_server.state.update(GameState(score=0, name="Eve"))
-        bridge = make_bridge_stand_in()
+        bridge = make_bridge_stand_in(fresh_server)
 
         ClientBridge.save_state_snapshot(bridge, SimpleNamespace(detail=None))
 
@@ -241,7 +249,7 @@ class TestLoadStateSnapshot:
 
     def test_restores_state_then_replays_route(self, captured_events, fresh_server):
         fresh_server.state.update(GameState(score=0, name="start"))
-        bridge = make_bridge_stand_in()
+        bridge = make_bridge_stand_in(fresh_server)
         event = self.make_load_event(
             GameState(score=99, name="saved"), "guess", {"answer": 4}
         )
@@ -258,7 +266,7 @@ class TestLoadStateSnapshot:
         self, captured_events, fresh_server
     ):
         fresh_server.state.update(GameState(score=1, name="keep"))
-        bridge = make_bridge_stand_in()
+        bridge = make_bridge_stand_in(fresh_server)
         event = SimpleNamespace(
             detail=SimpleNamespace(
                 state_json="corrupt!!!", route="guess", kwargs_json="{}"
@@ -274,7 +282,7 @@ class TestLoadStateSnapshot:
 
     def test_shape_mismatch_reports_friendly_error(self, captured_events, fresh_server):
         fresh_server.state.update(GameState(score=1, name="keep"))
-        bridge = make_bridge_stand_in()
+        bridge = make_bridge_stand_in(fresh_server)
         event = SimpleNamespace(
             detail=SimpleNamespace(
                 state_json=json.dumps({"unrelated": True}),
@@ -290,7 +298,7 @@ class TestLoadStateSnapshot:
         assert len(events_of_type(captured_events, "client.load_snapshot_failed")) == 1
 
     def test_missing_payload_reports_error(self, captured_events, fresh_server):
-        bridge = make_bridge_stand_in()
+        bridge = make_bridge_stand_in(fresh_server)
 
         ClientBridge.load_state_snapshot(bridge, SimpleNamespace(detail=None))
 

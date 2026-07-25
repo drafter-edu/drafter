@@ -16,6 +16,7 @@ import pytest
 if not hasattr(sys.modules.get("js"), "document"):
     sys.modules["js"] = MagicMock()
 
+from drafter.bridge.bridger import build_server_hooks
 from drafter.bridge.client_bridge import ClientBridge
 from drafter.bridge.site_renderer import SiteRenderer
 from drafter.client_server.client_server import ClientServer
@@ -55,11 +56,18 @@ def theme_event(detail):
     return SimpleNamespace(detail=detail)
 
 
+def make_bridge_stand_in(server):
+    """set_site_theme only touches the injected server hooks, so a minimal
+    stand-in carrying real hooks (built the same way bridger builds them)
+    is enough."""
+    hooks = build_server_hooks(server, MagicMock(), MagicMock(), MagicMock())
+    return SimpleNamespace(hooks=hooks, _require_hooks=lambda: hooks)
+
+
 class TestSetSiteTheme:
-    def test_valid_theme_reconfigures_the_server(
-        self, captured_events, fresh_server
-    ):
-        ClientBridge.set_site_theme(SimpleNamespace(), theme_event("sakura"))
+    def test_valid_theme_reconfigures_the_server(self, captured_events, fresh_server):
+        bridge = make_bridge_stand_in(fresh_server)
+        ClientBridge.set_site_theme(bridge, theme_event("sakura"))
 
         updates = events_of_type(captured_events, "UpdatedConfiguration")
         assert len(updates) == 1
@@ -67,16 +75,16 @@ class TestSetSiteTheme:
         assert updates[0].value == "sakura"
 
     def test_none_theme_is_accepted(self, captured_events, fresh_server):
-        ClientBridge.set_site_theme(SimpleNamespace(), theme_event("none"))
+        bridge = make_bridge_stand_in(fresh_server)
+        ClientBridge.set_site_theme(bridge, theme_event("none"))
 
         updates = events_of_type(captured_events, "UpdatedConfiguration")
         assert len(updates) == 1
         assert updates[0].value == "none"
 
-    def test_unknown_theme_reports_a_suggestion(
-        self, captured_events, fresh_server
-    ):
-        ClientBridge.set_site_theme(SimpleNamespace(), theme_event("skelton"))
+    def test_unknown_theme_reports_a_suggestion(self, captured_events, fresh_server):
+        bridge = make_bridge_stand_in(fresh_server)
+        ClientBridge.set_site_theme(bridge, theme_event("skelton"))
 
         assert not events_of_type(captured_events, "UpdatedConfiguration")
         errors = events_of_type(captured_events, "client.set_theme_unknown")
@@ -84,12 +92,12 @@ class TestSetSiteTheme:
         assert "skeleton" in errors[0].error.message
 
     def test_missing_name_reports_error(self, captured_events, fresh_server):
-        ClientBridge.set_site_theme(SimpleNamespace(), theme_event(None))
+        bridge = make_bridge_stand_in(fresh_server)
+        ClientBridge.set_site_theme(bridge, theme_event(None))
 
         assert not events_of_type(captured_events, "UpdatedConfiguration")
         assert (
-            len(events_of_type(captured_events, "client.set_theme_missing_name"))
-            == 1
+            len(events_of_type(captured_events, "client.set_theme_missing_name")) == 1
         )
 
 

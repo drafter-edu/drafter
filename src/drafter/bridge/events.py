@@ -400,6 +400,7 @@ class EventManager:
         self,
         event_handlers: dict[str, Callable[[Any], Any]],
         key_handlers: dict[str, Callable[[], None]],
+        activate: Callable[[], None] | None = None,
     ) -> None:
         """Register global window event listeners and hotkey callbacks.
 
@@ -410,16 +411,34 @@ class EventManager:
 
             key_handlers: Mapping from key combination (e.g. "ctrl+d") to
                 the callback triggered on a double press of that hotkey.
+
+            activate: Optional callable run before every registered handler
+                (window events and hotkeys alike). The composition root
+                passes a closure that pins this instance's server as the
+                "current" one, so telemetry raised anywhere inside a handler
+                routes to this instance's event bus even when several
+                instances share the interpreter.
         """
         debug_log("client.setup_events")
 
+        def activated(handler: Callable) -> Callable:
+            pin_instance = activate
+            if pin_instance is None:
+                return handler
+
+            def run(*args):
+                pin_instance()
+                return handler(*args)
+
+            return run
+
         # Global events
         for event_name, event_handler in event_handlers.items():
-            self._register_event(event_name, event_handler)
+            self._register_event(event_name, activated(event_handler))
 
         # Keyboard events
         for key_combo, key_handler in key_handlers.items():
-            self._register_hotkey(key_combo, key_handler)
+            self._register_hotkey(key_combo, activated(key_handler))
 
     def dispatch_page_loaded(
         self, route: str, request_id: int, response_id: int

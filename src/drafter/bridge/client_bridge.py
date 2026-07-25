@@ -22,20 +22,28 @@ from drafter.bridge.error_handling import (
     report_bridge_error,
 )
 from drafter.bridge.events import EventManager
+from drafter.bridge.hooks import ServerHooks
 from drafter.bridge.log import console_log, debug_log
 from drafter.bridge.navigation import NavigationController
 from drafter.bridge.persistence import evict_key
 from drafter.bridge.runtime import RuntimeAdapter, create_runtime
 from drafter.bridge.site_renderer import SiteRenderer
+from drafter.bridge.snapshot import (
+    deserialize_state_snapshot,
+    serialize_state_snapshot,
+)
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.data.details.config import UpdatedConfigurationEvent
+from drafter.data.details.state import UpdatedStateEvent
 from drafter.data.request import Request
 from drafter.data.response import Response
 from drafter.data.telemetry import TelemetryRecord
+from drafter.monitor.audit import log_record
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import (
     DRAFTER_TAG_IDS,
 )
+from drafter.styling.themes import get_theme_system
 
 
 @dataclass
@@ -65,6 +73,10 @@ class ClientBridge:
         context: The DomContext (window/document) this instance renders into.
 
         events: Manages DOM event listeners and hotkeys for this instance.
+
+        hooks: Server-facing operations injected by the composition root
+            via setup_events (None until then). The bridge reaches the
+            server only through these, never through a global lookup.
     """
 
     site_renderer: SiteRenderer
@@ -73,6 +85,7 @@ class ClientBridge:
     debug_panel: Any | None = None
     runtime: RuntimeAdapter = field(default_factory=create_runtime)
     site_title: str = "Default Title"
+    hooks: ServerHooks | None = None
 
     def __init__(
         self,
@@ -88,6 +101,7 @@ class ClientBridge:
         self.navigator = NavigationController(self.runtime)
         self.events = EventManager(self.runtime)
         self.debug_panel = None
+        self.hooks = None
         # Re-entrancy guard for _handle_debug_events: reporting a debug-panel
         # failure publishes an error event on the same bus this bridge
         # subscribes to, which would otherwise re-enter the same failing
@@ -124,32 +138,28 @@ class ClientBridge:
         self.events.set_scope(self.site_renderer.scope)
         self._setup_debug_menu()
 
-    def setup_events(
-        self,
-        handle_visit: Callable[[Request], Response],
-        handle_toggle_frame: Callable,
-        handle_debug_mode: Callable,
-    ) -> None:
-        """Install the navigation function and register DOM event handlers.
+    def setup_events(self, hooks: ServerHooks) -> None:
+        """Install the injected server hooks and register DOM event handlers.
 
-        Wires `handle_visit` into the NavigationController, registers the
-        Drafter custom events (toggle-frame, toggle-debug-mode,
-        evict-persistent, navigate) and the browser popstate event, binds the
-        "Q" hotkey to debug-mode toggling, and mounts the subtle production
-        debug-entry button.
+        Wires the hooks' visit callback into the NavigationController,
+        registers the Drafter custom events (toggle-frame, toggle-debug-mode,
+        evict-persistent, navigate, replay, save/load-state, set-theme) and
+        the browser popstate event, binds the "Q" hotkey to debug-mode
+        toggling, and mounts the subtle production debug-entry button. Every
+        registered handler runs behind hooks.activate, which pins this
+        instance's server as "current" so telemetry raised inside a handler
+        routes to this instance's event bus.
 
         Args:
-            handle_visit: Callback that performs a full visit for a Request
-                and returns its Response; used for all navigation.
-            handle_toggle_frame: Callback that flips the site frame
-                configuration.
-            handle_debug_mode: Callback that flips debug mode.
+            hooks: The server-facing operations assembled by the composition
+                root (bridger.build_server_hooks) for this instance.
         """
-        self.navigator.set_navigation_func(handle_visit)
+        self.hooks = hooks
+        self.navigator.set_navigation_func(hooks.visit)
         self.events.setup_events(
             {
-                "drafter-toggle-frame": lambda event: handle_toggle_frame(),
-                "drafter-toggle-debug-mode": lambda event: handle_debug_mode(),
+                "drafter-toggle-frame": lambda event: hooks.toggle_frame(),
+                "drafter-toggle-debug-mode": lambda event: hooks.toggle_debug_mode(),
                 "drafter-evict-persistent": lambda event: self.evict_persistent(event),
                 "drafter-navigate": lambda event: self.navigator.goto(event.detail),
                 "drafter-replay-route": lambda event: self.navigator.replay_last(),
@@ -160,13 +170,14 @@ class ClientBridge:
                 "popstate": self.navigator.handle_popstate,
             },
             {
-                "Q": handle_debug_mode,
+                "Q": hooks.toggle_debug_mode,
             },
+            activate=hooks.activate,
         )
         # The subtle production debug-entry button is part of the site frame
         # (injected once at setup, outside the re-rendered body), so a single
         # direct binding here covers the instance's lifetime.
-        self.events.mount_subtle_debug_entry(handle_debug_mode)
+        self.events.mount_subtle_debug_entry(hooks.toggle_debug_mode)
 
     def start(self):
         """
@@ -202,6 +213,20 @@ class ClientBridge:
             return
         self.navigator.replay_by_id(int(request_id))
 
+    def _require_hooks(self) -> ServerHooks:
+        """Return the injected ServerHooks, failing loudly when absent.
+
+        The handlers that call this are only wired up by setup_events,
+        which installs the hooks first, so a None here is a wiring bug in
+        the composition root rather than a user error.
+        """
+        if self.hooks is None:
+            raise RuntimeError(
+                "ClientBridge server hooks are not installed; setup_events "
+                "must run before server-facing handlers are invoked."
+            )
+        return self.hooks
+
     ### State Snapshots (debug menu Save/Load)
 
     def save_state_snapshot(self, event) -> None:
@@ -212,18 +237,13 @@ class ClientBridge:
         JS SaveLoadManager as StateSnapshot telemetry, which stores it in
         localStorage or downloads it as a file.
         """
-        from drafter.bridge.snapshot import serialize_state_snapshot
-        from drafter.client_server.commands import get_main_server
-        from drafter.monitor.audit import log_record
-
         detail = getattr(event, "detail", None)
         reason = str(getattr(detail, "reason", None) or "save")
         slot = str(getattr(detail, "slot", None) or "quick")
         last = self.navigator.last_request
         route = last.url if last else "index"
         kwargs = dict(last.kwargs) if last else {}
-        # TODO: Use the DI parameter _server instead of get_main_server
-        state = get_main_server().state.current
+        state = self._require_hooks().get_state()
         snapshot = serialize_state_snapshot(
             state, route, kwargs, reason, slot, self.site_title
         )
@@ -244,11 +264,6 @@ class ClientBridge:
         restored first, and then the route is re-invoked, because argument
         preparation reads the current state.
         """
-        from drafter.bridge.snapshot import deserialize_state_snapshot
-        from drafter.client_server.commands import get_main_server
-        from drafter.data.details.state import UpdatedStateEvent
-        from drafter.monitor.audit import log_record
-
         detail = getattr(event, "detail", None)
         state_json = getattr(detail, "state_json", None)
         route = str(getattr(detail, "route", None) or "index")
@@ -262,10 +277,9 @@ class ClientBridge:
                 phase="event_dispatch",
             )
             return
-        # TODO: Use the DI parameter _server instead of get_main_server
-        server = get_main_server()
+        hooks = self._require_hooks()
         try:
-            restored = deserialize_state_snapshot(str(state_json), server.state.current)
+            restored = deserialize_state_snapshot(str(state_json), hooks.get_state())
         except Exception as e:
             report_bridge_error(
                 "client.load_snapshot_failed",
@@ -284,7 +298,7 @@ class ClientBridge:
             kwargs = {}
         # Restore the state BEFORE replaying the route: argument preparation
         # reads state.current when invoking the route handler.
-        server.state.update(restored)
+        hooks.set_state(restored)
         log_record(
             UpdatedStateEvent.from_state(restored),
             "bridge.client_bridge.load_state_snapshot",
@@ -305,9 +319,6 @@ class ClientBridge:
         Args:
             event: The window CustomEvent; its detail is the theme name.
         """
-        from drafter.client_server.commands import get_main_server
-        from drafter.styling.themes import get_theme_system
-
         theme = str(getattr(event, "detail", None) or "")
         if not theme:
             report_bridge_error(
@@ -328,8 +339,7 @@ class ClientBridge:
                 phase="event_dispatch",
             )
             return
-        # TODO: Use the DI parameter _server instead of get_main_server
-        get_main_server().reconfigure(theme=theme)
+        self._require_hooks().set_theme(theme)
 
     def _refresh_site_theme(self) -> None:
         """Re-render the theme stylesheets for the current configuration.
@@ -338,10 +348,8 @@ class ClientBridge:
         so it is safe to call here just to learn the new cascade-ordered CSS
         list; the SiteRenderer then swaps only the stale stylesheet links.
         """
-        from drafter.client_server.commands import get_main_server
-
         try:
-            site_data = get_main_server().site.render()
+            site_data = self._require_hooks().render_site()
             self.site_renderer.refresh_theme_css(site_data.additional_css)
         except Exception as e:
             report_bridge_error(

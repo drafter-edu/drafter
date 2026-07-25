@@ -7,8 +7,11 @@ multiple concurrent instances can coexist, constructs the ClientBridge, and
 connects the visit/toggle-frame/debug-mode callbacks before starting the site.
 """
 
+from collections.abc import Callable
+
 from drafter.bridge.client_bridge import ClientBridge
 from drafter.bridge.context import DomContext
+from drafter.bridge.hooks import ServerHooks
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import (
     consume_pending_instance_context,
@@ -18,6 +21,54 @@ from drafter.client_server.commands import (
 )
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.config.system import SystemConfiguration
+
+
+def build_server_hooks(
+    server: ClientServer,
+    visit: Callable,
+    toggle_frame: Callable[[], None],
+    toggle_debug_mode: Callable[[], None],
+) -> ServerHooks:
+    """Assemble the ServerHooks the ClientBridge uses to reach its server.
+
+    Every server-touching hook pins the instance as the current server
+    first (set_main_server), following the same discipline as handle_visit
+    and handle_toggle_frame: the telemetry helpers (log_record,
+    report_bridge_error) resolve the event bus through the global
+    current-server pointer, so the pin makes an event on instance B publish
+    on B's bus even while instance A happens to be current.
+
+    Args:
+        server: The ClientServer instance the hooks operate on.
+        visit: Callback that performs a full visit for a Request and
+            returns its Response (already pins the instance itself).
+        toggle_frame: Callback that flips the site frame configuration.
+        toggle_debug_mode: Callback that flips debug mode.
+
+    Returns:
+        The hooks bundle to pass to ClientBridge.setup_events.
+    """
+
+    def pinned(op: Callable) -> Callable:
+        def runner(*args):
+            set_main_server(server)
+            return op(*args)
+
+        return runner
+
+    return ServerHooks(
+        activate=lambda: set_main_server(server),
+        visit=visit,
+        toggle_frame=toggle_frame,
+        toggle_debug_mode=toggle_debug_mode,
+        # Dereference server.state and server.site at call time rather than
+        # binding their methods here: reconfiguration can rebuild them over
+        # the instance's lifetime.
+        set_theme=pinned(lambda theme: server.reconfigure(theme=theme)),
+        get_state=pinned(lambda: server.state.current),
+        set_state=pinned(lambda state: server.state.update(state)),
+        render_site=pinned(lambda: server.site.render()),
+    )
 
 
 def run_client_bridge(
@@ -36,8 +87,9 @@ def run_client_bridge(
     subscribes the bridge to server telemetry events, defines the
     visit/toggle-frame/debug-mode callbacks (each of which first marks this
     server as the "current" instance so global lookups resolve correctly),
-    installs them as event handlers, starts the server with the initial
-    state, and issues the initial request.
+    bundles them with the server-facing hooks (build_server_hooks) and
+    installs the bundle as the bridge's event handlers, starts the server
+    with the initial state, and issues the initial request.
 
     Returns early, without wiring events or starting, if the initial render
     reported an error.
@@ -112,7 +164,9 @@ def run_client_bridge(
         set_main_server(server)
         server.reconfigure_flip("in_debug_mode")
 
-    client_bridge.setup_events(handle_visit, handle_toggle_frame, handle_debug_mode)
+    client_bridge.setup_events(
+        build_server_hooks(server, handle_visit, handle_toggle_frame, handle_debug_mode)
+    )
     # Starting Phase
     server.do_start(initial_state=initial_state)
     # Started Phase
