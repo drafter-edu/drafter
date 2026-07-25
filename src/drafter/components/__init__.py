@@ -20,6 +20,7 @@ groups are:
 - Timing and persistence: `Timer`, `Clock`, `RemovePersistent`
 - Audio recording and effects: `Microphone`, `AudioRecorder`, `Tone`,
   `Melody`, `Sound`, and effect wrappers like `Echo` and `Reverb`
+- Photo capture: `Camera` and `Photo`
 """
 
 from drafter.components.audio import (
@@ -36,6 +37,7 @@ from drafter.components.audio import (
     Sound,
     Tone,
 )
+from drafter.components.camera import Camera, Photo
 from drafter.components.files import Download, FileUpload
 from drafter.components.forms import (
     CheckBox,
@@ -159,6 +161,8 @@ __all__ = [
     "Timer",
     "Clock",
     "RemovePersistent",
+    "Camera",
+    "Photo",
     "Tone",
     "Melody",
     "Sound",

@@ -274,7 +274,8 @@ body {
 	drafter-melody[hidden],
 	drafter-sound[hidden],
 	drafter-microphone[hidden],
-	drafter-audio-recorder[hidden] {
+	drafter-audio-recorder[hidden],
+	drafter-camera[hidden] {
 		display: none !important;
 	}
 
@@ -311,7 +312,8 @@ body {
 	}
 
 	drafter-microphone,
-	drafter-audio-recorder {
+	drafter-audio-recorder,
+	drafter-camera {
 		display: block;
 		margin: 1rem 0;
 		padding: 1rem;
@@ -319,8 +321,22 @@ body {
 		border-radius: 3px;
 		background-color: #ece9d8;
 
+		.drafter-camera-preview,
+		.drafter-camera-photo {
+			display: block;
+			max-width: 100%;
+			border: 1px solid #7f9db9;
+			background-color: #000;
+		}
+
+		.drafter-camera-buttons {
+			display: flex;
+			gap: 0.5rem;
+		}
+
 		.drafter-microphone-status,
-		.drafter-recorder-status {
+		.drafter-recorder-status,
+		.drafter-camera-status {
 			display: flex;
 			flex-direction: column;
 			align-items: center;

@@ -296,6 +296,12 @@ snippets = {
         "with_handlers": """AudioRecorder('voice', on_record='got_recording', on_denied='rec_denied', on_error='rec_failed')""",
         "recording_data": """Recording('granted', message='OK', data_url='data:audio/webm;base64,AAAA', duration=2.5, size=1024)""",
     },
+    "camera": {
+        "simple": """Camera('photo')""",
+        "with_settings": """Camera('photo', width=1280, height=720, facing='environment', mirror=False, show=False)""",
+        "with_handlers": """Camera('photo', on_capture='got_photo', on_denied='cam_denied', on_error='cam_failed')""",
+        "photo_data": """Photo('granted', message='OK', data_url='data:image/png;base64,AAAA', width=640, height=480)""",
+    },
     "svg": {
         "simple": """SVG('<circle cx="50" cy="50" r="40"/>')""",
         "with_dimensions": """SVG('<rect width="100" height="100"/>', width=100, height=100)""",

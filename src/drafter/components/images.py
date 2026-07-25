@@ -15,7 +15,7 @@ from drafter.components.page_content import Component, ComponentArgument, UrlOrF
 # is observed.
 from drafter.components.utilities import image_support
 from drafter.components.utilities.image_support import PILImage
-from drafter.helpers.urls import check_invalid_external_url, friendly_urls
+from drafter.helpers.urls import check_invalid_external_url, friendly_urls, is_data_url
 
 
 @dataclass(repr=False)
@@ -150,6 +150,10 @@ class Image(Component):
             Dictionary of HTML attributes including src.
         """
         attributes = super().get_attributes(context)
+
+        if is_data_url(self.url):
+            attributes["src"] = self.url
+            return attributes
 
         try:
             was_pil, url = self._handle_pil_image(self.url)

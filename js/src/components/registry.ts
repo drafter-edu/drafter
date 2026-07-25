@@ -6,4 +6,5 @@ import "./sound";
 import "./media";
 import "./microphone";
 import "./audioRecorder";
+import "./camera";
 import "./map";

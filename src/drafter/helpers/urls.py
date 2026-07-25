@@ -79,6 +79,19 @@ def is_valid_url(url: str) -> bool:
     return re.match(URL_REGEX, url) is not None
 
 
+def is_data_url(url: str) -> bool:
+    """
+    Checks if a URL is a data URL.
+
+    Args:
+        url: The URL to check
+
+    Returns:
+        True if the URL is a data URL, False otherwise
+    """
+    return url.startswith("data:")
+
+
 def check_invalid_external_url(url: str) -> str:
     """
     Checks if a URL is a valid external URL. If it is not, it will return an error message. If it is,
