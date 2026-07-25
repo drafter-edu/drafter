@@ -5,7 +5,7 @@
  * relative-time formatting and system-status collection backing the
  * Save/Load menu and bug reports (js/src/debug/saveload.tsx).
  */
-import { afterEach, describe, expect, jest, test } from "@jest/globals";
+import { afterEach, describe, expect, test } from "@jest/globals";
 
 import {
 	applyTheme,
@@ -48,19 +48,23 @@ describe("theme switching", () => {
 		expect(getCurrentTheme()).toBe("mvp");
 	});
 
-	test("applyTheme stores the override (keeping others) and reloads", () => {
+	test("applyTheme stores the override (keeping others) and dispatches the event, without reloading", () => {
 		window.localStorage.setItem(
 			OVERRIDES_KEY,
 			JSON.stringify({ title: "Kept" }),
 		);
-		const reload = jest.fn();
+		const seen: CustomEvent[] = [];
+		window.addEventListener("drafter-set-theme", ((event: Event) => {
+			seen.push(event as CustomEvent);
+		}) as EventListener);
 
-		applyTheme("skeleton", reload as () => void);
+		applyTheme("skeleton");
 
 		expect(
 			JSON.parse(window.localStorage.getItem(OVERRIDES_KEY) ?? "{}"),
 		).toEqual({ title: "Kept", theme: "skeleton" });
-		expect(reload).toHaveBeenCalledTimes(1);
+		expect(seen).toHaveLength(1);
+		expect(seen[0].detail).toBe("skeleton");
 	});
 
 	test("the dialog lists every theme and marks the current one", () => {
@@ -77,6 +81,23 @@ describe("theme switching", () => {
 			".drafter-theme-option.is-current",
 		) as HTMLElement;
 		expect(current.textContent).toContain("tacit");
+	});
+
+	test("picking a theme in the dialog applies it live via the event", () => {
+		const seen: CustomEvent[] = [];
+		window.addEventListener("drafter-set-theme", ((event: Event) => {
+			seen.push(event as CustomEvent);
+		}) as EventListener);
+		openThemeSwitcher();
+
+		(
+			document.querySelector(
+				".drafter-theme-option-sakura",
+			) as HTMLButtonElement
+		).click();
+
+		expect(seen).toHaveLength(1);
+		expect(seen[0].detail).toBe("sakura");
 	});
 });
 

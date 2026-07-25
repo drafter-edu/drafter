@@ -148,13 +148,7 @@ class SiteRenderer:
             # left links connected, the matching prefix is reused in place
             # instead of recreated: a link that never leaves the DOM never
             # refetches its CSS (dev servers often serve it uncacheable).
-            wanted_css = []
-            for css in initial_site_data.additional_css:
-                css_url = css.url if hasattr(css, "url") else css
-                css_classes = " ".join(css.classes) if hasattr(css, "classes") else ""
-                wanted_css.append(
-                    (css_url, f"{DRAFTER_TAG_CLASSES['THEME']} {css_classes}".strip())
-                )
+            wanted_css = self._as_wanted_css(initial_site_data.additional_css)
 
             reused_links = 0
             if initial_site_data.use_shadow_dom:
@@ -231,6 +225,59 @@ class SiteRenderer:
                 exception=e,
                 phase="setup",
             )
+
+    def _as_wanted_css(self, additional_css) -> list:
+        """Normalize CSS assets to (url, class attribute) pairs in cascade
+        order, tagging each with the shared theme class.
+
+        Args:
+            additional_css: CSSLink objects (or bare URL strings) from an
+                InitialSiteData.
+
+        Returns:
+            A list of (url, class attribute value) tuples.
+        """
+        wanted_css = []
+        for css in additional_css:
+            css_url = css.url if hasattr(css, "url") else css
+            css_classes = " ".join(css.classes) if hasattr(css, "classes") else ""
+            wanted_css.append(
+                (css_url, f"{DRAFTER_TAG_CLASSES['THEME']} {css_classes}".strip())
+            )
+        return wanted_css
+
+    def refresh_theme_css(self, additional_css) -> None:
+        """Swap the connected stylesheet links to match a new CSS list.
+
+        Runtime companion to the CSS portion of setup(), used when the
+        theme changes mid-run (debug menu "Switch Theme" or a student's
+        set_website_theme call): the still-matching prefix of connected
+        links stays untouched (no refetch, no flash), the stale tail is
+        removed, and the remaining wanted links are created in cascade
+        order. The page body is never rebuilt.
+
+        Args:
+            additional_css: The new CSSLink list, as produced by
+                Site.render() with the updated configuration.
+        """
+        if self.scope is None:
+            return
+        wanted_css = self._as_wanted_css(additional_css)
+        theme_class = DRAFTER_TAG_CLASSES["THEME"]
+        if self.use_shadow_dom:
+            existing_links = list(
+                self.scope.querySelectorAll(f"link.{theme_class}")
+            )
+            reused_links = reuse_theme_link_prefix(existing_links, wanted_css)
+            for css_url, classes in wanted_css[reused_links:]:
+                add_link_to_shadow(self.scope, css_url, with_class=classes)
+        else:
+            existing_links = list(
+                self.document.querySelectorAll(f"link.{theme_class}")
+            )
+            reused_links = reuse_theme_link_prefix(existing_links, wanted_css)
+            for css_url, classes in wanted_css[reused_links:]:
+                add_link(self.scope, css_url, with_class=classes)
 
     def _find_existing_shadow_root(self, true_root):
         """The shadow root left behind by a previous run of this instance.

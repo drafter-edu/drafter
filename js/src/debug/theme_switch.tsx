@@ -37,23 +37,22 @@ export function getCurrentTheme(): string | null {
 }
 
 /**
- * Store a theme choice as a configuration override and reload so the site
- * re-renders with it. Theme CSS is injected during site setup, so a reload
- * is the reliable way to apply it (overrides re-apply automatically, the
- * same mechanism the Configuration panel uses).
+ * Apply a theme without reloading: dispatch ``drafter-set-theme`` (the
+ * same event-driven pattern as the frame toggle), which Python answers by
+ * reconfiguring the server and swapping the connected theme stylesheets in
+ * place. The choice is also stored as a configuration override so a later
+ * page reload keeps it (the same mechanism the Configuration panel uses).
  */
-export function applyTheme(
-	theme: string,
-	// Injectable for tests: jsdom's window.location cannot be stubbed.
-	reload: () => void = () => window.location.reload(),
-): void {
+export function applyTheme(theme: string): void {
 	const overrides = {
 		...getStoredConfigurationOverrides(),
 		theme,
 	};
 	setStoredConfigurationOverrides(overrides);
 	syncWindowConfigurationOverrides(overrides);
-	reload();
+	window.dispatchEvent(
+		new CustomEvent("drafter-set-theme", { detail: theme }),
+	);
 }
 
 /** Dialog listing the available themes; picking one applies it (reloads). */

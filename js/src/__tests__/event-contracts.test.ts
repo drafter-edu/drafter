@@ -15,6 +15,7 @@ import { DRAFTER_PAGE_LOADED_EVENT } from "../components/events";
 import { openCodeEditor } from "../debug/editor";
 import { DebugPanel } from "../debug/index";
 import { DebugFooterBar } from "../debug/footer";
+import { applyTheme } from "../debug/theme_switch";
 import { setSystemErrorSink } from "../bridge/engine";
 import { t } from "../i18n";
 
@@ -43,6 +44,7 @@ const PYTHON_LISTENED_EVENTS = [
 	"drafter-replay-request",
 	"drafter-save-state",
 	"drafter-load-state",
+	"drafter-set-theme",
 ];
 
 // Jest's cwd is js/ (tests are always run via `npm test` from js/, matching
@@ -256,6 +258,20 @@ describe("debug panel dispatch sites", () => {
 		).click();
 
 		expect(events).toHaveLength(1);
+	});
+
+	test("applyTheme dispatches drafter-set-theme with the theme name", () => {
+		const events = capture("drafter-set-theme");
+		try {
+			applyTheme("sakura");
+		} finally {
+			// applyTheme also persists a config override; keep it out of
+			// the other tests in this file.
+			window.localStorage.clear();
+		}
+
+		expect(events).toHaveLength(1);
+		expect(events[0].detail).toBe("sakura");
 	});
 
 	test("history Revisit button dispatches drafter-replay-request with the request id", () => {

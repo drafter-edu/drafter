@@ -156,6 +156,7 @@ class ClientBridge:
                 "drafter-replay-request": lambda event: self.replay_request(event),
                 "drafter-save-state": lambda event: self.save_state_snapshot(event),
                 "drafter-load-state": lambda event: self.load_state_snapshot(event),
+                "drafter-set-theme": lambda event: self.set_site_theme(event),
                 "popstate": self.navigator.handle_popstate,
             },
             {
@@ -290,6 +291,67 @@ class ClientBridge:
             route=route,
         )
         self.navigator.goto(route, kwargs, action="system")
+
+    ### Theme Switching (debug menu View > Switch Theme)
+
+    def set_site_theme(self, event) -> None:
+        """Change the site theme in response to a ``drafter-set-theme`` event.
+
+        Mirrors the frame toggle's flow: the event triggers a server
+        reconfigure, whose UpdatedConfiguration telemetry loops back into
+        handle_server_event, which refreshes the connected theme stylesheets
+        in place — no page reload.
+
+        Args:
+            event: The window CustomEvent; its detail is the theme name.
+        """
+        from drafter.client_server.commands import get_main_server
+        from drafter.styling.themes import get_theme_system
+
+        theme = str(getattr(event, "detail", None) or "")
+        if not theme:
+            report_bridge_error(
+                "client.set_theme_missing_name",
+                "Set theme event arrived without a theme name",
+                "bridge.client_bridge.set_site_theme",
+                f"Event detail: {repr(getattr(event, 'detail', None))}",
+                phase="event_dispatch",
+            )
+            return
+        theme_system = get_theme_system()
+        if theme != "none" and not theme_system.is_valid_theme(theme):
+            report_bridge_error(
+                "client.set_theme_unknown",
+                theme_system.suggest_mistake(theme),
+                "bridge.client_bridge.set_site_theme",
+                f"Requested theme: {theme}",
+                phase="event_dispatch",
+            )
+            return
+        # TODO: Use the DI parameter _server instead of get_main_server
+        get_main_server().reconfigure(theme=theme)
+
+    def _refresh_site_theme(self) -> None:
+        """Re-render the theme stylesheets for the current configuration.
+
+        Site.render() is a pure data computation (it never touches the DOM),
+        so it is safe to call here just to learn the new cascade-ordered CSS
+        list; the SiteRenderer then swaps only the stale stylesheet links.
+        """
+        from drafter.client_server.commands import get_main_server
+
+        try:
+            site_data = get_main_server().site.render()
+            self.site_renderer.refresh_theme_css(site_data.additional_css)
+        except Exception as e:
+            report_bridge_error(
+                "client.theme_refresh_failed",
+                "Could not apply the new theme to the page",
+                "bridge.client_bridge._refresh_site_theme",
+                f"Theme: {self.configuration.theme}",
+                exception=e,
+                phase="event_dispatch",
+            )
 
     ### Debug Panel
 
@@ -482,6 +544,9 @@ class ClientBridge:
             elif event.get("key") == "favicon":
                 self.configuration.favicon = str(event.get("value"))
                 self.set_site_favicon(self.configuration.favicon)
+            elif event.get("key") == "theme":
+                self.configuration.theme = str(event.get("value"))
+                self._refresh_site_theme()
             elif event.get("key") == "page_transition":
                 self.configuration.page_transition = str(event.get("value"))
             elif event.get("key") == "page_transition_duration":
