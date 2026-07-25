@@ -1,39 +1,36 @@
 """
-Assertions and comparison machinery for testing Drafter sites.
+Comparison machinery for testing Drafter sites.
 
-Currently provides:
+This module is the engine underneath the student-facing assertion
+functions in `drafter.testing.asserts`. It provides:
 
-- `assert_state` for checking the state of a Page (or Fragment) against an
-  expected value, delegating to Bakery's `assert_equal`
 - `compare_equal` and its helpers, which recursively compare values
-  (including Drafter components) and report a list of `Difference` objects
+  (including Drafter components, payloads, and dataclasses) and report
+  a list of `Difference` objects
 - `search_content` for finding a value anywhere within nested page content
-
-The following are unimplemented placeholder stubs that currently do
-nothing: `assert_page`, `assert_content`, and `assert_has`.
+- `collect_text` for gathering the visible text chunks of page content
 
 Comparison behavior is controlled by `ComparisonSettings` flags such as
 `precision`, `exact_strings`, and `strict_styles` (style differences are
 ignored by default).
 """
 
+import dataclasses
 from dataclasses import dataclass
 
 # Number encapsulates bool, int, float, complex, decimal.Decimal, etc.
 from numbers import Number
 from typing import Any
 
-from bakery.assertions import (
-    LIST_GENERATOR_TYPES,
-    SET_GENERATOR_TYPES,
-    _normalize_string,
-    make_type_name,
-)
-
 from drafter.components.page_content import Component
 from drafter.components.text import Text
 from drafter.payloads.kinds.fragment import Fragment
-from drafter.testing.testing import assert_equal
+from drafter.testing.normalize import (
+    LIST_GENERATOR_TYPES,
+    SET_GENERATOR_TYPES,
+    make_type_name,
+    normalize_string,
+)
 
 
 @dataclass
@@ -124,19 +121,24 @@ def compare_equal(
     """
     # Convert generator types to concrete types for comparison
     if isinstance(actual, LIST_GENERATOR_TYPES):
-        actual = list(actual)
+        actual = list(actual)  # type: ignore[call-overload]
     if isinstance(expected, LIST_GENERATOR_TYPES):
-        expected = list(expected)
+        expected = list(expected)  # type: ignore[call-overload]
     if isinstance(actual, SET_GENERATOR_TYPES):
-        actual = set(actual)
+        actual = set(actual)  # type: ignore[call-overload]
     if isinstance(expected, SET_GENERATOR_TYPES):
-        expected = set(expected)
+        expected = set(expected)  # type: ignore[call-overload]
 
-    # Check for special Drafter types if we're not being strict about styles
-    if not settings.strict_styles:
-        differences = compare_drafter_types(actual, expected, settings, path)
-        if differences is not None:
-            return differences
+    # Check for special Drafter types (components, pages/fragments).
+    # Styles are ignored inside this comparison unless strict_styles is set.
+    differences = compare_drafter_types(actual, expected, settings, path)
+    if differences is not None:
+        return differences
+
+    # Check for dataclasses (typically student-defined State classes)
+    differences = compare_dataclasses(actual, expected, settings, path)
+    if differences is not None:
+        return differences
 
     # Check for primitive types
     if isinstance(actual, float) and isinstance(expected, float):
@@ -318,7 +320,7 @@ def compare_strings(
                 )
             ]
     else:
-        if _normalize_string(actual) == _normalize_string(expected):
+        if normalize_string(actual) == normalize_string(expected):
             return []
         else:
             return [
@@ -540,14 +542,116 @@ def render_difference(difference: Difference) -> str:
     return f"In {path}: {difference.message}"
 
 
+def compare_fragments(
+    actual: Fragment, expected: Fragment, settings, path: list[PathItem]
+) -> list[Difference]:
+    """Compare two payloads (Fragments or Pages) by state and content.
+
+    The states are compared first, then the content lists. The `target`,
+    `css`, and `js` fields are treated as presentation details and only
+    participate in the comparison when `settings.strict_styles` is set.
+
+    Args:
+        actual: The actual Fragment/Page.
+        expected: The expected Fragment/Page.
+        settings: The comparison settings.
+        path: The path to the current element being compared.
+
+    Returns:
+        list[Difference]: All differences found; empty if the payloads match.
+    """
+    payload_name = make_type_name(expected)
+    if type(actual) is not type(expected):
+        return [
+            Difference(
+                path,
+                f"Expected a {make_type_name(expected)} but got a {make_type_name(actual)}",
+                actual=actual,
+                expected=expected,
+            )
+        ]
+    differences = compare_equal(
+        actual.state,
+        expected.state,
+        settings,
+        path + [PathItem("attributes", payload_name), PathItem("key", "state")],
+    )
+    differences += compare_equal(
+        list(actual.content),
+        list(expected.content),
+        settings,
+        path + [PathItem("attributes", payload_name), PathItem("key", "content")],
+    )
+    if settings.strict_styles:
+        for field_name in ("target", "css", "js"):
+            differences += compare_equal(
+                getattr(actual, field_name),
+                getattr(expected, field_name),
+                settings,
+                path
+                + [PathItem("attributes", payload_name), PathItem("key", field_name)],
+            )
+    return differences
+
+
+def compare_dataclasses(
+    actual, expected, settings, path: list[PathItem]
+) -> list[Difference] | None:
+    """Compare two dataclass instances field by field.
+
+    Only applies when both values are dataclass instances (Drafter
+    components are handled earlier by `compare_drafter_types`). Returns
+    None when the comparison is not applicable so that `compare_equal`
+    can fall through to other strategies.
+
+    Args:
+        actual: The actual value.
+        expected: The expected value.
+        settings: The comparison settings.
+        path: The path to the current element being compared.
+
+    Returns:
+        list[Difference] | None: The differences between the two
+        instances, or None when either value is not a dataclass instance.
+    """
+    if not dataclasses.is_dataclass(actual) or not dataclasses.is_dataclass(expected):
+        return None
+    # Dataclass *types* (as opposed to instances) are not compared here
+    if isinstance(actual, type) or isinstance(expected, type):
+        return None
+    if type(actual) is not type(expected):
+        return [
+            Difference(
+                path,
+                f"Expected type {make_type_name(expected)} but got type {make_type_name(actual)}",
+                actual=actual,
+                expected=expected,
+            )
+        ]
+    type_name = make_type_name(expected)
+    differences = []
+    for field in dataclasses.fields(expected):
+        if not field.compare:
+            continue
+        differences.extend(
+            compare_equal(
+                getattr(actual, field.name),
+                getattr(expected, field.name),
+                settings,
+                path + [PathItem("attributes", type_name), PathItem("key", field.name)],
+            )
+        )
+    return differences
+
+
 def compare_drafter_types(
     actual, expected, settings, path: list[PathItem]
 ) -> list[Difference] | None:
     """
-    Compare special Drafter types when not enforcing strict styles.
+    Compare special Drafter types (components and page payloads).
     Returns None if the comparison is not applicable.
-    This basically ignores the styles of the Drafter types, and any additional
-    CSS/JS metadata.
+    Unless `settings.strict_styles` is set, style attributes and any
+    additional CSS/JS metadata are ignored.
 
     Args:
         actual (Any): The actual Drafter type instance.
@@ -558,10 +662,8 @@ def compare_drafter_types(
     Returns:
         list[Difference]: A list of differences found between the actual and expected Drafter type instances, or None if not applicable.
     """
-    # if isinstance(actual, Fragment) and isinstance(expected, Fragment):
-    #    pass
-    # Allowed to flatten content in some cases
-    # if isinstance(actual, Component) and isinstance(expected, (list, tuple)):
+    if isinstance(actual, Fragment) and isinstance(expected, Fragment):
+        return compare_fragments(actual, expected, settings, path)
 
     do_comparison = False
     component_name = "Unknown"
@@ -583,8 +685,9 @@ def compare_drafter_types(
         expected_attributes, expected_positional = expected.get_fields()
 
     if isinstance(actual, Component) and isinstance(expected, Component):
-        # Simple path first, are they just equal?
-        if actual == expected:
+        # Simple path first, are they just equal? (Not usable when styles
+        # are strict: component __eq__ may ignore extra settings/styles.)
+        if not settings.strict_styles and actual == expected:
             return []
 
         # Check if the same type
@@ -604,13 +707,12 @@ def compare_drafter_types(
         do_comparison = True
 
     if do_comparison:
-        # print("Actual Positional:", actual_positional)
-        # print("Expected Positional:", expected_positional)
-        # print("Actual Attributes:", actual_attributes)
-        # print("Expected Attributes:", expected_attributes)
+        if not settings.strict_styles:
+            actual_attributes = ignore_styles(actual_attributes)
+            expected_attributes = ignore_styles(expected_attributes)
         result = compare_mappings(
-            ignore_styles(actual_attributes),
-            ignore_styles(expected_attributes),
+            actual_attributes,
+            expected_attributes,
             settings,
             path + [PathItem("attributes", component_name)],
         )
@@ -753,8 +855,6 @@ def search_content(
                 )
             )
         return matches
-
-        return path
     if isinstance(actual, (set, frozenset)):
         matches = []
         for item in actual:
@@ -769,50 +869,89 @@ def search_content(
     return []
 
 
-def assert_page(
-    actual, expected, precision=4, exact_strings=False, strict_styles=False
-):
-    """Unimplemented stub: does nothing. Intended to eventually assert that a Page matches expected content, ignoring style differences by default."""
+def collect_text(actual, path: list[PathItem]) -> list[tuple[list[PathItem], str]]:
+    """Collect the visible text chunks of page content.
 
-
-# TODO: Finish assert_page
-# TODO: finish assert_content
-
-
-def assert_content(
-    actual, expected, precision=4, exact_strings=False, strict_styles=False
-):
-    """Unimplemented stub: does nothing."""
-
-
-def assert_state(
-    actual, expected, precision=4, exact_strings=False, strict_styles=False
-):
-    """
-    Assert that the state of a Page matches the expected state.
+    Walks through strings, Fragments/Pages, components (following only
+    their content arguments, not their attributes), and composite
+    containers, gathering every piece of text a user would see on the
+    page. Numbers and booleans encountered as content are converted to
+    their string form.
 
     Args:
-        actual: The actual state of the Page.
-        expected: The expected state to compare against.
-        precision: The number of decimal places to consider for numerical comparisons.
-        exact_strings: Whether to require exact string matches.
-        strict_styles: Whether to require exact style matches.
+        actual: The content to walk (a Fragment/Page, component, string,
+            or a container of these).
+        path: The current path within the content.
+
+    Returns:
+        list[tuple[list[PathItem], str]]: One (path, text) pair per text
+        chunk found, in page order.
     """
+    if isinstance(actual, str):
+        return [(path, actual)]
+    if isinstance(actual, bool) or isinstance(actual, (int, float)):
+        return [(path, str(actual))]
     if isinstance(actual, Fragment):
-        actual = actual.state
-    if isinstance(expected, Fragment):
-        expected = expected.state
-    assert_equal(
-        actual,
-        expected,
-        precision=precision,
-        exact_strings=exact_strings,
-        strict_styles=strict_styles,
-    )
+        return collect_text(actual.content, path)
+    if isinstance(actual, Component):
+        component_name = make_type_name(actual)
+        chunks = []
+        for argument in actual.ARGUMENTS:
+            if not argument.is_content:
+                continue
+            value = getattr(actual, argument.name, argument.default_value)
+            if value is None:
+                continue
+            child_path = path + [
+                PathItem("attributes", component_name),
+                PathItem("key", argument.name),
+            ]
+            if argument.kind == "var":
+                chunks.extend(collect_text(list(value), child_path))
+            else:
+                chunks.extend(collect_text(value, child_path))
+        return chunks
+    if isinstance(actual, dict):
+        chunks = []
+        for key, value in actual.items():
+            chunks.extend(collect_text(value, path + [PathItem("key", str(key))]))
+        return chunks
+    if isinstance(actual, (list, tuple)):
+        chunks = []
+        for index, item in enumerate(actual):
+            chunks.extend(collect_text(item, path + [PathItem("index", str(index))]))
+        return chunks
+    if isinstance(actual, (set, frozenset)):
+        chunks = []
+        for item in actual:
+            chunks.extend(collect_text(item, path + [PathItem("set_item", str(item))]))
+        return chunks
+    return []
 
 
-# TODO: Finish assert_has
+def get_component_children(component: Component) -> list[Any]:
+    """Collect the direct child content of a component.
 
+    Follows the component's declared content arguments (the same fields
+    its renderer uses for child content), flattening var-args arguments
+    and skipping None values. Unlike `Component.get_children`, this does
+    not require a rendering context.
 
-def assert_has(actual, needle, precision=4, exact_strings=False, strict_styles=False):
-    """Unimplemented stub: does nothing."""
+    Args:
+        component: The component whose children should be collected.
+
+    Returns:
+        list[Any]: The child content items, in declaration order.
+    """
+    children: list[Any] = []
+    for argument in component.ARGUMENTS:
+        if not argument.is_content:
+            continue
+        value = getattr(component, argument.name, argument.default_value)
+        if value is None:
+            continue
+        if argument.kind == "var":
+            children.extend(value)
+        else:
+            children.append(value)
+    return children

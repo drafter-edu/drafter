@@ -13,5 +13,7 @@ export interface TestCaseEvent extends TelemetryRecord {
 	given_formatted: string;
 	expected_formatted: string;
 	diff_html: string;
+	/** Student-friendly explanation of the failure (empty when passed). */
+	message?: string;
 	assertion_kind: string;
 }

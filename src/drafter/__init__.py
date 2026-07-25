@@ -145,7 +145,23 @@ from drafter.styling.styling import (
     strikethrough,
     underline,
 )
-from drafter.testing import assert_equal
+from drafter.testing import (
+    assert_attribute,
+    assert_children,
+    assert_content,
+    assert_equal,
+    assert_has,
+    assert_has_regex,
+    assert_in,
+    assert_in_regex,
+    assert_not_has,
+    assert_not_in,
+    assert_page,
+    assert_state,
+    assert_style,
+    assert_text,
+    set_assertion_defaults,
+)
 from drafter.version import CURRENT_DRAFTER_VERSION
 
 __all__ = [
@@ -247,6 +263,20 @@ __all__ = [
     "get_site_information",
     "deploy_site",
     "assert_equal",
+    "assert_page",
+    "assert_state",
+    "assert_content",
+    "assert_has",
+    "assert_in",
+    "assert_not_has",
+    "assert_not_in",
+    "assert_has_regex",
+    "assert_in_regex",
+    "assert_attribute",
+    "assert_style",
+    "assert_children",
+    "assert_text",
+    "set_assertion_defaults",
     "update_style",
     "update_attr",
     "float_right",

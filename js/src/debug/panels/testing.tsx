@@ -42,6 +42,9 @@ export class TestPanel extends Panel {
                     <span class="test-line">Line {testCase.line}</span>
                     <code class="test-caller">{testCase.caller}</code>
                 </div>
+                {!testCase.passed && testCase.message ? (
+                    <pre class="test-case-message">{testCase.message}</pre>
+                ) : null}
                 <div class="test-case-diff"></div>
             </div>
         );

@@ -23,6 +23,7 @@ class TestCaseEvent(TelemetryRecord):
         expected_formatted: Formatted version of the expected value
         assertion_kind: The type of assertion (e.g., 'assert_equal', 'assert_state')
         diff_html: HTML diff showing the differences (if test failed)
+        message: Student-friendly explanation of the failure (if test failed)
         kind: Event-type discriminator, always "TestCaseEvent"
     """
 
@@ -34,6 +35,7 @@ class TestCaseEvent(TelemetryRecord):
     given_formatted: str = ""
     expected_formatted: str = ""
     diff_html: str = ""
+    message: str = ""
     assertion_kind: str = "assert_equal"
     kind: str = "TestCaseEvent"
 
@@ -55,4 +57,5 @@ class TestCaseEvent(TelemetryRecord):
             "expected_formatted": self.expected_formatted,
             "assertion_kind": self.assertion_kind,
             "diff_html": self.diff_html,
+            "message": self.message,
         }
