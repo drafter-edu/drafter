@@ -211,6 +211,28 @@ def compile_site(
                 dest_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(additional_path, dest_path)
 
+    # A favicon referencing a local file (whether configured via app_common
+    # or set_website_favicon) must ship with the build; URLs and data URIs
+    # need no copying.
+    favicons = {system.app_common.favicon, server.get_config_setting("favicon")}
+    for favicon in favicons:
+        if not favicon or "://" in favicon or favicon.startswith(("data:", "//")):
+            continue
+        favicon_path = Path(favicon)
+        if not favicon_path.is_absolute():
+            favicon_path = base_dir / favicon_path
+        if not favicon_path.exists():
+            print(f"Warning: favicon file not found: {favicon}")
+            continue
+        try:
+            relative_path = favicon_path.relative_to(base_dir)
+        except ValueError:
+            relative_path = Path(favicon_path.name)
+        dest_path = output_directory / relative_path
+        print(f"- Copying favicon {favicon_path} to {dest_path}")
+        dest_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(favicon_path, dest_path)
+
     if system.bootstrap.verbose:
         print(f"Assets copied to {dest_assets_dir}")
 

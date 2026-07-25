@@ -35,6 +35,8 @@ class AppCommonConfiguration(BaseConfiguration):
         asset_directory: Static assets directory (uses the packages' `src/drafter/assets/` folder if false and exists, then falls back to `js/dist/` if not, otherwise throws error).
         override_asset_url: Custom asset URL (False to use defaults). When building, this will be used to name the output folder.
         site_title: Browser tab title.
+        favicon: URL or adjacent file path for the browser tab icon; empty
+            string uses the built-in Drafter favicon.
         engine: Python execution engine ("skulpt" or "pyodide").
         show_filename_as: Display name for main file in UI (if different).
         prerender_initial_page: Prerender initial page on server start.
@@ -63,6 +65,7 @@ class AppCommonConfiguration(BaseConfiguration):
     override_asset_url: bool | str = False
 
     site_title: str = "Drafter App Server"
+    favicon: str = ""
 
     def __post_init__(self):
         """Populate mutable field defaults after dataclass construction."""
@@ -86,8 +89,8 @@ class AppCommonConfiguration(BaseConfiguration):
 
         Reads the DRAFTER_-prefixed variables for the engine, prerendering,
         asset directory, filename display, local mounting, Pyodide Drafter
-        path, asset URL override, site title, automatic package loading, and
-        the semicolon-separated project/system package lists.
+        path, asset URL override, site title, favicon, automatic package
+        loading, and the semicolon-separated project/system package lists.
 
         Args:
             env_vars: A dictionary of environment variables.
@@ -110,6 +113,7 @@ class AppCommonConfiguration(BaseConfiguration):
         )
         result.get_string_if_exists("DRAFTER_OVERRIDE_ASSET_URL", "override_asset_url")
         result.get_string_if_exists("DRAFTER_SITE_TITLE", "site_title")
+        result.get_string_if_exists("DRAFTER_FAVICON", "favicon")
         result.get_bool_if_exists(
             "DRAFTER_LOAD_PACKAGES_AUTOMATICALLY", "load_packages_automatically"
         )
@@ -174,6 +178,14 @@ class AppCommonConfiguration(BaseConfiguration):
             help="Browser tab title",
         )
         group.add_argument(
+            "--favicon",
+            type=str,
+            help=(
+                "Icon shown in the browser tab: a URL or the path to an "
+                "image file (svg, png, ico, ...) adjacent to your site"
+            ),
+        )
+        group.add_argument(
             "--load-packages-automatically",
             action="store_true",
             help="Load Python packages detected in students' code automatically on startup. This will be in addition to whatever are explicitly listed in the --system-packages and --project-packages options.",
@@ -229,6 +241,8 @@ class AppCommonConfiguration(BaseConfiguration):
             result["override_asset_url"] = parsed_args["override_asset_url"]
         if parsed_args.get("site_title"):
             result["site_title"] = parsed_args["site_title"]
+        if parsed_args.get("favicon"):
+            result["favicon"] = parsed_args["favicon"]
         if parsed_args.get("load_packages_automatically"):
             result["load_packages_automatically"] = True
         if parsed_args.get("project_packages"):

@@ -221,6 +221,29 @@ def add_link(
     return link
 
 
+def set_favicon(document, favicon: str) -> None:
+    """Point the page's favicon at the given URL.
+
+    Updates the favicon ``<link>`` rendered by the page template (found by
+    its well-known id), creating one in the head when the hosting page was
+    not generated from a Drafter template.
+
+    Args:
+        document: The document whose favicon should change (may be an
+            iframe's document rather than the top page's).
+        favicon: URL of the icon image (may be a relative path, absolute
+            URL, or data URI).
+    """
+    link = document.getElementById(DRAFTER_TAG_IDS["FAVICON"])
+    if not link:
+        link = document.createElement("link")
+        link.setAttribute("rel", "icon")
+        link.setAttribute("id", DRAFTER_TAG_IDS["FAVICON"])
+        head = document.head or document.documentElement
+        head.appendChild(link)
+    link.setAttribute("href", favicon)
+
+
 def reuse_theme_link_prefix(existing_links, wanted_css) -> int:
     """Keep the longest prefix of connected links matching the wanted list.
 

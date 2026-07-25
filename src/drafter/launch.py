@@ -25,6 +25,7 @@ def start_server(
     framed: bool | None = None,
     theme: str | None = None,
     site_title: str | None = None,
+    favicon: str | None = None,
     information: dict | None = None,
     # AppServer-specific parameters
     verbose: bool | None = None,
@@ -65,6 +66,8 @@ def start_server(
         framed: Whether to frame the content.
         theme: Theme name (e.g., "default").
         site_title: Title displayed in UI.
+        favicon: Browser tab icon: a URL or the path to an adjacent image
+            file (svg, png, ico, ...).
         information: Dict of site information (author, description, etc.).
         verbose: Enable verbose logging.
         asset_directory: Assets directory (uses Drafter defaults if False).
@@ -106,6 +109,8 @@ def start_server(
         parameters["theme"] = theme
     if site_title is not None:
         parameters["site_title"] = site_title
+    if favicon is not None:
+        parameters["favicon"] = favicon
     if information is not None:
         parameters["information"] = information
     if verbose is not None:

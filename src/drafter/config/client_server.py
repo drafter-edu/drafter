@@ -30,6 +30,8 @@ class ClientServerConfiguration(BaseConfiguration):
         enable_subtle_debug_entry: Show a subtle production-only control to enter debug mode.
         enable_audit_logging: Enable audit logging of requests/responses.
         site_title: Title displayed in the UI.
+        favicon: URL or adjacent file path for the browser tab icon; empty
+            string uses the built-in Drafter favicon.
         information: Optional SiteInformation object with site metadata.
         framed: Whether to frame the application.
         theme: Theme name (e.g., "default").
@@ -58,6 +60,7 @@ class ClientServerConfiguration(BaseConfiguration):
     enable_subtle_debug_entry: bool = False
     enable_audit_logging: bool = True
     site_title: str = "Drafter Application"
+    favicon: str = ""
     information: SiteInformation | None = None
     # Parse semicolon-separated format: "URL Text;URL Text;URL;..."
     external_pages: list[str | tuple[str, str]] | None = None
@@ -107,7 +110,7 @@ class ClientServerConfiguration(BaseConfiguration):
         """Extract client server settings from environment variables.
 
         Reads the DRAFTER_-prefixed variables for the server name, debug mode,
-        subtle debug entry, audit logging, site title, framing, theme, deploy
+        subtle debug entry, audit logging, site title, favicon, framing, theme, deploy
         image path, asset URL override, Shadow DOM, root element id, newline
         conversion, and the semicolon-separated lists for external pages and
         additional header/style/CSS/JS/script content.
@@ -130,6 +133,7 @@ class ClientServerConfiguration(BaseConfiguration):
             "DRAFTER_ENABLE_AUDIT_LOGGING", "enable_audit_logging"
         )
         result.get_string_if_exists("DRAFTER_SITE_TITLE", "site_title")
+        result.get_string_if_exists("DRAFTER_FAVICON", "favicon")
         result.get_string_if_exists("DRAFTER_FRAMED", "framed")
         result.get_string_if_exists("DRAFTER_THEME", "theme")
         result.get_string_if_exists("DRAFTER_DEPLOY_IMAGE_PATH", "deploy_image_path")
@@ -314,6 +318,8 @@ class ClientServerConfiguration(BaseConfiguration):
             result["enable_audit_logging"] = True
         if parsed_args.get("site_title"):
             result["site_title"] = parsed_args["site_title"]
+        if parsed_args.get("favicon"):
+            result["favicon"] = parsed_args["favicon"]
         if parsed_args.get("no_frame"):
             result["framed"] = False
         if parsed_args.get("theme"):
@@ -381,6 +387,7 @@ class ClientServerConfiguration(BaseConfiguration):
             "enable_subtle_debug_entry": self.enable_subtle_debug_entry,
             "enable_audit_logging": self.enable_audit_logging,
             "site_title": self.site_title,
+            "favicon": self.favicon,
             "information": self.information.to_json() if self.information else None,
             "framed": self.framed,
             "theme": self.theme,
@@ -413,6 +420,7 @@ class ClientServerConfiguration(BaseConfiguration):
             enable_subtle_debug_entry=self.enable_subtle_debug_entry,
             enable_audit_logging=self.enable_audit_logging,
             site_title=self.site_title,
+            favicon=self.favicon,
             information=self.information.copy() if self.information else None,
             framed=self.framed,
             theme=self.theme,

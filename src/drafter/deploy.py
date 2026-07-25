@@ -47,6 +47,22 @@ def set_website_title(title: str, server: ClientServer | None = None):
     server.reconfigure(site_title=title)
 
 
+def set_website_favicon(favicon: str, server: ClientServer | None = None):
+    """
+    Sets the favicon of the website, the small icon shown in the browser tab.
+    Give the name of an image file (svg, png, ico, ...) next to your Python
+    file, or a full URL to an image. By default, websites use the built-in
+    Drafter icon.
+
+    Args:
+        favicon: The path or URL of the image to use as the favicon.
+        server: The server to configure. If None, uses the main server.
+    """
+    if server is None:
+        server = get_main_server()
+    server.reconfigure(favicon=favicon)
+
+
 def set_website_framed(framed: bool, server: ClientServer | None = None):
     """
     Sets whether the website should be framed or not. If you are deploying the website, then

@@ -709,9 +709,17 @@ every field so the two can be copied back and forth safely.
 Do not mutate configuration objects directly - simply modifying fields will NOT trigger changes in
 the deployed site. Call `ClientServer.reconfigure(...)`, which emits an `UpdatedConfigurationEvent`
 on the event bus. The `ClientBridge` subscribes and currently reacts to changes of `framed`,
-`in_debug_mode`, and `enable_subtle_debug_entry`; other keys are logged as unhandled. The page
-title is applied imperatively during site setup. **[PLANNED]**: reacting to more configuration keys
-(e.g., live title updates, favicon - favicon handling does not exist yet at all).
+`in_debug_mode`, `enable_subtle_debug_entry`, `favicon`, `page_transition`, and
+`page_transition_duration`; other keys are logged as unhandled. The page title and favicon are also
+applied imperatively during site setup. **[PLANNED]**: reacting to more configuration keys
+(e.g., live title updates).
+
+The favicon pipeline: the index template always renders a `<link rel="icon" id="drafter-favicon--">`
+whose href is `app_common.favicon` when set (CLI `--favicon` / `DRAFTER_FAVICON`), otherwise the
+built-in Drafter icon (`scaffolding/favicon.svg`, inlined as a data URI). The user-facing
+`set_website_favicon()` (or `start_server(favicon=...)`) goes through `client_server.favicon`
+instead, which the bridge applies to the document at site setup and on reconfigure. The static
+builder copies a favicon that references a local file into the build output.
 
 ## ClientBridge Architecture
 

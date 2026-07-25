@@ -7,6 +7,7 @@
     <meta name="description" content="{{ meta_description }}" />
     <meta name="author" content="{{ meta_author }}" />
     <title>{{ title or "Drafter App" }}</title>
+    <link rel="icon" id="{{ favicon_id }}" href="{{ favicon }}" />
     <script>window.DRAFTER_ENGINE = "{{ system.app_common.engine }}";</script>
     {% if compiled_headers %}
       <!-- Additional header content from precompilation -->

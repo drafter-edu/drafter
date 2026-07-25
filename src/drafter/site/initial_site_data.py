@@ -16,6 +16,8 @@ class InitialSiteData:
     Attributes:
         site_html: HTML markup for the site frame structure.
         site_title: Page title for the browser tab and SEO.
+        favicon: URL for the browser tab icon; empty string keeps the
+            page's current favicon (the built-in Drafter default).
         additional_js: List of JavaScript file URLs to load.
         additional_scripts: List of inline JavaScript code strings.
         additional_css: List of CSSLink objects (URL + classes) to load.
@@ -28,6 +30,7 @@ class InitialSiteData:
 
     site_html: str
     site_title: str
+    favicon: str = ""
     additional_js: list = field(default_factory=list)
     additional_scripts: list[str] = field(default_factory=list)
     additional_css: list = field(default_factory=list)  # List of CSSLink objects

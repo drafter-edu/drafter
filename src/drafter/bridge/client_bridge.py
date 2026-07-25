@@ -12,6 +12,7 @@ from typing import Any
 
 from drafter.bridge.context import DomContext
 from drafter.bridge.dom import (
+    set_favicon,
     swap_debug_mode,
     update_subtle_debug_entry,
 )
@@ -108,6 +109,8 @@ class ClientBridge:
                 assets, and flags) produced by the server's render phase.
         """
         self.set_site_title(initial_site_data.site_title)
+        if initial_site_data.favicon:
+            self.set_site_favicon(initial_site_data.favicon)
         self.site_renderer.setup(initial_site_data)
         update_subtle_debug_entry(
             self.site_renderer.get_scope(),
@@ -362,6 +365,9 @@ class ClientBridge:
                     self.configuration.in_debug_mode,
                     self.configuration.enable_subtle_debug_entry,
                 )
+            elif event.get("key") == "favicon":
+                self.configuration.favicon = str(event.get("value"))
+                self.set_site_favicon(self.configuration.favicon)
             elif event.get("key") == "page_transition":
                 self.configuration.page_transition = str(event.get("value"))
             elif event.get("key") == "page_transition_duration":
@@ -407,3 +413,18 @@ class ClientBridge:
         if self.debug_panel:
             self.debug_panel.setHeaderTitle(title)
         # debug_log("client.set_title", title)
+
+    def set_site_favicon(self, favicon: str) -> None:
+        """Set the browser tab icon for this instance's document.
+
+        Like the document `<title>`, the favicon belongs to the document as
+        a whole, so only the primary instance (rendering into the default
+        root id) may change it; secondary instances sharing a document must
+        not fight over it.
+
+        Args:
+            favicon: URL of the icon image (relative path, absolute URL, or
+                data URI).
+        """
+        if self.site_renderer.root_id == DRAFTER_TAG_IDS["ROOT"]:
+            set_favicon(self.context.document, favicon)

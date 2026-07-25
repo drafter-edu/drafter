@@ -39,6 +39,7 @@ DRAFTER_TAG_IDS = {
     "SUBTLE_DEBUG_ENTRY": "drafter-subtle-debug-entry--",
     "PADDING_V": "drafter-padding-v--",
     "PADDING_H": "drafter-padding-h--",
+    "FAVICON": "drafter-favicon--",
 }
 """Well-known element ids of the site frame structure, keyed by role.
 The trailing double hyphen marks them as Drafter-internal."""
@@ -291,6 +292,7 @@ class Site:
         return InitialSiteData(
             site_html=site_html,
             site_title=configuration.site_title,
+            favicon=configuration.favicon,
             additional_css=additional_css,
             additional_js=additional_js,
             additional_header=additional_headers,
