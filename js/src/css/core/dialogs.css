@@ -71,14 +71,22 @@
 }
 
 .drafter-dialog-close {
+	appearance: none;
+	-webkit-appearance: none;
 	border: none;
 	background: transparent;
 	color: #26496f;
+	font-family: inherit;
 	font-size: 1.25rem;
 	line-height: 1;
 	cursor: pointer;
 	padding: 0.1rem 0.35rem;
 	border-radius: 6px;
+	box-shadow: none;
+	text-shadow: none;
+	margin: 0;
+	width: auto;
+	min-height: 0;
 }
 
 .drafter-dialog-close:hover {
@@ -109,14 +117,27 @@
 }
 
 .drafter-dialog-button {
+	appearance: none;
+	-webkit-appearance: none;
 	border: 1px solid #8fa8c6;
 	background: #ffffff;
 	color: #1c3a5e;
 	padding: 0.42rem 0.86rem;
 	border-radius: 8px;
 	cursor: pointer;
+	font-family: inherit;
 	font-size: 0.88rem;
 	font-weight: 600;
+	/* Pinned so site themes' global button rules can't bleed in. */
+	box-shadow: none;
+	text-shadow: none;
+	text-transform: none;
+	letter-spacing: normal;
+	margin: 0;
+	width: auto;
+	min-height: 0;
+	filter: none;
+	transform: none;
 	transition: background-color 140ms ease;
 }
 

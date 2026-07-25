@@ -2,9 +2,10 @@
 
 Defines the `Theme` and `ThemeSystem` dataclasses and initializes the
 shared `theme_system` instance with the built-in themes ("default",
-"none", "mvp", "sakura", "simple", "skeleton", "tacit", and the retro
-Windows themes "98", "xp", and "7"). Each theme
-names the CSS (and optionally
+"none", "almond", "brutal", "darkfairy", "daub", "latex", "magick",
+"matcha", "mvp", "pico", "retro", "sakura", "simple", "skeleton",
+"tacit", "terminal", "water", "yorha", and the retro Windows themes
+"98", "xp", and "7"). Each theme names the CSS (and optionally
 JavaScript) assets that style a site; `set_website_style` selects one by
 name, and unknown names get a "did you mean" suggestion via
 `ThemeSystem.suggest_mistake`.
@@ -97,9 +98,11 @@ class ThemeSystem:
 # Initialize the theme system with default themes
 theme_system = ThemeSystem()
 """The shared ThemeSystem instance, preloaded below with the built-in
-themes ("default", "none", "mvp", "sakura", "simple", "skeleton",
-"tacit", "98", "xp", and "7"). Access it through `get_theme_system`
-rather than importing it directly."""
+themes ("default", "none", "almond", "brutal", "darkfairy", "daub",
+"latex", "magick", "matcha", "mvp", "pico", "retro", "sakura", "simple",
+"skeleton", "tacit", "terminal", "water", "yorha", "98", "xp", and
+"7"). Access it through `get_theme_system` rather than importing it
+directly."""
 theme_system.register_theme(
     Theme(
         name="default",
@@ -207,6 +210,150 @@ theme_system.register_theme(
         metadata={
             "credit": "Tacit by yegor256",
             "url": "https://yegor256.github.io/tacit/",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="almond",
+        css_paths=["css/almond.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Almond.CSS by Alvaro Montoro",
+            "url": "https://github.com/alvaromontoro/almond.css",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="brutal",
+        css_paths=["css/brutal.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Brutal by Vitor Estevam",
+            "url": "https://github.com/VitorEstevam/Brutal",
+        },
+    )
+)
+
+# theme_system.register_theme(
+#     Theme(
+#         name="darkfairy",
+#         css_paths=["css/darkfairy.css"],
+#         js_paths=[],
+#         metadata={
+#             "credit": "AttriCSS (darkfairy-pink) by Raj Singh",
+#             "url": "https://raj457036.github.io/attriCSS/",
+#         },
+#     )
+# )
+
+theme_system.register_theme(
+    Theme(
+        name="daub",
+        css_paths=["css/daub.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Daub UI Kit (classless layer) by Sliday",
+            "url": "https://github.com/sliday/daub/tree/main",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="latex",
+        css_paths=["css/latex.css"],
+        js_paths=[],
+        metadata={
+            "credit": "LaTeX.css by Vincent Doerig",
+            "url": "https://latex.vercel.app/",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="magick",
+        css_paths=["css/magick.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Magick.css by winterveil (wintermute-cell)",
+            "url": "https://github.com/wintermute-cell/magick.css",
+        },
+    )
+)
+
+# theme_system.register_theme(
+#     Theme(
+#         name="matcha",
+#         css_paths=["css/matcha.css"],
+#         js_paths=[],
+#         metadata={
+#             "credit": "matcha.css by Simon Lecoq (lowlighter)",
+#             "url": "https://matcha.mizu.sh/",
+#         },
+#     )
+# )
+
+theme_system.register_theme(
+    Theme(
+        name="pico",
+        css_paths=["css/pico.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Pico CSS",
+            "url": "https://picocss.com/",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="retro",
+        css_paths=["css/retro.css"],
+        js_paths=[],
+        metadata={
+            "credit": "retro (markdowncss) by John Otander",
+            "url": "https://github.com/markdowncss/retro",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="terminal",
+        css_paths=["css/terminal.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Based on the Terminal theme by panr (Radek Koziel)",
+            "url": "https://github.com/panr/hugo-theme-terminal",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="water",
+        css_paths=["css/water.css"],
+        js_paths=[],
+        metadata={
+            "credit": "Water.css (dark) by Kognise",
+            "url": "https://watercss.kognise.dev/",
+        },
+    )
+)
+
+theme_system.register_theme(
+    Theme(
+        name="yorha",
+        css_paths=["css/yorha.css"],
+        js_paths=[],
+        metadata={
+            "credit": "YoRHa CSS by Ethan Chan (metakirby5)",
+            "url": "https://metakirby5.github.io/yorha/",
         },
     )
 )

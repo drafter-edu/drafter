@@ -1448,15 +1448,311 @@ div.btlw-container img {
 	color: #9f2424;
 }
 
-/* Switch Theme dialog (rows reuse the save/load slot styling) */
+/* Switch Theme dialog */
 .drafter-theme-note {
 	margin-top: 0;
 	color: #506784;
 }
 
-.drafter-theme-option.is-current {
+/*
+ * Each theme option is a miniature abstract preview of its theme: the
+ * per-theme blocks below supply an estimated page background, text
+ * color, accent color, and primary font via custom properties. Every
+ * other visual property is pinned explicitly (and the selectors are kept
+ * above element-level specificity) so the page's currently active theme
+ * cannot restyle the options into unreadability.
+ */
+.drafter-theme-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: 8px;
+	max-height: 340px;
+	overflow-y: auto;
+	padding: 2px;
+}
+
+.drafter-dialog .drafter-theme-option {
+	appearance: none;
+	-webkit-appearance: none;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 5px;
+	width: 100%;
+	min-height: 0;
+	height: auto;
+	margin: 0;
+	padding: 9px 11px;
+	background: var(--drafter-tp-bg, #ffffff);
+	color: var(--drafter-tp-fg, #182941);
+	border: 1px solid rgba(96, 108, 124, 0.55);
+	border-left: 5px solid var(--drafter-tp-accent, #3a7db8);
+	border-radius: 8px;
+	box-shadow: none;
+	text-shadow: none;
+	text-transform: none;
+	text-decoration: none;
+	text-align: left;
+	text-indent: 0;
+	letter-spacing: normal;
+	word-spacing: normal;
+	white-space: normal;
+	line-height: 1.35;
+	font-family: Raleway, HelveticaNeue, "Helvetica Neue", Helvetica, Arial,
+		sans-serif;
+	font-size: 12px;
+	font-weight: 400;
+	font-style: normal;
+	filter: none;
+	transform: none;
+	opacity: 1;
+	outline: none;
+	cursor: pointer;
+	transition:
+		border-color 120ms ease,
+		box-shadow 120ms ease;
+}
+
+.drafter-dialog .drafter-theme-option:hover,
+.drafter-dialog .drafter-theme-option:focus-visible {
+	background: var(--drafter-tp-bg, #ffffff);
+	color: var(--drafter-tp-fg, #182941);
 	border-color: #3a7db8;
-	background-color: #e3eefa;
+	border-left-color: var(--drafter-tp-accent, #3a7db8);
+	box-shadow: 0 2px 8px rgba(2, 17, 43, 0.3);
+	filter: none;
+	transform: none;
+}
+
+.drafter-dialog .drafter-theme-option:focus-visible,
+.drafter-dialog .drafter-theme-option.is-current {
+	outline: 2px solid #1161c2;
+	outline-offset: 1px;
+}
+
+.drafter-dialog .drafter-theme-option:active {
+	filter: none;
+	transform: translateY(1px);
+	box-shadow: none;
+}
+
+.drafter-theme-option-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px;
+}
+
+.drafter-theme-name {
+	font-family: var(--drafter-tp-font, inherit);
+	font-size: 15px;
+	font-weight: 700;
+	color: inherit;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.drafter-theme-current-badge {
+	flex: none;
+	font-family: Raleway, HelveticaNeue, "Helvetica Neue", Helvetica, Arial,
+		sans-serif;
+	font-size: 9px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: #ffffff;
+	background: #1161c2;
+	border-radius: 999px;
+	padding: 2px 7px;
+}
+
+.drafter-theme-swatches {
+	display: flex;
+	gap: 4px;
+}
+
+.drafter-theme-swatch {
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+	box-sizing: border-box;
+	/* Double ring keeps swatches visible on light and dark previews. */
+	box-shadow:
+		0 0 0 1px rgba(255, 255, 255, 0.45),
+		inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+.drafter-theme-swatch-bg {
+	background: var(--drafter-tp-bg, #ffffff);
+}
+
+.drafter-theme-swatch-fg {
+	background: var(--drafter-tp-fg, #182941);
+}
+
+.drafter-theme-swatch-accent {
+	background: var(--drafter-tp-accent, #3a7db8);
+}
+
+.drafter-theme-desc {
+	font-size: 11px;
+	opacity: 0.85;
+}
+
+/* Estimated palette + primary font of every registered theme. */
+.drafter-theme-option-default {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #222222;
+	--drafter-tp-accent: #3e3e9e;
+	--drafter-tp-font: Raleway, "Helvetica Neue", Arial, sans-serif;
+}
+
+.drafter-theme-option-none {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #000000;
+	--drafter-tp-accent: #0000ee;
+	--drafter-tp-font: "Times New Roman", Times, serif;
+}
+
+.drafter-theme-option-7 {
+	--drafter-tp-bg: #f0f0f0;
+	--drafter-tp-fg: #222222;
+	--drafter-tp-accent: #0066cc;
+	--drafter-tp-font: "Segoe UI", Tahoma, sans-serif;
+}
+
+.drafter-theme-option-98 {
+	--drafter-tp-bg: #c0c0c0;
+	--drafter-tp-fg: #222222;
+	--drafter-tp-accent: #000080;
+	--drafter-tp-font: "MS Sans Serif", Tahoma, sans-serif;
+}
+
+.drafter-theme-option-almond {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #212121;
+	--drafter-tp-accent: #336699;
+	--drafter-tp-font: Helvetica, Arial, sans-serif;
+}
+
+.drafter-theme-option-brutal {
+	--drafter-tp-bg: #fdfd96;
+	--drafter-tp-fg: #000000;
+	--drafter-tp-accent: #f4d738;
+	--drafter-tp-font: "Public Sans", Arial, sans-serif;
+}
+
+.drafter-theme-option-darkfairy {
+	--drafter-tp-bg: #ad1457;
+	--drafter-tp-fg: #fce4ec;
+	--drafter-tp-accent: #e91e63;
+	--drafter-tp-font: Nunito, "Segoe UI", sans-serif;
+}
+
+.drafter-theme-option-daub {
+	--drafter-tp-bg: #f5f0e1;
+	--drafter-tp-fg: #3d3832;
+	--drafter-tp-accent: #c67b5c;
+	--drafter-tp-font: Charter, "Sitka Text", Cambria, Georgia, serif;
+}
+
+.drafter-theme-option-latex {
+	--drafter-tp-bg: #f9fafb;
+	--drafter-tp-fg: #1f1414;
+	--drafter-tp-accent: #a80000;
+	--drafter-tp-font: "Latin Modern", Georgia, Cambria, serif;
+}
+
+.drafter-theme-option-magick {
+	--drafter-tp-bg: #fefefe;
+	--drafter-tp-fg: #0e0e0e;
+	--drafter-tp-accent: #00004d;
+	--drafter-tp-font: "Averia Serif Libre", Georgia, serif;
+}
+
+.drafter-theme-option-matcha {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #1f2328;
+	--drafter-tp-accent: #0969da;
+	--drafter-tp-font: -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+}
+
+.drafter-theme-option-mvp {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #000000;
+	--drafter-tp-accent: #118bee;
+	--drafter-tp-font: -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.drafter-theme-option-pico {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #373c44;
+	--drafter-tp-accent: #0172ad;
+	--drafter-tp-font: system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+.drafter-theme-option-retro {
+	--drafter-tp-bg: #222222;
+	--drafter-tp-fg: #fafafa;
+	--drafter-tp-accent: #01ff70;
+	--drafter-tp-font: "Courier New", monospace;
+}
+
+.drafter-theme-option-sakura {
+	--drafter-tp-bg: #f9f9f9;
+	--drafter-tp-fg: #4a4a4a;
+	--drafter-tp-accent: #1d7484;
+	--drafter-tp-font: -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.drafter-theme-option-simple {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #212121;
+	--drafter-tp-accent: #0d47a1;
+	--drafter-tp-font: -apple-system, Avenir, Roboto, sans-serif;
+}
+
+.drafter-theme-option-skeleton {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #222222;
+	--drafter-tp-accent: #33c3f0;
+	--drafter-tp-font: Raleway, "Helvetica Neue", Arial, sans-serif;
+}
+
+.drafter-theme-option-tacit {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #1a1919;
+	--drafter-tp-accent: #275a90;
+	--drafter-tp-font: system-ui, "Helvetica Neue", Arial, sans-serif;
+}
+
+.drafter-theme-option-terminal {
+	--drafter-tp-bg: #1a170f;
+	--drafter-tp-fg: #eceae5;
+	--drafter-tp-accent: #eec35e;
+	--drafter-tp-font: "Fira Code", Monaco, Consolas, monospace;
+}
+
+.drafter-theme-option-water {
+	--drafter-tp-bg: #202b38;
+	--drafter-tp-fg: #dbdbdb;
+	--drafter-tp-accent: #41adff;
+	--drafter-tp-font: system-ui, "Segoe UI", sans-serif;
+}
+
+.drafter-theme-option-xp {
+	--drafter-tp-bg: #ece9d8;
+	--drafter-tp-fg: #222222;
+	--drafter-tp-accent: #0053ee;
+	--drafter-tp-font: Tahoma, Verdana, Arial, sans-serif;
+}
+
+.drafter-theme-option-yorha {
+	--drafter-tp-bg: #d1cdb7;
+	--drafter-tp-fg: #454138;
+	--drafter-tp-accent: #bab5a1;
+	--drafter-tp-font: Helvetica, Arial, sans-serif;
 }
 
 /* Edit State dialog (stub) */

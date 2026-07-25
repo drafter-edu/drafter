@@ -1,0 +1,199 @@
+/**
+The MIT License (MIT)
+https://github.com/markdowncss/retro/tree/master
+Copyright (c) 2014-2015 John Otander
+**/
+
+/* Ported for Drafter: the upstream html/body layout rules are remapped
+ * onto the Drafter frame classes (.drafter-frame--, .drafter-body--).
+ * Upstream set html { font-size: 12px } with media-query overrides, but a
+ * later unconditional html { font-size: 18px } won the cascade at every
+ * width, so the effective root size is 18px; those html rules are removed
+ * and every rem value is converted to its px equivalent (x18).
+ * The upstream body margin of 6rem auto 1rem (108px top) is softened to a
+ * moderate .drafter-body-- padding of 48px 8px 18px for app framing.
+ */
+
+pre,
+code {
+	font-family: Menlo, Monaco, "Courier New", monospace;
+}
+
+pre {
+	padding: 9px;
+	line-height: 1.25;
+	overflow-x: scroll;
+}
+
+@media print {
+	*,
+	*:before,
+	*:after {
+		background: transparent !important;
+		color: #000 !important;
+		box-shadow: none !important;
+		text-shadow: none !important;
+	}
+
+	a,
+	a:visited {
+		text-decoration: underline;
+	}
+
+	a[href]:after {
+		content: " (" attr(href) ")";
+	}
+
+	abbr[title]:after {
+		content: " (" attr(title) ")";
+	}
+
+	a[href^="#"]:after,
+	a[href^="javascript:"]:after {
+		content: "";
+	}
+
+	pre,
+	blockquote {
+		border: 1px solid #999;
+		page-break-inside: avoid;
+	}
+
+	thead {
+		display: table-header-group;
+	}
+
+	tr,
+	img {
+		page-break-inside: avoid;
+	}
+
+	img {
+		max-width: 100% !important;
+	}
+
+	p,
+	h2,
+	h3 {
+		orphans: 3;
+		widows: 3;
+	}
+
+	h2,
+	h3 {
+		page-break-after: avoid;
+	}
+}
+
+a,
+a:visited {
+	color: #01ff70;
+}
+
+a:hover,
+a:focus,
+a:active {
+	color: #2ecc40;
+}
+
+.retro-no-decoration {
+	text-decoration: none;
+}
+
+p,
+.retro-p {
+	font-size: 18px;
+	margin-bottom: 23.4px;
+}
+
+h1,
+.retro-h1,
+h2,
+.retro-h2,
+h3,
+.retro-h3,
+h4,
+.retro-h4 {
+	margin: 25.45px 0 9px;
+	font-weight: inherit;
+	line-height: 1.42;
+}
+
+h1,
+.retro-h1 {
+	margin-top: 0;
+	font-size: 71.96px;
+}
+
+h2,
+.retro-h2 {
+	font-size: 50.89px;
+}
+
+h3,
+.retro-h3 {
+	font-size: 35.98px;
+}
+
+h4,
+.retro-h4 {
+	font-size: 25.45px;
+}
+
+h5,
+.retro-h5 {
+	font-size: 20.18px;
+}
+
+h6,
+.retro-h6 {
+	font-size: 15.84px;
+}
+
+small,
+.retro-small {
+	font-size: 0.707em;
+}
+
+/* https://github.com/mrmrs/fluidity */
+
+img,
+canvas,
+iframe,
+video,
+svg,
+select,
+textarea {
+	max-width: 100%;
+}
+
+body {
+	margin: 0;
+	height: 100dvh;
+	box-sizing: border-box;
+	background-color: #222;
+}
+
+.drafter-frame-- {
+	/* Upstream: body { max-width: 48rem } at an 18px root = 864px. */
+	max-width: 864px;
+	margin: 0 auto;
+}
+
+.drafter-body-- {
+	color: #fafafa;
+	font-family: "Courier New";
+	font-size: 18px;
+	line-height: 1.45;
+	/* Upstream body margin was 6rem auto 1rem + 0.25rem padding; softened. */
+	padding: 48px 8px 18px;
+}
+
+pre {
+	background-color: #333;
+}
+
+blockquote {
+	border-left: 3px solid #01ff70;
+	padding-left: 18px;
+}

@@ -10,14 +10,26 @@ import {
 export const AVAILABLE_THEMES = [
 	"default",
 	"none",
+	"7",
+	"98",
+	"almond",
+	"brutal",
+	"darkfairy",
+	"daub",
+	"latex",
+	"magick",
+	"matcha",
 	"mvp",
+	"pico",
+	"retro",
 	"sakura",
 	"simple",
 	"skeleton",
 	"tacit",
-	"98",
+	"terminal",
+	"water",
 	"xp",
-	"7",
+	"yorha",
 ];
 
 /** The theme currently in effect: local override first, then embedded config. */
@@ -55,24 +67,43 @@ export function applyTheme(theme: string): void {
 	);
 }
 
-/** Dialog listing the available themes; picking one applies it (reloads). */
+/**
+ * Dialog listing the available themes; picking one applies it live.
+ *
+ * Each option is rendered as an abstract "mini preview" of its theme: the
+ * button carries `drafter-theme-option-<name>`, whose CSS (in
+ * drafter_debug.css) sets per-theme custom properties for the estimated
+ * page background, text color, accent color, and primary font. The dialog
+ * CSS pins every other visual property so the page's active theme cannot
+ * bleed into the options and make them unreadable.
+ */
 export function openThemeSwitcher(): void {
 	const current = getCurrentTheme();
-	const list = (
-		<div class="drafter-saveload-slots drafter-theme-list"></div>
-	) as HTMLDivElement;
+	const list = (<div class="drafter-theme-list"></div>) as HTMLDivElement;
 	AVAILABLE_THEMES.forEach((theme) => {
 		const isCurrent = theme === current;
 		const pick = (
 			<button
 				type="button"
-				class={`drafter-saveload-slot drafter-theme-option drafter-theme-option-${theme} ${
+				class={`drafter-theme-option drafter-theme-option-${theme} ${
 					isCurrent ? "is-current" : ""
 				}`}
 			>
-				<span class="drafter-saveload-slot-name">{theme}</span>
-				<span class="drafter-saveload-slot-meta">
-					{isCurrent ? t("theme.current") : ""}
+				<span class="drafter-theme-option-header">
+					<span class="drafter-theme-name">{theme}</span>
+					{isCurrent ? (
+						<span class="drafter-theme-current-badge">
+							{t("theme.current")}
+						</span>
+					) : null}
+				</span>
+				<span class="drafter-theme-swatches" aria-hidden="true">
+					<span class="drafter-theme-swatch drafter-theme-swatch-bg"></span>
+					<span class="drafter-theme-swatch drafter-theme-swatch-fg"></span>
+					<span class="drafter-theme-swatch drafter-theme-swatch-accent"></span>
+				</span>
+				<span class="drafter-theme-desc">
+					{t(`theme.desc.${theme}`)}
 				</span>
 			</button>
 		) as HTMLButtonElement;
@@ -90,7 +121,7 @@ export function openThemeSwitcher(): void {
 				{list}
 			</div>
 		) as HTMLElement,
-		width: "420px",
+		width: "560px",
 		buttons: [{ label: t("saveload.close"), variant: "secondary" }],
 	});
 }

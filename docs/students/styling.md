@@ -433,11 +433,23 @@ different options.
     Sets the website style to the specified theme. The theme must be one of the following:
 
     * `default`: The default theme, a simple, clean theme designed for Drafter.
+    * `almond`: A soft, neutral look with blue accents. Check out <https://github.com/alvaromontoro/almond.css> for more information.
+    * `brutal`: A bold "neubrutalist" look with thick borders and hard shadows. Check out <https://github.com/VitorEstevam/Brutal> for more information.
+    * `darkfairy`: A dark magenta-and-pink fairytale look, from AttriCSS. Check out <https://raj457036.github.io/attriCSS/> for more information.
+    * `daub`: A warm, earthy, hand-crafted look (Daub UI Kit).
+    * `latex`: The scholarly look of a LaTeX paper. Check out <https://latex.vercel.app/> for more information.
+    * `magick`: A whimsical, hand-drawn spellbook look. Check out <https://github.com/wintermute-cell/magick.css> for more information.
+    * `matcha`: A modern, GitHub-flavored look with automatic dark mode. Check out <https://matcha.mizu.sh/> for more information.
     * `mvp`: Check out <https://andybrewer.github.io/mvp/> for more information.
+    * `pico`: An elegant, polished look with automatic dark mode. Check out <https://picocss.com/> for more information.
+    * `retro`: Terminal-green typewriter text on dark gray. Check out <https://github.com/markdowncss/retro> for more information.
     * `sakura`: Check out <https://oxal.org/projects/sakura/> for more information.
     * `simple`: Check out <https://simplecss.org/> for more information.
     * `skeleton`: A simple, clean theme. Check <http://getskeleton.com/> for more information.
     * `tacit`: Check out <https://yegor256.github.io/tacit/> for more information.
+    * `terminal`: An amber-on-black monospace terminal look, based on <https://github.com/panr/hugo-theme-terminal>.
+    * `water`: An effortless dark theme. Check out <https://watercss.kognise.dev/> for more information.
+    * `yorha`: A NieR:Automata-inspired beige military UI. Check out <https://metakirby5.github.io/yorha/> for more information.
     * `98`: A retro Windows 98 look, based on <https://jdan.github.io/98.css/>.
     * `xp`: A retro Windows XP look, based on <https://botoxparty.github.io/XP.css/>.
     * `7`: A retro Windows 7 look, based on <https://khang-nd.github.io/7.css/>.
