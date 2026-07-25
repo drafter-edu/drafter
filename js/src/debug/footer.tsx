@@ -11,8 +11,14 @@ export class DebugFooterBar {
     private persistPanel: HTMLElement;
     private persistList: HTMLElement;
     private revealButton: HTMLButtonElement;
+    private statusButton: HTMLButtonElement | null = null;
 
-    constructor(root: ParentNode = document) {
+    constructor(
+        root: ParentNode = document,
+        // Invoked when the student clicks the error/warning status area;
+        // the debug panel uses this to jump to its Current tab.
+        private onStatusClick?: () => void
+    ) {
         this.root = root;
         this.footerElement = root.querySelector(
             ".drafter-footer--"
@@ -61,12 +67,25 @@ export class DebugFooterBar {
     }
 
     private createFooterBar() {
+        this.statusButton = (
+            <button
+                type="button"
+                className="drafter-footer-status"
+                title={t("footer.status.tooltip")}
+                hidden
+            ></button>
+        ) as HTMLButtonElement;
+        this.statusButton.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.onStatusClick?.();
+        });
         return (
             <div className="drafter-footer-bar">
                 <span className="drafter-footer-label">
                     {t("footer.route")}
                 </span>
                 <span className="drafter-footer-route truncate"></span>
+                {this.statusButton}
                 <button
                     type="button"
                     className="drafter-footer-persist-button"
@@ -76,6 +95,26 @@ export class DebugFooterBar {
                 </button>
             </div>
         );
+    }
+
+    /**
+     * Update the error/warning counts in the footer status area. Hidden
+     * while both counts are zero; clicking it activates the Current tab.
+     */
+    public setProblemCounts(errors: number, warnings: number) {
+        if (!this.statusButton) {
+            return;
+        }
+        const parts: string[] = [];
+        if (errors > 0) {
+            parts.push(`❌ ${errors}`);
+        }
+        if (warnings > 0) {
+            parts.push(`⚠️ ${warnings}`);
+        }
+        this.statusButton.textContent = parts.join("  ");
+        this.statusButton.hidden = parts.length === 0;
+        this.statusButton.classList.toggle("has-errors", errors > 0);
     }
 
     private createPersistPanel() {

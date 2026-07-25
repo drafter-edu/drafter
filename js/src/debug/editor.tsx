@@ -7,6 +7,7 @@ import {
 	historyKeymap,
 } from "@codemirror/commands";
 import { python } from "@codemirror/lang-python";
+import { html } from "@codemirror/lang-html";
 import {
 	syntaxHighlighting,
 	defaultHighlightStyle,
@@ -15,6 +16,57 @@ import {
 } from "@codemirror/language";
 import { showDialog } from "../dialogs";
 import { t } from "../i18n";
+
+/** The student source currently loaded, as tracked by the engine bootstrap. */
+export function getCurrentSourceCode(): string {
+	return (window as any).__drafterCurrentCode ?? "# Source code not available";
+}
+
+/**
+ * Build a CodeMirror view inside `parent`. Shared between the editable
+ * Python source editor (openCodeEditor) and the read-only page-HTML viewer
+ * (openSourceViewer in viewsource.tsx).
+ */
+export function buildPythonEditorView(
+	parent: HTMLElement,
+	doc: string,
+	readOnly: boolean = false,
+	language: "python" | "html" = "python",
+): EditorView {
+	const extensions = [
+		lineNumbers(),
+		history(),
+		indentOnInput(),
+		bracketMatching(),
+		syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+		language === "html" ? html() : python(),
+		keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
+		EditorView.theme({
+			"&": {
+				height: "100%",
+				fontSize: "0.9rem",
+				fontFamily: "'Consolas', 'Monaco', 'Courier New', monospace",
+			},
+			".cm-scroller": { overflow: "auto" },
+		}),
+	];
+	if (readOnly) {
+		extensions.push(
+			EditorState.readOnly.of(true),
+			EditorView.editable.of(false),
+		);
+	}
+
+	const state = EditorState.create({
+		doc,
+		extensions,
+	});
+
+	return new EditorView({
+		state,
+		parent,
+	});
+}
 
 /**
  * Opens a CodeMirror-based dialog allowing the user to edit the current
@@ -26,41 +78,14 @@ import { t } from "../i18n";
  * fallback after the new code is stored in sessionStorage.
  */
 export function openCodeEditor(): void {
-	const initialCode: string =
-		(window as any).__drafterCurrentCode ?? "# Source code not available";
+	const initialCode: string = getCurrentSourceCode();
 
 	// Container that will host the CodeMirror view
 	const editorContainer = (
 		<div class="drafter-code-editor-container"></div>
 	) as HTMLDivElement;
 
-	const extensions = [
-		lineNumbers(),
-		history(),
-		indentOnInput(),
-		bracketMatching(),
-		syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-		python(),
-		keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
-		EditorView.theme({
-			"&": {
-				height: "100%",
-				fontSize: "0.9rem",
-				fontFamily: "'Consolas', 'Monaco', 'Courier New', monospace",
-			},
-			".cm-scroller": { overflow: "auto" },
-		}),
-	];
-
-	const state = EditorState.create({
-		doc: initialCode,
-		extensions,
-	});
-
-	const view = new EditorView({
-		state,
-		parent: editorContainer,
-	});
+	const view = buildPythonEditorView(editorContainer, initialCode);
 
 	showDialog({
 		title: t("editor.title"),

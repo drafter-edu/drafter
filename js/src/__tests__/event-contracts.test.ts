@@ -18,6 +18,8 @@ import { DebugFooterBar } from "../debug/footer";
 import { setSystemErrorSink } from "../bridge/engine";
 import { t } from "../i18n";
 
+import REQUEST_EVENT from "./fixtures/telemetry/request-event.json";
+
 /**
  * Cross-language CustomEvent contract tests.
  *
@@ -37,6 +39,10 @@ const PYTHON_LISTENED_EVENTS = [
 	"drafter-toggle-debug-mode",
 	"drafter-evict-persistent",
 	"drafter-navigate",
+	"drafter-replay-route",
+	"drafter-replay-request",
+	"drafter-save-state",
+	"drafter-load-state",
 ];
 
 // Jest's cwd is js/ (tests are always run via `npm test` from js/, matching
@@ -161,13 +167,13 @@ describe("debug panel dispatch sites", () => {
 		);
 	}
 
-	test("exit-debug button dispatches drafter-toggle-debug-mode", () => {
+	test("View > Production menu item dispatches drafter-toggle-debug-mode", () => {
 		createPanel();
 		const events = capture("drafter-toggle-debug-mode");
 
 		(
 			document.querySelector(
-				".drafter-exit-debug-button",
+				".drafter-menu-item-production",
 			) as HTMLButtonElement
 		).click();
 
@@ -175,13 +181,13 @@ describe("debug panel dispatch sites", () => {
 		expect(events[0].detail).toBeNull();
 	});
 
-	test("toggle-frame button dispatches drafter-toggle-frame", () => {
+	test("View > Toggle Frame menu item dispatches drafter-toggle-frame", () => {
 		createPanel();
 		const events = capture("drafter-toggle-frame");
 
 		(
 			document.querySelector(
-				".drafter-toggle-frame-button",
+				".drafter-menu-item-toggle-frame",
 			) as HTMLButtonElement
 		).click();
 
@@ -189,18 +195,22 @@ describe("debug panel dispatch sites", () => {
 		expect(events[0].detail).toBeNull();
 	});
 
-	test("home and reset buttons dispatch drafter-navigate with route details", () => {
+	test("Navigate > Home and Reset menu items dispatch drafter-navigate with route details", () => {
 		createPanel();
 		const events = capture("drafter-navigate");
 
-		const actions = document.querySelector(
-			".drafter-debug-actions",
+		const menubar = document.querySelector(
+			".drafter-header-menubar",
 		) as HTMLElement;
 		(
-			actions.querySelector(".drafter-home-button") as HTMLButtonElement
+			menubar.querySelector(
+				".drafter-menu-item-home",
+			) as HTMLButtonElement
 		).click();
 		(
-			actions.querySelector(".drafter-reset-button") as HTMLButtonElement
+			menubar.querySelector(
+				".drafter-menu-item-reset",
+			) as HTMLButtonElement
 		).click();
 
 		expect(events.map((event) => event.detail)).toEqual([
@@ -209,17 +219,61 @@ describe("debug panel dispatch sites", () => {
 		]);
 	});
 
-	test("header about button dispatches drafter-navigate with --about", () => {
+	test("Navigate > About menu item dispatches drafter-navigate with --about", () => {
 		createPanel();
 		const events = capture("drafter-navigate");
 
 		(
 			document.querySelector(
-				".drafter-header-- .drafter-about-button",
+				".drafter-header-- .drafter-menu-item-about",
 			) as HTMLButtonElement
 		).click();
 
 		expect(events.map((event) => event.detail)).toEqual(["--about"]);
+	});
+
+	test("Navigate > Reload menu item dispatches drafter-navigate with --reload", () => {
+		createPanel();
+		const events = capture("drafter-navigate");
+
+		(
+			document.querySelector(
+				".drafter-menu-item-reload",
+			) as HTMLButtonElement
+		).click();
+
+		expect(events.map((event) => event.detail)).toEqual(["--reload"]);
+	});
+
+	test("Navigate > Replay Route menu item dispatches drafter-replay-route", () => {
+		createPanel();
+		const events = capture("drafter-replay-route");
+
+		(
+			document.querySelector(
+				".drafter-menu-item-replay",
+			) as HTMLButtonElement
+		).click();
+
+		expect(events).toHaveLength(1);
+	});
+
+	test("history Revisit button dispatches drafter-replay-request with the request id", () => {
+		const panel = createPanel();
+		panel.handleEvent({
+			...(REQUEST_EVENT as object),
+			request_id: 42,
+		} as never);
+		const events = capture("drafter-replay-request");
+
+		(
+			document.querySelector(
+				".request-recreate-link",
+			) as HTMLButtonElement
+		).click();
+
+		expect(events).toHaveLength(1);
+		expect(events[0].detail).toEqual({ request_id: 42 });
 	});
 
 	test("footer evict button dispatches drafter-evict-persistent with the persist key", () => {

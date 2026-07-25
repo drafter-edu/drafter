@@ -6,14 +6,14 @@
  * the same fixtures through DebugPanel.handleEvent and asserts the
  * adapter-level outcomes plus the per-record DOM basics. This file focuses
  * on everything else the panel renders and does:
- *   - construction/mounting: the base structure (sections, nav anchors,
- *     action buttons, header/footer decoration), root scoping, and the
+ *   - construction/mounting: the base structure (five tab areas holding the
+ *     sections, header menu bar/footer decoration), root scoping, and the
  *     constructor contract used by the Python bridge
  *     (create_debug_panel(debug_id, client_bridge, scope) in
  *     src/drafter/bridge/runtime.py -> new DebugPanel(id, bridge, scope),
  *     where scope arrives as null for the non-shadow-DOM case),
- *   - interactions feasible in jsdom: nav-anchor "tab" switching, the
- *     action buttons' CustomEvents, history pagination/clear/expansion,
+ *   - interactions feasible in jsdom: tab switching, the header menu
+ *     items' CustomEvents, history pagination/clear/expansion,
  *     config override editing, files-panel refresh/preview, footer
  *     persisted-components popup,
  *   - the full matrix of state representation renderers,
@@ -22,14 +22,12 @@
  *   - the event-log DOM for handled and unhandled records, including
  *     TS-side system errors delivered through the engine sink.
  *
+ * TabBar and HeaderMenuBar internals (keyboard navigation, badges,
+ * outside-click dismissal, localStorage persistence) have their own suites
+ * in debug-tabs.test.tsx and debug-menubar.test.tsx.
+ *
  * Notes on current production behavior discovered while writing these
  * tests (documented, not fixed, per task rules):
- *   - The header hot buttons save/load/download/toggle/close have no click
- *     handlers anywhere in the JS layer (only home/reset/about are wired by
- *     DebugPanel.attachEventHandlers, and edit by DebugHeaderBar). The
- *     "Download state as JSON File" flow described by menus.ts LABELS is
- *     therefore unreachable from the DOM; menus.ts ICONS/LABELS are exported
- *     but never imported by the header (suspected dead code / not yet wired).
  *   - renderRepresentation has no case for the declared "class" and "union"
  *     representation kinds; both fall through to the default renderer, which
  *     shows only kind/type (fields/options are silently dropped).
@@ -73,16 +71,62 @@ import UPDATED_STATE from "./fixtures/telemetry/updated-state.json";
 const CONTAINER_ID = "drafter-debug-container";
 const OVERRIDES_STORAGE_KEY = "drafter.debug.configuration-overrides.v1";
 
-// Section DOM-id prefixes and their titles, in the order DebugPanel
-// registers its panels (state, routes, history, testing, log, config, files).
+// Section DOM-id prefixes and their titles, in DOM order: tabpanels appear
+// in tab order (current, history, overview, tests, environment) and each
+// tab's sections in composition order.
 const PANEL_SECTIONS: Array<[string, string]> = [
+	["drafter-debug-current", "Current Page"],
 	["drafter-debug-current-state", "Current State"],
-	["drafter-debug-routes", "Registered Routes"],
 	["drafter-debug-history", "Page History"],
+	["drafter-debug-routes", "Registered Routes"],
+	["drafter-debug-route-graph", "Route Graph"],
 	["drafter-debug-tests", "Your Tests"],
-	["drafter-debug-log", "Event Log"],
-	["drafter-debug-config", "Configuration"],
+	["drafter-debug-coverage", "Coverage"],
+	["drafter-debug-test-wizard", "Create a Test"],
 	["drafter-debug-files", "File Systems"],
+	["drafter-debug-packages", "Installed Packages"],
+	["drafter-debug-config", "Configuration"],
+	["drafter-debug-runtime", "Runtime Info"],
+	["drafter-debug-log", "Event Log"],
+	["drafter-debug-storage", "Browser Storage"],
+	["drafter-debug-internals", "Advanced"],
+];
+
+// The five tab areas: [tab id, English label, section id prefixes it holds].
+const TABS: Array<[string, string, string[]]> = [
+	[
+		"current",
+		"Current",
+		["drafter-debug-current", "drafter-debug-current-state"],
+	],
+	["history", "History", ["drafter-debug-history"]],
+	[
+		"overview",
+		"Overview",
+		["drafter-debug-routes", "drafter-debug-route-graph"],
+	],
+	[
+		"tests",
+		"Tests",
+		[
+			"drafter-debug-tests",
+			"drafter-debug-coverage",
+			"drafter-debug-test-wizard",
+		],
+	],
+	[
+		"environment",
+		"Environment",
+		[
+			"drafter-debug-files",
+			"drafter-debug-packages",
+			"drafter-debug-config",
+			"drafter-debug-runtime",
+			"drafter-debug-log",
+			"drafter-debug-storage",
+			"drafter-debug-internals",
+		],
+	],
 ];
 
 // The constructor logs setup problems via console.error and
@@ -171,7 +215,7 @@ function requestEvent(overrides: Partial<RequestEvent> = {}): RequestEvent {
 }
 
 describe("construction and mounting", () => {
-	test("base structure: title, subtitle, actions, content, all sections", () => {
+	test("base structure: title, subtitle, tab bar, content, all sections", () => {
 		createPanel();
 		const root = container();
 
@@ -179,7 +223,7 @@ describe("construction and mounting", () => {
 			root.querySelector(".drafter-debug-header-title")?.textContent,
 		).toBe("Debug Panel");
 		expect(root.querySelector(".drafter-debug-header-subtitle")).not.toBeNull();
-		expect(root.querySelector(".drafter-debug-actions")).not.toBeNull();
+		expect(root.querySelector(".drafter-debug-tabbar")).not.toBeNull();
 		expect(root.querySelector(".drafter-debug-content")).not.toBeNull();
 
 		const sections = Array.from(
@@ -201,113 +245,171 @@ describe("construction and mounting", () => {
 		});
 	});
 
-	test("navigation anchors target each section id, separated by '|'", () => {
+	test("tab bar renders the five tab areas holding their sections", () => {
 		createPanel();
 		const root = container();
-		const buttonBar = root.querySelector(
-			".drafter-debug-header-buttons",
+		const instanceId = instanceIdOf(root);
+		const tabbar = root.querySelector(
+			".drafter-debug-tabbar",
 		) as HTMLElement;
 
-		const anchors = Array.from(
-			buttonBar.querySelectorAll("a"),
-		) as HTMLAnchorElement[];
-		expect(anchors).toHaveLength(PANEL_SECTIONS.length);
-		anchors.forEach((anchor, index) => {
-			expect(anchor.textContent).toBe(PANEL_SECTIONS[index][1]);
-			const target = anchor.getAttribute("href") ?? "";
-			expect(target.startsWith("#")).toBe(true);
-			// The href resolves to a real section element in the panel.
-			expect(root.querySelector(target)).not.toBeNull();
+		const buttons = Array.from(
+			tabbar.querySelectorAll("[role='tab']"),
+		) as HTMLButtonElement[];
+		expect(buttons).toHaveLength(TABS.length);
+		buttons.forEach((button, index) => {
+			const [tabId, label, sectionPrefixes] = TABS[index];
+			expect(
+				button.querySelector(".drafter-debug-tab-label")?.textContent,
+			).toBe(label);
+			// aria-controls resolves to the tab's tabpanel, which holds the
+			// tab's sections in order.
+			const tabpanel = root.querySelector(
+				`#${button.getAttribute("aria-controls")}`,
+			) as HTMLElement;
+			expect(tabpanel).not.toBeNull();
+			expect(tabpanel.id).toBe(
+				`drafter-debug-tab-${tabId}-${instanceId}`,
+			);
+			const sectionIds = Array.from(
+				tabpanel.querySelectorAll(".drafter-debug-section"),
+			).map((section) => (section as HTMLElement).id);
+			expect(sectionIds).toEqual(
+				sectionPrefixes.map((prefix) => `${prefix}-${instanceId}`),
+			);
 		});
-		// intersperse() puts a "|" between every pair of anchors.
-		const separators = buttonBar.textContent?.match(/\|/g) ?? [];
-		expect(separators).toHaveLength(PANEL_SECTIONS.length - 1);
 	});
 
-	test("'tab' switching is plain fragment navigation (anchor click is safe)", () => {
-		// The panel has no JS tab-switching logic: the header anchors are
-		// bare href="#section-id" links and highlighting/scrolling is left to
-		// the browser. jsdom does NOT implement anchor-click fragment
-		// navigation (location.hash stays ""), so the hash change itself
-		// cannot be asserted here; what can be is that the link targets
-		// resolve (previous test) and that clicking is handler-free and
-		// side-effect-free on the panel DOM.
+	test("tab switching shows one tabpanel at a time and persists the choice", () => {
 		createPanel();
-		const routesAnchor = Array.from(
-			container().querySelectorAll(".drafter-debug-header-buttons a"),
-		).find((a) => a.textContent === "Registered Routes") as HTMLAnchorElement;
-		const before = container().innerHTML;
+		const root = container();
+		const tabButton = (id: string) =>
+			root.querySelector(
+				`[id^='drafter-debug-tab-btn-${id}-']`,
+			) as HTMLButtonElement;
+		const tabPanel = (id: string) =>
+			root.querySelector(
+				`[id^='drafter-debug-tab-${id}-']:not([id*='btn'])`,
+			) as HTMLElement;
 
-		expect(() => routesAnchor.click()).not.toThrow();
+		// "current" is the default active tab.
+		expect(tabButton("current").getAttribute("aria-selected")).toBe(
+			"true",
+		);
+		expect(tabPanel("current").hidden).toBe(false);
+		expect(tabPanel("history").hidden).toBe(true);
 
-		expect(container().innerHTML).toBe(before);
+		tabButton("history").click();
+
+		expect(tabButton("current").getAttribute("aria-selected")).toBe(
+			"false",
+		);
+		expect(tabButton("history").getAttribute("aria-selected")).toBe(
+			"true",
+		);
+		expect(tabPanel("current").hidden).toBe(true);
+		expect(tabPanel("history").hidden).toBe(false);
+		// The choice persists for the next construction (page reload).
+		expect(
+			window.localStorage.getItem("drafter.debug.active-tab.v1"),
+		).toBe("history");
 	});
 
-	test("action buttons render with i18n labels and tooltips", () => {
+	test("menu items render with i18n labels and tooltips", () => {
 		createPanel();
-		const actions = container().querySelector(
-			".drafter-debug-actions",
+		const menubar = document.querySelector(
+			".drafter-header-menubar",
 		) as HTMLElement;
 
-		const home = actions.querySelector(
-			".drafter-home-button",
+		const home = menubar.querySelector(
+			".drafter-menu-item-home",
 		) as HTMLButtonElement;
 		expect(home.textContent).toBe("🏠 Home");
 		expect(home.title).toBe("Go to Home");
 
-		const reset = actions.querySelector(
-			".drafter-reset-button",
+		const reset = menubar.querySelector(
+			".drafter-menu-item-reset",
 		) as HTMLButtonElement;
 		expect(reset.textContent).toBe("🔄 Reset");
 		expect(reset.title).toBe("Clear state, history, and return to home");
 
-		const exitDebug = actions.querySelector(
-			".drafter-exit-debug-button",
+		const production = menubar.querySelector(
+			".drafter-menu-item-production",
 		) as HTMLButtonElement;
-		expect(exitDebug.textContent).toBe("🚪 Production");
-		expect(exitDebug.title).toBe(
+		expect(production.textContent).toBe("🚪 Production");
+		expect(production.title).toBe(
 			"Exit debug mode and switch to production view",
 		);
 
 		expect(
-			actions.querySelector(".drafter-toggle-frame-button")?.textContent,
+			menubar.querySelector(".drafter-menu-item-toggle-frame")
+				?.textContent,
 		).toContain("Toggle Frame");
 	});
 
-	test("header bar is decorated with the app title and hot buttons", () => {
+	test("header bar is decorated with the identity area and menu bar", () => {
 		createPanel();
 		const headerBar = document.querySelector(
 			".drafter-header-- .drafter-header-bar",
 		) as HTMLElement;
 
 		expect(headerBar).not.toBeNull();
-		expect(headerBar.querySelector("span")?.textContent).toBe(
-			"Drafter Application",
-		);
-
-		// All hot buttons exist. Only home/reset/about (wired by
-		// DebugPanel.attachEventHandlers) and edit (wired by DebugHeaderBar)
-		// have click handlers; save/load/download/toggle/close are inert in
-		// the JS layer -- there is no handler anywhere in js/src for them,
-		// so e.g. "Download state as JSON" cannot be exercised beyond
-		// presence (documented limitation, see file header).
-		for (const cls of [
-			"drafter-home-button",
-			"drafter-reset-button",
-			"drafter-about-button",
-			"drafter-edit-button",
-			"drafter-save-button",
-			"drafter-load-button",
-			"drafter-download-button",
-			"drafter-toggle-button",
-			"drafter-close-button",
-		]) {
-			expect(headerBar.querySelector(`.${cls}`)).not.toBeNull();
-		}
 		expect(
-			(headerBar.querySelector(".drafter-download-button") as HTMLElement)
-				.title,
-		).toBe("Download");
+			headerBar.querySelector(
+				".drafter-header-identity .drafter-header-title",
+			)?.textContent,
+		).toBe("Drafter Application");
+		// No favicon <link> exists in the jsdom host page, so the mirror
+		// image stays hidden.
+		expect(
+			(
+				headerBar.querySelector(
+					".drafter-header-favicon",
+				) as HTMLImageElement
+			).hidden,
+		).toBe(true);
+
+		// The five dropdown menus replace the old hot-button row entirely.
+		const menuButtons = Array.from(
+			headerBar.querySelectorAll(
+				".drafter-menu-button .drafter-menu-button-label",
+			),
+		).map((label) => label.textContent);
+		expect(menuButtons).toEqual([
+			"Navigate",
+			"View",
+			"Edit",
+			"Save/Load",
+			"Help",
+		]);
+		// Each top-level button advertises its dropdown with a caret.
+		expect(
+			headerBar.querySelectorAll(".drafter-menu-button .drafter-menu-caret"),
+		).toHaveLength(5);
+		expect(headerBar.querySelector(".drafter-header-hot-buttons")).toBeNull();
+
+		// Every menu item is rendered and enabled ("Load Most Recent" is the
+		// exception: it stays greyed out until something has been saved,
+		// covered in the header menu item events suite).
+		for (const cls of [
+			"drafter-menu-item-quick-save",
+			"drafter-menu-item-save-slot",
+			"drafter-menu-item-load-slot",
+			"drafter-menu-item-download",
+			"drafter-menu-item-upload",
+			"drafter-menu-item-replay",
+			"drafter-menu-item-bug-report",
+			"drafter-menu-item-view-source",
+			"drafter-menu-item-switch-theme",
+			"drafter-menu-item-edit-state",
+			"drafter-menu-item-edit-source",
+		]) {
+			const item = headerBar.querySelector(
+				`.${cls}`,
+			) as HTMLButtonElement;
+			expect(item).not.toBeNull();
+			expect(item.disabled).toBe(false);
+		}
 	});
 
 	test("footer bar is decorated with the route label and persisted count", () => {
@@ -414,17 +516,28 @@ describe("i18n", () => {
 		try {
 			createPanel();
 			expect(
-				document.querySelector(".drafter-header-bar span")?.textContent,
+				document.querySelector(".drafter-header-title")?.textContent,
 			).toBe("Aplicación Drafter");
 			expect(
-				container().querySelector(".drafter-exit-debug-button")
+				document.querySelector(".drafter-menu-item-production")
 					?.textContent,
 			).toBe("🚪 Producción");
+			expect(
+				document.querySelector(
+					".drafter-menu-button-navigate .drafter-menu-button-label",
+				)?.textContent,
+			).toBe("Navegar");
+			// Tab labels are localized too.
+			expect(
+				container().querySelector(
+					".drafter-debug-tab-button .drafter-debug-tab-label",
+				)?.textContent,
+			).toBe("Actual");
 			// "button.home.tooltip" has no Spanish entry: falls back to English.
 			expect(
 				(
-					container().querySelector(
-						".drafter-debug-actions .drafter-home-button",
+					document.querySelector(
+						".drafter-menu-item-home",
 					) as HTMLButtonElement
 				).title,
 			).toBe("Go to Home");
@@ -434,7 +547,7 @@ describe("i18n", () => {
 	});
 });
 
-describe("action button events", () => {
+describe("header menu item events", () => {
 	function captureWindowEvent(name: string): Array<CustomEvent> {
 		const seen: Array<CustomEvent> = [];
 		window.addEventListener(name, ((event: Event) => {
@@ -443,101 +556,222 @@ describe("action button events", () => {
 		return seen;
 	}
 
-	test("home button dispatches drafter-navigate with 'index'", () => {
+	function menuItem(className: string): HTMLButtonElement {
+		return document.querySelector(
+			`.drafter-header-menubar .${className}`,
+		) as HTMLButtonElement;
+	}
+
+	test("Navigate > Home dispatches drafter-navigate with 'index'", () => {
 		createPanel();
 		const seen = captureWindowEvent("drafter-navigate");
 
-		(
-			container().querySelector(
-				".drafter-debug-actions .drafter-home-button",
-			) as HTMLButtonElement
-		).click();
+		menuItem("drafter-menu-item-home").click();
 
 		expect(seen).toHaveLength(1);
 		expect(seen[0].detail).toBe("index");
 	});
 
-	test("reset button dispatches drafter-navigate with '--reset'", () => {
+	test("Navigate > Reset dispatches drafter-navigate with '--reset'", () => {
 		createPanel();
 		const seen = captureWindowEvent("drafter-navigate");
 
-		(
-			container().querySelector(
-				".drafter-debug-actions .drafter-reset-button",
-			) as HTMLButtonElement
-		).click();
+		menuItem("drafter-menu-item-reset").click();
 
 		expect(seen).toHaveLength(1);
 		expect(seen[0].detail).toBe("--reset");
 	});
 
-	test("header-bar about button (also wired by the panel) dispatches '--about'", () => {
+	test("Navigate > About dispatches drafter-navigate with '--about'", () => {
 		createPanel();
 		const seen = captureWindowEvent("drafter-navigate");
 
-		(
-			document.querySelector(
-				".drafter-header-bar .drafter-about-button",
-			) as HTMLButtonElement
-		).click();
+		menuItem("drafter-menu-item-about").click();
 
 		expect(seen).toHaveLength(1);
 		expect(seen[0].detail).toBe("--about");
 	});
 
-	test("exit-debug button dispatches drafter-toggle-debug-mode", () => {
+	test("Navigate > Reload Site dispatches drafter-navigate with '--reload'", () => {
+		createPanel();
+		const seen = captureWindowEvent("drafter-navigate");
+
+		menuItem("drafter-menu-item-reload").click();
+
+		expect(seen).toHaveLength(1);
+		expect(seen[0].detail).toBe("--reload");
+	});
+
+	test("View > Production dispatches drafter-toggle-debug-mode", () => {
 		createPanel();
 		const seen = captureWindowEvent("drafter-toggle-debug-mode");
 
-		(
-			container().querySelector(
-				".drafter-exit-debug-button",
-			) as HTMLButtonElement
-		).click();
+		menuItem("drafter-menu-item-production").click();
 
 		expect(seen).toHaveLength(1);
 	});
 
-	test("toggle-frame button dispatches drafter-toggle-frame", () => {
+	test("View > Toggle Frame dispatches drafter-toggle-frame", () => {
 		createPanel();
 		const seen = captureWindowEvent("drafter-toggle-frame");
 
+		menuItem("drafter-menu-item-toggle-frame").click();
+
+		expect(seen).toHaveLength(1);
+	});
+
+	test("Navigate > Replay Route dispatches drafter-replay-route", () => {
+		createPanel();
+		const seen = captureWindowEvent("drafter-replay-route");
+
+		menuItem("drafter-menu-item-replay").click();
+
+		expect(seen).toHaveLength(1);
+	});
+
+	test("Save/Load > Quick Save dispatches drafter-save-state", () => {
+		createPanel();
+		const seen = captureWindowEvent("drafter-save-state");
+
+		menuItem("drafter-menu-item-quick-save").click();
+
+		expect(seen).toHaveLength(1);
+		expect(seen[0].detail).toEqual({ reason: "save", slot: "quick" });
+	});
+
+	test("Save/Load > Download dispatches drafter-save-state with reason download", () => {
+		createPanel();
+		const seen = captureWindowEvent("drafter-save-state");
+
+		menuItem("drafter-menu-item-download").click();
+
+		expect(seen).toHaveLength(1);
+		expect(seen[0].detail).toEqual({ reason: "download", slot: "quick" });
+	});
+
+	test("Load Most Recent is greyed out until a save exists, then shows its age", () => {
+		const panel = createPanel();
+		const item = menuItem("drafter-menu-item-load-recent");
+		expect(item.disabled).toBe(true);
+
+		// A completed save round-trip fills the quick slot...
+		panel.handleEvent({
+			kind: "StateSnapshot",
+			route: "guess",
+			kwargs_json: "{}",
+			state_json: '{"score": 1}',
+			state_type: "GameState",
+			representation: null,
+			reason: "save",
+			slot: "quick",
+			app_title: "",
+			version: 1,
+		} as never);
+		// ...and opening the menu refreshes the dynamic item.
 		(
-			container().querySelector(
-				".drafter-toggle-frame-button",
+			document.querySelector(
+				".drafter-header-- .drafter-menu-button-saveload",
 			) as HTMLButtonElement
 		).click();
 
+		expect(item.disabled).toBe(false);
+		expect(
+			item.querySelector(".drafter-menu-item-suffix")?.textContent,
+		).toBe(" (just now)");
+	});
+
+	test("the debug panel has its own View menu for when the frame is hidden", () => {
+		createPanel();
+		// It lives in the debug container (which survives frame toggling),
+		// not in the frame header.
+		const panelMenu = container().querySelector(
+			".drafter-menu-button-panel-view",
+		) as HTMLButtonElement;
+		expect(panelMenu).not.toBeNull();
+
+		const seen = captureWindowEvent("drafter-toggle-frame");
+		(
+			container().querySelector(
+				".drafter-menu-popup-panel-view .drafter-menu-item-toggle-frame",
+			) as HTMLButtonElement
+		).click();
 		expect(seen).toHaveLength(1);
+
+		// The view-settings trio is all present, including Switch Theme.
+		for (const cls of [
+			"drafter-menu-item-toggle-frame",
+			"drafter-menu-item-production",
+			"drafter-menu-item-switch-theme",
+		]) {
+			expect(
+				container().querySelector(
+					`.drafter-menu-popup-panel-view .${cls}`,
+				),
+			).not.toBeNull();
+		}
+	});
+
+	test("Help > Documentation opens the official docs in a new tab", () => {
+		createPanel();
+		const openSpy = jest
+			.spyOn(window, "open")
+			.mockImplementation(() => null);
+		try {
+			menuItem("drafter-menu-item-documentation").click();
+			expect(openSpy).toHaveBeenCalledWith(
+				"https://drafter-edu.github.io/drafter/",
+				"_blank",
+			);
+		} finally {
+			openSpy.mockRestore();
+		}
 	});
 });
 
 describe("setHeaderTitle / setRoute", () => {
-	test("setHeaderTitle updates the title and keeps the hot buttons", () => {
+	test("setHeaderTitle updates the title and keeps the menu bar", () => {
 		const panel = createPanel();
 		const header = document.querySelector(
 			".drafter-header--",
 		) as HTMLElement;
-		expect(header.querySelector(".drafter-home-button")).not.toBeNull();
+		expect(header.querySelector(".drafter-header-menubar")).not.toBeNull();
 
 		panel.setHeaderTitle("My Cool Site");
 
 		expect(
 			header.querySelector(".drafter-header-title")?.textContent,
 		).toBe("My Cool Site");
-		// The hot-button toolbar rendered by the constructor survives.
-		for (const cls of [
-			"drafter-home-button",
-			"drafter-reset-button",
-			"drafter-about-button",
-			"drafter-edit-button",
-			"drafter-save-button",
-			"drafter-load-button",
-			"drafter-download-button",
-			"drafter-toggle-button",
-			"drafter-close-button",
-		]) {
-			expect(header.querySelector(`.${cls}`)).not.toBeNull();
+		// The menu bar rendered by the constructor survives, menus intact.
+		expect(
+			header.querySelectorAll(".drafter-header-menubar .drafter-menu-button"),
+		).toHaveLength(5);
+		expect(
+			header.querySelector(".drafter-menu-item-home"),
+		).not.toBeNull();
+	});
+
+	test("setHeaderTitle mirrors the page favicon into the header", () => {
+		// The favicon <link> lives in the document head (rendered by the
+		// page template with id drafter-favicon--); the header mirrors it.
+		const link = document.createElement("link");
+		link.id = "drafter-favicon--";
+		link.setAttribute("rel", "icon");
+		link.setAttribute("href", "data:image/svg+xml;base64,abc123");
+		document.head.appendChild(link);
+		try {
+			const panel = createPanel();
+			const favicon = document.querySelector(
+				".drafter-header-favicon",
+			) as HTMLImageElement;
+			expect(favicon.hidden).toBe(false);
+			expect(favicon.src).toContain("data:image/svg+xml;base64,abc123");
+
+			// A favicon change is picked up on the next title update.
+			link.setAttribute("href", "data:image/svg+xml;base64,def456");
+			panel.setHeaderTitle("Retitled");
+			expect(favicon.src).toContain("data:image/svg+xml;base64,def456");
+		} finally {
+			link.remove();
 		}
 	});
 

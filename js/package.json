@@ -57,9 +57,11 @@
 		"typescript": "^5"
 	},
 	"dependencies": {
+		"@codemirror/lang-html": "^6.4.11",
 		"@codemirror/lang-python": "^6.2.1",
 		"codemirror": "^6.0.2",
 		"css-tree": "^3.2.1",
+		"diff": "^9.0.0",
 		"diff2html": "^3.4.52",
 		"highlight.js": "^11.11.1",
 		"i18next": "^25.6.2",

@@ -78,6 +78,11 @@ export class TestPanel extends Panel {
         }
     }
 
+    /** Number of failing tests so far (drives the Tests tab badge). */
+    public getFailCount(): number {
+        return this.tests.filter((t) => !t.passed).length;
+    }
+
     public updateTestSummary(): void {
         const summaryElement = this.queryWithin(
             this.scopedSelector("drafter-debug-current-tests-summary"),

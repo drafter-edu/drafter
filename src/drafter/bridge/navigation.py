@@ -37,16 +37,34 @@ class NavigationController:
 
         redirect_loop_stack: Reprs of the redirect payloads currently being
             followed, used to detect redirect loops.
+
+        last_request: The most recently dispatched Request, kept so the
+            debug menu's "Replay Route" (and state snapshots) can re-invoke
+            the current route with the same arguments; None before the
+            first request.
+
+        request_log: The most recent Requests keyed by their id (bounded to
+            REQUEST_LOG_LIMIT entries), so the debug history's "Revisit"
+            button can replay a specific past request. Telemetry only
+            carries a repr of a request's kwargs, so replays must come from
+            these Python-side Request objects.
     """
+
+    #: Maximum number of Requests retained in request_log for replay.
+    REQUEST_LOG_LIMIT = 100
 
     history: BrowserHistory
     navigation_func: Callable[[Request], Response] | None = None
     redirect_loop_stack: list[str]
+    last_request: Request | None
+    request_log: dict[int, Request]
 
     def __init__(self, runtime):
         self.history = BrowserHistory(runtime)
         self.redirect_loop_stack = []
         self.navigation_func = None
+        self.last_request = None
+        self.request_log = {}
 
     def set_navigation_func(self, func: Callable[[Request], Response]) -> None:
         """Install the callback used to perform visits.
@@ -192,10 +210,84 @@ class NavigationController:
         if self.navigation_func is None:
             raise RuntimeError("Navigation function not set in ClientBridge.")
         debug_log("client.initiate_request", request)
+        self._record_request(request)
         if remember:
             self.history.add_to_history(request)
         next_visit = self.navigation_func(request)
         return next_visit
+
+    ### Replaying past requests (debug menu "Replay Route" / history "Revisit")
+
+    def _record_request(self, request: Request) -> None:
+        """Remember a dispatched request for later replay, evicting the
+        oldest entries beyond REQUEST_LOG_LIMIT."""
+        self.last_request = request
+        self.request_log[request.id] = request
+        while len(self.request_log) > self.REQUEST_LOG_LIMIT:
+            oldest = next(iter(self.request_log))
+            del self.request_log[oldest]
+
+    def replay_last(self):
+        """Re-dispatch the most recent request (same route and arguments).
+
+        The replay is not added to the browser history (the browser is
+        already on this page). Reports a bridge warning and returns None if
+        nothing has been requested yet.
+
+        Returns:
+            The Response produced by the navigation function, or None.
+        """
+        if self.last_request is None:
+            report_bridge_error(
+                "bridge.replay_without_request",
+                "No request has been made yet, so there is nothing to replay",
+                "bridge.navigation.replay_last",
+                "",
+                phase="navigation",
+            )
+            return None
+        return self._replay(self.last_request)
+
+    def replay_by_id(self, request_id: int):
+        """Re-dispatch a specific logged request by its id.
+
+        Args:
+            request_id: The id of the Request to replay (from the debug
+                history timeline).
+
+        Returns:
+            The Response produced by the navigation function, or None when
+            the request has aged out of the log (or never existed).
+        """
+        request = self.request_log.get(request_id)
+        if request is None:
+            report_bridge_error(
+                "bridge.replay_unknown_request",
+                f"Request {request_id} is no longer available to replay",
+                "bridge.navigation.replay_by_id",
+                f"Logged request ids: {sorted(self.request_log)}",
+                phase="navigation",
+            )
+            return None
+        return self._replay(request)
+
+    def _replay(self, original: Request):
+        """Dispatch a fresh copy of a past request.
+
+        A copy (with a new request id) is dispatched rather than the
+        original object so telemetry can distinguish the replay, and the
+        original action label is preserved because route handling (e.g.
+        component contract helpers) can depend on it.
+        """
+        replayed = Request(
+            original.action,
+            original.url,
+            dict(original.kwargs),
+            {},
+            original.dom_id,
+            button_pressed=original.button_pressed,
+        )
+        return self.navigate(replayed, remember=False)
 
 
 def extract_button_pressed(data: dict) -> str:

@@ -163,6 +163,16 @@ export class HistoryPanel extends Panel {
 				Revisit
 			</button>
 		);
+		// Telemetry only carries a repr of the request's kwargs, so the
+		// replay sends the request id and Python re-dispatches the actual
+		// Request object it logged for that id.
+		recreateLink.addEventListener("click", () => {
+			window.dispatchEvent(
+				new CustomEvent("drafter-replay-request", {
+					detail: { request_id: request.request_id },
+				}),
+			);
+		});
 
 		const requestElement = (
 			<div class="history-event" data-request-id={request.request_id}>

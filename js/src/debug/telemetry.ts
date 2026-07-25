@@ -9,6 +9,7 @@ import type {
 	ResponseEvent,
 } from "./telemetry/requests";
 import type { RouteAddedEvent } from "./telemetry/routes";
+import type { StateSnapshotEvent } from "./telemetry/snapshot";
 import type { UpdatedStateEvent } from "./telemetry/state";
 import type { TestCaseEvent } from "./telemetry/tests";
 import type { TelemetryRecord } from "./telemetry/base";
@@ -21,6 +22,7 @@ export type { TelemetryRecord } from "./telemetry/base";
 export type TypedRecord =
 	| RouteAddedEvent
 	| UpdatedStateEvent
+	| StateSnapshotEvent
 	| RequestEvent
 	| RequestParseEvent
 	| ResponseEvent

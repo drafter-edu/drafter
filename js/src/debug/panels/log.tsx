@@ -1,6 +1,6 @@
 import { Panel } from "./panel";
 import type { TelemetryRecord } from "../telemetry";
-import type { ErrorDetailsJson } from "../telemetry/errors";
+import { extractErrorDetails } from "../utils/errors";
 
 interface LogEntry {
 	message: string;
@@ -16,7 +16,7 @@ export class LogPanel extends Panel {
 	}
 
 	public renderEvent(event: TelemetryRecord): void {
-		const envelope = this.asErrorDetails(event);
+		const envelope = extractErrorDetails(event);
 		if (envelope) {
 			switch (envelope.severity) {
 				case "critical":
@@ -50,22 +50,6 @@ export class LogPanel extends Panel {
 				this.renderLogDefault(event.kind);
 				break;
 		}
-	}
-
-	private asErrorDetails(record: TelemetryRecord): ErrorDetailsJson | null {
-		const error = (record as { error?: unknown }).error;
-		if (!error || typeof error !== "object") {
-			return null;
-		}
-		if (
-			"id" in error &&
-			"category" in error &&
-			"severity" in error &&
-			"message" in error
-		) {
-			return error as ErrorDetailsJson;
-		}
-		return null;
 	}
 
 	public renderLogWarning(warning: LogEntry): void {

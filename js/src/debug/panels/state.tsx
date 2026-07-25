@@ -291,8 +291,39 @@ function renderRepresentation(rep: SpecificRepresentation) {
 	}
 }
 
+/**
+ * Stable plain-text rendering of a state representation, for diffing two
+ * states. The per-value `id` and `complexity` bookkeeping fields are
+ * stripped so they never show up as spurious differences.
+ */
+export function representationToText(
+	rep: SpecificRepresentation | null,
+): string {
+	if (rep === null) {
+		return "";
+	}
+	const strip = (value: unknown): unknown => {
+		if (Array.isArray(value)) {
+			return value.map(strip);
+		}
+		if (value && typeof value === "object") {
+			const cleaned: Record<string, unknown> = {};
+			for (const [key, entry] of Object.entries(value)) {
+				if (key === "id" || key === "complexity") {
+					continue;
+				}
+				cleaned[key] = strip(entry);
+			}
+			return cleaned;
+		}
+		return value;
+	};
+	return JSON.stringify(strip(rep), null, 2);
+}
+
 export class StatePanel extends Panel {
 	private currentState: SpecificRepresentation | null = null;
+	private previousState: SpecificRepresentation | null = null;
 
 	constructor(containerId: string, instanceId: number, root: ParentNode = document) {
 		super(
@@ -309,7 +340,35 @@ export class StatePanel extends Panel {
 	}
 
 	public renderState(state: SpecificRepresentation): void {
+		this.previousState = this.currentState;
+		this.currentState = state;
 		const result = renderRepresentation(state!);
 		this.getContentElement().replaceChildren(result);
+	}
+
+	/**
+	 * Plain-text rendering of the current state, for previews outside the
+	 * panel (e.g. the Edit State dialog).
+	 */
+	public getPlainText(): string {
+		return this.getContentElement().textContent ?? "";
+	}
+
+	/**
+	 * Text renderings of the previous and current states for the Current
+	 * tab's state diff; each is null when that state does not exist yet.
+	 */
+	public getDiffTexts(): {
+		previous: string | null;
+		current: string | null;
+	} {
+		return {
+			previous: this.previousState
+				? representationToText(this.previousState)
+				: null,
+			current: this.currentState
+				? representationToText(this.currentState)
+				: null,
+		};
 	}
 }

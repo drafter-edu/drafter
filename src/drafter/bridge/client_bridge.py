@@ -6,6 +6,7 @@ management, channel content, redirect detection, history, hotkeys, and telemetry
 Runtime-specific differences (Skulpt vs Pyodide) are delegated to a RuntimeAdapter.
 """
 
+import json
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
@@ -151,6 +152,10 @@ class ClientBridge:
                 "drafter-toggle-debug-mode": lambda event: handle_debug_mode(),
                 "drafter-evict-persistent": lambda event: self.evict_persistent(event),
                 "drafter-navigate": lambda event: self.navigator.goto(event.detail),
+                "drafter-replay-route": lambda event: self.navigator.replay_last(),
+                "drafter-replay-request": lambda event: self.replay_request(event),
+                "drafter-save-state": lambda event: self.save_state_snapshot(event),
+                "drafter-load-state": lambda event: self.load_state_snapshot(event),
                 "popstate": self.navigator.handle_popstate,
             },
             {
@@ -176,6 +181,115 @@ class ClientBridge:
         parking_area = self.site_renderer.get_parking_area()
         if parking_area is not None:
             evict_key(parking_area, str(key))
+
+    def replay_request(self, event) -> None:
+        """Replay a specific past request (from the debug history's Revisit).
+
+        The event detail carries `{request_id}`; the actual Request object
+        is looked up Python-side (telemetry only has a repr of its kwargs).
+        """
+        detail = getattr(event, "detail", None)
+        request_id = getattr(detail, "request_id", None)
+        if request_id is None:
+            report_bridge_error(
+                "client.replay_request_missing_id",
+                "Replay request event arrived without a request_id",
+                "bridge.client_bridge.replay_request",
+                f"Event detail: {repr(detail)}",
+                phase="navigation",
+            )
+            return
+        self.navigator.replay_by_id(int(request_id))
+
+    ### State Snapshots (debug menu Save/Load)
+
+    def save_state_snapshot(self, event) -> None:
+        """Capture the current state + route invocation as a snapshot event.
+
+        Responds to the debug UI's ``drafter-save-state`` window event (its
+        detail carries `{reason, slot}`). The snapshot travels back to the
+        JS SaveLoadManager as StateSnapshot telemetry, which stores it in
+        localStorage or downloads it as a file.
+        """
+        from drafter.bridge.snapshot import serialize_state_snapshot
+        from drafter.client_server.commands import get_main_server
+        from drafter.monitor.audit import log_record
+
+        detail = getattr(event, "detail", None)
+        reason = str(getattr(detail, "reason", None) or "save")
+        slot = str(getattr(detail, "slot", None) or "quick")
+        last = self.navigator.last_request
+        route = last.url if last else "index"
+        kwargs = dict(last.kwargs) if last else {}
+        # TODO: Use the DI parameter _server instead of get_main_server
+        state = get_main_server().state.current
+        snapshot = serialize_state_snapshot(
+            state, route, kwargs, reason, slot, self.site_title
+        )
+        if snapshot is not None:
+            log_record(
+                snapshot,
+                "bridge.client_bridge.save_state_snapshot",
+                route=route,
+                request_id=last.id if last else None,
+            )
+
+    def load_state_snapshot(self, event) -> None:
+        """Restore a previously saved snapshot and replay its route.
+
+        Responds to the debug UI's ``drafter-load-state`` window event (its
+        detail carries `{state_json, route, kwargs_json}`). The state is
+        rebuilt from plain data against the running app's state class,
+        restored first, and then the route is re-invoked, because argument
+        preparation reads the current state.
+        """
+        from drafter.bridge.snapshot import deserialize_state_snapshot
+        from drafter.client_server.commands import get_main_server
+        from drafter.data.details.state import UpdatedStateEvent
+        from drafter.monitor.audit import log_record
+
+        detail = getattr(event, "detail", None)
+        state_json = getattr(detail, "state_json", None)
+        route = str(getattr(detail, "route", None) or "index")
+        kwargs_json = str(getattr(detail, "kwargs_json", None) or "{}")
+        if not state_json:
+            report_bridge_error(
+                "client.load_snapshot_missing_payload",
+                "Load state event arrived without a saved state payload",
+                "bridge.client_bridge.load_state_snapshot",
+                f"Event detail: {repr(detail)}",
+                phase="event_dispatch",
+            )
+            return
+        # TODO: Use the DI parameter _server instead of get_main_server
+        server = get_main_server()
+        try:
+            restored = deserialize_state_snapshot(str(state_json), server.state.current)
+        except Exception as e:
+            report_bridge_error(
+                "client.load_snapshot_failed",
+                "Could not load the saved state; it may have been saved under a "
+                "different version of your code",
+                "bridge.client_bridge.load_state_snapshot",
+                f"Route: {route}",
+                exception=e,
+                route=route,
+                phase="event_dispatch",
+            )
+            return
+        try:
+            kwargs = json.loads(kwargs_json)
+        except Exception:
+            kwargs = {}
+        # Restore the state BEFORE replaying the route: argument preparation
+        # reads state.current when invoking the route handler.
+        server.state.update(restored)
+        log_record(
+            UpdatedStateEvent.from_state(restored),
+            "bridge.client_bridge.load_state_snapshot",
+            route=route,
+        )
+        self.navigator.goto(route, kwargs, action="system")
 
     ### Debug Panel
 
