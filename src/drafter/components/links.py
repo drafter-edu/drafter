@@ -239,7 +239,8 @@ class Link(LinkContent):
         Returns:
             Dictionary including the submit button name and data-submit-button value.
         """
-        # TODO: Handle external links correctly
+        # External URLs are handled by the bridge's click handler, which lets
+        # the browser follow the href natively instead of dispatching a route.
         # TODO: Handle the configuration setting that blocks external links
         attributes = super().get_attributes(context)
         attributes["name"] = SUBMIT_BUTTON_KEY

@@ -19,6 +19,7 @@ from drafter.components import (
     Paragraph,
     PreformattedText,
     Span,
+    Table,
 )
 from drafter.data.errors import ErrorDetails
 from drafter.payloads.kinds.page import Page
@@ -186,6 +187,7 @@ def _render_traceback(traceback_text: str | None):
     return Div(*children, classes="drafter-traceback")
 
 
+# TODO: Expand on these a bit more
 def _build_friendly_summary(error: ErrorDetails) -> str:
     """Return a plain-language summary of the failure for novice users."""
     if error.id == "request.route_not_found":
@@ -245,9 +247,11 @@ def _build_fix_steps(error: ErrorDetails) -> list[str]:
         ]
 
     return [
-        "Read the technical message below and locate the first relevant line in the traceback.",
+        "Read the technical message above.",
+        "If that is not clear, then read the traceback and locate the first relevant line.",
+        "Hypothesize what you think the error means, then check your code to see if that is true.",
         "Fix that first error, then run again and see if any new message appears.",
-        "If you are stuck, share the error ID and traceback with your instructor or teammate.",
+        "If you are stuck, seek help on what the error ID and traceback mean.",
     ]
 
 
@@ -262,40 +266,60 @@ def default_error(state, error: ErrorDetails, server: ClientServer):
 
     Returns:
         Page content with error information.
+
+    The error page content can be customized via configuration:
+    `error_page_title` replaces the heading, `error_page_message` replaces
+    the friendly summary, and `error_page_show_details=False` hides the
+    technical details/traceback section (useful on deployed sites).
     """
-    friendly_summary = _build_friendly_summary(error)
+    configuration = server.get_current_configuration()
+    title = getattr(configuration, "error_page_title", "") or "Something Went Wrong"
+    friendly_summary = getattr(
+        configuration, "error_page_message", ""
+    ) or _build_friendly_summary(error)
+    show_details = getattr(configuration, "error_page_show_details", True)
     fix_steps = _build_fix_steps(error)
-    content = [
-        Div(
-            Header("Something Went Wrong", level=2),
-            Paragraph(friendly_summary),
-            Header("What To Try Next", level=3),
-            BulletedList(fix_steps),
-            Header("Technical Details", level=3),
-            Paragraph("Error ID:", InlineCode(error.id)),
-            Paragraph("Message:"),
-            PreformattedText(error.message),
-            Paragraph("Status:", InlineCode(error.status_code or "error")),
-            Paragraph("Severity:", InlineCode(error.severity)),
-            Paragraph(
-                "Recoverable:",
-                InlineCode("yes" if error.recoverable else "no"),
-            ),
-            Paragraph("Traceback:"),
-            _render_traceback(error.traceback),
-            Paragraph("Details:"),
-            PreformattedText(error.details),
-            Paragraph("Category:", InlineCode(error.category)),
-            Paragraph("Navigation options:"),
-            BulletedList(
-                [
-                    Link("Return to Index Page", "index"),
-                    Link("Reset State and Return to Index", "--reset"),
-                    Link("Reload Page", "--reload"),
-                ]
-            ),
-            classes="error-page",
+    sections: list = [
+        Header(title, level=2),
+        Paragraph(friendly_summary),
+        PreformattedText(f"{error.id}: {error.message}"),
+        Header("What To Try Next", level=3),
+        BulletedList(fix_steps),
+        Header("Navigation Options:", level=3),
+        BulletedList(
+            [
+                Link("Return to Index Page", "index"),
+                Link("Reset State and Return to Index", "--reset"),
+                Link("Reload Entire Application", "--reload"),
+                Link("Submit a Bug Report", "--bug-report"),
+            ]
         ),
     ]
+
+    if show_details:
+        sections.extend(
+            [
+                Header("Technical Details", level=3),
+                Table(
+                    [
+                        ["Error ID", InlineCode(error.id)],
+                        ["Message", PreformattedText(error.message)],
+                        ["Status", InlineCode(error.status_code or "error")],
+                        ["Severity", InlineCode(error.severity)],
+                        ["Category", InlineCode(error.category)],
+                        [
+                            "Recoverable",
+                            InlineCode("yes" if error.recoverable else "no"),
+                        ],
+                        [
+                            "Traceback",
+                            _render_traceback(error.traceback),
+                        ],
+                        ["Details", PreformattedText(error.details)],
+                    ]
+                ),
+            ]
+        )
+    content = [Div(*sections, classes="error-page")]
     # TODO: Consider a hard refresh option that appends a nonce to the URL
     return Page(state, content)

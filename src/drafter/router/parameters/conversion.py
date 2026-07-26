@@ -17,9 +17,10 @@ import dataclasses
 import inspect
 import io
 import json
+import sys
 from dataclasses import replace
 from datetime import date, datetime, time
-from typing import Any, get_type_hints
+from typing import Any, ForwardRef, get_args, get_origin, get_type_hints
 
 from PIL import Image as PILImage
 
@@ -339,6 +340,37 @@ def _is_dataclass_type(target: Any) -> bool:
     return isinstance(target, type) and dataclasses.is_dataclass(target)
 
 
+def _resolve_forward_references(annotation: Any, owner: type) -> Any:
+    """Resolve string/ForwardRef annotations against the owner's module.
+
+    Recursive dataclasses are typically annotated with quoted names (e.g.
+    ``children: list["TreeNode"]``); depending on the Python version,
+    ``get_type_hints`` can leave the quoted name unresolved inside the
+    generic's arguments. Without resolution, no converter matches and the
+    field fails with "annotation not supported".
+    """
+    if isinstance(annotation, (str, ForwardRef)):
+        reference = (
+            annotation if isinstance(annotation, str) else annotation.__forward_arg__
+        )
+        module = sys.modules.get(owner.__module__)
+        try:
+            return eval(reference, getattr(module, "__dict__", {}))
+        except Exception:
+            return annotation
+    args = get_args(annotation)
+    if not args:
+        return annotation
+    resolved_args = tuple(_resolve_forward_references(arg, owner) for arg in args)
+    if resolved_args == args:
+        return annotation
+    origin = get_origin(annotation)
+    try:
+        return origin[resolved_args if len(resolved_args) > 1 else resolved_args[0]]
+    except Exception:
+        return annotation
+
+
 def convert_dataclass(ctx: ConversionContext) -> ConversionResult | None:
     """Build a dataclass from a dict (or JSON string), converting each field."""
     target = ctx.resolved_type
@@ -368,7 +400,9 @@ def convert_dataclass(ctx: ConversionContext) -> ConversionResult | None:
         if not field_spec.init:
             continue
         if field_spec.name in value:
-            field_type = hints.get(field_spec.name, field_spec.type)
+            field_type = _resolve_forward_references(
+                hints.get(field_spec.name, field_spec.type), target
+            )
             child = replace(
                 ctx,
                 param_name=f"{ctx.param_name}.{field_spec.name}",

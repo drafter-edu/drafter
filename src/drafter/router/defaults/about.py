@@ -9,15 +9,54 @@ from drafter.components import (
     Link,
     Paragraph,
 )
-from drafter.components.page_content import PageContent
+from drafter.components.page_content import Component, PageContent
+from drafter.helpers.urls import is_external_url
 from drafter.payloads.kinds.page import Page
+
+
+def render_information_value(value) -> list[PageContent]:
+    """Convert one site-information value into renderable page content.
+
+    Strings that look like URLs become links; lists and tuples become
+    bulleted lists (with each entry converted the same way); components
+    pass through unchanged.
+
+    Args:
+        value: A site information field value (str, list, tuple, or
+            component).
+
+    Returns:
+        A list of content items to append to the page (possibly empty).
+    """
+    if isinstance(value, str):
+        if not value:
+            return []
+        if is_external_url(value):
+            return [Link(value, value)]
+        return [value]
+    if isinstance(value, Component):
+        return [value]
+    if isinstance(value, (list, tuple)):
+        items: list[PageContent] = []
+        for item in value:
+            if isinstance(item, str) and is_external_url(item):
+                items.append(Link(item, item))
+            elif isinstance(item, (Component, str)):
+                items.append(item)
+            else:
+                items.append(str(item))
+        if not items:
+            return []
+        return [BulletedList(items)]
+    return [str(value)]
 
 
 def default_about(state, _server: ClientServer):
     """Generate the About page from site information settings.
 
-    Displays author, description, sources, planning, and links sections.
-    Includes external pages if configured, and a back button.
+    Displays the site title plus the author, description, sources,
+    planning, and links sections that have been filled in. Includes
+    external pages if configured, and a back button.
 
     Args:
         state: Current application state, passed through to the returned Page.
@@ -30,27 +69,30 @@ def default_about(state, _server: ClientServer):
         information when none has been configured.
     """
     configuration = _server.get_current_configuration()
+    title = getattr(configuration, "site_title", "") or ""
     if not configuration.information:
         return Page(
             state,
             [
+                Header(f"About {title}".strip(), level=1),
                 Paragraph(
                     "No site information has been set. Use the ",
                     InlineCode("set_site_information()"),
                     " function to set the information about your site.",
-                )
+                ),
+                Button("Back to Index (Main Page)", "index"),
             ],
         )
 
     # Build the about page content
     information = configuration.information
-    content_parts: list[PageContent] = []
-    site_parts = list(information.get_parts())
+    content_parts: list[PageContent | str] = [Header(f"About {title}".strip(), level=1)]
 
-    for title, content in site_parts:
-        if content:
-            content_parts.append(Header(title, level=2))
-            content_parts.append(content)
+    for section_title, content in information.get_parts():
+        rendered = render_information_value(content)
+        if rendered:
+            content_parts.append(Header(section_title, level=2))
+            content_parts.extend(rendered)
 
     if configuration.external_pages:
         content_parts.append(Header("External Pages", level=2))
@@ -64,80 +106,10 @@ def default_about(state, _server: ClientServer):
                 raise ValueError(
                     "Invalid external page format in configuration: " + repr(page_item)
                 )
-            external_items.append(Link(url, label))
+            external_items.append(Link(label, url))
         if external_items:
             content_parts.append(BulletedList(external_items))
 
     content_parts.append(Button("Back to Index (Main Page)", "index"))
 
     return Page(state, content_parts)
-
-
-# # Helper function to render different SiteInformationType values
-# def render_site_info(self, value: SiteInformationType) -> str:
-#     """Convert site information values to HTML.
-
-#     Handles PageContent objects, lists/tuples (rendered as lists),
-#     and strings. Detects and converts URLs to clickable links.
-
-#     Args:
-#         value: Site information to render.
-
-#     Returns:
-#         str: HTML representation of the value.
-#     """
-#     # TODO: Need a "is_page_content" helper to properly typecheck
-#     # TODO: This whole function seems broken
-#     if isinstance(value, PageContent):
-#         # If it's PageContent, render it using its render method
-#         return value.render(self._state, self.configuration)
-#     elif isinstance(value, (list, tuple)):
-#         # If it's a list/tuple of strings, render as an unordered list with links converted to <a> tags
-#         items = []
-#         for item in value:
-#             if isinstance(item, str):
-#                 # Check if the item looks like a URL
-#                 if is_external_url(item):
-#                     items.append(
-#                         f'<a href="{html.escape(item)}">{html.escape(item)}</a>'
-#                     )
-#                 else:
-#                     items.append(html.escape(item))
-#             else:
-#                 items.append(str(item))
-#         items_html = "\n".join(f"<li>{item}</li>" for item in items)
-#         return f"<ul>{items_html}</ul>"
-#     else:
-#         # If it's a string, render as text with links converted to <a> tags
-#         value_str = str(value)
-#         # Check if the value looks like a URL
-#         if is_external_url(value_str):
-#             return f'<a href="{html.escape(value_str)}">{html.escape(value_str)}</a>'
-#         else:
-#             return html.escape(value_str)
-
-
-# # Add external pages if configured
-# if self.configuration.external_pages:
-#     content_parts.append("<h2>External Pages</h2>")
-#     external_items = []
-#     # Parse semicolon-separated format: "URL Text;URL Text;URL;..."
-#     for entry in self.configuration.external_pages.split(";"):
-#         entry = entry.strip()
-#         if not entry:
-#             continue
-#         # Split on first whitespace to separate URL from optional label
-#         parts = entry.split(None, 1)
-#         if len(parts) == 2:
-#             url, label = parts
-#             external_items.append(
-#                 f'<a href="{html.escape(url)}">{html.escape(label)}</a>'
-#             )
-#         elif len(parts) == 1:
-#             url = parts[0]
-#             external_items.append(
-#                 f'<a href="{html.escape(url)}">{html.escape(url)}</a>'
-#             )
-#     if external_items:
-#         items_html = "\n".join(f"<li>{item}</li>" for item in external_items)
-#         content_parts.append(f"<ul>{items_html}</ul>")

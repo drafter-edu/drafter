@@ -55,6 +55,73 @@ def verify_response_payload_type(request: Request, payload: ResponsePayload):
     return message
 
 
+def collect_named_components(item: Any, found: list) -> None:
+    """Recursively collect (name, component) pairs from page content.
+
+    Walks strings/components/lists, descending into each component's
+    content arguments. Links and Buttons are skipped: they intentionally
+    share one submit-button name.
+
+    Args:
+        item: A content item (component, string, list of items, ...).
+        found: Output list of (name, component) pairs, appended in order.
+    """
+    from drafter.components.links import LinkContent
+    from drafter.components.page_content import Component
+
+    if isinstance(item, (list, tuple)):
+        for child in item:
+            collect_named_components(child, found)
+        return
+    if not isinstance(item, Component):
+        return
+    if not isinstance(item, LinkContent):
+        name = getattr(item, "name", None)
+        if isinstance(name, str) and name:
+            found.append((name, item))
+    for argument in getattr(item, "ARGUMENTS", []):
+        if argument.is_content:
+            value = getattr(item, argument.name, argument.default_value)
+            collect_named_components(value, found)
+
+
+def verify_unique_component_names(request: Request, content: Any) -> str | None:
+    """Validate that no two components on a page share a form-field name.
+
+    Two components with the same name silently merge into one route
+    parameter (as a list), which is almost never what a student intends.
+
+    Args:
+        request: Associated request providing context (URL).
+        content: The page's content list.
+
+    Returns:
+        str or None: Error message naming the duplicates, None if valid.
+    """
+    found: list = []
+    collect_named_components(content, found)
+    first_seen: dict[str, Any] = {}
+    duplicates: dict[str, list] = {}
+    for name, component in found:
+        if name in first_seen:
+            duplicates.setdefault(name, [first_seen[name]]).append(component)
+        else:
+            first_seen[name] = component
+    if not duplicates:
+        return None
+    descriptions = []
+    for name, components in duplicates.items():
+        component_types = ", ".join(type(c).__name__ for c in components)
+        descriptions.append(f"  {name!r} is used by: {component_types}")
+    plural = "s" if len(duplicates) > 1 else ""
+    return (
+        f"The page returned from {request.url} has multiple components with "
+        f"the same name{plural}:\n" + "\n".join(descriptions) + "\n"
+        "Each component must have a unique name, because the name is how "
+        "values are matched to route parameters. Rename the duplicates."
+    )
+
+
 def verify_page_state_history(
     request: Request, updated_state: Any, state_history: list
 ) -> str | None:

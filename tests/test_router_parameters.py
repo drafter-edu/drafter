@@ -730,7 +730,7 @@ class TestRouterPipeline:
 
         router = self.make_router(add)
         request = Request("submit", "test", {"x": "5", "y": "3"}, {})
-        args, kwargs, representation = self.prepare(router, request)
+        args, kwargs, representation, _provenance = self.prepare(router, request)
         assert args == []
         assert kwargs == {"x": 5, "y": 3}
         assert representation == "add(5, 3)"
@@ -764,7 +764,7 @@ class TestRouterPipeline:
 
         router = self.make_router(greet)
         request = Request("submit", "test", {"name": "x", "stray": "y"}, {})
-        args, kwargs, _ = self.prepare(router, request)
+        args, kwargs, _, _provenance = self.prepare(router, request)
         assert kwargs == {"name": "x"}
 
     def test_injected_dependencies_bind_but_stay_out_of_representation(self):
@@ -775,7 +775,7 @@ class TestRouterPipeline:
 
         router = self.make_router(add_stop)
         request = Request("pin", "test", {"x": "5"}, {})
-        args, kwargs, representation = self.prepare(
+        args, kwargs, representation, _provenance = self.prepare(
             router, request, state="STATE", deps={"add_marker": helper}
         )
         assert kwargs["add_marker"] is helper
@@ -788,7 +788,7 @@ class TestRouterPipeline:
 
         router = self.make_router(index)
         request = Request("click", "test", {}, {})
-        args, kwargs, _ = self.prepare(router, request, state={"count": 3})
+        args, kwargs, _, _provenance = self.prepare(router, request, state={"count": 3})
         assert args == [{"count": 3}]
         assert kwargs == {}
 
@@ -807,7 +807,7 @@ class TestRouterPipeline:
                 {"name": "remaining", "value": 42, "source": "event_detail"},
             ],
         )
-        args, kwargs, _ = self.prepare(router, request)
+        args, kwargs, _, _provenance = self.prepare(router, request)
         assert kwargs == {"remaining": 42}
 
     def test_add_route_reports_signature_string(self):
@@ -817,3 +817,41 @@ class TestRouterPipeline:
         router = Router()
         info = router.add_route("add", add)
         assert info["signature"] == "add(x: int, y: int)"
+
+    def test_add_route_reports_structured_parameters(self):
+        def add(state, x: int, y: int = 0, _server=None):
+            return x + y
+
+        router = Router()
+        info = router.add_route("add", add)
+        # state and injected parameters are omitted; request parameters
+        # carry name/type/required/default for the debug panel's forms.
+        assert info["parameters"] == [
+            {"name": "x", "type": "int", "required": True, "default": None},
+            {"name": "y", "type": "int", "required": False, "default": "0"},
+        ]
+
+    def test_provenance_tracks_sources_and_conversions(self):
+        def guess(state, answer: int, hint: str = "none"):
+            return answer
+
+        router = self.make_router(guess)
+        request = Request(
+            "submit",
+            "test",
+            {"answer": "5"},
+            {},
+            raw_payload=[
+                {"name": "answer", "value": "5", "source": "form_field"},
+            ],
+        )
+        _, _, _, provenance = self.prepare(router, request, state={"n": 1})
+
+        by_name = {entry["name"]: entry for entry in provenance}
+        assert by_name["state"]["source"] == "state"
+        assert by_name["answer"]["source"] == "form_field"
+        assert by_name["answer"]["changed"] is True
+        assert by_name["answer"]["converted"] == "5"
+        assert by_name["answer"]["expected_type"] == "int"
+        assert by_name["hint"]["source"] == "default"
+        assert by_name["hint"]["value"] == "'none'"

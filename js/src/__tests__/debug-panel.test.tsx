@@ -78,11 +78,12 @@ const PANEL_SECTIONS: Array<[string, string]> = [
 	["drafter-debug-current", "Current Page"],
 	["drafter-debug-current-state", "Current State"],
 	["drafter-debug-history", "Page History"],
+	["drafter-debug-state-history", "State History"],
 	["drafter-debug-routes", "Registered Routes"],
 	["drafter-debug-route-graph", "Route Graph"],
 	["drafter-debug-tests", "Your Tests"],
-	["drafter-debug-coverage", "Coverage"],
-	["drafter-debug-test-wizard", "Create a Test"],
+	// ["drafter-debug-coverage", "Coverage"],
+	// ["drafter-debug-test-wizard", "Create a Test"],
 	["drafter-debug-files", "File Systems"],
 	["drafter-debug-packages", "Installed Packages"],
 	["drafter-debug-config", "Configuration"],
@@ -99,7 +100,11 @@ const TABS: Array<[string, string, string[]]> = [
 		"Current",
 		["drafter-debug-current", "drafter-debug-current-state"],
 	],
-	["history", "History", ["drafter-debug-history"]],
+	[
+		"history",
+		"History",
+		["drafter-debug-history", "drafter-debug-state-history"],
+	],
 	[
 		"overview",
 		"Overview",
@@ -110,8 +115,8 @@ const TABS: Array<[string, string, string[]]> = [
 		"Tests",
 		[
 			"drafter-debug-tests",
-			"drafter-debug-coverage",
-			"drafter-debug-test-wizard",
+			// "drafter-debug-coverage",
+			// "drafter-debug-test-wizard",
 		],
 	],
 	[
@@ -134,9 +139,7 @@ const TABS: Array<[string, string, string[]]> = [
 const consoleErrorSpy = jest
 	.spyOn(console, "error")
 	.mockImplementation(() => {});
-const consoleWarnSpy = jest
-	.spyOn(console, "warn")
-	.mockImplementation(() => {});
+const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
 
 afterEach(() => {
 	// The DebugPanel constructor registers itself as the system error sink.
@@ -222,7 +225,9 @@ describe("construction and mounting", () => {
 		expect(
 			root.querySelector(".drafter-debug-header-title")?.textContent,
 		).toBe("Debug Panel");
-		expect(root.querySelector(".drafter-debug-header-subtitle")).not.toBeNull();
+		expect(
+			root.querySelector(".drafter-debug-header-subtitle"),
+		).not.toBeNull();
 		expect(root.querySelector(".drafter-debug-tabbar")).not.toBeNull();
 		expect(root.querySelector(".drafter-debug-content")).not.toBeNull();
 
@@ -240,7 +245,9 @@ describe("construction and mounting", () => {
 			).toBe(title);
 			// Each section owns a content region with an instance-scoped id.
 			expect(
-				section.querySelector(`#${domPrefix}-content-${instanceIdOf(container())}`),
+				section.querySelector(
+					`#${domPrefix}-content-${instanceIdOf(container())}`,
+				),
 			).not.toBeNull();
 		});
 	});
@@ -293,9 +300,7 @@ describe("construction and mounting", () => {
 			) as HTMLElement;
 
 		// "current" is the default active tab.
-		expect(tabButton("current").getAttribute("aria-selected")).toBe(
-			"true",
-		);
+		expect(tabButton("current").getAttribute("aria-selected")).toBe("true");
 		expect(tabPanel("current").hidden).toBe(false);
 		expect(tabPanel("history").hidden).toBe(true);
 
@@ -304,15 +309,13 @@ describe("construction and mounting", () => {
 		expect(tabButton("current").getAttribute("aria-selected")).toBe(
 			"false",
 		);
-		expect(tabButton("history").getAttribute("aria-selected")).toBe(
-			"true",
-		);
+		expect(tabButton("history").getAttribute("aria-selected")).toBe("true");
 		expect(tabPanel("current").hidden).toBe(true);
 		expect(tabPanel("history").hidden).toBe(false);
 		// The choice persists for the next construction (page reload).
-		expect(
-			window.localStorage.getItem("drafter.debug.active-tab.v1"),
-		).toBe("history");
+		expect(window.localStorage.getItem("drafter.debug.active-tab.v1")).toBe(
+			"history",
+		);
 	});
 
 	test("menu items render with i18n labels and tooltips", () => {
@@ -384,9 +387,13 @@ describe("construction and mounting", () => {
 		]);
 		// Each top-level button advertises its dropdown with a caret.
 		expect(
-			headerBar.querySelectorAll(".drafter-menu-button .drafter-menu-caret"),
+			headerBar.querySelectorAll(
+				".drafter-menu-button .drafter-menu-caret",
+			),
 		).toHaveLength(5);
-		expect(headerBar.querySelector(".drafter-header-hot-buttons")).toBeNull();
+		expect(
+			headerBar.querySelector(".drafter-header-hot-buttons"),
+		).toBeNull();
 
 		// Every menu item is rendered and enabled ("Load Most Recent" is the
 		// exception: it stays greyed out until something has been saved,
@@ -738,16 +745,16 @@ describe("setHeaderTitle / setRoute", () => {
 
 		panel.setHeaderTitle("My Cool Site");
 
-		expect(
-			header.querySelector(".drafter-header-title")?.textContent,
-		).toBe("My Cool Site");
+		expect(header.querySelector(".drafter-header-title")?.textContent).toBe(
+			"My Cool Site",
+		);
 		// The menu bar rendered by the constructor survives, menus intact.
 		expect(
-			header.querySelectorAll(".drafter-header-menubar .drafter-menu-button"),
+			header.querySelectorAll(
+				".drafter-header-menubar .drafter-menu-button",
+			),
 		).toHaveLength(5);
-		expect(
-			header.querySelector(".drafter-menu-item-home"),
-		).not.toBeNull();
+		expect(header.querySelector(".drafter-menu-item-home")).not.toBeNull();
 	});
 
 	test("setHeaderTitle mirrors the page favicon into the header", () => {
@@ -948,9 +955,9 @@ describe("history panel interactions", () => {
 		expect(next2.disabled).toBe(true);
 
 		previous2.click();
-		expect(
-			historyList().querySelectorAll(".history-event"),
-		).toHaveLength(5);
+		expect(historyList().querySelectorAll(".history-event")).toHaveLength(
+			5,
+		);
 	});
 
 	test("a new request resets pagination to page 1", () => {
@@ -970,18 +977,15 @@ describe("history panel interactions", () => {
 				?.textContent,
 		).toBe("Page 1 of 2");
 		expect(
-			(
-				historyList().querySelector(".history-event") as HTMLElement
-			).dataset.requestId,
+			(historyList().querySelector(".history-event") as HTMLElement)
+				.dataset.requestId,
 		).toBe("7");
 	});
 
 	test("clear history asks for confirmation and clears when accepted", () => {
 		const panel = createPanel();
 		panel.handleEvent(requestEvent());
-		const confirmSpy = jest
-			.spyOn(window, "confirm")
-			.mockReturnValue(true);
+		const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
 		try {
 			(
 				container().querySelector(
@@ -1005,9 +1009,7 @@ describe("history panel interactions", () => {
 	test("clear history keeps entries when the confirm is declined", () => {
 		const panel = createPanel();
 		panel.handleEvent(requestEvent());
-		const confirmSpy = jest
-			.spyOn(window, "confirm")
-			.mockReturnValue(false);
+		const confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(false);
 		try {
 			(
 				container().querySelector(
@@ -1067,9 +1069,9 @@ describe("history panel interactions", () => {
 		expect(detailBlocks[0].querySelector("summary")?.textContent).toBe(
 			"Request",
 		);
-		expect(
-			detailBlocks[1].querySelector("summary")?.textContent,
-		).toContain("Response:");
+		expect(detailBlocks[1].querySelector("summary")?.textContent).toContain(
+			"Response:",
+		);
 
 		detailBlocks[1].open = true;
 		expect(detailBlocks[1].open).toBe(true);
@@ -1220,9 +1222,7 @@ describe("state panel representation rendering", () => {
 			id: 7,
 			complexity: 12,
 		});
-		const rep = content.querySelector(
-			".drafter-debug-rep-homogenous-grid",
-		);
+		const rep = content.querySelector(".drafter-debug-rep-homogenous-grid");
 		expect(rep?.textContent).toContain("list[list[int]]");
 		expect(rep?.querySelectorAll(".drafter-debug-rep-hg-row")).toHaveLength(
 			2,
@@ -1455,8 +1455,7 @@ describe("config panel interactions", () => {
 				?.textContent,
 		).toBe('"midnight"');
 		expect(
-			item.querySelector(".drafter-debug-config-base-value")
-				?.textContent,
+			item.querySelector(".drafter-debug-config-base-value")?.textContent,
 		).toContain('embedded: "default"');
 
 		// Persisted to localStorage and mirrored onto the window overrides.
@@ -1654,8 +1653,7 @@ describe("config panel interactions", () => {
 				?.textContent,
 		).toBe('"midnight"');
 		expect(
-			item.querySelector(".drafter-debug-config-base-value")
-				?.textContent,
+			item.querySelector(".drafter-debug-config-base-value")?.textContent,
 		).toContain('embedded: "dark"');
 		expect(
 			item.classList.contains("drafter-debug-config-item-updated"),
@@ -1838,9 +1836,7 @@ describe("multiple instances", () => {
 		);
 
 		panelA.handleEvent(ROUTE_ADDED as RouteAddedEvent);
-		panelB.handleEvent(
-			requestEvent({ request_id: 1, url: "only-in-b" }),
-		);
+		panelB.handleEvent(requestEvent({ request_id: 1, url: "only-in-b" }));
 
 		// Panel A got the route; panel B did not.
 		expect(

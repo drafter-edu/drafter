@@ -190,6 +190,49 @@ def set_page_transition(
         server.reconfigure(page_transition_duration=float(duration))
 
 
+def set_error_page(
+    title: str | None = None,
+    message: str | None = None,
+    show_details: bool | None = None,
+    server: ClientServer | None = None,
+):
+    """
+    Customizes the content of the built-in error page.
+
+    Args:
+        title: A custom heading to show instead of "Something Went Wrong".
+        message: A custom friendly message to show instead of the default
+            explanation of what went wrong.
+        show_details: Whether the technical details (error message,
+            traceback, etc.) are included. Set to False for deployed sites
+            where users should not see tracebacks.
+        server: The server to configure. If None, uses the main server.
+    """
+    if server is None:
+        server = get_main_server()
+    if title is not None:
+        server.reconfigure(error_page_title=title)
+    if message is not None:
+        server.reconfigure(error_page_message=message)
+    if show_details is not None:
+        server.reconfigure(error_page_show_details=bool(show_details))
+
+
+def set_button_spinners(enabled: bool = True, server: ClientServer | None = None):
+    """
+    Enables or disables loading spinners on buttons: while a pressed
+    button's request is being processed, the button shows a small spinner
+    and is temporarily disabled.
+
+    Args:
+        enabled: Whether buttons should show loading spinners.
+        server: The server to configure. If None, uses the main server.
+    """
+    if server is None:
+        server = get_main_server()
+    server.reconfigure(button_spinners=bool(enabled))
+
+
 def add_website_header(header: str, server: ClientServer | None = None):
     """
     Adds additional header content to the website. This is useful for adding custom

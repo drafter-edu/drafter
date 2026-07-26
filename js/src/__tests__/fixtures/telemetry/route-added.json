@@ -17,5 +17,6 @@
 	},
 	"url": "index",
 	"signature": "index(state: State) -> Page",
+	"parameters": [],
 	"is_system_route": false
 }

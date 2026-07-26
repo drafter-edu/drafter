@@ -248,19 +248,37 @@ class NavigationController:
             return None
         return self._replay(self.last_request)
 
-    def replay_by_id(self, request_id: int):
+    def replay_by_id(
+        self,
+        request_id: int,
+        fallback_url: str | None = None,
+        fallback_kwargs: dict | None = None,
+    ):
         """Re-dispatch a specific logged request by its id.
 
         Args:
             request_id: The id of the Request to replay (from the debug
                 history timeline).
+            fallback_url: Route to visit when the request is no longer in
+                the log (e.g. after a bridge restart emptied it); the
+                debug history keeps the url/kwargs from telemetry so the
+                Revisit button still works.
+            fallback_kwargs: Keyword arguments to use with `fallback_url`.
 
         Returns:
             The Response produced by the navigation function, or None when
-            the request has aged out of the log (or never existed).
+            the request has aged out of the log (or never existed) and no
+            fallback was available.
         """
         request = self.request_log.get(request_id)
         if request is None:
+            if fallback_url:
+                return self.goto(
+                    fallback_url,
+                    dict(fallback_kwargs or {}),
+                    action="link",
+                    remember=False,
+                )
             report_bridge_error(
                 "bridge.replay_unknown_request",
                 f"Request {request_id} is no longer available to replay",

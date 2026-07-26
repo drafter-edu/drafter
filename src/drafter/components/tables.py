@@ -149,7 +149,7 @@ class Table(Component):
                 tbody_rows.append(
                     self.render_tr(
                         [
-                            self.render_td(str(getattr(row, attr)), context)
+                            self.render_td(getattr(row, attr), context)
                             for attr in row.__dataclass_fields__
                         ],
                         context,
@@ -158,7 +158,7 @@ class Table(Component):
             elif isinstance(row, list):
                 tbody_rows.append(
                     self.render_tr(
-                        [self.render_td(str(cell), context) for cell in row], context
+                        [self.render_td(cell, context) for cell in row], context
                     )
                 )
 

@@ -429,7 +429,7 @@ class ClientServer:
         """
         # Call the route function to get the payload
         try:
-            args, kwargs, representation = self.router.prepare_arguments(
+            args, kwargs, representation, provenance = self.router.prepare_arguments(
                 request,
                 self.state.current,
                 configuration,
@@ -439,6 +439,7 @@ class ClientServer:
                 RequestParseEvent(
                     request_id=request.id,
                     representation=representation,
+                    arguments=list(provenance),
                 ),
                 "client_server.execute_route",
                 route=request.url,
@@ -493,7 +494,9 @@ class ClientServer:
             )
         # Payload specific verification
         try:
-            payload.verify(self.router, self.state, configuration, request)
+            possible_failure = payload.verify(
+                self.router, self.state, configuration, request
+            )
         except Exception as e:
             raise self.make_visit_error(
                 "payload.verification_failed",
@@ -504,6 +507,15 @@ class ClientServer:
                 status_code=STATUS_ERROR,
                 exception=e,
             ) from e
+        if possible_failure is not None:
+            raise self.make_visit_error(
+                "payload.verification_failed",
+                CATEGORY_PAYLOAD,
+                f"Payload verification failed for URL {request.url}: {possible_failure.message}",
+                request,
+                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                status_code=STATUS_ERROR,
+            )
 
     def render_payload(
         self,

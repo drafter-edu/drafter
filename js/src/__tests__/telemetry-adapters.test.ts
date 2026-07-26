@@ -103,7 +103,7 @@ describe("RouteAdded", () => {
 			".drafter-debug-route-signature",
 		);
 		expect(entry?.querySelector("strong")?.textContent).toBe("index");
-		expect(entry?.querySelector("pre")?.textContent).toBe(
+		expect(entry?.querySelector("code")?.textContent).toBe(
 			"index(state: State) -> Page",
 		);
 	});
@@ -126,6 +126,88 @@ describe("RouteAdded", () => {
 			systemList?.querySelector(".drafter-debug-route-signature strong")
 				?.textContent,
 		).toBe("--reset");
+	});
+
+	test("route entry includes a swagger-style parameter form", () => {
+		const panel = createPanel();
+		const fixture: RouteAddedEvent = {
+			...(ROUTE_ADDED as RouteAddedEvent),
+			url: "guess",
+			signature: "guess(state: State, answer: int)",
+			parameters: [
+				{ name: "answer", type: "int", required: true, default: null },
+			],
+		};
+
+		panel.handleEvent(fixture);
+
+		const form = container().querySelector(
+			".drafter-debug-route-try",
+		) as HTMLFormElement;
+		expect(form).not.toBeNull();
+		const input = form.querySelector(
+			"input[name='answer']",
+		) as HTMLInputElement;
+		expect(input).not.toBeNull();
+		expect(form.textContent).toContain("answer");
+		expect(form.textContent).toContain("int");
+
+		const navigations: CustomEvent[] = [];
+		const listener = (event: Event) =>
+			navigations.push(event as CustomEvent);
+		window.addEventListener("drafter-navigate", listener);
+		try {
+			input.value = "4";
+			form.dispatchEvent(
+				new Event("submit", { bubbles: true, cancelable: true }),
+			);
+		} finally {
+			window.removeEventListener("drafter-navigate", listener);
+		}
+
+		expect(navigations).toHaveLength(1);
+		expect(navigations[0].detail).toEqual({
+			url: "guess",
+			kwargs_json: '{"answer":"4"}',
+		});
+	});
+
+	test("route form with empty fields navigates with no arguments", () => {
+		const panel = createPanel();
+		const fixture: RouteAddedEvent = {
+			...(ROUTE_ADDED as RouteAddedEvent),
+			url: "about",
+			parameters: [
+				{
+					name: "topic",
+					type: "str",
+					required: false,
+					default: "'general'",
+				},
+			],
+		};
+		panel.handleEvent(fixture);
+
+		const form = container().querySelector(
+			".drafter-debug-route-try",
+		) as HTMLFormElement;
+		const navigations: CustomEvent[] = [];
+		const listener = (event: Event) =>
+			navigations.push(event as CustomEvent);
+		window.addEventListener("drafter-navigate", listener);
+		try {
+			form.dispatchEvent(
+				new Event("submit", { bubbles: true, cancelable: true }),
+			);
+		} finally {
+			window.removeEventListener("drafter-navigate", listener);
+		}
+
+		expect(navigations).toHaveLength(1);
+		expect(navigations[0].detail).toEqual({
+			url: "about",
+			kwargs_json: "{}",
+		});
 	});
 
 	test("a system 'index' route still renders in the regular list", () => {
@@ -178,6 +260,48 @@ describe("RequestEvent / RequestParseEvent / ResponseEvent", () => {
 		expect(parse?.textContent).toBe(
 			"index(state=State(score=0), name='Ada')",
 		);
+	});
+
+	test("RequestParseEvent renders a parameter provenance table", () => {
+		const panel = createPanel();
+		panel.handleEvent(REQUEST_EVENT as RequestEvent);
+
+		panel.handleEvent(REQUEST_PARSE_EVENT as RequestParseEvent);
+
+		const table = container().querySelector(".drafter-debug-provenance");
+		expect(table).not.toBeNull();
+		const rows = Array.from(table!.querySelectorAll("tbody tr"));
+		expect(rows).toHaveLength(2);
+		expect(rows[0].textContent).toContain("state");
+		expect(rows[0].textContent).toContain("current state");
+		expect(rows[1].textContent).toContain("name: str");
+		expect(rows[1].textContent).toContain("form field");
+		expect(rows[1].textContent).toContain("'Ada'");
+	});
+
+	test("history Revisit dispatches the url and kwargs for fallback replay", () => {
+		const panel = createPanel();
+		panel.handleEvent(REQUEST_EVENT as RequestEvent);
+
+		const replays: CustomEvent[] = [];
+		const listener = (event: Event) => replays.push(event as CustomEvent);
+		window.addEventListener("drafter-replay-request", listener);
+		try {
+			(
+				container().querySelector(
+					".request-recreate-link",
+				) as HTMLButtonElement
+			).click();
+		} finally {
+			window.removeEventListener("drafter-replay-request", listener);
+		}
+
+		expect(replays).toHaveLength(1);
+		expect(replays[0].detail).toEqual({
+			request_id: 1,
+			url: "index",
+			kwargs_json: '{"name": "Ada"}',
+		});
 	});
 
 	test("ResponseEvent marks the request and renders status and content", () => {
@@ -326,6 +450,72 @@ describe("TestCaseEvent", () => {
 		expect(summary?.textContent).toContain("Passed: 1");
 		expect(summary?.textContent).toContain("Failed: 1");
 	});
+
+	test("Copy All Tests writes a runnable Python file to the clipboard", async () => {
+		const panel = createPanel();
+		panel.handleEvent(TEST_CASE_EVENT as TestCaseEvent);
+		panel.handleEvent(TEST_CASE_EVENT_FAILED as TestCaseEvent);
+
+		const writeText = jest.fn<(text: string) => Promise<void>>(() =>
+			Promise.resolve(),
+		);
+		Object.defineProperty(window.navigator, "clipboard", {
+			value: { writeText },
+			configurable: true,
+		});
+
+		(
+			container().querySelector(
+				".drafter-debug-copy-tests-btn",
+			) as HTMLButtonElement
+		).click();
+		await Promise.resolve();
+
+		expect(writeText).toHaveBeenCalledTimes(1);
+		const source = writeText.mock.calls[0][0];
+		expect(source).toContain("from drafter import *");
+		expect(source).toContain(
+			(TEST_CASE_EVENT as TestCaseEvent).caller,
+		);
+		expect(source).toContain(
+			(TEST_CASE_EVENT_FAILED as TestCaseEvent).caller,
+		);
+		expect(source).toContain("# Line 42 - passed");
+	});
+
+	test("Download Tests builds a .py blob download", () => {
+		const panel = createPanel();
+		panel.handleEvent(TEST_CASE_EVENT as TestCaseEvent);
+
+		const createObjectURL = jest.fn(() => "blob:test-url");
+		const revokeObjectURL = jest.fn();
+		const urlGlobal = URL as unknown as {
+			createObjectURL?: unknown;
+			revokeObjectURL?: unknown;
+		};
+		const originalCreate = urlGlobal.createObjectURL;
+		const originalRevoke = urlGlobal.revokeObjectURL;
+		urlGlobal.createObjectURL = createObjectURL;
+		urlGlobal.revokeObjectURL = revokeObjectURL;
+		const clickSpy = jest
+			.spyOn(HTMLAnchorElement.prototype, "click")
+			.mockImplementation(() => {});
+
+		try {
+			(
+				container().querySelector(
+					".drafter-debug-download-tests-btn",
+				) as HTMLButtonElement
+			).click();
+		} finally {
+			clickSpy.mockRestore();
+			urlGlobal.createObjectURL = originalCreate;
+			urlGlobal.revokeObjectURL = originalRevoke;
+		}
+
+		expect(createObjectURL).toHaveBeenCalledTimes(1);
+		expect(revokeObjectURL).toHaveBeenCalledWith("blob:test-url");
+	});
 });
 
 describe("InitialConfiguration / UpdatedConfiguration", () => {
@@ -446,14 +636,57 @@ describe("UpdatedState", () => {
 		};
 		panel.handleEvent(primitiveOnly);
 
+		// Scope to the Current State section: the State History panel keeps
+		// earlier snapshots (including the dataclass one) by design.
+		const currentState = container().querySelector(
+			"[class*='drafter-debug-current-state-content']",
+		) as HTMLElement;
 		expect(
-			container().querySelector(".drafter-debug-rep-dataclass"),
+			currentState.querySelector(".drafter-debug-rep-dataclass"),
 		).toBeNull();
-		const primitive = container().querySelector(
+		const primitive = currentState.querySelector(
 			".drafter-debug-rep-primitive",
 		);
 		expect(primitive?.textContent).toContain("7");
 		expect(primitive?.textContent).toContain("int");
+	});
+
+	test("each update appends a snapshot to the state history timeline", () => {
+		const panel = createPanel();
+		panel.handleEvent(UPDATED_STATE as unknown as UpdatedStateEvent);
+		const primitiveOnly: UpdatedStateEvent = {
+			...(UPDATED_STATE as unknown as UpdatedStateEvent),
+			representation: {
+				kind: "primitive",
+				value: "7",
+				type: "int",
+				id: 9793312,
+				complexity: 1,
+			},
+		};
+		panel.handleEvent(primitiveOnly);
+
+		const entries = Array.from(
+			container().querySelectorAll(".drafter-debug-state-history-entry"),
+		);
+		expect(entries).toHaveLength(2);
+		// Newest first: the primitive snapshot leads, the dataclass follows.
+		expect(entries[0].textContent).toContain("#2");
+		expect(entries[0].querySelector(".drafter-debug-rep-primitive")).not.toBeNull();
+		expect(entries[1].textContent).toContain("#1");
+		expect(entries[1].querySelector(".drafter-debug-rep-dataclass")).not.toBeNull();
+		// The route from the event's correlation is shown in the summary.
+		const route = (UPDATED_STATE as unknown as UpdatedStateEvent)
+			.correlation?.route;
+		if (route) {
+			expect(entries[1].querySelector("summary")?.textContent).toContain(
+				route,
+			);
+		}
+		// The empty-state notice is gone once snapshots exist.
+		expect(
+			container().querySelector(".drafter-debug-state-history-empty"),
+		).toBeNull();
 	});
 
 	test("unknown representation kinds fall back to the default renderer", () => {

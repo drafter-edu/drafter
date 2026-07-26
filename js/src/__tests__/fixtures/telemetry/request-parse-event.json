@@ -16,5 +16,25 @@
 		"phase": null
 	},
 	"request_id": 1,
-	"representation": "index(state=State(score=0), name='Ada')"
+	"representation": "index(state=State(score=0), name='Ada')",
+	"arguments": [
+		{
+			"name": "state",
+			"source": "state",
+			"source_detail": "",
+			"value": "State(score=0)",
+			"expected_type": "",
+			"converted": null,
+			"changed": false
+		},
+		{
+			"name": "name",
+			"source": "form_field",
+			"source_detail": "name",
+			"value": "'Ada'",
+			"expected_type": "str",
+			"converted": null,
+			"changed": false
+		}
+	]
 }

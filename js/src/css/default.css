@@ -352,3 +352,24 @@ body {
 		transform: rotate(360deg);
 	}
 }
+
+/* Loading state applied to pressed buttons while their request is being
+   processed (configuration setting `button_spinners`). Applied by the
+   bridge's click/submit handlers and cleared when the response commits. */
+.drafter-button-loading-- {
+	pointer-events: none;
+	opacity: 0.75;
+}
+
+.drafter-button-loading--::after {
+	content: "";
+	display: inline-block;
+	width: 0.75em;
+	height: 0.75em;
+	margin-left: 0.5em;
+	border: 0.15em solid currentcolor;
+	border-top-color: transparent;
+	border-radius: 50%;
+	vertical-align: middle;
+	animation: drafter-geolocation-spin 0.8s linear infinite;
+}

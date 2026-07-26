@@ -108,13 +108,10 @@ describe(`Simple Drafter Application`, () => {
 		let drafterBody2 = await document.querySelector("#drafter-body--");
 		expect(drafterBody2).not.toBeNull();
 		let app2 = within(drafterBody2 as HTMLElement);
-		// Simulate clicking the "Second" button
-		const button2 = await app2.findByRole("button", { name: /second/i });
-
-		await userEvent.click(button2);
-
-		// Should now get an error message
-		await app2.findByText(/no route found for URL: second/i);
+		// Page verification rejects the page at render time because its
+		// Button points at a route that no longer exists (proving the
+		// first app's routes were reset).
+		await app2.findByText(/non-existent page `second`/i);
 
 		// Now run the third application
 		clearDrafterSiteRoot();

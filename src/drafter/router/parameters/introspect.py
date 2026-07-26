@@ -143,6 +143,32 @@ class RouteSignatureSpec:
                 parts.append(f"{param.name}: {type_name}")
         return f"{self.function_name}({', '.join(parts)})"
 
+    def describe_request_parameters(self) -> list[dict]:
+        """Describe the parameters a request can supply, as plain data.
+
+        Skips `state`, framework-injected parameters, and variadics; the
+        result is JSON-serializable and shipped to the debug panel so the
+        routes list can build parameter forms.
+
+        Returns:
+            A list of dicts with "name", "type" (display name or ""),
+            "required", and "default" (repr string, or None when the
+            parameter has no default).
+        """
+        parameters = []
+        for param in self.params:
+            if param.injected or param.is_variadic or param.name == "state":
+                continue
+            parameters.append(
+                {
+                    "name": param.name,
+                    "type": param.describe_annotation() or "",
+                    "required": param.required,
+                    "default": repr(param.default) if param.has_default else None,
+                }
+            )
+        return parameters
+
 
 INJECTED_PARAMETER_PREFIX = "_"
 """Parameters whose names start with this prefix are marked as injected:

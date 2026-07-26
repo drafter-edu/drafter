@@ -6,6 +6,7 @@ import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrappe
 import type { TestCaseEvent } from "./telemetry/tests";
 import { TestPanel } from "./panels/testing";
 import { StatePanel } from "./panels/state";
+import { StateHistoryPanel } from "./panels/state_history";
 import { RoutesPanel } from "./panels/routes";
 import { HistoryPanel } from "./panels/history";
 import { LogPanel } from "./panels/log";
@@ -23,7 +24,11 @@ import { StoragePanel } from "./panels/storage";
 import { InternalsPanel } from "./panels/internals";
 import { attachPrinterConsole } from "../console/printer";
 import { TabBar } from "./tabs";
-import { HeaderMenuBar, type MenuDefinition, type MenuItemDefinition } from "./menubar";
+import {
+	HeaderMenuBar,
+	type MenuDefinition,
+	type MenuItemDefinition,
+} from "./menubar";
 import { getCurrentSourceCode, openCodeEditor } from "./editor";
 import { openSourceViewer } from "./viewsource";
 import { openStateEditor } from "./state_edit";
@@ -47,6 +52,7 @@ export class DebugPanel {
 	private footerBar: DebugFooterBar;
 	private testingPanel: TestPanel;
 	private statePanel: StatePanel;
+	private stateHistoryPanel: StateHistoryPanel;
 	private routesPanel: RoutesPanel;
 	private historyPanel: HistoryPanel;
 	private configPanel: ConfigPanel;
@@ -99,6 +105,11 @@ export class DebugPanel {
 			this.root,
 		);
 		this.statePanel = new StatePanel(
+			this.containerId,
+			this.instanceId,
+			this.root,
+		);
+		this.stateHistoryPanel = new StateHistoryPanel(
 			this.containerId,
 			this.instanceId,
 			this.root,
@@ -173,6 +184,7 @@ export class DebugPanel {
 			this.currentPanel,
 			this.statePanel,
 			this.historyPanel,
+			this.stateHistoryPanel,
 			this.routesPanel,
 			this.routeGraphPanel,
 			this.testingPanel,
@@ -272,7 +284,10 @@ export class DebugPanel {
 			{
 				id: "history",
 				labelKey: "debug.tab.history",
-				content: [this.historyPanel.createStructure()],
+				content: [
+					this.historyPanel.createStructure(),
+					this.stateHistoryPanel.createStructure(),
+				],
 			},
 			{
 				id: "overview",
@@ -287,8 +302,9 @@ export class DebugPanel {
 				labelKey: "debug.tab.tests",
 				content: [
 					this.testingPanel.createStructure(),
-					this.coveragePanel.createStructure(),
-					this.testWizardPanel.createStructure(),
+					// TODO: Finish these panels
+					// this.coveragePanel.createStructure(),
+					// this.testWizardPanel.createStructure(),
 				],
 			},
 			{
@@ -464,8 +480,8 @@ export class DebugPanel {
 						tooltipKey: "menu.edit_state.tooltip",
 						className: "drafter-menu-item-edit-state",
 						action: () =>
-							openStateEditor(() =>
-								this.statePanel?.getPlainText() ?? "",
+							openStateEditor(
+								() => this.statePanel?.getPlainText() ?? "",
 							),
 					},
 					{
@@ -486,7 +502,8 @@ export class DebugPanel {
 						iconKey: "icon.save",
 						tooltipKey: "button.save.tooltip",
 						className: "drafter-menu-item-quick-save",
-						action: () => this.saveLoad.requestSave("save", "quick"),
+						action: () =>
+							this.saveLoad.requestSave("save", "quick"),
 					},
 					{
 						labelKey: "menu.save_slot",
@@ -544,8 +561,7 @@ export class DebugPanel {
 						iconKey: "icon.documentation",
 						tooltipKey: "menu.documentation.tooltip",
 						className: "drafter-menu-item-documentation",
-						action: () =>
-							window.open(DOCUMENTATION_URL, "_blank"),
+						action: () => window.open(DOCUMENTATION_URL, "_blank"),
 					},
 					{
 						labelKey: "menu.bug_report",
@@ -590,6 +606,7 @@ export class DebugPanel {
 					typed.url,
 					typed.signature,
 					typed.is_system_route,
+					typed.parameters ?? [],
 				);
 				break;
 			case "RequestEvent":
@@ -606,12 +623,14 @@ export class DebugPanel {
 				break;
 			case "ResponseEvent":
 				handled = this.historyPanel?.addResponse(typed) ?? false;
-				this.currentPanel?.setPageContent(
-					typed.formatted_page_content,
-				);
+				this.currentPanel?.setPageContent(typed.formatted_page_content);
 				break;
 			case "UpdatedState":
 				this.statePanel?.renderState(typed.representation);
+				this.stateHistoryPanel?.addSnapshot(
+					typed.representation,
+					typed.correlation?.route ?? "",
+				);
 				break;
 			case "StateSnapshot":
 				this.saveLoad.handleSnapshot(typed);
@@ -646,10 +665,7 @@ export class DebugPanel {
 		if (!envelope) {
 			return;
 		}
-		if (
-			envelope.severity === "error" ||
-			envelope.severity === "critical"
-		) {
+		if (envelope.severity === "error" || envelope.severity === "critical") {
 			this.currentErrorCount++;
 		} else if (envelope.severity === "warning") {
 			this.currentWarningCount++;

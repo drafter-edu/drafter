@@ -2,7 +2,8 @@
 Request/Response events for tracking page visits and server interactions.
 """
 
-from dataclasses import dataclass
+import json
+from dataclasses import dataclass, field
 from typing import Any
 
 from drafter.data.errors import STATUS_OK
@@ -18,6 +19,10 @@ class RequestEvent(TelemetryRecord):
         url: The URL being requested
         action: The action being performed
         kwargs: String representation of the request keyword arguments
+        kwargs_json: JSON encoding of the request keyword arguments, or ""
+            when they are not JSON-serializable. Lets the debug history's
+            Revisit button rebuild the request even after the in-memory
+            request log has been reset or aged out.
         event: String representation of the additional event information
         request_id: Unique identifier for this request
         kind: Event-type discriminator, always "RequestEvent"
@@ -26,6 +31,7 @@ class RequestEvent(TelemetryRecord):
     url: str = ""
     action: str = ""
     kwargs: str = ""
+    kwargs_json: str = ""
     event: str = ""
     request_id: int = -1
     kind: str = "RequestEvent"
@@ -42,6 +48,7 @@ class RequestEvent(TelemetryRecord):
             "url": self.url,
             "action": self.action,
             "kwargs": self.kwargs,
+            "kwargs_json": self.kwargs_json,
             "event": self.event,
             "request_id": self.request_id,
         }
@@ -53,22 +60,28 @@ class RequestEvent(TelemetryRecord):
 
         Args:
             request: The Request to summarize; its kwargs and event dicts
-                are captured as string representations.
+                are captured as string representations (plus a JSON
+                encoding of kwargs when possible, for replay).
 
         Returns:
             A new RequestEvent populated from the request.
         """
+        try:
+            kwargs_json = json.dumps(request.kwargs) if request.kwargs else "{}"
+        except Exception:
+            kwargs_json = ""
         return cls(
             url=request.url,
             action=request.action,
             kwargs=str(request.kwargs),
+            kwargs_json=kwargs_json,
             event=str(request.event),
             request_id=request.id,
         )
 
 
-# TODO: Also track argument type changes, unused arguments, unmatched
-#       arguments, and button-namespace usage in RequestParseEvent.
+# TODO: Also track unused arguments, unmatched arguments, and
+#       button-namespace usage in RequestParseEvent.
 @dataclass
 class RequestParseEvent(TelemetryRecord):
     """
@@ -80,11 +93,15 @@ class RequestParseEvent(TelemetryRecord):
     Attributes:
         request_id: Unique identifier for this request
         representation: String representation of the parsed request
+        arguments: Per-parameter provenance dicts (name, source,
+            source_detail, value, expected_type, converted, changed)
+            describing where each bound argument came from
         kind: Event-type discriminator, always "RequestParseEvent"
     """
 
     request_id: int = -1
     representation: str = ""
+    arguments: list[dict] = field(default_factory=list)
     kind: str = "RequestParseEvent"
 
     def to_json(self) -> dict[str, Any]:
@@ -98,6 +115,7 @@ class RequestParseEvent(TelemetryRecord):
             **super().to_json(),
             "request_id": self.request_id,
             "representation": self.representation,
+            "arguments": self.arguments,
         }
 
 

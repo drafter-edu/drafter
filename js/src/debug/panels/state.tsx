@@ -4,7 +4,7 @@ import type { SpecificRepresentation } from "../telemetry/state";
 // TODO: Cycle background colors for instances of the same type for easier distinction
 // Need to track unique types seen so far, so promote to class later if needed
 
-function renderRepresentation(rep: SpecificRepresentation) {
+export function renderRepresentation(rep: SpecificRepresentation) {
 	switch (rep.kind) {
 		case "primitive":
 			return (

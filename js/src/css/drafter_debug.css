@@ -1769,3 +1769,90 @@ div.btlw-container img {
 	border-radius: 4px;
 	padding: 0.5em;
 }
+
+/* Routes panel: swagger-style "try it" parameter forms. */
+.drafter-debug-route-signature {
+	margin: 4px 0;
+}
+
+.drafter-debug-route-signature > summary {
+	cursor: pointer;
+}
+
+.drafter-debug-route-try {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin: 6px 0 8px 18px;
+	padding: 6px 8px;
+	border-left: 3px solid rgba(96, 108, 124, 0.35);
+}
+
+.drafter-debug-route-try-field {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.drafter-debug-route-try-name {
+	font-family: monospace;
+	font-weight: 600;
+	min-width: 90px;
+}
+
+.drafter-debug-route-try-type {
+	font-family: monospace;
+	opacity: 0.7;
+}
+
+.drafter-debug-route-try input {
+	flex: 1;
+	min-width: 60px;
+	font-family: monospace;
+	padding: 2px 6px;
+}
+
+.drafter-debug-route-try-submit {
+	align-self: flex-start;
+}
+
+/* History panel: per-request parameter provenance table. */
+.drafter-debug-provenance {
+	border-collapse: collapse;
+	margin: 4px 0;
+	font-size: 11px;
+}
+
+.drafter-debug-provenance th,
+.drafter-debug-provenance td {
+	border: 1px solid rgba(96, 108, 124, 0.35);
+	padding: 2px 6px;
+	text-align: left;
+	font-family: monospace;
+}
+
+.drafter-debug-provenance th {
+	font-weight: 600;
+}
+
+/* State history timeline (history tab). */
+.drafter-debug-state-history-entry {
+	margin: 4px 0;
+}
+
+.drafter-debug-state-history-entry > summary {
+	cursor: pointer;
+	font-family: monospace;
+}
+
+.drafter-debug-state-history-empty {
+	opacity: 0.7;
+	font-style: italic;
+}
+
+/* Test panel: copy/download all generated tests. */
+.drafter-debug-test-actions {
+	display: flex;
+	gap: 6px;
+	margin-bottom: 6px;
+}

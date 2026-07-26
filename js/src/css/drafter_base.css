@@ -24,12 +24,18 @@
 	background-color: #fffaf0;
 	border-left: 4px solid #e53e3e;
 	padding: 15px;
-	border-radius: 4px;
 	font-family: "Consolas", "Monaco", "Courier New", monospace;
 	font-size: 14px;
 	line-height: 1.6;
 	color: #2d3748;
 	overflow-x: auto;
+}
+
+.drafter-body-- .error-page table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 15px;
+	background-color: #fffaf0;
 }
 
 .drafter-body-- .error-page .error-navigation {

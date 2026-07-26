@@ -33,6 +33,7 @@ from drafter.bridge.log import debug_log
 from drafter.bridge.runtime import RuntimeAdapter
 from drafter.components.page_content import Component
 from drafter.data.request import Request
+from drafter.helpers.urls import is_external_url
 from drafter.site.site import DRAFTER_TAG_IDS
 
 DOUBLE_PRESS_THRESHOLD = 600  # milliseconds
@@ -118,10 +119,39 @@ class EventManager:
         # concurrent instances don't find each other's elements.
         self.scope: Any = runtime.context.document
 
+        # Whether pressed buttons show a loading spinner until the response
+        # is committed (configuration setting `button_spinners`).
+        self.button_spinners: bool = False
+
     def set_scope(self, scope: Any) -> None:
         """Scope this manager's inner-frame lookups to the given node."""
         if scope is not None:
             self.scope = scope
+
+    BUTTON_LOADING_CLASS = "drafter-button-loading--"
+
+    def start_button_spinner(self, element: Any) -> None:
+        """Mark a pressed button as loading (spinner + no more clicks).
+
+        Only acts when the `button_spinners` configuration setting is on.
+        The CSS class shows a spinner and disables pointer events; the
+        mark is cleared by clear_button_spinners when a response commits.
+        """
+        if not self.button_spinners or element is None:
+            return
+        try:
+            element.classList.add(self.BUTTON_LOADING_CLASS)
+        except Exception:
+            pass
+
+    def clear_button_spinners(self) -> None:
+        """Remove the loading mark from any buttons still spinning."""
+        try:
+            spinning = self.scope.querySelectorAll("." + self.BUTTON_LOADING_CLASS)
+            for element in spinning:
+                element.classList.remove(self.BUTTON_LOADING_CLASS)
+        except Exception:
+            pass
 
     # Event Mounts
 
@@ -255,19 +285,30 @@ class EventManager:
             # Find nearest element with data-nav or data-call
             nearest_nav_link = target.closest("[data-nav], [data-call]")
             if nearest_nav_link and root.contains(nearest_nav_link):
-                event.preventDefault()
-                debug_log("client.handle_click", nearest_nav_link)
                 name = nearest_nav_link.getAttribute(
                     "data-nav"
                 ) or nearest_nav_link.getAttribute("data-call")
+                is_anchor = nearest_nav_link.tagName.lower() == "a"
+                if name and is_external_url(name):
+                    # External URLs leave the Drafter app entirely; they are
+                    # not routes and must not be dispatched to the router.
+                    if is_anchor:
+                        # The anchor's href is the external URL; let the
+                        # browser follow it natively (honoring target=,
+                        # modifier keys, etc.).
+                        return
+                    # A button would otherwise submit the surrounding form.
+                    event.preventDefault()
+                    self.runtime.context.window.location.href = name
+                    return
+                event.preventDefault()
+                debug_log("client.handle_click", nearest_nav_link)
                 if not name:
                     return
 
                 dom_id = (
                     nearest_nav_link.id if hasattr(nearest_nav_link, "id") else None
                 )
-
-                is_anchor = nearest_nav_link.tagName.lower() == "a"
                 incomplete_data = get_all_event_data(
                     self.runtime,
                     target,
@@ -275,6 +316,8 @@ class EventManager:
                     None if is_anchor else nearest_nav_link,
                     self.scope,
                 )
+                if not is_anchor:
+                    self.start_button_spinner(nearest_nav_link)
 
                 def finish_navigation(files_and_data):
                     bundle = files_and_data[-1] if files_and_data else {}
@@ -323,10 +366,17 @@ class EventManager:
                 url = form_root.action
             else:
                 url = self.runtime.context.window.location.href
+            if url and is_external_url(url):
+                # An external formaction leaves the Drafter app entirely;
+                # navigate the browser instead of dispatching to the router.
+                self.runtime.context.window.location.href = url
+                return
             # Build and dispatch navigation event
             incomplete_data = get_all_event_data(
                 self.runtime, event.target, event, submitter, self.scope
             )
+            if submitter is not None:
+                self.start_button_spinner(submitter)
 
             def finish_form_navigation(files_and_data):
                 # Like the other handlers, this receives the resolved list of

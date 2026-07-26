@@ -163,13 +163,17 @@ export class HistoryPanel extends Panel {
 				Revisit
 			</button>
 		);
-		// Telemetry only carries a repr of the request's kwargs, so the
-		// replay sends the request id and Python re-dispatches the actual
-		// Request object it logged for that id.
+		// Python re-dispatches the actual Request object it logged for this
+		// id; the url and JSON kwargs ride along so the request can be
+		// rebuilt even after the log was reset (e.g. a code restart).
 		recreateLink.addEventListener("click", () => {
 			window.dispatchEvent(
 				new CustomEvent("drafter-replay-request", {
-					detail: { request_id: request.request_id },
+					detail: {
+						request_id: request.request_id,
+						url: request.url,
+						kwargs_json: request.kwargs_json ?? "",
+					},
 				}),
 			);
 		});
@@ -233,7 +237,71 @@ export class HistoryPanel extends Panel {
 		);
 
 		requestEventElement.appendChild(parseElement);
+		const provenance = this.buildProvenanceTable(parseEvent.arguments);
+		if (provenance) {
+			requestEventElement.appendChild(provenance);
+		}
 		return true;
+	}
+
+	/** Human-readable labels for argument provenance sources. */
+	private static readonly SOURCE_LABELS: Record<string, string> = {
+		form_field: "form field",
+		event_detail: "event value",
+		component_argument: "component argument",
+		framework_meta: "framework value",
+		framework_injected: "framework (injected)",
+		state: "current state",
+		default: "default value",
+	};
+
+	/** A table showing where each bound route argument came from. */
+	private buildProvenanceTable(
+		argumentEntries: RequestParseEvent["arguments"] | undefined,
+	): HTMLElement | null {
+		if (!argumentEntries || argumentEntries.length === 0) {
+			return null;
+		}
+		return (
+			<details class="drafter-debug-provenance-details">
+				<summary>Parameters ({argumentEntries.length})</summary>
+				<table class="drafter-debug-provenance">
+					<thead>
+						<tr>
+							<th>Parameter</th>
+							<th>Source</th>
+							<th>Value</th>
+							<th>Converted</th>
+						</tr>
+					</thead>
+					<tbody>
+						{argumentEntries.map((entry) => (
+							<tr>
+								<td>
+									{entry.name}
+									{entry.expected_type
+										? `: ${entry.expected_type}`
+										: ""}
+								</td>
+								<td>
+									{HistoryPanel.SOURCE_LABELS[entry.source] ??
+										entry.source}
+									{entry.source_detail
+										? ` (${entry.source_detail})`
+										: ""}
+								</td>
+								<td>{entry.value}</td>
+								<td>
+									{entry.changed
+										? (entry.converted ?? "")
+										: "—"}
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</details>
+		) as HTMLElement;
 	}
 
 	public addResponse(response: ResponseEvent): boolean {

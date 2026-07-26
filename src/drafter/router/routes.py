@@ -160,10 +160,12 @@ class Router:
         # TODO: Handle ignored parameters.
         self.routes[normalize_url(url)] = func
         self.route_functions[clean_url(url)] = func
-        self.signatures[normalize_url(url)] = get_signature(func)
+        signature = get_signature(func)
+        self.signatures[normalize_url(url)] = signature
         return {
             "url": url,
-            "signature": self.signatures[normalize_url(url)].to_string(),
+            "signature": signature.to_string(),
+            "parameters": signature.describe_request_parameters(),
         }
 
     def reset(self) -> None:
@@ -184,7 +186,7 @@ class Router:
         current_state: SiteState,
         configuration: ClientServerConfiguration,
         extra_dependencies: dict[str, Any],
-    ) -> tuple[list[Any], dict[str, Any], str]:
+    ) -> tuple[list[Any], dict[str, Any], str, tuple[dict, ...]]:
         """Prepare positional and keyword arguments for route invocation.
 
         Runs the deterministic five-stage parameter pipeline:
@@ -208,7 +210,8 @@ class Router:
             extra_dependencies: Framework values injected by parameter name.
 
         Returns:
-            Tuple of (args list, kwargs dict, representation string).
+            Tuple of (args list, kwargs dict, representation string,
+            per-parameter provenance dicts for the debug panel).
 
         Raises:
             ParameterBindingError: If required parameters are missing or
@@ -247,7 +250,12 @@ class Router:
         representation = self.build_argument_representation(
             signature, list(bound.args), representable_kwargs
         )
-        return list(bound.args), dict(bound.kwargs), representation
+        return (
+            list(bound.args),
+            dict(bound.kwargs),
+            representation,
+            bound.provenance,
+        )
 
     def report_diagnostics(
         self, request: Request, diagnostics: tuple[RouteDiagnostic, ...]

@@ -11,7 +11,7 @@ round-trip is covered by js/src/__tests__/debug-saveload.test.tsx.
 
 import json
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -51,6 +51,15 @@ class GameState:
     score: int
     name: str
     inventory: Inventory | None = None
+
+
+@dataclass
+class TreeNode:
+    """Self-referential dataclass to prove cycles survive the round trip."""
+
+    name: str
+    children: list["TreeNode"] = field(default_factory=list)
+    parent: "TreeNode | None" = None
 
 
 @pytest.fixture
@@ -164,6 +173,67 @@ class TestSerializeSnapshot:
             )
             == 1
         )
+
+
+class TestCircularReferences:
+    def test_self_cycle_encodes_with_reference_marker(self):
+        node = TreeNode(name="root")
+        node.parent = node
+
+        event = serialize_state_snapshot(node, "index", {}, "save", "quick")
+
+        assert event is not None
+        data = json.loads(event.state_json)
+        assert data["name"] == "root"
+        assert data["parent"] == {"$drafter_ref": []}
+
+    def test_parent_child_cycle_round_trips_with_identity(self):
+        root = TreeNode(name="root")
+        child = TreeNode(name="child", parent=root)
+        root.children.append(child)
+
+        event = serialize_state_snapshot(root, "index", {}, "save", "quick")
+        assert event is not None
+        restored = deserialize_state_snapshot(event.state_json, TreeNode(name=""))
+
+        assert restored.name == "root"
+        assert restored.children[0].name == "child"
+        # The cycle is a real object cycle again, not a duplicate.
+        assert restored.children[0].parent is restored
+
+    def test_list_cycle_round_trips_without_a_state_class(self):
+        data = [1, 2]
+        data.append(data)
+
+        event = serialize_state_snapshot(data, "index", {}, "save", "quick")
+        assert event is not None
+        restored = deserialize_state_snapshot(event.state_json, None)
+
+        assert restored[0] == 1
+        assert restored[2] is restored
+
+    def test_dict_cycle_round_trips_without_a_state_class(self):
+        data = {"name": "loop"}
+        data["me"] = data
+
+        event = serialize_state_snapshot(data, "index", {}, "save", "quick")
+        assert event is not None
+        restored = deserialize_state_snapshot(event.state_json, None)
+
+        assert restored["name"] == "loop"
+        assert restored["me"] is restored
+
+    def test_shared_but_acyclic_objects_still_encode(self):
+        shared = TreeNode(name="shared")
+        root = TreeNode(name="root", children=[shared, shared])
+
+        event = serialize_state_snapshot(root, "index", {}, "save", "quick")
+
+        assert event is not None
+        data = json.loads(event.state_json)
+        # Shared (non-cyclic) references are duplicated, as before.
+        assert data["children"][0]["name"] == "shared"
+        assert data["children"][1]["name"] == "shared"
 
 
 class TestDeserializeSnapshot:

@@ -9,6 +9,7 @@ from drafter.history.state import SiteState
 from drafter.payloads.failure import VerificationFailure
 from drafter.payloads.kinds.fragment import Fragment
 from drafter.payloads.target import DEFAULT_BODY_TARGET
+from drafter.payloads.verification import verify_unique_component_names
 from drafter.router.routes import Router
 
 
@@ -98,12 +99,15 @@ class Page(Fragment):
         try:
             for chunk in self.content:
                 if hasattr(chunk, "verify"):
-                    chunk.verify(state, configuration, request)
+                    chunk.verify(router, state, configuration, request)
         except Exception as e:
             return VerificationFailure(
                 f"While verifying the Page() object returned from {original_function}, an error was encountered:\n"
                 f"{e}"
             )
+        duplicate_message = verify_unique_component_names(request, self.content)
+        if duplicate_message:
+            return VerificationFailure(duplicate_message)
         return None
 
     def format_target(self) -> str:

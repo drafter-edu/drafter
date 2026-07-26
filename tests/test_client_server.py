@@ -348,6 +348,54 @@ class TestPayloadHandling:
             started_server.verify_payload(sample_request, payload, config)
         assert exc_info.value.status_code == STATUS_ERROR
 
+    def test_verify_payload_duplicate_component_names(
+        self, started_server: ClientServer, sample_request: Request
+    ):
+        """Two components sharing a name is a verification error."""
+        from drafter.components.forms import TextBox
+
+        payload = Page(None, [TextBox("answer"), TextBox("answer")])
+        config = started_server.get_current_configuration()
+
+        with pytest.raises(ErrorDetails) as exc_info:
+            started_server.verify_payload(sample_request, payload, config)
+        assert "answer" in exc_info.value.message
+
+    def test_verify_payload_nested_duplicate_component_names(
+        self, started_server: ClientServer, sample_request: Request
+    ):
+        """Duplicate names are found even inside container components."""
+        from drafter.components.forms import TextArea, TextBox
+        from drafter.components.layout import Div
+
+        payload = Page(None, [TextBox("answer"), Div(TextArea("answer"))])
+        config = started_server.get_current_configuration()
+
+        with pytest.raises(ErrorDetails) as exc_info:
+            started_server.verify_payload(sample_request, payload, config)
+        assert "answer" in exc_info.value.message
+
+    def test_verify_payload_unique_component_names(
+        self, started_server: ClientServer, sample_request: Request
+    ):
+        """Distinct names (and multiple Buttons/Links) verify fine."""
+        from drafter.components.forms import TextBox
+        from drafter.components.links import Button
+
+        started_server.add_route("guess", lambda state: Page(None, []))
+        payload = Page(
+            None,
+            [
+                TextBox("first"),
+                TextBox("second"),
+                Button("Go", "guess"),
+                Button("Also Go", "guess"),
+            ],
+        )
+        config = started_server.get_current_configuration()
+
+        started_server.verify_payload(sample_request, payload, config)
+
     def test_render_payload_page(
         self, started_server: ClientServer, sample_request: Request
     ):

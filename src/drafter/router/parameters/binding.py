@@ -43,6 +43,10 @@ class BoundArguments:
         consumed_payload_keys: Payload names that bound to a parameter.
         conversions: ConversionRecord/UnchangedRecord entries for the
             debug panel.
+        provenance: JSON-serializable dicts describing, per bound
+            parameter, where its value came from (form field, event,
+            component argument, default, state, framework) and how it was
+            converted; shipped to the debug panel with the parse event.
     """
 
     args: tuple[Any, ...]
@@ -50,6 +54,7 @@ class BoundArguments:
     diagnostics: tuple[RouteDiagnostic, ...]
     consumed_payload_keys: frozenset[str]
     conversions: tuple[Any, ...] = ()
+    provenance: tuple[dict, ...] = ()
 
 
 class PayloadMerger:
@@ -189,6 +194,7 @@ class RouteBinder:
         extra_dependencies = extra_dependencies or {}
         diagnostics: list[RouteDiagnostic] = []
         conversions: list[Any] = []
+        provenance: list[dict] = []
         consumed: set[str] = set()
         args: list[Any] = []
         kwargs: dict[str, Any] = {}
@@ -217,6 +223,17 @@ class RouteBinder:
         if inject_state:
             args.append(state)
             bound_names.add(named[0].name)
+            provenance.append(
+                {
+                    "name": named[0].name,
+                    "source": "state",
+                    "source_detail": "",
+                    "value": preview_value(state),
+                    "expected_type": named[0].describe_annotation() or "",
+                    "converted": None,
+                    "changed": False,
+                }
+            )
 
         # Framework dependencies bind by exact name and win over request data.
         for param in named:
@@ -225,6 +242,17 @@ class RouteBinder:
             if param.name in extra_dependencies:
                 kwargs[param.name] = extra_dependencies[param.name]
                 bound_names.add(param.name)
+                provenance.append(
+                    {
+                        "name": param.name,
+                        "source": "framework_injected",
+                        "source_detail": "",
+                        "value": preview_value(extra_dependencies[param.name]),
+                        "expected_type": param.describe_annotation() or "",
+                        "converted": None,
+                        "changed": False,
+                    }
+                )
 
         # Bind payload values by name, then by declared aliases.
         payload_bound: dict[str, PayloadValue] = {}
@@ -344,16 +372,44 @@ class RouteBinder:
                 )
                 continue
             kwargs[param.name] = result.value
-            if result.value is value.value:
-                conversions.append(
-                    UnchangedRecord(param.name, value.value, param.annotation)
-                )
-            else:
+            changed = result.value is not value.value
+            if changed:
                 conversions.append(
                     ConversionRecord(
                         param.name, value.value, param.annotation, result.value
                     )
                 )
+            else:
+                conversions.append(
+                    UnchangedRecord(param.name, value.value, param.annotation)
+                )
+            provenance.append(
+                {
+                    "name": param.name,
+                    "source": value.source,
+                    "source_detail": value.source_detail or "",
+                    "value": preview_value(value.value),
+                    "expected_type": param.describe_annotation() or "",
+                    "converted": preview_value(result.value) if changed else None,
+                    "changed": changed,
+                }
+            )
+
+        # Parameters that fell back to their declared default value.
+        for param in named:
+            if param.name in bound_names or not param.has_default:
+                continue
+            provenance.append(
+                {
+                    "name": param.name,
+                    "source": "default",
+                    "source_detail": "",
+                    "value": preview_value(param.default),
+                    "expected_type": param.describe_annotation() or "",
+                    "converted": None,
+                    "changed": False,
+                }
+            )
 
         return BoundArguments(
             args=tuple(args),
@@ -361,4 +417,5 @@ class RouteBinder:
             diagnostics=tuple(diagnostics),
             consumed_payload_keys=frozenset(consumed),
             conversions=tuple(conversions),
+            provenance=tuple(provenance),
         )

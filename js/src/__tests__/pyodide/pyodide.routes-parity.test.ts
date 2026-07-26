@@ -109,9 +109,10 @@ describe("Pyodide Routes Parity", () => {
 		let drafterBody2 = document.querySelector("#drafter-body--");
 		expect(drafterBody2).not.toBeNull();
 		let app2 = within(drafterBody2 as HTMLElement);
-		const button2 = await app2.findByRole("button", { name: /second/i });
-		await userEvent.click(button2);
-		await app2.findByText(/no route found for URL: second/i);
+		// Page verification rejects the page at render time because its
+		// Button points at a route that no longer exists (proving the
+		// first app's routes were reset).
+		await app2.findByText(/non-existent page `second`/i);
 
 		await resetPyodideDrafterRuntime();
 		await runStudentCode({

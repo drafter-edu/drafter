@@ -18,6 +18,7 @@
 	"url": "index",
 	"action": "click",
 	"kwargs": "{'name': 'Ada'}",
+	"kwargs_json": "{\"name\": \"Ada\"}",
 	"event": "{'button_pressed': 'submit'}",
 	"request_id": 1
 }

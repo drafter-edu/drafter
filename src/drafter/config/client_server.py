@@ -52,6 +52,16 @@ class ClientServerConfiguration(BaseConfiguration):
             page in from transparent, and any CSS color (e.g. "black",
             "white", "#004488") fades the new page in from that color.
         page_transition_duration: Length of the page transition in seconds.
+        button_spinners: Whether pressed buttons show a loading spinner
+            (and stop accepting clicks) until their request's response is
+            committed.
+        error_page_title: Custom heading for the built-in error page; ""
+            uses the default ("Something Went Wrong").
+        error_page_message: Custom friendly message for the error page; ""
+            uses the category-based default summary.
+        error_page_show_details: Whether the error page includes the
+            technical details/traceback section (disable for deployed
+            sites).
     """
 
     server_name: str = "MAIN_SERVER"
@@ -92,8 +102,15 @@ class ClientServerConfiguration(BaseConfiguration):
     page_transition: str = "none"
     # Page transition length in seconds
     page_transition_duration: float = 0.5
+    # Show a loading spinner on buttons while their request is processed
+    button_spinners: bool = False
+    # Custom heading for the error page ("" uses the default)
+    error_page_title: str = ""
+    # Custom friendly message for the error page ("" uses the default)
+    error_page_message: str = ""
+    # Whether the error page includes the technical details/traceback section
+    error_page_show_details: bool = True
     # TODO: Handle the system routes as configuration settings
-    # TODO: Config setting to add spinner to buttons
     # TODO: Config setting to forbid external links
 
     @staticmethod
@@ -162,6 +179,12 @@ class ClientServerConfiguration(BaseConfiguration):
         result.get_string_if_exists("DRAFTER_PAGE_TRANSITION", "page_transition")
         result.get_float_if_exists(
             "DRAFTER_PAGE_TRANSITION_DURATION", "page_transition_duration"
+        )
+        result.get_bool_if_exists("DRAFTER_BUTTON_SPINNERS", "button_spinners")
+        result.get_string_if_exists("DRAFTER_ERROR_PAGE_TITLE", "error_page_title")
+        result.get_string_if_exists("DRAFTER_ERROR_PAGE_MESSAGE", "error_page_message")
+        result.get_bool_if_exists(
+            "DRAFTER_ERROR_PAGE_SHOW_DETAILS", "error_page_show_details"
         )
         return result.as_dict()
 
@@ -287,6 +310,29 @@ class ClientServerConfiguration(BaseConfiguration):
             type=float,
             help="Length of the page transition in seconds",
         )
+        group.add_argument(
+            "--button-spinners",
+            action="store_true",
+            help=(
+                "Show a loading spinner on buttons while their request is "
+                "being processed"
+            ),
+        )
+        group.add_argument(
+            "--error-page-title",
+            type=str,
+            help="Custom heading shown on the error page",
+        )
+        group.add_argument(
+            "--error-page-message",
+            type=str,
+            help="Custom friendly message shown on the error page",
+        )
+        group.add_argument(
+            "--hide-error-details",
+            action="store_true",
+            help="Hide the technical details/traceback section on the error page",
+        )
         return group
 
     @staticmethod
@@ -367,6 +413,14 @@ class ClientServerConfiguration(BaseConfiguration):
             result["page_transition"] = parsed_args["page_transition"]
         if parsed_args.get("page_transition_duration") is not None:
             result["page_transition_duration"] = parsed_args["page_transition_duration"]
+        if parsed_args.get("button_spinners"):
+            result["button_spinners"] = True
+        if parsed_args.get("error_page_title"):
+            result["error_page_title"] = parsed_args["error_page_title"]
+        if parsed_args.get("error_page_message"):
+            result["error_page_message"] = parsed_args["error_page_message"]
+        if parsed_args.get("hide_error_details"):
+            result["error_page_show_details"] = False
         return result
 
     def to_json(self) -> dict:
@@ -405,6 +459,10 @@ class ClientServerConfiguration(BaseConfiguration):
             "newlines_to_br": self.newlines_to_br,
             "page_transition": self.page_transition,
             "page_transition_duration": self.page_transition_duration,
+            "button_spinners": self.button_spinners,
+            "error_page_title": self.error_page_title,
+            "error_page_message": self.error_page_message,
+            "error_page_show_details": self.error_page_show_details,
         }
 
     def copy(self) -> "ClientServerConfiguration":
@@ -439,6 +497,10 @@ class ClientServerConfiguration(BaseConfiguration):
             newlines_to_br=self.newlines_to_br,
             page_transition=self.page_transition,
             page_transition_duration=self.page_transition_duration,
+            button_spinners=self.button_spinners,
+            error_page_title=self.error_page_title,
+            error_page_message=self.error_page_message,
+            error_page_show_details=self.error_page_show_details,
         )
 
     def update_multiple_configuration(self, **kwargs):

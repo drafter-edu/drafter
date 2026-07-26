@@ -148,6 +148,22 @@ class TestReplayById:
             len(events_of_type(captured_events, "bridge.replay_unknown_request")) == 1
         )
 
+    def test_unknown_id_uses_fallback_url_and_kwargs(self, captured_events):
+        # After a bridge restart the request_log is empty, but the debug
+        # history still knows the url/kwargs from telemetry.
+        navigator, dispatched = make_navigator()
+
+        response = navigator.replay_by_id(
+            999999, fallback_url="guess", fallback_kwargs={"answer": 4}
+        )
+
+        assert response.url == "guess"
+        assert dispatched[-1].url == "guess"
+        assert dispatched[-1].kwargs == {"answer": 4}
+        # No history entry and no error report for the fallback path.
+        navigator.history.add_to_history.assert_not_called()
+        assert not events_of_type(captured_events, "bridge.replay_unknown_request")
+
 
 class TestClientBridgeReplayRequest:
     """ClientBridge.replay_request only touches self.navigator, so it can be
@@ -160,7 +176,37 @@ class TestClientBridgeReplayRequest:
 
         ClientBridge.replay_request(fake_bridge, event)
 
-        navigator.replay_by_id.assert_called_once_with(17)
+        navigator.replay_by_id.assert_called_once_with(
+            17, fallback_url=None, fallback_kwargs={}
+        )
+
+    def test_forwards_url_and_decoded_kwargs_for_fallback(self):
+        navigator = MagicMock()
+        fake_bridge = SimpleNamespace(navigator=navigator)
+        event = SimpleNamespace(
+            detail=SimpleNamespace(
+                request_id=17, url="guess", kwargs_json='{"answer": 4}'
+            )
+        )
+
+        ClientBridge.replay_request(fake_bridge, event)
+
+        navigator.replay_by_id.assert_called_once_with(
+            17, fallback_url="guess", fallback_kwargs={"answer": 4}
+        )
+
+    def test_bad_kwargs_json_falls_back_to_empty(self):
+        navigator = MagicMock()
+        fake_bridge = SimpleNamespace(navigator=navigator)
+        event = SimpleNamespace(
+            detail=SimpleNamespace(request_id=17, url="guess", kwargs_json="not json")
+        )
+
+        ClientBridge.replay_request(fake_bridge, event)
+
+        navigator.replay_by_id.assert_called_once_with(
+            17, fallback_url="guess", fallback_kwargs={}
+        )
 
     def test_missing_detail_reports_instead_of_raising(self, captured_events):
         navigator = MagicMock()

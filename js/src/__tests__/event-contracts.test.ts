@@ -289,7 +289,11 @@ describe("debug panel dispatch sites", () => {
 		).click();
 
 		expect(events).toHaveLength(1);
-		expect(events[0].detail).toEqual({ request_id: 42 });
+		expect(events[0].detail).toEqual({
+			request_id: 42,
+			url: "index",
+			kwargs_json: '{"name": "Ada"}',
+		});
 	});
 
 	test("footer evict button dispatches drafter-evict-persistent with the persist key", () => {

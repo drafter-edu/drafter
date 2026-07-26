@@ -100,6 +100,7 @@ class ClientBridge:
         )
         self.navigator = NavigationController(self.runtime)
         self.events = EventManager(self.runtime)
+        self.events.button_spinners = getattr(configuration, "button_spinners", False)
         self.debug_panel = None
         self.hooks = None
         # Re-entrancy guard for _handle_debug_events: reporting a debug-panel
@@ -161,7 +162,7 @@ class ClientBridge:
                 "drafter-toggle-frame": lambda event: hooks.toggle_frame(),
                 "drafter-toggle-debug-mode": lambda event: hooks.toggle_debug_mode(),
                 "drafter-evict-persistent": lambda event: self.evict_persistent(event),
-                "drafter-navigate": lambda event: self.navigator.goto(event.detail),
+                "drafter-navigate": lambda event: self.navigate_from_event(event),
                 "drafter-replay-route": lambda event: self.navigator.replay_last(),
                 "drafter-replay-request": lambda event: self.replay_request(event),
                 "drafter-save-state": lambda event: self.save_state_snapshot(event),
@@ -194,11 +195,36 @@ class ClientBridge:
         if parking_area is not None:
             evict_key(parking_area, str(key))
 
+    def navigate_from_event(self, event) -> None:
+        """Navigate from a drafter-navigate CustomEvent.
+
+        The detail is either a plain route string (menu items) or an
+        object `{url, kwargs_json}` (the routes panel's parameter forms),
+        where kwargs_json is a JSON object of route arguments.
+        """
+        detail = getattr(event, "detail", None)
+        if detail is None:
+            return
+        url = getattr(detail, "url", None)
+        if url is None:
+            self.navigator.goto(str(detail))
+            return
+        kwargs_json = getattr(detail, "kwargs_json", "") or ""
+        try:
+            data = json.loads(kwargs_json) if kwargs_json else {}
+        except Exception:
+            data = {}
+        if not isinstance(data, dict):
+            data = {}
+        self.navigator.goto(str(url), data, action="link")
+
     def replay_request(self, event) -> None:
         """Replay a specific past request (from the debug history's Revisit).
 
-        The event detail carries `{request_id}`; the actual Request object
-        is looked up Python-side (telemetry only has a repr of its kwargs).
+        The event detail carries `{request_id, url, kwargs_json}`. The
+        actual Request object is looked up Python-side; when it has aged
+        out of the log (or the bridge was reset), the url/kwargs captured
+        by telemetry are used to rebuild an equivalent request instead.
         """
         detail = getattr(event, "detail", None)
         request_id = getattr(detail, "request_id", None)
@@ -211,7 +237,19 @@ class ClientBridge:
                 phase="navigation",
             )
             return
-        self.navigator.replay_by_id(int(request_id))
+        fallback_url = getattr(detail, "url", None)
+        kwargs_json = getattr(detail, "kwargs_json", "") or ""
+        try:
+            fallback_kwargs = json.loads(kwargs_json) if kwargs_json else {}
+        except Exception:
+            fallback_kwargs = {}
+        if not isinstance(fallback_kwargs, dict):
+            fallback_kwargs = {}
+        self.navigator.replay_by_id(
+            int(request_id),
+            fallback_url=str(fallback_url) if fallback_url else None,
+            fallback_kwargs=fallback_kwargs,
+        )
 
     def _require_hooks(self) -> ServerHooks:
         """Return the injected ServerHooks, failing loudly when absent.
@@ -476,6 +514,7 @@ class ClientBridge:
             True if the site DOM was updated (and event handlers were
             re-registered), False otherwise.
         """
+        self.events.clear_button_spinners()
         self.site_renderer.remove_page_specific_content()
         self.site_renderer.apply_before_channel(response)
         self.navigator.set_navigation_func(callback)
@@ -561,6 +600,17 @@ class ClientBridge:
                 self.configuration.page_transition_duration = float(
                     event.get("value") or 0.0
                 )
+            elif event.get("key") == "button_spinners":
+                self.configuration.button_spinners = bool(event.get("value"))
+                self.events.button_spinners = self.configuration.button_spinners
+            elif event.get("key") in (
+                "error_page_title",
+                "error_page_message",
+                "error_page_show_details",
+            ):
+                # Consumed by the server-side error route; nothing for the
+                # bridge to do beyond keeping its configuration copy fresh.
+                setattr(self.configuration, str(event.get("key")), event.get("value"))
             else:
                 report_bridge_error(
                     "client.unhandled_config_update",
