@@ -11,6 +11,7 @@ server-side visit lifecycle. Bridge lifecycle ``phase`` tags are ``setup``,
 
 from typing import Any
 
+from drafter.data.error_explainer import explain
 from drafter.data.errors import (
     CATEGORY_BRIDGE,
     SEVERITY_ERROR,
@@ -38,6 +39,7 @@ def report_bridge_error(
     source: str,
     details: str,
     *,
+    data: dict[str, Any] | None = None,
     exception: Any | None = None,
     request_id: int | None = None,
     response_id: int | None = None,
@@ -59,7 +61,8 @@ def report_bridge_error(
         event_type: Stable, code-like id (e.g. ``bridge.redirect_loop_detected``).
         message: Human-safe message.
         source: The component/function reporting the failure.
-        details: Developer-focused details.
+        details: Developer-focused free-text details.
+        data: Structured, JSON-safe details (sanitized on construction).
         exception: Originating exception or thrown value, if any.
         request_id: Associated request id, if known.
         response_id: Associated response id, if known.
@@ -89,18 +92,24 @@ def report_bridge_error(
             CATEGORY_BRIDGE,
             message=message,
             details=details,
+            data=data,
             severity=severity,
             context=context,
             status_code=resolved_status,
             recoverable=recoverable,
         )
     else:
+        explanation = explain(None, event_type, CATEGORY_BRIDGE)
         envelope = ErrorDetails(
             id=event_type,
             category=CATEGORY_BRIDGE,
             message=message,
             severity=severity,
             details=details,
+            data=data or {},
+            friendly_title=explanation.title,
+            friendly_message=explanation.message,
+            friendly_steps=explanation.steps,
             context=context,
             status_code=resolved_status,
             recoverable=recoverable,

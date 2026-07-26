@@ -84,6 +84,8 @@ function buildEnvelope(
 		severity: report.severity ?? "error",
 		message: report.message,
 		details: `${error.name}: ${error.message}`,
+		friendly_message: report.friendlyMessage ?? buildStudentLead(report),
+		friendly_steps: resolveStudentSteps(report, error),
 		traceback: error.stack ?? null,
 		context: {
 			causation_id: context.causation_id ?? null,
@@ -174,7 +176,11 @@ function formatSystemErrorMessage(
 		`Severity: ${report.severity ?? "error"}`,
 		`${error.name}: ${error.message}`,
 	].join("\n");
-	return `${message}\n\nWhat to try:\n- ${suggestion}\n\nTechnical details:\n${technicalDetails}`;
+	const lead = report.friendlyMessage ? `${report.friendlyMessage}\n\n` : "";
+	const steps = resolveStudentSteps(report, error, suggestion)
+		.map((step) => `- ${step}`)
+		.join("\n");
+	return `${message}\n\n${lead}What to try:\n${steps}\n\nTechnical details:\n${technicalDetails}`;
 }
 
 function buildStudentLead(report: SystemErrorReport): string {
@@ -191,6 +197,22 @@ function buildStudentLead(report: SystemErrorReport): string {
 		return "A runtime problem interrupted your program before it could finish.";
 	}
 	return "Something went wrong while Drafter was running your project.";
+}
+
+/**
+ * Student-facing fix steps for a report: steps supplied by the reporter
+ * (e.g. passed through from a Python envelope) win; otherwise they are
+ * derived from the error text.
+ */
+function resolveStudentSteps(
+	report: SystemErrorReport,
+	error: Error,
+	suggestion: string = report.suggestion ?? DEFAULT_SUGGESTION,
+): string[] {
+	if (report.friendlySteps && report.friendlySteps.length > 0) {
+		return report.friendlySteps;
+	}
+	return buildStudentSteps(report, error, suggestion);
 }
 
 function buildStudentSteps(
@@ -223,6 +245,34 @@ function buildStudentSteps(
 	];
 }
 
+/**
+ * Fill a step list item, turning backtick-marked fragments (like `this`)
+ * into inline <code> elements. Text is always added via text nodes, so
+ * step strings can never inject markup.
+ */
+function appendStepContent(
+	item: HTMLElement,
+	step: string,
+	targetDocument: Document,
+): void {
+	if (!step.includes("`")) {
+		item.textContent = step;
+		return;
+	}
+	step.split("`").forEach((segment, index) => {
+		if (!segment) {
+			return;
+		}
+		if (index % 2 === 1) {
+			const code = targetDocument.createElement("code");
+			code.textContent = segment;
+			item.appendChild(code);
+		} else {
+			item.appendChild(targetDocument.createTextNode(segment));
+		}
+	});
+}
+
 function renderSystemErrorInRoot(
 	report: SystemErrorReport,
 	message: string,
@@ -248,15 +298,15 @@ function renderSystemErrorInRoot(
 	title.textContent = "Something Went Wrong";
 
 	const lead = targetDocument.createElement("p");
-	lead.textContent = buildStudentLead(report);
+	lead.textContent = report.friendlyMessage ?? buildStudentLead(report);
 
 	const advice = targetDocument.createElement("p");
 	advice.textContent = "What to try next:";
 
 	const steps = targetDocument.createElement("ul");
-	for (const step of buildStudentSteps(report, error, suggestion)) {
+	for (const step of resolveStudentSteps(report, error, suggestion)) {
 		const item = targetDocument.createElement("li");
-		item.textContent = step;
+		appendStepContent(item, step, targetDocument);
 		steps.appendChild(item);
 	}
 

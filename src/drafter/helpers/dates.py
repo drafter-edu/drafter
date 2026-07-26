@@ -3,6 +3,8 @@
 from datetime import date, datetime, time
 from typing import Any
 
+from drafter.data.errors import StudentFacingError
+
 
 def try_convert_datetime(value, target_type) -> tuple[bool, Any]:
     """Convert a value to datetime-like types if possible.
@@ -20,7 +22,7 @@ def try_convert_datetime(value, target_type) -> tuple[bool, Any]:
         value or original input.
 
     Raises:
-        ValueError: If a string value cannot be parsed as ISO for the target type.
+        StudentFacingError: If a string value cannot be parsed as ISO for the target type.
     """
     if target_type not in {datetime, date, time}:
         return False, value
@@ -43,8 +45,19 @@ def try_convert_datetime(value, target_type) -> tuple[bool, Any]:
             elif target_type is time:
                 return True, time.fromisoformat(value)
         except ValueError as e:
-            raise ValueError(
-                f"Could not convert string '{value}' to {target_type.__name__}. Expected ISO format."
+            raise StudentFacingError(
+                f"Could not convert string '{value}' to {target_type.__name__}. Expected ISO format.",
+                friendly=(
+                    f"The text '{value}' is not written in a way Python can "
+                    f"read as a {target_type.__name__}."
+                ),
+                steps=(
+                    "Write dates as YYYY-MM-DD (like '2026-07-26') and "
+                    "times as HH:MM:SS (like '14:30:00').",
+                    "If the value comes from a form, use a TextBox with the "
+                    "matching date/time kind so the browser formats it "
+                    "for you.",
+                ),
             ) from e
 
     return False, value

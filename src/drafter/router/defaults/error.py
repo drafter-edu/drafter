@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from drafter.client_server.client_server import ClientServer
 from drafter.components import (
     BulletedList,
+    Details,
     Div,
     Header,
     InlineCode,
@@ -21,6 +22,7 @@ from drafter.components import (
     Span,
     Table,
 )
+from drafter.data.error_explainer import explain
 from drafter.data.errors import ErrorDetails
 from drafter.payloads.kinds.page import Page
 
@@ -187,72 +189,103 @@ def _render_traceback(traceback_text: str | None):
     return Div(*children, classes="drafter-traceback")
 
 
-# TODO: Expand on these a bit more
-def _build_friendly_summary(error: ErrorDetails) -> str:
-    """Return a plain-language summary of the failure for novice users."""
-    if error.id == "request.route_not_found":
-        return "Drafter could not find the page route your app tried to open."
-    if error.category == "request":
-        return "Drafter had trouble loading a page (route) from your app."
-    if error.category == "payload":
-        return "Drafter could not turn your page result into something it can display."
-    if error.category == "runtime":
-        return "Your Python code ran into an error while it was executing."
-    if error.category == "config":
-        return "Drafter found a configuration setting that it could not use."
-    if error.category == "bridge":
-        return "Drafter had trouble syncing your Python code with the browser."
-    return "Your program hit an error and stopped this request before it could finish."
+def _render_step(text: str):
+    """Render one "what to try next" step, honoring backtick code marks.
+
+    Step strings may wrap code fragments in backticks (like `` `this` ``);
+    those fragments become inline code. Steps without backticks pass
+    through as plain strings.
+    """
+    if "`" not in text:
+        return text
+    parts: list = []
+    for index, segment in enumerate(text.split("`")):
+        if not segment:
+            continue
+        # Odd split positions are inside backticks.
+        parts.append(InlineCode(segment) if index % 2 == 1 else segment)
+    return Span(*parts)
 
 
-def _build_fix_steps(error: ErrorDetails) -> list[str]:
-    """Build concrete next-step suggestions based on common error patterns."""
-    combined = "\n".join(
-        text for text in (error.message, error.details, error.traceback or "") if text
+def _render_data_value(value):
+    """Render one JSON-safe structured-data value as nested components.
+
+    Dictionaries become nested key/value tables, lists become bulleted
+    lists, and scalars become inline code (or a preformatted block for
+    long/multi-line text), so arbitrarily nested envelope `data` reads as
+    structure instead of one long repr string.
+    """
+    if isinstance(value, dict):
+        if not value:
+            return InlineCode("{}")
+        return Table(
+            [
+                [Span(str(key), classes="error-data-key"), _render_data_value(item)]
+                for key, item in value.items()
+            ],
+            classes="error-data-table",
+        )
+    if isinstance(value, (list, tuple)):
+        if not value:
+            return InlineCode("[]")
+        return BulletedList([_render_data_value(item) for item in value])
+    if value is None or isinstance(value, (bool, int, float)):
+        return InlineCode(repr(value))
+    text = str(value)
+    if "\n" in text or len(text) > 80:
+        return PreformattedText(text)
+    return InlineCode(text)
+
+
+def _render_route_call(error: ErrorDetails):
+    """Render the generated route call, noting when it is approximate."""
+    call = PreformattedText(str(error.data["route_call"]), classes="error-route-call")
+    if error.data.get("route_call_exact", False):
+        return call
+    return Div(
+        call,
+        Paragraph(
+            "(approximate — built from the raw request values, since the "
+            "arguments were never fully matched to the route)",
+            classes="error-route-call-note",
+        ),
     )
 
-    if error.id == "request.route_not_found":
-        return [
-            "Check route names and links so they match exactly (including dashes and slashes).",
-            "Confirm that the route is added before your app starts handling requests.",
-            "Use the 'Return to Index Page' link below to get back to a known page.",
-        ]
 
-    if "SyntaxError" in combined:
-        return [
-            "Go to the file and line number shown in the traceback.",
-            "Check for missing colons, commas, quotes, or parentheses on that line.",
-            "Run again after fixing one syntax problem at a time.",
-        ]
-
-    if "NameError" in combined:
-        return [
-            "Look for a misspelled variable or function name.",
-            "Make sure the variable is created before you use it.",
-            "Check capitalization because Python names are case-sensitive.",
-        ]
-
-    if "TypeError" in combined:
-        return [
-            "Check that each function call has the right number of arguments.",
-            "Verify that values have the type your code expects (for example, text vs number).",
-            "Print intermediate values to see what type they are before the failing line.",
-        ]
-
-    if "IndexError" in combined or "KeyError" in combined:
-        return [
-            "Check that the list index or dictionary key exists before using it.",
-            "Print the list length or dictionary keys right before the failing line.",
-            "Add a guard condition so missing data is handled safely.",
-        ]
-
-    return [
-        "Read the technical message above.",
-        "If that is not clear, then read the traceback and locate the first relevant line.",
-        "Hypothesize what you think the error means, then check your code to see if that is true.",
-        "Fix that first error, then run again and see if any new message appears.",
-        "If you are stuck, seek help on what the error ID and traceback mean.",
+def _build_technical_rows(error: ErrorDetails) -> list:
+    """Build the rows of the technical-details table for an envelope."""
+    data = error.data if isinstance(error.data, dict) else {}
+    rows: list = [
+        ["Error ID", InlineCode(error.id)],
+        ["Message", PreformattedText(error.message)],
     ]
+    if data.get("route_call"):
+        rows.append(["Route Call", _render_route_call(error)])
+    rows.extend(
+        [
+            ["Status", InlineCode(error.status_code or "error")],
+            ["Severity", InlineCode(error.severity)],
+            ["Category", InlineCode(error.category)],
+            ["Recoverable", InlineCode("yes" if error.recoverable else "no")],
+        ]
+    )
+    for key, value in data.items():
+        if key in ("route_call", "route_call_exact"):
+            continue
+        rendered = _render_data_value(value)
+        if isinstance(value, (dict, list, tuple)) and value:
+            # Nested structures (like the full request) start collapsed so
+            # the table stays scannable; one click expands them.
+            rendered = Details(
+                Span("Show details", classes="error-data-summary"),
+                rendered,
+                open=False,
+            )
+        rows.append([key.replace("_", " ").title(), rendered])
+    if error.details:
+        rows.append(["Details", PreformattedText(error.details)])
+    rows.append(["Traceback", _render_traceback(error.traceback)])
+    return rows
 
 
 def default_error(state, error: ErrorDetails, server: ClientServer):
@@ -273,18 +306,23 @@ def default_error(state, error: ErrorDetails, server: ClientServer):
     technical details/traceback section (useful on deployed sites).
     """
     configuration = server.get_current_configuration()
-    title = getattr(configuration, "error_page_title", "") or "Something Went Wrong"
-    friendly_summary = getattr(
-        configuration, "error_page_message", ""
-    ) or _build_friendly_summary(error)
+    # The envelope normally arrives with its friendly tier already filled in
+    # by the producer; explain() returns those fields untouched (the envelope
+    # is itself an exception carrying them) and only derives fallback text
+    # for envelopes from producers that did not provide any. Configuration
+    # overrides always win over the derived title/summary.
+    explanation = explain(error, error.id, error.category)
+    title = getattr(configuration, "error_page_title", "") or explanation.title
+    friendly_summary = (
+        getattr(configuration, "error_page_message", "") or explanation.message
+    )
     show_details = getattr(configuration, "error_page_show_details", True)
-    fix_steps = _build_fix_steps(error)
     sections: list = [
         Header(title, level=2),
         Paragraph(friendly_summary),
         PreformattedText(f"{error.id}: {error.message}"),
         Header("What To Try Next", level=3),
-        BulletedList(fix_steps),
+        BulletedList([_render_step(step) for step in explanation.steps]),
         Header("Navigation Options:", level=3),
         BulletedList(
             [
@@ -300,24 +338,7 @@ def default_error(state, error: ErrorDetails, server: ClientServer):
         sections.extend(
             [
                 Header("Technical Details", level=3),
-                Table(
-                    [
-                        ["Error ID", InlineCode(error.id)],
-                        ["Message", PreformattedText(error.message)],
-                        ["Status", InlineCode(error.status_code or "error")],
-                        ["Severity", InlineCode(error.severity)],
-                        ["Category", InlineCode(error.category)],
-                        [
-                            "Recoverable",
-                            InlineCode("yes" if error.recoverable else "no"),
-                        ],
-                        [
-                            "Traceback",
-                            _render_traceback(error.traceback),
-                        ],
-                        ["Details", PreformattedText(error.details)],
-                    ]
-                ),
+                Table(_build_technical_rows(error)),
             ]
         )
     content = [Div(*sections, classes="error-page")]

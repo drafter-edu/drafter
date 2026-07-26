@@ -80,7 +80,12 @@ start_server()
 
 		await runStudentCode({ code, presentErrors: false });
 
+		// The error page titles the failure by its exception type (a
+		// TypeError here) rather than the generic "Something Went Wrong".
 		const drafterBody = document.querySelector("#drafter-body--");
-		expect(drafterBody?.textContent).toContain("Something Went Wrong");
+		expect(drafterBody?.textContent).toContain("Type Mismatch");
+		expect(drafterBody?.textContent).toContain(
+			"request.route_execution_failed",
+		);
 	});
 });

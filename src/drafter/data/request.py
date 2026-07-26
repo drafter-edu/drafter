@@ -42,3 +42,28 @@ class Request:
         """Assign the next sequential request id."""
         type(self).REQUEST_COUNTER += 1
         self.id = type(self).REQUEST_COUNTER
+
+    def to_json(self) -> dict[str, Any]:
+        """Describe the request as a plain dictionary.
+
+        Values are passed through as-is (callers that need strict JSON
+        safety, like the error envelope, sanitize the result themselves);
+        `button_pressed` may be a live DOM element, so it is reduced to a
+        short string description.
+
+        Returns:
+            A dictionary with the request's fields.
+        """
+        button = self.button_pressed
+        if button is not None and not isinstance(button, str):
+            button = getattr(button, "id", None) or repr(button)
+        return {
+            "id": self.id,
+            "action": self.action,
+            "url": self.url,
+            "kwargs": self.kwargs,
+            "event": self.event,
+            "dom_id": self.dom_id,
+            "button_pressed": button,
+            "raw_payload": self.raw_payload,
+        }

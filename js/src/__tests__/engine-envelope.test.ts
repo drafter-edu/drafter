@@ -156,6 +156,45 @@ describe("envelope shape (via the telemetry sink)", () => {
 		});
 	});
 
+	test("the envelope always carries a derived friendly tier", () => {
+		const received = captureSink();
+
+		reportSystemError(
+			baseReport({
+				id: "runtime.student_code_failed",
+				severity: "info",
+				error: new Error("NameError: name 'x' is not defined"),
+			}),
+		);
+
+		const envelope = received[0].error;
+		expect(envelope.friendly_message).toBe(
+			"Your code started running but stopped because of an error.",
+		);
+		expect(envelope.friendly_steps?.[0]).toBe(
+			"Check for misspelled variable or function names.",
+		);
+	});
+
+	test("report-supplied friendly text is copied into the envelope", () => {
+		const received = captureSink();
+
+		reportSystemError(
+			baseReport({
+				severity: "info",
+				friendlyMessage: "A plain explanation.",
+				friendlySteps: ["First do this.", "Then do that."],
+			}),
+		);
+
+		const envelope = received[0].error;
+		expect(envelope.friendly_message).toBe("A plain explanation.");
+		expect(envelope.friendly_steps).toEqual([
+			"First do this.",
+			"Then do that.",
+		]);
+	});
+
 	test("missing report.error falls back to the message for details", () => {
 		const received = captureSink();
 
@@ -546,6 +585,31 @@ describe("student-facing root rendering", () => {
 		expect(container.querySelector("li")?.textContent).toContain(
 			"traceback or stack details",
 		);
+	});
+
+	test("report-supplied friendly text overrides the derived lead and steps", () => {
+		const container = renderToRoot({
+			error: new SyntaxError("invalid syntax"),
+			friendlyMessage: "Python could not read one of your lines.",
+			friendlySteps: ["Check line 3 of your file."],
+		});
+
+		const lead = container.querySelectorAll("p")[0];
+		expect(lead.textContent).toBe("Python could not read one of your lines.");
+		const steps = Array.from(container.querySelectorAll("li")).map(
+			(li) => li.textContent,
+		);
+		expect(steps).toEqual(["Check line 3 of your file."]);
+	});
+
+	test("backtick fragments in steps render as inline code", () => {
+		const container = renderToRoot({
+			friendlySteps: ["Use the `in` operator before indexing."],
+		});
+
+		const item = container.querySelector("li");
+		expect(item?.querySelector("code")?.textContent).toBe("in");
+		expect(item?.textContent).toBe("Use the in operator before indexing.");
 	});
 
 	test("generic steps lead with the suggestion (custom and default)", () => {

@@ -14,6 +14,7 @@ from typing import Any
 
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import RenderPlan
+from drafter.data.errors import StudentFacingError
 
 
 @dataclass(repr=False)
@@ -359,7 +360,7 @@ class DefinitionList(Component):
             **extra_settings: Additional HTML attributes and styles.
 
         Raises:
-            ValueError: If items is not one of the supported formats.
+            StudentFacingError: If items is not one of the supported formats.
         """
         self.items = items
         self.extra_settings = extra_settings
@@ -384,14 +385,37 @@ class DefinitionList(Component):
                 ):
                     pairs.append((item[0], item[1]))
                 else:
-                    raise ValueError(
+                    raise StudentFacingError(
                         f"DefinitionList items must be (term, definition) pairs, "
-                        f"but the item at index {index} was {item!r}."
+                        f"but the item at index {index} was {item!r}.",
+                        friendly=(
+                            "Every item in a DefinitionList needs to be a pair "
+                            "of exactly two things (a term and its definition), "
+                            f"but item number {index} was not a pair."
+                        ),
+                        steps=(
+                            f"Look at item {index} in the list you gave "
+                            "DefinitionList and make it a two-item pair, like "
+                            "('term', 'definition').",
+                            "Or use a dictionary instead, like "
+                            "DefinitionList({'term': 'definition'}).",
+                        ),
                     )
             return pairs
-        raise ValueError(
+        raise StudentFacingError(
             "DefinitionList expects a dictionary, a dataclass instance, or a "
-            f"list of (term, definition) pairs, but got {type(self.items).__name__}."
+            f"list of (term, definition) pairs, but got {type(self.items).__name__}.",
+            friendly=(
+                "The items argument you gave DefinitionList was a "
+                f"{type(self.items).__name__}, which is not a kind of value "
+                "it knows how to turn into terms and definitions."
+            ),
+            steps=(
+                "Pass a dictionary, like "
+                "DefinitionList({'HTML': 'A markup language'}).",
+                "Or pass a list of pairs, like "
+                "DefinitionList([('Term', 'Definition')]).",
+            ),
         )
 
     def get_children(self, context) -> list[PageContent | RenderPlan]:

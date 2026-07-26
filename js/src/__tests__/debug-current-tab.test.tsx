@@ -140,6 +140,61 @@ describe("CurrentPanel", () => {
 		).not.toBeNull();
 	});
 
+	test("a friendly message leads and the technical message joins the details", () => {
+		const panel = createPanel();
+		const record = errorRecord("error", "ZeroDivisionError: division by zero");
+		(
+			record as unknown as { error: { friendly_message?: string } }
+		).error.friendly_message =
+			"Your code tried to divide by zero, which is not allowed.";
+		panel.handleEvent(record);
+
+		const problem = query(".drafter-debug-current-problem");
+		expect(
+			problem.querySelector(".drafter-debug-current-problem-message")
+				?.textContent,
+		).toBe("Your code tried to divide by zero, which is not allowed.");
+		const details =
+			problem.querySelector(".drafter-debug-current-problem-details pre")
+				?.textContent ?? "";
+		expect(details).toContain("ZeroDivisionError: division by zero");
+		expect(details).toContain("extra context");
+	});
+
+	test("structured envelope data appears pretty-printed in the details", () => {
+		const panel = createPanel();
+		const record = errorRecord("error", "Route crashed");
+		(
+			record as unknown as { error: { data?: Record<string, unknown> } }
+		).error.data = {
+			route_call: "guess(pick=5)",
+			request: { url: "guess", kwargs: { pick: "5" } },
+		};
+		panel.handleEvent(record);
+
+		const details =
+			query(".drafter-debug-current-problem")?.querySelector(
+				".drafter-debug-current-problem-details pre",
+			)?.textContent ?? "";
+		expect(details).toContain('"route_call": "guess(pick=5)"');
+		expect(details).toContain('"pick": "5"');
+	});
+
+	test("problems without a friendly message keep the technical lead", () => {
+		const panel = createPanel();
+		panel.handleEvent(errorRecord("error", "Route crashed"));
+
+		const problem = query(".drafter-debug-current-problem");
+		expect(
+			problem.querySelector(".drafter-debug-current-problem-message")
+				?.textContent,
+		).toBe("Route crashed");
+		expect(
+			problem.querySelector(".drafter-debug-current-problem-details pre")
+				?.textContent,
+		).toBe("extra context");
+	});
+
 	test("problems without a request correlation survive navigations", () => {
 		const panel = createPanel();
 		// A startup warning (e.g. a route-signature problem replayed into the

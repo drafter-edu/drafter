@@ -15,6 +15,7 @@ from typing import Any
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import NewlineMode, RenderPlan
 from drafter.components.utilities.validation import validate_parameter_name
+from drafter.data.errors import StudentFacingError
 
 
 class FormComponent(Component):
@@ -272,8 +273,19 @@ class SelectBox(FormComponent):
             and self.default_value
             and self.default_value not in self.options
         ):
-            raise ValueError(
-                f"default_value '{self.default_value}' is not in options {self.options}"
+            raise StudentFacingError(
+                f"default_value '{self.default_value}' is not in options {self.options}",
+                friendly=(
+                    "The starting choice for this SelectBox has to be one of "
+                    "the options in its list, and "
+                    f"'{self.default_value}' is not."
+                ),
+                steps=(
+                    "Add the default value to the options list, or change it "
+                    "to one of the existing options.",
+                    "Check for typos and capitalization differences between "
+                    "the default value and the options.",
+                ),
             )
 
     def get_children(self, context) -> list[PageContent | RenderPlan]:

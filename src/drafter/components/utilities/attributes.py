@@ -8,6 +8,8 @@ and inline styles.
 import html
 from typing import Any
 
+from drafter.data.errors import StudentFacingError
+
 BASELINE_ATTRS = [
     "accesskey",
     "anchor",
@@ -244,9 +246,19 @@ def parse_extra_settings(extra_settings, known_attrs, component_id):
             elif key in ATTRIBUTE_ENUMERATIONS:
                 enum_map = ATTRIBUTE_ENUMERATIONS[key]
                 if value not in enum_map:
-                    raise ValueError(
+                    raise StudentFacingError(
                         f"Invalid value '{value}' for attribute '{key}'. "
-                        f"Valid values are: {list(enum_map.keys())}"
+                        f"Valid values are: {list(enum_map.keys())}",
+                        friendly=(
+                            f"The '{key}' setting on this component only "
+                            "accepts a few specific values, and "
+                            f"'{value}' is not one of them."
+                        ),
+                        steps=(
+                            f"Change '{key}' to one of: "
+                            f"{', '.join(map(str, enum_map.keys()))}.",
+                            "Check the spelling and capitalization of the value.",
+                        ),
                     )
                 if isinstance(value, str):
                     value = value.lower()

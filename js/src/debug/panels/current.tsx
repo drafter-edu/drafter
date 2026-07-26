@@ -152,6 +152,27 @@ export class CurrentPanel extends Panel {
 	): void {
 		const isError =
 			envelope.severity === "error" || envelope.severity === "critical";
+		// Lead with the student-friendly explanation when the envelope
+		// carries one; the technical message then joins the collapsible
+		// details so it stays one click away (and is never shown twice).
+		const friendly = envelope.friendly_message ?? "";
+		const primary = friendly || envelope.message;
+		// Bridged envelopes may hold a proxy here, so even key inspection
+		// stays inside the try.
+		let structured = "";
+		try {
+			if (envelope.data && Object.keys(envelope.data).length > 0) {
+				structured = JSON.stringify(envelope.data, null, 2);
+			}
+		} catch {
+			structured = "";
+		}
+		const technicalParts = friendly
+			? [envelope.message, envelope.details, structured]
+			: [envelope.details, structured];
+		const technical = technicalParts
+			.filter((part) => part && part !== primary)
+			.join("\n");
 		problems.appendChild(
 			(
 				<div
@@ -163,12 +184,12 @@ export class CurrentPanel extends Panel {
 						{isError ? "❌" : "⚠"}
 					</span>
 					<span class="drafter-debug-current-problem-message">
-						{envelope.message}
+						{primary}
 					</span>
-					{envelope.details ? (
+					{technical ? (
 						<details class="drafter-debug-current-problem-details">
 							<summary>{t("current.problem_details")}</summary>
-							<pre>{envelope.details}</pre>
+							<pre>{technical}</pre>
 						</details>
 					) : null}
 				</div>

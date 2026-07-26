@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.planning.render_plan import RenderPlan
+from drafter.data.errors import StudentFacingError
 from drafter.data.images import Picture, bytes_to_data_url
 from drafter.helpers.utils import is_pyodide
 
@@ -148,7 +149,7 @@ class MatPlotLibPlot(Component):
             RenderPlan for img element (PNG) or raw SVG content.
 
         Raises:
-            ValueError: If format is not 'png' or 'svg'.
+            StudentFacingError: If format is not 'png' or 'svg'.
         """
         if is_pyodide():
             return self._plan_pyodide(context)
@@ -172,8 +173,19 @@ class MatPlotLibPlot(Component):
                     raw_html=figure,
                 )
             else:
-                raise ValueError(
-                    f"Unsupported format {self.extra_matplotlib_settings['format']}"
+                raise StudentFacingError(
+                    f"Unsupported format {self.extra_matplotlib_settings['format']}",
+                    friendly=(
+                        "The format you gave MatPlotLibPlot in "
+                        "extra_matplotlib_settings is "
+                        f"{self.extra_matplotlib_settings['format']!r}, but "
+                        "plots can only be shown as 'png' or 'svg'."
+                    ),
+                    steps=(
+                        "Change the format to 'png' or 'svg', like "
+                        "MatPlotLibPlot({'format': 'png'}).",
+                        "Or leave out the format setting to use the default ('png').",
+                    ),
                 )
 
             attrs.update(self.extra_settings)

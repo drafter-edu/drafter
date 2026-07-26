@@ -43,6 +43,22 @@ export interface ErrorDetailsJson {
 	severity: SystemErrorSeverity;
 	message: string;
 	details: string;
+	/**
+	 * Structured, JSON-safe details (nested objects/arrays). Well-known
+	 * keys: route_call, route_call_exact, request. Optional; Python-side
+	 * envelopes always include it (possibly empty).
+	 */
+	data?: Record<string, unknown>;
+	/** Student-friendly page-title-style label (see friendly_message). */
+	friendly_title?: string;
+	/**
+	 * Student-friendly explanation of the failure. Optional so envelopes
+	 * from older producers still parse; empty/absent means "not provided"
+	 * and renderers fall back to generic wording.
+	 */
+	friendly_message?: string;
+	/** Student-friendly "what to try next" suggestions (see friendly_message). */
+	friendly_steps?: string[];
 	traceback: string | null;
 	context: {
 		causation_id: number | null;
@@ -69,6 +85,10 @@ export interface SystemErrorReport {
 	recoverable?: boolean;
 	/** Actionable advice shown to the user. */
 	suggestion?: string;
+	/** Student-friendly explanation; preferred over the derived lead text. */
+	friendlyMessage?: string;
+	/** Student-friendly fix steps; preferred over the derived step lists. */
+	friendlySteps?: string[];
 	/** Dialog title (dialog presentation only). */
 	title?: string;
 	/** Originating thrown value, if any. */

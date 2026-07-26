@@ -15,6 +15,7 @@ from drafter.components.images import Image
 from drafter.components.links import LinkContent
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.data.channel import Message
+from drafter.data.errors import StudentFacingError
 from drafter.data.images import Picture
 from drafter.data.request import Request
 from drafter.history.formatting import format_page_content
@@ -67,9 +68,20 @@ class Fragment(ResponsePayload):
             self.content = [content]
         elif not isinstance(content, list):
             incorrect_type = type(content).__name__
-            raise ValueError(
+            raise StudentFacingError(
                 "The content of a Fragment must be a list of strings or components."
-                f" Found {incorrect_type} instead."
+                f" Found {incorrect_type} instead.",
+                friendly=(
+                    "The content you returned in this "
+                    f"{self.__class__.__name__} was a {incorrect_type}, but "
+                    "it needs to be text, a component, or a list of those."
+                ),
+                steps=(
+                    "Wrap the content in a list, like "
+                    f"{self.__class__.__name__}(state, ['Hello!']).",
+                    "Convert plain values to text with str() before "
+                    "putting them on the page.",
+                ),
             )
         else:
             self.content = [
@@ -79,9 +91,22 @@ class Fragment(ResponsePayload):
             for index, chunk in enumerate(self.content):
                 if not isinstance(chunk, (str, Component)):
                     incorrect_type = type(chunk).__name__
-                    raise ValueError(
+                    raise StudentFacingError(
                         "The content of a Fragment must be a list of strings or components."
-                        f" Found {incorrect_type} at index {index} instead."
+                        f" Found {incorrect_type} at index {index} instead.",
+                        friendly=(
+                            f"Item number {index} in this "
+                            f"{self.__class__.__name__}'s content list is a "
+                            f"{incorrect_type}, but every item needs to be "
+                            "text or a component."
+                        ),
+                        steps=(
+                            f"Look at item {index} of your content list and "
+                            "turn it into text with str(), like "
+                            "str(the_value).",
+                            "Or replace it with a component, like "
+                            "Text(the_value) or Image(the_value).",
+                        ),
                     )
 
     def get_state_updates(self) -> tuple[bool, Any]:

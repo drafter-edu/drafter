@@ -25,6 +25,10 @@ class SimpleErrorPage(ResponsePayload):
     ) -> str:
         """Render the error as a plain `System Error: ...` string.
 
+        The single static friendly sentence is deliberate: this payload must
+        stay bulletproof, so it never consults the error explainer or any
+        other rendering machinery.
+
         Args:
             state: Current application state (unused).
             configuration: Server configuration (unused).
@@ -32,4 +36,8 @@ class SimpleErrorPage(ResponsePayload):
         Returns:
             str: The error text.
         """
-        return f"System Error: {self.message}"
+        return (
+            "Drafter itself hit a problem while showing this page, so only a "
+            "plain message is available. Reloading the application may help. "
+            f"System Error: {self.message}"
+        )

@@ -18,6 +18,7 @@ from datetime import datetime as datetime_type
 from drafter.components.layout import BlockComponent, handle_arguments_compatibility
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import NewlineMode, RenderPlan
+from drafter.data.errors import StudentFacingError
 
 
 def normalize_datetime(value) -> str | None:
@@ -131,12 +132,21 @@ class Header(Component):
             **extra_settings: Additional HTML attributes and styles.
 
         Raises:
-            ValueError: If level is not between 1 and 6.
+            StudentFacingError: If level is not between 1 and 6.
         """
         self.body = body
         self.level = level
         if level < 1 or level > 6:
-            raise ValueError("Header level must be between 1 and 6")
+            raise StudentFacingError(
+                f"Header level must be between 1 and 6, not {level!r}",
+                friendly=(
+                    "Headers only come in six sizes, so the level argument "
+                    "must be a number from 1 (biggest) to 6 (smallest)."
+                ),
+                steps=(
+                    "Change the level argument of this Header to a number from 1 to 6.",
+                ),
+            )
         self.extra_settings = extra_settings
 
     def get_tag(self, context) -> str:

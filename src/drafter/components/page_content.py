@@ -33,6 +33,7 @@ from drafter.components.utilities.validation import (
     validate_json_value,
     validate_parameter_name,
 )
+from drafter.data.errors import StudentFacingError
 
 RouteSafeValue = str | int | float | bool
 """Type alias for values that are safe to pass in routes (JSON serializable primitives)."""
@@ -106,7 +107,7 @@ def convert_arguments_to_json(arguments, only_validate=False) -> str | None:
         JSON string representing arguments, or None if only_validate=True.
 
     Raises:
-        ValueError: If arguments format is invalid or contains invalid parameter names/values.
+        StudentFacingError: If arguments format is invalid or contains invalid parameter names/values.
     """
     if isinstance(arguments, dict):
         for key, value in arguments.items():
@@ -139,13 +140,34 @@ def convert_arguments_to_json(arguments, only_validate=False) -> str | None:
                 validate_json_value(value, "Argument")
                 argument_dict[key] = value
             else:
-                raise ValueError(
-                    f"Invalid argument format at index {index}: {item}.\nMust be an Arguable, a (name, value) pair, or a dict with a single key-value pair."
+                raise StudentFacingError(
+                    f"Invalid argument format at index {index}: {item}.\nMust be an Arguable, a (name, value) pair, or a dict with a single key-value pair.",
+                    friendly=(
+                        f"Item number {index} in the arguments list you gave "
+                        "this component is not something Drafter can turn "
+                        "into a named argument."
+                    ),
+                    steps=(
+                        f"Look at item {index} of your arguments list and "
+                        "make it a (name, value) pair, like ('score', 10).",
+                        "Or use an Argument object, like Argument('score', 10).",
+                    ),
                 )
         return json.dumps(argument_dict) if not only_validate else None
     else:
-        raise ValueError(
-            "The arguments must be an Argument, a list of Argument objects, a list of (name, value) pairs, or a dict of name to value."
+        raise StudentFacingError(
+            "The arguments must be an Argument, a list of Argument objects, a list of (name, value) pairs, or a dict of name to value.",
+            friendly=(
+                "The arguments you gave this component are not in a shape "
+                "Drafter understands; it needs names paired with values."
+            ),
+            steps=(
+                "Pass a dictionary, like arguments={'score': 10}.",
+                "Or pass a list of (name, value) pairs, like "
+                "arguments=[('score', 10)].",
+                "Or pass one or more Argument objects, like "
+                "arguments=Argument('score', 10).",
+            ),
         )
 
 
@@ -653,8 +675,18 @@ def normalize_page_content(content: PageContent) -> list[Content]:
     elif isinstance(content, Sequence):
         return list(content)
     else:
-        raise ValueError(
-            f"Invalid PageContent: expected Component, str, or a sequence of these, but got {type(content).__name__}."
+        raise StudentFacingError(
+            f"Invalid PageContent: expected Component, str, or a sequence of these, but got {type(content).__name__}.",
+            friendly=(
+                "The content you put on this page was a "
+                f"{type(content).__name__}, but page content has to be text, "
+                "a component, or a list of those."
+            ),
+            steps=(
+                "Wrap plain values in str() to display them as text.",
+                "Put multiple pieces of content in a list, like "
+                "['Hello', Button('Go', go)].",
+            ),
         )
 
 

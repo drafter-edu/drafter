@@ -13,6 +13,7 @@ from drafter.components.utilities.persistence import (
     PERSIST_EVICT_ATTR,
     PERSIST_KEY_ATTR,
 )
+from drafter.data.errors import StudentFacingError
 
 
 def resolve_persist_key(target: str | Component) -> str:
@@ -27,7 +28,8 @@ def resolve_persist_key(target: str | Component) -> str:
         The persistence key string.
 
     Raises:
-        ValueError: If given a component that does not support persistence.
+        StudentFacingError: If given a component that does not support
+            persistence, or a target that is neither a string nor a Component.
     """
     if isinstance(target, str):
         return target
@@ -36,13 +38,34 @@ def resolve_persist_key(target: str | Component) -> str:
         key = attributes.get(PERSIST_KEY_ATTR)
         if key:
             return str(key)
-        raise ValueError(
+        raise StudentFacingError(
             f"{target.__class__.__name__} components do not support persistence, "
-            "so there is no persisted version to remove."
+            "so there is no persisted version to remove.",
+            friendly=(
+                f"You gave RemovePersistent a {target.__class__.__name__} "
+                "component, but that kind of component never keeps running "
+                "between pages, so there is nothing to remove."
+            ),
+            steps=(
+                "Only pass components that were created with "
+                "persistent=True, like Timer, Clock, Audio, or Video.",
+                "Or pass the id string you gave the persistent component.",
+            ),
         )
-    raise ValueError(
+    raise StudentFacingError(
         "RemovePersistent expects a key string or a Component, "
-        f"but was given {target!r}."
+        f"but was given {target!r}.",
+        friendly=(
+            "The target argument you gave RemovePersistent was a "
+            f"{type(target).__name__}, but it needs the name (a string) or "
+            "the component you want to remove."
+        ),
+        steps=(
+            "Pass the id you gave the persistent component, like "
+            "RemovePersistent('background-music').",
+            "Or pass an equivalent component, like "
+            "RemovePersistent(Audio('theme.mp3', persistent=True)).",
+        ),
     )
 
 

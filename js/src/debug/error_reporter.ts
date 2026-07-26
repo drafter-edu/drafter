@@ -25,11 +25,61 @@ const MAX_QUEUED_REPORTS = 25;
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_TEXT_LENGTH = 8000;
 
+/** Cap on friendly_steps entries kept per report. */
+const MAX_FRIENDLY_STEPS = 10;
+
 function truncate(text: string | null, limit: number): string | null {
 	if (typeof text !== "string" || text.length <= limit) {
 		return text ?? null;
 	}
 	return `${text.slice(0, limit)}… [truncated]`;
+}
+
+/**
+ * Copy structured envelope data as a plain, size-bounded object. Bridged
+ * values may be proxies whose JSON.stringify output is unreliable, so the
+ * value is round-tripped through JSON (best-effort: anything that fails to
+ * serialize, or that exceeds the size cap, is summarized instead).
+ */
+function normalizeData(
+	data: unknown,
+): Record<string, unknown> | undefined {
+	if (data === null || data === undefined) {
+		return undefined;
+	}
+	try {
+		const text = JSON.stringify(data);
+		if (typeof text !== "string") {
+			return undefined;
+		}
+		if (text.length > MAX_TEXT_LENGTH) {
+			return { truncated: `structured data omitted (${text.length} bytes)` };
+		}
+		const parsed = JSON.parse(text);
+		return typeof parsed === "object" && parsed !== null
+			? (parsed as Record<string, unknown>)
+			: undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+/**
+ * Normalize friendly_steps into a bounded plain string array. Bridged
+ * envelopes may hold a proxy rather than a real Array, so the value is
+ * copied element-by-element (best-effort: anything non-iterable becomes []).
+ */
+function normalizeSteps(steps: unknown): string[] {
+	if (!steps || typeof steps === "string") {
+		return [];
+	}
+	try {
+		return Array.from(steps as Iterable<unknown>)
+			.slice(0, MAX_FRIENDLY_STEPS)
+			.map((step) => truncate(String(step), MAX_MESSAGE_LENGTH) ?? "");
+	} catch {
+		return [];
+	}
 }
 
 /**
@@ -46,6 +96,12 @@ function normalizeEnvelope(envelope: ErrorDetailsJson): ErrorDetailsJson {
 		severity: envelope.severity,
 		message: truncate(envelope.message, MAX_MESSAGE_LENGTH) ?? "",
 		details: truncate(envelope.details, MAX_TEXT_LENGTH) ?? "",
+		data: normalizeData(envelope.data),
+		friendly_title:
+			truncate(envelope.friendly_title ?? "", MAX_MESSAGE_LENGTH) ?? "",
+		friendly_message:
+			truncate(envelope.friendly_message ?? "", MAX_MESSAGE_LENGTH) ?? "",
+		friendly_steps: normalizeSteps(envelope.friendly_steps),
 		traceback: truncate(envelope.traceback, MAX_TEXT_LENGTH),
 		context: {
 			causation_id: context.causation_id ?? null,

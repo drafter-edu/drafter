@@ -32,6 +32,7 @@ from drafter.data.details.request import (
 )
 from drafter.data.details.routes import RouteAddedEvent
 from drafter.data.details.state import UpdatedStateEvent
+from drafter.data.error_explainer import explain
 from drafter.data.errors import (
     CATEGORY_PAYLOAD,
     CATEGORY_REQUEST,
@@ -137,6 +138,12 @@ class ClientServer:
 
         self.requests = Scope()
         self.start_time = 0.0
+        # Best-known generated route call per in-flight request id, as a
+        # (call_string, is_exact) pair: an approximation from the raw request
+        # is stored when the route is resolved, upgraded to the exact bound
+        # call once argument preparation succeeds, and attached to any error
+        # envelope raised during the visit (see make_visit_error).
+        self._route_call_reprs: dict[int, tuple[str, bool]] = {}
         self.transition("initialized")
 
     def reset(self) -> None:
@@ -304,6 +311,7 @@ class ClientServer:
         request: Request,
         *,
         details: str = "",
+        data: dict[str, Any] | None = None,
         status_code: str | None = None,
         exception: Exception | None = None,
         source: str = "client_server.visit",
@@ -314,12 +322,21 @@ class ClientServer:
         `ErrorDetails` is created first, telemetry is emitted from it,
         and the returned envelope is raised directly.
 
+        Every envelope automatically carries the structured request
+        description (`data["request"]`) and, when known, the generated route
+        call that led to the failure (`data["route_call"]` plus
+        `data["route_call_exact"]`) — the exact bound call string once
+        argument preparation succeeded, or a best-effort approximation from
+        the raw request values before that.
+
         Args:
             error_id: Stable, code-like id (e.g. `request.route_not_found`).
             category: Canonical error category.
             message: Human-safe message.
             request: The request being processed (for correlation context).
-            details: Developer-focused details.
+            details: Developer-focused free-text details.
+            data: Extra structured details for this failure (e.g. the
+                payload); merged with the automatic request/route-call keys.
             status_code: Symbolic status string; defaults to
                 `STATUS_ERROR`.
             exception: Originating exception, if any (for traceback capture).
@@ -330,6 +347,11 @@ class ClientServer:
         """
         context = Correlation(route=request.url, request_id=request.id, phase="visit")
         resolved_status = status_code if status_code is not None else STATUS_ERROR
+        merged_data: dict[str, Any] = dict(data or {})
+        call_repr = self._route_call_reprs.get(request.id)
+        if call_repr is not None and "route_call" not in merged_data:
+            merged_data["route_call"], merged_data["route_call_exact"] = call_repr
+        merged_data.setdefault("request", request)
         if exception is not None:
             envelope = envelope_from_exception(
                 exception,
@@ -337,15 +359,21 @@ class ClientServer:
                 category,
                 message=message,
                 details=details,
+                data=merged_data,
                 context=context,
                 status_code=resolved_status,
             )
         else:
+            explanation = explain(None, error_id, category)
             envelope = ErrorDetails(
                 id=error_id,
                 category=category,
                 message=message,
                 details=details,
+                data=merged_data,
+                friendly_title=explanation.title,
+                friendly_message=explanation.message,
+                friendly_steps=explanation.steps,
                 context=context,
                 status_code=resolved_status,
             )
@@ -371,7 +399,6 @@ class ClientServer:
                 CATEGORY_REQUEST,
                 f"No route found for URL: {request.url}",
                 request,
-                details=repr(request),
                 status_code=STATUS_NOT_FOUND,
             )
         return route_func
@@ -408,6 +435,27 @@ class ClientServer:
         )
         return dependencies
 
+    @staticmethod
+    def _approximate_route_call(route_func, request: Request) -> str:
+        """Best-effort route call string from the raw request values.
+
+        Used before argument preparation has produced the exact bound call:
+        the raw form/component values stand in for the real arguments, so
+        the result shows "as much as has been constructed" so far. Framework
+        bookkeeping entries (keys with the ``--`` prefix, like the submit
+        button) are not part of the student's call and are left out.
+        """
+        name = getattr(route_func, "__name__", "") or request.url or "route"
+        try:
+            arguments = ", ".join(
+                f"{key}={value!r}"
+                for key, value in request.kwargs.items()
+                if not str(key).startswith("--")
+            )
+        except Exception:
+            arguments = "..."
+        return f"{name}({arguments})"
+
     def execute_route(
         self,
         route_func,
@@ -435,6 +483,9 @@ class ClientServer:
                 configuration,
                 self._get_extra_dependencies(request, configuration),
             )
+            # The exact bound call is now known; error envelopes raised for
+            # the rest of this visit will carry it (see make_visit_error).
+            self._route_call_reprs[request.id] = (representation, True)
             log_record(
                 RequestParseEvent(
                     request_id=request.id,
@@ -451,7 +502,6 @@ class ClientServer:
                 CATEGORY_REQUEST,
                 f"Error while parsing arguments for request to URL {request.url}: {e}",
                 request,
-                details=repr(request),
                 status_code=STATUS_BAD_REQUEST,
                 exception=e,
             ) from e
@@ -463,7 +513,6 @@ class ClientServer:
                 CATEGORY_REQUEST,
                 f"Error while processing request for URL '{request.url}': {e}",
                 request,
-                details=f"Full call: {representation}\nFull Request: {request!r}",
                 status_code=STATUS_ERROR,
                 exception=e,
             ) from e
@@ -489,7 +538,7 @@ class ClientServer:
                 CATEGORY_PAYLOAD,
                 f"Payload verification failed for URL {request.url}: {possible_incorrect_type}",
                 request,
-                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                data={"payload": payload},
                 status_code=STATUS_ERROR,
             )
         # Payload specific verification
@@ -503,7 +552,7 @@ class ClientServer:
                 CATEGORY_PAYLOAD,
                 f"Payload verification failed for URL {request.url}: {e}",
                 request,
-                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                data={"payload": payload},
                 status_code=STATUS_ERROR,
                 exception=e,
             ) from e
@@ -513,7 +562,7 @@ class ClientServer:
                 CATEGORY_PAYLOAD,
                 f"Payload verification failed for URL {request.url}: {possible_failure.message}",
                 request,
-                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                data={"payload": payload},
                 status_code=STATUS_ERROR,
             )
 
@@ -545,7 +594,7 @@ class ClientServer:
                 CATEGORY_PAYLOAD,
                 f"Payload rendering failed for URL {request.url}: {e}",
                 request,
-                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                data={"payload": payload},
                 status_code=STATUS_ERROR,
                 exception=e,
             ) from e
@@ -580,7 +629,7 @@ class ClientServer:
                 CATEGORY_PAYLOAD,
                 f"Payload formatting failed for URL {request.url}: {e}",
                 request,
-                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                data={"payload": payload},
                 status_code=STATUS_ERROR,
                 exception=e,
             ) from e
@@ -613,7 +662,7 @@ class ClientServer:
                     CATEGORY_PAYLOAD,
                     f"State verification failed for URL {request.url}: {possible_state_update_issue}",
                     request,
-                    details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                    data={"payload": payload},
                     status_code=STATUS_ERROR,
                     source="client_server.handle_state_updates",
                 )
@@ -631,7 +680,7 @@ class ClientServer:
                     CATEGORY_PAYLOAD,
                     f"Failed to update server state from payload for URL {request.url}: {e}",
                     request,
-                    details=f"Updated state: {repr(updated_state)}",
+                    data={"updated_state": updated_state},
                     status_code=STATUS_ERROR,
                     exception=e,
                     source="client_server.handle_state_updates",
@@ -697,6 +746,12 @@ class ClientServer:
                     # TODO: Most of these should be private methods
                     configuration = self.get_current_configuration()
                     route_func = self.get_route(request)
+                    # Until the exact bound call is known, remember a
+                    # best-effort approximation for error envelopes.
+                    self._route_call_reprs[request.id] = (
+                        self._approximate_route_call(route_func, request),
+                        False,
+                    )
                     payload, representation = self.execute_route(
                         route_func, request, configuration
                     )
@@ -732,7 +787,6 @@ class ClientServer:
                         CATEGORY_SYSTEM,
                         f"Failed to create success response for URL {request.url}: {e}",
                         request,
-                        details=f"Request: {repr(request)}",
                         status_code=STATUS_ERROR,
                         exception=e,
                     )
@@ -753,6 +807,7 @@ class ClientServer:
                 self.transition("committing")
                 return response
         finally:
+            self._route_call_reprs.pop(request.id, None)
             get_main_event_bus().unsubscribe(warning_subscription)
 
     def make_success_response(
@@ -821,7 +876,7 @@ class ClientServer:
                 CATEGORY_PAYLOAD,
                 f"Payload target retrieval failed for URL {request.url}: {e}",
                 request,
-                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                data={"payload": payload},
                 status_code=STATUS_ERROR,
                 exception=e,
             ) from e
@@ -856,7 +911,7 @@ class ClientServer:
                 CATEGORY_PAYLOAD,
                 f"Payload message retrieval failed for URL {request.url}: {e}",
                 request,
-                details=f"Request: {repr(request)}\nPayload: {repr(payload)}",
+                data={"payload": payload},
                 status_code=STATUS_ERROR,
                 exception=e,
             ) from e

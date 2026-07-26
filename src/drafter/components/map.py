@@ -35,6 +35,7 @@ from drafter.components.utilities.registry import (
 )
 from drafter.components.utilities.validation import validate_parameter_name
 from drafter.data.converter import ConversionContext, ConversionResult
+from drafter.data.errors import StudentFacingError
 
 
 @dataclass
@@ -100,10 +101,20 @@ def _normalize_center(center: CenterValue, component_name: str) -> MapLocation |
                 return MapLocation(float(parts[0]), float(parts[1]))
             except ValueError:
                 pass
-    raise ValueError(
+    raise StudentFacingError(
         f"Invalid center for {component_name}: {center!r}. "
         "Provide a MapLocation, a (latitude, longitude) pair, "
-        'or a "latitude,longitude" string.'
+        'or a "latitude,longitude" string.',
+        friendly=(
+            f"The center argument you gave {component_name} is not something "
+            "it can understand as a spot on the map; it needs a latitude "
+            "and a longitude."
+        ),
+        steps=(
+            "Pass a pair of numbers, like center=(40.7, -74.0).",
+            "Or pass a MapLocation, like center=MapLocation(40.7, -74.0).",
+            "Check that both numbers are real latitude/longitude values.",
+        ),
     )
 
 
@@ -376,9 +387,21 @@ class Map(Component):
             elif isinstance(marker, (tuple, list)) and len(marker) in (2, 3):
                 normalized.append(MapMarker(*marker))
             else:
-                raise ValueError(
+                raise StudentFacingError(
                     f"Invalid marker for Map: {marker!r}. Provide a MapMarker, "
-                    "a MapLocation, or a (latitude, longitude, label?) pair."
+                    "a MapLocation, or a (latitude, longitude, label?) pair.",
+                    friendly=(
+                        "One of the markers you gave the Map is not something "
+                        "it can understand as a point; each marker needs a "
+                        "latitude and a longitude (and optionally a label)."
+                    ),
+                    steps=(
+                        "Write each marker as a pair of numbers, like "
+                        "markers=[(40.7, -74.0)].",
+                        "Add an optional label as a third item, like "
+                        "(40.7, -74.0, 'New York').",
+                        "Or use MapMarker, like markers=[MapMarker(40.7, -74.0)].",
+                    ),
                 )
         return normalized
 

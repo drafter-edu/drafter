@@ -81,6 +81,17 @@ class SiteState:
                 message=message,
                 severity=SEVERITY_WARNING,
                 details=message,
+                friendly_message=(
+                    "Drafter could not make a full copy of your state for its "
+                    "history, so the debugger's history may show values that "
+                    "changed later."
+                ),
+                friendly_steps=(
+                    "This usually means the state holds something unusual, like "
+                    "an open file or a network connection.",
+                    "Keep your state made of simple data (numbers, text, lists, "
+                    "and dataclasses) when possible.",
+                ),
             ),
             "site_state.snapshot",
         )
@@ -116,6 +127,17 @@ class SiteState:
                         message=f"SiteState type changed from {old_type_name} to {new_type_name}.",
                         severity=SEVERITY_WARNING,
                         details=f"SiteState type changed from {old_type_name} to {new_type_name}.",
+                        friendly_message=(
+                            f"One of your routes changed the site state from "
+                            f"{old_type_name} to {new_type_name}; the state "
+                            "should keep the same type for the whole site."
+                        ),
+                        friendly_steps=(
+                            "Find the route that returned a different kind of "
+                            "state value.",
+                            "Make every route keep the state as the same type "
+                            "(for example, always your State dataclass).",
+                        ),
                     ),
                     "site_state.update",
                 )

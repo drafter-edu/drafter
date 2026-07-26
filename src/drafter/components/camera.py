@@ -28,6 +28,7 @@ from drafter.components.utilities.registry import (
     COMPONENT_CONTRACT_REGISTRY,
 )
 from drafter.components.utilities.validation import validate_parameter_name
+from drafter.data.errors import StudentFacingError
 
 FACING_MODES = ("user", "environment")
 """Which camera a `Camera` prefers: "user" (front/selfie) or
@@ -182,13 +183,27 @@ class Camera(Component):
             on_denied: Function or URL to call when permission is denied.
             on_error: Function or URL to call when the camera fails.
             **extra_settings: Additional HTML attributes.
+
+        Raises:
+            StudentFacingError: If facing is not a supported mode, or if
+                width or height is not a positive whole number.
         """
         validate_parameter_name(name, "Camera")
         if facing not in FACING_MODES:
-            raise ValueError(
+            raise StudentFacingError(
                 f"Camera facing must be one of"
                 f" {', '.join(repr(mode) for mode in FACING_MODES)},"
-                f" not {facing!r}."
+                f" not {facing!r}.",
+                friendly=(
+                    f"The facing argument you gave Camera was {facing!r}, "
+                    "but a camera can only face 'user' (the front, selfie "
+                    "camera) or 'environment' (the rear camera)."
+                ),
+                steps=(
+                    "Use facing='user' for the front/selfie camera.",
+                    "Use facing='environment' for the rear camera.",
+                    "Check the spelling of the facing argument.",
+                ),
             )
         for dimension_name, dimension in (("width", width), ("height", height)):
             if (
@@ -196,9 +211,19 @@ class Camera(Component):
                 or isinstance(dimension, bool)
                 or dimension <= 0
             ):
-                raise ValueError(
+                raise StudentFacingError(
                     f"Camera {dimension_name} must be a positive number of"
-                    f" pixels, not {dimension!r}."
+                    f" pixels, not {dimension!r}.",
+                    friendly=(
+                        f"The {dimension_name} argument you gave Camera was "
+                        f"{dimension!r}, but it needs to be a whole number "
+                        "of pixels bigger than zero."
+                    ),
+                    steps=(
+                        f"Give {dimension_name} a whole number, like "
+                        f"{dimension_name}=480.",
+                        f"Or leave out {dimension_name} to use the default size.",
+                    ),
                 )
         self.name = name
         self.width = width

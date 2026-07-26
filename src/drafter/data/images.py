@@ -18,6 +18,8 @@ import urllib.parse
 
 from PIL import Image as PILImage
 
+from drafter.data.errors import StudentFacingError
+
 __all__ = [
     "Picture",
     "bytes_to_data_url",
@@ -65,6 +67,22 @@ _EXTENSION_TO_MIME = {
     ".tif": "image/tiff",
     ".tiff": "image/tiff",
 }
+
+_SIZE_STEPS = (
+    "Use whole numbers greater than zero for the width and height, like "
+    "Picture.new(200, 100).",
+    "If you calculated the size, print the numbers first to make sure "
+    "they are positive integers (not decimals, strings, or zero).",
+)
+"""Shared "what to try next" steps for bad width/height arguments."""
+
+_DATA_URL_STEPS = (
+    "Make sure the text starts with 'data:image/...;base64,' followed by "
+    "the encoded image data.",
+    "If the text came from a file or website, pass the file path or "
+    "web address to Picture(...) instead.",
+)
+"""Shared "what to try next" steps for malformed data URLs."""
 
 _MAGIC_NUMBERS = [
     (b"\x89PNG\r\n\x1a\n", "image/png"),
@@ -183,13 +201,29 @@ def decode_data_url(url: str) -> tuple[bytes, str]:
         ``image/png`` when the URL does not declare one.
 
     Raises:
-        ValueError: If the string is not a well-formed data URL.
+        StudentFacingError: If the string is not a well-formed data URL.
     """
     if not isinstance(url, str) or not url.startswith("data:"):
-        raise ValueError(f"Not a data URL: {url[:64]!r}")
+        raise StudentFacingError(
+            f"Not a data URL: {url[:64]!r}",
+            friendly=(
+                "This text is not a data URL, which is a special kind of "
+                "text that starts with 'data:' and contains an image's "
+                "encoded data."
+            ),
+            steps=_DATA_URL_STEPS,
+        )
     header, _, payload = url.partition(",")
     if not _:
-        raise ValueError("Malformed data URL: missing ',' separator.")
+        raise StudentFacingError(
+            "Malformed data URL: missing ',' separator.",
+            friendly=(
+                "This data URL is incomplete: it is missing the comma that "
+                "separates the 'data:image/...' header from the encoded "
+                "image data."
+            ),
+            steps=_DATA_URL_STEPS,
+        )
     header = header[len("data:") :]
     is_base64 = header.endswith(";base64")
     if is_base64:
@@ -261,8 +295,8 @@ class Picture:
             mime_type: Optional MIME type override.
 
         Raises:
-            ValueError: If the source is not a supported type, or its data
-                cannot be decoded as an image.
+            StudentFacingError: If the source is not a supported type, or
+                its data cannot be decoded as an image.
         """
         self._pil: PILImage.Image | None = None
         self._encoded: bytes | None = None
@@ -295,16 +329,37 @@ class Picture:
                 status = getattr(source, "status", "unknown")
                 message = getattr(source, "message", None)
                 detail = f" ({message})" if message else ""
-                raise ValueError(
+                raise StudentFacingError(
                     f"This Photo has no image data (status: {status}{detail}). "
-                    f"Check photo.status before building a Picture from it."
+                    f"Check photo.status before building a Picture from it.",
+                    friendly=(
+                        "This Photo is empty, so there is no image to turn "
+                        "into a Picture; the camera may have failed or been "
+                        "denied permission."
+                    ),
+                    steps=(
+                        "Check photo.status before using the photo, and only "
+                        "build a Picture when the status is 'captured'.",
+                        "Try taking the photo again, and make sure the "
+                        "browser has permission to use the camera.",
+                    ),
                 )
             data, url_mime = decode_data_url(data_url)
             self._init_from_bytes(data, filename, mime_type or url_mime)
         else:
-            raise ValueError(
+            raise StudentFacingError(
                 f"Cannot make a Picture from {type(source).__name__}. Provide "
-                f"a filename, URL, bytes, a PIL image, or another Picture."
+                f"a filename, URL, bytes, a PIL image, or another Picture.",
+                friendly=(
+                    f"Picture(...) does not know how to turn a "
+                    f"{type(source).__name__} value into an image."
+                ),
+                steps=(
+                    "Pass Picture(...) an image file name, a web address, "
+                    "an uploaded file, or another Picture.",
+                    "Print the value you are passing in to see what it "
+                    "actually is; it may not be the image you expected.",
+                ),
             )
 
     # -- construction helpers --------------------------------------------
@@ -327,9 +382,20 @@ class Picture:
             image.load()
         except Exception as error:
             name = f" {filename!r}" if filename else ""
-            raise ValueError(
+            raise StudentFacingError(
                 f"Could not read{name} as an image ({error}). Perhaps the "
-                f"data is not an image?"
+                f"data is not an image?",
+                friendly=(
+                    "Drafter could not understand this data as a picture; "
+                    "it may be a different kind of file (like text) or a "
+                    "damaged or unsupported image."
+                ),
+                steps=(
+                    "Check that the file really is an image, such as a "
+                    ".png, .jpg, or .gif file.",
+                    "Try opening the file in another program to make sure "
+                    "it is not corrupted.",
+                ),
             ) from error
         self._pil = image
         self._encoded = data
@@ -424,9 +490,15 @@ class Picture:
                 or isinstance(dimension, bool)
                 or dimension <= 0
             ):
-                raise ValueError(
+                raise StudentFacingError(
                     f"Picture.new {label} must be a positive whole number of "
-                    f"pixels, not {dimension!r}."
+                    f"pixels, not {dimension!r}.",
+                    friendly=(
+                        f"A new Picture's {label} has to be a whole number "
+                        f"of pixels greater than zero, and {dimension!r} "
+                        f"is not."
+                    ),
+                    steps=_SIZE_STEPS,
                 )
         return cls(PILImage.new("RGB", (width, height), color))
 
@@ -449,16 +521,39 @@ class Picture:
     def _ensure_loaded(self) -> PILImage.Image:
         if self._pil is None:
             if self._url is None:
-                raise ValueError("This Picture has no image data to load.")
+                raise StudentFacingError(
+                    "This Picture has no image data to load.",
+                    friendly=(
+                        "This Picture is empty: it has no pixels and no web "
+                        "address to fetch them from, so it cannot be used."
+                    ),
+                    steps=(
+                        "Rebuild the Picture from a real source, like an "
+                        "image file name, a web address, or an uploaded "
+                        "file.",
+                    ),
+                )
             try:
                 data = self._read_path(self._url)
                 image = PILImage.open(io.BytesIO(data))
                 image.load()
             except Exception as error:
-                raise ValueError(
+                raise StudentFacingError(
                     f"Could not load the image at {self._url!r} ({error}). "
                     f"Check that the URL is correct and the site allows "
-                    f"downloading it."
+                    f"downloading it.",
+                    friendly=(
+                        "Drafter tried to download this Picture's image "
+                        "from its web address, but the download failed."
+                    ),
+                    steps=(
+                        "Paste the URL into your browser to check that it "
+                        "really shows an image.",
+                        "Check your internet connection, and watch out for "
+                        "typos in the URL.",
+                        "Some websites block downloads from other pages; "
+                        "try an image from a different site.",
+                    ),
                 ) from error
             self._pil = image
             self._encoded = data
@@ -556,9 +651,15 @@ class Picture:
                 or isinstance(dimension, bool)
                 or dimension <= 0
             ):
-                raise ValueError(
+                raise StudentFacingError(
                     f"Picture.resize {label} must be a positive whole number "
-                    f"of pixels, not {dimension!r}."
+                    f"of pixels, not {dimension!r}.",
+                    friendly=(
+                        f"To resize a Picture, the new {label} has to be a "
+                        f"whole number of pixels greater than zero, and "
+                        f"{dimension!r} is not."
+                    ),
+                    steps=_SIZE_STEPS,
                 )
         return self._derive(self._ensure_loaded().resize((width, height)))
 
@@ -569,8 +670,18 @@ class Picture:
             or isinstance(factor, bool)
             or factor <= 0
         ):
-            raise ValueError(
-                f"Picture.scale factor must be a positive number, not {factor!r}."
+            raise StudentFacingError(
+                f"Picture.scale factor must be a positive number, not {factor!r}.",
+                friendly=(
+                    f"To scale a Picture, the factor has to be a number "
+                    f"greater than zero, and {factor!r} is not."
+                ),
+                steps=(
+                    "Use a positive number: 0.5 makes the picture half as "
+                    "big, and 2 makes it twice as big.",
+                    "If you want an exact size instead, use "
+                    "picture.resize(width, height).",
+                ),
             )
         image = self._ensure_loaded()
         width = max(1, round(image.width * factor))
@@ -585,10 +696,23 @@ class Picture:
         """A new Picture cut down to the box from (left, top) to (right, bottom)."""
         image = self._ensure_loaded()
         if not (0 <= left < right <= image.width and 0 <= top < bottom <= image.height):
-            raise ValueError(
+            raise StudentFacingError(
                 f"Picture.crop box ({left}, {top}, {right}, {bottom}) must fit "
                 f"inside the image (width {image.width}, height {image.height}) "
-                f"with left < right and top < bottom."
+                f"with left < right and top < bottom.",
+                friendly=(
+                    f"The crop box does not fit inside this Picture, which "
+                    f"is {image.width} pixels wide and {image.height} "
+                    f"pixels tall."
+                ),
+                steps=(
+                    "Keep all four numbers between 0 and the picture's "
+                    "width or height.",
+                    "Make sure left is smaller than right and top is "
+                    "smaller than bottom.",
+                    "Check the picture's size first with picture.width and "
+                    "picture.height.",
+                ),
             )
         return self._derive(image.crop((left, top, right, bottom)))
 
@@ -618,8 +742,17 @@ class Picture:
             and not isinstance(x, bool)
             and not isinstance(y, bool)
         ):
-            raise ValueError(
-                f"Pixel coordinates must be whole numbers, not ({x!r}, {y!r})."
+            raise StudentFacingError(
+                f"Pixel coordinates must be whole numbers, not ({x!r}, {y!r}).",
+                friendly=(
+                    "Pixel positions have to be whole numbers, because a "
+                    "picture is a grid of pixels counted from 0."
+                ),
+                steps=(
+                    "Use whole numbers (integers) for x and y, like get_pixel(10, 20).",
+                    "If you calculated the position, wrap it in int(...) "
+                    "or use // instead of / when dividing.",
+                ),
             )
         if not (0 <= x < image.width and 0 <= y < image.height):
             raise IndexError(

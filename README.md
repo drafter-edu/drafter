@@ -377,7 +377,7 @@ Other useful JS scripts (run from `js/`): `npm run build` (production build), `n
 
 ### Run tests
 
-- JS tests (fast unit tests are the default; `test:integration` runs the real-Pyodide suites serially with a large heap, `test:skulpt` the Skulpt suites, `test:all` everything):
+- JS tests (fast unit tests are the default; `test:integration` runs the real-Pyodide suites serially with a large heap; `test:skulpt` runs the legacy Skulpt suites, which are currently known-failing and not part of the regular baseline):
 
     ```powershell
     cd js

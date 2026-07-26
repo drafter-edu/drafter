@@ -278,6 +278,10 @@ class Router:
                     message=diagnostic.message,
                     severity=SEVERITY_WARNING,
                     details=diagnostic.hint,
+                    # Diagnostics are authored student-facing already: the
+                    # message explains, the hint says what to do about it.
+                    friendly_message=diagnostic.message,
+                    friendly_steps=(diagnostic.hint,) if diagnostic.hint else (),
                     context=Correlation(route=request.url, request_id=request.id),
                 ),
                 "router.prepare_arguments",

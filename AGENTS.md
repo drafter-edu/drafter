@@ -76,7 +76,7 @@ Preserve these constraints unless the task explicitly requires an architectural 
 
 - `start_server` dispatches among browser mode, static compile mode, and normal CPython app mode. A change in shared code may affect all three.
 - Student application code executes once on the host and again in the browser. Do not assume that code reachable in the browser has normal CPython filesystem, process, networking, threading, or package availability.
-- Pyodide is the default browser engine. Skulpt remains supported where existing code and tests promise parity. Avoid introducing CPython-only language or library behavior into shared runtime paths.
+- Pyodide is the default browser engine. Skulpt is legacy and effectively unmaintained: its Jest project (`npm run test:skulpt`) is known-failing and excluded from the validation baseline, so do not modify, run, or try to fix Skulpt code or tests (`js/src/skulpt_bridge/`, the Skulpt bundles, `precompile`, `update-skulpt`) unless a task explicitly targets Skulpt. Still avoid introducing CPython-only language or library behavior into shared runtime paths.
 - Keep the `ClientBridge` focused on DOM interaction and transport. Put application, routing, state, validation, and response logic in the `ClientServer` or other Python-side domain modules.
 - A `ResponsePayload` is the content to display; a `Response` carries system metadata. Error paths must still produce and send a `Response`.
 - Preserve lazy initialization of the module-level main server and isolation between registered Drafter instances. Avoid mutable global state that can leak across embedded applications or tests.
@@ -160,12 +160,11 @@ JavaScript validation commands:
 cd js
 npm test
 npm run test:integration
-npm run test:skulpt
 npm run test:e2e
 npm run build
 ```
 
-Choose the smallest applicable set during development, but run every tier affected by the change.
+Choose the smallest applicable set during development, but run every tier affected by the change. (`npm run test:skulpt` exists but is legacy and known-failing; leave it out unless a task explicitly targets Skulpt.)
 
 ## Testing requirements by change type
 
@@ -208,7 +207,7 @@ npm run test:e2e
 npm run build
 ```
 
-Also run `npm run test:skulpt` when the affected behavior is shared with or implemented for Skulpt.
+Skulpt is legacy: skip `npm run test:skulpt` even for shared behavior unless the task explicitly targets Skulpt.
 
 ### Static builder, asset resolution, docs demo, or packaging change
 
@@ -229,7 +228,6 @@ Run the CI-equivalent gates that apply:
 just check
 uv run python tools/doc_drift.py
 just test
-cd js && npm run test:skulpt
 cd js && npm run test:e2e
 just build
 ```

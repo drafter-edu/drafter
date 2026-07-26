@@ -115,6 +115,10 @@ class TestErrorEnvelope:
             "severity": "error",
             "message": "Setup failed",
             "details": "stack details",
+            "data": {},
+            "friendly_title": "",
+            "friendly_message": "",
+            "friendly_steps": [],
             "traceback": None,
             "context": {
                 "causation_id": None,
@@ -127,6 +131,128 @@ class TestErrorEnvelope:
             "status_code": STATUS_ERROR,
             "recoverable": False,
         }
+
+
+# ============================================================================
+# STRUCTURED DATA
+# ============================================================================
+
+
+class TestStructuredData:
+    def test_data_defaults_to_empty_dict(self):
+        envelope = ErrorDetails(id="x", category=CATEGORY_SYSTEM, message="m")
+        assert envelope.data == {}
+        assert envelope.to_json()["data"] == {}
+
+    def test_data_is_sanitized_on_construction(self):
+        class Odd:
+            def __repr__(self):
+                return "<odd thing>"
+
+        envelope = ErrorDetails(
+            id="x",
+            category=CATEGORY_SYSTEM,
+            message="m",
+            data={"nested": {"values": [1, "two", Odd()]}, "flag": True},
+        )
+        assert envelope.data == {
+            "nested": {"values": [1, "two", "<odd thing>"]},
+            "flag": True,
+        }
+
+    def test_data_converts_objects_with_to_json(self):
+        from drafter.data.request import Request
+
+        request = Request("click", "guess", {"pick": "5"}, {})
+        envelope = ErrorDetails(
+            id="x",
+            category=CATEGORY_SYSTEM,
+            message="m",
+            data={"request": request},
+        )
+        described = envelope.data["request"]
+        assert described["url"] == "guess"
+        assert described["kwargs"] == {"pick": "5"}
+
+    def test_data_converts_dataclasses(self):
+        from dataclasses import dataclass as plain_dataclass
+
+        @plain_dataclass
+        class State:
+            score: int
+            name: str
+
+        envelope = ErrorDetails(
+            id="x",
+            category=CATEGORY_SYSTEM,
+            message="m",
+            data={"updated_state": State(score=3, name="Ada")},
+        )
+        assert envelope.data["updated_state"] == {"score": 3, "name": "Ada"}
+
+
+# ============================================================================
+# FRIENDLY TIER
+# ============================================================================
+
+
+class TestFriendlyTier:
+    def test_defaults_to_empty(self):
+        envelope = ErrorDetails(id="x", category=CATEGORY_SYSTEM, message="m")
+        assert envelope.friendly_message == ""
+        assert envelope.friendly_steps == ()
+
+    def test_steps_coerced_to_tuple(self):
+        envelope = ErrorDetails(
+            id="x",
+            category=CATEGORY_SYSTEM,
+            message="m",
+            friendly_steps=["one", "two"],
+        )
+        assert envelope.friendly_steps == ("one", "two")
+        assert envelope.to_json()["friendly_steps"] == ["one", "two"]
+
+    def test_envelope_from_exception_derives_friendly_text(self):
+        envelope = envelope_from_exception(
+            NameError("name 'total' is not defined", name="total"),
+            "request.route_execution_failed",
+            CATEGORY_REQUEST,
+        )
+        assert envelope.friendly_title == "Unknown Name"
+        assert "'total'" in envelope.friendly_message
+        assert envelope.friendly_steps
+        assert any("misspelled" in step for step in envelope.friendly_steps)
+
+    def test_envelope_from_exception_explicit_friendly_text_wins(self):
+        envelope = envelope_from_exception(
+            NameError("nope"),
+            "request.route_execution_failed",
+            CATEGORY_REQUEST,
+            friendly_message="Custom explanation.",
+            friendly_steps=("Custom step.",),
+        )
+        assert envelope.friendly_message == "Custom explanation."
+        assert envelope.friendly_steps == ("Custom step.",)
+
+    def test_student_facing_error_carries_friendly_text(self):
+        from drafter.data.errors import StudentFacingError
+
+        error = StudentFacingError(
+            "Header level must be between 1 and 6, not 9",
+            friendly="The Header component only supports levels 1 through 6.",
+            steps=["Change the level argument to a number from 1 to 6."],
+        )
+        assert str(error) == "Header level must be between 1 and 6, not 9"
+        envelope = envelope_from_exception(
+            error, "request.route_execution_failed", CATEGORY_REQUEST
+        )
+        assert (
+            envelope.friendly_message
+            == "The Header component only supports levels 1 through 6."
+        )
+        assert envelope.friendly_steps == (
+            "Change the level argument to a number from 1 to 6.",
+        )
 
 
 # ============================================================================
@@ -273,6 +399,45 @@ class TestVisitLifecycle:
         assert envelope.id == "payload.verification_failed"
         assert envelope.category == CATEGORY_PAYLOAD
         assert envelope.status_code == STATUS_ERROR
+
+    def test_route_not_found_carries_request_data_but_no_call(self, started_server):
+        request, response = self._visit(started_server, "nowhere")
+        envelope = response.errors[0]
+        assert "route_call" not in envelope.data
+        assert envelope.data["request"]["url"] == "nowhere"
+        assert envelope.data["request"]["id"] == request.id
+
+    def test_route_execution_failure_carries_exact_route_call(self, started_server):
+        def guess(pick: int):
+            raise ValueError("boom")
+
+        request, response = self._visit(started_server, "guess", guess, {"pick": "5"})
+        envelope = response.errors[0]
+        assert envelope.id == "request.route_execution_failed"
+        assert envelope.data["route_call_exact"] is True
+        assert envelope.data["route_call"].startswith("guess(")
+        assert "5" in envelope.data["route_call"]
+        assert envelope.data["request"]["kwargs"] == {"pick": "5"}
+
+    def test_argument_parsing_failure_carries_approximate_route_call(
+        self, started_server
+    ):
+        def typed(pick: int):
+            return None
+
+        request, response = self._visit(
+            started_server,
+            "typed",
+            typed,
+            {"pick": "abc", "--submit-button": "typed_btn"},
+        )
+        envelope = response.errors[0]
+        assert envelope.id == "request.argument_parsing_failed"
+        assert envelope.data["route_call_exact"] is False
+        assert envelope.data["route_call"].startswith("typed(")
+        assert "abc" in envelope.data["route_call"]
+        # Framework bookkeeping entries never appear in the generated call.
+        assert "--submit-button" not in envelope.data["route_call"]
 
     def test_make_error_response_uses_given_envelope(self, started_server):
         """Direct calls carry the provided envelope through to response errors."""

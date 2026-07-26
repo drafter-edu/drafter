@@ -25,6 +25,7 @@ from drafter.components.utilities.validation import (
     validate_parameter_name,
 )
 from drafter.constants import SUBMIT_BUTTON_KEY
+from drafter.data.errors import StudentFacingError
 from drafter.helpers.urls import (
     check_invalid_external_url,
     friendly_urls,
@@ -159,19 +160,42 @@ class LinkContent(Component):
             None if the URL is a known route or a valid external URL.
 
         Raises:
-            ValueError: If the URL is neither a known route nor a valid
-                external URL.
+            StudentFacingError: If the URL is neither a known route nor a
+                valid external URL.
         """
         if not router.has_route(self.url):
             invalid_external_url_reason = check_invalid_external_url(self.url)
             if invalid_external_url_reason == "is a valid external url":
                 return None
             elif invalid_external_url_reason:
-                raise ValueError(
-                    f"Link `{self.url}` is not a valid external url.\n{invalid_external_url_reason}."
+                raise StudentFacingError(
+                    f"Link `{self.url}` is not a valid external url.\n{invalid_external_url_reason}.",
+                    friendly=(
+                        f"This link's url argument (`{self.url}`) does not match "
+                        "any of your route functions and is not a working web "
+                        "address either."
+                    ),
+                    steps=(
+                        "Check the url argument for typos.",
+                        "If you meant one of your own pages, pass the route "
+                        "function itself, like Link('Home', index).",
+                        "If you meant an external website, use a full address "
+                        "that starts with https://",
+                    ),
                 )
-            raise ValueError(
-                f"Link `{self.text}` points to non-existent page `{self.url}`."
+            raise StudentFacingError(
+                f"Link `{self.text}` points to non-existent page `{self.url}`.",
+                friendly=(
+                    f"The link labeled '{self.text}' tries to go to a page "
+                    f"named `{self.url}`, but your site has no route with "
+                    "that name."
+                ),
+                steps=(
+                    "Check the spelling of the page name in the Link.",
+                    "Make sure the page's function has the @route decorator.",
+                    "Pass the route function itself instead of a string, "
+                    "like Link('Next', next_page).",
+                ),
             )
         return None
 

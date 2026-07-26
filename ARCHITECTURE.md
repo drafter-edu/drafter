@@ -28,7 +28,9 @@ and runs the user's code in the browser runtime. This effectively runs the progr
 "server side" in CPython (starting the server, running unit tests, printing output), then "client
 side" in Skulpt/Pyodide, where the user's application actually runs. The default engine is
 **Pyodide** (`AppCommonConfiguration.engine = "pyodide"`); Skulpt remains a semi-supported alternative
-via `--engine skulpt`.
+via `--engine skulpt`. Skulpt is legacy: its code (`js/src/skulpt_bridge/`) and Jest project
+(`npm run test:skulpt`, currently known-failing) are outside the regular validation baseline, and
+should not be modified or "fixed" as a side effect of other work (see AGENTS.md).
 
 Hot reload: the dev server exposes a WebSocket route backed by `ReloadHub` and a `watchfiles`
 watcher (`src/drafter/app/watcher.py`). The watcher distinguishes "full reload" from "restart

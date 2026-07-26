@@ -48,6 +48,7 @@ from drafter.components.utilities.registry import (
 )
 from drafter.components.utilities.validation import validate_parameter_name
 from drafter.data.converter import ConversionContext, ConversionResult
+from drafter.data.errors import StudentFacingError
 
 WAVEFORMS = ("sine", "square", "triangle", "sawtooth")
 """The oscillator waveform names accepted by `Tone` and `Melody`."""
@@ -93,15 +94,15 @@ def note_to_frequency(note: str) -> float:
         The frequency in Hz.
 
     Raises:
-        ValueError: If the note name is not recognized.
+        StudentFacingError: If the note name is not recognized.
     """
     original = note
     note = note.strip()
     if len(note) < 2:
-        raise ValueError(_bad_note_message(original))
+        raise _bad_note_error(original)
     letter = note[0].upper()
     if letter not in _NOTE_SEMITONES:
-        raise ValueError(_bad_note_message(original))
+        raise _bad_note_error(original)
     rest = note[1:]
     accidental = 0
     if rest[0] in ("#", "♯"):
@@ -111,10 +112,25 @@ def note_to_frequency(note: str) -> float:
         accidental = -1
         rest = rest[1:]
     if not rest.isdigit() or len(rest) != 1:
-        raise ValueError(_bad_note_message(original))
+        raise _bad_note_error(original)
     octave = int(rest)
     midi = (octave + 1) * 12 + _NOTE_SEMITONES[letter] + accidental
     return round(440.0 * 2 ** ((midi - 69) / 12), 4)
+
+
+_BAD_NOTE_FRIENDLY = (
+    "One of the musical notes is not written in a way Drafter recognizes."
+)
+"""Friendly explanation shared by every invalid-note-name error."""
+
+_BAD_NOTE_STEPS = (
+    "Write each note as a letter from A to G followed by an octave digit,"
+    " like 'C4' or 'G5'.",
+    "Put any sharp (#) or flat (b) between the letter and the digit, like"
+    " 'F#3' or 'Bb5'.",
+    "In a Melody, use 'rest' for a beat of silence.",
+)
+"""Fix steps shared by every invalid-note-name error."""
 
 
 def _bad_note_message(note) -> str:
@@ -125,41 +141,97 @@ def _bad_note_message(note) -> str:
     )
 
 
+def _bad_note_error(note) -> StudentFacingError:
+    """Build the two-tier error for an unrecognized note name."""
+    return StudentFacingError(
+        _bad_note_message(note),
+        friendly=_BAD_NOTE_FRIENDLY,
+        steps=_BAD_NOTE_STEPS,
+    )
+
+
 def _validate_pitch(pitch, component_name: str) -> None:
     """Check that a pitch is a valid note name or a positive frequency."""
     if isinstance(pitch, str):
         note_to_frequency(pitch)
     elif isinstance(pitch, (int, float)) and not isinstance(pitch, bool):
         if pitch <= 0:
-            raise ValueError(
+            raise StudentFacingError(
                 f"{component_name} pitch must be a positive frequency in Hz,"
-                f" not {pitch!r}."
+                f" not {pitch!r}.",
+                friendly=(
+                    f"The pitch given to this {component_name} is a number,"
+                    " but frequencies only make sense when they are bigger"
+                    " than zero."
+                ),
+                steps=(
+                    "Use a positive frequency in Hz, like 440.",
+                    "Or use a note name instead, like 'A4'.",
+                ),
             )
     else:
-        raise ValueError(
+        raise StudentFacingError(
             f"{component_name} pitch must be a note name like 'C4' or a"
-            f" frequency in Hz, not {pitch!r}."
+            f" frequency in Hz, not {pitch!r}.",
+            friendly=(
+                f"The pitch given to this {component_name} has to be either"
+                " a note name (text) or a frequency (a number), and this"
+                " value is neither."
+            ),
+            steps=(
+                "Use a note name in quotes, like 'C4' or 'F#3'.",
+                "Or use a number of Hz, like 440.",
+            ),
         )
+
+
+def _fraction_error(message: str, parameter_name: str, component_name: str):
+    """Build the two-tier error for an out-of-range fraction argument."""
+    return StudentFacingError(
+        message,
+        friendly=(
+            f"The {parameter_name} for this {component_name} has to be a"
+            " number between 0.0 and 1.0."
+        ),
+        steps=(
+            f"Pick a decimal from 0.0 (none) to 1.0 (maximum) for"
+            f" {parameter_name}, like 0.5.",
+            "Make sure you are passing a number, not text or True/False.",
+        ),
+    )
 
 
 def _validate_fraction(value, parameter_name: str, component_name: str) -> None:
     if not isinstance(value, (int, float)) or isinstance(value, bool):
-        raise ValueError(
+        raise _fraction_error(
             f"{component_name} {parameter_name} must be a number between"
-            f" 0.0 and 1.0, not {value!r}."
+            f" 0.0 and 1.0, not {value!r}.",
+            parameter_name,
+            component_name,
         )
     if not 0.0 <= value <= 1.0:
-        raise ValueError(
+        raise _fraction_error(
             f"{component_name} {parameter_name} must be between 0.0 and 1.0,"
-            f" not {value!r}."
+            f" not {value!r}.",
+            parameter_name,
+            component_name,
         )
 
 
 def _validate_waveform(waveform, component_name: str) -> None:
     if waveform not in WAVEFORMS:
-        raise ValueError(
+        raise StudentFacingError(
             f"{component_name} waveform must be one of"
-            f" {', '.join(repr(w) for w in WAVEFORMS)}, not {waveform!r}."
+            f" {', '.join(repr(w) for w in WAVEFORMS)}, not {waveform!r}.",
+            friendly=(
+                f"The waveform for this {component_name} is not one of the"
+                " four wave shapes Drafter knows."
+            ),
+            steps=(
+                "Choose 'sine', 'square', 'triangle', or 'sawtooth' for the waveform.",
+                "Check the spelling and make sure the waveform is lowercase"
+                " text in quotes.",
+            ),
         )
 
 
@@ -358,24 +430,51 @@ def _validate_effects(effects, component_name: str) -> None:
     if effects is None:
         return
     if not isinstance(effects, list):
-        raise ValueError(
+        raise StudentFacingError(
             f"{component_name} effects must be a list of effects like"
-            f" [Echo(), Reverb()], not {effects!r}."
+            f" [Echo(), Reverb()], not {effects!r}.",
+            friendly=(
+                f"The effects for this {component_name} have to be given as"
+                " a list, even if there is only one effect."
+            ),
+            steps=(
+                "Wrap the effects in square brackets, like effects=[Echo()].",
+                "Separate multiple effects with commas, like"
+                " effects=[Echo(), Reverb()].",
+            ),
         )
     for index, effect in enumerate(effects):
         if not isinstance(effect, AudioEffect):
-            raise ValueError(
+            raise StudentFacingError(
                 f"{component_name} effects must all be effects (Echo, Reverb,"
                 f" Muffle, Sharpen, or Distortion), but item {index} was"
-                f" {effect!r}."
+                f" {effect!r}.",
+                friendly=(
+                    f"One of the items in this {component_name}'s effects"
+                    " list is not an audio effect object."
+                ),
+                steps=(
+                    "Make every item an effect like Echo(), Reverb(),"
+                    " Muffle(), Sharpen(), or Distortion().",
+                    "Remember the parentheses: use Echo(), not just Echo.",
+                ),
             )
         for field_name, field_value in asdict(effect).items():
             if not isinstance(field_value, (int, float)) or isinstance(
                 field_value, bool
             ):
-                raise ValueError(
+                raise StudentFacingError(
                     f"{component_name} effects: {type(effect).__name__}"
-                    f" {field_name} must be a number, not {field_value!r}."
+                    f" {field_name} must be a number, not {field_value!r}.",
+                    friendly=(
+                        f"One of the effects in this {component_name} was"
+                        " given a setting that is not a number."
+                    ),
+                    steps=(
+                        f"Use a number for the {field_name} setting, like 0.5.",
+                        "Check that you did not accidentally pass text or"
+                        " True/False to the effect.",
+                    ),
                 )
 
 
@@ -586,9 +685,16 @@ COMPONENT_CONTRACT_REGISTRY.register(Tone.CONTRACT)
 def _normalize_notes(notes) -> list[list]:
     """Validate a Melody note list and normalize it to [note, beats] pairs."""
     if not isinstance(notes, list) or not notes:
-        raise ValueError(
+        raise StudentFacingError(
             "Melody notes must be a non-empty list of note names like"
-            " ['C4', 'E4', 'G4'], optionally with beats like [('C4', 2)]."
+            " ['C4', 'E4', 'G4'], optionally with beats like [('C4', 2)].",
+            friendly=(
+                "The notes for a Melody have to be a list with at least one note in it."
+            ),
+            steps=(
+                "Put the notes in square brackets, like Melody(['C4', 'E4', 'G4']).",
+                "To hold a note longer, use a (note, beats) pair like ('C4', 2).",
+            ),
         )
     normalized = []
     for index, item in enumerate(notes):
@@ -596,9 +702,19 @@ def _normalize_notes(notes) -> list[list]:
         note = item
         if isinstance(item, (tuple, list)):
             if len(item) != 2:
-                raise ValueError(
+                raise StudentFacingError(
                     f"Melody notes: item {index} should be a (note, beats)"
-                    f" pair, but had {len(item)} parts: {item!r}."
+                    f" pair, but had {len(item)} parts: {item!r}.",
+                    friendly=(
+                        f"Item {index} of the Melody's notes is a pair, but"
+                        " a pair has to be exactly a note and a number of"
+                        " beats."
+                    ),
+                    steps=(
+                        "Write pairs with exactly two parts, like ('C4', 2).",
+                        "If the note only lasts one beat, just write the"
+                        " note by itself, like 'C4'.",
+                    ),
                 )
             note, beats = item
             if (
@@ -606,16 +722,34 @@ def _normalize_notes(notes) -> list[list]:
                 or isinstance(beats, bool)
                 or beats <= 0
             ):
-                raise ValueError(
+                raise StudentFacingError(
                     f"Melody notes: item {index} has beats {beats!r}, but"
-                    " beats must be a positive number."
+                    " beats must be a positive number.",
+                    friendly=(
+                        f"Item {index} of the Melody's notes has a beats"
+                        " value that is not a positive number."
+                    ),
+                    steps=(
+                        "Use a positive number of beats, like ('C4', 2) or"
+                        " ('C4', 0.5).",
+                        "Make sure the beats value is a number, not text.",
+                    ),
                 )
         if note is None:
             note = REST
         if not isinstance(note, str):
-            raise ValueError(
+            raise StudentFacingError(
                 f"Melody notes: item {index} should be a note name like 'C4'"
-                f" or 'rest', not {note!r}."
+                f" or 'rest', not {note!r}.",
+                friendly=(
+                    f"Item {index} of the Melody's notes is not a note name"
+                    " written as text."
+                ),
+                steps=(
+                    "Write each note as text in quotes, like 'C4' or 'rest'.",
+                    "To set how long a note lasts, use a (note, beats) pair"
+                    " like ('C4', 2).",
+                ),
             )
         if note.strip().lower() == REST:
             note = REST
@@ -765,9 +899,17 @@ class Melody(Component):
         _validate_fraction(volume, "volume", "Melody")
         _validate_effects(effects, "Melody")
         if not isinstance(tempo, (int, float)) or isinstance(tempo, bool) or tempo <= 0:
-            raise ValueError(
+            raise StudentFacingError(
                 f"Melody tempo must be a positive number of beats per minute,"
-                f" not {tempo!r}."
+                f" not {tempo!r}.",
+                friendly=(
+                    "The tempo for this Melody has to be a positive number"
+                    " of beats per minute."
+                ),
+                steps=(
+                    "Use a positive number for tempo, like 120.",
+                    "Bigger numbers play faster; try values between about 60 and 240.",
+                ),
             )
         self.notes = notes
         self.tempo = tempo
@@ -960,15 +1102,43 @@ class Sound(Component):
             or isinstance(pan, bool)
             or not (-1.0 <= pan <= 1.0)
         ):
-            raise ValueError(
-                f"Sound pan must be between -1.0 (left) and 1.0 (right), not {pan!r}."
+            raise StudentFacingError(
+                f"Sound pan must be between -1.0 (left) and 1.0 (right), not {pan!r}.",
+                friendly=(
+                    "The pan for this Sound has to be a number between -1.0 and 1.0."
+                ),
+                steps=(
+                    "Use -1.0 for fully left, 0.0 for the center, and 1.0"
+                    " for fully right.",
+                    "Pick a decimal in between, like -0.5, for positions"
+                    " partway to one side.",
+                ),
             )
         if not isinstance(speed, (int, float)) or isinstance(speed, bool) or speed <= 0:
-            raise ValueError(f"Sound speed must be a positive number, not {speed!r}.")
+            raise StudentFacingError(
+                f"Sound speed must be a positive number, not {speed!r}.",
+                friendly=(
+                    "The speed for this Sound has to be a positive number"
+                    " that multiplies the normal playback speed."
+                ),
+                steps=(
+                    "Use 1.0 for normal speed, 2.0 for twice as fast, or"
+                    " 0.5 for half speed.",
+                    "Make sure the speed is a number bigger than zero.",
+                ),
+            )
         if visualize is not None and visualize not in ("waveform", "bars"):
-            raise ValueError(
+            raise StudentFacingError(
                 f"Sound visualize must be 'waveform', 'bars', or None,"
-                f" not {visualize!r}."
+                f" not {visualize!r}.",
+                friendly=(
+                    "The visualize style for this Sound is not one of the"
+                    " styles it can draw."
+                ),
+                steps=(
+                    "Choose 'waveform' or 'bars' for visualize.",
+                    "Leave visualize out (or use None) for no visualization.",
+                ),
             )
         self.src = src
         self.volume = volume
@@ -1194,10 +1364,19 @@ class Microphone(Component):
         validate_parameter_name(name, "Microphone")
         _validate_fraction(threshold, "threshold", "Microphone")
         if visualize not in VISUALIZATIONS:
-            raise ValueError(
+            raise StudentFacingError(
                 f"Microphone visualize must be one of"
                 f" {', '.join(repr(v) for v in VISUALIZATIONS)},"
-                f" not {visualize!r}."
+                f" not {visualize!r}.",
+                friendly=(
+                    "The visualize style for this Microphone is not one of"
+                    " the styles it can draw."
+                ),
+                steps=(
+                    "Choose 'meter', 'waveform', or 'bars' for visualize.",
+                    "Check the spelling and make sure the style is lowercase"
+                    " text in quotes.",
+                ),
             )
         self.name = name
         self.threshold = threshold
