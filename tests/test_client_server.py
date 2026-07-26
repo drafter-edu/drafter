@@ -396,6 +396,40 @@ class TestPayloadHandling:
 
         started_server.verify_payload(sample_request, payload, config)
 
+    def test_verify_payload_related_checkboxes_share_a_name(
+        self, started_server: ClientServer, sample_request: Request
+    ):
+        """RelatedCheckBox groups share one name by design and verify fine."""
+        from drafter.components.forms import RelatedCheckBox
+
+        payload = Page(
+            None,
+            [
+                RelatedCheckBox("places", "New York"),
+                RelatedCheckBox("places", "Los Angeles"),
+                RelatedCheckBox("places", "Chicago"),
+            ],
+        )
+        config = started_server.get_current_configuration()
+
+        started_server.verify_payload(sample_request, payload, config)
+
+    def test_verify_payload_shared_name_with_non_group_component(
+        self, started_server: ClientServer, sample_request: Request
+    ):
+        """A RelatedCheckBox name reused by another component is still an error."""
+        from drafter.components.forms import RelatedCheckBox, TextBox
+
+        payload = Page(
+            None,
+            [RelatedCheckBox("places", "New York"), TextBox("places")],
+        )
+        config = started_server.get_current_configuration()
+
+        with pytest.raises(ErrorDetails) as exc_info:
+            started_server.verify_payload(sample_request, payload, config)
+        assert "places" in exc_info.value.message
+
     def test_render_payload_page(
         self, started_server: ClientServer, sample_request: Request
     ):

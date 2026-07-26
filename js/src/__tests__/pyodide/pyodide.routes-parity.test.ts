@@ -111,8 +111,9 @@ describe("Pyodide Routes Parity", () => {
 		let app2 = within(drafterBody2 as HTMLElement);
 		// Page verification rejects the page at render time because its
 		// Button points at a route that no longer exists (proving the
-		// first app's routes were reset).
-		await app2.findByText(/non-existent page `second`/i);
+		// first app's routes were reset). The error page repeats the
+		// message (summary line + technical details), so expect "all".
+		await app2.findAllByText(/non-existent page `second`/i);
 
 		await resetPyodideDrafterRuntime();
 		await runStudentCode({

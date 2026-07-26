@@ -396,6 +396,9 @@ class RelatedCheckBox(FormComponent):
 
     tag = "input"
     KNOWN_ATTRS = ["type", "name", "checked"]
+    # Members of a group share one name and submit as a single list, so the
+    # duplicate-name payload verification must not flag them.
+    ALLOWS_SHARED_NAME = True
 
     ARGUMENTS = [
         ComponentArgument("name"),

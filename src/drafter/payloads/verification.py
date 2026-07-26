@@ -90,6 +90,9 @@ def verify_unique_component_names(request: Request, content: Any) -> str | None:
 
     Two components with the same name silently merge into one route
     parameter (as a list), which is almost never what a student intends.
+    Components whose class sets `ALLOWS_SHARED_NAME` (like RelatedCheckBox)
+    share a name by design and are allowed, as long as every component
+    using that name opts in.
 
     Args:
         request: Associated request providing context (URL).
@@ -107,6 +110,13 @@ def verify_unique_component_names(request: Request, content: Any) -> str | None:
             duplicates.setdefault(name, [first_seen[name]]).append(component)
         else:
             first_seen[name] = component
+    duplicates = {
+        name: components
+        for name, components in duplicates.items()
+        if not all(
+            getattr(component, "ALLOWS_SHARED_NAME", False) for component in components
+        )
+    }
     if not duplicates:
         return None
     descriptions = []

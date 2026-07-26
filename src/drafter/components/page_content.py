@@ -255,6 +255,8 @@ class Component:
     SELF_CLOSING_TAG: ClassVar[bool] = False
     NEWLINE_MODE: ClassVar[str] = NewlineMode.CONVERT_TO_BR
 
+    ALLOWS_SHARED_NAME: bool = False
+
     # Constants
     DRAFTER_DATA_ARGUMENT_NAME: ClassVar[str] = "data--drafter-arguments"
     DRAFTER_DATA_HANDLERS_NAME: ClassVar[str] = "data--drafter-handlers"

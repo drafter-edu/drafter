@@ -146,7 +146,7 @@ describe("RouteAdded", () => {
 		) as HTMLFormElement;
 		expect(form).not.toBeNull();
 		const input = form.querySelector(
-			"input[name='answer']",
+			"input[data-parameter='answer']",
 		) as HTMLInputElement;
 		expect(input).not.toBeNull();
 		expect(form.textContent).toContain("answer");

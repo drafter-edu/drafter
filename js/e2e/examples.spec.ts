@@ -50,6 +50,10 @@ const INTENTIONAL_ERROR_EXAMPLES = [
 	"error_non_string_page.py",
 	"error_in_route.py",
 	"state_conversion.py",
+	// These two fail Link verification at the initial render (bad external
+	// URL / link to a route that does not exist), which is their point.
+	"error_link.py",
+	"error_missing_page.py",
 ];
 
 type Example = { fileName: string; contents: string };
@@ -97,16 +101,21 @@ async function runInPage(
 				}
 				const debugPanel = root.querySelector(".drafter-debug--");
 				const formBody = root.querySelector(".drafter-form--");
+				// Drafter's error route wraps its output in .error-page, which
+				// is a more precise signal than scanning the text for "error" (the
+				// form text includes the debug menubar and any page copy that
+				// legitimately uses the word, e.g. custom_error_page.py).
+				const errorPage = formBody?.querySelector(".error-page") ?? null;
 				const formText = formBody?.textContent ?? "";
 				if (!presentErrors) {
 					if (!debugPanel) {
 						return "missing .drafter-debug--";
 					}
-					if (/error/i.test(formText)) {
-						return `form contains error text: ${formText.slice(0, 300)}`;
+					if (errorPage) {
+						return `form shows an error page: ${errorPage.textContent?.slice(0, 300)}`;
 					}
-				} else if (!/error/i.test(formText)) {
-					return `expected error text, got: ${formText.slice(0, 300)}`;
+				} else if (!errorPage) {
+					return `expected an error page, got: ${formText.slice(0, 300)}`;
 				}
 				return null;
 			},

@@ -70,12 +70,17 @@ export class RoutesPanel extends Panel {
 		const form = (
 			<form class="drafter-debug-route-try">
 				{parameters.map((parameter) => {
+					// Deliberately no `name` attribute: these inputs live in
+					// the same document as the app's own form, and a shared
+					// name would collide with the app's identically-named
+					// fields. Pyodide maps Python None to undefined, so the
+					// no-default check must catch both.
 					const input = (
 						<input
 							type="text"
-							name={parameter.name}
+							data-parameter={parameter.name}
 							placeholder={
-								parameter.default !== null
+								parameter.default != null
 									? `default: ${parameter.default}`
 									: parameter.type || "value"
 							}
