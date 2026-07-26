@@ -3,6 +3,7 @@ System routes for the Drafter framework.
 """
 
 from drafter.router.defaults.about import default_about
+from drafter.router.defaults.bug_report import default_bug_report
 from drafter.router.defaults.error import default_error
 from drafter.router.defaults.index import default_index
 from drafter.router.defaults.reload import default_reload
@@ -12,6 +13,7 @@ _SYSTEM_ERROR_ROUTE = "--error"
 _SYSTEM_ABOUT_ROUTE = "--about"
 _SYSTEM_RESET_ROUTE = "--reset"
 _SYSTEM_RELOAD_ROUTE = "--reload"
+_SYSTEM_BUG_REPORT_ROUTE = "--bug-report"
 _SYSTEM_INDEX_ROUTE = "index"
 
 _SYSTEM_ROUTES = {
@@ -19,5 +21,6 @@ _SYSTEM_ROUTES = {
     _SYSTEM_ABOUT_ROUTE: default_about,
     _SYSTEM_RESET_ROUTE: default_reset,
     _SYSTEM_RELOAD_ROUTE: default_reload,
+    _SYSTEM_BUG_REPORT_ROUTE: default_bug_report,
     _SYSTEM_INDEX_ROUTE: default_index,
 }

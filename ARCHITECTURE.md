@@ -403,7 +403,7 @@ configuration, and `cli.py` basically just runs the student's file. (The old `do
    1. The `ClientServer` is started (`ClientServer.do_start`).
    2. The state is initialized from the initial state.
    3. Missing system routes are registered with the router (`src/drafter/router/system_routes.py`,
-      defaults in `src/drafter/router/defaults/`: about, error, index, reload, reset).
+      defaults in `src/drafter/router/defaults/`: about, bug-report, error, index, reload, reset).
 10. Started Phase
     1. The `ClientBridge` creates the initial `Request`.
     2. The `ClientBridge` initiates a visit with the initial `Request`.
@@ -781,6 +781,12 @@ system; the Client (browser runtime) needs a virtual one.
   JSON listing endpoint (`__drafter_list_files`). The static build copies assets and configured
   `additional_paths` globs into the output directory, so relative URLs work identically when
   deployed. Images are assumed to be available via the server.
+- **Error logging**: outside production mode, the debug panel batches error envelopes to the dev
+  server's `__drafter_error_log` endpoint (`js/src/debug/error_reporter.ts`, disabled for the
+  session after the first failed delivery). The server appends them, plus bug-report-style
+  environment details, to a shared JSON Lines file `drafter-debug.log` next to the student's code
+  (`src/drafter/app/error_log.py`, size-capped with best-effort trimming); the file watcher ignores
+  that file so log writes never trigger reloads.
 - **Uploads**: uploaded files are read into memory (`RuntimeAdapter.handle_file_upload`) as
   `{filename, content, type, size}` dicts and injected into the request data.
 - **Native directory mounting**: Pyodide can mount a real local directory via `mountNativeFS`, with

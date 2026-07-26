@@ -11,6 +11,11 @@ import type { ErrorDetailsJson } from "../telemetry/errors";
  * previous one (rendered with diff2html, like test-failure diffs).
  */
 export class CurrentPanel extends Panel {
+	// Problems not tied to any single request (startup/setup warnings and
+	// errors). They are re-rendered after every navigation instead of being
+	// wiped with the per-page problems.
+	private persistentProblems: ErrorDetailsJson[] = [];
+
 	constructor(
 		containerId: string,
 		instanceId: number,
@@ -89,16 +94,26 @@ export class CurrentPanel extends Panel {
 		);
 	}
 
-	/** A new navigation began: clear the per-page problems list. */
+	/**
+	 * A new navigation began: clear the per-page problems list, keeping the
+	 * persistent (page-independent) problems visible.
+	 */
 	public startNavigation(route: string): void {
 		this.getRouteElement().textContent = route;
-		this.getProblemsElement().replaceChildren(
-			(
-				<p class="drafter-debug-current-no-problems">
-					{t("current.no_problems")}
-				</p>
-			) as HTMLElement,
-		);
+		const problems = this.getProblemsElement();
+		problems.replaceChildren();
+		for (const envelope of this.persistentProblems) {
+			this.renderProblem(problems, envelope);
+		}
+		if (this.persistentProblems.length === 0) {
+			problems.appendChild(
+				(
+					<p class="drafter-debug-current-no-problems">
+						{t("current.no_problems")}
+					</p>
+				) as HTMLElement,
+			);
+		}
 	}
 
 	public setRoute(route: string): void {
@@ -112,12 +127,29 @@ export class CurrentPanel extends Panel {
 		).textContent = formatted;
 	}
 
-	/** Append an error/warning envelope to this page's problems list. */
-	public addProblem(envelope: ErrorDetailsJson): void {
+	/**
+	 * Append an error/warning envelope to this page's problems list. When
+	 * `persistent` is true, the problem is not tied to the current page and
+	 * stays visible across navigations (e.g. warnings raised at startup).
+	 */
+	public addProblem(
+		envelope: ErrorDetailsJson,
+		persistent: boolean = false,
+	): void {
+		if (persistent) {
+			this.persistentProblems.push(envelope);
+		}
 		const problems = this.getProblemsElement();
 		problems
 			.querySelector(".drafter-debug-current-no-problems")
 			?.remove();
+		this.renderProblem(problems, envelope);
+	}
+
+	private renderProblem(
+		problems: HTMLElement,
+		envelope: ErrorDetailsJson,
+	): void {
 		const isError =
 			envelope.severity === "error" || envelope.severity === "critical";
 		problems.appendChild(

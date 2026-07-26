@@ -13,6 +13,7 @@ from typing import Any
 from starlette.websockets import WebSocket
 from watchfiles import awatch
 
+from drafter.app.error_log import DEBUG_LOG_FILENAME
 from drafter.config.system import SystemConfiguration
 
 
@@ -136,6 +137,14 @@ async def _watch_and_reload(
     restart_paths = {wp.directory.resolve() for wp in watch_paths if not wp.full_reload}
     async for changes in awatch(*[wp.directory for wp in watch_paths], stop_event=None):
         changed_paths = {Path(path).resolve() for _, path in changes}
+        # The shared debug log is written by the server itself whenever the
+        # browser reports an error; reacting to those writes would put the
+        # site in a restart loop (restart -> error -> log write -> restart).
+        changed_paths = {
+            path for path in changed_paths if path.name != DEBUG_LOG_FILENAME
+        }
+        if not changed_paths:
+            continue
         print("Checking for", restart_paths, "in", changed_paths)
         if changed_paths and any(
             changed_path.is_relative_to(restart_path)

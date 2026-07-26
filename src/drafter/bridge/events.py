@@ -431,6 +431,25 @@ class EventManager:
         self.mount_event_handlers(root, do_navigation)
         debug_log("client.mount_navigation_complete")
 
+    def mount_bug_report_download(self, callback: Callable[[], None]) -> None:
+        """Wire the bug-report page's download button to the given callback.
+
+        The button (rendered by the ``--bug-report`` system route with the
+        well-known BUG_REPORT_DOWNLOAD id) is regular page content, so this
+        runs after every page commit; pages without the button return
+        immediately, and a button that already has its listener (marked via
+        the mounted attribute) is left alone.
+        """
+        button = self.scope.querySelector("#" + DRAFTER_TAG_IDS["BUG_REPORT_DOWNLOAD"])
+        if not button:
+            return
+        if button.getAttribute(HANDLERS_MOUNTED_ATTR):
+            return
+        wrapped_handler = self.runtime.wrap_event_handler(lambda event: callback())
+        button.addEventListener("click", wrapped_handler)
+        button.setAttribute(HANDLERS_MOUNTED_ATTR, "true")
+        debug_log("client.bug_report_download_mounted")
+
     def mount_subtle_debug_entry(self, callback: Callable[[], None]) -> None:
         """Wire the subtle production debug-entry button to the debug toggle.
 

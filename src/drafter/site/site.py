@@ -37,6 +37,7 @@ DRAFTER_TAG_IDS = {
     "FORM": "drafter-form--",
     "DEBUG": "drafter-debug--",
     "SUBTLE_DEBUG_ENTRY": "drafter-subtle-debug-entry--",
+    "BUG_REPORT_DOWNLOAD": "drafter-bug-report-download--",
     "PADDING_V": "drafter-padding-v--",
     "PADDING_H": "drafter-padding-h--",
     "FAVICON": "drafter-favicon--",

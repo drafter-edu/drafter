@@ -34,6 +34,7 @@ import { openSourceViewer } from "./viewsource";
 import { openStateEditor } from "./state_edit";
 import { openThemeSwitcher } from "./theme_switch";
 import { downloadBugReport, SaveLoadManager } from "./saveload";
+import { DevServerErrorReporter } from "./error_reporter";
 
 const DOCUMENTATION_URL = "https://drafter-edu.github.io/drafter/";
 
@@ -75,6 +76,13 @@ export class DebugPanel {
 	// keeps the cumulative record.
 	private currentErrorCount = 0;
 	private currentWarningCount = 0;
+	// Problems with no request correlation (startup/setup issues). They are
+	// not tied to the page being shown, so they survive navigations.
+	private globalErrorCount = 0;
+	private globalWarningCount = 0;
+	// Forwards error envelopes to the local dev server's debug log while the
+	// site is not in production mode.
+	private errorReporter = new DevServerErrorReporter();
 
 	// The node to scope all debug DOM lookups to: the instance's shadow root
 	// when shadow DOM is on, else document. Lets concurrent instances each
@@ -362,6 +370,19 @@ export class DebugPanel {
 		this.tabBar?.activate(tabId);
 	}
 
+	/**
+	 * Download the bug-report bundle (telemetry events, system status, page
+	 * context). Used by the Help menu and, via the client bridge, by the
+	 * download button on the `--bug-report` system route's page.
+	 */
+	public downloadBugReport(): void {
+		downloadBugReport(this.events, {
+			route: this.lastRoute,
+			pageHtml: this.getPageHtml(),
+			sourceCode: getCurrentSourceCode(),
+		});
+	}
+
 	private navigate(target: string): void {
 		window.dispatchEvent(
 			new CustomEvent("drafter-navigate", { detail: target }),
@@ -568,12 +589,7 @@ export class DebugPanel {
 						iconKey: "icon.bug_report",
 						tooltipKey: "menu.bug_report.tooltip",
 						className: "drafter-menu-item-bug-report",
-						action: () =>
-							downloadBugReport(this.events, {
-								route: this.lastRoute,
-								pageHtml: this.getPageHtml(),
-								sourceCode: getCurrentSourceCode(),
-							}),
+						action: () => this.downloadBugReport(),
 					},
 				],
 			},
@@ -646,9 +662,16 @@ export class DebugPanel {
 				break;
 			case "InitialConfiguration":
 				this.configPanel?.renderInitialConfig(typed.config);
+				this.errorReporter.setDebugMode(
+					(typed.config as { in_debug_mode?: boolean } | undefined)
+						?.in_debug_mode !== false,
+				);
 				break;
 			case "UpdatedConfiguration":
 				this.configPanel?.renderConfigUpdate(typed.key, typed.value);
+				if (typed.key === "in_debug_mode") {
+					this.errorReporter.setDebugMode(Boolean(typed.value));
+				}
 				break;
 			default:
 				handled = false;
@@ -665,26 +688,40 @@ export class DebugPanel {
 		if (!envelope) {
 			return;
 		}
-		if (envelope.severity === "error" || envelope.severity === "critical") {
-			this.currentErrorCount++;
-		} else if (envelope.severity === "warning") {
-			this.currentWarningCount++;
-		} else {
+		const isError =
+			envelope.severity === "error" || envelope.severity === "critical";
+		if (!isError && envelope.severity !== "warning") {
 			return;
 		}
-		this.currentPanel?.addProblem(envelope);
+		// Problems without a request correlation are not tied to the page
+		// being shown (startup/setup issues, often replayed into the panel
+		// before the first navigation): keep them visible across navigations
+		// instead of wiping them on the next RequestEvent.
+		const isGlobal = envelope.context?.request_id == null;
+		if (isError) {
+			if (isGlobal) {
+				this.globalErrorCount++;
+			} else {
+				this.currentErrorCount++;
+			}
+			this.errorReporter.report(envelope);
+		} else if (isGlobal) {
+			this.globalWarningCount++;
+		} else {
+			this.currentWarningCount++;
+		}
+		this.currentPanel?.addProblem(envelope, isGlobal);
 		this.updateProblemIndicators();
 	}
 
 	private updateProblemIndicators(): void {
+		const errors = this.currentErrorCount + this.globalErrorCount;
+		const warnings = this.currentWarningCount + this.globalWarningCount;
 		this.tabBar?.setBadge(
 			"current",
-			this.currentErrorCount + this.currentWarningCount,
-			this.currentErrorCount > 0 ? "error" : "warn",
+			errors + warnings,
+			errors > 0 ? "error" : "warn",
 		);
-		this.footerBar?.setProblemCounts(
-			this.currentErrorCount,
-			this.currentWarningCount,
-		);
+		this.footerBar?.setProblemCounts(errors, warnings);
 	}
 }

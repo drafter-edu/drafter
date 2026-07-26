@@ -490,6 +490,26 @@ class ClientBridge:
         if self.debug_panel:
             self.debug_panel.setRoute(response_url)
 
+    def _download_bug_report(self) -> None:
+        """Ask the debug panel to download the bug-report bundle.
+
+        Invoked by the download button on the ``--bug-report`` system
+        route's page (see EventManager.mount_bug_report_download).
+        """
+        if not self.debug_panel:
+            return
+        try:
+            self.debug_panel.downloadBugReport()
+        except Exception as e:
+            report_bridge_error(
+                "client.bug_report_download_failed",
+                "Failed to download the bug-report bundle",
+                "bridge.client_bridge._download_bug_report",
+                f"Exception: {repr(e)}",
+                exception=e,
+                phase="event_dispatch",
+            )
+
     ### Response Handling
 
     def handle_response(
@@ -526,6 +546,7 @@ class ClientBridge:
                 self.configuration.page_transition_duration,
             )
             self.events.mount_navigation(self.navigator.navigate)
+            self.events.mount_bug_report_download(self._download_bug_report)
             # TODO: Improve this check for a full page load
             if not response.target or response.target.is_page_load:
                 self.events.dispatch_page_loaded(

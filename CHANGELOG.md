@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Ported the retro Windows themes (`98`, `xp`, `7`) from Drafter v1 as classless themes: the page now renders as a period-appropriate window on the desktop, with all element styling scoped to the Drafter body so the debug panel is unaffected.
 -   Fixed the `sakura` theme squeezing the whole page (including the debug panel) instead of just the site content.
 -   Added table styling to the `default` theme.
+-   Warnings (and errors) without a request correlation, such as route-signature or state warnings raised at startup, now stay visible in the debug panel's Current-tab problems area instead of being wiped by the next navigation.
+-   Added the `--bug-report` system route, which explains when a bug report is appropriate (actual Drafter bugs or limitations, not homework help) and provides a button that downloads the same bug-report bundle as the debug panel's Help menu.
+-   Outside production mode, errors are now reported to the local development server and appended (with bug-report-style environment details) to a shared, size-capped `drafter-debug.log` JSON Lines file next to the student's code.
 
 ## [2.0.0] - 2026-07-24
 

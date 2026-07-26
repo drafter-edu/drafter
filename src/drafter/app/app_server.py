@@ -5,6 +5,7 @@ file watching, and pre-rendering of initial pages.
 """
 
 import asyncio
+import json
 import webbrowser
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 
+from drafter.app.error_log import append_error_log_entry, build_log_entry
 from drafter.app.hacks import DRAFTER_LOG_CONFIG_FOR_UVICORN
 from drafter.app.watcher import ReloadHub, WatchedPath, _watch_and_reload, ws_endpoint
 from drafter.client_server.client_server import ClientServer
@@ -102,6 +104,42 @@ async def list_user_files(req) -> Response:
     )
 
 
+MAX_ERROR_REPORT_BYTES = 256 * 1024
+"""Reject browser error reports larger than this many bytes."""
+
+
+async def record_error_log(req) -> Response:
+    """Receive a browser error report and append it to the shared debug log.
+
+    The browser posts errors here while the site is not in production mode
+    (see js/src/debug/error_reporter.ts). Each report is combined with
+    server-side environment details and appended to the debug log next to
+    the student's code (see drafter.app.error_log). Log-write failures are
+    reported in the response body but never crash the server.
+
+    Args:
+        req: Starlette request whose JSON body is the error report.
+
+    Returns:
+        JSONResponse with {"ok": bool}, or an error response for oversized
+        or malformed reports.
+    """
+    app: Starlette = req.app  # type: ignore
+    body = await req.body()
+    if len(body) > MAX_ERROR_REPORT_BYTES:
+        return JSONResponse({"error": "Report too large"}, status_code=413)
+    try:
+        payload = json.loads(body)
+    except Exception:
+        return JSONResponse({"error": "Invalid JSON"}, status_code=400)
+    if not isinstance(payload, dict):
+        return JSONResponse({"error": "Invalid report"}, status_code=400)
+    system: SystemConfiguration = app.state.system
+    entry = build_log_entry(payload, str(system.bootstrap.get_main_filename()))
+    written = append_error_log_entry(app.state.user_directory, entry)
+    return JSONResponse({"ok": written})
+
+
 def make_app(
     system: SystemConfiguration, server: ClientServer, initial_state
 ) -> Starlette:
@@ -136,6 +174,7 @@ def make_app(
     routes = [
         Route("/", index),
         WebSocketRoute("/" + INTERNAL_ROUTES["WS"], ws_endpoint),
+        Route("/" + INTERNAL_ROUTES["ERROR_LOG"], record_error_log, methods=["POST"]),
     ]
     # Handle default assets
     if not system.app_common.override_asset_url:

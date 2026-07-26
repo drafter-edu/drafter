@@ -50,6 +50,9 @@ function createPanel(): DebugPanel {
 function errorRecord(
 	severity: "error" | "warning",
 	message: string,
+	// Request-scoped by default; pass null for a global (startup) problem
+	// that is not tied to any page.
+	requestId: number | null = 7,
 ): TelemetryRecord {
 	return {
 		kind: "some.failure",
@@ -64,7 +67,7 @@ function errorRecord(
 			context: {
 				causation_id: null,
 				route: null,
-				request_id: null,
+				request_id: requestId,
 				response_id: null,
 				dom_id: null,
 				phase: null,
@@ -136,6 +139,31 @@ describe("CurrentPanel", () => {
 			),
 		).not.toBeNull();
 	});
+
+	test("problems without a request correlation survive navigations", () => {
+		const panel = createPanel();
+		// A startup warning (e.g. a route-signature problem replayed into the
+		// panel before the first visit) carries no request id.
+		panel.handleEvent(errorRecord("warning", "State type looks off", null));
+		panel.handleEvent(errorRecord("error", "Route crashed", 7));
+
+		expect(
+			document.querySelectorAll(".drafter-debug-current-problem"),
+		).toHaveLength(2);
+
+		// The navigation wipes only the page-scoped problem.
+		panel.handleEvent(REQUEST_EVENT as RequestEvent);
+		const problems = document.querySelectorAll(
+			".drafter-debug-current-problem",
+		);
+		expect(problems).toHaveLength(1);
+		expect(problems[0].textContent).toContain("State type looks off");
+		expect(
+			query(".drafter-debug-current-problems").querySelector(
+				".drafter-debug-current-no-problems",
+			),
+		).toBeNull();
+	});
 });
 
 describe("problem badges and footer status", () => {
@@ -168,6 +196,18 @@ describe("problem badges and footer status", () => {
 		panel.handleEvent(REQUEST_EVENT as RequestEvent);
 		expect(currentBadge().hidden).toBe(true);
 		expect(query(".drafter-footer-status").hidden).toBe(true);
+	});
+
+	test("global problems keep the badge and footer counts after navigation", () => {
+		const panel = createPanel();
+		panel.handleEvent(errorRecord("warning", "startup warning", null));
+		expect(currentBadge().textContent).toBe("1");
+
+		panel.handleEvent(REQUEST_EVENT as RequestEvent);
+		expect(currentBadge().hidden).toBe(false);
+		expect(currentBadge().textContent).toBe("1");
+		expect(currentBadge().classList.contains("is-warn")).toBe(true);
+		expect(query(".drafter-footer-status").textContent).toContain("⚠️ 1");
 	});
 
 	test("clicking the footer status activates the Current tab", () => {
