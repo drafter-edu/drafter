@@ -1,3 +1,14 @@
+---
+page_type: reference
+title: Fonts
+level: L2
+audience: S
+priority: P1
+prereqs: []
+symbols: []
+outcome: Look up safe fonts.
+---
+
 # HTML Fonts
 
 A list of common web-safe fonts.

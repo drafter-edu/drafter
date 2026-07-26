@@ -1,3 +1,14 @@
+---
+page_type: reference
+title: HTML colors
+level: L2
+audience: S
+priority: P1
+prereqs: []
+symbols: []
+outcome: Look up color names.
+---
+
 # HTML Colors
 
 A list of common HTML colors and their hex values.

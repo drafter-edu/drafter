@@ -84,6 +84,7 @@ dev = [
   "lxml",
   "html5lib",
   "snakeviz>=2.2.1",
+  "mkdocs-redirects>=1.2.3",
 ]
 
 [project.optional-dependencies]

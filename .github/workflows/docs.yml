@@ -36,8 +36,22 @@ jobs:
       - name: Install dependencies
         run: uv sync --python 3.13
 
+      # Documentation CI gates (STUDENT_DOCS_PLAN.md §11). Coverage is
+      # report-only until Phase E, when it gains --strict.
+      - name: Check docs URL contract
+        run: uv run python tools/scaffold_docs.py --check
+
+      - name: Lint docs
+        run: uv run python tools/docs_lint.py
+
+      - name: Docs coverage report
+        run: uv run python tools/docs_coverage.py
+
+      - name: Run docs fences
+        run: uv run pytest tests/test_docs_fences.py -q
+
       - name: Build docs
-        run: uv run drafter-docs build
+        run: uv run drafter-docs build --strict
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4

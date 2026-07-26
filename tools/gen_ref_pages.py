@@ -1,7 +1,7 @@
 """Generate the API reference pages for mkdocstrings.
 
 Executed by the mkdocs-gen-files plugin during `mkdocs build` (see
-mkdocs.yml). Creates one virtual page per module under reference/api/,
+mkdocs.yml). Creates one virtual page per module under dev/api/,
 each containing a mkdocstrings identifier block, plus the SUMMARY.md
 navigation file consumed by mkdocs-literate-nav.
 
@@ -23,14 +23,14 @@ if os.getenv("DRAFTER_MKDOCS_API", "").strip().lower() not in {
     "yes",
     "on",
 }:
-    with mkdocs_gen_files.open("reference/api/index.md", "w") as fd:
+    with mkdocs_gen_files.open("dev/api/index.md", "w") as fd:
         fd.write(
             "# API Reference\n\n"
             "The full API reference was skipped to speed up this build.\n\n"
             "Rebuild with `uv run drafter-docs build --api` (or serve with "
             "`uv run drafter-docs serve --api`) to include it.\n"
         )
-    with mkdocs_gen_files.open("reference/api/SUMMARY.md", "w") as nav_file:
+    with mkdocs_gen_files.open("dev/api/SUMMARY.md", "w") as nav_file:
         nav_file.write("* [Overview](index.md)\n")
     print("Skipping full API reference (pass --api to drafter-docs to build it).")
     raise SystemExit(0)
@@ -43,7 +43,7 @@ src = root / "src"
 for path in tqdm(sorted(src.rglob("*.py")), desc="Generating API reference pages"):
     module_path = path.relative_to(src).with_suffix("")
     doc_path = path.relative_to(src).with_suffix(".md")
-    full_doc_path = Path("reference/api", doc_path)
+    full_doc_path = Path("dev/api", doc_path)
 
     parts = tuple(module_path.parts)
 
@@ -59,7 +59,7 @@ for path in tqdm(sorted(src.rglob("*.py")), desc="Generating API reference pages
     elif parts[-1] == "index":
         # A module literally named index.py (router/defaults/index.py) would
         # collide with its package's __init__ page (index.md), putting the
-        # same Page in the nav twice — which sends section-index's on_nav
+        # same Page in the nav twice â€” which sends section-index's on_nav
         # into an infinite loop. Give it a distinct filename.
         doc_path = doc_path.with_name("index_.md")
         full_doc_path = full_doc_path.with_name("index_.md")
@@ -73,7 +73,7 @@ for path in tqdm(sorted(src.rglob("*.py")), desc="Generating API reference pages
 
     mkdocs_gen_files.set_edit_path(full_doc_path, path.relative_to(root))
 
-with mkdocs_gen_files.open("reference/api/SUMMARY.md", "w") as nav_file:
+with mkdocs_gen_files.open("dev/api/SUMMARY.md", "w") as nav_file:
     nav_file.writelines(nav.build_literate_nav())
 
 print("API reference pages generated successfully.")
