@@ -2,13 +2,15 @@
 
 Defines block-level grouping elements (`Div`, `Span`, `Paragraph`, and
 semantic sections such as `Article`, `Nav`, `HeaderContent`), the flexbox
-`Row` helper, list components (`NumberedList`, `BulletedList`), and the
-`LineBreak` and `HorizontalRule` spacing elements. The aliases `Division`,
-`Box`, and `P` are also provided.
+`Row` helper, list components (`NumberedList`, `BulletedList`,
+`DefinitionList`), figures (`Figure`, `FigureCaption`), the collapsible
+`Details` element, and the `LineBreak` and `HorizontalRule` spacing
+elements. The aliases `Division`, `Box`, and `P` are also provided.
 """
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, fields, is_dataclass
+from typing import Any
 
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import RenderPlan
@@ -218,6 +220,204 @@ class FooterContent(BlockComponent):
     """
 
     tag = "footer"
+
+
+class Figure(BlockComponent):
+    """Renders a figure element for self-contained content like images or diagrams.
+
+    Usually contains a `FigureCaption` alongside the main content.
+
+    Attributes:
+        content: List of page content items to display in the figure.
+        tag: The HTML tag name, always 'figure'.
+
+    Example:
+        ```python
+        Figure(Image("chart.png"), FigureCaption("Monthly sales"))
+        ```
+    """
+
+    tag = "figure"
+
+
+class FigureCaption(BlockComponent):
+    """Renders a caption for a `Figure` (figcaption).
+
+    Attributes:
+        content: List of page content items to display in the caption.
+        tag: The HTML tag name, always 'figcaption'.
+    """
+
+    tag = "figcaption"
+
+
+@dataclass(repr=False)
+class Details(Component):
+    """Renders a collapsible disclosure element (details) with a summary.
+
+    Attributes:
+        summary: Content shown in the always-visible summary line.
+        content: List of page content items revealed when expanded.
+        open: Whether the details start expanded.
+        group: Optional group name relating multiple Details; only one
+            Details in a group can be open at a time (accordion-style).
+        tag: The HTML tag name, always 'details'.
+
+    Example:
+        ```python
+        Details("Hint", "Try checking the loop condition.", group="hints")
+        ```
+    """
+
+    summary: PageContent
+    content: list[PageContent]
+    open: bool
+    group: str | None
+    tag = "details"
+
+    KNOWN_ATTRS = ["open", "name"]
+    RENAME_ATTRS = {"group": "name"}
+
+    ARGUMENTS = [
+        ComponentArgument("summary", is_content=True),
+        ComponentArgument("content", kind="var", is_content=True),
+        ComponentArgument("open", kind="keyword", default_value=False),
+        ComponentArgument("group", kind="keyword", default_value=None),
+    ]
+
+    def __init__(
+        self,
+        summary: PageContent,
+        *content: PageContent,
+        open: bool = False,
+        group: str | None = None,
+        **extra_settings,
+    ):
+        """Initialize details component.
+
+        Args:
+            summary: Content shown in the always-visible summary line.
+            *content: Variable-length content revealed when expanded.
+            open: Whether the details start expanded. Defaults to False.
+            group: Optional group name relating multiple Details
+                accordion-style (rendered as the HTML `name` attribute).
+            **extra_settings: Additional HTML attributes and styles.
+        """
+        self.summary = summary
+        self.content, self.extra_settings = handle_arguments_compatibility(
+            list(content), extra_settings
+        )
+        self.open = open
+        self.group = group
+
+    def get_children(self, context) -> list[PageContent | RenderPlan]:
+        """Build the summary element followed by the collapsible content.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            A list starting with a summary tag RenderPlan wrapping the
+            summary content, followed by the remaining content items.
+        """
+        return [
+            RenderPlan(kind="tag", tag_name="summary", children=[self.summary]),
+            *self.content,
+        ]
+
+
+@dataclass(repr=False)
+class DefinitionList(Component):
+    """Renders a definition list (dl) of term/definition pairs.
+
+    Accepts a dictionary (keys become terms), a dataclass instance (field
+    names become terms), or a list of (term, definition) pairs. Each term
+    is rendered as a dt element and each definition as a dd element.
+
+    Attributes:
+        items: The dictionary, dataclass instance, or list of pairs.
+        tag: The HTML tag name, always 'dl'.
+
+    Example:
+        ```python
+        DefinitionList({"HTML": "A markup language", "CSS": "A styling language"})
+        DefinitionList([("Term", "Definition"), ("Other", "Meaning")])
+        ```
+    """
+
+    items: Any
+    tag = "dl"
+
+    ARGUMENTS = [ComponentArgument("items", is_content=True)]
+
+    def __init__(self, items, **extra_settings):
+        """Initialize definition list component.
+
+        Args:
+            items: A dictionary, a dataclass instance, or a list of
+                (term, definition) pairs.
+            **extra_settings: Additional HTML attributes and styles.
+
+        Raises:
+            ValueError: If items is not one of the supported formats.
+        """
+        self.items = items
+        self.extra_settings = extra_settings
+        # Validate eagerly so students see errors where they made them
+        self._get_pairs()
+
+    def _get_pairs(self) -> list[tuple[Any, Any]]:
+        if isinstance(self.items, dict):
+            return list(self.items.items())
+        if is_dataclass(self.items) and not isinstance(self.items, type):
+            return [
+                (field.name, getattr(self.items, field.name))
+                for field in fields(self.items)
+            ]
+        if isinstance(self.items, Sequence) and not isinstance(self.items, str):
+            pairs = []
+            for index, item in enumerate(self.items):
+                if (
+                    isinstance(item, Sequence)
+                    and not isinstance(item, str)
+                    and len(item) == 2
+                ):
+                    pairs.append((item[0], item[1]))
+                else:
+                    raise ValueError(
+                        f"DefinitionList items must be (term, definition) pairs, "
+                        f"but the item at index {index} was {item!r}."
+                    )
+            return pairs
+        raise ValueError(
+            "DefinitionList expects a dictionary, a dataclass instance, or a "
+            f"list of (term, definition) pairs, but got {type(self.items).__name__}."
+        )
+
+    def get_children(self, context) -> list[PageContent | RenderPlan]:
+        """Build alternating dt/dd elements from the term/definition pairs.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            A list of dt and dd tag RenderPlans, one pair per entry.
+        """
+
+        def as_content(value):
+            if isinstance(value, (Component, str, list)):
+                return value
+            return str(value)
+
+        children: list[PageContent | RenderPlan] = []
+        for term, definition in self._get_pairs():
+            children.append(
+                RenderPlan(kind="tag", tag_name="dt", children=[as_content(term)])
+            )
+            children.append(
+                RenderPlan(kind="tag", tag_name="dd", children=[as_content(definition)])
+            )
+        return children
 
 
 Division = Div

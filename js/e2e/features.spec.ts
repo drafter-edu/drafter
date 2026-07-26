@@ -207,7 +207,5 @@ test("Download component produces a real browser download", async ({
 	for await (const chunk of stream) {
 		chunks.push(chunk as Buffer);
 	}
-	expect(Buffer.concat(chunks).toString("utf-8")).toBe(
-		"'downloaded content'",
-	);
+	expect(Buffer.concat(chunks).toString("utf-8")).toBe("downloaded content");
 });

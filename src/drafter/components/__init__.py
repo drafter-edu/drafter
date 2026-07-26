@@ -5,15 +5,18 @@ that `from drafter.components import ...` works for all of them. The main
 groups are:
 
 - Base machinery: `Component`, `Content`, `PageContent`
-- Layout: `Div`, `Span`, `Row`, `BulletedList`, `NumberedList`, semantic
-  sections, and spacing elements
-- Text: `Text`, `Header`, `Pre`, `BlockQuote`, `InlineCode`, `RawHTML`
+- Layout: `Div`, `Span`, `Row`, `BulletedList`, `NumberedList`,
+  `DefinitionList`, `Figure`, `Details`, semantic sections, and spacing
+  elements
+- Text: `Text`, `Header`, `Pre`, `BlockQuote`, `InlineCode`, `RawHTML`,
+  and semantic inline text such as `Strong`, `Emphasis`, `MarkedText`,
+  and `Abbreviation`
 - Forms: `TextBox`, `TextArea`, `SelectBox`, `CheckBox`, `Label`, and
   date/time inputs
 - Navigation: `Link`, `Button`, `Argument`
 - Media and graphics: `Image`, `Audio`, `Video`, `Canvas`, `SVG`,
   `MatPlotLibPlot`
-- Data display: `Table`, `Output`, `Progress`
+- Data display: `Table`, `Output`, `ProgressBar`, `Meter`, `TimeOutput`
 - Files: `Download`, `FileUpload`
 - Location and maps: `CurrentLocation`, `Location`, `Map` and its markers
   and views
@@ -58,8 +61,12 @@ from drafter.components.layout import (
     Aside,
     Box,
     BulletedList,
+    DefinitionList,
+    Details,
     Div,
     Division,
+    Figure,
+    FigureCaption,
     FooterContent,
     HeaderContent,
     HorizontalRule,
@@ -81,7 +88,7 @@ from drafter.components.map import (
     MapView,
 )
 from drafter.components.media import SVG, Audio, Canvas, Video
-from drafter.components.output import Output, Progress
+from drafter.components.output import Meter, Output, ProgressBar, TimeOutput
 from drafter.components.page_content import Component, Content, PageContent
 from drafter.components.persistence import RemovePersistent
 from drafter.components.plotting import MatPlotLibPlot
@@ -89,13 +96,27 @@ from drafter.components.plotting import MatPlotLibPlot
 # TODO: Sliders, Autocomplete, RadioButtons
 from drafter.components.tables import Table
 from drafter.components.text import (
+    Abbreviation,
     BlockQuote,
+    DefinitionTerm,
+    DeletedText,
+    Emphasis,
     Header,
     HtmlTag,
     InlineCode,
+    InlineQuotation,
+    InlineVariable,
+    InsertedText,
+    KeyboardInput,
+    MarkedText,
     Pre,
     PreformattedText,
     RawHTML,
+    SampleOutput,
+    SmallText,
+    Strong,
+    Subscript,
+    Superscript,
     Text,
 )
 from drafter.components.timer import Clock, Timer
@@ -121,6 +142,10 @@ __all__ = [
     "NumberedList",
     "Division",
     "Box",
+    "Figure",
+    "FigureCaption",
+    "Details",
+    "DefinitionList",
     "BlockQuote",
     "Text",
     "InlineCode",
@@ -129,6 +154,20 @@ __all__ = [
     "Pre",
     "PreformattedText",
     "Header",
+    "Strong",
+    "Emphasis",
+    "InlineQuotation",
+    "DefinitionTerm",
+    "Abbreviation",
+    "DeletedText",
+    "InsertedText",
+    "KeyboardInput",
+    "MarkedText",
+    "SampleOutput",
+    "SmallText",
+    "Superscript",
+    "Subscript",
+    "InlineVariable",
     "TextBox",
     "TextArea",
     "SelectBox",
@@ -145,7 +184,9 @@ __all__ = [
     "MapMarker",
     "MapView",
     "AddMarkerFunction",
-    "Progress",
+    "ProgressBar",
+    "Meter",
+    "TimeOutput",
     "Output",
     "Table",
     "Link",

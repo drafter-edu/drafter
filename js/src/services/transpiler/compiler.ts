@@ -53,6 +53,23 @@ const DIRECT_COMPONENT_TAGS: Record<string, string> = {
 	footer: "FooterContent",
 	pre: "Pre",
 	code: "InlineCode",
+	strong: "Strong",
+	em: "Emphasis",
+	q: "InlineQuotation",
+	dfn: "DefinitionTerm",
+	abbr: "Abbreviation",
+	del: "DeletedText",
+	ins: "InsertedText",
+	kbd: "KeyboardInput",
+	mark: "MarkedText",
+	samp: "SampleOutput",
+	small: "SmallText",
+	sup: "Superscript",
+	sub: "Subscript",
+	var: "InlineVariable",
+	figure: "Figure",
+	figcaption: "FigureCaption",
+	time: "TimeOutput",
 };
 
 const EMPTY_COMPONENT_TAGS: Record<string, string> = {
@@ -181,8 +198,6 @@ class DrafterCompiler {
 				return this.handleStyle(node);
 			case "title":
 				return this.handleTitle(node);
-			case "strong":
-				return this.handleStrong(node);
 			case "a":
 				return this.handleLink(node);
 			case "button":
@@ -197,6 +212,12 @@ class DrafterCompiler {
 				return this.handleOutput(node);
 			case "progress":
 				return this.handleProgress(node);
+			case "meter":
+				return this.handleMeter(node);
+			case "details":
+				return this.handleDetails(node);
+			case "dl":
+				return this.handleDefinitionList(node);
 			case "input":
 				return this.handleInput(node);
 			case "textarea":
@@ -223,17 +244,6 @@ class DrafterCompiler {
 			this.title = value;
 		}
 		return [];
-	}
-
-	private handleStrong(node: TreeNode): string[] {
-		const content = this.walkChildren(node);
-		if (content.length === 0) {
-			return ["bold('')"];
-		}
-		if (content.length === 1) {
-			return [`bold(${content[0]})`];
-		}
-		return [`bold([${content.join(", ")}])`];
 	}
 
 	private handleLink(node: TreeNode): string[] {
@@ -376,8 +386,94 @@ class DrafterCompiler {
 		}
 		return [
 			callComponent(
-				"Progress",
+				"ProgressBar",
 				args,
+				parsed.attributes,
+				parsed.styles,
+				parsed.classes,
+			),
+		];
+	}
+
+	private handleMeter(node: TreeNode): string[] {
+		const parsed = this.parseAttrs(node);
+		const value = this.popAttr(parsed.attributes, "value") || "0";
+		const args = [pythonLiteral(value)];
+		for (const key of ["min", "max", "low", "high", "optimum"]) {
+			const attr = this.popAttr(parsed.attributes, key);
+			if (attr !== undefined) {
+				args.push(`${key}=${pythonLiteral(attr)}`);
+			}
+		}
+		return [
+			callComponent(
+				"Meter",
+				args,
+				parsed.attributes,
+				parsed.styles,
+				parsed.classes,
+			),
+		];
+	}
+
+	private handleDetails(node: TreeNode): string[] {
+		const parsed = this.parseAttrs(node);
+		let summary = stringify("");
+		const content: string[] = [];
+		for (const child of node.children || []) {
+			if (child.type === "element" && child.name === "summary") {
+				summary = this.makeSingleContent(this.walkChildren(child));
+			} else {
+				content.push(...this.walk(child));
+			}
+		}
+		const args = [summary, ...content];
+		if (Object.prototype.hasOwnProperty.call(parsed.attributes, "open")) {
+			delete parsed.attributes.open;
+			args.push("open=True");
+		}
+		const group = this.popAttr(parsed.attributes, "name");
+		if (group !== undefined) {
+			args.push(`group=${stringify(group)}`);
+		}
+		return [
+			callComponent(
+				"Details",
+				args,
+				parsed.attributes,
+				parsed.styles,
+				parsed.classes,
+			),
+		];
+	}
+
+	private handleDefinitionList(node: TreeNode): string[] {
+		const parsed = this.parseAttrs(node);
+		const pairs: string[] = [];
+		let term: string | null = null;
+		// dt/dd may optionally be wrapped in divs inside a dl
+		const entries = (node.children || []).flatMap((child) =>
+			child.type === "element" && child.name === "div"
+				? child.children || []
+				: [child],
+		);
+		for (const child of entries) {
+			if (child.type !== "element") {
+				continue;
+			}
+			if (child.name === "dt") {
+				term = this.makeSingleContent(this.walkChildren(child));
+			} else if (child.name === "dd") {
+				const definition = this.makeSingleContent(
+					this.walkChildren(child),
+				);
+				pairs.push(`(${term !== null ? term : stringify("")}, ${definition})`);
+			}
+		}
+		return [
+			callComponent(
+				"DefinitionList",
+				[`[${pairs.join(", ")}]`],
 				parsed.attributes,
 				parsed.styles,
 				parsed.classes,

@@ -225,10 +225,92 @@ snippets = {
         "with_for": """Output('named', '100%', for_id='progress1')""",
         "with_style": """Output('another', 'Success!', style_color='green', style_font_weight='bold')""",
     },
-    "progress": {
-        "simple": """Progress(0.5)""",
-        "with_max": """Progress(75, max=100)""",
-        "with_style": """Progress(0.8, max=1.0, style_width='300px', style_height='30px')""",
+    "progressbar": {
+        "simple": """ProgressBar(0.5)""",
+        "with_max": """ProgressBar(75, max=100)""",
+        "with_style": """ProgressBar(0.8, max=1.0, style_width='300px', style_height='30px')""",
+    },
+    "meter": {
+        "simple": """Meter(0.5)""",
+        "with_range": """Meter(70, min=0, max=100)""",
+        "full_options": """Meter(70, min=0, max=100, low=30, high=80, optimum=90)""",
+        "with_style": """Meter(0.4, style_width='200px')""",
+    },
+    "timeoutput": {
+        "simple": """TimeOutput('July 25th')""",
+        "with_datetime": """TimeOutput('July 25th', datetime='2026-07-25')""",
+        "from_date": """TimeOutput('New Year', datetime=date1)""",
+        "with_style": """TimeOutput('Soon', datetime='2026-08-01', style_color='green')""",
+    },
+    "strong": {
+        "simple": """Strong('important')""",
+        "with_style": """Strong('Loud', style_color='red')""",
+    },
+    "emphasis": {
+        "simple": """Emphasis('emphasized')""",
+        "with_style": """Emphasis('Subtle', style_color='gray')""",
+    },
+    "inlinequotation": {
+        "simple": """InlineQuotation('Be yourself')""",
+        "with_cite": """InlineQuotation('Be yourself', cite='https://example.com')""",
+        "with_style": """InlineQuotation('Styled quote', style_font_style='italic')""",
+    },
+    "definitionterm": {
+        "simple": """DefinitionTerm('HTML')""",
+        "with_title": """DefinitionTerm('HTML', title='HyperText Markup Language')""",
+    },
+    "abbreviation": {
+        "simple": """Abbreviation('WWW')""",
+        "with_title": """Abbreviation('WWW', title='World Wide Web')""",
+    },
+    "deletedtext": {
+        "simple": """DeletedText('removed')""",
+        "with_cite": """DeletedText('old price', cite='https://example.com/why')""",
+        "with_datetime": """DeletedText('old price', datetime='2026-07-25')""",
+        "from_datetime": """DeletedText('old price', datetime=datetime1)""",
+    },
+    "insertedtext": {
+        "simple": """InsertedText('added')""",
+        "with_cite_and_datetime": """InsertedText('new price', cite='https://example.com/why', datetime='2026-07-25')""",
+    },
+    "keyboardinput": {
+        "simple": """KeyboardInput('Ctrl+C')""",
+        "multiple_items": """KeyboardInput('Ctrl', '+', 'C')""",
+    },
+    "markedtext": {
+        "simple": """MarkedText('highlighted')""",
+        "with_style": """MarkedText('Neon', style_background_color='yellow')""",
+    },
+    "sampleoutput": {
+        "simple": """SampleOutput('Error: file not found')""",
+    },
+    "smalltext": {
+        "simple": """SmallText('fine print')""",
+    },
+    "superscript": {
+        "simple": """Superscript('2')""",
+        "nested": """Superscript(InlineVariable('n'))""",
+    },
+    "subscript": {
+        "simple": """Subscript('i')""",
+    },
+    "inlinevariable": {
+        "simple": """InlineVariable('x')""",
+    },
+    "figure": {
+        "simple": """Figure('Content')""",
+        "with_caption": """Figure(FigureCaption('A caption'), 'Content')""",
+    },
+    "details": {
+        "simple": """Details('Click to expand', 'Hidden content')""",
+        "open": """Details('Summary', 'Content', open=True)""",
+        "grouped": """Details('Question 1', 'Answer 1', group='faq')""",
+        "with_components": """Details(Strong('Hint'), Paragraph('Check the loop.'))""",
+    },
+    "definitionlist": {
+        "from_dict": """DefinitionList({'HTML': 'markup', 'CSS': 'styles'})""",
+        "from_pairs": """DefinitionList([('a', 1), ('b', 2)])""",
+        "with_style": """DefinitionList([('Term', 'Meaning')], style_margin='8px')""",
     },
     "download": {
         "simple": """Download('Download File', 'file.txt', 'Hello World')""",

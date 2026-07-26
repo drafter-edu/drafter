@@ -76,6 +76,17 @@ describe("direct component tags", () => {
 		["header", "HeaderContent"],
 		["footer", "FooterContent"],
 		["code", "InlineCode"],
+		["strong", "Strong"],
+		["em", "Emphasis"],
+		["kbd", "KeyboardInput"],
+		["mark", "MarkedText"],
+		["samp", "SampleOutput"],
+		["small", "SmallText"],
+		["sup", "Superscript"],
+		["sub", "Subscript"],
+		["var", "InlineVariable"],
+		["figure", "Figure"],
+		["figcaption", "FigureCaption"],
 	])("<%s> maps to %s", (tag, component) => {
 		const code = compile(`<${tag}>content</${tag}>`);
 		expect(code).toContain(`${component}("content")`);
@@ -117,7 +128,7 @@ describe("headings", () => {
 	test("heading with mixed content wraps content in a Span", () => {
 		const code = compile("<h1>Hello <em>World</em></h1>");
 		expect(code).toContain(
-			'Header(Span("Hello", HtmlTag("em", "World")), level=1)',
+			'Header(Span("Hello", Emphasis("World")), level=1)',
 		);
 	});
 });
@@ -140,7 +151,7 @@ describe("lists", () => {
 
 	test("list items with nested markup become single Span items", () => {
 		const code = compile("<ul><li>a <strong>b</strong></li></ul>");
-		expect(code).toContain('BulletedList([Span("a", bold("b"))])');
+		expect(code).toContain('BulletedList([Span("a", Strong("b"))])');
 	});
 });
 
@@ -458,15 +469,34 @@ describe("labels, output, progress", () => {
 		expect(code).toContain('Output("output", "0", for_id="a b")');
 	});
 
-	test("<progress> maps to Progress with numeric value and max", () => {
+	test("<progress> maps to ProgressBar with numeric value and max", () => {
 		const code = compile('<progress value="30" max="100"></progress>');
-		expect(code).toContain("Progress(30, max=100)");
+		expect(code).toContain("ProgressBar(30, max=100)");
 	});
 
 	test("<progress> without a value defaults to 0", () => {
 		const code = compile("<progress></progress>");
-		expect(code).toContain("Progress(0)");
+		expect(code).toContain("ProgressBar(0)");
 		expect(code).not.toContain("max=");
+	});
+
+	test("<meter> maps to Meter with numeric range attributes", () => {
+		const code = compile(
+			'<meter value="70" min="0" max="100" low="30" high="80" optimum="90"></meter>',
+		);
+		expect(code).toContain(
+			"Meter(70, min=0, max=100, low=30, high=80, optimum=90)",
+		);
+	});
+
+	test("<meter> without a value defaults to 0", () => {
+		const code = compile("<meter></meter>");
+		expect(code).toContain("Meter(0)");
+	});
+
+	test("<time> maps to TimeOutput with a datetime kwarg", () => {
+		const code = compile('<time datetime="2026-07-25">July 25</time>');
+		expect(code).toContain('TimeOutput("July 25", datetime="2026-07-25")');
 	});
 });
 
@@ -485,18 +515,74 @@ describe("blockquote", () => {
 	});
 });
 
-describe("strong / bold", () => {
-	test("single child becomes bold(...)", () => {
-		expect(compile("<strong>Bold</strong>")).toContain('bold("Bold")');
-	});
-
-	test("empty strong becomes bold('')", () => {
-		expect(compile("<strong></strong>")).toContain("bold('')");
-	});
-
-	test("multiple children become a list", () => {
+describe("semantic inline text", () => {
+	test("strong with multiple children keeps them as varargs", () => {
 		const code = compile("<strong>a<em>b</em></strong>");
-		expect(code).toContain('bold(["a", HtmlTag("em", "b")])');
+		expect(code).toContain('Strong("a", Emphasis("b"))');
+	});
+
+	test("<q> maps to InlineQuotation with a cite kwarg", () => {
+		const code = compile('<q cite="https://example.com">Quote</q>');
+		expect(code).toContain(
+			'InlineQuotation("Quote", cite="https://example.com")',
+		);
+	});
+
+	test("<abbr> maps to Abbreviation with a title kwarg", () => {
+		const code = compile('<abbr title="World Wide Web">WWW</abbr>');
+		expect(code).toContain('Abbreviation("WWW", title="World Wide Web")');
+	});
+
+	test("<dfn> maps to DefinitionTerm with a title kwarg", () => {
+		const code = compile('<dfn title="HyperText Markup Language">HTML</dfn>');
+		expect(code).toContain(
+			'DefinitionTerm("HTML", title="HyperText Markup Language")',
+		);
+	});
+
+	test("<del> and <ins> map with cite and datetime kwargs", () => {
+		const code = compile(
+			'<del cite="why.html" datetime="2026-07-25">old</del>' +
+				'<ins datetime="2026-07-26">new</ins>',
+		);
+		expect(code).toContain(
+			'DeletedText("old", cite="why.html", datetime="2026-07-25")',
+		);
+		expect(code).toContain('InsertedText("new", datetime="2026-07-26")');
+	});
+});
+
+describe("details and definition lists", () => {
+	test("<details> maps summary, content, open, and group", () => {
+		const code = compile(
+			'<details open name="faq"><summary>More</summary><p>Body</p></details>',
+		);
+		expect(code).toContain(
+			'Details("More", Paragraph("Body"), open=True, group="faq")',
+		);
+		expectValidPython(code);
+	});
+
+	test("<details> without a summary uses an empty string", () => {
+		const code = compile("<details><p>Body</p></details>");
+		expect(code).toContain('Details("", Paragraph("Body"))');
+	});
+
+	test("<dl> maps dt/dd pairs to DefinitionList", () => {
+		const code = compile(
+			"<dl><dt>HTML</dt><dd>markup</dd><dt>CSS</dt><dd>styles</dd></dl>",
+		);
+		expect(code).toContain(
+			'DefinitionList([("HTML", "markup"), ("CSS", "styles")])',
+		);
+		expectValidPython(code);
+	});
+
+	test("<dl> with div-wrapped pairs still collects dt/dd", () => {
+		const code = compile(
+			"<dl><div><dt>a</dt><dd>1</dd></div><div><dt>b</dt><dd>2</dd></div></dl>",
+		);
+		expect(code).toContain('DefinitionList([("a", "1"), ("b", "2")])');
 	});
 });
 
@@ -631,8 +717,8 @@ describe("unknown tags and fallbacks", () => {
 	});
 
 	test("common inline tags without direct mappings use HtmlTag", () => {
-		const code = compile("<p><em>soft</em></p>");
-		expect(code).toContain('HtmlTag("em", "soft")');
+		const code = compile("<p><u>soft</u></p>");
+		expect(code).toContain('HtmlTag("u", "soft")');
 	});
 });
 
@@ -642,7 +728,7 @@ describe("nesting and malformed HTML", () => {
 			'<div class="outer"><p>Hello <strong>World</strong></p></div>',
 		);
 		expect(code).toContain(
-			'Div(Paragraph("Hello", bold("World")), classes="outer")',
+			'Div(Paragraph("Hello", Strong("World")), classes="outer")',
 		);
 		expectValidPython(code);
 	});

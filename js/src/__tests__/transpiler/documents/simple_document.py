@@ -16,7 +16,7 @@ def index(state: State) -> Page:
         [
             Div(
                 "Hello",
-                bold("world"),
+                Strong("world"),
                 "!",
                 Button("Click Me", style_padding="0.5rem", style_color="blue"),
                 classes="card",

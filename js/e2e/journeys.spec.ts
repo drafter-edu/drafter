@@ -137,7 +137,8 @@ test("editor journey: edit code in the debug panel and Run restarts the app", as
 	const root = page.locator("#drafter-root--");
 	await expect(root).toContainText("Version One");
 
-	await page.locator(".drafter-edit-button").click();
+	await page.locator(".drafter-menu-button-edit").click();
+	await page.locator(".drafter-menu-item-edit-source").click();
 	await expect(page.getByText("Edit Source Code")).toBeVisible();
 
 	const editor = page.locator(".cm-content");

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Added semantic inline text components: `Strong`, `Emphasis`, `InlineQuotation`, `DefinitionTerm`, `Abbreviation`, `DeletedText`, `InsertedText`, `KeyboardInput`, `MarkedText`, `SampleOutput`, `SmallText`, `Superscript`, `Subscript`, and `InlineVariable`.
+-   Added structural components: `Figure`/`FigureCaption`, `Details` (with `summary`, `open`, and accordion-style `group`), and `DefinitionList` (accepts a dictionary, a dataclass instance, or a list of term/definition pairs).
+-   Added `Meter` (with `min`/`max`/`low`/`high`/`optimum`) and `TimeOutput` (with `datetime`) output components.
+-   Renamed the `Progress` component to `ProgressBar` to avoid overlap with the planned `Progress` payload type.
+-   The HTML-to-Drafter transpiler now maps the corresponding tags (including `strong`, which previously produced `bold(...)`) to the new components.
 -   Ported the `simple`, `skeleton`, and `tacit` classless themes from Drafter v1; all built-in themes now scope their layout to the Drafter frame so the debug panel is unaffected.
 -   Ported the retro Windows themes (`98`, `xp`, `7`) from Drafter v1 as classless themes: the page now renders as a period-appropriate window on the desktop, with all element styling scoped to the Drafter body so the debug panel is unaffected.
 -   Fixed the `sakura` theme squeezing the whole page (including the debug panel) instead of just the site content.
