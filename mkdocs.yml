@@ -231,6 +231,7 @@ nav:
   - Contributing: dev/contributing.md
   - Writing documentation: dev/docs-guide.md
   - Internals map: dev/internals-map.md
+  - Template zoo: dev/template-zoo.md
 
 markdown_extensions:
 # hl_lines support on fences (used by the drafter-codeblocks plugin).
@@ -238,23 +239,45 @@ markdown_extensions:
 - pymdownx.superfences
 # Callout boxes ("!!! note") used across templates.
 - admonition
+# Grid cards on index pages and attribute hooks for the design system.
+- attr_list
+- md_in_html
 
 theme:
   name: material
+  # Design-system layer (STUDENT_DOCS_PLAN.md §9): zone banners and the
+  # front-matter page-header block live in overrides/main.html; tokens and
+  # motif styling in docs/assets/drafter-theme.css.
+  custom_dir: overrides
+  # The Drafter blueprint "D" mark, kept subtle: header + drawer + favicon.
+  logo: assets/drafter-blueprint-d.svg
+  favicon: assets/drafter-blueprint-d-favicon.svg
+  # System font stack (no Google Fonts request: classrooms may be offline).
+  font: false
+  features:
+    - navigation.tabs
+    - navigation.top
+    - content.code.copy
   palette:
     - scheme: default
-      primary: blue
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
 
     - scheme: slate
-      primary: blue
-      accent: blue
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
+
+extra_css:
+  - assets/drafter-theme.css
+
+extra_javascript:
+  - assets/drafter-theme.js
 
 plugins:
 - search

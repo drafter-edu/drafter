@@ -976,4 +976,16 @@ Recorded 2026-07-26. Every §15 item now has an answer or an explicit deferral w
 
 Phase A exit criteria met: no unowned [Q] item blocks phases B-D.
 
+### Phase C design notes (stakeholder feedback, 2026-07-26)
+
+Applied to the theme layer:
+
+1. Extend shares the Teach palette (zone attribute set by URL; no instructor banner on Extend pages).
+2. The utility group (Examples / Reference / Help / More) is right-aligned in the header, in a quieter weight.
+3. Teach, Extend, and Developers collapse into a "More" dropdown (custom tabs partial in `overrides/partials/tabs.html`; CSS-only, opens on hover and keyboard focus).
+4. Hero text sits on solid plates so the blueprint grid never runs behind text.
+5. The Drafter blueprint "D" mark (`static/`) is the site logo and favicon, kept subtle.
+6. **Deferred**: the editable-embed editor (`src/drafter/docs/embed_editor.js`) is a plain textarea with no syntax highlighting; replace with a CodeMirror instance in a later phase (candidate: Phase F, alongside the editable-embed performance measurement, since CodeMirror adds page weight that belongs in the same budget).
+7. The home page hides both sidebars, widens the content grid, and moves the below-the-fold links into a right-hand column.
+
 

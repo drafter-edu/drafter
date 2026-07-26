@@ -1513,3 +1513,9 @@ pages:
     audience: D
     priority: P2
     outcome: Find the right module fast.
+  - path: dev/template-zoo.md
+    title: Template zoo
+    template: reference
+    audience: D
+    priority: P1
+    outcome: Review every design-system element with dummy content.

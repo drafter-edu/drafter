@@ -1,0 +1,410 @@
+/* Drafter documentation design system (STUDENT_DOCS_PLAN.md §9).
+ *
+ * A customization layer over mkdocs-material: design tokens for the student
+ * light/dark schemes plus the Teach (navy) and Developer (graphite) zones,
+ * the quiet blueprint motif, page-type/level badges, zone banners, and the
+ * "drafting sheet" framing for embedded demos.
+ *
+ * Token values are the §9.2 starting points; every pair is meant to hold
+ * WCAG 2.2 AA contrast. The zone attribute (data-zone) is stamped on <html>
+ * by overrides/main.html from the page's audience front-matter.
+ */
+
+/* ---- Tokens: student zone ---- */
+
+[data-md-color-scheme="default"] {
+  --md-default-bg-color: #fafbfd;
+  --md-default-fg-color: #1d2a38;
+  --md-default-fg-color--light: #44536a;
+  --md-primary-fg-color: #1d5dbf;
+  --md-primary-fg-color--dark: #17498f;
+  --md-accent-fg-color: #c4610c;
+  --md-typeset-a-color: #1d5dbf;
+  --drafter-surface: #ffffff;
+  --drafter-grid: #e3ebf5;
+  --drafter-accent: #c4610c;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: #111827;
+  --md-default-fg-color: #e6eaf0;
+  --md-default-fg-color--light: #b3bfd0;
+  --md-primary-fg-color: #6ea8ff;
+  --md-accent-fg-color: #e8a04c;
+  --md-typeset-a-color: #6ea8ff;
+  --drafter-surface: #1a2332;
+  --drafter-grid: #233047;
+  --drafter-accent: #e8a04c;
+}
+
+/* ---- Tokens: Teach and Developer zones (override either scheme) ---- */
+
+[data-zone="teach"] [data-md-color-scheme] {
+  --md-default-bg-color: #0f172a;
+  --md-default-fg-color: #dce4f2;
+  --md-default-fg-color--light: #aebdd8;
+  --md-primary-fg-color: #7fb0ff;
+  --md-accent-fg-color: #e8b93e;
+  --md-typeset-a-color: #7fb0ff;
+  --drafter-surface: #16213b;
+  --drafter-grid: #1d2b4a;
+  --drafter-accent: #e8b93e;
+}
+
+[data-zone="dev"] [data-md-color-scheme] {
+  --md-default-bg-color: #16181d;
+  --md-default-fg-color: #dde1e6;
+  --md-default-fg-color--light: #aab2bd;
+  --md-primary-fg-color: #4fc3e8;
+  --md-accent-fg-color: #b48cff;
+  --md-typeset-a-color: #4fc3e8;
+  --drafter-surface: #1e2128;
+  --drafter-grid: #262b33;
+  --drafter-accent: #b48cff;
+}
+
+/* ---- Typography (§9.2) ---- */
+
+body,
+.md-typeset {
+  font-family: "Inter", "Source Sans 3", -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+}
+
+.md-typeset code,
+.md-typeset pre,
+.md-typeset kbd {
+  font-family: "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono",
+    monospace;
+  font-variant-ligatures: none;
+}
+
+/* Cap the measure for readability; layout still reflows at 320px. */
+.md-typeset p,
+.md-typeset li {
+  max-width: 72ch;
+}
+
+/* ---- Two-tier header (§9.3) ----
+ * With navigation.tabs and the custom tabs partial, the visible tabs are:
+ * Home, the four journey sections, then Examples / Reference / Help / More.
+ * The utility group (item 6 onward) is pushed to the right and rendered in
+ * a quieter weight. Position-based: revisit if top-level nav sections are
+ * reordered in mkdocs.yml.
+ */
+
+/* Material clips the tab bar (overflow: auto + contain: content), which
+ * would hide the More dropdown. The tab bar only renders on wide screens
+ * and our tab set fits, so releasing the clipping is safe. */
+.md-tabs,
+.md-tabs__list {
+  overflow: visible;
+}
+
+.md-tabs__list {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  contain: none;
+}
+
+.md-tabs__item:nth-child(n + 6) .md-tabs__link {
+  font-weight: 400;
+  opacity: 0.75;
+  font-size: 0.66rem;
+}
+
+.md-tabs__item:nth-child(-n + 5) .md-tabs__link {
+  font-weight: 600;
+}
+
+/* Push the utility group to the right-hand side of the header. */
+.md-tabs__item:nth-child(6) {
+  margin-left: auto;
+}
+
+/* ---- "More" dropdown (Teach / Extend / Developers) ---- */
+
+.drafter-more {
+  position: relative;
+}
+
+.drafter-more__button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+}
+
+.drafter-more__caret {
+  font-size: 0.55rem;
+}
+
+.drafter-more__menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  min-width: 9rem;
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  background: var(--drafter-surface);
+  border: 1px solid var(--drafter-grid);
+  border-radius: 0.2rem;
+  box-shadow: var(--md-shadow-z2);
+}
+
+.drafter-more:hover .drafter-more__menu,
+.drafter-more:focus-within .drafter-more__menu,
+.drafter-more--open .drafter-more__menu {
+  display: block;
+}
+
+.drafter-more__menu li {
+  margin: 0;
+  list-style: none;
+}
+
+.drafter-more__link {
+  display: block;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.7rem;
+  color: var(--md-default-fg-color);
+}
+
+.drafter-more__link:hover,
+.drafter-more__link:focus {
+  color: var(--md-primary-fg-color);
+  background: color-mix(in srgb, var(--md-primary-fg-color) 8%, transparent);
+}
+
+/* ---- Zone banners (§9.3) ---- */
+
+.drafter-zone-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 0 1rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--drafter-surface);
+  border-left: 0.2rem solid var(--drafter-accent);
+}
+
+.drafter-zone-banner a {
+  font-weight: 400;
+  color: var(--md-typeset-a-color);
+}
+
+/* ---- Page header block: type badge, level chip, outcome (§9.3) ---- */
+
+.drafter-page-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.drafter-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border: 1px solid currentcolor;
+}
+
+.drafter-badge--type {
+  color: var(--md-primary-fg-color);
+}
+
+.drafter-badge--level {
+  color: var(--md-default-fg-color--light);
+}
+
+.drafter-page-meta__outcome {
+  flex-basis: 100%;
+  font-size: 0.72rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* ---- Blueprint motif: hero band only, never behind body text (§9.2) ---- */
+
+.drafter-hero {
+  padding: 1.6rem 1.6rem 1.2rem;
+  border: 1px solid var(--drafter-grid);
+  border-radius: 0.3rem;
+  background-color: var(--drafter-surface);
+  background-image:
+    linear-gradient(var(--drafter-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--drafter-grid) 1px, transparent 1px);
+  background-size: 1.5rem 1.5rem;
+}
+
+.drafter-hero > :first-child {
+  margin-top: 0;
+}
+
+/* Text inside the hero sits on a subtle surface background, full width,
+ * so the grid never reduces readability (design feedback, 2026-07-26). */
+.drafter-hero > p {
+  background: color-mix(in srgb, var(--drafter-surface) 88%, transparent);
+  border-radius: 0.25rem;
+  padding: 0.7rem 1rem;
+}
+
+/* ---- Embedded demos as drafting sheets (§9.2) ---- */
+
+.drafter-demo {
+  position: relative;
+  margin: 1rem 0;
+  padding: 0.4rem;
+  border: 1px solid var(--drafter-grid);
+  border-radius: 0.2rem;
+  background: var(--drafter-surface);
+}
+
+/* Corner tick marks. */
+.drafter-demo::before,
+.drafter-demo::after {
+  content: "";
+  position: absolute;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-color: var(--md-primary-fg-color);
+  border-style: solid;
+  opacity: 0.55;
+}
+
+.drafter-demo::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.drafter-demo::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.drafter-demo iframe {
+  display: block;
+  border: 1px solid var(--drafter-grid) !important;
+  border-radius: 0.15rem !important;
+  background: #ffffff;
+}
+
+/* ---- Logo: the blueprint "D" is dark blue, so it sits on a white plate
+ * to stay visible on the colored header (design feedback, 2026-07-26). ---- */
+
+.md-header__button.md-logo img,
+.md-nav__button.md-logo img {
+  height: 1.6rem;
+  width: auto;
+  background: #ffffff;
+  border-radius: 0.3rem;
+  padding: 0.15rem;
+}
+
+/* ---- Cards on index pages ---- */
+
+.md-typeset .grid.cards > ul > li {
+  border-color: var(--drafter-grid);
+  border-radius: 0.3rem;
+  background: var(--drafter-surface);
+}
+
+.md-typeset .grid.cards > ul > li:hover {
+  border-color: var(--md-primary-fg-color);
+}
+
+/* ---- Home page layout (design feedback, 2026-07-26) ----
+ * The home page hides both sidebars (front-matter `hide`), widens the grid,
+ * and moves the previously below-the-fold links into a right-hand column.
+ * The data-home attribute is stamped by overrides/main.html.
+ */
+
+[data-home] .md-grid {
+  max-width: 76rem;
+}
+
+.drafter-home {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(17rem, 2fr);
+  gap: 1.6rem;
+  align-items: start;
+}
+
+@media screen and (max-width: 59.9375em) {
+  .drafter-home {
+    grid-template-columns: 1fr;
+  }
+}
+
+.drafter-home__side {
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--drafter-grid);
+  border-radius: 0.3rem;
+  background: var(--drafter-surface);
+}
+
+/* The three entry cards live in the sidebar and stack vertically. */
+.drafter-home__side .grid.cards {
+  margin-bottom: 1.2rem;
+}
+
+.drafter-home__side > :first-child {
+  margin-top: 0;
+}
+
+.drafter-home__side h2 {
+  font-size: 0.85rem;
+  margin: 0 0 0.6rem;
+}
+
+.drafter-home__side ul {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.drafter-home__side li {
+  margin: 0 0 0.45rem;
+  padding: 0;
+}
+
+.drafter-home__quiet {
+  font-size: 0.68rem;
+  color: var(--md-default-fg-color--light);
+  border-top: 1px solid var(--drafter-grid);
+  padding-top: 0.8rem;
+}
+
+/* ---- Accessibility engineering (§9.5) ---- */
+
+:focus-visible {
+  outline: 2px solid var(--md-accent-fg-color);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001s !important;
+    animation-duration: 0.001s !important;
+  }
+}
