@@ -69,7 +69,7 @@ class Fragment(ResponsePayload):
         elif not isinstance(content, list):
             incorrect_type = type(content).__name__
             raise StudentFacingError(
-                "The content of a Fragment must be a list of strings or components."
+                f"The content of a {self.__class__.__name__} must be a list of strings or components."
                 f" Found {incorrect_type} instead.",
                 friendly=(
                     "The content you returned in this "
@@ -92,7 +92,7 @@ class Fragment(ResponsePayload):
                 if not isinstance(chunk, (str, Component)):
                     incorrect_type = type(chunk).__name__
                     raise StudentFacingError(
-                        "The content of a Fragment must be a list of strings or components."
+                        f"The content of a {self.__class__.__name__} must be a list of strings or components."
                         f" Found {incorrect_type} at index {index} instead.",
                         friendly=(
                             f"Item number {index} in this "
