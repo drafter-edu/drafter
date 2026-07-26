@@ -1,8 +1,57 @@
 site_name: "Drafter Documentation"
 nav:
 - Home: index.md
-- Quickstart: quickstart/quickstart.md
+- Quick Start: quick start new/quickstart_new.md
 - Multiple Examples: multiple_examples.md
+- Component Documentation: 
+  - Basic Components:
+    - Overview: ComponentDocs/BasicComponents/index.md
+    - TextBox: ComponentDocs/BasicComponents/textbox.md
+    - TextArea: ComponentDocs/BasicComponents/textarea.md
+    - Button: ComponentDocs/BasicComponents/button.md
+    - Link: ComponentDocs/BasicComponents/link.md
+    - CheckBox: ComponentDocs/BasicComponents/checkbox.md
+    - NumberedList: ComponentDocs/BasicComponents/numberedlist.md
+    - BulletedList: ComponentDocs/BasicComponents/bulletedlist.md
+    - Argument: ComponentDocs/BasicComponents/argument.md
+  - Advanced Components:
+    - Overview: ComponentDocs/AdvancedComponents/index.md
+    - Image: ComponentDocs/AdvancedComponents/image.md
+    - Table: ComponentDocs/AdvancedComponents/table.md
+    - SelectBox: ComponentDocs/AdvancedComponents/selectbox.md
+    - Formatting:
+      - Overview: ComponentDocs/AdvancedComponents/formatting/index.md
+      - Div / Row: ComponentDocs/AdvancedComponents/formatting/divrow.md
+      - Span: ComponentDocs/AdvancedComponents/formatting/span.md
+      - Header: ComponentDocs/AdvancedComponents/formatting/header.md
+      - Line Break: ComponentDocs/AdvancedComponents/formatting/linebreak.md
+      - Preformatted Text: ComponentDocs/AdvancedComponents/formatting/preformattedtext.md
+    - File Management:
+      - Overview: ComponentDocs/AdvancedComponents/filemanagement/index.md
+      - Download: ComponentDocs/AdvancedComponents/filemanagement/download.md
+      - FileUpload: ComponentDocs/AdvancedComponents/filemanagement/fileupload.md
+  - Specialized Components:
+    - Overview: ComponentDocs/SpecializedComponents/index.md
+    - Matplotlib: ComponentDocs/SpecializedComponents/matplotlib/index.md
+  - Styling:
+    - Overview: ComponentDocs/Styling/index.md
+    - Themes:
+      - Overview: ComponentDocs/Styling/themes/index.md
+    - Components:
+      - Overview: ComponentDocs/Styling/components/index.md
+      - Postion:
+        - Overview: ComponentDocs/Styling/components/postion/index.md
+      - Shape:
+        - Overview: ComponentDocs/Styling/components/shape/index.md
+      - Text:
+        - Overview: ComponentDocs/Styling/components/text/index.md
+        - Font / Type: ComponentDocs/Styling/components/text/fonttype/index.md
+        - Size: ComponentDocs/Styling/components/text/size/index.md
+        - Transformations: ComponentDocs/Styling/components/text/transformations/index.md
+      - Color:
+        - Overview: ComponentDocs/Styling/components/color/index.md
+    - Css:
+      - Overview: ComponentDocs/Styling/Css/index.md
 - Student Guide:
   - Installation: students/installation.md
   - Documentation for Students: students/docs.md
@@ -15,10 +64,6 @@ nav:
   - More Help: students/help.md
 - Workbook:
   - Overview: workbook/index.md
-  - Part 1 - Cookie Clicker: workbook/part1/cookie.md
-  - Part 2 - Bank Account: workbook/part2/bank.md
-  - Part 3 - Adventure Game: workbook/part3/adventure.md
-  - Part 4 - Store: workbook/part4/store.md
 - Examples:
   - Overview: examples/examples.md
   - Calculator: examples/calculator.md
@@ -26,13 +71,6 @@ nav:
   - Forms: examples/forms.md
   - Login: examples/login.md
   - Nested Data: examples/nested_data.md
-- Reference:
-  - Overview: reference/reference.md
-  - Colors: reference/colors.md
-  - Components: reference/components.md
-  - Fonts: reference/fonts.md
-  - Transition to Flask: reference/flask.md
-  - API Reference: reference/api/
 
 markdown_extensions:
 # hl_lines support on fences (used by the drafter-codeblocks plugin).
@@ -42,8 +80,19 @@ markdown_extensions:
 theme:
   name: material
   palette:
-    primary: blue
-    accent: blue
+    - scheme: default
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
 
 plugins:
 - search
@@ -66,3 +115,6 @@ plugins:
           docstring_style: google
           show_source: false
           merge_init_into_class: true
+
+extra_css:
+  - extra.css

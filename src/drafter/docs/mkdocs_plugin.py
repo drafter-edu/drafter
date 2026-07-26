@@ -298,8 +298,6 @@ class DrafterCodeBlockPlugin(BasePlugin):
             self._pyodide_package_style,
             "--production" if self.config["production"] else "",
             "--subtle-debug-entry" if self.config["subtle_debug_entry"] else "",
-            "--system-packages",
-            "bakery",
             "--verbose",
         ]
         if self.config["shared_runtime"]:
