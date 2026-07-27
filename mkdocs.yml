@@ -57,6 +57,7 @@ nav:
     - Prepare for release: your-project/deploy/prepare.md
     - Publish on GitHub Pages: your-project/deploy/github-pages.md
     - Fix a failed deployment: your-project/deploy/troubleshooting.md
+  - Get feedback on your design: your-project/get-feedback.md
   - Project gallery:
     - your-project/gallery/index.md
 - Examples:
@@ -242,6 +243,8 @@ markdown_extensions:
 - pymdownx.details
 # Callout boxes ("!!! note") used across templates.
 - admonition
+# Collapsible "??? note" blocks (progressive disclosure for screenshots).
+- pymdownx.details
 # Grid cards on index pages and attribute hooks for the design system.
 - attr_list
 - md_in_html
@@ -260,6 +263,9 @@ theme:
   features:
     - navigation.tabs
     - navigation.top
+    # Previous/Next links at the bottom of every page, following nav order,
+    # so sequential guides (Start, Deploy) always show the way onward.
+    - navigation.footer
     - content.code.copy
   palette:
     - scheme: default

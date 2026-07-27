@@ -18,7 +18,8 @@ effort that gets the look you want.
 
 ## Before you start
 
-You should already understand how to build pages.
+You should already understand how to build pages; if not, start with
+[Build your first app](../../start/first-app.md).
 
 Drafter offers three tiers of styling, in order of
 effort. Start at the top and only go deeper when the tier above cannot

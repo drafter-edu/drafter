@@ -334,6 +334,13 @@ pages:
     audience: S
     priority: P0
     outcome: Diagnose and retry failed deploys.
+  - path: your-project/get-feedback.md
+    title: Get feedback on your design
+    template: how-to
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Learn how real users experience your app and what to change.
   - path: your-project/gallery/index.md
     title: Project gallery
     template: index
