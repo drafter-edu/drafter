@@ -838,8 +838,10 @@ Here are the parts of Drafter that have to be hosted:
   - `drafter_debug.css` - debug menu styles.
   - `drafter_deploy.css` - styles for deployed (non-debug) mode.
   - Themes (registered in `src/drafter/styling/themes.py`): `default`, `none` (special-cased to no
-    stylesheets), `mvp`, `sakura`. Additional theme CSS files are built but not yet registered
-    (skeleton, tacit, simple). **[PLANNED]**: a `dark` theme.
+    stylesheets), `almond`, `brutal`, `darkfairy`, `daub`, `latex`, `magick`, `matcha`, `mvp`,
+    `pico`, `retro`, `sakura`, `simple`, `skeleton`, `tacit`, `terminal`, `water`, `yorha`, and the
+    retro Windows themes `98`, `xp`, and `7`. The student docs catalog deliberately omits
+    `darkfairy` and `matcha` (registered but dormant).
 - **Skulpt libraries** (built into `js/dist/skulpt/` by helper scripts, not part of the default
   build): `skulpt.js` and `skulpt-stdlib.js` (fetched/copied by `npm run update-skulpt`), and
   `skulpt-drafter.js` (the Skulpt-precompiled Drafter Python, produced by `npm run precompile`,
