@@ -110,6 +110,33 @@ async def ws_endpoint(websocket: WebSocket):
         await hub.unregister(websocket)
 
 
+async def _read_student_code(student_path: Path, attempts: int = 5) -> str:
+    """Read the student's code file, retrying transient failures.
+
+    Editors (especially on Windows) briefly lock or truncate the file
+    mid-save, so the first read after a change event can fail or return a
+    partial file. Retries with a short delay before giving up.
+
+    Args:
+        student_path: Path to the student's main code file.
+        attempts: Maximum number of read attempts.
+
+    Returns:
+        The file contents.
+
+    Raises:
+        OSError: If the file still cannot be read after all attempts.
+    """
+    last_error: OSError | None = None
+    for attempt in range(attempts):
+        try:
+            return student_path.read_text(encoding="utf-8")
+        except OSError as error:
+            last_error = error
+            await asyncio.sleep(0.1 * (attempt + 1))
+    raise last_error if last_error else OSError("Could not read student code")
+
+
 async def _watch_and_reload(
     hub: ReloadHub,
     watch_paths: list[WatchedPath],
@@ -156,7 +183,7 @@ async def _watch_and_reload(
                     "Trying to restart student code due to changes in:", changed_paths
                 )
                 await hub.broadcast_student_restart(
-                    watched_student_path.read_text(encoding="utf-8")
+                    await _read_student_code(watched_student_path)
                 )
             except Exception:
                 print("Failed. Reloading instead.")

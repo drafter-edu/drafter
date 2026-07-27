@@ -262,6 +262,127 @@ function scheduleInterruptEscalation(buffer: Int32Array, pyodide: any) {
 	}, 1000);
 }
 
+interface StudentSyntaxProblem {
+	errorName: string;
+	message: string;
+	lineno: number | null;
+	text: string;
+	formatted: string;
+}
+
+const SYNTAX_CHECK_SNIPPET = `
+import ast as _ast
+import json as _json
+import traceback as _traceback
+
+def _drafter_check_syntax(source, filename):
+    try:
+        compile(source, filename, "exec", flags=_ast.PyCF_ALLOW_TOP_LEVEL_AWAIT)
+    except SyntaxError as exc:
+        return _json.dumps({
+            "ok": False,
+            "error_name": type(exc).__name__,
+            "message": exc.msg or "invalid syntax",
+            "lineno": exc.lineno,
+            "text": (exc.text or "").strip(),
+            "formatted": "".join(_traceback.format_exception_only(exc)).rstrip(),
+        })
+    return _json.dumps({"ok": True})
+
+_drafter_check_syntax(__drafter_syntax_source, __drafter_syntax_filename)
+`;
+
+/**
+ * Compile-check student code without executing it, so a restart can refuse
+ * to tear down a working site for code that cannot even start. Returns the
+ * problem details when the code fails to compile, or null when it compiles.
+ * The guard fails open: if the check itself cannot run, null is returned
+ * and the normal execution path reports whatever is actually wrong.
+ */
+async function checkStudentCodeSyntax(
+	code: string,
+	filename: string,
+): Promise<StudentSyntaxProblem | null> {
+	const pyodide = (window as any).pyodide;
+	if (pyodide === undefined) {
+		return null;
+	}
+	// PyCF_ALLOW_TOP_LEVEL_AWAIT mirrors runPythonAsync's own compile flags,
+	// so the check never rejects code the real run would accept.
+	const checkGlobals = pyodide.toPy({
+		__drafter_syntax_source: code,
+		__drafter_syntax_filename: filename,
+	});
+	try {
+		const resultJson = await pyodide.runPythonAsync(SYNTAX_CHECK_SNIPPET, {
+			globals: checkGlobals,
+		});
+		const result = JSON.parse(resultJson);
+		if (result.ok) {
+			return null;
+		}
+		return {
+			errorName: result.error_name,
+			message: result.message,
+			lineno: result.lineno ?? null,
+			text: result.text ?? "",
+			formatted:
+				result.formatted ?? `${result.error_name}: ${result.message}`,
+		};
+	} catch (error) {
+		console.warn(
+			"[Drafter AppServer Scaffolding] Syntax pre-check could not run:",
+			error,
+		);
+		return null;
+	} finally {
+		checkGlobals.destroy?.();
+	}
+}
+
+/**
+ * Report a syntax problem caught by the pre-flight check. When a previous
+ * run is still on screen (`keptPreviousRun`), the report is recoverable and
+ * presents as a dialog over the still-working site; on a first run there is
+ * nothing to preserve, so it renders a friendly error page into the root.
+ */
+function reportStudentSyntaxError(
+	problem: StudentSyntaxProblem,
+	options: DrafterInitOptions,
+	filename: string,
+	keptPreviousRun: boolean,
+): Error {
+	const syntaxError = new Error(problem.formatted);
+	syntaxError.name = problem.errorName;
+	const location =
+		problem.lineno !== null
+			? `line ${problem.lineno} of ${filename}`
+			: filename;
+	return reportSystemError({
+		id: "runtime.student_code_syntax_error",
+		category: "runtime",
+		message: `Your code has a syntax error (${problem.errorName}: ${problem.message})`,
+		title: "Syntax Error",
+		error: syntaxError,
+		recoverable: keptPreviousRun,
+		friendlyMessage: keptPreviousRun
+			? "Your latest code has a syntax error, so Drafter is still showing the last working version of your site."
+			: "Drafter could not start your site because the code has a syntax error.",
+		friendlySteps: [
+			problem.text
+				? `Look at ${location}: \`${problem.text}\``
+				: `Look at ${location}.`,
+			"Check punctuation first: missing colons, commas, quotes, or parentheses.",
+			keptPreviousRun
+				? "Fix the code and save or run it again; your site will restart automatically."
+				: "Fix the code and run it again.",
+		],
+		context: { phase: "setup", dom_id: options.rootElementId },
+		targetDocument: options.targetWindow?.document,
+		rootElementId: options.rootElementId,
+	});
+}
+
 async function fetchStudentCode(pythonUrl?: string): Promise<string> {
 	if (!pythonUrl) {
 		throw new Error(
@@ -301,6 +422,7 @@ export async function createDrafterInstance(
 	let latestStudentCode: string | null = null;
 	let runInProgress = false;
 	let restartRequested = false;
+	let hasCompletedRun = false;
 	let instanceWebSocket: WebSocket | null = null;
 
 	const getStudentCode = async () => {
@@ -345,6 +467,24 @@ export async function createDrafterInstance(
 					// configure -> run critical section, so concurrent
 					// instances can never interleave their setup phases.
 					await enqueueRuntimeWork(async () => {
+						// Guard: refuse to tear down a working site for code
+						// that cannot compile. Checking BEFORE the reset means
+						// a syntax error while live-editing (or a partially
+						// saved file) leaves the previous version running.
+						const displayFilename =
+							options.studentFilename || "main.py";
+						const syntaxProblem = await checkStudentCodeSyntax(
+							code,
+							displayFilename,
+						);
+						if (syntaxProblem) {
+							throw reportStudentSyntaxError(
+								syntaxProblem,
+								executionOptions,
+								displayFilename,
+								hasCompletedRun,
+							);
+						}
 						await resetPyodideRuntime(
 							instanceKey,
 							rootElementId,
@@ -353,6 +493,7 @@ export async function createDrafterInstance(
 						await setupEnvironment(executionOptions);
 						return runStudentCodeInner(executionOptions);
 					});
+					hasCompletedRun = true;
 				} catch (error) {
 					// Interrupt-driven restarts are expected while live-editing.
 					if (!restartRequested) {
