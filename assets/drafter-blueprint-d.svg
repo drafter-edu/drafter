@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Drafter blueprint D logo</title>
+  <desc id="desc">A geometric capital D with blueprint construction lines, designed to remain legible at favicon size.</desc>
+
+  <defs>
+    <style>
+      .main { fill: none; stroke: #2468c9; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+      .guide { fill: none; stroke: #78a9e8; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 10 8; opacity: .9; }
+      .mark { fill: none; stroke: #2468c9; stroke-width: 3; stroke-linecap: square; opacity: .95; }
+    </style>
+  </defs>
+
+  <!-- Construction guides -->
+  <path class="guide" d="M48 64H194M48 128H208M48 192H194"/>
+  <path class="guide" d="M88 40V216M144 40V216"/>
+
+  <!-- Primary D -->
+  <path class="main" d="M64 48V208H128C178 208 208 176 208 128S178 48 128 48H64Z"/>
+  <path class="main" d="M96 80V176H126C157 176 176 157 176 128S157 80 126 80H96Z"/>
+
+  <!-- Blueprint extension marks -->
+  <path class="mark" d="M64 28V44M64 212V228M44 48H28M44 208H28"/>
+  <path class="mark" d="M208 108H228M208 148H228"/>
+  <path class="mark" d="M128 40V28M128 216V228"/>
+
+  <!-- Corner registration ticks -->
+  <path class="mark" d="M56 48H72M64 40V56"/>
+  <path class="mark" d="M56 208H72M64 200V216"/>
+</svg>

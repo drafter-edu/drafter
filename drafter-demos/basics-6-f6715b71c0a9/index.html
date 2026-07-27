@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Drafter App Server</title>
+    <link rel="icon" id="drafter-favicon--" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsbGVkYnk9InRpdGxlIj4KICA8dGl0bGUgaWQ9InRpdGxlIj5EcmFmdGVyIGJsdWVwcmludCBEIGZhdmljb248L3RpdGxlPgogIDxyZWN0IHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgcng9IjEyIiBmaWxsPSIjZjRmOGZmIi8+CiAgPHBhdGggZD0iTTE3IDEyVjUySDMxQzQzIDUyIDUxIDQ0IDUxIDMyUzQzIDEyIDMxIDEySDE3WiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjQ2OGM5IiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KICA8cGF0aCBkPSJNMjUgMjBWNDRIMzFDMzggNDQgNDMgMzkgNDMgMzJTMzggMjAgMzEgMjBIMjVaIiBmaWxsPSJub25lIiBzdHJva2U9IiMyNDY4YzkiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0xMSAyMEg1M00xMSAzMkg1Nk0xMSA0NEg1M00yNSA4VjU2TTM3IDhWNTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc4YTllOCIgc3Ryb2tlLXdpZHRoPSIxLjI1IiBzdHJva2UtZGFzaGFycmF5PSIzIDMiIG9wYWNpdHk9Ii45Ii8+Cjwvc3ZnPgo=" />
+    <script>window.DRAFTER_ENGINE = "pyodide";</script>
+    
+      <!-- Additional header content from precompilation -->
+      <link type="text/css" rel="stylesheet" href="../_shared/css/drafter_deploy.css" class="drafter-precompiled-headers-- drafter-non-debug-css--">
+<link type="text/css" rel="stylesheet" href="../_shared/css/default.css" class="drafter-precompiled-headers--">
+<link type="text/css" rel="stylesheet" href="../_shared/css/diff2html.min.css" class="drafter-precompiled-headers--">
+      <!-- End of additional header content -->
+    
+    <style>
+      #--drafter-initial-loading-white-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.7);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.5em;
+      }
+
+      .drafter-loading-spinner {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 0.25rem solid #d8d8d8;
+        border-top-color: #444;
+        border-radius: 50%;
+        animation: drafter-spin 0.8s linear infinite;
+      }
+
+      @keyframes drafter-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      
+    </style>
+  </head>
+  <body>
+    <div id="--drafter-initial-loading-white-screen">
+      <div class="drafter-loading-spinner" aria-hidden="true"></div>
+      <div>Loading, please wait...</div>
+    </div>
+    <div id="drafter-root--">
+      
+        <!-- Precompiled body content -->
+        <div class="drafter-body--">Today&#x27;s mood: undecided<br>
+<button data-nav="sleepy" formaction="#" id="drafter-component-139939333172464" name="--submit-button" type="submit" value="&amp;quot;\ud83d\ude34#drafter-component-139939333172464&amp;quot;">
+  😴
+</button>
+<button data-nav="party" formaction="#" id="drafter-component-139939331771920" name="--submit-button" type="submit" value="&amp;quot;\ud83c\udf89#drafter-component-139939331771920&amp;quot;">
+  🎉
+</button>
+</div>
+      
+    </div>
+    <script>window.DRAFTER_CONFIGURATION = {"app_builder": {"additional_paths": [], "create_404": "if_missing", "output_directory": "/home/runner/work/drafter/drafter/site/drafter-demos/basics-6-f6715b71c0a9", "output_filename": "index.html", "pyodide_package_style": "pypi", "shared_runtime": true, "warn_missing_info": true, "zip_output": false}, "app_common": {"asset_directory": false, "engine": "pyodide", "favicon": "", "load_packages_automatically": true, "mount_drafter_locally": false, "override_asset_url": "../_shared", "prerender_initial_page": true, "project_packages": null, "pyodide_drafter_path": null, "pyodide_url": "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/", "show_filename_as": false, "site_title": "Drafter App Server", "system_packages": ["bakery", "pillow"]}, "app_server": {"host": "localhost", "inline_py": true, "open_browser": true, "port": 8000, "serve_adjacent_files": true, "use_reloader": true}, "bootstrap": {"config_file": null, "mode": "compile_site", "path": "/tmp/mkdocs-drafter-rcc7nb5d/basics-6-f6715b71c0a9.py", "verbose": true}, "client_server": {"additional_css_content": [], "additional_header_content": [], "additional_js_content": [], "additional_script_content": [], "additional_style_content": [], "button_spinners": false, "console_mode": "auto", "deploy_image_path": "", "enable_audit_logging": true, "enable_subtle_debug_entry": true, "error_page_message": "", "error_page_show_details": true, "error_page_title": "", "external_pages": null, "favicon": "", "framed": true, "in_debug_mode": false, "information": null, "newlines_to_br": true, "override_asset_url": "../_shared", "page_transition": "none", "page_transition_duration": 0.5, "root_element_id": "drafter-root--", "server_name": "MAIN_SERVER", "site_title": "Drafter Application", "system_routes": [], "theme": "default", "use_shadow_dom": false}};</script>
+    
+      <script>window.DRAFTER_MODIFIED_CONFIGURATION = {"app_builder": {"output_directory": "/home/runner/work/drafter/drafter/site/drafter-demos/basics-6-f6715b71c0a9", "output_filename": "index.html", "pyodide_package_style": "pypi", "shared_runtime": true}, "app_common": {"override_asset_url": "../_shared"}, "app_server": {}, "bootstrap": {"mode": "compile_site", "path": "/tmp/mkdocs-drafter-rcc7nb5d/basics-6-f6715b71c0a9.py", "verbose": true}, "client_server": {"enable_subtle_debug_entry": true, "in_debug_mode": false, "override_asset_url": "../_shared"}};</script>
+    
+    <script type="text/python" id="user-code">from drafter import *
+from dataclasses import dataclass
+
+
+@dataclass
+class State:
+    mood: str
+
+
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        "Today's mood: " + state.mood + "\n",
+        Button("😴", "sleepy"),
+        Button("🎉", "party")
+    ])
+
+
+@route
+def sleepy(state: State) -> Page:
+    state.mood = "resting"
+    return index(state)
+
+
+@route
+def party(state: State) -> Page:
+    state.mood = "celebrating"
+    return index(state)
+
+
+start_server(State("undecided"))
+</script>
+    <!-- Engine-specific scripts -->
+    
+  <script src=""https://cdn.jsdelivr.net/pyodide/v0.29.0/full/"/pyodide.js"></script>
+  <script src="../_shared/js/drafter.pyodide.js"></script>
+
+    <!-- Engine-specific initialization -->
+    
+  <script>
+  (async () => {
+    try {
+      
+      // Shared-runtime mode: when this page is embedded in an iframe whose
+      // parent has the Drafter bundle loaded, attach to the parent's host and
+      // share its single Pyodide runtime instead of booting our own. This
+      // page's own document still fully encapsulates the app's HTML/CSS.
+      // Falls through to the standalone boot when no host is reachable
+      // (direct viewing, cross-origin parent, or an old parent bundle).
+      const parentHost = (() => {
+        try {
+          if (window.parent === window) { return null; }
+          return window.parent.Drafter?.getHost?.() ?? null;
+        } catch (error) {
+          return null;
+        }
+      })();
+      if (parentHost) {
+        try {
+          // The host fetches from the PARENT page's URL, so every relative
+          // asset URL must be made absolute against THIS document first.
+          const absolute = (url) => (url ? new URL(url, window.location.href).href : url);
+          const drafterPath = "drafter==2.0.0";
+          await parentHost.attach({
+            window: window,
+            code: document.getElementById('user-code')?.textContent || '',
+            instanceId: window.name ? `embed-${window.name}` : undefined,
+            studentFilename: "basics-6-f6715b71c0a9.py",
+            loadPackagesAutomatically: true,
+            explicitPackageList: null,
+            bootSettings: {
+              pyodideUrl: absolute("https://cdn.jsdelivr.net/pyodide/v0.29.0/full/"),
+              systemPackages: ["bakery", "pillow"],
+              drafterPath: drafterPath && !drafterPath.startsWith("drafter") ? absolute(drafterPath) : drafterPath,
+              mountDrafterLocally: false,
+              verbose: true,
+              modifiedConfiguration: window.DRAFTER_MODIFIED_CONFIGURATION,
+            },
+          });
+          console.log("[Drafter AppServer Scaffolding] Attached to parent page's shared Pyodide runtime.");
+          return;
+        } catch (error) {
+          // e.g. the shared runtime ships a Drafter too old for the attach
+          // protocol. Booting our own runtime still works, so degrade to that.
+          console.warn("[Drafter AppServer Scaffolding] Shared-runtime attach failed; falling back to standalone boot:", error);
+        }
+      }
+      
+      // 1) Load Pyodide
+      await window.Drafter.setupPyodide({
+        pyodideUrl: "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/",
+        systemPackages: ["bakery", "pillow"],
+      }, true);
+
+      // 4) Mount Drafter either locally or remotely based on configuration
+      
+        const url = "drafter==2.0.0";
+        await window.Drafter.mountDrafterRemote(url);
+      
+
+      // Old debugging step to dump the output of drafter directory
+      // await window.Drafter.runStudentCode({code: "import os; print(os.listdir('./drafter/'))"});
+
+      // 4) Patch Drafter
+      await window.Drafter.patchPythonFeatures();
+
+      // 5) Initial run of student's code
+      await window.Drafter.startPyodideAppServerSession({
+        devWsUrl: null,
+        pythonUrl: "basics-6-f6715b71c0a9.py",
+        inlineCode: document.getElementById('user-code')?.textContent || '',
+        studentFilename: "basics-6-f6715b71c0a9.py",
+        loadPackagesAutomatically: true,
+        explicitPackageList: null,
+      });
+
+      // All done!
+      console.log("[Drafter AppServer Scaffolding] Student Code Initialized with Pyodide:");
+    } finally {
+      document.getElementById('--drafter-initial-loading-white-screen').remove();
+    }
+  })();
+  </script>
+
+  </body>
+</html>
