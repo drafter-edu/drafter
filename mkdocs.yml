@@ -334,7 +334,6 @@ plugins:
       workbook/part3/adventure.md: tutorials/quiz-game.md
       workbook/part4/store.md: tutorials/finishing.md
       reference/reference.md: reference/index.md
-      reference/components.md: reference/components/index.md
       reference/flask.md: extend/flask.md
       components/basic/index.md: reference/components/index.md
       components/basic/text_box.md: reference/components/input/textbox.md
