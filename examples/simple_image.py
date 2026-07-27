@@ -1,3 +1,4 @@
+from drafter import route, start_server, Page, Image, Link, set_image_path
 from bakery import assert_equal
 
 from drafter import Image, Link, Page, route, start_server

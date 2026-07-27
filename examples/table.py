@@ -9,6 +9,7 @@ from drafter import (
     hide_debug_information,
     route,
     start_server,
+    assert_equal,
 )
 
 hide_debug_information()
@@ -62,5 +63,9 @@ def finish_adding_dog_page(state: list[Dog], name: str, age: str, breed: str) ->
 def view_dogs_page(state: list[Dog]) -> Page:
     return Page(state, ["Here are the dogs:", Table(state), Button("Go back", index)])
 
+
+assert_equal(
+    Table([[Button("Click me", "index")]]), Table([[Button("Click me", "index")]])
+)
 
 start_server([], reloader=True)

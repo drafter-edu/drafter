@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-07-27
+
+-   Complete rewrite of the entire system. Deployment now happens through Skulpt or Pyodide, with no backend server required.
+-   Matplotlib is no longer preloaded in the browser; it is installed on demand when student code imports it or uses `MatPlotLibPlot`.
+-   New component system, with better attribute handling and more components.
+-   More sophisticated architecture for handling state, navigation, and rendering.
+-   Improved error handling and debugging tools.
+-   New testing framework for writing and running tests against Drafter applications.
 -   Added semantic inline text components: `Strong`, `Emphasis`, `InlineQuotation`, `DefinitionTerm`, `Abbreviation`, `DeletedText`, `InsertedText`, `KeyboardInput`, `MarkedText`, `SampleOutput`, `SmallText`, `Superscript`, `Subscript`, and `InlineVariable`.
 -   Added structural components: `Figure`/`FigureCaption`, `Details` (with `summary`, `open`, and accordion-style `group`), and `DefinitionList` (accepts a dictionary, a dataclass instance, or a list of term/definition pairs).
 -   Added `Meter` (with `min`/`max`/`low`/`high`/`optimum`) and `TimeOutput` (with `datetime`) output components.
@@ -20,14 +28,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Added the `--bug-report` system route, which explains when a bug report is appropriate (actual Drafter bugs or limitations, not homework help) and provides a button that downloads the same bug-report bundle as the debug panel's Help menu.
 -   Outside production mode, errors are now reported to the local development server and appended (with bug-report-style environment details) to a shared, size-capped `drafter-debug.log` JSON Lines file next to the student's code.
 
-## [2.0.0] - 2026-07-24
+## [1.9.5] - 2025-12-05
 
--   Complete rewrite of the entire system. Deployment now happens through Skulpt or Pyodide, with no backend server required.
--   Matplotlib is no longer preloaded in the browser; it is installed on demand when student code imports it or uses `MatPlotLibPlot`.
--   New component system, with better attribute handling and more components.
--   More sophisticated architecture for handling state, navigation, and rendering.
--   Improved error handling and debugging tools.
--   New testing framework for writing and running tests against Drafter applications.
+* Images inside of Divs and other elements now have the correct path
+* Fixed issue with images not rendering in test deployments.
+
+## [1.9.4] - 2025-12-05
+
+* Empty image uploads now provide a None value instead of an error
+* D3 is now included in the deployed Skulpt version
+
+## [1.9.3] - 2025-12-04
+
+* The `Page` class now supports an optional `js` parameter to add custom JS to the page.
+* File writing now works correctly in deployed Drafter (only writes to LocalStorage).
+
+## [1.9.2] - 2025-12-02
+
+* Fixed a related bug with deploying additional files
+
+## [1.9.1] - 2025-12-02
+
+* Fixed bug with deploying additional files
+
+## [1.9.0] - 2025-11-30
+
+* Footer can now be disabled (thanks to @BJT207)
+* Documentation for using Drafter in VS Code
+* New `set_server_setting` and `do_not_start_server` functions to control server settings
+* Fix for `additional-files` cli option to correctly collect ALL files and not just the last one
+
+## [1.8.9] - 2025-11-23
+
+* Fixes for `repr` of rows, text, buttons, headers, and many other text elements.
+* Explicit change for Gemini URL
+
+## [1.8.8] - 2025-11-19
+
+* Fixed issue with textbox contents not getting encoded correctly in the HTML
+* Fixed issue with deploys defaulting to the old `'website'` directory instead of top-level
+* Fixed the ability to control the deployment folder for images with `set_image_path` function
+* Improved compatibility of new LLM Gemini call system with Skulpt
+* Fixed issue with tables not testing correctly
+
+## [1.8.7] - 2025-10-30
+
+* Automatically make planning text into links for set_site_information
+* Handle popstate in the deployed Skulpt version
+* Fixed embarrassing but funny licensing issue
 
 ## [1.8.6] - 2025-10-10
 

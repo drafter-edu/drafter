@@ -1,6 +1,5 @@
-from string import printable
-
 from drafter import *
+from string import printable
 
 
 @dataclass
