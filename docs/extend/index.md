@@ -27,13 +27,23 @@ something login-shaped.
 - **[Third-party libraries](packages.md)**: using matplotlib,
   pandas, requests, and other packages, what loads automatically,
   and what cannot work in a browser.
+- **[Deploy with GitHub Actions](github-actions.md)**: build the
+  deployment machinery yourself, from an empty repository to a
+  site that republishes on every push.
 - **[Security honestly](security.md)**: exactly which protections
   exist (very few), why that is fine for course projects, and
   what would require a real backend.
-
-Four more pages are planned but not yet written: JavaScript
-interop, building your own components, performance, and moving on
-to Flask.
+- **[JavaScript interop](javascript.md)**: the `js` module and
+  the other doors to the browser, for the feature no component
+  covers.
+- **[Build your own components](custom-components.md)**: three
+  levels of packaging repeated page furniture, from helper
+  functions to the `RenderPlan` API.
+- **[Performance](performance.md)**: the four real causes of a
+  slow Drafter app, and what fixes each.
+- **[Moving on to Flask](flask.md)**: the bridge to a backend
+  framework, once your project needs what Drafter deliberately
+  lacks.
 
 ## Fair warning
 

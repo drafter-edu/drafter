@@ -104,6 +104,5 @@ planned feature and watch it go green when the feature lands.
 
 Collect the convicted-and-fixed starter file: three failing
 tests turned green tells the whole story. On the final project,
-grade for one honest assertion per feature (the
-[rubric notes](../classroom.md) suggest weightings), which makes
-this session's habit worth points for the rest of the term.
+grade for one honest assertion per feature, which makes this
+session's habit worth points for the rest of the term.

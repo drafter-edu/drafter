@@ -218,13 +218,13 @@ nav:
   - Project ideas: teach/project-ideas.md
   - Student misconceptions: teach/student-misconceptions.md
   - Expert misconceptions: teach/expert-misconceptions.md
-  - Classroom logistics: teach/classroom.md
 - Extend:
   - extend/index.md
   - Python in the browser: extend/pyodide.md
   - JavaScript interop: extend/javascript.md
   - Build your own components: extend/custom-components.md
   - Third-party libraries: extend/packages.md
+  - Deploy with GitHub Actions: extend/github-actions.md
   - Performance: extend/performance.md
   - Security honestly: extend/security.md
   - Moving on to Flask: extend/flask.md

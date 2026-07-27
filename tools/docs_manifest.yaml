@@ -1442,12 +1442,6 @@ pages:
     audience: T
     priority: P1
     outcome: Correct experienced-developer assumptions about Drafter.
-  - path: teach/classroom.md
-    title: Classroom logistics
-    template: how-to
-    audience: T
-    priority: P2
-    outcome: Run Drafter robustly in class.
 
   # ---- Extend (§5.11) ----
   - path: extend/index.md
@@ -1478,6 +1472,13 @@ pages:
     audience: S
     priority: P2
     outcome: Create reusable components.
+  - path: extend/github-actions.md
+    title: Deploy with GitHub Actions
+    template: how-to
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Set up a repository that rebuilds and deploys your site on every push.
   - path: extend/packages.md
     title: Third-party libraries
     template: how-to

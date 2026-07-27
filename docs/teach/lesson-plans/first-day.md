@@ -32,9 +32,7 @@ a longer free-play block.
 
 Students can write and call functions and have seen a dataclass
 at least once. Drafter is installed, or the first ten minutes
-absorb [installation](../../start/install.md) (having it
-preinstalled on lab machines buys back a third of the session;
-see [Classroom logistics](../classroom.md)).
+absorb [installation](../../start/install.md).
 
 ## Materials
 

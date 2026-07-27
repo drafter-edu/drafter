@@ -40,9 +40,10 @@ that situation, and notes where your course might differ.
 - **[Expert misconceptions](expert-misconceptions.md)**: the
   wrong assumptions experienced web developers (and instructors)
   bring, mostly by analogy to Flask.
-
-Three more pages are planned but not yet written: lesson plans,
-project ideas, and classroom logistics.
+- **[Lesson plans](lesson-plans/index.md)**: three ready-to-run
+  session plans (first day, forms and state, testing).
+- **[Project ideas](project-ideas.md)**: sixteen assignable
+  ideas rated by scope, plus the anti-patterns to redirect.
 
 ## How the student docs are organized
 

@@ -72,5 +72,4 @@ Whatever the idea, the same rubric skeleton fits: a working
 deployed app (the [deploy guide](../your-project/deploy/index.md)
 makes this fair to require), one test per feature, a state
 design that matches the data, and an honest interface (labels,
-empty states, no fake security). [Classroom logistics](classroom.md)
-carries the weightings and submission mechanics.
+empty states, no fake security).
