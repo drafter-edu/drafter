@@ -299,6 +299,8 @@ class DrafterCodeBlockPlugin(BasePlugin):
             "--production" if self.config["production"] else "",
             "--subtle-debug-entry" if self.config["subtle_debug_entry"] else "",
             "--verbose",
+            "--console_mode",
+            "hover",
         ]
         if self.config["shared_runtime"]:
             command.append("--shared-runtime")

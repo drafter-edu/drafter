@@ -236,7 +236,10 @@ nav:
 markdown_extensions:
 # hl_lines support on fences (used by the drafter-codeblocks plugin).
 - pymdownx.highlight
+- pymdownx.inlinehilite
+- pymdownx.keys
 - pymdownx.superfences
+- pymdownx.details
 # Callout boxes ("!!! note") used across templates.
 - admonition
 # Grid cards on index pages and attribute hooks for the design system.
