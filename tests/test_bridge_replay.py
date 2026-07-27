@@ -165,6 +165,53 @@ class TestReplayById:
         assert not events_of_type(captured_events, "bridge.replay_unknown_request")
 
 
+class TestToggleAboutPage:
+    """The Ctrl+I hotkey flips between the --about system route and index,
+    judging the current page from the navigator's last request."""
+
+    def make_bridge(self):
+        navigator, dispatched = make_navigator()
+        fake_bridge = SimpleNamespace(navigator=navigator)
+        return fake_bridge, navigator, dispatched
+
+    def test_goes_to_about_before_any_request(self):
+        fake_bridge, _, dispatched = self.make_bridge()
+
+        ClientBridge.toggle_about_page(fake_bridge)
+
+        assert dispatched[-1].url == "--about"
+
+    def test_goes_to_about_from_a_regular_page(self):
+        fake_bridge, navigator, dispatched = self.make_bridge()
+        navigator.navigate(Request("link", "guess", {"answer": 4}, {}, ""))
+
+        ClientBridge.toggle_about_page(fake_bridge)
+
+        assert dispatched[-1].url == "--about"
+
+    def test_returns_to_index_from_the_about_page(self):
+        fake_bridge, navigator, dispatched = self.make_bridge()
+        navigator.navigate(Request("link", "guess", {}, {}, ""))
+        ClientBridge.toggle_about_page(fake_bridge)
+        assert dispatched[-1].url == "--about"
+
+        ClientBridge.toggle_about_page(fake_bridge)
+
+        assert dispatched[-1].url == "index"
+
+    def test_round_trips_back_to_about(self):
+        fake_bridge, _, dispatched = self.make_bridge()
+        ClientBridge.toggle_about_page(fake_bridge)
+        ClientBridge.toggle_about_page(fake_bridge)
+        ClientBridge.toggle_about_page(fake_bridge)
+
+        assert [request.url for request in dispatched] == [
+            "--about",
+            "index",
+            "--about",
+        ]
+
+
 class TestClientBridgeReplayRequest:
     """ClientBridge.replay_request only touches self.navigator, so it can be
     exercised with a minimal stand-in for the bridge."""

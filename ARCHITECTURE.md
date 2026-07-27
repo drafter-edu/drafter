@@ -399,8 +399,9 @@ configuration, and `cli.py` basically just runs the student's file. (The old `do
    5. `ClientBridge.setup_events` attaches handlers for page interactivity and page-wide navigation
       (`popstate`, `drafter-navigate`, `drafter-toggle-frame`, `drafter-toggle-debug-mode`,
       `drafter-evict-persistent`).
-   6. A hotkey binding is registered to toggle the Debug Menu: **Ctrl/Cmd + double-press `Q`**
-      (within 600ms).
+   6. Hotkey bindings are registered (each triggered by **Ctrl/Cmd + double-press** within
+      600ms): `Q` toggles the Debug Menu, and `I` toggles between the About page (`--about`)
+      and the index.
 9. Starting Phase
    1. The `ClientServer` is started (`ClientServer.do_start`).
    2. The state is initialized from the initial state.

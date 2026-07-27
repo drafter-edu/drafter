@@ -146,7 +146,8 @@ class ClientBridge:
         registers the Drafter custom events (toggle-frame, toggle-debug-mode,
         evict-persistent, navigate, replay, save/load-state, set-theme) and
         the browser popstate event, binds the "Q" hotkey to debug-mode
-        toggling, and mounts the subtle production debug-entry button. Every
+        toggling and the "I" hotkey to About-page toggling, and mounts the
+        subtle production debug-entry button. Every
         registered handler runs behind hooks.activate, which pins this
         instance's server as "current" so telemetry raised inside a handler
         routes to this instance's event bus.
@@ -172,6 +173,7 @@ class ClientBridge:
             },
             {
                 "Q": hooks.toggle_debug_mode,
+                "I": self.toggle_about_page,
             },
             activate=hooks.activate,
         )
@@ -217,6 +219,26 @@ class ClientBridge:
         if not isinstance(data, dict):
             data = {}
         self.navigator.goto(str(url), data, action="link")
+
+    def toggle_about_page(self) -> None:
+        """Toggle between the About page and the index (the "I" hotkey).
+
+        Navigates to the ``--about`` system route, or back to the index
+        when the About page is already the current page (judged from the
+        navigator's most recent request).
+        """
+        # Imported lazily like ClientServer.register_system_routes: the
+        # system-routes module pulls in the default route handlers (and
+        # through them the ClientServer stack) at import time.
+        from drafter.router.system_routes import (
+            _SYSTEM_ABOUT_ROUTE,
+            _SYSTEM_INDEX_ROUTE,
+        )
+
+        last = self.navigator.last_request
+        on_about_page = last is not None and last.url == _SYSTEM_ABOUT_ROUTE
+        target = _SYSTEM_INDEX_ROUTE if on_about_page else _SYSTEM_ABOUT_ROUTE
+        self.navigator.goto(target)
 
     def replay_request(self, event) -> None:
         """Replay a specific past request (from the debug history's Revisit).
