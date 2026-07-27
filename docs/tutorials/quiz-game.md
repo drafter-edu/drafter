@@ -124,6 +124,12 @@ def restart(state: State) -> Page:
     return index(state)
 
 
+assert_state(check(State(QUESTIONS, 0, 0), "a cat"),
+             State(QUESTIONS, 1, 1))
+assert_state(check(State(QUESTIONS, 0, 0), "a dog"),
+             State(QUESTIONS, 1, 0))
+assert_has(results(State(QUESTIONS, 3, 3)), "You scored 3 out of 3.")
+
 start_server(State(QUESTIONS, 0, 0))
 ```
 
@@ -393,12 +399,6 @@ def restart(state: State) -> Page:
     state.position = 0
     return index(state)
 
-
-assert_state(check(State(QUESTIONS, 0, 0), "a cat"),
-             State(QUESTIONS, 1, 1))
-assert_state(check(State(QUESTIONS, 0, 0), "a dog"),
-             State(QUESTIONS, 1, 0))
-assert_has(results(State(QUESTIONS, 3, 3)), "You scored 3 out of 3.")
 
 start_server(State(QUESTIONS, 0))
 ```

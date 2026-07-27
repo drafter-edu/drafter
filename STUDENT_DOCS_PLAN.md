@@ -56,7 +56,7 @@ Consequences for every page:
 7. **Honest about security and persistence.** [I][R] No page implies that client-side validation, hidden source, browser storage, or a simulated login protects anything. The login example carries this disclaimer today [R]; the rewrite systematizes it.
 8. **Accessible by default.** [I] WCAG 2.2 AA is a release requirement for the site shell, the embedded editors and demos, and the content (alt text, contrast, keyboard operation, reduced motion, no color-only meaning).
 9. **Docs are versioned, tested software.** [I] Every canonical example executes in CI; coverage of `__all__` is machine-checked; template completeness is machine-checked; links and accessibility are checked on every build.
-10. **Calm, professional, friendly tone.** [I] Plain language, stable technical vocabulary with plain-language glosses, no "easy/obvious/just", no em dashes, minimal emoji, no unnecessary repetition within a page.
+10. **Calm, professional, friendly tone.** [I] Plain language, stable technical vocabulary with plain-language glosses, no "easy/obvious/just", no em dashes, minimal emoji, no unnecessary repetition within a page. Prose must read as a thoughtful instructor writing, never as generated or compressed boilerplate; the binding checklist of banned patterns and the model rewrite live in §18 "Prose standard (2026-07-27)".
 11. **Example code is model code.** [I] Names are accurate, clear, concise, and PEP 8-conventional; functions have one responsibility; helper functions are used where they clarify; tests use Drafter's assertions (`assert_state`, `assert_content`, `assert_has`, `assert_in`) and avoid brittle whole-page snapshots unless the point is regression testing.
 
 ---
@@ -1031,5 +1031,27 @@ P1 round 4 (2026-07-27): **Your Project P1 complete**: choose-an-idea (eight com
 Gates after round 4: lint 194 clean, 167 fence tests, strict build green.
 
 P1 still remaining: component pages dateinput, timeinput, datetimeinput, text (text/text.md), pre, matplotlibplot, timer, map, currentlocation, camera; teach P1 (index, why-drafter, big-ideas, beyond-the-basics, both misconception pages — remember `search: {exclude: true}` for T/D audience); extend P1 (index, pyodide, packages, security); dev P1 (index, architecture, api).
+
+### Prose standard (2026-07-27)
+
+A full editing pass ran over all 194 pages (~122 files changed, committed in "Massive editing work to humanize some of the documentation prose") to remove prose that sounded formulaic, compressed, or machine-generated. The requirements below are binding for all future student-facing writing and for reviewing any drafted page. They extend principle §3.10.
+
+**Voice.** Write as a thoughtful instructor: friendly, professional, clear, and technically precise. Use complete sentences and logically connected paragraphs. Explain the relationships between actions, state changes, and outcomes rather than listing behaviors. Prefer clear transitions over chains of clauses. Use established terminology consistently and define terms students may not know. Keep sentences concise but vary their length and structure. Use contractions sparingly, and lists only when they genuinely improve comprehension. Preserve concrete examples and details. State errors and constraints neutrally. Do not drift bureaucratic, academic, promotional, or chatty.
+
+**Patterns that must not appear** (rewrite on sight):
+
+- Repeated short punchy clauses, or semicolon-heavy sentences that compress several behaviors into one ("Buying spends coins, lowers stock, and adds the item to what you own; sold-out items lose their button").
+- Colon-led fragment summaries ("A little shop: items with prices and stock, a purse of coins, and a Buy button per item").
+- Lists of actions written as fragments instead of complete explanations, including one-fragment link descriptions ("- [Foo](foo.md): the concept.").
+- Compression idioms: "one route handles everything", "told apart by", "gets refused", "loses its button".
+- Formulaic triples ("X does Y, lowers Z, and adds A").
+- Dramatic contrasts, slogans, epigrams, or marketing phrasing ("the two rules of commerce: you pay, and stock drops"; "a habit worth stealing").
+- "simple", "just", "merely", "straightforward", "easy", "obvious", or anything else implying a difficult concept should be trivial.
+- Vague "this / that / it / things" where the referent is not immediately clear.
+- Anthropomorphized code where a direct technical statement is clearer ("the app wants to remember", "inputs fight over one parameter").
+
+**Model rewrite.** The "What it does" section of examples/shop.md is the canonical before/after: lead with what the reader sees on the page, then explain what each action changes and why, then give the routing detail, all in complete sentences.
+
+Gates after the pass: lint 194 clean, 167 fence tests green, strict build green. Fixed en route: the humanize commit had placed the three finished-app tests inside quiz-game.md's Step 3 fence, where `State` has no `score` field and no `results` route exists; they were moved into the top finished-app fence, which also makes Step 4's "its last lines before `start_server` are three tests" claim true. Editorial flags still open for author review: colors.md body duplicated wholesale; virtual-pet.md says `State(5, 5)` "names the fields" (positional call); quiz-game.md Step 1 says Step 3 gives running-out-of-questions meaning (it is Step 2); first-app.md ten-vs-twenty-minute estimates; start-server.md vs testing-functions.md on whether failing assertions stop the site; testing-functions.md `quiet` vs `report_success`; route-not-found.md claims the message distinguishes its three causes; image.md description omits the PIL source its Type column allows; add/pictures.md upload recipe pairs `portrait: Picture` state field with `new_portrait: Picture | None` parameter.
 
 
