@@ -114,6 +114,7 @@ def index(state: State) -> Page:
     return Page(state, [
         "Who is the hero of the story?",
         TextBox("hero"),
+        "\n",
         Button("Tell the story", "story")
     ])
 
@@ -122,7 +123,7 @@ def index(state: State) -> Page:
 def story(state: State, hero: str) -> Page:
     state.hero = hero
     return Page(state, [
-        "Once upon a time, there was " + state.hero + ".",
+        "Once upon a time, there was " + state.hero + ".\n",
         Button("Start over", "index")
     ])
 
@@ -156,10 +157,11 @@ def index(state: State) -> Page:
     return Page(state, [
         "A hero:",
         TextBox("hero"),
-        "A place:",
+        "\nA place:",
         TextBox("place"),
-        "An object:",
+        "\nAn object:",
         TextBox("thing"),
+        "\n",
         Button("Tell the story", "story")
     ])
 
@@ -172,7 +174,7 @@ def story(state: State, hero: str, place: str, thing: str) -> Page:
     return Page(state, [
         "Long ago, " + state.hero + " traveled to " + state.place + ".",
         "Nobody there had ever seen " + state.thing + " before.",
-        "By sunset, " + state.hero + " was famous.",
+        "By sunset, " + state.hero + " was famous.\n",
         Button("Change the words", "index")
     ])
 
@@ -208,10 +210,11 @@ def index(state: State) -> Page:
     return Page(state, [
         "A hero:",
         TextBox("hero", state.hero),
-        "A place:",
+        "\nA place:",
         TextBox("place", state.place),
-        "An object:",
+        "\nAn object:",
         TextBox("thing", state.thing),
+        "\n",
         Button("Tell the story", "story")
     ])
 
@@ -224,7 +227,7 @@ def story(state: State, hero: str, place: str, thing: str) -> Page:
     return Page(state, [
         "Long ago, " + state.hero + " traveled to " + state.place + ".",
         "Nobody there had ever seen " + state.thing + " before.",
-        "By sunset, " + state.hero + " was famous.",
+        "By sunset, " + state.hero + " was famous.\n",
         Button("Change the words", "index")
     ])
 
@@ -260,10 +263,11 @@ def index(state: State) -> Page:
     return Page(state, [
         "A hero:",
         TextBox("hero", state.hero),
-        "A place:",
+        "\nA place:",
         TextBox("place", state.place),
-        "An object:",
+        "\nAn object:",
         TextBox("thing", state.thing),
+        "\n",
         Button("Tell the story", "story")
     ])
 
@@ -276,7 +280,7 @@ def story(state: State, hero: str, place: str, thing: str) -> Page:
     return Page(state, [
         "Long ago, " + state.hero + " traveled to " + state.place + ".",
         "Nobody there had ever seen " + state.thing + " before.",
-        "By sunset, " + state.hero + " was famous.",
+        "By sunset, " + state.hero + " was famous.\n",
         Button("Tell it differently", "another_story"),
         Button("Change the words", "index")
     ])
@@ -287,7 +291,7 @@ def another_story(state: State) -> Page:
     return Page(state, [
         "Deep in " + state.place + ", something glittered.",
         "It was " + state.thing + ", lost for a hundred years.",
-        "Only " + state.hero + " knew what it could do.",
+        "Only " + state.hero + " knew what it could do.\n",
         Button("Change the words", "index")
     ])
 

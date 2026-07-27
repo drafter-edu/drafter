@@ -71,6 +71,7 @@ def index(state: State) -> Page:
     return Page(state, [
         "What is your name?",
         TextBox("new_name"),
+        "\n",
         Button("Greet me", "greet")
     ])
 
@@ -79,7 +80,7 @@ def index(state: State) -> Page:
 def greet(state: State, new_name: str) -> Page:
     state.name = new_name
     return Page(state, [
-        "Hello, " + state.name + "!",
+        "Hello, " + state.name + "!\n",
         Button("Start over", "index")
     ])
 
@@ -110,10 +111,11 @@ class State:
 @route
 def index(state: State) -> Page:
     return Page(state, [
-        "The last total was " + str(state.total) + ".",
+        "The last total was " + str(state.total) + ".\n",
         "Pick two whole numbers to add:",
         TextBox("first", 3),
         TextBox("second", 4),
+        "\n",
         Button("Add them", "add")
     ])
 

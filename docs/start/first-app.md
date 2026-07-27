@@ -197,7 +197,7 @@ class State:
 @route
 def index(state: State) -> Page:
     return Page(state, [
-        "Current count: " + str(state.count),
+        "Current count: " + str(state.count) + "\n",
         Button("+1", "increment"),
         Button("-1", "decrement"),
         Button("Reset", "reset_count")
@@ -253,7 +253,7 @@ class State:
 @route
 def index(state: State) -> Page:
     return Page(state, [
-        "Current count: " + str(state.count),
+        "Current count: " + str(state.count) + "\n",
         Button("+1", "increment"),
         Button("Reset", "reset_count")
     ])

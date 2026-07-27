@@ -69,7 +69,7 @@ class State:
 @route
 def index(state: State) -> Page:
     return Page(state, [
-        "Score: " + str(state.score),
+        "Score: " + str(state.score) + "\n",
         Button("Score a point", "add_point")
     ])
 
@@ -122,7 +122,7 @@ def add_duck(state: State) -> Page:
     return index(state)
 
 
-start_server(State([Pet("Dog", "woof"), Pet("Cat", "meow")]))
+start_server(State([Pet("Ada", "woof"), Pet("Captain", "meow")]))
 ```
 
 ## What this means for your code

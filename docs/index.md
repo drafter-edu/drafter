@@ -36,7 +36,7 @@ class State:
 @route
 def index(state: State) -> Page:
     return Page(state, [
-        "You have clicked " + str(state.clicks) + " times.",
+        "You have clicked " + str(state.clicks) + " times.\n",
         Button("Click me!", "add_click"),
     ])
 

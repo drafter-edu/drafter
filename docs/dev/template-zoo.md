@@ -65,7 +65,7 @@ class State:
 @route
 def index(state: State) -> Page:
     return Page(state, [
-        "The zoo says: " + state.message,
+        "The zoo says: " + state.message + "\n",
         Button("Visit again", "index"),
     ])
 

@@ -133,6 +133,10 @@ From STUDENT_DOCS_PLAN.md §3 and §6, the short version:
 - No keyword arguments in basic examples and tutorials: `State(5, 5)`,
   not `State(hunger=5, energy=5)`. Keywords appear only for genuinely
   optional parameters.
+- Drafter does not put content on new lines by default. Use `"\n"` where
+  a visual break belongs: append to the text before a button row
+  (`"... was famous.\n"`), or prefix labels (`"\nA place:"`), or use a
+  standalone `"\n"` item before a button.
 - Names are plain-English PEP 8; the canonical name glossary keeps
   `State`, `index`, `state` consistent site-wide.
 - Tests in examples use `assert_state`, `assert_has`, and `assert_in`, not
