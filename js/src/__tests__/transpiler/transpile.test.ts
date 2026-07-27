@@ -9,7 +9,7 @@ import COMPONENT_DOCUMENT_PYTHON from "./documents/component_document.py";
 import { parse, unparse } from "py-ast";
 
 function normalizePython(code: string) {
-	return unparse(parse(code));
+	return unparse(parse(code.replace(/\r\n?/g, "\n")));
 }
 
 describe("parseHtmlCss", () => {
