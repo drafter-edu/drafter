@@ -1,0 +1,1910 @@
+@import url("./drafter_base.css");
+
+body {
+	height: 100vh;
+}
+
+#drafter-root-- {
+	height: 100%;
+}
+
+.drafter-site-- {
+	flex-direction: column;
+	display: flex;
+	height: 100%;
+}
+
+.drafter-frame-- {
+	max-width: 100vw;
+	overflow: auto;
+	padding: 0em;
+	flex-grow: 1;
+}
+
+.drafter-body-- {
+	border: 1px solid lightgrey;
+}
+
+.drafter-hidden-- {
+	display: none !important;
+}
+
+.drafter-body--.drafter-body-frame-hidden-- {
+	border: 0;
+}
+
+.drafter-subtle-debug-entry-- {
+	display: none !important;
+}
+
+.drafter-form-- {
+	flex: 1;
+	display: flex;
+	flex-direction: row;
+}
+
+.drafter-padding-h-- {
+	flex: 0 0 1em;
+	background-color: white;
+}
+
+.drafter-padding-v-- {
+	flex: 0 0 1em;
+	background-color: white;
+}
+
+.drafter-header-- {
+	background-color: #eee;
+	border: 1px solid lightgrey;
+	border-bottom: 0px;
+	padding-left: 1em;
+	font-weight: bold;
+
+	font-size: 1.25em;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+.drafter-header-- .drafter-header-bar {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.drafter-header-- .drafter-header-identity {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5em;
+	min-width: 0;
+}
+
+.drafter-header-- .drafter-header-favicon {
+	width: 1.2em;
+	height: 1.2em;
+	flex: 0 0 auto;
+	object-fit: contain;
+}
+
+/* Dropdown menu bars: the frame header (Navigate / View / Edit /
+   Save-Load / Help) and the debug panel's own top-right View menu share
+   these rules, hence the :is() scoping. */
+:is(.drafter-header--, .drafter-debug--) .drafter-header-menubar {
+	margin-left: auto;
+	margin-right: 1em;
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	flex-wrap: wrap;
+	font-size: 0.8em;
+	font-weight: normal;
+}
+
+:is(.drafter-header--, .drafter-debug--) .drafter-menu {
+	position: relative;
+}
+
+/* Middle ground between plain text and a full button: quiet by default
+   (transparent border keeps the geometry stable), button-like on hover,
+   filled while the menu is open. The caret is the "I'm a dropdown" cue. */
+:is(.drafter-header--, .drafter-debug--) .drafter-menu-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35em;
+	margin: 2px 1px;
+	padding: 5px 10px;
+	cursor: pointer;
+	background: none;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	color: black;
+	font: inherit;
+}
+
+:is(.drafter-header--, .drafter-debug--) .drafter-menu-button:hover {
+	background-color: #e3eefa;
+	border-color: #b7cfe6;
+}
+
+:is(.drafter-header--, .drafter-debug--)
+	.drafter-menu-button[aria-expanded="true"] {
+	background-color: #3a7db8;
+	border-color: #3a7db8;
+	color: white;
+}
+
+:is(.drafter-header--, .drafter-debug--) .drafter-menu-caret {
+	font-size: 0.7em;
+	color: #506784;
+}
+
+:is(.drafter-header--, .drafter-debug--)
+	.drafter-menu-button:hover
+	.drafter-menu-caret {
+	color: inherit;
+}
+
+:is(.drafter-header--, .drafter-debug--)
+	.drafter-menu-button[aria-expanded="true"]
+	.drafter-menu-caret {
+	color: inherit;
+}
+
+:is(.drafter-header--, .drafter-debug--) .drafter-menu-popup {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	z-index: 11000;
+	min-width: 13em;
+	display: flex;
+	flex-direction: column;
+	background-color: white;
+	border: 1px solid #aaa;
+	border-radius: 4px;
+	box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.25);
+	padding: 4px 0;
+}
+
+/* The display:flex above would otherwise defeat the [hidden] attribute
+   (the UA's [hidden]{display:none} loses to any authored display). */
+:is(.drafter-header--, .drafter-debug--) .drafter-menu-popup[hidden] {
+	display: none;
+}
+
+:is(.drafter-header--, .drafter-debug--) .drafter-menu-item {
+	display: block;
+	width: 100%;
+	text-align: left;
+	padding: 6px 12px;
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: black;
+	font: inherit;
+	white-space: nowrap;
+}
+
+:is(.drafter-header--, .drafter-debug--)
+	.drafter-menu-item:hover:not([disabled]) {
+	background-color: #e3eefa;
+}
+
+:is(.drafter-header--, .drafter-debug--) .drafter-menu-item[disabled] {
+	color: #999;
+	cursor: default;
+}
+
+:is(.drafter-header--, .drafter-debug--) .drafter-menu-item-suffix {
+	color: #506784;
+	font-size: 0.9em;
+}
+
+:is(.drafter-header--, .drafter-debug--)
+	.drafter-menu-item[disabled]
+	.drafter-menu-item-suffix {
+	color: inherit;
+}
+
+:is(.drafter-header--, .drafter-debug--) .drafter-menu-separator {
+	border-top: 1px solid #ddd;
+	margin: 4px 0;
+}
+
+.drafter-footer-- {
+	background-color: #eee;
+	border: 1px solid lightgrey;
+	border-top: 0px;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
+	padding-left: 1em;
+	font-weight: bold;
+
+	font-size: 0.9em;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+.drafter-footer-- .drafter-footer-bar {
+	display: flex;
+	flex-direction: row;
+
+	align-items: baseline;
+	flex-wrap: nowrap;
+	gap: 0.25rem;
+}
+
+.drafter-footer-- .drafter-footer-route {
+	font-family: "Courier New", Courier, monospace;
+	background-color: white;
+	padding: 2px 4px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	flex: 1 1 auto;
+	min-width: 0;
+	white-space: normal;
+	word-break: break-all;
+}
+
+.drafter-footer-- .drafter-footer-label {
+	flex: 0 0 auto;
+}
+
+.drafter-footer-- .drafter-footer-route.truncate {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.drafter-footer-- .drafter-footer-status {
+	flex: 0 0 auto;
+	font-size: 0.85em;
+	padding: 2px 6px;
+	border: 1px solid #b07d2a;
+	border-radius: 4px;
+	background-color: #fff7e6;
+	cursor: pointer;
+}
+
+.drafter-footer-- .drafter-footer-status.has-errors {
+	border-color: #b02a2a;
+	background-color: #fdeaea;
+}
+
+.drafter-footer-- .drafter-footer-status:hover {
+	background-color: #f5e2c8;
+}
+
+.drafter-footer-- .drafter-footer-status.has-errors:hover {
+	background-color: #f5c8c8;
+}
+
+.drafter-footer-- .drafter-footer-persist-button,
+.drafter-footer-- .drafter-footer-persist-reveal,
+.drafter-footer-- .drafter-footer-persist-evict {
+	flex: 0 0 auto;
+	font-size: 0.85em;
+	padding: 2px 6px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	background-color: white;
+	cursor: pointer;
+}
+
+.drafter-footer-- .drafter-footer-persist-button:hover,
+.drafter-footer-- .drafter-footer-persist-reveal:hover,
+.drafter-footer-- .drafter-footer-persist-evict:hover {
+	background-color: #ddd;
+}
+
+.drafter-footer-- .drafter-footer-persist-panel {
+	margin-top: 0.5em;
+	margin-right: 1em;
+	padding: 0.5em;
+	border: 1px dashed #aaa;
+	border-radius: 4px;
+	background-color: white;
+	font-weight: normal;
+}
+
+.drafter-footer-- .drafter-footer-persist-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-weight: bold;
+	margin-bottom: 0.25em;
+}
+
+.drafter-footer-- .drafter-footer-persist-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.drafter-footer-- .drafter-footer-persist-item {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 2px 0;
+}
+
+.drafter-footer-- .drafter-footer-persist-key {
+	font-family: "Courier New", Courier, monospace;
+	background-color: #f7f7f7;
+	padding: 1px 4px;
+	border-radius: 3px;
+	word-break: break-all;
+}
+
+.drafter-footer-- .drafter-footer-persist-empty {
+	color: #777;
+	font-style: italic;
+}
+
+/* When revealed from the debug panel, make the parked components visibly
+   distinct so it is clear they are not part of the page. */
+.drafter-footer-- .drafter-persist--:not([hidden]) {
+	display: block;
+	margin: 0.5em 1em 0.5em 0;
+	padding: 0.5em;
+	border: 2px dashed #d69e2e;
+	border-radius: 4px;
+	background-color: #fffbe6;
+}
+
+@media print {
+	.drafter-footer-- .drafter-footer-persist-panel,
+	.drafter-footer-- .drafter-footer-persist-button {
+		display: none;
+	}
+}
+
+/*.reset-button--,
+.about-button-- {
+    float: right;
+    cursor: pointer;
+    background-color: white;
+    padding: 4px;
+    text-decoration: none;
+    color: black;
+}*/
+
+.drafter-padding-v--,
+.drafter-padding-h-- {
+	background-color: #cfe8ff;
+	background-image:
+		linear-gradient(#9bc3e69f 1px, transparent 1px),
+		linear-gradient(90deg, #9bc3e6ab 1px, transparent 1px);
+	background-size: 22px 22px;
+}
+
+.drafter-debug-- {
+	all: unset;
+	flex-grow: 1;
+	background-color: #cfe8ff;
+	background-image:
+		linear-gradient(#9bc3e69f 1px, transparent 1px),
+		linear-gradient(90deg, #9bc3e6ab 1px, transparent 1px);
+	background-size: 22px 22px;
+	color: #0f2a45;
+	padding: 20px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1em;
+	/* border: 1px solid #ccc; */
+}
+
+.drafter-debug-- h1 {
+	font-size: 2em;
+	margin-top: 0em;
+	margin-bottom: 0.5em;
+}
+
+.drafter-debug-- h4 {
+	font-size: 1.25em;
+	margin-top: 0em;
+	margin-bottom: 0em;
+}
+
+.drafter-debug-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 14px;
+	margin-bottom: 10px;
+	background: rgba(255, 255, 255, 0.8);
+	border: 2px solid #3a7db8;
+	border-bottom-width: 1px;
+	border-radius: 6px 6px 0 0;
+	box-shadow: 2px 2px 0 #9bc3e6;
+}
+
+.drafter-debug-header-left {
+	gap: 8px;
+	margin-bottom: 4px;
+
+	background: rgba(255, 255, 255, 0.8);
+	border: 2px solid #3a7db8;
+	border-left: 2px solid #3a7db8;
+	border-right: 2px solid #3a7db8;
+	padding: 8px 14px;
+}
+
+.drafter-debug-header-icon {
+	font-size: 1.4rem;
+}
+
+.drafter-debug-header-title {
+	font-size: 1.5rem;
+	color: #0f2a45;
+	font-weight: bold;
+}
+
+.drafter-debug-header-subtitle {
+	font-size: 0.75rem;
+	color: #506784;
+}
+
+.drafter-debug-- .drafter-debug-button-- {
+	margin-left: auto;
+	padding: 4px 8px;
+	cursor: pointer;
+	background-color: white;
+	text-decoration: none;
+	color: black;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+.drafter-debug-- .drafter-debug-button--:hover {
+	background-color: #ddd;
+}
+
+/* Debug panel header row: title on the left, the panel's own View menu on
+   the right (it must survive the frame being hidden). */
+.drafter-debug-- .drafter-debug-header-top {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 0.5em;
+}
+
+/* Debug panel tab bar: a segmented control — pill buttons grouped inside
+   one shared rounded track, so they clearly belong together while staying
+   visually detached from the panel area below. */
+.drafter-debug-- .drafter-debug-tabbar {
+	margin-top: 0.75em;
+	margin-bottom: 0.25em;
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 4px;
+	flex-wrap: wrap;
+	padding: 4px;
+	background-color: #dce8f5;
+	border: 1px solid #9bc3e6;
+	border-radius: 999px;
+	align-self: flex-start;
+}
+
+.drafter-debug-- .drafter-debug-tab-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding: 5px 16px;
+	cursor: pointer;
+	background: none;
+	color: #0f2a45;
+	border: 1px solid transparent;
+	border-radius: 999px;
+	font-weight: bold;
+}
+
+.drafter-debug-- .drafter-debug-tab-button:hover {
+	background-color: white;
+}
+
+.drafter-debug-- .drafter-debug-tab-button[aria-selected="true"] {
+	background-color: #3a7db8;
+	color: white;
+	border-color: #2a5d88;
+}
+
+.drafter-debug-- .drafter-debug-tab-badge {
+	display: inline-block;
+	min-width: 1.4em;
+	padding: 0 0.3em;
+	border-radius: 999px;
+	font-size: 0.75em;
+	text-align: center;
+	background-color: #888;
+	color: white;
+}
+
+/* Authored display would otherwise defeat the [hidden] attribute. */
+.drafter-debug-- .drafter-debug-tab-badge[hidden] {
+	display: none;
+}
+
+.drafter-debug-- .drafter-debug-tab-badge.is-error,
+.drafter-debug-- .drafter-debug-tab-badge.is-fail {
+	background-color: #b02a2a;
+}
+
+.drafter-debug-- .drafter-debug-tab-badge.is-warn {
+	background-color: #b07d2a;
+}
+
+.drafter-debug-- .drafter-debug-tabpanel {
+	padding-top: 1.25em;
+}
+
+.drafter-debug-- pre {
+	margin: 0;
+	padding: 1em;
+	overflow: auto;
+}
+
+.drafter-debug-- .drafter-debug-section {
+	border: 1px solid #3a7db8;
+	padding: 15px;
+	margin-bottom: 20px;
+	padding-top: 30px;
+	border-radius: 4px;
+	position: relative;
+	background: rgba(255, 255, 255, 0.8);
+	color: black;
+}
+
+.drafter-debug-- .drafter-debug-section-header {
+	position: absolute;
+	top: -10px;
+	left: 10px;
+	/** Lighter background **/
+	background-color: #ffffff;
+	border: 1px solid #8fd6ff;
+	color: #144d8d;
+	padding: 0 5px;
+	font-weight: bold;
+}
+
+div.btlw-debug .copy-button {
+	float: right;
+	cursor: pointer;
+	background-color: white;
+	padding: 4px;
+}
+
+div.btlw-container img {
+	display: block;
+}
+
+/* Test status styles */
+.drafter-debug-- .test-summary {
+	margin-bottom: 15px;
+	padding: 10px;
+	border-radius: 4px;
+	background: rgba(255, 255, 255, 0.9);
+	border: 1px solid #ddd;
+}
+
+.drafter-debug-- .test-summary-stats {
+	display: flex;
+	gap: 15px;
+	flex-wrap: wrap;
+}
+
+.drafter-debug-- .test-total {
+	font-weight: bold;
+	color: #333;
+}
+
+.drafter-debug-- .test-passed {
+	color: #397239;
+	font-weight: bold;
+}
+
+.drafter-debug-- .test-failed {
+	color: #8d3734;
+	font-weight: bold;
+}
+
+.drafter-debug-- .test-case {
+	padding: 10px;
+	margin-bottom: 10px;
+	border-radius: 4px;
+	background: rgba(255, 255, 255, 0.9);
+	border: 1px solid #ddd;
+}
+
+.drafter-debug-- .test-case.test-passed {
+	border-left: 4px solid #5cb85c;
+}
+
+.drafter-debug-- .test-case.test-failed {
+	border-left: 4px solid #d9534f;
+	background: rgba(217, 83, 79, 0.05);
+}
+
+.drafter-debug-- .test-case-header {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+
+.drafter-debug-- .test-status {
+	font-size: 1.2em;
+}
+
+.drafter-debug-- .test-line {
+	color: #666;
+	font-size: 0.9em;
+}
+
+.drafter-debug-- .test-caller {
+	font-family: monospace;
+	font-size: 0.9em;
+	background: rgba(0, 0, 0, 0.05);
+	padding: 2px 6px;
+	border-radius: 3px;
+}
+
+.drafter-debug-- .test-diff {
+	margin-top: 10px;
+	padding: 10px;
+	background: rgba(0, 0, 0, 0.02);
+	border-radius: 3px;
+}
+
+.drafter-debug-- .test-diff summary {
+	cursor: pointer;
+	font-weight: bold;
+	color: #666;
+}
+
+.drafter-debug-- .test-diff summary:hover {
+	color: #333;
+}
+
+.drafter-debug-- .test-diff table {
+	width: 100%;
+	margin-top: 10px;
+	font-size: 0.85em;
+	border-collapse: collapse;
+	background-color: white;
+	color: black;
+	border: 1px solid #ccc;
+}
+
+.drafter-debug-- .test-diff .diff_next {
+	display: none;
+}
+
+.drafter-debug-- .test-diff table td,
+.drafter-debug-- .test-diff table th {
+	padding: 4px 8px;
+	text-align: left;
+	vertical-align: top;
+	font-family: monospace;
+}
+
+.drafter-debug-- .d2h-moved-tag {
+	display: none;
+}
+
+.drafter-debug-- .drafter-debug-history-actions {
+	margin-bottom: 1em;
+	display: flex;
+	flex-direction: row;
+	gap: 0.5em;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+.drafter-debug-- .drafter-debug-history-actions button {
+	padding: 4px;
+	cursor: pointer;
+	background-color: white;
+	text-decoration: none;
+	color: black;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+.drafter-debug-- .drafter-debug-page-history-list {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+/* Pagination bars stretch the full width of the history section; one sits
+   above the list and a replica sits below it. */
+.drafter-debug-- .drafter-debug-page-history-pagination {
+	width: 100%;
+	margin: 8px 0;
+}
+
+.drafter-debug-- .drafter-debug-pagination-bar {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	width: 100%;
+}
+
+.drafter-debug-- .drafter-debug-pagination-controls {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: 100%;
+}
+
+.drafter-debug-- .drafter-debug-pagination-btn {
+	padding: 4px 8px;
+	cursor: pointer;
+}
+
+.drafter-debug-- .drafter-debug-pagination-btn:disabled {
+	cursor: default;
+	opacity: 0.5;
+}
+
+.drafter-debug-- .drafter-debug-page-history-page-label {
+	text-align: center;
+}
+
+.drafter-debug-- .drafter-debug-page-history-range {
+	opacity: 0.7;
+	font-size: 0.9em;
+}
+
+/* Progress track showing how far through the results the current page is. */
+.drafter-debug-- .drafter-debug-pagination-progress {
+	width: 100%;
+	height: 6px;
+	border-radius: 3px;
+	background: rgba(96, 108, 124, 0.3);
+	overflow: hidden;
+}
+
+.drafter-debug-- .drafter-debug-pagination-progress-fill {
+	height: 100%;
+	border-radius: 3px;
+	background: #4a7fb5;
+	transition: width 0.15s ease;
+}
+
+/* Lighten "via" text in history */
+.drafter-history-via {
+	color: #999;
+	font-weight: normal;
+}
+
+.drafter-debug-- .history-event .drafter-history-request-time {
+	color: #506784;
+	font-size: 0.9em;
+}
+
+.drafter-debug-- .history-event .request-event {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: nowrap;
+	gap: 0.5rem;
+}
+
+.drafter-debug-- .history-event .request-event > strong,
+.drafter-debug-- .history-event .request-event > span {
+	flex: 0 0 auto;
+}
+
+.drafter-debug-- .history-event .request-event .drafter-history-request-url {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-family: monospace;
+	cursor: pointer;
+
+	white-space: normal;
+	word-break: break-all;
+}
+
+.drafter-debug--
+	.history-event
+	.request-event
+	.drafter-history-request-url.truncate {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.drafter-debug-- .history-event .request-event .drafter-history-request-meta {
+	flex: 0 0 auto;
+	font-size: 0.9em;
+	color: #506784;
+}
+
+.drafter-debug-- .history-event .request-parse-event {
+	margin-left: 1em;
+	padding: 2px 4px;
+}
+
+.drafter-debug-- .history-event .request-parse-event code {
+	background-color: #e8f0fe;
+	border: 1px solid #a3c0fa;
+	padding: 2px 4px;
+	border-radius: 3px;
+}
+
+.drafter-debug-- .history-event .drafter-debug-history-event-detail {
+	margin-left: 1em;
+	padding: 2px 4px;
+	display: flex;
+	flex-direction: row;
+	gap: 4px;
+}
+
+.drafter-debug-- .history-event .drafter-debug-history-event-detail pre {
+	background-color: #e6ffed;
+	border: 1px solid #a3f7b1;
+	padding: 2px 4px;
+	border-radius: 3px;
+	white-space: pre-wrap;
+}
+
+.drafter-debug-- .drafter-debug-log-content {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+
+	background: #fcfcfc;
+	padding: 10px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+
+	max-height: 300px;
+	overflow-y: auto;
+
+	font-family: monospace;
+}
+
+.drafter-debug-- .drafter-debug-log-content .drafter-log-error-item {
+	color: #ad2323;
+}
+
+.drafter-debug-- .drafter-debug-log-content .drafter-log-warning-item {
+	color: #e07c07;
+}
+
+.drafter-debug-current-state-content {
+	font-family: monospace;
+}
+
+.drafter-debug-rep-row {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+}
+
+.drafter-debug-rep-col {
+	display: flex;
+	flex-direction: column;
+}
+
+.drafter-debug-rep-cell {
+	padding: 4px 8px;
+	border: 1px solid #ccc;
+}
+
+.drafter-debug-rep-cell
+	.drafter-debug-rep-cell
+	.drafter-debug-rep-cell
+	.drafter-debug-rep-cell
+	.drafter-debug-rep-cell
+	.drafter-debug-rep-cell {
+	padding: 1px 1px;
+}
+
+.drafter-debug-rep-primitive {
+	background-color: #e8f4f8;
+	gap: 0px;
+}
+
+.drafter-debug-rep-dataclass {
+	background-color: #fff4e6;
+	gap: 0px;
+}
+
+/* Dataclass table styling for better type display */
+.drafter-debug-rep-dataclass-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 8px;
+	background-color: white;
+}
+
+.drafter-debug-rep-dataclass-table thead {
+	background-color: #ffecd9;
+	font-weight: bold;
+}
+
+.drafter-debug-rep-dataclass-table th {
+	padding: 6px 12px;
+	text-align: left;
+	border: 1px solid #ddd;
+	color: #cc6600;
+}
+
+.drafter-debug-rep-dataclass-table td {
+	padding: 6px 12px;
+	border: 1px solid #ddd;
+}
+
+.drafter-debug-rep-dataclass-field-row:hover {
+	background-color: #fffaf5;
+}
+
+.drafter-debug-rep-dataclass-field-type {
+	font-family: monospace;
+	color: #666;
+	font-size: 0.9em;
+}
+
+/* This should be a two column wide grid */
+.drafter-debug-rep-dataclass-fields {
+	display: grid;
+	grid-template-columns: auto auto;
+	gap: 4px 12px;
+}
+
+.drafter-debug-rep-empty-linear-collection,
+.drafter-debug-rep-homogenous-linear-collection {
+	background-color: #f0f7f0;
+	gap: 0px;
+}
+
+.drafter-debug-rep-linear-collection {
+	background-color: #f0f7f0;
+	gap: 0px;
+}
+
+.drafter-debug-rep-tuple {
+	background-color: #f5f0ff;
+	gap: 0px;
+}
+
+.drafter-debug-rep-dict {
+	background-color: #fff0f5;
+	gap: 0px;
+}
+
+.drafter-debug-rep-hg-rows {
+	display: table;
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.drafter-debug-rep-hg-row {
+	display: table-row;
+}
+
+.drafter-debug-rep-hg-element {
+	display: table-cell;
+	border: 1px solid #ccc;
+	padding: 4px 8px;
+}
+
+/* Count display for collections and dataclasses */
+.drafter-debug-count {
+	font-size: 0.9em;
+	color: #666;
+	font-weight: normal;
+	font-style: italic;
+}
+
+/* Type labels with better colors */
+.drafter-debug-rep-primitive-type {
+	color: #0066cc;
+	font-weight: 600;
+}
+
+.drafter-debug-rep-dataclass-type {
+	color: #cc6600;
+	font-weight: 600;
+}
+
+.drafter-debug-rep-hlc-type,
+.drafter-debug-rep-lc-type,
+.drafter-debug-rep-elc-type {
+	color: #009900;
+	font-weight: 600;
+}
+
+.drafter-debug-rep-tuple-type {
+	color: #9900cc;
+	font-weight: 600;
+}
+
+.drafter-debug-rep-dict-type {
+	color: #cc0066;
+	font-weight: 600;
+}
+
+.drafter-debug-rep-hg-type {
+	color: #006699;
+	font-weight: 600;
+}
+
+/* Empty collection types */
+.drafter-debug-rep-empty-tuple,
+.drafter-debug-rep-empty-dict {
+	background-color: #fafafa;
+	gap: 0px;
+}
+
+/* Special representation types */
+.drafter-debug-rep-cycle {
+	background-color: #fff9e6;
+	gap: 0px;
+}
+
+.drafter-debug-rep-cycle-message {
+	color: #cc8800;
+	font-style: italic;
+}
+
+.drafter-debug-rep-max-depth {
+	background-color: #f0f0f0;
+	gap: 0px;
+}
+
+.drafter-debug-rep-max-depth-message {
+	color: #888;
+	font-style: italic;
+}
+
+.drafter-debug-rep-unknown {
+	background-color: #f5f5f5;
+	gap: 0px;
+}
+
+.drafter-debug-rep-error {
+	background-color: #ffe6e6;
+	gap: 0px;
+}
+
+.drafter-debug-rep-error-message {
+	color: #cc0000;
+	font-weight: 600;
+}
+
+.drafter-debug-rep-failure {
+	background-color: #ffcccc;
+	gap: 0px;
+}
+
+.drafter-debug-rep-failure-message {
+	color: #990000;
+	font-weight: 700;
+}
+
+.drafter-debug-rep-image-value {
+	max-width: 100px;
+	max-height: 100px;
+	object-fit: contain;
+}
+
+.drafter-debug-rep-image-caption {
+	font-size: 0.85em;
+	color: #4a637a;
+}
+
+.drafter-debug-rep-bytes-preview {
+	font-family: monospace;
+	font-size: 0.85em;
+	word-break: break-all;
+}
+
+.drafter-debug-config-item-updated {
+	font-weight: bold;
+	color: #cc6600;
+}
+
+.drafter-debug-- .drafter-debug-config-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 0.75rem;
+}
+
+.drafter-debug-- .drafter-debug-config-note {
+	font-size: 0.9em;
+	color: #4a637a;
+}
+
+.drafter-debug-- .drafter-debug-config-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.drafter-debug-- .drafter-debug-config-item {
+	padding: 2px 4px;
+	background: #f9fcff;
+}
+
+.drafter-debug-- .drafter-debug-config-item-overridden {
+	border-top: 1px solid #d67f00;
+	border-bottom: 1px solid #d67f00;
+	background: #fff8ea;
+}
+
+.drafter-debug-- .drafter-debug-config-item-header {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.5rem;
+	margin-bottom: 0;
+}
+
+.drafter-debug-- .drafter-debug-config-inline-main {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	min-width: 0;
+	flex: 1 1 auto;
+}
+
+.drafter-debug-- .drafter-debug-config-inline-main strong {
+	flex: 0 0 auto;
+}
+
+.drafter-debug-- .drafter-debug-config-inline-separator {
+	color: #5f7790;
+	flex: 0 0 auto;
+}
+
+.drafter-debug-- .drafter-debug-config-inline-value {
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: #1f3f5f;
+}
+
+.drafter-debug-- .drafter-debug-config-inline-right {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin-left: auto;
+	flex: 0 0 auto;
+}
+
+.drafter-debug-- .drafter-debug-config-source {
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 0.8em;
+	font-weight: 600;
+	border: 1px solid transparent;
+}
+
+.drafter-debug-- .drafter-debug-config-source-base {
+	background: #eaf5ff;
+	color: #134f8a;
+	border-color: #95c6ef;
+}
+
+.drafter-debug-- .drafter-debug-config-source-override {
+	background: #fff1d9;
+	color: #8c4f00;
+	border-color: #e2b56a;
+}
+
+.drafter-debug-- .drafter-debug-config-base-value {
+	font-size: 0.9em;
+	margin-top: 0.35rem;
+	margin-bottom: 0;
+	color: #7b560f;
+}
+
+.drafter-debug-- .drafter-debug-config-base-value code {
+	background: #fff5e2;
+	padding: 1px 4px;
+	border-radius: 3px;
+	border: 1px solid #efd19f;
+}
+
+.drafter-debug-- .drafter-debug-config-value {
+	font-size: 0.95em;
+	background: #f4f9ff;
+	border: 1px solid #d2e5f7;
+	border-radius: 4px;
+	padding: 6px 8px;
+	white-space: normal;
+	word-break: break-word;
+}
+
+.drafter-debug-- .drafter-debug-config-value code {
+	background: transparent;
+	padding: 0;
+	border: 0;
+}
+
+.drafter-debug-- .drafter-debug-config-editor {
+	width: 100%;
+	min-height: 4.5rem;
+	resize: vertical;
+	font-family: monospace;
+	font-size: 0.9em;
+	padding: 8px;
+	border: 1px solid #a9c6df;
+	border-radius: 4px;
+	background: white;
+	box-sizing: border-box;
+}
+
+.drafter-debug-- .drafter-debug-config-buttons {
+	display: flex;
+	gap: 0.35rem;
+	margin-top: 0;
+	flex-wrap: wrap;
+}
+
+.drafter-debug-- .drafter-debug-config-buttons button,
+.drafter-debug-- .drafter-debug-config-actions button {
+	padding: 2px 6px;
+	cursor: pointer;
+	background-color: white;
+	color: black;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 0.85em;
+}
+
+.drafter-debug-- .drafter-debug-config-buttons button:hover,
+.drafter-debug-- .drafter-debug-config-actions button:hover {
+	background-color: #ddd;
+}
+
+.drafter-debug-- .drafter-debug-config-error {
+	margin-top: 0.35rem;
+	min-height: 1rem;
+	font-size: 0.85em;
+	color: #b63030;
+	visibility: hidden;
+}
+
+.drafter-debug-- .drafter-debug-config-error.visible {
+	visibility: visible;
+}
+
+/** Two columns, equally sized **/
+.drafter-debug-files-content {
+	display: flex;
+	flex-direction: row;
+	gap: 20px;
+	flex-grow: 1;
+	justify-content: space-between;
+}
+
+.drafter-debug-files-list {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	flex: 1;
+}
+
+.drafter-debug-files-list-items {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin-top: 10px;
+}
+
+/* Code editor dialog */
+.drafter-code-editor-container {
+	width: 100%;
+	height: 480px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.drafter-code-editor-container .cm-editor {
+	height: 100%;
+}
+
+.drafter-code-editor-container .cm-editor.cm-focused {
+	outline: 2px solid #3a7db8;
+	outline-offset: -2px;
+}
+
+/* Read-only source viewer variant of the code editor dialog */
+.drafter-code-viewer-container {
+	background-color: #fafafa;
+}
+
+/* Current tab: route, page content, problems, state diff */
+.drafter-debug-current-route-row {
+	margin-bottom: 0.5em;
+}
+
+.drafter-debug-current-page {
+	margin-bottom: 0.75em;
+}
+
+.drafter-debug-current-page-content {
+	background-color: #fafafa;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	max-height: 240px;
+}
+
+.drafter-debug-current-problems-area {
+	margin-bottom: 0.75em;
+}
+
+.drafter-debug-current-no-problems {
+	color: #3f6f3f;
+	margin: 0.25em 0;
+}
+
+.drafter-debug-current-problem {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.4em;
+	padding: 4px 8px;
+	margin: 4px 0;
+	border-radius: 4px;
+	border: 1px solid #b07d2a;
+	background-color: #fff7e6;
+}
+
+.drafter-debug-current-problem.is-error {
+	border-color: #b02a2a;
+	background-color: #fdeaea;
+}
+
+.drafter-debug-current-problem-details {
+	flex-basis: 100%;
+	font-size: 0.85em;
+}
+
+.drafter-debug-current-diff-empty {
+	color: #506784;
+	margin: 0.5em 0 0;
+}
+
+.drafter-debug-current-diff {
+	margin-top: 0.5em;
+}
+
+/* Stub panels (route graph, coverage, test wizard, internals) */
+.drafter-debug-stub-notice {
+	color: #506784;
+	font-style: italic;
+	margin-top: 0;
+}
+
+.drafter-debug-route-graph-sample {
+	max-width: 100%;
+	height: auto;
+	font-family: "Courier New", Courier, monospace;
+	font-size: 0.85rem;
+}
+
+.drafter-debug-coverage-row {
+	display: flex;
+	align-items: center;
+	gap: 0.75em;
+	margin: 6px 0;
+}
+
+.drafter-debug-coverage-label {
+	flex: 0 0 11em;
+}
+
+.drafter-debug-coverage-bar {
+	flex: 1 1 auto;
+	height: 12px;
+	border: 1px solid #3a7db8;
+	border-radius: 999px;
+	background-color: white;
+	overflow: hidden;
+}
+
+.drafter-debug-coverage-fill {
+	display: block;
+	height: 100%;
+	background-color: #7fb2df;
+}
+
+.drafter-debug-coverage-percent {
+	flex: 0 0 3em;
+	text-align: right;
+}
+
+.drafter-debug-test-wizard-sample {
+	background-color: #fafafa;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+/* Environment tab: packages, storage, runtime tables */
+.drafter-debug-packages-table,
+.drafter-debug-storage-table,
+.drafter-debug-runtime-table,
+.drafter-debug-internals-table {
+	border-collapse: collapse;
+	margin-top: 0.5em;
+	width: 100%;
+}
+
+.drafter-debug-packages-table th,
+.drafter-debug-packages-table td,
+.drafter-debug-storage-table th,
+.drafter-debug-storage-table td,
+.drafter-debug-runtime-table th,
+.drafter-debug-runtime-table td,
+.drafter-debug-internals-table th,
+.drafter-debug-internals-table td {
+	border: 1px solid #ddd;
+	padding: 4px 8px;
+	text-align: left;
+	word-break: break-word;
+}
+
+.drafter-debug-storage-size {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.drafter-debug-storage-preview {
+	font-family: "Courier New", Courier, monospace;
+	font-size: 0.85em;
+}
+
+/* Save/Load slot dialogs */
+.drafter-saveload-slots {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	max-height: 320px;
+	overflow-y: auto;
+}
+
+.drafter-saveload-slot {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 0.75em;
+	width: 100%;
+	padding: 6px 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	background-color: white;
+	cursor: pointer;
+	text-align: left;
+}
+
+.drafter-saveload-slot:hover {
+	background-color: #e3eefa;
+}
+
+.drafter-saveload-slot-name {
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+.drafter-saveload-slot-meta {
+	color: #506784;
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.drafter-saveload-upload-error {
+	color: #9f2424;
+}
+
+/* Switch Theme dialog */
+.drafter-theme-note {
+	margin-top: 0;
+	color: #506784;
+}
+
+/*
+ * Each theme option is a miniature abstract preview of its theme: the
+ * per-theme blocks below supply an estimated page background, text
+ * color, accent color, and primary font via custom properties. Every
+ * other visual property is pinned explicitly (and the selectors are kept
+ * above element-level specificity) so the page's currently active theme
+ * cannot restyle the options into unreadability.
+ */
+.drafter-theme-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: 8px;
+	max-height: 340px;
+	overflow-y: auto;
+	padding: 2px;
+}
+
+.drafter-dialog .drafter-theme-option {
+	appearance: none;
+	-webkit-appearance: none;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 5px;
+	width: 100%;
+	min-height: 0;
+	height: auto;
+	margin: 0;
+	padding: 9px 11px;
+	background: var(--drafter-tp-bg, #ffffff);
+	color: var(--drafter-tp-fg, #182941);
+	border: 1px solid rgba(96, 108, 124, 0.55);
+	border-left: 5px solid var(--drafter-tp-accent, #3a7db8);
+	border-radius: 8px;
+	box-shadow: none;
+	text-shadow: none;
+	text-transform: none;
+	text-decoration: none;
+	text-align: left;
+	text-indent: 0;
+	letter-spacing: normal;
+	word-spacing: normal;
+	white-space: normal;
+	line-height: 1.35;
+	font-family:
+		Raleway, HelveticaNeue, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 12px;
+	font-weight: 400;
+	font-style: normal;
+	filter: none;
+	transform: none;
+	opacity: 1;
+	outline: none;
+	cursor: pointer;
+	transition:
+		border-color 120ms ease,
+		box-shadow 120ms ease;
+}
+
+.drafter-dialog .drafter-theme-option:hover,
+.drafter-dialog .drafter-theme-option:focus-visible {
+	background: var(--drafter-tp-bg, #ffffff);
+	color: var(--drafter-tp-fg, #182941);
+	border-color: #3a7db8;
+	border-left-color: var(--drafter-tp-accent, #3a7db8);
+	box-shadow: 0 2px 8px rgba(2, 17, 43, 0.3);
+	filter: none;
+	transform: none;
+}
+
+.drafter-dialog .drafter-theme-option:focus-visible,
+.drafter-dialog .drafter-theme-option.is-current {
+	outline: 2px solid #1161c2;
+	outline-offset: 1px;
+}
+
+.drafter-dialog .drafter-theme-option:active {
+	filter: none;
+	transform: translateY(1px);
+	box-shadow: none;
+}
+
+.drafter-theme-option-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px;
+}
+
+.drafter-theme-name {
+	font-family: var(--drafter-tp-font, inherit);
+	font-size: 15px;
+	font-weight: 700;
+	color: inherit;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.drafter-theme-current-badge {
+	flex: none;
+	font-family:
+		Raleway, HelveticaNeue, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 9px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: #ffffff;
+	background: #1161c2;
+	border-radius: 999px;
+	padding: 2px 7px;
+}
+
+.drafter-theme-swatches {
+	display: flex;
+	gap: 4px;
+}
+
+.drafter-theme-swatch {
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+	box-sizing: border-box;
+	/* Double ring keeps swatches visible on light and dark previews. */
+	box-shadow:
+		0 0 0 1px rgba(255, 255, 255, 0.45),
+		inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+.drafter-theme-swatch-bg {
+	background: var(--drafter-tp-bg, #ffffff);
+}
+
+.drafter-theme-swatch-fg {
+	background: var(--drafter-tp-fg, #182941);
+}
+
+.drafter-theme-swatch-accent {
+	background: var(--drafter-tp-accent, #3a7db8);
+}
+
+.drafter-theme-desc {
+	font-size: 11px;
+	opacity: 0.85;
+}
+
+/* Estimated palette + primary font of every registered theme. */
+.drafter-theme-option-default {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #222222;
+	--drafter-tp-accent: #3e3e9e;
+	--drafter-tp-font: Raleway, "Helvetica Neue", Arial, sans-serif;
+}
+
+.drafter-theme-option-none {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #000000;
+	--drafter-tp-accent: #0000ee;
+	--drafter-tp-font: "Times New Roman", Times, serif;
+}
+
+.drafter-theme-option-7 {
+	--drafter-tp-bg: #f0f0f0;
+	--drafter-tp-fg: #222222;
+	--drafter-tp-accent: #0066cc;
+	--drafter-tp-font: "Segoe UI", Tahoma, sans-serif;
+}
+
+.drafter-theme-option-98 {
+	--drafter-tp-bg: #c0c0c0;
+	--drafter-tp-fg: #222222;
+	--drafter-tp-accent: #000080;
+	--drafter-tp-font: "MS Sans Serif", Tahoma, sans-serif;
+}
+
+.drafter-theme-option-almond {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #212121;
+	--drafter-tp-accent: #336699;
+	--drafter-tp-font: Helvetica, Arial, sans-serif;
+}
+
+.drafter-theme-option-brutal {
+	--drafter-tp-bg: #fdfd96;
+	--drafter-tp-fg: #000000;
+	--drafter-tp-accent: #f4d738;
+	--drafter-tp-font: "Public Sans", Arial, sans-serif;
+}
+
+.drafter-theme-option-darkfairy {
+	--drafter-tp-bg: #ad1457;
+	--drafter-tp-fg: #fce4ec;
+	--drafter-tp-accent: #e91e63;
+	--drafter-tp-font: Nunito, "Segoe UI", sans-serif;
+}
+
+.drafter-theme-option-daub {
+	--drafter-tp-bg: #f5f0e1;
+	--drafter-tp-fg: #3d3832;
+	--drafter-tp-accent: #c67b5c;
+	--drafter-tp-font: Charter, "Sitka Text", Cambria, Georgia, serif;
+}
+
+.drafter-theme-option-latex {
+	--drafter-tp-bg: #f9fafb;
+	--drafter-tp-fg: #1f1414;
+	--drafter-tp-accent: #a80000;
+	--drafter-tp-font: "Latin Modern", Georgia, Cambria, serif;
+}
+
+.drafter-theme-option-magick {
+	--drafter-tp-bg: #fefefe;
+	--drafter-tp-fg: #0e0e0e;
+	--drafter-tp-accent: #00004d;
+	--drafter-tp-font: "Averia Serif Libre", Georgia, serif;
+}
+
+.drafter-theme-option-matcha {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #1f2328;
+	--drafter-tp-accent: #0969da;
+	--drafter-tp-font: -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+}
+
+.drafter-theme-option-mvp {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #000000;
+	--drafter-tp-accent: #118bee;
+	--drafter-tp-font: -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.drafter-theme-option-pico {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #373c44;
+	--drafter-tp-accent: #0172ad;
+	--drafter-tp-font: system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+.drafter-theme-option-retro {
+	--drafter-tp-bg: #222222;
+	--drafter-tp-fg: #fafafa;
+	--drafter-tp-accent: #01ff70;
+	--drafter-tp-font: "Courier New", monospace;
+}
+
+.drafter-theme-option-sakura {
+	--drafter-tp-bg: #f9f9f9;
+	--drafter-tp-fg: #4a4a4a;
+	--drafter-tp-accent: #1d7484;
+	--drafter-tp-font: -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.drafter-theme-option-simple {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #212121;
+	--drafter-tp-accent: #0d47a1;
+	--drafter-tp-font: -apple-system, Avenir, Roboto, sans-serif;
+}
+
+.drafter-theme-option-skeleton {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #222222;
+	--drafter-tp-accent: #33c3f0;
+	--drafter-tp-font: Raleway, "Helvetica Neue", Arial, sans-serif;
+}
+
+.drafter-theme-option-tacit {
+	--drafter-tp-bg: #ffffff;
+	--drafter-tp-fg: #1a1919;
+	--drafter-tp-accent: #275a90;
+	--drafter-tp-font: system-ui, "Helvetica Neue", Arial, sans-serif;
+}
+
+.drafter-theme-option-terminal {
+	--drafter-tp-bg: #1a170f;
+	--drafter-tp-fg: #eceae5;
+	--drafter-tp-accent: #eec35e;
+	--drafter-tp-font: "Fira Code", Monaco, Consolas, monospace;
+}
+
+.drafter-theme-option-water {
+	--drafter-tp-bg: #202b38;
+	--drafter-tp-fg: #dbdbdb;
+	--drafter-tp-accent: #41adff;
+	--drafter-tp-font: system-ui, "Segoe UI", sans-serif;
+}
+
+.drafter-theme-option-xp {
+	--drafter-tp-bg: #ece9d8;
+	--drafter-tp-fg: #222222;
+	--drafter-tp-accent: #0053ee;
+	--drafter-tp-font: Tahoma, Verdana, Arial, sans-serif;
+}
+
+.drafter-theme-option-yorha {
+	--drafter-tp-bg: #d1cdb7;
+	--drafter-tp-fg: #454138;
+	--drafter-tp-accent: #bab5a1;
+	--drafter-tp-font: Helvetica, Arial, sans-serif;
+}
+
+/* Edit State dialog (stub) */
+.drafter-state-editor-notice {
+	margin-top: 0;
+	color: #506784;
+}
+
+.drafter-state-editor-preview {
+	max-height: 300px;
+	overflow: auto;
+	background-color: #fafafa;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 0.5em;
+}
+
+/* Routes panel: swagger-style "try it" parameter forms. */
+.drafter-debug-route-signature {
+	margin: 4px 0;
+}
+
+.drafter-debug-route-signature > summary {
+	cursor: pointer;
+}
+
+.drafter-debug-route-try {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin: 6px 0 8px 18px;
+	padding: 6px 8px;
+	border-left: 3px solid rgba(96, 108, 124, 0.35);
+}
+
+.drafter-debug-route-try-field {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.drafter-debug-route-try-name {
+	font-family: monospace;
+	font-weight: 600;
+	min-width: 90px;
+}
+
+.drafter-debug-route-try-type {
+	font-family: monospace;
+	opacity: 0.7;
+}
+
+.drafter-debug-route-try input {
+	flex: 1;
+	min-width: 60px;
+	font-family: monospace;
+	padding: 2px 6px;
+}
+
+.drafter-debug-route-try-submit {
+	align-self: flex-start;
+}
+
+/* History panel: per-request parameter provenance table. */
+.drafter-debug-provenance {
+	border-collapse: collapse;
+	margin: 4px 0;
+	font-size: 11px;
+}
+
+.drafter-debug-provenance th,
+.drafter-debug-provenance td {
+	border: 1px solid rgba(96, 108, 124, 0.35);
+	padding: 2px 6px;
+	text-align: left;
+	font-family: monospace;
+}
+
+.drafter-debug-provenance th {
+	font-weight: 600;
+}
+
+/* State snapshot inside a visit's response details (history tab). */
+.drafter-debug-state-history-entry {
+	margin: 4px 0;
+}
+
+.drafter-debug-state-history-entry > summary {
+	cursor: pointer;
+	font-family: monospace;
+}
+
+/* Test panel: copy/download all generated tests. */
+.drafter-debug-test-actions {
+	display: flex;
+	gap: 6px;
+	margin-bottom: 6px;
+}

@@ -1,0 +1,4 @@
+{
+	"extraPaths": ["src/typings"],
+	"reportWildcardImportFromLibrary": "none"
+}

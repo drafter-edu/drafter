@@ -1,12 +1,11 @@
 from bakery import assert_equal
-from drafter import route, start_server, Page, Link
+
+from drafter import Link, Page, route, start_server
+
 
 @route("index")
 def index():
-    return Page(None, [
-        "Hello, World!",
-        Link("Second page", "second")
-    ])
+    return Page(None, ["Hello, World!", Link("Second page", "second")])
 
 
 assert_equal(index(), Page(None, ["Hello, World!", Link("Second page", "second")]))

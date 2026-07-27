@@ -1,10 +1,6 @@
 import argparse
-import base64
-import gzip
-import os
 import json
 from pathlib import Path
-
 
 if __name__ == "__main__":
     drafter_root_directory = Path(__file__).parent.parent
@@ -12,10 +8,14 @@ if __name__ == "__main__":
     default_output_path = drafter_root_directory / "drafter" / "raw_files.py"
 
     parser = argparse.ArgumentParser(description="Rebuild raw files")
-    parser.add_argument("--manifest", help="Path to the JSON manifest file",
-                        default=default_manifest_path)
-    parser.add_argument("--output", help="Path to the output file",
-                        default=default_output_path)
+    parser.add_argument(
+        "--manifest",
+        help="Path to the JSON manifest file",
+        default=default_manifest_path,
+    )
+    parser.add_argument(
+        "--output", help="Path to the output file", default=default_output_path
+    )
     args = parser.parse_args()
 
     manifest_path = Path(args.manifest)
@@ -29,13 +29,13 @@ if __name__ == "__main__":
     for theme, categories in manifest.items():
         if theme not in RAW_FILES:
             RAW_FILES[theme] = {}
-        RAW_FILES[theme]['metadata'] = categories.pop('metadata', {})
+        RAW_FILES[theme]["metadata"] = categories.pop("metadata", {})
         for category, filenames in categories.items():
             if category not in RAW_FILES[theme]:
                 RAW_FILES[theme][category] = {}
             for filename in filenames:
                 source_path = drafter_root_directory / "libs" / filename
-                with open(source_path, "r") as f:
+                with open(source_path) as f:
                     raw = f.read()
                 RAW_FILES[theme][category][filename] = raw
 
@@ -60,21 +60,25 @@ class RawFiles:
 """)
         f.write("RAW_FILES = {}\n")
         for theme, categories in RAW_FILES.items():
-            metadata = categories.pop('metadata', {})
-            f.write(f"RAW_FILES['{theme}'] = RawFiles({json.dumps(metadata)}, {{}}, {{}}, {{}})\n")
+            metadata = categories.pop("metadata", {})
+            f.write(
+                f"RAW_FILES['{theme}'] = RawFiles({json.dumps(metadata)}, {{}}, {{}}, {{}})\n"
+            )
 
             for category, files in categories.items():
                 for filename, raw in files.items():
-                    #converted = base64.b64encode(gzip.compress(raw.encode())).decode("utf-8")
-                    f.write(f"RAW_FILES['{theme}'].{category}['{filename}'] = {json.dumps(raw)}\n")
+                    # converted = base64.b64encode(gzip.compress(raw.encode())).decode("utf-8")
+                    f.write(
+                        f"RAW_FILES['{theme}'].{category}['{filename}'] = {json.dumps(raw)}\n"
+                    )
                     raw_file_count += 1
 
         f.write("\n")
         f.write("""
 
 def extract(text):
-    return gzip.decompress(b64decode(text)).decode()    
-    
+    return gzip.decompress(b64decode(text)).decode()
+
 CACHED_DECOMPRESSED = {}
 def get_raw_files(theme):
     if theme in CACHED_DECOMPRESSED:

@@ -1,0 +1,388 @@
+@import "./core/dialogs.css";
+
+.drafter-body-- {
+	/* Might add more later */
+}
+
+.drafter-body-- .error-page {
+	background-color: #fff5f5;
+	border: 2px solid #e53e3e;
+	border-radius: 8px;
+	padding: 20px;
+	margin: 20px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.drafter-body-- .error-page h2 {
+	color: #c53030;
+	margin-top: 0;
+	font-size: 1.5em;
+}
+
+.drafter-body-- .error-page pre {
+	white-space: pre-wrap;
+	background-color: #fffaf0;
+	border-left: 4px solid #e53e3e;
+	padding: 15px;
+	font-family: "Consolas", "Monaco", "Courier New", monospace;
+	font-size: 14px;
+	line-height: 1.6;
+	color: #2d3748;
+	overflow-x: auto;
+}
+
+.drafter-body-- .error-page table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 15px;
+	background-color: #fffaf0;
+}
+
+.drafter-body-- .error-page .error-navigation {
+	margin-bottom: 15px;
+}
+
+.drafter-body-- .error-page .error-home-link {
+	display: inline-block;
+	padding: 10px 20px;
+	background-color: #3182ce;
+	color: white;
+	text-decoration: none;
+	border-radius: 6px;
+	font-weight: 600;
+	transition: background-color 0.2s;
+	font-size: 0.75em;
+}
+
+.drafter-body-- .error-page .error-home-link:hover {
+	background-color: #2c5aa0;
+}
+
+.drafter-body-- .drafter-traceback {
+	background-color: #fffaf0;
+	border: 1px solid #e2e8f0;
+	border-left: 4px solid #e53e3e;
+	border-radius: 4px;
+	padding: 12px 15px;
+	font-size: 14px;
+}
+
+.drafter-body-- .drafter-traceback .traceback-hint {
+	margin: 0 0 10px;
+	color: #4a5568;
+	font-style: italic;
+	font-size: 0.95em;
+}
+
+.drafter-body-- .drafter-traceback .traceback-header {
+	color: #718096;
+	font-family: "Consolas", "Monaco", "Courier New", monospace;
+	font-size: 0.9em;
+	margin-bottom: 8px;
+}
+
+.drafter-body-- .drafter-traceback .traceback-frame {
+	border: 1px solid #e2e8f0;
+	border-radius: 4px;
+	background-color: #ffffff;
+	padding: 8px 10px;
+	margin-bottom: 8px;
+	opacity: 0.75;
+}
+
+.drafter-body-- .drafter-traceback .traceback-frame.is-student-code {
+	border-color: #ecc94b;
+	background-color: #fffff0;
+	opacity: 1;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.drafter-body-- .drafter-traceback .traceback-location {
+	font-family: "Consolas", "Monaco", "Courier New", monospace;
+	color: #2d3748;
+	line-height: 1.6;
+}
+
+.drafter-body-- .drafter-traceback .traceback-label {
+	color: #718096;
+}
+
+.drafter-body-- .drafter-traceback .traceback-badge {
+	display: inline-block;
+	margin-left: 8px;
+	padding: 1px 8px;
+	border-radius: 10px;
+	background-color: #d69e2e;
+	color: #ffffff;
+	font-family: inherit;
+	font-size: 0.75em;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	vertical-align: middle;
+}
+
+.drafter-body-- .drafter-traceback pre.traceback-code {
+	margin: 6px 0 0;
+	padding: 6px 10px;
+	background-color: #f7fafc;
+	border-left: 3px solid #cbd5e0;
+	border-radius: 2px;
+}
+
+.drafter-body--
+	.drafter-traceback
+	.traceback-frame.is-student-code
+	pre.traceback-code {
+	border-left-color: #d69e2e;
+}
+
+.drafter-body-- .drafter-traceback pre.traceback-exception {
+	margin: 4px 0 0;
+	padding: 10px 12px;
+	background-color: #fff5f5;
+	border-left: 4px solid #c53030;
+	color: #c53030;
+	font-weight: 700;
+}
+
+/* Persisted components live here between page loads; they must stay in the
+   DOM (so media keeps playing and timers keep ticking) but never render
+   unless the debug panel reveals them. */
+.drafter-persist--[hidden] {
+	display: none !important;
+}
+
+/* Printer console: captured print() output plus an interactive Python REPL.
+   Lives in the base stylesheet because the "hover" and "toast" console modes
+   must also work in production (deploy) styling. */
+.drafter-printer-console {
+	background-color: #1e1e1e;
+	color: #d4d4d4;
+	border: 1px solid #3c3c3c;
+	border-radius: 6px;
+	font-family: "Consolas", "Monaco", "Courier New", monospace;
+	font-size: 0.85rem;
+	font-weight: normal;
+	text-align: left;
+}
+
+.drafter-printer-console[hidden] {
+	display: none !important;
+}
+
+.drafter-printer-console-footer {
+	margin: 0.5em 1em 0.5em 0;
+}
+
+.drafter-printer-console-hover {
+	position: fixed;
+	left: 50%;
+	bottom: 0.75rem;
+	transform: translateX(-50%);
+	width: min(640px, calc(100vw - 2rem));
+	z-index: 9998;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.drafter-printer-console-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 4px 8px;
+	background-color: #2d2d2d;
+	border-bottom: 1px solid #3c3c3c;
+	border-radius: 6px 6px 0 0;
+}
+
+.drafter-printer-console-title {
+	flex: 1 1 auto;
+	font-weight: bold;
+	color: #cccccc;
+	font-size: 0.8rem;
+	letter-spacing: 0.03em;
+}
+
+.drafter-printer-console-header button {
+	flex: 0 0 auto;
+	font-size: 0.75rem;
+	font-family: inherit;
+	padding: 1px 8px;
+	border: 1px solid #555;
+	border-radius: 4px;
+	background-color: #3c3c3c;
+	color: #d4d4d4;
+	cursor: pointer;
+}
+
+.drafter-printer-console-header button:hover {
+	background-color: #505050;
+}
+
+.drafter-printer-console-output {
+	max-height: 12rem;
+	overflow-y: auto;
+	padding: 6px 8px;
+	white-space: pre-wrap;
+	word-break: break-word;
+	line-height: 1.45;
+}
+
+.drafter-printer-console-output:empty::before {
+	content: "(no output yet)";
+	color: #6e6e6e;
+	font-style: italic;
+}
+
+.drafter-printer-console-entry.drafter-printer-console-stderr,
+.drafter-printer-console-entry.drafter-printer-console-error {
+	color: #f48771;
+}
+
+.drafter-printer-console-entry.drafter-printer-console-echo {
+	color: #6a9955;
+}
+
+.drafter-printer-console-entry.drafter-printer-console-result {
+	color: #9cdcfe;
+}
+
+.drafter-printer-console-entry.drafter-printer-console-info {
+	color: #808080;
+	font-style: italic;
+}
+
+.drafter-printer-console-input-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 4px 8px;
+	border-top: 1px solid #3c3c3c;
+}
+
+.drafter-printer-console-prompt {
+	flex: 0 0 auto;
+	color: #4ec9b0;
+	font-weight: bold;
+}
+
+.drafter-printer-console-input {
+	flex: 1 1 auto;
+	min-width: 0;
+	background: transparent;
+	border: none;
+	outline: none;
+	color: #d4d4d4;
+	font-family: inherit;
+	font-size: inherit;
+	padding: 2px 0;
+}
+
+.drafter-printer-console-input::placeholder {
+	color: #6e6e6e;
+}
+
+.drafter-printer-console-input:disabled {
+	opacity: 0.5;
+}
+
+/* Toast console mode: each printed line appears briefly in the corner. */
+.drafter-printer-toasts {
+	position: fixed;
+	right: 1rem;
+	bottom: 1rem;
+	z-index: 10000;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.5rem;
+	pointer-events: none;
+}
+
+.drafter-printer-toast {
+	max-width: min(420px, calc(100vw - 2rem));
+	background-color: rgba(30, 30, 30, 0.92);
+	color: #d4d4d4;
+	border: 1px solid #3c3c3c;
+	border-left: 3px solid #4ec9b0;
+	border-radius: 6px;
+	padding: 6px 10px;
+	font-family: "Consolas", "Monaco", "Courier New", monospace;
+	font-size: 0.85rem;
+	white-space: pre-wrap;
+	word-break: break-word;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	animation: drafter-printer-toast-in 160ms ease-out;
+}
+
+.drafter-printer-toast.drafter-printer-console-stderr,
+.drafter-printer-toast.drafter-printer-console-error {
+	border-left-color: #f48771;
+	color: #f4b3a6;
+}
+
+@keyframes drafter-printer-toast-in {
+	from {
+		opacity: 0;
+		transform: translateY(0.5rem);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@media print {
+	.drafter-printer-console,
+	.drafter-printer-toasts {
+		display: none !important;
+	}
+}
+
+/* Page transitions: opt-in via set_page_transition(). The bridge restarts
+   these animations on the body container after each navigation swap. */
+.drafter-page-transition-fade-- {
+	animation: drafter-page-transition-fade-in
+		var(--drafter-page-transition-duration, 0.5s) ease-out;
+}
+
+@keyframes drafter-page-transition-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.drafter-page-transition-veil-- {
+	position: relative;
+}
+
+.drafter-page-transition-veil--::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 100;
+	pointer-events: none;
+	background-color: var(--drafter-page-transition-color, #000);
+	opacity: 0;
+	animation: drafter-page-transition-veil-out
+		var(--drafter-page-transition-duration, 0.5s) ease-out;
+}
+
+@keyframes drafter-page-transition-veil-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.drafter-page-transition-fade--,
+	.drafter-page-transition-veil--::after {
+		animation: none;
+	}
+}

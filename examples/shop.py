@@ -6,75 +6,163 @@ class Item:
     name: str
     price: int
     stock: int
+    description: str
 
 
 @dataclass
 class State:
-    items: list[Item]
+    items2: list[Item]
     bought: list[str]
     money: int
+    tiles: list[list[str]]
 
 
 @route
 def index(state: State) -> Page:
     for_sale = []
-    for item in state.items:
+    for item in state.items2:
         if item.stock > 0:
-            content = Span("Buy",
-                           Button(item.name, purchase, arguments=Argument("name", item.name)),
-                           "for " + str(item.price) + " coins (" + str(item.stock) + " left in stock)")
+            content = Span(
+                "Buy",
+                Button(item.name, purchase, arguments=Argument("name", item.name)),
+                "for "
+                + str(item.price)
+                + " coins ("
+                + str(item.stock)
+                + " left in stock)",
+                Button("?", "get_help", arguments=Argument("name", item.name)),
+            )
             for_sale.append(content)
-    return Page(state, [
-        "Welcome to the store!",
-        "You have: " + str(state.money) + " coins",
-        "You own: " + ", ".join(state.bought),
-        "Select an item to purchase:",
-        BulletedList(for_sale)
-    ])
+    return Page(
+        state,
+        [
+            "Welcome to the store!",
+            "You have: " + str(state.money) + " coins",
+            "You own: ",
+            BulletedList(state.bought),
+            "Select an item to purchase:",
+            BulletedList(for_sale),
+            Button("break_things", "break_things"),
+        ],
+    )
 
 
-def find_item(items: list[Item], name: str) -> Item:
-    for item in items:
+@route
+def break_things(state: State) -> Page:
+    raise RuntimeError("This is a broken route for testing purposes.")
+
+
+def find_item(items2: list[Item], name: str) -> Item | None:
+    for item in items2:
         if item.name == name:
             return item
     return None
 
 
 @route
+def get_help(state: State, name: str) -> Fragment:
+    item = find_item(state.items2, name)
+    if item is None:
+        message = "Unknown item!"
+    else:
+        message = item.description
+    return Fragment(
+        state,
+        [
+            Span(
+                message,
+                Button("Hide", hide_help, arguments=Argument("name", name)),
+                id="help-" + name,
+            )
+        ],
+    )
+
+
+@route
+def hide_help(state: State, name: str) -> Fragment:
+    return Fragment(
+        state,
+        [Button("?", "get_help", arguments=Argument("name", name))],
+        target="help-" + name,
+    )
+
+
+@route
 def purchase(state: State, name: str) -> Page:
     # Is the item in the store?
-    item = find_item(state.items, name)
+    item = find_item(state.items2, name)
     if item is None:
-        return Page(state, [
-            "Sorry, we do not have a " + name + " in stock",
-            Button("Return to store", index)
-        ])
+        return Page(
+            state,
+            [
+                "Sorry, we do not have a " + name + " in stock",
+                Button("Return to store", index),
+            ],
+        )
     # Is the item in stock?
     elif item.stock <= 0:
-        return Page(state, [
-            "Sorry, we are out of stock of " + item.name,
-            Button("Return to store", index)
-        ])
+        return Page(
+            state,
+            [
+                "Sorry, we are out of stock of " + item.name,
+                Button("Return to store", index),
+            ],
+        )
     # Do they have enough money?
     elif state.money < item.price:
-        return Page(state, [
-            "You cannot afford a " + item.name,
-            Button("Return to store", index)
-        ])
+        return Page(
+            state,
+            ["You cannot afford a " + item.name, Button("Return to store", index)],
+        )
     else:
         # Item is in stock, and player has enough money
         item.stock -= 1
         state.money -= item.price
         state.bought.append(item.name)
-        return Page(state, [
-            "You have purchased a " + item.name + " for " + str(item.price) + " coins",
-            Button("Return to store", index)
-        ])
+        return Page(
+            state,
+            [
+                "You have purchased a "
+                + item.name
+                + " for "
+                + str(item.price)
+                + " coins",
+                Button("Return to store", index),
+            ],
+        )
 
 
+assert_equal(
+    index(State([], [], 0, [])),
+    Page(
+        State([], [], 0, []),
+        [
+            "Welcome to the store!",
+            "You have: 0 coins",
+            "You own: ",
+            "Select an item to purchase:",
+            BulletedList([]),
+        ],
+    ),
+)
 
-start_server(State([
-    Item("Sword of Hope", 100, 3),
-    Item("John's Shield", 50, 5),
-    Item("Potion", 25, 10)
-], [], 200))
+
+start_server(
+    State(
+        [
+            Item(
+                "Sword of Hope", 100, 3, "A sword that gives you hope in tough times."
+            ),
+            Item("John's Shield", 50, 5, "A sturdy shield named after John."),
+            Item("Potion", 25, 10, "A magical potion that restores health."),
+            Item("!@#$%^&*\"')()<>", 100, 47, "A mysterious item with a strange name."),
+        ],
+        ["Potion", "Vulnery"],
+        200,
+        [
+            ["Grass", "Grass", "Tree"],
+            ["Water", "Water", "Grass"],
+            ["Mountain", "Grass", "Grass"],
+        ],
+    )
+)

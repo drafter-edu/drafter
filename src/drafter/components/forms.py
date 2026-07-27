@@ -1,0 +1,680 @@
+"""Form input components for collecting user data.
+
+Defines `FormComponent` (the shared base class for named form fields) and
+the concrete inputs students place on pages: `TextBox`, `TextArea`,
+`SelectBox`, `CheckBox`, `RelatedCheckBox`, `RadioButtonGroup`, `Label`,
+and the date/time inputs (`DateTimeInput`, `DateInput`, `TimeInput`).
+Each field's `name` becomes a parameter of the route that the enclosing
+page submits to.
+"""
+
+from dataclasses import dataclass
+from datetime import date, datetime, time
+from typing import Any
+
+from drafter.components.page_content import Component, ComponentArgument, PageContent
+from drafter.components.planning.render_plan import NewlineMode, RenderPlan
+from drafter.components.utilities.validation import validate_parameter_name
+from drafter.data.errors import StudentFacingError
+
+
+class FormComponent(Component):
+    """Base class for form input components.
+
+    Provides shared functionality for form fields including ARIA labels
+    and ID management.
+
+    Attributes:
+        name: The form field name for parameter submission.
+    """
+
+    name: str
+
+    NEWLINE_MODE = NewlineMode.RETAIN
+
+    def handle_aria(self, attributes: dict) -> None:
+        """Add ARIA label attribute if not already present.
+
+        Args:
+            attributes: Dictionary of HTML attributes to update.
+        """
+        if "aria-label" not in attributes:
+            attributes["aria-label"] = self.name
+
+    def get_attributes(self, context) -> dict:
+        """Get HTML attributes for the form component.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            Dictionary of HTML attributes including ARIA label.
+        """
+        attrs = super().get_attributes(context)
+        self.handle_aria(attrs)
+        return attrs
+
+    def get_id(self) -> str:
+        """Get the identifier for this form field.
+
+        Returns:
+            The element ID or the field name.
+        """
+        return self.extra_settings.get("id", self.name)
+
+
+@dataclass(repr=False)
+class Label(Component):
+    """A label element for form fields, optionally associated with an input.
+
+    Attributes:
+        text: The label text content.
+        for_id: Optional ID or FormComponent to associate with this label.
+        tag: The HTML tag name, always 'label'.
+    """
+
+    text: str
+    for_id: None | str | FormComponent = None
+    tag = "label"
+
+    ARGUMENTS = [
+        ComponentArgument("text", is_content=True),
+        ComponentArgument("for_id", kind="keyword", default_value=None),
+    ]
+
+    KNOWN_ATTRS = ["for"]
+    RENAME_ATTRS = {"for_id": "for"}
+
+    NEWLINE_MODE = NewlineMode.CONVERT_TO_BR
+
+    def __init__(
+        self,
+        text: str,
+        for_id: None | str | FormComponent = None,
+        **extra_settings,
+    ):
+        """Initialize label component.
+
+        Args:
+            text: The label text content.
+            for_id: Optional element ID or FormComponent to associate with.
+            **extra_settings: Additional HTML attributes.
+        """
+        self.text = text
+        if isinstance(for_id, FormComponent):
+            for_id = for_id.get_id()
+        self.for_id = for_id
+        self.extra_settings = extra_settings
+
+
+@dataclass(repr=False)
+class TextBox(FormComponent):
+    """Text input field for single-line user input.
+
+    Attributes:
+        default_value: Optional initial value for the text box.
+        kind: The HTML input type (text, password, email, etc.).
+        tag: The HTML tag name, always 'input'.
+    """
+
+    default_value: str | None
+    kind: str
+
+    tag = "input"
+    SELF_CLOSING_TAG = True
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("default_value", kind="keyword", default_value=""),
+        ComponentArgument("kind", kind="keyword", default_value="text"),
+    ]
+
+    RENAME_ATTRS = {"kind": "type", "default_value": "value"}
+    # TODO: There are many more of these to add in, see URL below
+    # https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#attributes
+    KNOWN_ATTRS = [
+        "type",
+        "name",
+        "value",
+        "alt",
+        "size",
+        "maxlength",
+        "pattern",
+        "minlength",
+        "placeholder",
+    ]
+    DEFAULT_ATTRS = {"type": "text"}
+
+    def __init__(
+        self,
+        name: str,
+        default_value: str | int | float | None = "",
+        kind: str = "text",
+        **extra_settings,
+    ):
+        validate_parameter_name(name, "TextBox")
+        self.name = name
+        self.kind = kind
+        # TODO: Can validate for supported types (text, password, email, search, number, etc.)
+        self.default_value = str(default_value) if default_value is not None else ""
+        self.extra_settings = extra_settings
+
+
+@dataclass(repr=False)
+class TextArea(FormComponent):
+    """Multi-line text input field for longer user input.
+
+    Attributes:
+        default_value: The initial text shown in the text area.
+        tag: The HTML tag name, always 'textarea'.
+
+    Example:
+        ```python
+        TextArea("essay", "Type your essay here...")
+        ```
+    """
+
+    tag = "textarea"
+    default_value: str
+
+    COLLAPSE_WHITESPACE = True
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument(
+            "default_value", kind="keyword", is_content=True, default_value=""
+        ),
+    ]
+
+    KNOWN_ATTRS = [
+        "name",
+        "rows",
+        "cols",
+        "autocomplete",
+        "autofocus",
+        "disabled",
+        "placeholder",
+        "readonly",
+        "required",
+    ]
+
+    def __init__(
+        self,
+        name: str,
+        default_value: str | int | float | None = None,
+        **kwargs,
+    ):
+        validate_parameter_name(name, "TextArea")
+        self.name = name
+        self.default_value = str(default_value) if default_value is not None else ""
+        self.extra_settings = kwargs
+
+
+@dataclass(repr=False)
+class SelectBox(FormComponent):
+    """Dropdown selection field for choosing one option from a list.
+
+    Attributes:
+        options: The list of option values to choose from.
+        default_value: The initially selected option, or an empty string.
+        tag: The HTML tag name, always 'select'.
+        allow_missing: Whether to allow a default value not in options.
+
+    Example:
+        ```python
+        SelectBox("flavor", ["vanilla", "chocolate", "strawberry"])
+        ```
+    """
+
+    tag = "select"
+    options: list[str]
+    default_value: str | None
+    allow_missing: bool
+
+    KNOWN_ATTRS = ["name", "multiple", "required", "size"]
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("options"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+        ComponentArgument("allow_missing", kind="keyword", default_value=False),
+    ]
+
+    RENAME_ATTRS = {"default_value": "", "options": ""}
+
+    def __init__(
+        self,
+        name: str,
+        options: list[str],
+        default_value: str | None = None,
+        allow_missing: bool = False,
+        **kwargs,
+    ):
+        """Initialize select box component.
+
+        Args:
+            name: The form field name.
+            options: List of option values to display.
+            default_value: Optional initially selected value.
+            allow_missing: Whether to allow a default value not in options.
+            **kwargs: Additional HTML attributes.
+
+        Raises:
+            ValueError: If name is not a valid parameter name or if default_value is not in options.
+        """
+        validate_parameter_name(name, "SelectBox")
+        self.name = name
+        self.options = [str(option) for option in options]
+        self.default_value = str(default_value) if default_value is not None else ""
+        self.allow_missing = allow_missing
+        self.extra_settings = kwargs
+        # Validate that default_value is in options, or raise ValueError
+        if (
+            not self.allow_missing
+            and self.default_value
+            and self.default_value not in self.options
+        ):
+            raise StudentFacingError(
+                f"default_value '{self.default_value}' is not in options {self.options}",
+                friendly=(
+                    "The starting choice for this SelectBox has to be one of "
+                    "the options in its list, and "
+                    f"'{self.default_value}' is not."
+                ),
+                steps=(
+                    "Add the default value to the options list, or change it "
+                    "to one of the existing options.",
+                    "Check for typos and capitalization differences between "
+                    "the default value and the options.",
+                ),
+            )
+
+    def get_children(self, context) -> list[PageContent | RenderPlan]:
+        """Build an `option` RenderPlan for each entry in `options`.
+
+        The option matching `default_value` gets the `selected` attribute.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            List of RenderPlan objects, one per option.
+        """
+        children: list[PageContent | RenderPlan] = []
+        for option in self.options:
+            option_attrs: dict[str, Any] = {"value": option}
+            if option == self.default_value:
+                option_attrs["selected"] = True
+            children.append(
+                RenderPlan(
+                    kind="tag",
+                    tag_name="option",
+                    attributes=option_attrs,
+                    children=[option],
+                    known_attributes=["value", "selected"],
+                )
+            )
+
+        return children
+
+
+@dataclass(repr=False)
+class CheckBox(FormComponent):
+    """
+    A checkbox input component for boolean values.
+
+    Note:
+        Rendering emits an extra hidden input with the same name (and an
+        empty value) before the checkbox, so that the unchecked state is
+        still submitted with the form.
+
+    Attributes:
+        default_value: Whether the checkbox is initially checked.
+    """
+
+    default_value: bool
+
+    tag = "input"
+    KNOWN_ATTRS = ["type", "name", "checked"]
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("default_value", kind="keyword", default_value=False),
+    ]
+    RENAME_ATTRS = {"default_value": "checked"}
+    DEFAULT_ATTRS = {"type": "checkbox"}
+
+    def __init__(self, name: str, default_value: bool = False, **kwargs):
+        """Initialize checkbox component.
+
+        Args:
+            name: The form field name.
+            default_value: Whether initially checked. Defaults to False.
+            **kwargs: Additional HTML attributes.
+
+        Raises:
+            ValueError: If name is not a valid parameter name.
+        """
+        validate_parameter_name(name, "CheckBox")
+        self.name = name
+        self.default_value = bool(default_value)
+        self.extra_settings = kwargs
+
+    def plan(self, context) -> RenderPlan:
+        """Plan the checkbox along with its hidden companion input.
+
+        Emits a hidden input with the same name (and an empty value) before
+        the checkbox itself, so that the unchecked state is still submitted
+        with the form.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            A fragment RenderPlan containing the hidden input and checkbox.
+        """
+        # Hidden input for unchecked state
+        hidden_plan = RenderPlan(
+            kind="tag",
+            tag_name="input",
+            attributes={
+                "type": "hidden",
+                "name": self.name,
+                "value": "",
+                "id": f"--drafter-hidden-{self.get_id()}",
+            },
+            self_closing=True,
+            known_attributes=["type", "name", "value", "id"],
+        )
+
+        # Checkbox input
+        checkbox_plan = self._plan_tag(context)
+
+        return RenderPlan(kind="fragment", items=[hidden_plan, checkbox_plan])
+
+
+@dataclass(repr=False)
+class RelatedCheckBox(FormComponent):
+    """
+    A checkbox component that is part of a group of related checkboxes.
+    These checkboxes share the same name and are submitted as a list of values.
+
+    Attributes:
+        value: The value this checkbox contributes to the submitted list when
+            checked. Also used as the element's default id (see `get_id`).
+        default_value: Whether the checkbox is initially checked.
+    """
+
+    default_value: bool
+
+    tag = "input"
+    KNOWN_ATTRS = ["type", "name", "checked"]
+    # Members of a group share one name and submit as a single list, so the
+    # duplicate-name payload verification must not flag them.
+    ALLOWS_SHARED_NAME = True
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("value"),
+        ComponentArgument("default_value", kind="keyword", default_value=False),
+    ]
+    RENAME_ATTRS = {"default_value": "checked"}
+    DEFAULT_ATTRS = {"type": "checkbox", "data-cardinality": "many"}
+
+    def __init__(self, name: str, value: str, default_value: bool = False, **kwargs):
+        """Initialize RelatedCheckBox component.
+
+        Args:
+            name: The form field name.
+            value: The value of the checkbox, which will be transformed into a list element
+            default_value: Whether initially checked. Defaults to False.
+            **kwargs: Additional HTML attributes.
+
+        Raises:
+            ValueError: If name is not a valid parameter name.
+        """
+        validate_parameter_name(name, "RelatedCheckBox")
+        self.name = name
+        self.value = value
+        self.default_value = bool(default_value)
+        self.extra_settings = kwargs
+
+    def get_id(self) -> str:
+        """Get the identifier for this checkbox.
+
+        Returns:
+            The element ID or, by default, the checkbox's value (so that
+            related checkboxes sharing a name still have distinct ids).
+        """
+        return self.extra_settings.get("id", self.value)
+
+
+@dataclass(repr=False)
+class RadioButtonGroup(FormComponent):
+    """A group of radio buttons for choosing exactly one option from a list.
+
+    Renders a `div` containing one radio `input` per option, all sharing
+    the same form field name so that a single value is submitted.
+
+    Attributes:
+        options: The list of radio button options.
+        default_value: The initially selected option, or an empty string.
+        tag: The HTML tag name, always 'div'.
+
+    Example:
+        ```python
+        RadioButtonGroup("size", ["small", "medium", "large"], default_value="medium")
+        ```
+    """
+
+    options: list[str]
+    default_value: str
+
+    tag = "div"
+    KNOWN_ATTRS = []
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("options"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+    ]
+    # The field values render on the child radio inputs, not the div.
+    RENAME_ATTRS = {"name": "", "options": "", "default_value": ""}
+    DEFAULT_ATTRS = {}
+
+    def __init__(
+        self,
+        name: str,
+        options: list[str],
+        default_value: str | int | float | None = None,
+        **kwargs,
+    ):
+        """Initialize a group of radio button components.
+
+        Args:
+            name: The form field name.
+            options: The list of radio button options.
+            default_value: The initially selected option. Defaults to None.
+            **kwargs: Additional HTML attributes.
+
+        Raises:
+            ValueError: If name is not a valid parameter name.
+        """
+        validate_parameter_name(name, "RadioButtonGroup")
+        self.name = name
+        self.options = [str(option) for option in options]
+        self.default_value = str(default_value) if default_value is not None else ""
+        self.extra_settings = kwargs
+
+    def get_children(self, context) -> list[PageContent | RenderPlan]:
+        """Build a labeled radio `input` RenderPlan per entry in `options`.
+
+        Each option renders as a `label` wrapping a radio input (sharing
+        the group's form field name) followed by the option's text, so
+        clicking the text selects the option. The option matching
+        `default_value` gets the `checked` attribute.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            List of RenderPlan objects, one labeled radio per option.
+        """
+        children: list[PageContent | RenderPlan] = []
+        for option in self.options:
+            option_attrs: dict[str, Any] = {
+                "type": "radio",
+                "name": self.name,
+                "value": option,
+            }
+            if option == self.default_value:
+                option_attrs["checked"] = True
+            radio = RenderPlan(
+                kind="tag",
+                tag_name="input",
+                attributes=option_attrs,
+                children=[],
+                self_closing=True,
+                known_attributes=["type", "name", "value", "checked"],
+            )
+            children.append(
+                RenderPlan(
+                    kind="tag",
+                    tag_name="label",
+                    children=[radio, " " + option],
+                    known_attributes=[],
+                )
+            )
+
+        return children
+
+    def get_id(self) -> str:
+        """Get the identifier for this radio button group.
+
+        Returns:
+            The element ID or, by default, the group's default value.
+        """
+        return self.extra_settings.get("id", self.default_value)
+
+
+@dataclass(repr=False)
+# TODO: Handle __eq__ and __hash__
+class DateTimeInput(FormComponent):
+    """
+    A datetime-local input component for selecting both date and time.
+
+    Args:
+        name: The name of the form field
+        default_value: Optional default value in ISO 8601 format (YYYY-MM-DDTHH:MM) or a `datetime` object
+        kwargs: Additional HTML attributes
+
+    Attributes:
+        default_value: The default value as an ISO 8601 string, or None.
+        tag: The HTML tag name, always 'input'.
+    """
+
+    default_value: str | None
+
+    tag = "input"
+    SELF_CLOSING_TAG = True
+    KNOWN_ATTRS = ["type", "name", "value"]
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+    ]
+    DEFAULT_ATTRS = {"type": "datetime-local"}
+    RENAME_ATTRS = {"default_value": "value"}
+
+    def __init__(
+        self, name: str, default_value: str | None | datetime = None, **kwargs
+    ):
+        validate_parameter_name(name, "DateTimeInput")
+        self.name = name
+        self.default_value = (
+            default_value.isoformat(timespec="minutes")
+            if isinstance(default_value, datetime)
+            else str(default_value)
+            if default_value is not None
+            else None
+        )
+        self.extra_settings = kwargs
+
+
+@dataclass(repr=False)
+class DateInput(FormComponent):
+    """
+    A date input component for selecting dates.
+
+    Args:
+        name: The name of the form field
+        default_value: Optional default value in ISO 8601 format (YYYY-MM-DD)
+        kwargs: Additional HTML attributes
+    """
+
+    default_value: str | None
+
+    tag = "input"
+    SELF_CLOSING_TAG = True
+    KNOWN_ATTRS = ["type", "name", "value"]
+    DEFAULT_ATTRS = {"type": "date"}
+    RENAME_ATTRS = {"default_value": "value"}
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+    ]
+
+    def __init__(
+        self,
+        name: str,
+        default_value: str | None | datetime | date = None,
+        **kwargs,
+    ):
+        validate_parameter_name(name, "DateInput")
+        self.name = name
+        self.default_value = (
+            default_value.isoformat()
+            if isinstance(default_value, (datetime, date))
+            else str(default_value)
+            if default_value is not None
+            else None
+        )
+        self.extra_settings = kwargs
+
+
+@dataclass(repr=False)
+class TimeInput(FormComponent):
+    """
+    A time input component for selecting times.
+
+    Args:
+        name: The name of the form field
+        default_value: Optional default value in ISO 8601 format (HH:MM or HH:MM:SS)
+        kwargs: Additional HTML attributes
+    """
+
+    default_value: str | None
+
+    tag = "input"
+    SELF_CLOSING_TAG = True
+    KNOWN_ATTRS = ["type", "name", "value"]
+    RENAME_ATTRS = {"default_value": "value"}
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+    ]
+
+    DEFAULT_ATTRS = {"type": "time"}
+
+    def __init__(self, name: str, default_value: str | None | time = None, **kwargs):
+        validate_parameter_name(name, "TimeInput")
+        self.name = name
+        self.default_value = (
+            default_value.isoformat()
+            if isinstance(default_value, time)
+            else str(default_value)
+            if default_value is not None
+            else None
+        )
+        self.extra_settings = kwargs

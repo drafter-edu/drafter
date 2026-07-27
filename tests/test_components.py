@@ -1,4 +1,5 @@
 import pytest
+
 from drafter import *
 
 snippets = {
@@ -20,12 +21,10 @@ snippets = {
         "with_style": """Argument('styled_param', 'styled_value', style_font_weight="bold")""",
         "with_attributes": """Argument('attr_param', 'attr_value', id="arg1", style_font_style="italic")""",
     },
-
     "span": {
         "simple": """Span('Hello world!')""",
         "with_style": """Span('Styled text', style_font_size="20px", style_color="#333333")""",
         "with_attributes": """Span('Attributed text', id="myspan", style_text_decoration="underline")""",
-
     },
     "ol": {
         "simple": """NumberedList(['First item', 'Second item', 'Third item'])""",
@@ -41,18 +40,15 @@ snippets = {
         "h3": """Header('This is a level 3 header', level=3)""",
         "with_style": """Header('Styled Header', level=2, style_text_align="center", style_color="#0000FF")""",
     },
-
     "text": {
         "simple": """Text('This is a simple text component.')""",
         "with_style": """Text('Styled text component.', style_font_family='Arial', style_font_size='16px')""",
     },
-
     "row": {
         "simple": """Row(['Hello world!', 'This is a row.'])""",
         "with_style": """Row(['Styled row'], style_background_color="#DDDDDD", style_padding="10px")""",
-    }
+    },
 }
-
 
 
 @pytest.mark.parametrize(
@@ -73,6 +69,7 @@ def test_snippet_consistent(category, name, snippet):
         f"{category} / {name}: evaluating the snippet twice "
         f"should produce equal objects.\nSnippet:\n{snippet}"
     )
+
 
 @pytest.mark.parametrize(
     "category,name,snippet",

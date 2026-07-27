@@ -1,0 +1,60 @@
+"""The `Redirect` payload for navigating the client to another route."""
+
+from dataclasses import dataclass
+from typing import Any
+
+from drafter.payloads.payloads import ResponsePayload
+
+
+@dataclass
+class Redirect(ResponsePayload):
+    """
+    A Redirect is a payload that will redirect the user to a new route.
+
+    Often, it is simpler to simply call a different route function inline.
+    However, that will not change the back/forward history of the browser.
+    A Redirect payload will cause the browser to navigate to a new route,
+    updating the history as appropriate. In other words, this is like a proper
+    version of a function call that the client is aware of.
+
+    Args:
+        target_route: The route to redirect to.
+        state_update: Optional new state to apply before redirecting; if None,
+            the state is left unchanged.
+        **kwargs: Any additional keyword arguments are passed to the target
+            route as its arguments (stored in the `arguments` attribute).
+    """
+
+    target_route: str
+    state_update: Any | None
+    arguments: dict | None = None
+
+    def __init__(self, target_route: str, state_update: Any | None = None, **kwargs):
+        self.target_route = target_route
+        self.state_update = state_update
+        self.arguments = kwargs if kwargs else None
+
+    def is_redirect(self) -> bool:
+        """Identify this payload as a redirect.
+
+        Returns:
+            bool: Always True.
+        """
+        return True
+
+    def get_state_updates(self) -> tuple[bool, Any]:
+        """Report the optional state update carried by the redirect.
+
+        Returns:
+            Tuple of (has_update, new_state); has_update is True only when
+            a state_update was provided.
+        """
+        return self.state_update is not None, self.state_update
+
+    def get_redirect(self) -> tuple[str, dict | None]:
+        """Retrieve the redirect destination.
+
+        Returns:
+            Tuple of (target_route, arguments dict or None).
+        """
+        return self.target_route, self.arguments

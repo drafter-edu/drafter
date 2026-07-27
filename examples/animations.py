@@ -1,6 +1,5 @@
 from drafter import *
 
-
 add_website_css("""
 .fade-in-element {
   animation: fadeIn 2s ease-in forwards;
@@ -20,11 +19,14 @@ class State:
 
 @route
 def index(state: State):
-    return Page(state, [
-        Div("Hello, world!", classes="fade-in-element"),
-        TextBox("text", state.text),
-        Button("Click me!", "index")
-    ])
+    return Page(
+        state,
+        [
+            Div("Hello, world!", classes="fade-in-element"),
+            TextBox("text", state.text),
+            Button("Click me!", "index"),
+        ],
+    )
 
 
 start_server(State("Type something here"))

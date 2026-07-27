@@ -1,0 +1,49 @@
+{#-
+  Drafter override of Material's tabs partial (STUDENT_DOCS_PLAN.md §9.3).
+
+  Renders the primary journey and utility sections as normal tabs, and
+  collapses the Teach / Extend / Developers sections into a "More" dropdown
+  at the far right — except when the reader is already inside one of those
+  sections, where all three render as visible tabs instead. The dropdown
+  opens on hover and keyboard focus via CSS, and on click/touch via
+  assets/drafter-theme.js.
+-#}
+{% import "partials/tabs-item.html" as item with context %}
+{% set more_titles = ["Teach", "Extend", "Developers"] %}
+{% set ns = namespace(expanded=false) %}
+{% for nav_item in nav.items %}
+  {% if nav_item.title in more_titles and nav_item.active %}
+    {% set ns.expanded = true %}
+  {% endif %}
+{% endfor %}
+<nav class="md-tabs" aria-label="{{ lang.t('tabs') }}" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      {% set more_items = [] %}
+      {% for nav_item in nav.items %}
+        {% if nav_item.title in more_titles and not ns.expanded %}
+          {% set _ = more_items.append(nav_item) %}
+        {% else %}
+          {{ item.render(nav_item) }}
+        {% endif %}
+      {% endfor %}
+      {% if more_items %}
+        {% set more_active = more_items | selectattr("active") | list | length > 0 %}
+        <li class="md-tabs__item drafter-more{% if more_active %} md-tabs__item--active{% endif %}">
+          <button type="button" class="md-tabs__link drafter-more__button" aria-haspopup="true">
+            More
+            <span class="drafter-more__caret" aria-hidden="true">▾</span>
+          </button>
+          <ul class="drafter-more__menu">
+            {% for nav_item in more_items %}
+              {% set first = nav_item.children | first if nav_item.children else nav_item %}
+              <li>
+                <a class="drafter-more__link" href="{{ first.url | url }}">{{ nav_item.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>

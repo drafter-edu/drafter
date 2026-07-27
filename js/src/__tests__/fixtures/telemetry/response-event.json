@@ -1,0 +1,27 @@
+{
+	"kind": "ResponseEvent",
+	"metadata": {
+		"source": "client_server.visit",
+		"level": "info",
+		"id": 13,
+		"version": "2.0.0b10",
+		"timestamp": "2026-07-23T10:15:31.230981"
+	},
+	"correlation": {
+		"causation_id": null,
+		"route": "index",
+		"request_id": 1,
+		"response_id": 2,
+		"dom_id": null,
+		"phase": null
+	},
+	"status_code": "ok",
+	"payload_type": "Page",
+	"body_length": 512,
+	"has_errors": false,
+	"has_warnings": false,
+	"duration_ms": 12.5,
+	"response_id": 2,
+	"request_id": 1,
+	"formatted_page_content": "<div class=\"drafter-page\">Hello, Ada!</div>"
+}

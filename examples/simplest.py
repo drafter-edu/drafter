@@ -1,5 +1,7 @@
 from bakery import assert_equal
-from drafter import route, start_server, Page
+
+from drafter import Page, route, start_server
+
 
 @route("index")
 def index():

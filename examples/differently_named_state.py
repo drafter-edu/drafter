@@ -1,5 +1,6 @@
-from drafter import *
 from dataclasses import dataclass
+
+from drafter import *
 
 
 @dataclass
@@ -10,13 +11,10 @@ class Apples:
 
 @route
 def index(state: Apples) -> Page:
-    return Page(state, [
-        "The message is:",
-        state.message,
-        "There are",
-        str(state.count),
-        "apples."
-    ])
+    return Page(
+        state,
+        ["The message is:", state.message, "There are", str(state.count), "apples."],
+    )
 
 
 start_server(Apples("The original message", 5))

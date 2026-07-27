@@ -1,0 +1,375 @@
+.drafter-frame-- {
+	margin: 0 auto;
+}
+
+body {
+	margin: 0;
+	height: 100dvh;
+	box-sizing: border-box;
+}
+
+.drafter-body-- {
+	box-sizing: border-box;
+	padding: 20px;
+	font-size: 1.5em;
+	line-height: 1.6;
+	font-weight: 400;
+	font-family:
+		Raleway, HelveticaNeue, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	color: #222;
+
+	/* display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    align-content: flex-start; */
+
+	button {
+		font-family:
+			Raleway, HelveticaNeue, "Helvetica Neue", Helvetica, Arial,
+			sans-serif;
+		padding: 10px 15px;
+		font-size: 1em;
+		border-radius: 5px;
+		border: 1px solid #ccc;
+		background-color: #3e3e9e;
+		color: white;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+		cursor: pointer;
+		margin: 0.5em 0.25em;
+	}
+
+	button :hover {
+		background-color: #f0f0f0;
+	}
+
+	button :active {
+		background-color: #e0e0e0;
+	}
+
+	/* Need to be able to override this easily */
+	h1 {
+		font-size: 4rem !important;
+		line-height: 1.2 !important;
+		letter-spacing: -0.1rem !important;
+	}
+
+	input,
+	select,
+	textarea {
+		font-family:
+			Raleway, HelveticaNeue, "Helvetica Neue", Helvetica, Arial,
+			sans-serif;
+		font-size: 1em;
+		padding: 8px;
+		border-radius: 4px;
+		border: 1px solid #ccc;
+		margin: 0.5em 0.25em;
+		vertical-align: middle;
+	}
+
+	input[type="checkbox"] {
+		transform: scale(2);
+		margin-left: 10px;
+		margin-right: 10px;
+	}
+
+	table {
+		border-collapse: separate;
+		border-spacing: 0;
+		margin: 0.5em 0.25em 1em;
+		border: 1px solid #ccc;
+		border-radius: 5px;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+		overflow: hidden;
+	}
+
+	th,
+	td {
+		padding: 8px 14px;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	th {
+		background-color: #3e3e9e;
+		color: white;
+		font-weight: 600;
+	}
+
+	tr:not(:last-child) > td,
+	tr:not(:last-child) > th {
+		border-bottom: 1px solid #ddd;
+	}
+
+	tbody tr:nth-child(even) {
+		background-color: #f4f4fb;
+	}
+
+	caption {
+		font-weight: 600;
+		margin-bottom: 0.25em;
+	}
+
+	drafter-timer {
+		display: inline-block;
+		margin: 0.25em 0.25em;
+		border: 1px solid black;
+		padding: 0.25em 1em;
+		background-color: #f9f9f9;
+		border-radius: 1em;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+		text-align: center;
+		width: fit-content;
+	}
+
+	/* Deferred-autoplay wrapper around <audio>/<video>; must never affect
+	   layout, so the wrapped media element renders exactly as if bare. */
+	drafter-media {
+		display: contents;
+	}
+
+	drafter-tone[hidden],
+	drafter-melody[hidden],
+	drafter-sound[hidden],
+	drafter-microphone[hidden],
+	drafter-audio-recorder[hidden],
+	drafter-camera[hidden] {
+		display: none !important;
+	}
+
+	drafter-tone,
+	drafter-melody {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5em;
+
+		.drafter-audio-status {
+			min-width: 1.5em;
+			color: #3e3e9e;
+		}
+	}
+
+	drafter-sound {
+		display: inline-flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.25em;
+		vertical-align: middle;
+
+		audio {
+			vertical-align: middle;
+		}
+	}
+
+	.drafter-audio-visualizer {
+		display: block;
+		width: 300px;
+		height: 60px;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		background-color: #f9f9f9;
+	}
+
+	drafter-microphone,
+	drafter-audio-recorder,
+	drafter-camera {
+		display: block;
+		margin: 1rem 0;
+		padding: 1rem;
+		border: 1px solid #ddd;
+		border-radius: 8px;
+		background-color: #f9f9f9;
+
+		.drafter-camera-preview,
+		.drafter-camera-photo {
+			display: block;
+			max-width: 100%;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			background-color: #000;
+		}
+
+		.drafter-camera-buttons {
+			display: flex;
+			gap: 0.5rem;
+		}
+
+		.drafter-microphone-status,
+		.drafter-recorder-status,
+		.drafter-camera-status {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 0.5rem;
+			text-align: center;
+
+			p {
+				margin: 0;
+			}
+		}
+
+		.drafter-microphone-spinner {
+			width: 32px;
+			height: 32px;
+			border: 3px solid #f3f3f3;
+			border-top: 3px solid #007bff;
+			border-radius: 50%;
+			animation: drafter-geolocation-spin 1s linear infinite;
+		}
+
+		.drafter-microphone-meter {
+			width: 100%;
+			max-width: 300px;
+			height: 20px;
+			border: 1px solid #ccc;
+			border-radius: 10px;
+			background-color: #eee;
+			overflow: hidden;
+		}
+
+		.drafter-microphone-meter-fill {
+			height: 100%;
+			width: 0%;
+			background-color: #28a745;
+			transition: width 0.05s linear;
+		}
+
+		.drafter-microphone-meter-loud {
+			background-color: #dc3545;
+		}
+
+		.drafter-microphone-live-message {
+			font-size: 0.875rem;
+			color: #666;
+		}
+
+		.drafter-microphone-error-icon {
+			font-size: 2rem;
+		}
+
+		.drafter-microphone-error-message {
+			font-weight: 600;
+			color: #dc3545;
+		}
+
+		.drafter-microphone-help-link {
+			background: none;
+			border: none;
+			box-shadow: none;
+			color: #007bff;
+			font-size: 0.875rem;
+			text-decoration: underline;
+			padding: 0;
+			margin: 0;
+		}
+
+		.drafter-recorder-elapsed {
+			font-family: monospace;
+			color: #dc3545;
+			font-weight: 600;
+		}
+	}
+
+	drafter-current-location {
+		display: block;
+		margin: 1rem 0;
+		padding: 1rem;
+		border: 1px solid #ddd;
+		border-radius: 8px;
+		background-color: #f9f9f9;
+
+		.drafter-geolocation-status {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 0.5rem;
+			text-align: center;
+
+			p {
+				margin: 0;
+			}
+		}
+
+		.drafter-geolocation-help {
+			font-size: 0.875rem;
+			color: #666;
+		}
+
+		.drafter-geolocation-spinner {
+			width: 32px;
+			height: 32px;
+			border: 3px solid #f3f3f3;
+			border-top: 3px solid #007bff;
+			border-radius: 50%;
+			animation: drafter-geolocation-spin 1s linear infinite;
+		}
+
+		.drafter-geolocation-success-icon {
+			font-size: 2rem;
+			color: #28a745;
+		}
+
+		.drafter-geolocation-success-message {
+			font-weight: 600;
+			color: #28a745;
+		}
+
+		.drafter-geolocation-error-icon {
+			font-size: 2rem;
+		}
+
+		.drafter-geolocation-error-message {
+			font-weight: 600;
+			color: #dc3545;
+		}
+
+		.drafter-geolocation-coords {
+			font-family: monospace;
+			font-size: 0.875rem;
+			color: #333;
+		}
+
+		.drafter-geolocation-help-link {
+			background: none;
+			border: none;
+			box-shadow: none;
+			color: #007bff;
+			font-size: 0.875rem;
+			text-decoration: underline;
+			padding: 0;
+			margin: 0;
+		}
+	}
+}
+
+@keyframes drafter-geolocation-spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Loading state applied to pressed buttons while their request is being
+   processed (configuration setting `button_spinners`). Applied by the
+   bridge's click/submit handlers and cleared when the response commits. */
+.drafter-button-loading-- {
+	pointer-events: none;
+	opacity: 0.75;
+}
+
+.drafter-button-loading--::after {
+	content: "";
+	display: inline-block;
+	width: 0.75em;
+	height: 0.75em;
+	margin-left: 0.5em;
+	border: 0.15em solid currentcolor;
+	border-top-color: transparent;
+	border-radius: 50%;
+	vertical-align: middle;
+	animation: drafter-geolocation-spin 0.8s linear infinite;
+}

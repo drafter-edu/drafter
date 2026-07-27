@@ -1,0 +1,373 @@
+import { DrafterHTMLElement } from "./drafterHTMLElement";
+import {
+	geolocationBroker,
+	type LocationRequestOptions,
+} from "./geolocationBroker";
+
+type LocationStatus =
+	| "unavailable"
+	| "prompt"
+	| "granted"
+	| "denied"
+	| "pending"
+	| "error";
+
+type LocationData = {
+	status: LocationStatus;
+	message?: string;
+	latitude?: number;
+	longitude?: number;
+	accuracy?: number;
+	altitude?: number;
+	heading?: number;
+	speed?: number;
+	timestamp?: number;
+};
+
+const DENIED_HELP_INSTRUCTIONS = [
+	"To enable location access:",
+	"",
+	"1. Click the lock or info icon in your browser's address bar",
+	"2. Find Location permissions",
+	"3. Change to 'Allow'",
+	"4. Refresh this page",
+].join("\n");
+
+function paragraph(className: string, text: string): HTMLParagraphElement {
+	const element = document.createElement("p");
+	if (className) {
+		element.className = className;
+	}
+	element.textContent = text;
+	return element;
+}
+
+class CurrentLocation extends DrafterHTMLElement {
+	static get observedAttributes() {
+		return [
+			"name",
+			"show",
+			"show-coordinates",
+			"enable-high-accuracy",
+			"timeout",
+			"maximum-age",
+		];
+	}
+
+	private input: HTMLInputElement | null = null;
+	private statusArea: HTMLDivElement | null = null;
+	private location: LocationData = { status: "prompt" };
+
+	private getName(): string {
+		return this.getAttribute("name") ?? "";
+	}
+
+	private shouldShowCoordinates(): boolean {
+		return this.getBooleanAttribute("show-coordinates", false);
+	}
+
+	private shouldShow(): boolean {
+		return this.getBooleanAttribute("show", true);
+	}
+
+	private getEnableHighAccuracy(): boolean {
+		return this.getBooleanAttribute("enable-high-accuracy", true);
+	}
+
+	private getNumericOption(
+		attributeName: string,
+		defaultValue: number,
+	): number {
+		const rawValue = this.getAttribute(attributeName);
+		if (rawValue === null || rawValue.trim() === "") {
+			return defaultValue;
+		}
+		const parsed = Number(rawValue);
+		if (!Number.isFinite(parsed) || parsed < 0) {
+			return defaultValue;
+		}
+		return parsed;
+	}
+
+	private getRequestOptions(): LocationRequestOptions {
+		return {
+			enableHighAccuracy: this.getEnableHighAccuracy(),
+			timeoutMs: this.getNumericOption("timeout", 10000),
+			maxAgeMs: this.getNumericOption("maximum-age", 0),
+		};
+	}
+
+	private syncVisibility(): void {
+		this.hidden = !this.shouldShow();
+	}
+
+	// The hidden input is what actually enters the form payload: its value is
+	// the JSON-encoded location, and data-transform="json-decode" tells the
+	// bridge to decode it before the router converts it to a Location.
+	private renderStructure(): void {
+		const input = document.createElement("input");
+		input.type = "hidden";
+		input.name = this.getName();
+		input.setAttribute("data-transform", "json-decode");
+
+		const statusArea = document.createElement("div");
+		statusArea.className = "drafter-geolocation-status";
+
+		this.input = input;
+		this.statusArea = statusArea;
+		this.replaceChildren(input, statusArea);
+		this.syncVisibility();
+	}
+
+	private setLocation(location: LocationData, emit = true): void {
+		this.location = location;
+		if (this.input !== null) {
+			this.input.value = JSON.stringify(location);
+		}
+		this.renderStatus();
+		if (emit) {
+			const detail = { ...location };
+			this.dispatchEvent(new CustomEvent("locate", { detail }));
+			if (location.status === "denied") {
+				this.dispatchEvent(new CustomEvent("error", { detail }));
+				this.dispatchEvent(new CustomEvent("denied", { detail }));
+			} else if (
+				location.status === "error" &&
+				(location.message ?? "") === "Location request timed out"
+			) {
+				this.dispatchEvent(new CustomEvent("error", { detail }));
+				this.dispatchEvent(new CustomEvent("timeout", { detail }));
+			} else if (location.status === "error") {
+				this.dispatchEvent(new CustomEvent("error", { detail }));
+			}
+		}
+	}
+
+	private beginRequest(): void {
+		this.setLocation(
+			{ status: "pending", message: "Requesting permission..." },
+			false,
+		);
+		geolocationBroker
+			.getPosition(this.getRequestOptions())
+			.then((position) => this.handleSuccess(position))
+			.catch((error) => this.handleError(error));
+	}
+
+	private handleSuccess(position: GeolocationPosition): void {
+		const coords = position.coords;
+		const location: LocationData = {
+			status: "granted",
+			message: "Location available",
+			latitude: coords.latitude,
+			longitude: coords.longitude,
+			accuracy: coords.accuracy,
+			timestamp: position.timestamp,
+		};
+		if (coords.altitude !== null) {
+			location.altitude = coords.altitude;
+		}
+		if (coords.heading !== null) {
+			location.heading = coords.heading;
+		}
+		if (coords.speed !== null) {
+			location.speed = coords.speed;
+		}
+		this.setLocation(location);
+	}
+
+	private handleError(error: unknown): void {
+		let status: LocationStatus = "error";
+		let message = "Could not retrieve location";
+		const geolocationError = error as
+			| (GeolocationPositionError & {
+					PERMISSION_DENIED?: number;
+					POSITION_UNAVAILABLE?: number;
+					TIMEOUT?: number;
+			  })
+			| undefined;
+		const code = geolocationError?.code;
+		if (code === geolocationError?.PERMISSION_DENIED || code === 1) {
+			status = "denied";
+			message = "Location access denied";
+		} else if (
+			code === geolocationError?.POSITION_UNAVAILABLE ||
+			code === 2
+		) {
+			message = "Location information unavailable";
+		} else if (code === geolocationError?.TIMEOUT || code === 3) {
+			message = "Location request timed out";
+		} else if (error instanceof Error && error.message) {
+			message = error.message;
+		}
+		this.setLocation({ status, message });
+	}
+
+	private checkExistingPermission(): void {
+		if (!navigator.permissions) {
+			return;
+		}
+		navigator.permissions
+			.query({ name: "geolocation" })
+			.then((result) => {
+				if (!this.isConnected) {
+					return;
+				}
+				if (result.state === "granted") {
+					this.beginRequest();
+				} else if (result.state === "denied") {
+					this.setLocation(
+						{ status: "denied", message: "Location access denied" },
+						false,
+					);
+				}
+				// If "prompt", leave the initial button visible.
+			})
+			.catch(() => {
+				// Permissions API not fully supported; leave the prompt.
+			});
+	}
+
+	private renderStatus(): void {
+		if (this.statusArea === null) {
+			return;
+		}
+		const { status, message } = this.location;
+		const children: Node[] = [];
+
+		if (status === "prompt") {
+			const button = document.createElement("button");
+			button.type = "button";
+			button.className = "drafter-geolocation-prompt";
+			button.textContent = "📍 Use my location";
+			button.addEventListener("click", () => {
+				this.beginRequest();
+			});
+			children.push(
+				button,
+				paragraph(
+					"drafter-geolocation-help",
+					"Your location helps personalize your experience. Click to allow.",
+				),
+			);
+		} else if (status === "pending") {
+			const spinner = document.createElement("div");
+			spinner.className = "drafter-geolocation-spinner";
+			children.push(
+				spinner,
+				paragraph("", message ?? "Requesting permission..."),
+			);
+		} else if (status === "granted") {
+			children.push(
+				paragraph("drafter-geolocation-success-icon", "✓"),
+				paragraph(
+					"drafter-geolocation-success-message",
+					message ?? "Location available",
+				),
+			);
+			const { latitude, longitude, accuracy } = this.location;
+			if (
+				this.shouldShowCoordinates() &&
+				latitude !== undefined &&
+				longitude !== undefined
+			) {
+				const accuracyText = accuracy
+					? ` (±${Math.round(accuracy)}m)`
+					: "";
+				children.push(
+					paragraph(
+						"drafter-geolocation-coords",
+						`${latitude.toFixed(6)}, ${longitude.toFixed(6)}${accuracyText}`,
+					),
+				);
+			}
+		} else if (status === "denied") {
+			const helpButton = document.createElement("button");
+			helpButton.type = "button";
+			helpButton.className = "drafter-geolocation-help-link";
+			helpButton.textContent = "How to enable location access";
+			helpButton.addEventListener("click", () => {
+				window.alert(DENIED_HELP_INSTRUCTIONS);
+			});
+			children.push(
+				paragraph("drafter-geolocation-error-icon", "⚠️"),
+				paragraph(
+					"drafter-geolocation-error-message",
+					message ?? "Location access denied",
+				),
+				helpButton,
+			);
+		} else if (status === "unavailable") {
+			children.push(
+				paragraph("drafter-geolocation-error-icon", "ℹ️"),
+				paragraph(
+					"",
+					message ?? "Geolocation is not supported by your browser",
+				),
+			);
+		} else {
+			children.push(
+				paragraph("drafter-geolocation-error-icon", "⚠️"),
+				paragraph(
+					"drafter-geolocation-error-message",
+					message ?? "Could not retrieve location",
+				),
+			);
+		}
+
+		this.statusArea.dataset.status = status;
+		this.statusArea.replaceChildren(...children);
+	}
+
+	connectedCallback() {
+		this.renderStructure();
+		if (!navigator.geolocation) {
+			this.setLocation(
+				{
+					status: "unavailable",
+					message: "Geolocation is not supported by your browser",
+				},
+				false,
+			);
+			return;
+		}
+		this.setLocation(
+			{
+				status: "prompt",
+				message: "Location permission has not been requested yet",
+			},
+			false,
+		);
+		this.checkExistingPermission();
+	}
+
+	attributeChangedCallback(
+		name: string,
+		oldValue: string | null,
+		newValue: string | null,
+	) {
+		if (oldValue === newValue || !this.isConnected) {
+			return;
+		}
+		if (name === "name") {
+			if (this.input !== null) {
+				this.input.name = newValue ?? "";
+			}
+			return;
+		}
+		if (name === "show-coordinates") {
+			this.renderStatus();
+			return;
+		}
+		if (name === "show") {
+			this.syncVisibility();
+		}
+	}
+
+	disconnectedCallback() {
+		this.input = null;
+		this.statusArea = null;
+	}
+}
+
+customElements.define("drafter-current-location", CurrentLocation);

@@ -1,0 +1,40 @@
+{
+	"kind": "InitialConfiguration",
+	"metadata": {
+		"source": "client_server.do_configuration",
+		"level": "info",
+		"id": 2,
+		"version": "2.0.0b10",
+		"timestamp": "2026-07-23T10:15:29.900000"
+	},
+	"correlation": {
+		"causation_id": null,
+		"route": null,
+		"request_id": null,
+		"response_id": null,
+		"dom_id": null,
+		"phase": null
+	},
+	"config": {
+		"server_name": "MAIN_SERVER",
+		"in_debug_mode": true,
+		"enable_subtle_debug_entry": false,
+		"enable_audit_logging": true,
+		"site_title": "Drafter Application",
+		"information": null,
+		"framed": true,
+		"theme": "default",
+		"override_asset_url": false,
+		"deploy_image_path": "",
+		"additional_header_content": [],
+		"additional_style_content": [],
+		"additional_css_content": [],
+		"additional_js_content": [],
+		"additional_script_content": [],
+		"use_shadow_dom": false,
+		"root_element_id": "drafter-root--",
+		"system_routes": ["--reset", "--about"],
+		"external_pages": null,
+		"newlines_to_br": true
+	}
+}

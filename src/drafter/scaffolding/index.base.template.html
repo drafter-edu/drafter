@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="{{ meta_lang }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="keywords" content="{{ meta_keywords }}" />
+    <meta name="description" content="{{ meta_description }}" />
+    <meta name="author" content="{{ meta_author }}" />
+    <title>{{ title or "Drafter App" }}</title>
+    <link rel="icon" id="{{ favicon_id }}" href="{{ favicon }}" />
+    <script>window.DRAFTER_ENGINE = "{{ system.app_common.engine }}";</script>
+    {% if compiled_headers %}
+      <!-- Additional header content from precompilation -->
+      {{ compiled_headers }}
+      <!-- End of additional header content -->
+    {% endif %}
+    <style>
+      #--drafter-initial-loading-white-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.7);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.5em;
+      }
+
+      .drafter-loading-spinner {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 0.25rem solid #d8d8d8;
+        border-top-color: #444;
+        border-radius: 50%;
+        animation: drafter-spin 0.8s linear infinite;
+      }
+
+      @keyframes drafter-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      
+    </style>
+  </head>
+  <body>
+    <div id="--drafter-initial-loading-white-screen">
+      <div class="drafter-loading-spinner" aria-hidden="true"></div>
+      <div>Loading, please wait...</div>
+    </div>
+    <div id="{{ drafter_root }}">
+      {% if compiled_body %}
+        <!-- Precompiled body content -->
+        <div class="drafter-body--">{{ compiled_body }}</div>
+      {% else %}
+        <!-- Drafter App will initialize here -->
+      {% endif %}
+    </div>
+    {% if system_json %}<script>window.DRAFTER_CONFIGURATION = {{ system_json | tojson }};</script>{% endif %}
+    {% if modified_system %}
+      <script>window.DRAFTER_MODIFIED_CONFIGURATION = {{ modified_system | tojson }};</script>
+    {% endif %}
+    {% if inline_py %}<script type="text/python" id="user-code">{{ user_code }}</script>{% endif %}
+    <!-- Engine-specific scripts -->
+    {% block scripts %}
+    {% endblock scripts %}
+    <!-- Engine-specific initialization -->
+    {% block initialization %}
+    {% endblock initialization %}
+  </body>
+</html>

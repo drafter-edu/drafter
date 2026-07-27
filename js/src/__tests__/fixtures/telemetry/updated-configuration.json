@@ -1,0 +1,21 @@
+{
+	"kind": "UpdatedConfiguration",
+	"metadata": {
+		"source": "client_server.reconfigure",
+		"level": "info",
+		"id": 30,
+		"version": "2.0.0b10",
+		"timestamp": "2026-07-23T10:15:33.000789"
+	},
+	"correlation": {
+		"causation_id": null,
+		"route": null,
+		"request_id": 1,
+		"response_id": null,
+		"dom_id": null,
+		"phase": null
+	},
+	"key": "theme",
+	"value": "dark",
+	"update_default": false
+}

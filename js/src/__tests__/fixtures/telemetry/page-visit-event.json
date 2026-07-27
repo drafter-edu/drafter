@@ -1,0 +1,25 @@
+{
+	"kind": "PageVisitEvent",
+	"metadata": {
+		"source": "client_server.visit",
+		"level": "info",
+		"id": 14,
+		"version": "2.0.0b10",
+		"timestamp": "2026-07-23T10:15:31.250000"
+	},
+	"correlation": {
+		"causation_id": null,
+		"route": "index",
+		"request_id": 1,
+		"response_id": 2,
+		"dom_id": null,
+		"phase": null
+	},
+	"url": "index",
+	"function_name": "index",
+	"arguments": "state=State(score=0)",
+	"status_code": 200,
+	"duration_ms": 12.5,
+	"timestamp": "2026-07-23T10:15:31.250000",
+	"button_pressed": "submit"
+}

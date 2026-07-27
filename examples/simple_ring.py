@@ -1,33 +1,33 @@
 from bakery import assert_equal
-from drafter import route, start_server, Page, Link
+
+from drafter import Link, Page, route, start_server
 
 
 @route()
 def index():
-    return Page(None, [
-        "Hello, World!",
-        Link("Second page", "second")
-    ])
+    return Page(None, ["Hello, World!", Link("Second page", "second")])
 
 
 @route
 def second():
-    return Page(None, [
-        "Welcome to the second page.",
-        Link("Third page", third)
-    ])
+    return Page(None, ["Welcome to the second page.", Link("Third page", third)])
 
 
 @route
 def third():
-    return Page(None, [
-        "Welcome to the third page.",
-        Link("Return to start", index)
-    ])
+    return Page(None, ["Welcome to the third page.", Link("Return to start", index)])
 
 
 assert_equal(index(), Page(None, ["Hello, World!", Link("Second page", "second")]))
-assert_equal(second(), Page(None, ["Welcome to the second page.", Link("Third page", third)]))
-assert_equal(third(), Page(None, ["Welcome to the third page.", Link("Return to start", index)]))
+assert_equal(
+    second(), Page(None, ["Welcome to the second page.", Link("Third page", third)])
+)
+assert_equal(
+    third(), Page(None, ["Welcome to the third page.", Link("Return to start", index)])
+)
+
+assert_equal(
+    third(), Page(5, ["Welcome 2 the third page.", Link("Return to start", "second")])
+)
 
 start_server()

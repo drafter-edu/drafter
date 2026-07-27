@@ -1,5 +1,6 @@
-from drafter import *
 from dataclasses import dataclass
+
+from drafter import *
 
 
 @dataclass
@@ -9,22 +10,28 @@ class State:
 
 @route
 def index(state: State) -> Page:
-    return Page(state, [
-        "Your current balance is:",
-        state.balance,
-        Button("Withdraw", start_withdraw),
-        # Button("Deposit", start_deposit)
-    ])
+    return Page(
+        state,
+        [
+            "Your current balance is:",
+            state.balance,
+            Button("Withdraw", start_withdraw),
+            # Button("Deposit", start_deposit)
+        ],
+    )
 
 
 @route
 def start_withdraw(state: State) -> Page:
-    return Page(state, [
-        "How much do you want to withdraw?",
-        TextBox("amount", 10),
-        Button("Make withdraw", update_balance),
-        Button("Cancel", index)
-    ])
+    return Page(
+        state,
+        [
+            "How much do you want to withdraw?",
+            TextBox("amount", 10),
+            Button("Make withdraw", update_balance),
+            Button("Cancel", index),
+        ],
+    )
 
 
 @route

@@ -1,0 +1,33 @@
+{% extends "index.base.template.html" %}
+{% block scripts %}
+  <script src="{{ static('js/skulpt.js') }}"></script>
+  <script src="{{ static('js/skulpt-stdlib.js') }}"></script>
+  <script src="{{ static('js/skulpt-drafter.js') }}"></script>
+  <script src="{{ static('js/drafter.skulpt.js') }}"></script>
+{% endblock scripts %}
+{% block initialization %}
+  <script>
+  (async () => {
+  try {
+  {% if dev_ws_url %}
+    const ws = new WebSocket('{{ dev_ws_url }}');
+    ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'reload' || msg.type === 'restart_student_code') location.reload();
+    };
+  {% endif %}
+  const app = await window.Drafter.runStudentCode({
+  assetsUrl: '{{ assets_url }}',
+  {% if inline_py %}
+    code: document.getElementById('user-code').textContent
+  {% else %}
+    url: '{{ python_url }}'
+  {% endif %}
+  });
+  console.log("[Drafter AppServer Scaffolding] Student Code Initialized with Skulpt:");
+  } finally {
+  document.getElementById('--drafter-initial-loading-white-screen').remove();
+  }
+  })();
+  </script>
+{% endblock initialization %}

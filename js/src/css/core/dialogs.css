@@ -1,0 +1,195 @@
+.drafter-dialog-backdrop {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem;
+	box-sizing: border-box;
+	font-family: "Consolas", "Monaco", "Courier New", monospace;
+}
+
+.drafter-dialog-backdrop.is-modal {
+	background: rgba(17, 24, 39, 0.4);
+	backdrop-filter: blur(1px);
+	pointer-events: auto;
+}
+
+.drafter-dialog-backdrop.is-modeless {
+	background: transparent;
+	pointer-events: none;
+	align-items: flex-start;
+	justify-content: flex-start;
+	padding: 0;
+}
+
+.drafter-dialog {
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	min-width: 320px;
+	max-width: min(90vw, 560px);
+	border-radius: 14px;
+	border: 1px solid #dbe4ef;
+	background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+	box-shadow:
+		0 18px 45px rgba(2, 17, 43, 0.24),
+		0 3px 12px rgba(2, 17, 43, 0.14);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	pointer-events: auto;
+	color: #182941;
+	animation: drafter-dialog-pop-in 120ms ease-out;
+	font-family:
+		Raleway, HelveticaNeue, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.drafter-dialog-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.7rem 0.9rem;
+	background: linear-gradient(180deg, #eef5ff 0%, #dcecff 100%);
+	border-bottom: 1px solid #c6d7ee;
+	gap: 0.8rem;
+	user-select: none;
+	font-weight: 600;
+}
+
+.drafter-dialog-header.is-draggable {
+	cursor: move;
+}
+
+.drafter-dialog-title {
+	font-size: 0.97rem;
+	line-height: 1.2;
+	margin: 0;
+	padding: 0;
+	font-weight: 700;
+}
+
+.drafter-dialog-close {
+	appearance: none;
+	-webkit-appearance: none;
+	border: none;
+	background: transparent;
+	color: #26496f;
+	font-family: inherit;
+	font-size: 1.25rem;
+	line-height: 1;
+	cursor: pointer;
+	padding: 0.1rem 0.35rem;
+	border-radius: 6px;
+	box-shadow: none;
+	text-shadow: none;
+	margin: 0;
+	width: auto;
+	min-height: 0;
+}
+
+.drafter-dialog-close:hover {
+	background: rgba(38, 73, 111, 0.12);
+}
+
+.drafter-dialog-content {
+	padding: 0.95rem;
+	line-height: 1.45;
+	font-size: 0.95rem;
+	max-height: 55vh;
+	overflow: auto;
+}
+
+.drafter-dialog-content p {
+	margin: 0;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.drafter-dialog-actions {
+	padding: 0.85rem 0.95rem;
+	display: flex;
+	gap: 0.5rem;
+	justify-content: flex-end;
+	border-top: 1px solid #dbe4ef;
+	background: #f4f8fd;
+}
+
+.drafter-dialog-button {
+	appearance: none;
+	-webkit-appearance: none;
+	border: 1px solid #8fa8c6;
+	background: #ffffff;
+	color: #1c3a5e;
+	padding: 0.42rem 0.86rem;
+	border-radius: 8px;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: 0.88rem;
+	font-weight: 600;
+	/* Pinned so site themes' global button rules can't bleed in. */
+	box-shadow: none;
+	text-shadow: none;
+	text-transform: none;
+	letter-spacing: normal;
+	margin: 0;
+	width: auto;
+	min-height: 0;
+	filter: none;
+	transform: none;
+	transition: background-color 140ms ease;
+}
+
+.drafter-dialog-button:hover {
+	background: #eef4fc;
+}
+
+.drafter-dialog-button.is-primary {
+	background: #1161c2;
+	border-color: #0e53a6;
+	color: #ffffff;
+}
+
+.drafter-dialog-button.is-primary:hover {
+	background: #0f56ac;
+}
+
+.drafter-dialog-button.is-danger {
+	background: #ba2a2a;
+	border-color: #9b2121;
+	color: #ffffff;
+}
+
+.drafter-dialog-button.is-danger:hover {
+	background: #9f2424;
+}
+
+.drafter-dialog-prompt-input {
+	width: 100%;
+	margin-top: 0.55rem;
+	box-sizing: border-box;
+	padding: 0.45rem 0.55rem;
+	border: 1px solid #9ab0cc;
+	border-radius: 8px;
+	font-size: 0.95rem;
+	color: #163153;
+	background: #ffffff;
+}
+
+.drafter-dialog-prompt-input:focus {
+	outline: 2px solid #5b92d7;
+	outline-offset: 1px;
+}
+
+@keyframes drafter-dialog-pop-in {
+	from {
+		opacity: 0;
+		transform: translate(-50%, -48%);
+	}
+
+	to {
+		opacity: 1;
+		transform: translate(-50%, -50%);
+	}
+}

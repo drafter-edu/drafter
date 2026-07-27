@@ -1,0 +1,1547 @@
+# Documentation page manifest — the URL contract from STUDENT_DOCS_PLAN.md §5.
+#
+# Every planned page appears here with its final front-matter seed. The
+# scaffold generator (tools/scaffold_docs.py) creates missing stub pages from
+# this file, and the docs linter treats these paths as the authoritative
+# sitemap: pages may gain content, but their URLs must not drift from this
+# contract without a plan change.
+#
+# Fields per page:
+#   path      docs-relative markdown file (directory URLs come from mkdocs)
+#   title     page title (H1 / nav label source)
+#   template  one of: tutorial, concept, how-to, component, api, example,
+#             error, gallery, lesson, misconception, archetype, plus the
+#             structural templates: index, reference, troubleshooting,
+#             playground
+#   level     L1-L4 (omitted for unleveled pages)
+#   audience  S (students), T (teachers), D (developers)
+#   priority  P0 (minimum viable pathway), P1 (first release), P2 (post-release)
+#   outcome   one sentence: what the reader can do after this page
+#   symbols   drafter API names this page is the primary documentation for
+#
+# Gallery seed entries (6) and teacher lesson-plan seeds (3) get slugs when
+# their content phases (G, I) design them, so only their indexes appear here.
+# /your-project/deploy/course-checklist/ was dropped per the Phase A decision
+# log (Q10): course-specific material lives on a course-maintained page.
+
+pages:
+  # ---- Home ----
+  - path: index.md
+    title: Drafter
+    template: index
+    audience: S
+    priority: P0
+    outcome: Understand what Drafter is and take the right next step.
+
+  # ---- Start (§5.1) ----
+  - path: start/index.md
+    title: Start here
+    template: index
+    level: L1
+    audience: S
+    priority: P0
+    outcome: See the journey ahead and check prerequisites.
+  - path: start/install.md
+    title: Get Drafter running
+    template: how-to
+    level: L1
+    audience: S
+    priority: P0
+    outcome: Get Drafter installed and verified locally.
+  - path: start/first-app.md
+    title: Build your first app
+    template: tutorial
+    level: L1
+    audience: S
+    priority: P0
+    outcome: Build and run a working counter site in about 20 minutes.
+    symbols: [start_server, route, Page, Button]
+  - path: start/make-a-change.md
+    title: Make one visible change
+    template: tutorial
+    level: L1
+    audience: S
+    priority: P0
+    outcome: Edit a running app, see the result, and recover from a first error.
+  - path: start/debug-panel.md
+    title: See inside your app
+    template: tutorial
+    level: L1
+    audience: S
+    priority: P0
+    outcome: Read state, history, and test results in the debugger.
+  - path: start/how-drafter-works.md
+    title: How Drafter works
+    template: concept
+    level: L1
+    audience: S
+    priority: P0
+    outcome: Hold a correct minimal model of where and when your program runs.
+
+  # ---- Guided Projects (§5.2) ----
+  - path: tutorials/index.md
+    title: Guided Projects
+    template: index
+    audience: S
+    priority: P0
+    outcome: Choose the next project in the spine.
+  - path: tutorials/virtual-pet.md
+    title: 1. Care for a virtual pet
+    template: tutorial
+    level: L1
+    audience: S
+    priority: P0
+    outcome: Build a first interactive app where buttons change displayed data.
+  - path: tutorials/story-maker.md
+    title: 2. Build a story maker
+    template: tutorial
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Build a multi-page app where form values cross pages.
+  - path: tutorials/quiz-game.md
+    title: 3. Make a quiz game
+    template: tutorial
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Build a data-driven branching app from a list of dataclasses.
+  - path: tutorials/finishing.md
+    title: 4. Finish and test an app
+    template: tutorial
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Turn a working app into a tested, styled, releasable one.
+
+  # ---- Add to Your App (§5.3) ----
+  - path: add/index.md
+    title: Add to Your App
+    template: index
+    audience: S
+    priority: P0
+    outcome: Find the task page for what you want to add.
+  - path: add/pages.md
+    title: Add and connect pages
+    template: how-to
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Create and link several pages.
+  - path: add/ask-for-information.md
+    title: Ask the user for information
+    template: how-to
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Build working forms.
+  - path: add/remember-things.md
+    title: Remember a score or choice
+    template: how-to
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Keep information between clicks and pages.
+  - path: add/show-a-collection.md
+    title: Show a collection of items
+    template: how-to
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Display lists and tables from state.
+  - path: add/show-different-content.md
+    title: Show different content
+    template: how-to
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Make one page respond to state and choices.
+  - path: add/pictures.md
+    title: Use pictures
+    template: how-to
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Show, upload, and edit images.
+  - path: add/files.md
+    title: Upload and download files
+    template: how-to
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Move files in and out of the app.
+    symbols: [open, get_drafter_path]
+  - path: add/change-appearance/index.md
+    title: Change the appearance
+    template: how-to
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Choose a styling approach and get quick wins.
+  - path: add/change-appearance/themes.md
+    title: Use a theme
+    template: how-to
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Restyle the whole site in one line.
+  - path: add/change-appearance/helpers.md
+    title: Styling functions and keywords
+    template: how-to
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Style individual components without CSS.
+  - path: add/change-appearance/design-basics.md
+    title: Design basics
+    template: concept
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Apply spacing, color, and typography deliberately.
+  - path: add/change-appearance/custom-css.md
+    title: Custom CSS
+    template: how-to
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Use real CSS with classes.
+  - path: add/change-appearance/gotchas.md
+    title: Styling gotchas
+    template: troubleshooting
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Avoid the weird parts of styling a Drafter page.
+  - path: add/live-behavior.md
+    title: Add live behavior
+    template: how-to
+    level: L3
+    audience: S
+    priority: P1
+    outcome: React to input without a full page change.
+  - path: add/timers.md
+    title: Make things happen over time
+    template: how-to
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Add countdowns, ticks, and clocks.
+  - path: add/html.md
+    title: Embed HTML
+    template: how-to
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Use raw HTML when components are not enough.
+  - path: add/test-a-feature.md
+    title: Test a feature
+    template: how-to
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Write focused tests for routes.
+  - path: add/freeze-pages.md
+    title: Freeze finished pages
+    template: how-to
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Auto-generate regression tests from page history.
+
+  # ---- Your Project (§5.4) ----
+  - path: your-project/index.md
+    title: Your Project
+    template: index
+    level: L2
+    audience: S
+    priority: P0
+    outcome: See the whole road from idea to deployed app.
+  - path: your-project/choose-an-idea.md
+    title: Choose a manageable idea
+    template: how-to
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Pick a project that fits the timeline and your skills.
+  - path: your-project/sketch-the-pages.md
+    title: Sketch the pages
+    template: how-to
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Draw the app before coding it.
+  - path: your-project/plan-your-data.md
+    title: Decide what to remember
+    template: how-to
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Design state from the page sketches.
+  - path: your-project/build-one-path.md
+    title: Build one working path
+    template: how-to
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Get a thin end-to-end slice working first.
+  - path: your-project/add-features.md
+    title: Add features one at a time
+    template: how-to
+    level: L2
+    audience: S
+    priority: P2
+    outcome: Grow the app without breaking it.
+  - path: your-project/test-as-you-go.md
+    title: Test as you go
+    template: how-to
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Keep a working app working.
+  - path: your-project/improve-the-design.md
+    title: Improve the design
+    template: how-to
+    level: L2
+    audience: S
+    priority: P2
+    outcome: Make the app pleasant and usable.
+  - path: your-project/deploy/index.md
+    title: Deploy and submit
+    template: how-to
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Understand what deployment is and see the three steps.
+  - path: your-project/deploy/prepare.md
+    title: Prepare for release
+    template: how-to
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Make the app production-ready.
+  - path: your-project/deploy/github-pages.md
+    title: Publish on GitHub Pages
+    template: how-to
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Get the site live.
+  - path: your-project/deploy/troubleshooting.md
+    title: Fix a failed deployment
+    template: troubleshooting
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Diagnose and retry failed deploys.
+  - path: your-project/get-feedback.md
+    title: Get feedback on your design
+    template: how-to
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Learn how real users experience your app and what to change.
+  - path: your-project/gallery/index.md
+    title: Project gallery
+    template: index
+    audience: S
+    priority: P1
+    outcome: See what a finished project looks like and get inspired.
+
+  # ---- Concepts (§5.5) ----
+  - path: concepts/index.md
+    title: Concepts
+    template: index
+    audience: S
+    priority: P1
+    outcome: See how the ideas fit together.
+  - path: concepts/routes-and-pages.md
+    title: Routes and pages
+    template: concept
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Explain what a route is and how pages connect.
+  - path: concepts/state.md
+    title: State
+    template: concept
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Design and reason about application state.
+  - path: concepts/forms-and-input.md
+    title: Forms and input
+    template: concept
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Explain how a form field's value reaches a route function.
+  - path: concepts/dynamic-pages.md
+    title: Dynamic pages
+    template: concept
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Make one route render differently based on state and arguments.
+  - path: concepts/live-updates.md
+    title: Live updates
+    template: concept
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Understand events and partial updates.
+  - path: concepts/how-the-web-works.md
+    title: How the web works
+    template: concept
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Understand URLs, browsers, and servers well enough to place Drafter.
+
+  # ---- Examples (§5.6) ----
+  - path: examples/index.md
+    title: Examples
+    template: index
+    audience: S
+    priority: P0
+    outcome: Find an example by goal, concept, or component.
+  - path: examples/calculator.md
+    title: Calculator
+    template: example
+    level: L2
+    audience: S
+    priority: P0
+    outcome: See forms and state working together in one small app.
+  - path: examples/ring.md
+    title: Three linked pages
+    template: example
+    level: L2
+    audience: S
+    priority: P0
+    outcome: See stateless multi-page navigation.
+  - path: examples/forms.md
+    title: Big form
+    template: example
+    level: L2
+    audience: S
+    priority: P0
+    outcome: See every core input in one form.
+  - path: examples/login.md
+    title: Login flow
+    template: example
+    level: L3
+    audience: S
+    priority: P1
+    outcome: See conditional pages driven by state (and why this is not security).
+  - path: examples/pet-registry.md
+    title: Pet registry
+    template: example
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Work with nested data as a list of dataclasses.
+  - path: examples/todo-list.md
+    title: To-do list
+    template: example
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Add and remove items from list state.
+  - path: examples/shop.md
+    title: Shop
+    template: example
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Use Arguments, inventory state, and multiple routes together.
+  - path: examples/photo-editor.md
+    title: Photo editor
+    template: example
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Upload and transform images.
+  - path: examples/playground/index.md
+    title: Playground
+    template: index
+    audience: S
+    priority: P1
+    outcome: Run and edit many small programs.
+  - path: examples/playground/basics.md
+    title: Basics
+    template: playground
+    level: L1
+    audience: S
+    priority: P1
+    outcome: Tinker with hello, counter, and multi-page demos.
+  - path: examples/playground/forms.md
+    title: Forms
+    template: playground
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Tinker with every input type.
+  - path: examples/playground/lists-and-tables.md
+    title: Lists and tables
+    template: playground
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Tinker with data display.
+  - path: examples/playground/styling.md
+    title: Styling
+    template: playground
+    level: L2
+    audience: S
+    priority: P1
+    outcome: See styling approaches side by side.
+  - path: examples/playground/media.md
+    title: Images and media
+    template: playground
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Tinker with images, audio, and video.
+  - path: examples/playground/interactive.md
+    title: Interactive
+    template: playground
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Tinker with events and partial updates.
+  - path: examples/playground/sensors.md
+    title: Camera, location, and sound
+    template: playground
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Tinker with device features.
+
+  # ---- Reference core (§5.7) ----
+  - path: reference/index.md
+    title: Reference
+    template: index
+    audience: S
+    priority: P0
+    outcome: Find authoritative details fast.
+  - path: reference/glossary.md
+    title: Glossary
+    template: reference
+    audience: S
+    priority: P1
+    outcome: Look up terms in stable, plain language.
+  - path: reference/components/index.md
+    title: All components
+    template: reference
+    audience: S
+    priority: P0
+    outcome: See every component, organized coherently.
+  - path: reference/page.md
+    title: Page
+    template: reference
+    level: L1
+    audience: S
+    priority: P0
+    outcome: Know exact Page behavior.
+    symbols: [Page]
+  - path: reference/fragment.md
+    title: Fragment
+    template: reference
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Know how partial page updates work.
+    symbols: [Fragment]
+  - path: reference/update.md
+    title: Update
+    template: reference
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Know how state-only responses work.
+    symbols: [Update]
+  - path: reference/redirect.md
+    title: Redirect
+    template: reference
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Navigate from inside a route.
+    symbols: [Redirect]
+  - path: reference/route.md
+    title: route
+    template: reference
+    level: L1
+    audience: S
+    priority: P0
+    outcome: Know exact route decorator behavior.
+    symbols: [route, add_route]
+  - path: reference/start-server.md
+    title: start_server
+    template: reference
+    level: L1
+    audience: S
+    priority: P0
+    outcome: Know every student-relevant start_server option.
+    symbols: [start_server]
+  - path: reference/site-config.md
+    title: Site configuration functions
+    template: reference
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Look up every set_ and add_ configuration helper.
+    symbols:
+      - set_website_title
+      - set_website_favicon
+      - set_website_framed
+      - set_website_style
+      - set_page_transition
+      - set_error_page
+      - set_button_spinners
+      - add_website_header
+      - add_website_css
+      - set_site_information
+      - get_site_information
+      - hide_debug_information
+      - show_debug_information
+      - deploy_site
+  - path: reference/styling-functions.md
+    title: Styling functions
+    template: reference
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Look up every styling helper.
+    symbols:
+      - update_style
+      - update_attr
+      - float_right
+      - float_left
+      - bold
+      - italic
+      - underline
+      - strikethrough
+      - monospace
+      - small_font
+      - large_font
+      - change_color
+      - change_background_color
+      - change_text_size
+      - change_text_font
+      - change_text_align
+      - change_text_decoration
+      - change_text_transform
+      - change_height
+      - change_width
+      - change_border
+      - change_margin
+      - change_padding
+  - path: reference/testing-functions.md
+    title: Testing functions
+    template: reference
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Look up every assertion.
+    symbols:
+      - assert_equal
+      - assert_page
+      - assert_state
+      - assert_content
+      - assert_has
+      - assert_in
+      - assert_not_has
+      - assert_not_in
+      - assert_has_regex
+      - assert_in_regex
+      - assert_attribute
+      - assert_style
+      - assert_children
+      - assert_text
+      - set_assertion_defaults
+  - path: reference/keyword-attributes.md
+    title: Keywords every component accepts
+    template: reference
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Understand the extra keyword attributes components accept.
+    symbols: [PageContent, Content, Component]
+  - path: reference/data-types/index.md
+    title: Data types
+    template: index
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Find value-type documentation.
+  - path: reference/data-types/picture.md
+    title: Picture
+    template: reference
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Use the full Picture API.
+    symbols: [Picture]
+  - path: reference/data-types/photo.md
+    title: Photo
+    template: reference
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Use the camera result type.
+    symbols: [Photo]
+  - path: reference/data-types/location-types.md
+    title: Location and map types
+    template: reference
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Use the geolocation and map value types.
+    symbols: [Location, MapLocation, MapMarker, MapView, AddMarkerFunction]
+  - path: reference/data-types/file-types.md
+    title: File types
+    template: reference
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Use the upload result types.
+    symbols: [DrafterTextFile, DrafterBinaryFile]
+  - path: reference/data-types/audio-types.md
+    title: Audio types
+    template: reference
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Use the microphone and recorder result types.
+    symbols: [AudioLevel, Recording]
+  - path: reference/themes.md
+    title: Theme catalog
+    template: reference
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Preview and choose among all 20 themes.
+  - path: reference/colors.md
+    title: HTML colors
+    template: reference
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Look up color names.
+  - path: reference/fonts.md
+    title: Fonts
+    template: reference
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Look up safe fonts.
+  - path: reference/cli.md
+    title: Command line
+    template: reference
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Know the student-relevant command-line flags.
+
+  # ---- Reference components (§5.8) ----
+  - path: reference/components/actions/button.md
+    title: Button
+    template: component
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Trigger a route, optionally passing Arguments.
+    symbols: [Button]
+  - path: reference/components/actions/link.md
+    title: Link
+    template: component
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Navigate by text link, including external URLs.
+    symbols: [Link]
+  - path: reference/components/actions/argument.md
+    title: Argument
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Pass extra values to a route.
+    symbols: [Argument]
+  - path: reference/components/input/textbox.md
+    title: TextBox
+    template: component
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Collect a line of text or a number.
+    symbols: [TextBox]
+  - path: reference/components/input/textarea.md
+    title: TextArea
+    template: component
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Collect multi-line text.
+    symbols: [TextArea]
+  - path: reference/components/input/checkbox.md
+    title: CheckBox
+    template: component
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Collect a yes/no.
+    symbols: [CheckBox]
+  - path: reference/components/input/selectbox.md
+    title: SelectBox
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Choose one option from a list.
+    symbols: [SelectBox]
+  - path: reference/components/input/radiobuttongroup.md
+    title: RadioButtonGroup
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Choose one option with all options visible.
+    symbols: [RadioButtonGroup]
+  - path: reference/components/input/relatedcheckbox.md
+    title: RelatedCheckBox
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Choose many options, received as a list parameter.
+    symbols: [RelatedCheckBox]
+  - path: reference/components/input/dateinput.md
+    title: DateInput
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Collect a date.
+    symbols: [DateInput]
+  - path: reference/components/input/timeinput.md
+    title: TimeInput
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Collect a time.
+    symbols: [TimeInput]
+  - path: reference/components/input/datetimeinput.md
+    title: DateTimeInput
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Collect a date and time.
+    symbols: [DateTimeInput]
+  - path: reference/components/input/label.md
+    title: Label
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Caption an input accessibly.
+    symbols: [Label]
+  - path: reference/components/input/output.md
+    title: Output
+    template: component
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Show a computed result region.
+    symbols: [Output]
+  - path: reference/components/input/fileupload.md
+    title: FileUpload
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Receive a file from the user.
+    symbols: [FileUpload]
+  - path: reference/components/input/download.md
+    title: Download
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Let the user save a file.
+    symbols: [Download]
+  - path: reference/components/text/text.md
+    title: Text
+    template: component
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Use the explicit text component.
+    symbols: [Text]
+  - path: reference/components/text/header.md
+    title: Header
+    template: component
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Add section headings, levels 1-6.
+    symbols: [Header]
+  - path: reference/components/text/paragraph.md
+    title: Paragraph
+    template: component
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Use real paragraphs instead of strings.
+    symbols: [Paragraph]
+  - path: reference/components/text/pre.md
+    title: PreformattedText
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Preserve spacing and newlines.
+    symbols: [Pre, PreformattedText]
+  - path: reference/components/text/inlinecode.md
+    title: InlineCode
+    template: component
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Mark code in text.
+    symbols: [InlineCode]
+  - path: reference/components/text/blockquote.md
+    title: BlockQuote
+    template: component
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Quote a passage.
+    symbols: [BlockQuote]
+  - path: reference/components/text/inline-styles.md
+    title: Inline text semantics
+    template: component
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Use the inline semantic text components.
+    symbols:
+      - Strong
+      - Emphasis
+      - MarkedText
+      - KeyboardInput
+      - SampleOutput
+      - SmallText
+      - Superscript
+      - Subscript
+      - InlineVariable
+      - InlineQuotation
+      - DefinitionTerm
+      - Abbreviation
+      - DeletedText
+      - InsertedText
+  - path: reference/components/layout/div.md
+    title: Div (Box)
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Group content for styling.
+    symbols: [Div, Division, Box]
+  - path: reference/components/layout/span.md
+    title: Span
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Group content inline.
+    symbols: [Span]
+  - path: reference/components/layout/row.md
+    title: Row
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Lay content out side by side.
+    symbols: [Row]
+  - path: reference/components/layout/linebreak.md
+    title: LineBreak
+    template: component
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Force a new line.
+    symbols: [LineBreak]
+  - path: reference/components/layout/horizontalrule.md
+    title: HorizontalRule
+    template: component
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Add a divider line.
+    symbols: [HorizontalRule]
+  - path: reference/components/layout/details.md
+    title: Details
+    template: component
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Make collapsible sections and accordions.
+    symbols: [Details]
+  - path: reference/components/layout/page-regions.md
+    title: Page regions
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Use the semantic page-region components.
+    symbols:
+      - Section
+      - Article
+      - Aside
+      - Main
+      - Nav
+      - HeaderContent
+      - FooterContent
+      - Figure
+      - FigureCaption
+  - path: reference/components/lists/bulletedlist.md
+    title: BulletedList
+    template: component
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Show an unordered list from a Python list.
+    symbols: [BulletedList]
+  - path: reference/components/lists/numberedlist.md
+    title: NumberedList
+    template: component
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Show an ordered list.
+    symbols: [NumberedList]
+  - path: reference/components/lists/definitionlist.md
+    title: DefinitionList
+    template: component
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Show term/definition pairs, including from dataclasses.
+    symbols: [DefinitionList]
+  - path: reference/components/data/table.md
+    title: Table
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Show rows of lists or dataclasses.
+    symbols: [Table]
+  - path: reference/components/data/progressbar.md
+    title: ProgressBar
+    template: component
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Show progress.
+    symbols: [ProgressBar]
+  - path: reference/components/data/meter.md
+    title: Meter
+    template: component
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Show a gauge value.
+    symbols: [Meter]
+  - path: reference/components/data/timeoutput.md
+    title: TimeOutput
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Show semantic timestamps.
+    symbols: [TimeOutput]
+  - path: reference/components/media/image.md
+    title: Image
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Show images from a URL, file, Picture, or bytes.
+    symbols: [Image]
+  - path: reference/components/media/audio.md
+    title: Audio
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Play sound files, including across pages.
+    symbols: [Audio]
+  - path: reference/components/media/video.md
+    title: Video
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Play video files.
+    symbols: [Video]
+  - path: reference/components/media/canvas.md
+    title: Canvas
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Draw on a canvas surface (with JavaScript).
+    symbols: [Canvas]
+  - path: reference/components/media/svg.md
+    title: SVG
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Show inline vector graphics.
+    symbols: [SVG]
+  - path: reference/components/media/matplotlibplot.md
+    title: MatPlotLibPlot
+    template: component
+    level: L4
+    audience: S
+    priority: P1
+    outcome: Show a matplotlib figure.
+    symbols: [MatPlotLibPlot]
+  - path: reference/components/media/rawhtml.md
+    title: RawHTML and HtmlTag
+    template: component
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Use the escape hatch to raw HTML safely.
+    symbols: [RawHTML, HtmlTag]
+  - path: reference/components/time/timer.md
+    title: Timer
+    template: component
+    level: L4
+    audience: S
+    priority: P1
+    outcome: Run a countdown that fires a route.
+    symbols: [Timer]
+  - path: reference/components/time/clock.md
+    title: Clock
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Run a repeating tick route.
+    symbols: [Clock]
+  - path: reference/components/time/removepersistent.md
+    title: RemovePersistent
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Evict a persistent component.
+    symbols: [RemovePersistent]
+  - path: reference/components/place/map.md
+    title: Map
+    template: component
+    level: L4
+    audience: S
+    priority: P1
+    outcome: Show an interactive map with markers.
+    symbols: [Map]
+  - path: reference/components/place/currentlocation.md
+    title: CurrentLocation
+    template: component
+    level: L4
+    audience: S
+    priority: P1
+    outcome: Ask for the user's location.
+    symbols: [CurrentLocation]
+  - path: reference/components/capture/camera.md
+    title: Camera
+    template: component
+    level: L4
+    audience: S
+    priority: P1
+    outcome: Take a photo into the app.
+    symbols: [Camera]
+  - path: reference/components/sound/tone.md
+    title: Tone
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Play a single note.
+    symbols: [Tone]
+  - path: reference/components/sound/melody.md
+    title: Melody
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Play a note sequence.
+    symbols: [Melody]
+  - path: reference/components/sound/sound.md
+    title: Sound
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Play files through effects.
+    symbols: [Sound]
+  - path: reference/components/sound/microphone.md
+    title: Microphone
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: React to sound levels.
+    symbols: [Microphone]
+  - path: reference/components/sound/audiorecorder.md
+    title: AudioRecorder
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Record audio clips.
+    symbols: [AudioRecorder]
+  - path: reference/components/sound/effects.md
+    title: Audio effects
+    template: component
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Apply audio effects to sounds.
+    symbols: [Echo, Reverb, Muffle, Sharpen, Distortion]
+
+  # ---- Help (§5.9) ----
+  - path: help/index.md
+    title: Help
+    template: index
+    audience: S
+    priority: P0
+    outcome: Choose the right help path.
+  - path: help/troubleshooting.md
+    title: Troubleshooting
+    template: troubleshooting
+    audience: S
+    priority: P0
+    outcome: Diagnose problems by symptom.
+  - path: help/errors/index.md
+    title: Error index
+    template: index
+    audience: S
+    priority: P0
+    outcome: Find an entry from exact error text.
+  - path: help/errors/route-not-found.md
+    title: Link or button points to an unknown route
+    template: error
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Fix a link or button that points to an unknown route.
+  - path: help/errors/missing-parameter.md
+    title: Route is missing a parameter a form expected
+    template: error
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Fix a route missing a parameter a form expected.
+  - path: help/errors/type-conversion-int.md
+    title: Could not convert text to an int
+    template: error
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Fix a failed text-to-int conversion.
+  - path: help/errors/type-conversion-other.md
+    title: Could not convert a value to the parameter's type
+    template: error
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Fix a failed parameter type conversion.
+  - path: help/errors/state-mismatch.md
+    title: State doesn't match the State class
+    template: error
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Fix state that no longer matches the State class.
+  - path: help/errors/nothing-after-start-server.md
+    title: Code after start_server() never runs
+    template: error
+    level: L1
+    audience: S
+    priority: P0
+    outcome: Understand why code after start_server() never runs.
+  - path: help/errors/page-content-invalid.md
+    title: Page content must be a list of strings or components
+    template: error
+    level: L1
+    audience: S
+    priority: P0
+    outcome: Fix invalid Page content.
+  - path: help/errors/duplicate-component-name.md
+    title: Two components share a name
+    template: error
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Fix two components sharing a name.
+  - path: help/errors/selectbox-default-missing.md
+    title: SelectBox default not in options
+    template: error
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Fix a SelectBox default that is not among its options.
+  - path: help/errors/header-level-invalid.md
+    title: Header level must be 1-6
+    template: error
+    level: L2
+    audience: S
+    priority: P2
+    outcome: Fix an invalid Header level.
+  - path: help/errors/circular-reference-tests.md
+    title: Circular Reference appears in generated tests
+    template: error
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Handle circular references in generated tests.
+  - path: help/errors/file-decode-error.md
+    title: Uploaded file couldn't be read as text
+    template: error
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Fix an uploaded file that cannot be read as text.
+  - path: help/errors/missing-asset-on-deploy.md
+    title: Image or file works locally but 404s when deployed
+    template: error
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Fix assets that work locally but 404 when deployed.
+  - path: help/errors/deploy-build-failed.md
+    title: GitHub Actions build failed
+    template: error
+    level: L2
+    audience: S
+    priority: P0
+    outcome: Diagnose a failed GitHub Actions build.
+  - path: help/errors/package-import-error.md
+    title: A library import fails in the browser
+    template: error
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Fix a library import that fails in the browser.
+  - path: help/errors/permission-denied-device.md
+    title: Camera, microphone, or location permission denied
+    template: error
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Handle denied device permissions.
+  - path: help/debug-panel.md
+    title: The debug panel in depth
+    template: how-to
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Use all five debugger tabs.
+  - path: help/printing-and-console.md
+    title: Print and the console
+    template: how-to
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Use print() to see what is happening.
+  - path: help/bug-reports.md
+    title: Report a Drafter bug
+    template: how-to
+    audience: S
+    priority: P1
+    outcome: File a useful bug report.
+  - path: help/faq.md
+    title: FAQ
+    template: reference
+    audience: S
+    priority: P2
+    outcome: Get quick answers, each linking to the full page.
+
+  # ---- Teach (§5.10) ----
+  - path: teach/index.md
+    title: Teaching with Drafter
+    template: index
+    audience: T
+    priority: P1
+    outcome: Orient instructors.
+  - path: teach/why-drafter.md
+    title: Why Drafter
+    template: concept
+    audience: T
+    priority: P1
+    outcome: Evaluate Drafter for a course.
+  - path: teach/big-ideas.md
+    title: The big ideas
+    template: concept
+    audience: T
+    priority: P1
+    outcome: Know what to emphasize when teaching.
+  - path: teach/beyond-the-basics.md
+    title: Beyond the student docs
+    template: reference
+    audience: T
+    priority: P1
+    outcome: Know the advanced surface not obvious from student docs.
+  - path: teach/lesson-plans/index.md
+    title: Lesson plans
+    template: index
+    audience: T
+    priority: P2
+    outcome: Pick a lesson plan.
+  - path: teach/lesson-plans/first-day.md
+    title: First day with Drafter
+    template: lesson
+    audience: T
+    priority: P2
+    outcome: Run the first Drafter class session.
+  - path: teach/lesson-plans/forms-and-state-lab.md
+    title: Forms and state lab
+    template: lesson
+    audience: T
+    priority: P2
+    outcome: Run a lab connecting forms to state.
+  - path: teach/lesson-plans/testing-lab.md
+    title: Testing lab
+    template: lesson
+    audience: T
+    priority: P2
+    outcome: Run a lab building the testing habit.
+  - path: teach/project-ideas.md
+    title: Project ideas
+    template: reference
+    audience: T
+    priority: P2
+    outcome: Assign well-scoped projects.
+  - path: teach/student-misconceptions.md
+    title: Student misconceptions
+    template: misconception
+    audience: T
+    priority: P1
+    outcome: Anticipate and repair student misconceptions.
+  - path: teach/expert-misconceptions.md
+    title: Expert misconceptions
+    template: misconception
+    audience: T
+    priority: P1
+    outcome: Correct experienced-developer assumptions about Drafter.
+
+  # ---- Extend (§5.11) ----
+  - path: extend/index.md
+    title: Extend
+    template: index
+    level: L4
+    audience: S
+    priority: P1
+    outcome: Orient advanced students.
+  - path: extend/pyodide.md
+    title: Python in the browser
+    template: concept
+    level: L4
+    audience: S
+    priority: P1
+    outcome: Hold an accurate deeper runtime model.
+  - path: extend/javascript.md
+    title: JavaScript interop
+    template: how-to
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Call JavaScript when Python is not enough.
+  - path: extend/custom-components.md
+    title: Build your own components
+    template: how-to
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Create reusable components.
+  - path: extend/github-actions.md
+    title: Deploy with GitHub Actions
+    template: how-to
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Set up a repository that rebuilds and deploys your site on every push.
+  - path: extend/packages.md
+    title: Third-party libraries
+    template: how-to
+    level: L4
+    audience: S
+    priority: P1
+    outcome: Use pandas, matplotlib, and other libraries.
+  - path: extend/performance.md
+    title: Performance
+    template: how-to
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Keep apps responsive.
+  - path: extend/security.md
+    title: Security honestly
+    template: concept
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Know exactly what is and is not protected.
+  - path: extend/flask.md
+    title: Moving on to Flask
+    template: tutorial
+    level: L4
+    audience: S
+    priority: P2
+    outcome: Bridge from Drafter to a backend framework.
+
+  # ---- Developers (§5.12) ----
+  - path: dev/index.md
+    title: Developer documentation
+    template: index
+    audience: D
+    priority: P1
+    outcome: Orient contributors.
+  - path: dev/architecture.md
+    title: Architecture
+    template: concept
+    audience: D
+    priority: P1
+    outcome: Understand the system design.
+  - path: dev/contributing.md
+    title: Contributing
+    template: how-to
+    audience: D
+    priority: P2
+    outcome: Set up and validate a development environment.
+  - path: dev/docs-guide.md
+    title: Writing documentation
+    template: how-to
+    audience: D
+    priority: P1
+    outcome: Author pages that pass documentation CI.
+  - path: dev/internals-map.md
+    title: Internals map
+    template: reference
+    audience: D
+    priority: P2
+    outcome: Find the right module fast.
+  - path: dev/template-zoo.md
+    title: Template zoo
+    template: reference
+    audience: D
+    priority: P1
+    outcome: Review every design-system element with dummy content.

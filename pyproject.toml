@@ -1,3 +1,205 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "drafter"
+authors = [{ name = "Austin Cory Bart", email = "acbart@udel.edu" }]
+version = "2.0.0"
+description = "Student-friendly full stack web development library."
+readme = "README.md"
+urls = { "github" = "https://github.com/drafter-edu/drafter", "homepage" = "https://drafter-edu.github.io/drafter/" }
+license = "MIT"
+license-files = ["LICENSE.txt"]
+
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Education",
+
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+
+  "Topic :: Education",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+
+]
+requires-python = ">=3.10"
+dependencies = [
+  # Server
+  "jinja2",
+  "watchfiles",
+  "websockets>=12",
+  "starlette",
+  "uvicorn[standard]",
+  # CLI Tooling
+  "typer",
+  "rich",
+  # Actual library
+  "bakery",
+  "pillow",
+  "matplotlib",
+  # TODO: Is this necessary for compatibility?
+  # "typing-extensions; python_version < '3.11'",
+]
+[dependency-groups]
+dev = [
+  # Building
+  # Client Server
+  "pyodide-py",
+  # New Documentation
+  "properdocs",
+  "mkdocs-material",
+  "mkdocstrings-python",
+  # The 2026 releases of these three plugins (gen-files 0.6.x, literate-nav
+  # 0.6.3+, section-index 0.3.11+) force-depend on "properdocs", an unvetted
+  # MkDocs fork, print fork-migration advertisements into every build, and cap
+  # mkdocs at <=1.6.1. Pin to the last releases before that coupling.
+  "mkdocs-gen-files<0.6",
+  "mkdocs-literate-nav<0.6.3",
+  "mkdocs-section-index<0.3.11",
+  "Pygments",
+  "MarkupSafe",
+  # Formatting/Linting
+  "djlint",
+  "mypy",
+  "ruff",
+  "mdformat",
+  # Tools
+  "tqdm",
+  # Dependency
+  "pydeps",
+  # Testing
+  "pytest",
+  "pytest-cov",
+  "pytest-mock",
+  "coverage",
+  "tox",
+  "lxml",
+  "html5lib",
+  "snakeviz>=2.2.1",
+  "mkdocs-redirects>=1.2.3",
+]
+
+[project.optional-dependencies]
+examples = ["pandas", "seaborn", "requests", "scipy"]
+
+[project.scripts]
+drafter = "drafter.cli:main"
+drafter-docs = "drafter.docs.mkdocs_build:main"
+
+[project.entry-points."mkdocs.plugins"]
+drafter-codeblocks = "drafter.docs.mkdocs_plugin:DrafterCodeBlockPlugin"
+
+[tool.hatch.build.targets.sdist]
+artifacts = ["js/dist/**"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/drafter"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"js/dist/" = "drafter/assets/"
+
+[tool.mypy]
+mypy_path = ["src/typings"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+
+[tool.ruff]
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".ipynb_checkpoints",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pyenv",
+  ".pytest_cache",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  ".vscode",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "site-packages",
+  "venv",
+]
+
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+# Assume Python 3.10
+target-version = "py310"
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E4", "E7", "E9", "F", "I", "B", "UP", "RUF100", "D1"]
+ignore = ["D107", "UP007", "UP045"]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+"examples/**.py" = ["F403", "F405", "E402", "D1"]
+"tests/**.py" = ["F403", "F405", "D1", "UP", "B"]
+"docs/**/**.py" = ["F403", "F405", "E402", "D1"]
+"docs_legacy/**/**.py" = ["F403", "F405", "E402", "D1"]
+"docsrc/**/**.py" = ["F403", "F405", "E402", "D1"]
+"js/**/**.py" = ["F403", "F405", "F821", "E501", "E402", "D1"]
+"tools/**/**.py" = ["F403", "F405", "E402", "D1"]
+
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = true
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+docstring-code-line-length = "dynamic"

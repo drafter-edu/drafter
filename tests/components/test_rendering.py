@@ -1,0 +1,55 @@
+"""
+Eventually, we should switch to a more robust way of comparing the
+two HTML snippets rather than string comparison.
+"""
+
+import pytest
+from lxml import html as lxml_html
+
+from drafter import *
+from drafter.payloads.renderer import render
+from tests.components.snippets.forms import tests as forms_tests
+from tests.components.snippets.images import tests as images_tests
+from tests.components.snippets.links import tests as links_tests
+from tests.components.snippets.media import tests as media_tests
+from tests.components.snippets.output import tests as output_tests
+from tests.components.snippets.semantics import tests as semantics_tests
+from tests.components.snippets.simple import tests as simple_tests
+from tests.components.snippets.tables import tests as tables_tests
+
+SNIPPETS = {}
+SNIPPETS["simple"] = simple_tests.get_tests()
+SNIPPETS["forms"] = forms_tests.get_tests()
+SNIPPETS["media"] = media_tests.get_tests()
+SNIPPETS["images"] = images_tests.get_tests()
+SNIPPETS["output"] = output_tests.get_tests()
+SNIPPETS["semantics"] = semantics_tests.get_tests()
+SNIPPETS["tables"] = tables_tests.get_tests()
+SNIPPETS["links"] = links_tests.get_tests()
+
+
+def normalize_html(html: str):
+    """Normalize HTML string for comparison."""
+
+    parsed = lxml_html.fromstring(html)
+    return lxml_html.tostring(parsed, pretty_print=True, encoding="unicode").strip()
+
+
+def idfn(val):
+    if isinstance(val, tuple):
+        return f"{val[0]}/{val[1]}"
+    return None
+
+
+@pytest.mark.parametrize(
+    "category, name, content, expected",
+    [
+        (cat, name, *data)
+        for cat, items in SNIPPETS.items()
+        for name, data in items.items()
+    ],
+    ids=idfn,
+)
+def test_rendering(category, name, content, expected):
+    rendered = render(content).flatten()
+    assert normalize_html(rendered) == normalize_html(expected)

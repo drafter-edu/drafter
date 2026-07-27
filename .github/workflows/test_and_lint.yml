@@ -1,45 +1,168 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
 name: Test and Lint
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, v2-pyodide]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-
+  # The JS bundle (js/dist) is needed by the Python tests, the docs demos,
+  # and the wheel (hatch force-includes js/dist into drafter/assets),
+  # so build it once and share it as an artifact.
+  build-js:
+    name: Build JS assets
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest mypy
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        if [ -f requirements_dev.txt ]; then pip install -r requirements_dev.txt; fi
-    - name: Lint with mypy
-      continue-on-error: true
-      run: |
-        python -m mypy ./drafter/
-    - name: Test with pytest
-      run: |
-        python -m pytest ./tests/
-    - name: Store failures information
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results-${{ matrix.runs-on }}
-        path: |
-          **/tests.test**
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+      - name: Install JS dependencies
+        run: npm ci
+        working-directory: js
+      - name: Build JS bundle
+        run: npm run build
+        working-directory: js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: js-dist
+          path: js/dist/
+          if-no-files-found: error
+
+  test-js-unit:
+    name: JS unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+      - name: Install JS dependencies
+        run: npm ci
+        working-directory: js
+      - name: Run jest (unit project, with coverage thresholds)
+        # coverageThreshold in jest.config.ts fails this step if coverage
+        # regresses below the ratchet.
+        run: npm run test:coverage
+        working-directory: js
+
+  test-js-integration:
+    name: JS integration tests (pyodide)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+      - name: Install JS dependencies
+        run: npm ci
+        working-directory: js
+      - name: Run integration tests (per-file Jest processes)
+        # scripts/run-integration-tests.mjs runs each pyodide file in its own
+        # Jest process: Pyodide WASM memory is never reclaimed and leftover
+        # render loops from one file otherwise OOM later files.
+        run: npm run test:integration
+        working-directory: js
+
+  test-js-e2e:
+    name: JS e2e tests (Playwright)
+    needs: build-js
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: js-dist
+          path: js/dist
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+      - name: Install JS dependencies
+        run: npm ci
+        working-directory: js
+      - name: Install Playwright chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: js
+      - name: Run Playwright e2e suites
+        # Rebuilds the drafter zip from src/drafter (needs python on PATH),
+        # then boots real Pyodide in Chromium against the built bundle.
+        run: npm run test:e2e
+        working-directory: js
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: js/test-results/
+          if-no-files-found: ignore
+
+  lint:
+    name: Lint (ruff + mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Create js/dist placeholder for hatchling editable install
+        run: mkdir -p js/dist
+      - name: Install dependencies
+        run: uv sync --python 3.13
+      - name: Check formatting
+        run: uv run ruff format --check
+      - name: Lint with ruff
+        run: uv run ruff check
+      - name: Check docstring drift
+        run: uv run python tools/doc_drift.py
+      - name: Type-check with mypy
+        run: uv run mypy --ignore-missing-imports --install-types --non-interactive --package drafter
+
+  test-python:
+    name: Python tests (${{ matrix.python-version }})
+    needs: build-js
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      # Some tests exercise the client-server/compile path, which resolves
+      # assets from js/dist when running from a source checkout.
+      - uses: actions/download-artifact@v4
+        with:
+          name: js-dist
+          path: js/dist
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: uv sync --python ${{ matrix.python-version }}
+      - name: Run pytest
+        run: uv run pytest --verbose --color=yes tests
+
+  build-package:
+    name: Build sdist + wheel
+    needs: build-js
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: js-dist
+          path: js/dist
+      - uses: astral-sh/setup-uv@v6
+      - name: Build distributions
+        run: uv build
+      - name: Check that the wheel bundles the JS assets
+        run: |
+          unzip -l dist/*.whl | grep -q 'drafter/assets/js/drafter.pyodide.js' \
+            || { echo 'Wheel is missing bundled JS assets!'; exit 1; }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: dist/

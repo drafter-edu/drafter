@@ -1,0 +1,724 @@
+"""Base machinery for page content components.
+
+There are three main types defined here:
+- `Component`: The base class for all content that can be added to a page. It provides methods for verifying the component's state, parsing extra settings into HTML attributes and styles, updating styles and attributes, and planning how the component will be rendered.
+- `Content`: A type alias that represents either a `Component` or a string. This allows for flexibility in content representation.
+- `PageContent`: A type alias that represents either a single `Content` item or a list of `Content` items. This allows for multiple pieces of content to be grouped together for a page.
+
+Note that `str` is also considered a valid `Content` type, allowing for simple text content to be used directly without needing to create a `Component` instance.
+
+To create custom components, subclass the `Component` class. A subclass declares
+its constructor parameters via the `ARGUMENTS` class variable (a list of
+`ComponentArgument` entries) and is rendered by calling its `plan` method, which
+returns a `RenderPlan`. The `RenderPlan` captures everything needed to produce
+the final output, not just the HTML tag, attributes, and child content (some
+elements are composed of child elements, e.g., a `<div>` containing multiple
+`<p>` tags), but also any dedicated CSS and JavaScript assets that have their
+own lifecycle.
+
+A Component should always:
+- Have a `**extra_settings` kwargs parameter in its constructor to accept extra settings that are stored in the `extra_settings` dict
+
+Attribute order should always be consistent, with styles at the end. Generally, this means that they should be alphabetized.
+"""
+
+import json
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass
+from typing import Any, ClassVar, Union
+
+from drafter.components.planning.render_plan import AssetBundle, NewlineMode, RenderPlan
+from drafter.components.utilities.persistence import add_persistence_attributes
+from drafter.components.utilities.validation import (
+    validate_json_value,
+    validate_parameter_name,
+)
+from drafter.data.errors import StudentFacingError
+
+RouteSafeValue = str | int | float | bool
+"""Type alias for values that are safe to pass in routes (JSON serializable primitives)."""
+
+JsonSafeValue = str | int | float | bool | None | list | dict
+"""Type alias for JSON-safe values (primitives, lists, dicts, or None)."""
+
+UrlOrFunction = str | Callable
+"""Type alias for values that can be either URL strings or callable functions."""
+
+
+@dataclass
+class ComponentArgument:
+    """Describes an argument passed to a component's constructor.
+
+    Used by Component subclasses to declare their parameters and how they
+    should be rendered (positional, variadic, keyword) and whether they
+    represent content (child elements) or attributes.
+
+    Attributes:
+        name: The parameter name.
+        kind: The argument kind: "positional", "var", or "keyword".
+        default_value: Default value if not provided.
+        is_content: Whether this argument represents child content.
+        is_event: Whether this argument represents an event route handler.
+    """
+
+    name: str
+    kind: str = "positional"  # "positional", "var", "keyword"
+    default_value: Any = None
+    is_content: bool = False
+    is_event: bool = False
+
+
+@dataclass
+class Arguable:
+    """Represents a single named argument for component rendering.
+
+    Attributes:
+        name: The parameter name.
+        value: The JSON-safe value.
+    """
+
+    name: str
+    value: JsonSafeValue
+
+
+ArgumentList = (
+    Arguable
+    | list[Arguable]
+    | list[tuple[str, JsonSafeValue]]
+    | dict[str, JsonSafeValue]
+    | None
+)
+"""Type alias for flexible argument specification formats."""
+
+
+def convert_arguments_to_json(arguments, only_validate=False) -> str | None:
+    """Convert flexible argument formats to JSON-serialized dict.
+
+    Accepts multiple formats for specifying arguments:
+    - dict: Directly serialized to JSON
+    - Arguable: Converted to single-key dict
+    - list/tuple/set: Elements can be Arguable, (name, value) pairs, or single-key dicts
+
+    Args:
+        arguments: Arguments in any supported format.
+        only_validate: If True, validate but don't return JSON string.
+
+    Returns:
+        JSON string representing arguments, or None if only_validate=True.
+
+    Raises:
+        StudentFacingError: If arguments format is invalid or contains invalid parameter names/values.
+    """
+    if isinstance(arguments, dict):
+        for key, value in arguments.items():
+            validate_parameter_name(key, "Argument")
+            validate_json_value(value, "Argument")
+        return json.dumps(arguments) if not only_validate else None
+
+    elif isinstance(arguments, Arguable):
+        validate_parameter_name(arguments.name, "Argument")
+        validate_json_value(arguments.value, "Argument")
+        return (
+            json.dumps({arguments.name: arguments.value}) if not only_validate else None
+        )
+
+    elif isinstance(arguments, (list, set, tuple)):
+        argument_dict = {}
+        for index, item in enumerate(arguments):
+            if isinstance(item, Arguable):
+                validate_parameter_name(item.name, "Argument")
+                validate_json_value(item.value, "Argument")
+                argument_dict[item.name] = item.value
+            elif isinstance(item, (list, tuple)) and len(item) == 2:
+                key, value = item
+                validate_parameter_name(key, "Argument")
+                validate_json_value(value, "Argument")
+                argument_dict[key] = value
+            elif isinstance(item, dict) and len(item) == 1:
+                key, value = next(iter(item.items()))
+                validate_parameter_name(key, "Argument")
+                validate_json_value(value, "Argument")
+                argument_dict[key] = value
+            else:
+                raise StudentFacingError(
+                    f"Invalid argument format at index {index}: {item}.\nMust be an Arguable, a (name, value) pair, or a dict with a single key-value pair.",
+                    friendly=(
+                        f"Item number {index} in the arguments list you gave "
+                        "this component is not something Drafter can turn "
+                        "into a named argument."
+                    ),
+                    steps=(
+                        f"Look at item {index} of your arguments list and "
+                        "make it a (name, value) pair, like ('score', 10).",
+                        "Or use an Argument object, like Argument('score', 10).",
+                    ),
+                )
+        return json.dumps(argument_dict) if not only_validate else None
+    else:
+        raise StudentFacingError(
+            "The arguments must be an Argument, a list of Argument objects, a list of (name, value) pairs, or a dict of name to value.",
+            friendly=(
+                "The arguments you gave this component are not in a shape "
+                "Drafter understands; it needs names paired with values."
+            ),
+            steps=(
+                "Pass a dictionary, like arguments={'score': 10}.",
+                "Or pass a list of (name, value) pairs, like "
+                "arguments=[('score', 10)].",
+                "Or pass one or more Argument objects, like "
+                "arguments=Argument('score', 10).",
+            ),
+        )
+
+
+def repr_arg(key: str, value: Any) -> str:
+    """Represent an argument value for use in a component's `__repr__`.
+
+    Callable event handler values (keys starting with 'on') are rendered
+    as their bare function name; everything else uses `repr`.
+
+    Args:
+        key: The argument name.
+        value: The argument value.
+
+    Returns:
+        The string representation of the value.
+    """
+    if key.startswith("on"):
+        if callable(value):
+            return value.__name__
+    return repr(value)
+
+
+class Component:
+    """
+    Base class for all content that can be added to a page.
+    This class is not meant to be used directly, but rather to be subclassed by other classes.
+
+    Components can be turned into HTML by first calling the `plan` method, which
+    returns a `RenderPlan` object. The `RenderPlan` object contains all the information
+    needed to render the component, including its tag name, attributes, children,
+    and any associated assets.
+
+    Components can be converted to a string using __repr__, which should
+    be able to roundtrip back to the same component using eval.
+
+    Conceptually, there are three "versions" of the data for the Component:
+    - The "arguments" which are essentially defined by the __init__ method and include both
+        the positional and keyword arguments. These are stored as fields on the Component instance
+        as "internals".
+        The arguments can be either positional, variable, keyword, or extra (kwargs).
+        Every component must have extra_settings, and that ends up as a field as well.
+        When the __repr__ is called, it should generate these arguments to create a string that can be
+        eval'd back into the same component.
+    - The "fields" which are the actual fields contained inside of the Component as an instance.
+        These vary completely by the type of component, but can be used to derive both the arguments
+        and the externals. They should roughly align to the arguments, so that the users can
+        modify them after the fact and have the changes be reflected in the arguments and the externals.
+    - The "externals" which are the HTML attributes, children, assets, and other information
+        needed to render the component. These are derived from the internals, but are not stored that
+        way. Instead, they are generated on the fly when the `plan` method is called, using the
+        `get_attributes`, `get_children`, and `get_assets` methods.
+
+    Args that are marked as "Content" get turned into Children (child content), other args get turned into attributes.
+
+    So basically the canonical data is the fields, and then some of those fields are identified
+    to create the HTML attributes, children, and assets.
+
+    The default for an argument is to be turned into an attribute of the same name, unless
+    it is in the RENAME_ATTRS dict. The KNOWN_ATTRS list is used to force certain arguments
+    to be turned into attributes, even though the default is to turn them into style properties.
+    The DEFAULT_ATTRS dict is used to provide default values for attributes, which can be overridden
+    by the extra_settings.
+
+    Each subclass declares its constructor parameters in the `ARGUMENTS` class
+    variable, a list of `ComponentArgument` entries. Each entry records the
+    parameter's name, its kind ("positional", "var", or "keyword" with a default
+    value), whether it represents child content (`is_content`) rather than an
+    attribute, and whether it represents an event route handler (`is_event`).
+    Any extra keyword arguments beyond the declared ones are stored in
+    `extra_settings` and turned into attributes (or styles).
+
+    A special extra case is the `arguments` parameter, primarily for Link and Button components, but actually
+    usable by any component. This accepts an `ArgumentList` that will be turned into a special
+    `data--drafter-arguments` attribute that will have arguments embedded directly on the element, which will
+    then be passed to any events emanating from that element. The obvious use case is for links and buttons, where
+    you want arguments to be passed when the link or button is clicked, but it could also be used for other events.
+    - The `arguments` parameter can be a single `Arguable`, a sequence of `Arguable` objects, a sequence of (name, value) pairs, or a dict of name to value.
+    - The names MUST be valid Python identifiers, and the values can be any JSON-serializable value (but not dataclasses).
+    - The `arguments` parameter will be turned into a `data--drafter-arguments` attribute.
+    - The value of the `data--drafter-arguments` attribute will be a JSON string.
+    - The `arguments` parameter will usually be stored in the `extra_settings` dict, but it can also be stored as a field on the component if desired.
+
+    Under any student-facing circumstances, a string value can be used in place of a `Component` object
+    (in which case we say it is a `Content` type). However, the `Component` object
+    allows for more customization and control over the content. Most situations also
+    allow for a list of `Content` objects (which we call `PageContent`), which can be
+    used to group multiple pieces of content together.
+    """
+
+    tag: str
+    extra_settings: dict
+
+    ARGUMENTS: ClassVar[list[ComponentArgument]] = []
+
+    DEFAULT_ATTRS: ClassVar[dict] = {}
+    KNOWN_ATTRS: ClassVar[list[str]] = []
+    RENAME_ATTRS: ClassVar[dict[str, str]] = {}
+
+    # Whether this component can persist across simulated page reloads via a
+    # `persistent=True` argument. Persistable components always render a
+    # data-drafter-persist-key identity attribute (see
+    # drafter.components.utilities.persistence).
+    PERSISTABLE: ClassVar[bool] = False
+
+    # Formatting settings
+    COLLAPSE_WHITESPACE: ClassVar[bool] = False
+    SELF_CLOSING_TAG: ClassVar[bool] = False
+    NEWLINE_MODE: ClassVar[str] = NewlineMode.CONVERT_TO_BR
+
+    ALLOWS_SHARED_NAME: bool = False
+
+    # Constants
+    DRAFTER_DATA_ARGUMENT_NAME: ClassVar[str] = "data--drafter-arguments"
+    DRAFTER_DATA_HANDLERS_NAME: ClassVar[str] = "data--drafter-handlers"
+    # Supported event types for route dispatching
+    SUPPORTED_EVENTS: ClassVar[list[str]] = [
+        "blur",
+        "change",
+        "focus",
+        "input",
+        "keydown",
+        "keyup",
+        "keypress",
+        "mouseenter",
+        "mouseleave",
+        "mouseover",
+        "mouseout",
+        "click",
+        "dblclick",
+    ]
+    EXTRA_SUPPORTED_EVENTS: ClassVar[list[str]] = []
+
+    def plan(self, context) -> RenderPlan:
+        """Produce the RenderPlan describing how to render this component.
+
+        The default implementation delegates to `_plan_tag`, building a
+        single tag plan from `get_tag`, `get_attributes`, `get_children`,
+        and `get_assets`. Subclasses override this when they need a
+        different structure (e.g., raw output or multiple elements).
+
+        Args:
+            context: The active Renderer, providing rendering state and configuration.
+
+        Returns:
+            A RenderPlan capturing the tag, attributes, children, and assets.
+        """
+        return self._plan_tag(context)
+
+    def _plan_tag(
+        self,
+        context,
+        tag_name=None,
+        attributes=None,
+        children=None,
+        assets=None,
+        known_attributes=None,
+        id=None,
+        self_closing=None,
+        collapse_whitespace=None,
+        newline_mode=None,
+    ) -> RenderPlan:
+        return RenderPlan(
+            kind="tag",
+            tag_name=tag_name or self.get_tag(context),
+            attributes=attributes or self.get_attributes(context),
+            children=children or self.get_children(context),
+            assets=assets or self.get_assets(context),
+            known_attributes=known_attributes or self.KNOWN_ATTRS,
+            id=id or self.get_id(),
+            self_closing=self_closing
+            if self_closing is not None
+            else self.SELF_CLOSING_TAG,
+            collapse_whitespace=collapse_whitespace
+            if collapse_whitespace is not None
+            else self.COLLAPSE_WHITESPACE,
+            newline_mode=newline_mode
+            if newline_mode is not None
+            else self.NEWLINE_MODE,
+        )
+
+    def _handle_event(self, attribute_key, attribute_value):
+        if attribute_key.startswith("on_"):
+            event_type = attribute_key[3:]
+            if event_type in (self.SUPPORTED_EVENTS + self.EXTRA_SUPPORTED_EVENTS):
+                route_name = (
+                    attribute_value.__name__
+                    if callable(attribute_value)
+                    else attribute_value
+                )
+                return True, event_type, route_name
+        return False, attribute_key, attribute_value
+
+    def _handle_extra_settings(self, attributes, context, event_handlers) -> dict:
+        for key, value in self.extra_settings.items():
+            if key == "arguments":
+                attributes[self.DRAFTER_DATA_ARGUMENT_NAME] = convert_arguments_to_json(
+                    value
+                )
+            else:
+                is_event, event_type, route_name = self._handle_event(key, value)
+                if is_event:
+                    event_handlers[event_type] = route_name
+                else:
+                    attributes[key] = value
+        # Add event handlers as data attribute if any exist
+        if event_handlers:
+            attributes[self.DRAFTER_DATA_HANDLERS_NAME] = json.dumps(event_handlers)
+        return attributes
+
+    def get_attributes(self, context) -> dict:
+        """Build the HTML attributes for this component.
+
+        The default implementation starts from `DEFAULT_ATTRS`, adds each
+        declared non-content argument (renamed via `RENAME_ATTRS`, skipping
+        keyword arguments still at their default values), folds in
+        `extra_settings` (converting `arguments` and `on_*` event handlers
+        into their `data--drafter-*` attributes), and finally adds
+        persistence attributes for `PERSISTABLE` components. Subclasses
+        override this to add or adjust attributes, usually calling
+        `super().get_attributes(context)` first.
+
+        Args:
+            context: The active Renderer, providing rendering state and configuration.
+
+        Returns:
+            Dictionary mapping HTML attribute names to values.
+        """
+        attributes = {}
+        event_handlers = {}
+        # Default attributes that should always be included, unless overridden by extra_settings
+        if self.DEFAULT_ATTRS:
+            attributes.update(self.DEFAULT_ATTRS)
+        for argument in self.ARGUMENTS:
+            if argument.is_content:
+                continue
+            key = argument.name
+            value = getattr(self, key, argument.default_value)
+            if argument.kind == "keyword" and value == argument.default_value:
+                continue
+            key = self.RENAME_ATTRS.get(key, key)
+            if not key:
+                continue
+            if argument.is_event:
+                is_event, event_type, route_name = self._handle_event(key, value)
+                if is_event:
+                    event_handlers[event_type] = route_name
+                else:
+                    attributes[key] = value
+            else:
+                attributes[key] = value
+        # Handle extra settings
+        attributes = self._handle_extra_settings(attributes, context, event_handlers)
+        if self.PERSISTABLE:
+            add_persistence_attributes(self.tag, attributes, self.KNOWN_ATTRS)
+        return attributes
+
+    def get_tag(self, context) -> str:
+        """Get the HTML tag name for this component.
+
+        The default implementation returns the class-level `tag`.
+        Subclasses override this when the tag depends on the component's
+        state (e.g., `Header` chooses h1-h6 based on its level).
+
+        Args:
+            context: The active Renderer, providing rendering state and configuration.
+
+        Returns:
+            The HTML tag name.
+        """
+        return self.tag
+
+    def get_children(self, context) -> list[Any]:
+        """Build the child content for this component.
+
+        The default implementation collects the values of the declared
+        arguments marked `is_content`, flattening var-args arguments and
+        skipping None values. Subclasses override this to construct
+        derived child elements (e.g., option or list-item RenderPlans).
+
+        Args:
+            context: The active Renderer, providing rendering state and configuration.
+
+        Returns:
+            List of child content items (Components, strings, or RenderPlans).
+        """
+        children = []
+        for argument in self.ARGUMENTS:
+            if not argument.is_content:
+                continue
+            if argument.kind == "var":
+                value = getattr(self, argument.name)
+                if value is not None:
+                    for child in value:
+                        children.append(child)
+                continue
+            else:
+                key = argument.name
+                value = getattr(self, key, argument.default_value)
+                if value is not None:
+                    children.append(value)
+        return children
+
+    def get_arguments(self) -> list[str]:
+        """Generate arguments for __repr__ to enable round-trip serialization.
+
+        Returns arguments in proper order (positional then keyword) to recreate
+        the component via eval(repr(component)).
+
+        Returns:
+            List of argument strings.
+        """
+        arguments = []
+        handled_arguments = set()
+        still_positional = True
+        for argument in self.ARGUMENTS:
+            parameter_name = argument.name
+            # Don't double-render any keyword arguments that will also be in extra_settings
+            if argument.kind == "keyword" and parameter_name in self.extra_settings:
+                continue
+            handled_arguments.add(parameter_name)
+            value = getattr(self, parameter_name, argument.default_value)
+            if argument.is_content:
+                if argument.kind == "positional":
+                    arguments.append(repr_arg(parameter_name, value))
+                elif argument.kind == "var":
+                    for item in value:
+                        arguments.append(repr(item))
+                    still_positional = False
+                elif argument.kind == "keyword":
+                    if value != argument.default_value:
+                        if still_positional:
+                            arguments.append(repr_arg(parameter_name, value))
+                        else:
+                            arguments.append(
+                                f"{parameter_name}={repr_arg(parameter_name, value)}"
+                            )
+                    else:
+                        still_positional = False
+            else:
+                if argument.kind == "positional":
+                    arguments.append(repr_arg(parameter_name, value))
+                elif argument.kind == "var":
+                    for item in value:
+                        arguments.append(repr_arg(parameter_name, item))
+                    still_positional = False
+                elif argument.kind == "keyword":
+                    if value != argument.default_value:
+                        if still_positional:
+                            arguments.append(repr_arg(parameter_name, value))
+                        else:
+                            arguments.append(
+                                f"{parameter_name}={repr_arg(parameter_name, value)}"
+                            )
+                    else:
+                        still_positional = False
+
+        if self.extra_settings:
+            for key, value in sorted(self.extra_settings.items()):
+                if key in handled_arguments:
+                    continue
+                arguments.append(f"{key}={repr_arg(key, value)}")
+        return arguments
+
+    def get_fields(self) -> tuple[dict[str, Any], dict[str, Any]]:
+        """
+        Get the fields of the component, suitable for comparison.
+
+        Returns:
+            A tuple of two dicts. The first maps declared argument names (and
+            any unhandled `extra_settings` keys) to their values; the second
+            holds positionally-rendered values keyed as
+            `"{name} (item {index})"` for var-args items and for leading
+            keyword arguments that still render positionally.
+        """
+        arguments = {}
+        positional_arguments = {}
+        handled_arguments = set()
+        still_positional = True
+        index = 0
+        for argument in self.ARGUMENTS:
+            parameter_name = argument.name
+            # Don't double-render any keyword arguments that will also be in extra_settings
+            if argument.kind == "keyword" and parameter_name in self.extra_settings:
+                continue
+            handled_arguments.add(parameter_name)
+            value = getattr(self, parameter_name, argument.default_value)
+            if argument.kind == "positional":
+                arguments[parameter_name] = value
+            elif argument.kind == "var":
+                for item in value:
+                    positional_arguments[f"{parameter_name} (item {index})"] = item
+                    index += 1
+                still_positional = False
+            elif argument.kind == "keyword":
+                if value != argument.default_value:
+                    if still_positional:
+                        positional_arguments[f"{parameter_name} (item {index})"] = value
+                    else:
+                        arguments[parameter_name] = value
+                else:
+                    still_positional = False
+
+        if self.extra_settings:
+            for key, value in sorted(self.extra_settings.items()):
+                if key in handled_arguments:
+                    continue
+                arguments[key] = value
+        return arguments, positional_arguments
+
+    def get_assets(self, context) -> AssetBundle | None:
+        """Get the CSS and JavaScript assets required by this component.
+
+        The default implementation returns None (no assets). Subclasses
+        override this to bundle dedicated stylesheets or scripts with
+        their rendered output.
+
+        Args:
+            context: The active Renderer, providing rendering state and configuration.
+
+        Returns:
+            An AssetBundle of required assets, or None if there are none.
+        """
+        return None
+
+    def __repr__(self):
+        """Represent the component as a constructor-style call with its arguments."""
+        class_name = self.__class__.__name__
+        arguments = self.get_arguments()
+        return f"{class_name}({', '.join(arguments)})"
+
+    def get_id(self) -> str:
+        """
+        Gets the ID of the component if it has one.
+
+        Returns:
+            The ID of the component, or an auto-generated one if none is set.
+        """
+        return self.extra_settings.get("id", f"drafter-component-{id(self)}")
+
+    def verify(self, router, state, configuration, request):
+        """Verify component validity before rendering.
+
+        This method is called during request processing to ensure the
+        component is in a valid state. Override to add custom validation.
+
+        Args:
+            router: The route router instance.
+            state: The current page state.
+            configuration: The site configuration.
+            request: The current request object.
+
+        Returns:
+            None if valid; raise ValueError or return error details if invalid.
+        """
+        return None
+
+    def update_style(self, style: str, value: RouteSafeValue):
+        """Update a CSS style property.
+
+        Args:
+            style: The CSS property name (e.g., 'color').
+            value: The CSS value (e.g., 'red').
+
+        Returns:
+            Self for method chaining.
+        """
+        self.extra_settings[f"style_{style}"] = value
+        return self
+
+    def update_attr(self, attr: str, value: RouteSafeValue):
+        """Update an HTML attribute.
+
+        Args:
+            attr: The HTML attribute name.
+            value: The attribute value.
+
+        Returns:
+            Self for method chaining.
+
+        TODO:
+            Should this update component fields if attr corresponds to one?
+        """
+        self.extra_settings[attr] = value
+        return self
+
+
+Content = Union[Component, str]
+"""Type alias for page content: a component or string."""
+
+PageContent = Union[Content, Sequence[Content]]
+"""Type alias for page content: a content item or list of content items."""
+
+
+def normalize_page_content(content: PageContent) -> list[Content]:
+    """Normalize PageContent to a list of Content items.
+
+    Args:
+        content: The PageContent to normalize.
+
+    Returns:
+        A list of Content items (Component or str).
+    """
+    if isinstance(content, (Component, str)):
+        return [content]
+    elif isinstance(content, Sequence):
+        return list(content)
+    else:
+        raise StudentFacingError(
+            f"Invalid PageContent: expected Component, str, or a sequence of these, but got {type(content).__name__}.",
+            friendly=(
+                "The content you put on this page was a "
+                f"{type(content).__name__}, but page content has to be text, "
+                "a component, or a list of those."
+            ),
+            steps=(
+                "Wrap plain values in str() to display them as text.",
+                "Put multiple pieces of content in a list, like "
+                "['Hello', Button('Go', go)].",
+            ),
+        )
+
+
+def validate_page_content(content: Any) -> tuple[bool, str]:
+    """Check if the given content is valid PageContent.
+
+    Args:
+        content: The content to check.
+
+    Returns:
+        A tuple (is_valid, error_message). is_valid is True if valid, False otherwise.
+        error_message is empty if valid, or contains details if invalid.
+    """
+    if isinstance(content, (Component, str)):
+        return True, ""
+    # Prevent string-like binary objects (especially empty ones) from being
+    # treated as valid empty sequences:
+    elif isinstance(content, (bytes, bytearray, memoryview)):
+        return (
+            False,
+            f"Invalid PageContent: expected Component, str, or a sequence of these, but got binary data instead ({type(content).__name__}).",
+        )
+    elif isinstance(content, Sequence):
+        for index, item in enumerate(content):
+            if not isinstance(item, (Component, str)):
+                return (
+                    False,
+                    f"Invalid PageContent: item at index {index} is of type {type(item).__name__}, expected Component or string.",
+                )
+        return True, ""
+    else:
+        return (
+            False,
+            f"Invalid PageContent: expected Component, str, a list of Component or string, but instead got {type(content).__name__}.",
+        )

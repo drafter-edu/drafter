@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Drafter e2e harness</title>
+  </head>
+  <body>
+    <div id="status">idle</div>
+    <div id="drafter-root--"></div>
+    <script src="/pyodide/pyodide.js"></script>
+    <script src="/assets/js/drafter.pyodide.js"></script>
+    <script>
+			// Test harness API driven from Playwright via page.evaluate:
+			//   await bootRuntime()      — boot Pyodide + mount local drafter (once)
+			//   await runExample(code)   — reset the runtime, run a student app
+			// Mirrors the jest pyodide-test-harness so results stay comparable.
+			window.DRAFTER_MODIFIED_CONFIGURATION = {};
+
+			const status = document.getElementById("status");
+			const setStatus = (msg) => (status.textContent = msg);
+
+			let bootPromise = null;
+			window.bootRuntime = function bootRuntime() {
+				if (bootPromise === null) {
+					bootPromise = (async () => {
+						setStatus("loading pyodide");
+						await window.Drafter.setupPyodide({
+							pyodideUrl: "/pyodide/",
+							systemPackages: [],
+						});
+            await window.micropip.install("pillow");
+						setStatus("mounting drafter");
+						await window.Drafter.mountDrafterRemote(
+							"/drafter-pyodide.zip",
+						);
+						await window.Drafter.patchPythonFeatures();
+						setStatus("installing example dependencies");
+						await window.micropip.install("bakery");
+						setStatus("ready");
+					})();
+				}
+				return bootPromise;
+			};
+
+			window.resetDrafter = async function resetDrafter() {
+				// Same teardown as the jest harness: kill the previous app's
+				// server AND its bridge listeners, then clear the DOM.
+				await window.pyodide.runPythonAsync(
+					[
+						"from drafter.client_server.commands import reset_server_for_root, set_main_server",
+						'reset_server_for_root("drafter-root--")',
+						"set_main_server(None)",
+					].join("\n"),
+				);
+				window.Drafter.clearDrafterSiteRoot();
+			};
+
+			window.runExample = async function runExample(code, presentErrors) {
+				await window.bootRuntime();
+				await window.resetDrafter();
+				setStatus("running example");
+				await window.Drafter.runStudentCode({
+					code,
+					presentErrors: presentErrors ?? false,
+				});
+				setStatus("example done");
+			};
+
+			// Full-instance path (registers the drafter-restart-student-code
+			// listener, so the debug-panel editor's Run button works).
+			window.runInstance = async function runInstance(code) {
+				await window.bootRuntime();
+				await window.resetDrafter();
+				setStatus("starting instance");
+				const instance = await window.Drafter.createDrafterInstance({
+					rootElementId: "drafter-root--",
+					inlineCode: code,
+				});
+				window.__drafterInstance = instance;
+				setStatus("instance running");
+			};
+    </script>
+  </body>
+</html>

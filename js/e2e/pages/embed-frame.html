@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Drafter e2e embedded frame</title>
+  </head>
+  <body>
+    <div id="drafter-root--"></div>
+    <script src="/assets/js/drafter.pyodide.js"></script>
+    <script>
+			// The docs-embed shape: the iframe loads only the (cheap, cached)
+			// JS bundle — defining the custom elements in THIS document — and
+			// registers itself with the parent page's shared DrafterHost
+			// instead of booting its own Pyodide.
+			window.DRAFTER_MODIFIED_CONFIGURATION = {};
+
+			window.registerWithHost = async function registerWithHost(
+				code,
+				instanceId,
+			) {
+				const host = window.parent.Drafter.getHost();
+				await host.attach({
+					window: window,
+					code: code,
+					instanceId: instanceId,
+					bootSettings: {
+						pyodideUrl: "/pyodide/",
+						drafterPath: "/drafter-pyodide.zip",
+						systemPackages: ["pillow",],
+					},
+				});
+			};
+    </script>
+  </body>
+</html>

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{#
+  Drafter docs customization layer (STUDENT_DOCS_PLAN.md §9).
+
+  - Sets a zone attribute (teach/dev) on the root element from the page's
+    `audience` front-matter, so CSS can restyle those areas site-wide.
+  - Renders the zone banner and the front-matter-driven page header block
+    (page-type badge, level chip, outcome line) above the page content.
+#}
+
+{% block extrahead %}
+  {{ super() }}
+  {%- set audience = page.meta.audience if page and page.meta else None -%}
+  {#- Extend shares the Teach palette (design feedback, 2026-07-26) but keeps
+      no instructor banner: the zone attribute drives colors only. -#}
+  {%- if audience == "T" or (page and page.url.startswith("extend/")) -%}
+    <script>document.documentElement.dataset.zone = "teach"</script>
+  {%- elif audience == "D" -%}
+    <script>document.documentElement.dataset.zone = "dev"</script>
+  {%- endif -%}
+  {%- if page and page.is_homepage -%}
+    <script>document.documentElement.dataset.home = "1"</script>
+  {%- endif -%}
+{% endblock extrahead %}
+
+{% block content %}
+  {%- set audience = page.meta.audience if page and page.meta else None -%}
+  {%- if audience == "T" -%}
+    <div class="drafter-zone-banner drafter-zone-banner--teach">
+      <span>Instructor documentation</span>
+      <a href="{{ '/start/' | url }}">Students: go to the student docs</a>
+    </div>
+  {%- elif audience == "D" -%}
+    <div class="drafter-zone-banner drafter-zone-banner--dev">
+      <span>Developer documentation</span>
+      <a href="{{ '/reference/' | url }}">Students: you probably want the Reference</a>
+    </div>
+  {%- endif -%}
+
+  {%- set page_type = page.meta.page_type if page and page.meta else None -%}
+  {%- set type_labels = {
+        "tutorial": "Tutorial",
+        "concept": "Concept",
+        "how-to": "How-to",
+        "component": "Reference",
+        "reference": "Reference",
+        "api": "Reference",
+        "example": "Example",
+        "playground": "Playground",
+        "gallery": "Gallery",
+        "error": "Troubleshooting",
+        "troubleshooting": "Troubleshooting",
+        "lesson": "Lesson plan",
+        "misconception": "Misconceptions",
+        "archetype": "Project idea"
+     } -%}
+  {%- set level_labels = {
+        "L1": "First steps",
+        "L2": "Core",
+        "L3": "Advanced",
+        "L4": "Specialized"
+     } -%}
+  {%- if page_type and page_type != "index" -%}
+    <div class="drafter-page-meta">
+      {%- if page_type in type_labels -%}
+        <span class="drafter-badge drafter-badge--type drafter-badge--{{ page_type }}">{{ type_labels[page_type] }}</span>
+      {%- endif -%}
+      {%- if page.meta.level and page.meta.level in level_labels -%}
+        <span class="drafter-badge drafter-badge--level drafter-badge--{{ page.meta.level | lower }}">{{ level_labels[page.meta.level] }}</span>
+      {%- endif -%}
+      {%- if page.meta.outcome -%}
+        <span class="drafter-page-meta__outcome">{{ page.meta.outcome }}</span>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {{ super() }}
+{% endblock content %}

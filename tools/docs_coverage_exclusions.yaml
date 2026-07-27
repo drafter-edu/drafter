@@ -1,0 +1,7 @@
+# Exported names deliberately absent from student reference pages, with the
+# reason for each (STUDENT_DOCS_PLAN.md §11, gate 2). A name may be removed
+# from this list only by giving it a primary page (`symbols` front-matter).
+dataclass: Python stdlib re-export for convenience; taught inline in tutorials, not a Drafter API.
+get_system_configuration: Internal configuration inspection; documented in the developer API reference only.
+get_main_server: Multi-server plumbing for tests and embedding; developer API reference only.
+set_main_server: Multi-server plumbing for tests and embedding; developer API reference only.

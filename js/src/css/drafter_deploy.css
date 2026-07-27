@@ -1,0 +1,58 @@
+@import url("./drafter_base.css");
+
+.drafter-frame-- {
+	padding: 0;
+	border: 0;
+	max-width: 960px;
+}
+
+#drafter-root-- {
+	height: 100%;
+}
+
+.drafter-header-- {
+	display: none;
+}
+
+.drafter-footer-- {
+	display: none;
+}
+
+.drafter-debug-- {
+	display: none;
+}
+
+.drafter-subtle-debug-entry-- {
+	display: none;
+}
+
+.drafter-subtle-debug-entry--[data-enabled="true"][data-visible="true"] {
+	position: fixed;
+	top: 0.75rem;
+	right: 0.75rem;
+	z-index: 10000;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.2rem 0.45rem;
+	border-radius: 999px;
+	border: 1px solid rgba(21, 27, 38, 0.35);
+	background: rgba(255, 255, 255, 0.75);
+	color: #3a4659;
+	font:
+		600 0.72rem/1 Arial,
+		Helvetica,
+		sans-serif;
+	letter-spacing: 0.03em;
+	text-transform: lowercase;
+	cursor: pointer;
+	opacity: 0.45;
+	transition:
+		opacity 120ms ease,
+		background-color 120ms ease;
+}
+
+.drafter-subtle-debug-entry--[data-enabled="true"][data-visible="true"]:hover {
+	opacity: 0.95;
+	background: rgba(255, 255, 255, 0.95);
+}

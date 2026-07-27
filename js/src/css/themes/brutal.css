@@ -1,0 +1,282 @@
+/**
+github.com/VitorEstevam/Brutal
+
+Project Under MIT license
+
+Made in Brazil
+
+Brazil`s flag
+Support trans rights
+
+Trans flag
+**/
+
+/* Ported for Drafter: the upstream body layout rules are remapped onto the
+ * Drafter frame classes (.drafter-frame--, .drafter-body--) so the theme
+ * styles page content without squeezing the debug panel. Upstream uses the
+ * "Public Sans" and "Kanit" fonts without importing them, so a Google Fonts
+ * @import is added here.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&family=Public+Sans:wght@400;700&display=swap");
+
+:root {
+	--blue: #87ceeb;
+	--green: #90ee90;
+	--yellow: #f4d738;
+	--orange: #ff7a5c;
+	--pink: #ffb2ef;
+	--purple: #a388ee;
+
+	--light-blue: #daf5f0;
+	--light-green: #ddf5da;
+	--light-yellow: #fdfd96;
+	--light-orange: #f8d6b3;
+	--light-pink: #fcdfff;
+	--light-purple: #e3dff2;
+
+	--background-color: var(--light-yellow);
+	--accent-color: var(--yellow);
+}
+
+body {
+	margin: 0;
+	height: 100dvh;
+	box-sizing: border-box;
+	background: var(--background-color);
+}
+
+.drafter-frame-- {
+	/* Upstream: body { max-width: 80rem } = 1280px. */
+	max-width: 1280px;
+	margin: 0 auto;
+}
+
+.drafter-body-- {
+	padding: 0 10px;
+	font-family: "Public Sans";
+	line-height: 1.4;
+	color: black;
+}
+
+/* headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: "Kanit";
+}
+
+.bordered {
+	border: 0.25rem solid black;
+	box-shadow: 0.25rem 0.25rem black;
+}
+
+/* button */
+button,
+input[type="submit"],
+input[type="button"] {
+	font-family: "Public Sans";
+	font-weight: bold;
+	font-size: large;
+
+	padding: 15px 30px;
+	margin: 10px 0px;
+	background-color: var(--accent-color);
+
+	border: 0.25rem solid black;
+	box-shadow: 0.25rem 0.25rem black;
+
+	transition: box-shadow linear 0.1s;
+
+	outline: none;
+}
+
+button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+button:focus,
+input[type="submit"]:focus {
+	box-shadow: 0px 0px black;
+}
+
+button:active,
+input[type="submit"]:active,
+input[type="button"]:active {
+	filter: brightness(90%);
+}
+
+/* anchor */
+a {
+	color: black;
+	font-weight: bolder;
+}
+
+a:focus {
+	color: var(--accent-color);
+	outline: none;
+}
+
+/* general  */
+hr {
+	background-color: black;
+	border: 0px;
+	height: 0.25rem;
+}
+
+img {
+	border: 0.25rem solid black;
+	box-shadow: 0.25rem 0.25rem black;
+}
+
+ul {
+	list-style-type: square;
+}
+
+pre {
+	white-space: pre-wrap;
+	word-wrap: break-word;
+}
+
+blockquote {
+	border: 0.25rem solid black;
+	box-shadow: 0.25rem 0.25rem black;
+	font-weight: bold;
+	font-size: large;
+	background: white;
+	margin: auto 0px;
+	padding: 1px 2px;
+}
+
+iframe {
+	border: 0.25rem solid black;
+	box-shadow: 0.25rem 0.25rem black;
+}
+
+/* forms */
+form {
+	display: inline-block;
+	width: 100%;
+}
+
+fieldset {
+	border: 0.25rem solid black;
+	box-shadow: 0.25rem 0.25rem black;
+}
+
+fieldset legend {
+	font-size: large;
+	font-weight: bold;
+}
+
+label {
+	font-weight: bold;
+	font-size: large;
+}
+
+input {
+	cursor: pointer;
+}
+
+input:not([type]),
+input[type="text"],
+input[type="password"],
+input[type="email"],
+select,
+textarea {
+	height: 3rem;
+	margin: 10px 0px;
+	width: calc(100% - 10px);
+	margin: 20px auto;
+
+	box-sizing: inherit;
+
+	border: 0.25rem solid black;
+	box-shadow: 0.25rem 0.25rem black;
+	outline: none;
+
+	font-family: "Public Sans";
+	font-size: large;
+
+	transition: box-shadow linear 0.1s;
+}
+
+input:not([type]):focus,
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="checkbox"]:focus:before,
+select:focus,
+textarea:focus {
+	box-shadow: 0px 0px var(--accent-color);
+	border-color: var(--accent-color);
+}
+
+textarea {
+	resize: vertical;
+}
+
+input[type="checkbox"] {
+	vertical-align: middle;
+	outline: none;
+	content: none;
+	width: 2rem;
+	height: 2rem;
+
+	margin-right: 0.75rem;
+	margin-bottom: 0.75rem;
+}
+
+input[type="checkbox"]:before {
+	content: "x";
+	font-size: 1.5rem;
+	text-align: center;
+	font-weight: bold;
+	color: transparent !important;
+	background: white;
+	display: inline-block;
+	width: 2rem;
+	height: 2rem;
+	border: 0.25rem solid black;
+	box-shadow: 0.25rem 0.25rem black;
+
+	transition: box-shadow linear 0.1s;
+}
+
+input[type="checkbox"]:checked:before {
+	color: black !important;
+}
+
+input[type="color"] {
+	background-color: black;
+	transition: background-color linear 0.1s;
+	border: none;
+	outline: none;
+}
+
+input[type="color"]:focus {
+	background-color: var(--accent-color);
+}
+
+/* tables */
+
+table {
+	border-collapse: collapse;
+	box-shadow: 0.25rem 0.25rem black;
+}
+
+th {
+	font-weight: bold;
+}
+
+table,
+th,
+td {
+	border: 0.25rem solid black;
+}
+
+th,
+td {
+	padding: 0.5rem 1rem;
+}

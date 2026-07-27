@@ -6,7 +6,9 @@ for field in dir(drafter):
         continue
     value = getattr(drafter, field)
     # Check if value is a class
-    if hasattr(value, "__bases__") and issubclass(value, drafter.components.PageContent):
+    if hasattr(value, "__bases__") and issubclass(
+        value, drafter.components.PageContent
+    ):
         components.append(field)
     else:
         others.append(field)

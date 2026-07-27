@@ -1,7 +1,16 @@
+test-results/
+
+.idea/
+
+node_modules/
+js/coverage/
+js/test-results/
+js/playwright-report/
 ~$*.pptx
 ~$*.docx
 
 examples/index.html
+secret_examples/
 
 out/
 compiled-out/
@@ -22,6 +31,8 @@ build/
 develop-eggs/
 dist/
 dist-js/
+js/dist/
+js/vendor/
 downloads/
 eggs/
 .eggs/
@@ -170,3 +181,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 docsrc/_build/
+
+
+.ruff_cache/

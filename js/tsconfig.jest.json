@@ -1,0 +1,22 @@
+{
+	"compilerOptions": {
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"strict": true,
+		"jsx": "react-jsx",
+		"jsxImportSource": "jsx-dom",
+		"types": [
+			"node",
+			"jest",
+			"@testing-library/jest-dom",
+			"wicg-file-system-access"
+		],
+		"noEmit": true,
+		"skipLibCheck": true,
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"isolatedModules": false
+	},
+	"include": ["src", "src/__tests__", "src/services/tools/rawTransformer.js"]
+}
