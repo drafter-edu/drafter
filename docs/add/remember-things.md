@@ -43,7 +43,8 @@ def index(state: State) -> Page:
     return Page(state, [
         "Score: " + str(state.score) + "\n",
         "Best so far: " + str(state.best) + "\n",
-        Button("Score a point", "add_point")
+        Button("Score a point", "add_point"),
+        Button("Lose a point", "lose_point")
     ])
 
 
@@ -55,15 +56,24 @@ def add_point(state: State) -> Page:
     return index(state)
 
 
+@route
+def lose_point(state: State) -> Page:
+    state.score = state.score - 1
+    if state.score < 0:
+        state.score = 0
+    return index(state)
+
+
 assert_state(add_point(State(0, 0)), State(1, 1))
 assert_state(add_point(State(2, 9)), State(3, 9))
+assert_state(lose_point(State(3, 9)), State(2, 9))
 
 start_server(State(0, 0))
 ```
 
-`best` only ever grows, because only one route assigns it and that route
-checks first. Deciding **which routes may change a field** is most of
-state design.
+Score a few points, lose a few, and watch `best` stay put: it only ever
+grows, because only `add_point` assigns it, and it checks first. Deciding
+**which routes may change a field** is most of state design.
 
 ## Recipe: save a choice, use it on another page
 
