@@ -13,22 +13,30 @@ outcome: Explain what a route is and how pages connect.
 
 ## In one sentence
 
-A route is a function that Drafter shows as a page of your site, and your
-site is nothing more than routes connected by buttons and links.
+A route is a function that **returns** a page: when a visitor goes
+somewhere on your site, Drafter runs the matching route function and
+shows the `Page` it returns.
 
 ## The idea
 
-Marking a function with `#!python @route` registers it as a page. Three
-rules govern how that works:
+Marking a function with `#!python @route` registers it as a route: a
+function Drafter will call whenever it needs that part of your site.
+Three rules govern how that works:
 
-- **The function's name is the page's name.** A route called `menu` is the
-  page called `menu`, and it gets a matching web address. You never write
-  the address yourself; the name is enough.
-- **`index` is the front door.** The route named `index` is your site's
-  main page, the one visitors see first. Every Drafter site needs one.
+- **The function's name names the page it builds.** The route called
+  `menu` builds the `menu` page, and it gets a matching web address. You
+  never write the address yourself; the name is enough.
+- **`index` is the front door.** The route named `index` builds your
+  site's main page, the one visitors see first. Every Drafter site needs
+  one.
 - **A route returns a `Page`.** The `Page` holds a list of content:
   strings, buttons, images, form fields. Whatever the route returns is
   what the visitor sees next.
+
+The distinction matters: the route is not the page, the way a recipe is
+not a cake. The route is the recipe, and it bakes a fresh `Page` every
+time it runs. That is why the same route can produce different pages as
+your state changes.
 
 Pages connect through their content. A `#!python Button("Play", "play")`
 or a `#!python Link("About this site", "about")` names the route to go to.

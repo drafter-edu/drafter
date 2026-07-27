@@ -310,7 +310,7 @@ SUCCESS at line 33 (assert_has)
 You have already used the ideas; here are their names, which the rest of
 the docs use:
 
-- The functions marked with `#!python @route` are **routes**. Each route is a page
+- The functions marked with `#!python @route` are **routes**. Each route returns a page
   of your site. See [How Drafter works](how-drafter-works.md).
 - The dataclass your app remembers is its **state**. Buttons changed it;
   the page displayed it.

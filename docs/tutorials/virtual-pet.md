@@ -292,7 +292,8 @@ start_server(State(5, 5))
 ```
 
 Notice `pet_mood` has no `@route`. It is a plain helper function: routes
-are pages, helpers are everything else. Read the third test carefully; it
+return pages, helpers return everything else. Read the third test
+carefully; it
 checks the "never below zero" rule from Step 2, feeding a pet whose hunger
 is already 1.
 
