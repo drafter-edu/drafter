@@ -8,7 +8,6 @@ set_website_style("sakura")
 
 @route
 def index(state: str) -> Page:
-
     return Page(
         state,
         [
@@ -32,5 +31,4 @@ and even talk to it! Make sure to check on it regularly to keep it happy and hea
     )
 
 
-start_server("Nothing",
-             cdn_skulpt_drafter="http://localhost:8081/skulpt-drafter.js")
+start_server("Nothing", cdn_skulpt_drafter="http://localhost:8081/skulpt-drafter.js")

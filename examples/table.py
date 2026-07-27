@@ -6,10 +6,10 @@ from drafter import (
     SelectBox,
     Table,
     TextBox,
+    assert_equal,
     hide_debug_information,
     route,
     start_server,
-    assert_equal,
 )
 
 hide_debug_information()
