@@ -6,7 +6,6 @@ import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrappe
 import type { TestCaseEvent } from "./telemetry/tests";
 import { TestPanel } from "./panels/testing";
 import { StatePanel } from "./panels/state";
-import { StateHistoryPanel } from "./panels/state_history";
 import { RoutesPanel } from "./panels/routes";
 import { HistoryPanel } from "./panels/history";
 import { LogPanel } from "./panels/log";
@@ -53,7 +52,6 @@ export class DebugPanel {
 	private footerBar: DebugFooterBar;
 	private testingPanel: TestPanel;
 	private statePanel: StatePanel;
-	private stateHistoryPanel: StateHistoryPanel;
 	private routesPanel: RoutesPanel;
 	private historyPanel: HistoryPanel;
 	private configPanel: ConfigPanel;
@@ -113,11 +111,6 @@ export class DebugPanel {
 			this.root,
 		);
 		this.statePanel = new StatePanel(
-			this.containerId,
-			this.instanceId,
-			this.root,
-		);
-		this.stateHistoryPanel = new StateHistoryPanel(
 			this.containerId,
 			this.instanceId,
 			this.root,
@@ -192,7 +185,6 @@ export class DebugPanel {
 			this.currentPanel,
 			this.statePanel,
 			this.historyPanel,
-			this.stateHistoryPanel,
 			this.routesPanel,
 			this.routeGraphPanel,
 			this.testingPanel,
@@ -292,10 +284,7 @@ export class DebugPanel {
 			{
 				id: "history",
 				labelKey: "debug.tab.history",
-				content: [
-					this.historyPanel.createStructure(),
-					this.stateHistoryPanel.createStructure(),
-				],
+				content: [this.historyPanel.createStructure()],
 			},
 			{
 				id: "overview",
@@ -643,9 +632,11 @@ export class DebugPanel {
 				break;
 			case "UpdatedState":
 				this.statePanel?.renderState(typed.representation);
-				this.stateHistoryPanel?.addSnapshot(
+				// The history panel shows the snapshot with the visit's
+				// response details (below the generated unit test).
+				this.historyPanel?.addStateSnapshot(
 					typed.representation,
-					typed.correlation?.route ?? "",
+					typed.correlation?.request_id,
 				);
 				break;
 			case "StateSnapshot":

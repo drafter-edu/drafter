@@ -4,6 +4,8 @@ import type {
 	RequestParseEvent,
 	ResponseEvent,
 } from "../telemetry/requests";
+import type { SpecificRepresentation } from "../telemetry/state";
+import { renderRepresentation } from "./state";
 import { createTruncatableUrl } from "../components/urls";
 import type { ReactElement } from "jsx-dom/types";
 
@@ -11,9 +13,24 @@ export class HistoryPanel extends Panel {
 	private historyItems: ReactElement[] = [];
 	private currentPage = 1;
 	private readonly pageSize = 5;
+	// State snapshots arrive (UpdatedState) before their ResponseEvent, so
+	// they wait here keyed by request id until addResponse consumes them.
+	private pendingStateSnapshots = new Map<number, SpecificRepresentation>();
+	/** Unclaimed snapshots beyond this bound are dropped, oldest first. */
+	private readonly maxPendingSnapshots = 100;
 
-	constructor(containerId: string, instanceId: number, root: ParentNode = document) {
-		super(containerId, instanceId, "drafter-debug-history", "Page History", root);
+	constructor(
+		containerId: string,
+		instanceId: number,
+		root: ParentNode = document,
+	) {
+		super(
+			containerId,
+			instanceId,
+			"drafter-debug-history",
+			"Page History",
+			root,
+		);
 	}
 
 	protected getListElement(): HTMLElement {
@@ -52,6 +69,9 @@ export class HistoryPanel extends Panel {
 				<div
 					class={`drafter-debug-page-history-list drafter-debug-page-history-list-${this.instanceId}`}
 				></div>
+				<div
+					class={`drafter-debug-page-history-pagination drafter-debug-page-history-pagination-bottom-${this.instanceId}`}
+				></div>
 			</div>
 		);
 	}
@@ -63,8 +83,16 @@ export class HistoryPanel extends Panel {
 		);
 	}
 
+	private getBottomPaginationElement(): HTMLElement {
+		return this.queryWithin(
+			this.scopedSelector("drafter-debug-page-history-pagination-bottom"),
+			"DebugPanel: Bottom pagination element not found.",
+		);
+	}
+
 	public clearHistory(): void {
 		this.historyItems = [];
+		this.pendingStateSnapshots.clear();
 		this.currentPage = 1;
 		this.renderPage();
 	}
@@ -101,34 +129,58 @@ export class HistoryPanel extends Panel {
 	}
 
 	private renderPagination(totalPages: number): void {
-		const pagination = this.getPaginationElement();
-		pagination.innerHTML = ""; // Clear existing pagination
+		const containers = [
+			this.getPaginationElement(),
+			this.getBottomPaginationElement(),
+		];
+		containers.forEach((c) => (c.innerHTML = "")); // Clear existing pagination
 
 		if (this.historyItems.length <= this.pageSize) {
 			return; // No pagination needed
 		}
 
+		// Each bar needs its own elements (and listeners), so build one per
+		// container rather than cloning.
+		containers.forEach((c) =>
+			c.appendChild(this.buildPaginationBar(totalPages)),
+		);
+	}
+
+	/** One full-width pagination bar: controls plus a progress track showing
+	 * how far through the results the current page reaches. */
+	private buildPaginationBar(totalPages: number): ReactElement {
+		const totalItems = this.historyItems.length;
+		const startIndex = (this.currentPage - 1) * this.pageSize;
+		const endIndex = Math.min(startIndex + this.pageSize, totalItems);
+		const percent = Math.round((endIndex / totalItems) * 100);
+
 		const previousButton = (
 			<button
 				class="drafter-debug-pagination-btn drafter-debug-button--"
+				style="margin-left: 0;"
 				disabled={this.currentPage === 1}
 			>
-				Previous
+				&#9664; Previous
 			</button>
 		);
 
 		const pageLabel = (
 			<span class="drafter-debug-page-history-page-label">
 				Page {this.currentPage} of {totalPages}
+				<span class="drafter-debug-page-history-range">
+					{" "}
+					(visits {startIndex + 1}&ndash;{endIndex} of {totalItems})
+				</span>
 			</span>
 		);
 
 		const nextButton = (
 			<button
 				class="drafter-debug-pagination-btn drafter-debug-button--"
+				style="margin-left: 0;"
 				disabled={this.currentPage === totalPages}
 			>
-				Next
+				Next &#9654;
 			</button>
 		);
 
@@ -146,7 +198,28 @@ export class HistoryPanel extends Panel {
 			}
 		});
 
-		pagination.append(previousButton, pageLabel, nextButton);
+		return (
+			<div class="drafter-debug-pagination-bar">
+				<div class="drafter-debug-pagination-controls">
+					{previousButton}
+					{pageLabel}
+					{nextButton}
+				</div>
+				<div
+					class="drafter-debug-pagination-progress"
+					role="progressbar"
+					aria-valuemin={0}
+					aria-valuemax={100}
+					aria-valuenow={percent}
+					title={`${percent}% of the way through the results`}
+				>
+					<div
+						class="drafter-debug-pagination-progress-fill"
+						style={{ width: `${percent}%` }}
+					></div>
+				</div>
+			</div>
+		);
 	}
 
 	public addRequest(request: RequestEvent): void {
@@ -317,6 +390,11 @@ export class HistoryPanel extends Panel {
 			return false;
 		}
 
+		// The state snapshot for this visit (logged just before the response)
+		// renders below the generated unit test inside the response details.
+		const snapshot = this.pendingStateSnapshots.get(response.request_id);
+		this.pendingStateSnapshots.delete(response.request_id);
+
 		requestEventElement.classList.add("has-response");
 		// Choose a red marker, green marker, or yellow marker based on errors/warnings
 		const marker = response.has_errors
@@ -325,7 +403,7 @@ export class HistoryPanel extends Panel {
 				? "🟡"
 				: "🟢";
 		const responseElement = (
-			<div class="drafter-debug-history-event-detail">
+			<div class="drafter-debug-history-event-detail drafter-debug-history-response-detail">
 				<details>
 					<summary>
 						<strong>Response:</strong> {marker}{" "}
@@ -337,11 +415,63 @@ export class HistoryPanel extends Panel {
 						{response.formatted_page_content ||
 							"No content available."}
 					</pre>
+					{snapshot ? this.buildStateEntry(snapshot) : null}
 				</details>
 			</div>
 		);
 
 		requestEventElement.appendChild(responseElement);
 		return true;
+	}
+
+	/**
+	 * Record the state snapshot the server reported for the given request so
+	 * it can be shown with that visit's response details. Snapshots without a
+	 * request id (e.g. restored save slots) have no visit to attach to and
+	 * are ignored; the Current State panel still shows them.
+	 */
+	public addStateSnapshot(
+		representation: SpecificRepresentation,
+		requestId: number | null | undefined,
+	): void {
+		if (requestId == null) {
+			return;
+		}
+
+		// Late arrival (the response is already rendered): attach directly,
+		// replacing any earlier snapshot for the same visit.
+		const responseDetails = this.historyItems
+			.find((el) => el.dataset.requestId === "" + requestId)
+			?.querySelector(".drafter-debug-history-response-detail details");
+		if (responseDetails) {
+			responseDetails
+				.querySelector(".drafter-debug-state-history-entry")
+				?.remove();
+			responseDetails.appendChild(this.buildStateEntry(representation));
+			return;
+		}
+
+		this.pendingStateSnapshots.set(requestId, representation);
+		// A snapshot may reference a request this panel never saw (e.g. after
+		// a panel restart), so its response never claims it; bound the map.
+		while (this.pendingStateSnapshots.size > this.maxPendingSnapshots) {
+			const oldest = this.pendingStateSnapshots.keys().next().value;
+			if (oldest === undefined) {
+				break;
+			}
+			this.pendingStateSnapshots.delete(oldest);
+		}
+	}
+
+	/** The expandable "state after this visit" block for response details. */
+	private buildStateEntry(
+		representation: SpecificRepresentation,
+	): ReactElement {
+		return (
+			<details class="drafter-debug-state-history-entry">
+				<summary>State after this visit</summary>
+				{renderRepresentation(representation)}
+			</details>
+		);
 	}
 }

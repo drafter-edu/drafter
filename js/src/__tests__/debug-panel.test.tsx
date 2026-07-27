@@ -78,7 +78,6 @@ const PANEL_SECTIONS: Array<[string, string]> = [
 	["drafter-debug-current", "Current Page"],
 	["drafter-debug-current-state", "Current State"],
 	["drafter-debug-history", "Page History"],
-	["drafter-debug-state-history", "State History"],
 	["drafter-debug-routes", "Registered Routes"],
 	["drafter-debug-route-graph", "Route Graph"],
 	["drafter-debug-tests", "Your Tests"],
@@ -100,11 +99,7 @@ const TABS: Array<[string, string, string[]]> = [
 		"Current",
 		["drafter-debug-current", "drafter-debug-current-state"],
 	],
-	[
-		"history",
-		"History",
-		["drafter-debug-history", "drafter-debug-state-history"],
-	],
+	["history", "History", ["drafter-debug-history"]],
 	[
 		"overview",
 		"Overview",
@@ -930,7 +925,7 @@ describe("history panel interactions", () => {
 		expect(
 			pagination.querySelector(".drafter-debug-page-history-page-label")
 				?.textContent,
-		).toBe("Page 1 of 2");
+		).toContain("Page 1 of 2");
 		const [previous, next] = Array.from(
 			pagination.querySelectorAll(".drafter-debug-pagination-btn"),
 		) as HTMLButtonElement[];
@@ -960,6 +955,77 @@ describe("history panel interactions", () => {
 		);
 	});
 
+	test("pagination is replicated below the list and both bars work", () => {
+		const panel = createPanel();
+		for (let id = 1; id <= 6; id++) {
+			panel.handleEvent(requestEvent({ request_id: id }));
+		}
+
+		const bars = Array.from(
+			container().querySelectorAll(".drafter-debug-pagination-bar"),
+		) as HTMLElement[];
+		expect(bars).toHaveLength(2);
+		// One bar above the list, one below it.
+		const list = historyList();
+		expect(
+			bars[0].compareDocumentPosition(list) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(
+			list.compareDocumentPosition(bars[1]) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		// Both bars carry the same label and their own working buttons.
+		bars.forEach((bar) => {
+			expect(
+				bar.querySelector(".drafter-debug-page-history-page-label")
+					?.textContent,
+			).toContain("Page 1 of 2");
+		});
+
+		// The bottom bar's Next button paginates too.
+		const bottomNext = bars[1].querySelectorAll(
+			".drafter-debug-pagination-btn",
+		)[1] as HTMLButtonElement;
+		bottomNext.click();
+		expect(
+			container().querySelector(".drafter-debug-page-history-page-label")
+				?.textContent,
+		).toContain("Page 2 of 2");
+	});
+
+	test("a progress track shows how far through the results the page is", () => {
+		const panel = createPanel();
+		for (let id = 1; id <= 8; id++) {
+			panel.handleEvent(requestEvent({ request_id: id }));
+		}
+
+		// Page 1 of 2 shows visits 1-5 of 8: 63% of the way through.
+		let progress = container().querySelector(
+			".drafter-debug-pagination-progress",
+		) as HTMLElement;
+		expect(progress.getAttribute("aria-valuenow")).toBe("63");
+		let fill = progress.querySelector(
+			".drafter-debug-pagination-progress-fill",
+		) as HTMLElement;
+		expect(fill.style.width).toBe("63%");
+
+		const next = container().querySelectorAll(
+			".drafter-debug-pagination-btn",
+		)[1] as HTMLButtonElement;
+		next.click();
+
+		// Page 2 reaches the end of the results.
+		progress = container().querySelector(
+			".drafter-debug-pagination-progress",
+		) as HTMLElement;
+		expect(progress.getAttribute("aria-valuenow")).toBe("100");
+		fill = progress.querySelector(
+			".drafter-debug-pagination-progress-fill",
+		) as HTMLElement;
+		expect(fill.style.width).toBe("100%");
+	});
+
 	test("a new request resets pagination to page 1", () => {
 		const panel = createPanel();
 		for (let id = 1; id <= 6; id++) {
@@ -975,7 +1041,7 @@ describe("history panel interactions", () => {
 		expect(
 			container().querySelector(".drafter-debug-page-history-page-label")
 				?.textContent,
-		).toBe("Page 1 of 2");
+		).toContain("Page 1 of 2");
 		expect(
 			(historyList().querySelector(".history-event") as HTMLElement)
 				.dataset.requestId,

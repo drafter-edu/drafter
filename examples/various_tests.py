@@ -4,9 +4,6 @@ from dataclasses import dataclass, field
 from drafter import *
 
 
-hide_debug_information()
-
-
 @dataclass
 class State:
     past_words: list

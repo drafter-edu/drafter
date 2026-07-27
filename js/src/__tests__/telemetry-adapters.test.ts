@@ -636,8 +636,8 @@ describe("UpdatedState", () => {
 		};
 		panel.handleEvent(primitiveOnly);
 
-		// Scope to the Current State section: the State History panel keeps
-		// earlier snapshots (including the dataclass one) by design.
+		// Scope to the Current State section: history entries elsewhere may
+		// keep earlier snapshots (including the dataclass one) by design.
 		const currentState = container().querySelector(
 			"[class*='drafter-debug-current-state-content']",
 		) as HTMLElement;
@@ -651,41 +651,67 @@ describe("UpdatedState", () => {
 		expect(primitive?.textContent).toContain("int");
 	});
 
-	test("each update appends a snapshot to the state history timeline", () => {
+	test("the visit's snapshot renders below the generated test in the response details", () => {
+		// Real event order for one visit: RequestEvent, UpdatedState (as the
+		// route's state change is committed), then ResponseEvent. The snapshot
+		// belongs to the visit, so it renders inside that visit's response
+		// details, after the generated unit test.
 		const panel = createPanel();
+		panel.handleEvent(REQUEST_EVENT as RequestEvent);
 		panel.handleEvent(UPDATED_STATE as unknown as UpdatedStateEvent);
-		const primitiveOnly: UpdatedStateEvent = {
-			...(UPDATED_STATE as unknown as UpdatedStateEvent),
-			representation: {
-				kind: "primitive",
-				value: "7",
-				type: "int",
-				id: 9793312,
-				complexity: 1,
-			},
-		};
-		panel.handleEvent(primitiveOnly);
+		panel.handleEvent(RESPONSE_EVENT as ResponseEvent);
 
-		const entries = Array.from(
-			container().querySelectorAll(".drafter-debug-state-history-entry"),
+		const responseDetails = container().querySelector(
+			".drafter-debug-history-response-detail details",
+		) as HTMLElement;
+		expect(responseDetails).not.toBeNull();
+
+		const entry = responseDetails.querySelector(
+			".drafter-debug-state-history-entry",
+		) as HTMLElement;
+		expect(entry).not.toBeNull();
+		expect(entry.querySelector("summary")?.textContent).toBe(
+			"State after this visit",
 		);
-		expect(entries).toHaveLength(2);
-		// Newest first: the primitive snapshot leads, the dataclass follows.
-		expect(entries[0].textContent).toContain("#2");
-		expect(entries[0].querySelector(".drafter-debug-rep-primitive")).not.toBeNull();
-		expect(entries[1].textContent).toContain("#1");
-		expect(entries[1].querySelector(".drafter-debug-rep-dataclass")).not.toBeNull();
-		// The route from the event's correlation is shown in the summary.
-		const route = (UPDATED_STATE as unknown as UpdatedStateEvent)
-			.correlation?.route;
-		if (route) {
-			expect(entries[1].querySelector("summary")?.textContent).toContain(
-				route,
-			);
-		}
-		// The empty-state notice is gone once snapshots exist.
+		expect(entry.querySelector(".drafter-debug-rep-dataclass")).not.toBeNull();
+		// Below the generated unit test: the <pre> holding the test precedes
+		// the state entry within the same details element.
+		const pre = responseDetails.querySelector("pre") as HTMLElement;
 		expect(
-			container().querySelector(".drafter-debug-state-history-empty"),
+			pre.compareDocumentPosition(entry) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+	});
+
+	test("a snapshot arriving after the response still attaches to it", () => {
+		const panel = createPanel();
+		panel.handleEvent(REQUEST_EVENT as RequestEvent);
+		panel.handleEvent(RESPONSE_EVENT as ResponseEvent);
+		panel.handleEvent(UPDATED_STATE as unknown as UpdatedStateEvent);
+
+		const entry = container().querySelector(
+			".drafter-debug-history-response-detail details .drafter-debug-state-history-entry",
+		);
+		expect(entry).not.toBeNull();
+	});
+
+	test("snapshots without a request id do not create history entries", () => {
+		// E.g. restoring a save slot logs UpdatedState with no request
+		// correlation; there is no visit to attach it to.
+		const panel = createPanel();
+		panel.handleEvent(REQUEST_EVENT as RequestEvent);
+		const uncorrelated = {
+			...(UPDATED_STATE as unknown as UpdatedStateEvent),
+			correlation: {
+				...(UPDATED_STATE as unknown as UpdatedStateEvent).correlation,
+				request_id: null,
+			},
+		} as UpdatedStateEvent;
+		panel.handleEvent(uncorrelated);
+		panel.handleEvent(RESPONSE_EVENT as ResponseEvent);
+
+		expect(
+			container().querySelector(".drafter-debug-state-history-entry"),
 		).toBeNull();
 	});
 
