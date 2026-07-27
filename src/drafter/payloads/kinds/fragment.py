@@ -311,7 +311,16 @@ class Fragment(ResponsePayload):
             content_to_verify = [self.content]
         elif not isinstance(self.content, list):
             return VerificationFailure(
-                f"Expected content to be a list, but got {type(self.content).__name__}"
+                f"Expected content to be a list, but got {type(self.content).__name__}",
+                friendly_title="Page Content Problem",
+                friendly_message=(
+                    f"This fragment's content is a "
+                    f"{type(self.content).__name__} instead of a list."
+                ),
+                friendly_steps=(
+                    "Make the content argument a list, like "
+                    "Fragment(state, ['Hello!']).",
+                ),
             )
         else:
             content_to_verify = self.content
@@ -322,5 +331,7 @@ class Fragment(ResponsePayload):
                 if isinstance(chunk, LinkContent):
                     chunk.verify(router, state, configuration, request)
         except Exception as e:
-            return VerificationFailure(f"Error verifying fragment content: {str(e)}")
+            return VerificationFailure(
+                f"Error verifying fragment content: {str(e)}", exception=e
+            )
         return None

@@ -30,6 +30,8 @@ def index(state: State) -> Page:
             "\n",
             Link("Check out this page that has duplicate names.", "/duped_names"),
             "\n",
+            Link("Check out this page that has a broken route link.", "/broken_link"),
+            "\n",
             Link("Add a number to the list.", "/add_number"),
             "\n",
             Link("Add something malformed to the list", "/add_malformed"),
@@ -53,6 +55,19 @@ def duped_names(state: State) -> Page:
             "It has duplicate names in the form.",
             TextBox("name", "First Name"),
             TextBox("name", "Last Name"),
+            Link("Go back to the index page.", "/"),
+        ],
+    )
+
+
+@route
+def broken_link(state: State) -> Page:
+    return Page(
+        state,
+        [
+            "Oh no this page won't work.",
+            "It has a link to a route that doesn't exist.",
+            Link("Go to a broken route.", "/this_route_does_not_exist"),
             Link("Go back to the index page.", "/"),
         ],
     )

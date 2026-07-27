@@ -68,14 +68,34 @@ class Page(Fragment):
                 f"The server did not return a valid Page() object from {original_function}.\n"
                 f"Instead of a list of strings or content objects, the content field was a string:\n"
                 f" {self.content!r}\n"
-                f"Make sure you return a Page object with the new state and the list of strings/content objects."
+                f"Make sure you return a Page object with the new state and the list of strings/content objects.",
+                friendly_title="Page Content Problem",
+                friendly_message=(
+                    f"The Page returned from `{original_function}` has its "
+                    "content given as one plain string instead of a list."
+                ),
+                friendly_steps=(
+                    "Put the content inside a list, like "
+                    "Page(state, ['Hello!']).",
+                    "Even a single piece of content needs to be in a list.",
+                ),
             )
         elif not isinstance(self.content, list):
             return VerificationFailure(
                 f"The server did not return a valid Page() object from {original_function}.\n"
                 f"Instead of a list of strings or content objects, the content field was:\n"
                 f" {self.content!r}\n"
-                f"Make sure you return a Page object with the new state and the list of strings/content objects."
+                f"Make sure you return a Page object with the new state and the list of strings/content objects.",
+                friendly_title="Page Content Problem",
+                friendly_message=(
+                    f"The Page returned from `{original_function}` has "
+                    f"content that is a {type(self.content).__name__} "
+                    "instead of a list."
+                ),
+                friendly_steps=(
+                    "Make the content argument of Page a list, like "
+                    "Page(state, ['Hello!']).",
+                ),
             )
         else:
             from drafter.components.page_content import (
@@ -92,7 +112,19 @@ class Page(Fragment):
                         f"One of those items is not a string or a content object. Instead, it was:\n"
                         f" {item!r}\n"
                         f"Validation error: {error_message}\n"
-                        f"Make sure you return a Page object with the new state and the list of strings/content objects."
+                        f"Make sure you return a Page object with the new state and the list of strings/content objects.",
+                        friendly_title="Page Content Problem",
+                        friendly_message=(
+                            f"One of the items in the content list of the "
+                            f"Page returned from `{original_function}` is a "
+                            f"{type(item).__name__}, but every item has to "
+                            "be text or a component."
+                        ),
+                        friendly_steps=(
+                            "Find the item shown in the technical message "
+                            "above and replace it with text or a component.",
+                            "Convert plain values to text with str().",
+                        ),
                     )
 
         # Recursively verify each content chunk
@@ -103,11 +135,12 @@ class Page(Fragment):
         except Exception as e:
             return VerificationFailure(
                 f"While verifying the Page() object returned from {original_function}, an error was encountered:\n"
-                f"{e}"
+                f"{e}",
+                exception=e,
             )
-        duplicate_message = verify_unique_component_names(request, self.content)
-        if duplicate_message:
-            return VerificationFailure(duplicate_message)
+        duplicate_failure = verify_unique_component_names(request, self.content)
+        if duplicate_failure is not None:
+            return duplicate_failure
         return None
 
     def format_target(self) -> str:

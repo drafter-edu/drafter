@@ -400,6 +400,63 @@ class TestVisitLifecycle:
         assert envelope.category == CATEGORY_PAYLOAD
         assert envelope.status_code == STATUS_ERROR
 
+    def test_bad_link_keeps_friendly_text_and_traceback(self, started_server):
+        from drafter.components.links import Link
+        from drafter.payloads.kinds.page import Page
+
+        def bad_link_handler():
+            return Page(None, [Link("Next", "missing_page")])
+
+        request, response = self._visit(started_server, "bad_link", bad_link_handler)
+        assert response.status_code == STATUS_ERROR
+        envelope = response.errors[0]
+        assert envelope.id == "payload.verification_failed"
+        assert envelope.category == CATEGORY_PAYLOAD
+        # The link-specific StudentFacingError explanation survives, rather
+        # than falling back to generic payload-category guidance.
+        assert "missing_page" in envelope.friendly_message
+        assert any("@route" in step for step in envelope.friendly_steps)
+        assert envelope.traceback and "StudentFacingError" in envelope.traceback
+
+    def test_duplicate_names_keep_friendly_text_without_traceback_advice(
+        self, started_server
+    ):
+        from drafter.components.forms import TextBox
+        from drafter.payloads.kinds.page import Page
+
+        def duplicate_handler():
+            return Page(None, [TextBox("answer"), TextBox("answer")])
+
+        request, response = self._visit(
+            started_server, "duplicates", duplicate_handler
+        )
+        assert response.status_code == STATUS_ERROR
+        envelope = response.errors[0]
+        assert envelope.id == "payload.verification_failed"
+        # The tailored duplicate-name explanation survives instead of the
+        # generic payload-category guidance.
+        assert "answer" in envelope.friendly_message
+        assert any("unique name" in step for step in envelope.friendly_steps)
+        # No exception was involved, so there is no traceback — and the
+        # steps must not tell the student to go read one.
+        assert envelope.traceback is None
+        assert not any("traceback" in step.lower() for step in envelope.friendly_steps)
+
+    def test_returning_none_keeps_friendly_text_without_traceback_advice(
+        self, started_server
+    ):
+        def none_handler():
+            return None
+
+        request, response = self._visit(started_server, "forgot_return", none_handler)
+        assert response.status_code == STATUS_ERROR
+        envelope = response.errors[0]
+        assert envelope.id == "payload.verification_failed"
+        assert "returning a Page" in envelope.friendly_message
+        assert any("return" in step for step in envelope.friendly_steps)
+        assert envelope.traceback is None
+        assert not any("traceback" in step.lower() for step in envelope.friendly_steps)
+
     def test_route_not_found_carries_request_data_but_no_call(self, started_server):
         request, response = self._visit(started_server, "nowhere")
         envelope = response.errors[0]

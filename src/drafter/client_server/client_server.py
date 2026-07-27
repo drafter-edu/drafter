@@ -314,6 +314,9 @@ class ClientServer:
         data: dict[str, Any] | None = None,
         status_code: str | None = None,
         exception: Exception | None = None,
+        friendly_title: str | None = None,
+        friendly_message: str | None = None,
+        friendly_steps: tuple[str, ...] | None = None,
         source: str = "client_server.visit",
     ) -> ErrorDetails:
         """Build a canonical envelope for a visit failure and emit telemetry.
@@ -340,6 +343,12 @@ class ClientServer:
             status_code: Symbolic status string; defaults to
                 `STATUS_ERROR`.
             exception: Originating exception, if any (for traceback capture).
+            friendly_title: Student-friendly title authored at the failure
+                site; when None, one is derived by the central explainer.
+            friendly_message: Student-friendly explanation authored at the
+                failure site; when None, one is derived.
+            friendly_steps: Student-friendly fix suggestions authored at the
+                failure site; when None, they are derived.
             source: The component/function reporting the failure.
 
         Returns:
@@ -360,6 +369,9 @@ class ClientServer:
                 message=message,
                 details=details,
                 data=merged_data,
+                friendly_title=friendly_title,
+                friendly_message=friendly_message,
+                friendly_steps=friendly_steps,
                 context=context,
                 status_code=resolved_status,
             )
@@ -371,9 +383,11 @@ class ClientServer:
                 message=message,
                 details=details,
                 data=merged_data,
-                friendly_title=explanation.title,
-                friendly_message=explanation.message,
-                friendly_steps=explanation.steps,
+                friendly_title=friendly_title or explanation.title,
+                friendly_message=friendly_message or explanation.message,
+                friendly_steps=(
+                    friendly_steps if friendly_steps else explanation.steps
+                ),
                 context=context,
                 status_code=resolved_status,
             )
@@ -536,10 +550,13 @@ class ClientServer:
             raise self.make_visit_error(
                 "payload.verification_failed",
                 CATEGORY_PAYLOAD,
-                f"Payload verification failed for URL {request.url}: {possible_incorrect_type}",
+                f"Payload verification failed for URL {request.url}: {possible_incorrect_type.message}",
                 request,
                 data={"payload": payload},
                 status_code=STATUS_ERROR,
+                friendly_title=possible_incorrect_type.friendly_title or None,
+                friendly_message=possible_incorrect_type.friendly_message or None,
+                friendly_steps=possible_incorrect_type.friendly_steps or None,
             )
         # Payload specific verification
         try:
@@ -564,6 +581,10 @@ class ClientServer:
                 request,
                 data={"payload": payload},
                 status_code=STATUS_ERROR,
+                exception=possible_failure.exception,
+                friendly_title=possible_failure.friendly_title or None,
+                friendly_message=possible_failure.friendly_message or None,
+                friendly_steps=possible_failure.friendly_steps or None,
             )
 
     def render_payload(
@@ -660,10 +681,16 @@ class ClientServer:
                 raise self.make_visit_error(
                     "payload.state_verification_failed",
                     CATEGORY_PAYLOAD,
-                    f"State verification failed for URL {request.url}: {possible_state_update_issue}",
+                    f"State verification failed for URL {request.url}: {possible_state_update_issue.message}",
                     request,
                     data={"payload": payload},
                     status_code=STATUS_ERROR,
+                    friendly_title=possible_state_update_issue.friendly_title
+                    or None,
+                    friendly_message=possible_state_update_issue.friendly_message
+                    or None,
+                    friendly_steps=possible_state_update_issue.friendly_steps
+                    or None,
                     source="client_server.handle_state_updates",
                 )
             try:
