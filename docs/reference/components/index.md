@@ -11,9 +11,8 @@ outcome: See every component, organized coherently.
 # All components
 
 Components are the things you put in a page's content list. This is
-every one of them, grouped by purpose. Levels tell you when you are
-likely to need one: **L2** components appear in almost every app,
-**L3** in many, and **L4** in specialized projects.
+every one of them, grouped by purpose. Within each group, the
+components you are most likely to need come first.
 
 Strings are not on this list, but remember that they are the most
 common page content of all: any string in a content list renders as
@@ -36,11 +35,11 @@ text.
 
 Clickable things that run a route.
 
-| Component | Level | One line |
-| --------- | ----- | -------- |
-| [Button](actions/button.md) | L2 | Trigger a route, optionally passing Arguments. |
-| [Link](actions/link.md) | L2 | Navigate by text link, including external URLs. |
-| [Argument](actions/argument.md) | L3 | Pass extra values to a route. |
+| Component | One line |
+| --------- | -------- |
+| [Button](actions/button.md) | Trigger a route, optionally passing Arguments. |
+| [Link](actions/link.md) | Navigate by text link, including external URLs. |
+| [Argument](actions/argument.md) | Pass extra values to a route. |
 
 ## Input
 
@@ -48,112 +47,112 @@ Form fields. Each one's `name` becomes a parameter of the route its
 button submits to; see
 [Forms and input](../../concepts/forms-and-input.md).
 
-| Component | Level | One line |
-| --------- | ----- | -------- |
-| [TextBox](input/textbox.md) | L2 | Collect a line of text or a number. |
-| [TextArea](input/textarea.md) | L2 | Collect multi-line text. |
-| [CheckBox](input/checkbox.md) | L2 | Collect a yes/no. |
-| [SelectBox](input/selectbox.md) | L3 | Choose one option from a list. |
-| [RadioButtonGroup](input/radiobuttongroup.md) | L3 | Choose one option with all options visible. |
-| [RelatedCheckBox](input/relatedcheckbox.md) | L3 | Choose many options, received as a list parameter. |
-| [DateInput](input/dateinput.md) | L3 | Collect a date. |
-| [TimeInput](input/timeinput.md) | L3 | Collect a time. |
-| [DateTimeInput](input/datetimeinput.md) | L3 | Collect a date and time. |
-| [Label](input/label.md) | L3 | Caption an input accessibly. |
-| [Output](input/output.md) | L3 | Show a computed result region. |
-| [FileUpload](input/fileupload.md) | L3 | Receive a file from the user. |
-| [Download](input/download.md) | L3 | Let the user save a file. |
+| Component | One line |
+| --------- | -------- |
+| [TextBox](input/textbox.md) | Collect a line of text or a number. |
+| [TextArea](input/textarea.md) | Collect multi-line text. |
+| [CheckBox](input/checkbox.md) | Collect a yes/no. |
+| [SelectBox](input/selectbox.md) | Choose one option from a list. |
+| [RadioButtonGroup](input/radiobuttongroup.md) | Choose one option with all options visible. |
+| [RelatedCheckBox](input/relatedcheckbox.md) | Choose many options, received as a list parameter. |
+| [DateInput](input/dateinput.md) | Collect a date. |
+| [TimeInput](input/timeinput.md) | Collect a time. |
+| [DateTimeInput](input/datetimeinput.md) | Collect a date and time. |
+| [Label](input/label.md) | Caption an input accessibly. |
+| [Output](input/output.md) | Show a computed result region. |
+| [FileUpload](input/fileupload.md) | Receive a file from the user. |
+| [Download](input/download.md) | Let the user save a file. |
 
 ## Text
 
 Words, from headings to quotations.
 
-| Component | Level | One line |
-| --------- | ----- | -------- |
-| [Header](text/header.md) | L2 | Add section headings, levels 1-6. |
-| [Text](text/text.md) | L2 | Use the explicit text component. |
-| [Paragraph](text/paragraph.md) | L3 | Use real paragraphs instead of strings. |
-| [PreformattedText](text/pre.md) | L3 | Preserve spacing and newlines. |
-| [InlineCode](text/inlinecode.md) | L3 | Mark code in text. |
-| [BlockQuote](text/blockquote.md) | L3 | Quote a passage. |
-| [Inline text semantics](text/inline-styles.md) | L3 | Strong, Emphasis, MarkedText, and the other inline markers, on one page. |
+| Component | One line |
+| --------- | -------- |
+| [Header](text/header.md) | Add section headings, levels 1-6. |
+| [Text](text/text.md) | Use the explicit text component. |
+| [Paragraph](text/paragraph.md) | Use real paragraphs instead of strings. |
+| [PreformattedText](text/pre.md) | Preserve spacing and newlines. |
+| [InlineCode](text/inlinecode.md) | Mark code in text. |
+| [BlockQuote](text/blockquote.md) | Quote a passage. |
+| [Inline text semantics](text/inline-styles.md) | Strong, Emphasis, MarkedText, and the other inline markers, on one page. |
 
 ## Layout
 
 Structure and spacing.
 
-| Component | Level | One line |
-| --------- | ----- | -------- |
-| [LineBreak](layout/linebreak.md) | L2 | Force a new line. |
-| [HorizontalRule](layout/horizontalrule.md) | L2 | Add a divider line. |
-| [Div (Box)](layout/div.md) | L3 | Group content for styling. |
-| [Span](layout/span.md) | L3 | Group content inline. |
-| [Row](layout/row.md) | L3 | Lay content out side by side. |
-| [Details](layout/details.md) | L3 | Make collapsible sections and accordions. |
-| [Page regions](layout/page-regions.md) | L4 | Section, Article, Nav, and the other semantic regions, on one page. |
+| Component | One line |
+| --------- | -------- |
+| [LineBreak](layout/linebreak.md) | Force a new line. |
+| [HorizontalRule](layout/horizontalrule.md) | Add a divider line. |
+| [Div (Box)](layout/div.md) | Group content for styling. |
+| [Span](layout/span.md) | Group content inline. |
+| [Row](layout/row.md) | Lay content out side by side. |
+| [Details](layout/details.md) | Make collapsible sections and accordions. |
+| [Page regions](layout/page-regions.md) | Section, Article, Nav, and the other semantic regions, on one page. |
 
 ## Lists
 
-| Component | Level | One line |
-| --------- | ----- | -------- |
-| [BulletedList](lists/bulletedlist.md) | L2 | Show an unordered list from a Python list. |
-| [NumberedList](lists/numberedlist.md) | L2 | Show an ordered list. |
-| [DefinitionList](lists/definitionlist.md) | L3 | Show term/definition pairs, including from dataclasses. |
+| Component | One line |
+| --------- | -------- |
+| [BulletedList](lists/bulletedlist.md) | Show an unordered list from a Python list. |
+| [NumberedList](lists/numberedlist.md) | Show an ordered list. |
+| [DefinitionList](lists/definitionlist.md) | Show term/definition pairs, including from dataclasses. |
 
 ## Data display
 
-| Component | Level | One line |
-| --------- | ----- | -------- |
-| [Table](data/table.md) | L3 | Show rows of lists or dataclasses. |
-| [ProgressBar](data/progressbar.md) | L3 | Show progress. |
-| [Meter](data/meter.md) | L3 | Show a gauge value. |
-| [TimeOutput](data/timeoutput.md) | L4 | Show semantic timestamps. |
+| Component | One line |
+| --------- | -------- |
+| [Table](data/table.md) | Show rows of lists or dataclasses. |
+| [ProgressBar](data/progressbar.md) | Show progress. |
+| [Meter](data/meter.md) | Show a gauge value. |
+| [TimeOutput](data/timeoutput.md) | Show semantic timestamps. |
 
 ## Media
 
-| Component | Level | One line |
-| --------- | ----- | -------- |
-| [Image](media/image.md) | L3 | Show images from a URL, file, Picture, or bytes. |
-| [MatPlotLibPlot](media/matplotlibplot.md) | L4 | Show a matplotlib figure. |
-| [Audio](media/audio.md) | L4 | Play sound files, including across pages. |
-| [Video](media/video.md) | L4 | Play video files. |
-| [SVG](media/svg.md) | L4 | Show inline vector graphics. |
-| [Canvas](media/canvas.md) | L4 | Draw on a canvas surface (with JavaScript). |
-| [RawHTML and HtmlTag](media/rawhtml.md) | L3 | Use the escape hatch to raw HTML safely. |
+| Component | One line |
+| --------- | -------- |
+| [Image](media/image.md) | Show images from a URL, file, Picture, or bytes. |
+| [MatPlotLibPlot](media/matplotlibplot.md) | Show a matplotlib figure. |
+| [Audio](media/audio.md) | Play sound files, including across pages. |
+| [Video](media/video.md) | Play video files. |
+| [SVG](media/svg.md) | Show inline vector graphics. |
+| [Canvas](media/canvas.md) | Draw on a canvas surface (with JavaScript). |
+| [RawHTML and HtmlTag](media/rawhtml.md) | Use the escape hatch to raw HTML safely. |
 
 ## Time
 
 Components that make things happen on a schedule.
 
-| Component | Level | One line |
-| --------- | ----- | -------- |
-| [Timer](time/timer.md) | L4 | Run a countdown that fires a route. |
-| [Clock](time/clock.md) | L4 | Run a repeating tick route. |
-| [RemovePersistent](time/removepersistent.md) | L4 | Evict a persistent component. |
+| Component | One line |
+| --------- | -------- |
+| [Timer](time/timer.md) | Run a countdown that fires a route. |
+| [Clock](time/clock.md) | Run a repeating tick route. |
+| [RemovePersistent](time/removepersistent.md) | Evict a persistent component. |
 
 ## Place
 
-| Component | Level | One line |
-| --------- | ----- | -------- |
-| [Map](place/map.md) | L4 | Show an interactive map with markers. |
-| [CurrentLocation](place/currentlocation.md) | L4 | Ask for the user's location. |
+| Component | One line |
+| --------- | -------- |
+| [Map](place/map.md) | Show an interactive map with markers. |
+| [CurrentLocation](place/currentlocation.md) | Ask for the user's location. |
 
 ## Capture
 
-| Component | Level | One line |
-| --------- | ----- | -------- |
-| [Camera](capture/camera.md) | L4 | Take a photo into the app. |
+| Component | One line |
+| --------- | -------- |
+| [Camera](capture/camera.md) | Take a photo into the app. |
 
 ## Sound
 
-| Component | Level | One line |
-| --------- | ----- | -------- |
-| [Tone](sound/tone.md) | L4 | Play a single note. |
-| [Melody](sound/melody.md) | L4 | Play a note sequence. |
-| [Sound](sound/sound.md) | L4 | Play files through effects. |
-| [Microphone](sound/microphone.md) | L4 | React to sound levels. |
-| [AudioRecorder](sound/audiorecorder.md) | L4 | Record audio clips. |
-| [Audio effects](sound/effects.md) | L4 | Echo, Reverb, and the other effects, on one page. |
+| Component | One line |
+| --------- | -------- |
+| [Tone](sound/tone.md) | Play a single note. |
+| [Melody](sound/melody.md) | Play a note sequence. |
+| [Sound](sound/sound.md) | Play files through effects. |
+| [Microphone](sound/microphone.md) | React to sound levels. |
+| [AudioRecorder](sound/audiorecorder.md) | Record audio clips. |
+| [Audio effects](sound/effects.md) | Echo, Reverb, and the other effects, on one page. |
 
 ## Related
 

@@ -12,7 +12,7 @@ outcome: Add a divider line.
 
 # HorizontalRule
 
-Group: [Layout](../index.md#layout) · Level: L2
+Group: [Layout](../index.md#layout)
 
 ## Description
 

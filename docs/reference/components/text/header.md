@@ -12,7 +12,7 @@ outcome: Add section headings, levels 1-6.
 
 # Header
 
-Group: [Text](../index.md#text) · Level: L2
+Group: [Text](../index.md#text)
 
 ## Description
 

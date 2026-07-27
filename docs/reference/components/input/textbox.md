@@ -12,7 +12,7 @@ outcome: Collect a line of text or a number.
 
 # TextBox
 
-Group: [Input](../index.md#input) · Level: L2
+Group: [Input](../index.md#input)
 
 ## Description
 

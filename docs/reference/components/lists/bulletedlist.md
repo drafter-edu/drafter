@@ -12,7 +12,7 @@ outcome: Show an unordered list from a Python list.
 
 # BulletedList
 
-Group: [Lists](../index.md#lists) · Level: L2
+Group: [Lists](../index.md#lists)
 
 ## Description
 

@@ -12,7 +12,7 @@ outcome: Collect multi-line text.
 
 # TextArea
 
-Group: [Input](../index.md#input) · Level: L2
+Group: [Input](../index.md#input)
 
 ## Description
 

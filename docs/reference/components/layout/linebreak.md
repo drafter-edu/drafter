@@ -12,7 +12,7 @@ outcome: Force a new line.
 
 # LineBreak
 
-Group: [Layout](../index.md#layout) · Level: L2
+Group: [Layout](../index.md#layout)
 
 ## Description
 

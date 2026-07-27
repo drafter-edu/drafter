@@ -12,7 +12,7 @@ outcome: Show an ordered list.
 
 # NumberedList
 
-Group: [Lists](../index.md#lists) · Level: L2
+Group: [Lists](../index.md#lists)
 
 ## Description
 

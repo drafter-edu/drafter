@@ -12,7 +12,7 @@ outcome: Trigger a route, optionally passing Arguments.
 
 # Button
 
-Group: [Actions](../index.md#actions) · Level: L2
+Group: [Actions](../index.md#actions)
 
 ## Description
 

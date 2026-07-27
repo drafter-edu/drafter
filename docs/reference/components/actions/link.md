@@ -12,7 +12,7 @@ outcome: Navigate by text link, including external URLs.
 
 # Link
 
-Group: [Actions](../index.md#actions) · Level: L2
+Group: [Actions](../index.md#actions)
 
 ## Description
 

@@ -1006,6 +1006,16 @@ Written (stub replaced with real content, all fences green in CI): home; all six
 
 Verification notes from source spelunking, for future reference pages: `Page` auto-wraps a single string/component into a list (the "must be a list" error fires on other types, or on bad items at verify time); state injection binds the first parameter when named `state` or by the arity heuristic; `_server`/`_configuration`/`_request` are the injected framework params; `Label` associates by element id or FormComponent instance, not by field name; URL cleaning keeps only alphanumerics/underscores (no lowercasing); `deploy_site()` currently only calls `hide_debug_information()`.
 
-Remaining for the D exit criteria: nothing in the P0 page list. Still open: the Phase D walkthrough validation (§ Phase D) has not been scheduled yet, and P1 content (quiz-game and finishing tutorials, remaining concepts/add/reference/help pages) continues in priority order.
+Remaining for the D exit criteria: nothing in the P0 page list. Still open: the Phase D walkthrough validation (§ Phase D) has not been scheduled yet.
+
+### P1 progress log (2026-07-27)
+
+Stakeholder feedback applied: level codes (L2/L3/L4) removed from the component master-list tables, its explanatory intro, and the "Group: ... · Level: Lx" lines on the ten written component pages; front-matter `level:` keys stay (they drive the theme chip and the inventory).
+
+Written this round: **tutorials 3 and 4** (quiz-game: Question dataclass list, one `ask` route, answer buttons via Argument, score + varying results, break-it step; finishing: compliment-machine carrier app, freeze-a-page workflow via the History tab's Response `Page(...)` repr into `assert_equal`, break-and-fix, theme + release block). The guided-project spine is now complete. **Concepts complete**: index (ladder table), dynamic-pages, live-updates (on_* events accept route-name strings; supported events list verified in page_content.py), how-the-web-works (URL anatomy, ASCII two-worlds diagram, localhost/no-backend/no-secrets consequences). **Add P1**: show-different-content (branch/helper/one-route-many-items recipes) and freeze-pages (History-tab freeze workflow, when-not-to-freeze, stale-test updating). Gates after this round: lint 194 clean, 106 fence tests green, strict build green.
+
+Verified while writing: the History panel's Response section shows `formatted_page_content`, a constructor-style `Page(...)` repr built by `Fragment.format_payload` (fragment.py) — the v2 freeze-tests workflow quotes it verbatim; the Testing panel has copy-all/download-all for run tests; the test wizard is still a stub. `assert_has` matches substrings of page text. `assert_equal` is exported from drafter proper.
+
+P1 still remaining, in rough priority order: examples P1 (login, pet-registry, todo-list, shop, photo-editor; playground index + collections), reference P1 (glossary, fragment/update/redirect, testing-functions, keyword-attributes, data-types index + picture, ~15 P1 component pages), help P1 (debug-panel, printing-and-console, bug-reports, 8 P1 error entries), add P1 (pictures, files, design-basics, custom-css, gotchas, live-behavior), your-project P1 (choose-an-idea through test-as-you-go), teach/extend/dev P1.
 
 

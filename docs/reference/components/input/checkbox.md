@@ -12,7 +12,7 @@ outcome: Collect a yes/no.
 
 # CheckBox
 
-Group: [Input](../index.md#input) · Level: L2
+Group: [Input](../index.md#input)
 
 ## Description
 
