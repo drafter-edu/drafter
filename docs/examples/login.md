@@ -24,7 +24,7 @@ the whole personality of the app.
     the state. A real login system involves a server you control,
     stored password hashes, and encrypted transport; this example has
     none of those and cannot be patched into having them. Build login
-    *flows* with it, never login *protection*. More information is in
+    *flows* with it, never login *protection*. More information is
     in [Security honestly](../extend/security.md).
 
 ## Try it

@@ -477,8 +477,9 @@ class RadioButtonGroup(FormComponent):
         ComponentArgument("options"),
         ComponentArgument("default_value", kind="keyword", default_value=None),
     ]
-    RENAME_ATTRS = {}
-    DEFAULT_ATTRS = {"type": "radio", "data-cardinality": "one"}
+    # The field values render on the child radio inputs, not the div.
+    RENAME_ATTRS = {"name": "", "options": "", "default_value": ""}
+    DEFAULT_ATTRS = {}
 
     def __init__(
         self,
@@ -505,28 +506,42 @@ class RadioButtonGroup(FormComponent):
         self.extra_settings = kwargs
 
     def get_children(self, context) -> list[PageContent | RenderPlan]:
-        """Build a radio `input` RenderPlan for each entry in `options`.
+        """Build a labeled radio `input` RenderPlan per entry in `options`.
 
-        The option matching `default_value` gets the `checked` attribute.
+        Each option renders as a `label` wrapping a radio input (sharing
+        the group's form field name) followed by the option's text, so
+        clicking the text selects the option. The option matching
+        `default_value` gets the `checked` attribute.
 
         Args:
             context: Rendering context.
 
         Returns:
-            List of RenderPlan objects, one per option.
+            List of RenderPlan objects, one labeled radio per option.
         """
         children: list[PageContent | RenderPlan] = []
         for option in self.options:
-            option_attrs: dict[str, Any] = {"value": option}
+            option_attrs: dict[str, Any] = {
+                "type": "radio",
+                "name": self.name,
+                "value": option,
+            }
             if option == self.default_value:
                 option_attrs["checked"] = True
+            radio = RenderPlan(
+                kind="tag",
+                tag_name="input",
+                attributes=option_attrs,
+                children=[],
+                self_closing=True,
+                known_attributes=["type", "name", "value", "checked"],
+            )
             children.append(
                 RenderPlan(
                     kind="tag",
-                    tag_name="input",
-                    attributes=option_attrs,
-                    children=[],
-                    known_attributes=["type", "name", "value", "checked"],
+                    tag_name="label",
+                    children=[radio, " " + option],
+                    known_attributes=[],
                 )
             )
 

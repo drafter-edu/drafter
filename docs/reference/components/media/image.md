@@ -8,11 +8,85 @@ prereqs: []
 symbols:
   - Image
 outcome: Show images from a URL, file, Picture, or bytes.
-status: stub
 ---
 
 # Image
 
-!!! note "Planned page"
-    This page is planned (P1) but not yet written.
-    When finished, it will help you: show images from a url, file, picture, or bytes.
+Group: [Media](../index.md#media)
+
+## Description
+
+An `Image` shows a picture on the page, from wherever pictures come
+from: a web address, an image file next to your program, a
+[Picture](../../data-types/picture.md) value in state, or raw
+bytes. A bare `Picture` in a content list displays itself already;
+`Image` is the wrapper for when you want size control or alt text.
+
+## Syntax
+
+```python
+Image(url)
+Image(url, width, height)
+```
+
+## Parameters
+
+| Parameter | Type | Default | Meaning |
+| --------- | ---- | ------- | ------- |
+| `url` | `str`, `Picture`, `bytes`, or PIL image | required | The image source. Strings are web addresses or local file names. |
+| `width` | `int` | image's own | Display width in pixels. |
+| `height` | `int` | image's own | Display height in pixels. |
+
+The `alt` attribute sets the text description
+(`Image("ada.png", alt="Ada the corgi mid-zoom")`).
+
+## Examples
+
+```python drafter height=280
+from drafter import *
+
+
+@route
+def index() -> Page:
+    swatch = Picture.new(120, 80, "cadetblue")
+    return Page([
+        Header("Gallery of One"),
+        Image(swatch, alt="A calm blue rectangle"),
+        "\nThe same picture, small: ",
+        Image(swatch, 30, 20, alt="The same rectangle, tiny")
+    ])
+
+
+start_server()
+```
+
+## Notes
+
+- **Sizing here is display-only**: `Image(pic, 30, 20)` squeezes
+  the rendering without touching the pixels; `pic.scale(...)`
+  [actually resizes](../../data-types/picture.md).
+- **Local file names** work in development and keep working
+  deployed only if the file ships with the site; see
+  [works locally, 404s deployed](../../../help/errors/missing-asset-on-deploy.md).
+- **URL images** need the visitor to be online and the address to
+  point straight at an image file.
+- Mismatched width/height pairs stretch; give one, or matching
+  proportions, unless squashing is the joke.
+
+## Accessibility
+
+Every meaningful image deserves `alt` text describing what it
+*shows*, not that it is an image ("Ada asleep on the keyboard",
+not "photo"). Purely decorative images can use `alt=""` so screen
+readers skip them.
+
+## Related components
+
+- [Picture](../../data-types/picture.md): the value type behind
+  most images.
+- [Use pictures](../../../add/pictures.md): the how-to.
+- [Camera](../capture/camera.md): images straight from a lens.
+
+## External links
+
+- [The img element on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/img)
