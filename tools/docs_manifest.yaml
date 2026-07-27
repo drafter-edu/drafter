@@ -1406,6 +1406,24 @@ pages:
     audience: T
     priority: P2
     outcome: Pick a lesson plan.
+  - path: teach/lesson-plans/first-day.md
+    title: First day with Drafter
+    template: lesson
+    audience: T
+    priority: P2
+    outcome: Run the first Drafter class session.
+  - path: teach/lesson-plans/forms-and-state-lab.md
+    title: Forms and state lab
+    template: lesson
+    audience: T
+    priority: P2
+    outcome: Run a lab connecting forms to state.
+  - path: teach/lesson-plans/testing-lab.md
+    title: Testing lab
+    template: lesson
+    audience: T
+    priority: P2
+    outcome: Run a lab building the testing habit.
   - path: teach/project-ideas.md
     title: Project ideas
     template: reference

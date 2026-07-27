@@ -338,7 +338,7 @@ git checkout v2-pyodide
 | `js/`               | The TypeScript client (bridge, debug panel, engines integration), built with tsup into `js/dist/`. |
 | `examples/`         | Runnable example applications.                                                                     |
 | `tests/`            | Python test suite (pytest).                                                                        |
-| `docs/` / `docsrc/` | MkDocs documentation sources.                                                                      |
+| `docs/`             | MkDocs documentation sources (see also `docs_legacy/` for the retired v1 pages).                   |
 | `tools/`            | Maintenance scripts.                                                                               |
 | `Justfile`          | Common dev recipes (`just --list`).                                                                |
 

@@ -640,6 +640,10 @@ class HtmlTag(Component):
         ComponentArgument("tag", kind="positional"),
         ComponentArgument("content", kind="var", is_content=True),
     ]
+    # The tag argument names the element itself; without this rename
+    # suppression it would leak into the rendered output as an inline
+    # style (the unknown-attribute fallback).
+    RENAME_ATTRS = {"tag": ""}
 
     def __init__(self, tag: str, *content: PageContent, **extra_settings):
         self.tag = tag

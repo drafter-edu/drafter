@@ -27,10 +27,10 @@ You can build the site locally:
 - `uv run drafter-docs build --api` — also renders the full `/dev/api/`
   reference (slow; skipped by default).
 
-The site is being rewritten to the plan in `STUDENT_DOCS_PLAN.md` at the
-repository root. Most pages are currently stubs generated from
-`tools/docs_manifest.yaml`. The old site content lives in `docs_legacy/` as
-source material for the rewrite and is not built.
+The site follows the plan in `STUDENT_DOCS_PLAN.md` at the repository
+root; nearly all planned pages are written, with new pages scaffolded as
+stubs from `tools/docs_manifest.yaml`. The old site content lives in
+`docs_legacy/` as source material for the rewrite and is not built.
 
 ## The URL contract
 

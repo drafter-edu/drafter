@@ -297,7 +297,7 @@ tests.inline_code_styled = """
 
 tests.html_tag_simple = HtmlTag("mark", "Highlighted", id="html-tag-mark")
 tests.html_tag_simple = """
-<mark id="html-tag-mark" style="tag: mark">
+<mark id="html-tag-mark">
   Highlighted
 </mark>
 """
@@ -306,7 +306,7 @@ tests.html_tag_styled = HtmlTag(
     "section", "Custom body", id="html-tag-section", style_padding="4px"
 )
 tests.html_tag_styled = """
-<section id="html-tag-section" style="padding: 4px; tag: section">
+<section id="html-tag-section" style="padding: 4px">
   Custom body
 </section>
 """

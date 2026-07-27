@@ -212,6 +212,9 @@ nav:
   - Beyond the student docs: teach/beyond-the-basics.md
   - Lesson plans:
     - teach/lesson-plans/index.md
+    - First day with Drafter: teach/lesson-plans/first-day.md
+    - Forms and state lab: teach/lesson-plans/forms-and-state-lab.md
+    - Testing lab: teach/lesson-plans/testing-lab.md
   - Project ideas: teach/project-ideas.md
   - Student misconceptions: teach/student-misconceptions.md
   - Expert misconceptions: teach/expert-misconceptions.md
