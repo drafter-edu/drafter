@@ -26,14 +26,14 @@ did-you-mean hint suggesting it.
 
 The route declares a parameter, and after state injection, form
 fields, and button arguments were matched up by name, nothing filled
-it. The route cannot run with a hole in its arguments, so the request
+it. The route cannot run with a missing argument, so the request
 stopped.
 
 ## Where to look
 
-Two places, side by side: the route's `def` line, and the page that
-submitted to it (the form's components and the button's arguments).
-The mismatch is between those two.
+Compare two places side by side: the route's `def` line, and the
+page that submitted to it (the form's components and the button's
+arguments). The mismatch is somewhere between those two.
 
 ## Check
 
@@ -50,7 +50,7 @@ The mismatch is between those two.
 
 ## Fix
 
-Make the names agree; either side can move:
+Make the names agree; you can change either side:
 
 ```python
 # The page:
@@ -76,9 +76,9 @@ rename fails loudly before anyone clicks.
 ## Prevent
 
 Pick one name per piece of information and use it for both the
-component and the parameter. Writing the form and its route in the
-same sitting, checking name against name, makes the mismatch hard to
-type in the first place.
+component and the parameter. If you write the form and its route in
+the same sitting and check each name against its parameter, the
+mismatch is unlikely to appear in the first place.
 
 ## Understand
 

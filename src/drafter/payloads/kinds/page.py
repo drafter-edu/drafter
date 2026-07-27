@@ -75,8 +75,7 @@ class Page(Fragment):
                     "content given as one plain string instead of a list."
                 ),
                 friendly_steps=(
-                    "Put the content inside a list, like "
-                    "Page(state, ['Hello!']).",
+                    "Put the content inside a list, like Page(state, ['Hello!']).",
                     "Even a single piece of content needs to be in a list.",
                 ),
             )

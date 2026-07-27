@@ -21,16 +21,16 @@ Link `Next` points to non-existent page `sumary`.
 
 or the same for a `Button`. The friendly version explains that the
 link tries to go to a page named `sumary`, but your site has no route
-with that name. A close relative appears when you follow an address
-directly: "Drafter could not find the page route your app tried to
-open."
+with that name. A closely related message appears when you follow an
+address directly: "Drafter could not find the page route your app
+tried to open."
 
 ## What it means
 
 Before showing a page, Drafter checks that every button and link on
 it points at a real route. One of yours names a route that does not
-exist, so the page was stopped rather than rendered with a dead
-control.
+exist, so Drafter stopped the page rather than render it with a
+button or link that leads nowhere.
 
 ## Where to look
 
@@ -40,7 +40,8 @@ against your route functions' names.
 
 ## Check
 
-Three causes look alike; the message tells you which you have:
+Three causes produce this message, and the details in it tell you
+which one you have:
 
 - **A typo**: the target almost matches a route name (`"sumary"` vs
   `def summary`). Fix the spelling.

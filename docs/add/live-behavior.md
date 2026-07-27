@@ -14,24 +14,24 @@ outcome: React to input without a full page change.
 ## Goal
 
 You want part of the page to react while the visitor works: a
-counter that follows typing, a preview that updates on choosing, a
-save that happens silently.
+counter that follows their typing, a preview that updates when they
+pick an option, or a save that happens silently in the background.
 
 ## Before you start
 
-You can build multi-page apps with buttons. Two new pieces combine
-here: `on_` event keywords make a component call a route when
-something happens, and the route answers with a
-[Fragment](../reference/fragment.md) (part of a page),
-[Update](../reference/update.md) (state only), or
-[Redirect](../reference/redirect.md) (go elsewhere) instead of a
-whole `Page`. The concept is
-[Live updates](../concepts/live-updates.md).
+You can build multi-page apps with buttons. This page combines two
+new pieces. First, `on_` event keywords make a component call a
+route when something happens. Second, that route responds with a
+[Fragment](../reference/fragment.md) (a piece of a page), an
+[Update](../reference/update.md) (a change to state only), or a
+[Redirect](../reference/redirect.md) (an instruction to go to
+another page) instead of a whole `Page`. The concept behind both is
+explained in [Live updates](../concepts/live-updates.md).
 
 ## Recipe: a live character counter
 
-`on_input` fires on every keystroke; the fragment lands in a named
-`Output` region:
+`on_input` fires on every keystroke, and the fragment it triggers
+is placed into a named `Output` region:
 
 ```python drafter height=260
 from drafter import *
@@ -67,8 +67,9 @@ current text.
 
 ## Recipe: a silent save
 
-`Update` changes state with no visible reaction, right for
-bookkeeping the visitor should not be interrupted by:
+`Update` changes state without any visible reaction, which makes it
+the right choice for bookkeeping that should not interrupt the
+visitor:
 
 ```python drafter height=260
 from drafter import *
@@ -107,14 +108,14 @@ def elsewhere(state: State) -> Page:
 start_server(State(""))
 ```
 
-Leave mid-sentence and come back: the draft survived, because every
-keystroke quietly saved it.
+Try leaving mid-sentence and coming back: the draft is still there,
+because every keystroke saved it.
 
 ## Recipe: redirect after finishing
 
-A submit route that should land somewhere real returns a
-`Redirect`, so the address updates and the back button behaves; the
-worked example is on the
+When a submit route should leave the visitor on an actual page,
+return a `Redirect`. The browser's address updates, and the back
+button works as expected. A worked example is on the
 [Redirect reference page](../reference/redirect.md).
 
 ## Choosing among the three
@@ -128,14 +129,14 @@ worked example is on the
 
 ## Variations
 
-- Other events: `on_change` (value settled), `on_click`,
-  `on_mouseenter`, and friends; the list is on
+- Other events exist, including `on_change` (fires when the value
+  settles), `on_click`, and `on_mouseenter`; the full list is on
   [Keywords every component accepts](../reference/keyword-attributes.md).
-- Target any component by giving it an `id` and the fragment
-  `target="#that_id"`; `Output` is just a convenient pre-named
+- You can target any component by giving it an `id` and giving the
+  fragment `target="#that_id"`; `Output` is a convenient pre-named
   region.
-- Things that happen on a schedule instead of an action are
-  [Timers](timers.md).
+- For behavior that happens on a schedule instead of in response to
+  an action, see [Timers](timers.md).
 
 ## Common problems
 
@@ -146,15 +147,16 @@ worked example is on the
   display region only.
 - **Other parts of the page went stale**: a fragment redraws only
   its target. If the event changes state that several regions
-  display, cover them with the target or use the full-page rhythm.
+  display, choose a target that covers all of them, or return a
+  whole `Page` instead.
 - **The event never fires**: the keyword must be a supported event
   spelled exactly (`on_input`), and its value must name a real
   route.
 
 ## Understand it
 
-[Live updates](../concepts/live-updates.md): why fragments exist
-and when to prefer whole pages anyway.
+[Live updates](../concepts/live-updates.md) explains why fragments
+exist and when a whole page is still the better choice.
 
 ## See another example
 

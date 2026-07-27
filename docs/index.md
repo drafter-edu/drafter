@@ -21,7 +21,8 @@ hide:
 
 **Drafter turns the Python you already know into real, interactive
 websites.** Write plain functions, decorate them with `@route`, and Drafter
-renders them as pages you can click through, test, and publish for free.
+serves the pages they return as a website you can click through, test, and
+publish for free.
 
 ```python drafter height=180
 from drafter import *
@@ -82,7 +83,7 @@ change the code and run it again.
 
     ---
 
-    Buttons, forms, tables, maps, cameras, and more.
+    Look up buttons, forms, tables, maps, cameras, and more.
 
     [Browse the reference](reference/components/index.md)
 

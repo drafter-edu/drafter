@@ -13,8 +13,8 @@ outcome: Make the app production-ready.
 
 ## Goal
 
-You want your app dressed for the public: a proper title, an about page,
-no debug panel, and the full width of the screen.
+You want your app ready for the public, with a proper title, an about
+page, no debug panel, and the full width of the screen.
 
 ## Before you start
 
@@ -41,22 +41,22 @@ set_website_framed(False)
 
 What each line does:
 
-- `set_website_title(...)` names the browser tab.
+- `set_website_title(...)` sets the title shown in the browser tab.
 - `set_site_information(...)` fills your site's **about page**: who made
   it, what it does, what sources helped, any planning document you
   bundled, and related links. All five fields are required; use an empty
   string (or empty list for `links`) for any that do not apply. Visitors
   reach the page at your site's address plus `--about`. The values can
   be strings, lists of strings, or components like `Link`.
-- `hide_debug_information()` removes the debug panel. Your visitors get
-  the app, not its wiring.
+- `hide_debug_information()` removes the debug panel, so visitors see
+  only the app itself.
 - `set_website_framed(False)` lets the app fill the whole browser window
   instead of the small development frame.
 
 ## See it running
 
-Here is a small finished app with its release block. Notice what is
-missing below the page: no debug panel.
+Here is a small finished app with its release block. Notice that the
+debug panel no longer appears below the page.
 
 ```python drafter height=260
 from drafter import *
@@ -100,8 +100,8 @@ start_server(State(0))
 
 ## While you are still working
 
-Comment out the hiding line until you are actually done, so you keep the
-debugger while you debug:
+Comment out the `hide_debug_information()` line until you are actually
+done, so that you keep the debugger while you are still debugging:
 
 ```python
 # hide_debug_information()
@@ -128,13 +128,15 @@ Run the app locally one more time and confirm:
   called, or runs after `start_server(...)`. Configuration goes near the
   top of the file.
 - **The app is still in a small box**: add `set_website_framed(False)`.
-- **You cannot debug anymore**: that is what hiding does. Comment the
-  line out while developing.
+- **You cannot debug anymore**: that is the expected effect of hiding
+  the debug information. Comment the line out while you are still
+  developing.
 
 ## Understand it
 
 Configuration calls change how the site presents itself, never what it
-does: [How Drafter works](../../start/how-drafter-works.md).
+does. [How Drafter works](../../start/how-drafter-works.md) explains
+why.
 
 ## See another example
 
@@ -143,8 +145,8 @@ preparation on a guided project.
 
 ## Look it up
 
-[Site configuration](../../reference/site-config.md): every `set_` and
-`add_` function, including favicons and custom error pages.
+[Site configuration](../../reference/site-config.md) lists every `set_`
+and `add_` function, including favicons and custom error pages.
 
 ## Fix a problem
 

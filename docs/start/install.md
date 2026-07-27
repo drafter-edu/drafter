@@ -57,8 +57,9 @@ Create a new Python file, put this single line in it, and run it:
 from drafter import *
 ```
 
-If it runs without an error, Drafter is installed. Nothing visible happens
-yet; that is expected. Your first page is one step away.
+If it runs without an error, Drafter is installed. Nothing visible
+happens yet, and that is expected. You will build your first page in
+the next step.
 
 ## Common problems
 
@@ -82,7 +83,7 @@ Still stuck? See [Troubleshooting](../help/troubleshooting.md).
 
     ---
 
-    A working counter site, built one idea at a time, in about twenty
+    Build a working counter site, one idea at a time, in about twenty
     minutes.
 
     [Build your first app](first-app.md)

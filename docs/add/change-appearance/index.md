@@ -25,19 +25,21 @@ Drafter offers three tiers of styling, in order of
 effort. Start at the top and only go deeper when the tier above cannot
 do what you want:
 
-1. **[Use a theme](themes.md)**: one line restyles the whole site.
-   Twenty ready-made looks. Start here.
+1. **[Use a theme](themes.md)**: a single line of code restyles the
+   whole site, and there are twenty ready-made looks to choose from.
+   Start here.
 2. **[Styling functions and keywords](helpers.md)**: make one component
-   bold, colored, bigger, centered. For emphasis and small adjustments.
-3. **[Custom CSS](custom-css.md)**: real CSS classes and rules, when you
-   want a look that is truly yours. Learn
+   bold, colored, bigger, or centered. Use these for emphasis and small
+   adjustments.
+3. **[Custom CSS](custom-css.md)**: write real CSS classes and rules
+   when you want a look of your own. Learn
    [design basics](design-basics.md) first.
 
 ## Pick a Theme, Any Theme
 
-The fastest visible improvement: pick a theme. Here is a plain page with
-a theme applied; change `"sakura"` to `"retro"`, `"98"`, or `"terminal"`
-in the demo and run it to feel the difference:
+Picking a theme is the fastest visible improvement. Here is a plain
+page with a theme applied. Change `"sakura"` to `"retro"`, `"98"`, or
+`"terminal"` in the demo and run it again to see the difference:
 
 ```python drafter height=340
 from drafter import *
@@ -110,9 +112,9 @@ def lose_life(state: State) -> Page:
 start_server(State(3))
 ```
 
-The rule of thumb: **themes for the whole site, helpers for moments of
-emphasis**. If you find yourself styling every single component by hand,
-step back and pick a different theme instead.
+The rule of thumb is to use **themes for the whole site and helpers for
+moments of emphasis**. If you find yourself styling every single
+component by hand, step back and pick a different theme instead.
 
 ## Common problems
 
@@ -127,8 +129,9 @@ step back and pick a different theme instead.
 
 ## Understand it
 
-Styling changes how things look, never what the app remembers or does:
-[How Drafter works](../../start/how-drafter-works.md).
+Styling changes how things look, never what the app remembers or does.
+[How Drafter works](../../start/how-drafter-works.md) explains that
+separation.
 
 ## See another example
 

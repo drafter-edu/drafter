@@ -618,9 +618,7 @@ class ClientBridge:
                 self.site_renderer.toggle_frame()
             elif event.get("key") == "in_debug_mode":
                 self.configuration.in_debug_mode = bool(event.get("value"))
-                swap_debug_mode(
-                    self.context.document, self.configuration.in_debug_mode
-                )
+                swap_debug_mode(self.context.document, self.configuration.in_debug_mode)
                 update_subtle_debug_entry(
                     self.site_renderer.get_scope(),
                     self.configuration.in_debug_mode,

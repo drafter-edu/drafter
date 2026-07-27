@@ -14,9 +14,9 @@ error_text: "Process completed with exit code 1"
 
 ## The error
 
-A red X next to your deployment in the repository's **Actions** tab,
-and an email from GitHub about a failed workflow run. The log of the
-failed step typically ends with:
+A red X appears next to your deployment in the repository's
+**Actions** tab, and GitHub sends you an email about a failed
+workflow run. The log of the failed step typically ends with:
 
 ```text
 Error: Process completed with exit code 1.
@@ -28,19 +28,21 @@ The useful message is the lines just above that one.
 
 The deployment is a program GitHub runs for you: it takes your
 repository, builds your Drafter app into a static site, and
-publishes it. Some step of that failed, so your site was not updated.
-Your previous deployed version, if any, is still up.
+publishes it. One of those steps failed, so your site was not
+updated. Your previous deployed version, if any, is still up.
 
 ## Where to look
 
-Actions tab → the failed run (red X) → the failing job → expand the
-failing step. Read the last several lines of the log; the real error
-is named there, and it is often a Python message you already know how
-to read. Only the newest run matters; older red runs are history.
+In the Actions tab, open the failed run (the one with the red X),
+then the failing job, and expand the failing step. Read the last
+several lines of the log; the real error is named there, and it is
+often a Python message you already know how to read. Only the newest
+run matters; older failed runs are records of past attempts and do
+not affect the current site.
 
 ## Check
 
-Match the log's last lines against the usual suspects:
+Compare the last lines of the log against these common causes:
 
 - **Pages or permissions complaints** → GitHub Pages is not enabled
   as the source; enable it under Settings → Pages → Source →
@@ -50,8 +52,8 @@ Match the log's last lines against the usual suspects:
 - **A missing file** → see
   [works locally, 404s deployed](missing-asset-on-deploy.md);
   a file the build needs was never uploaded.
-- **Nothing found to build** → the workflow expects your program in
-  `main.py`, exactly that name.
+- **Nothing found to build** → the workflow expects your program to
+  be in a file named `main.py`, with exactly that name.
 
 ## Fix
 
@@ -64,13 +66,13 @@ triggers it).
 
 The newest run shows a green checkmark, and the live site reflects
 your change. Check it in a private browser window or from a second
-device to dodge caching.
+device so that you are not looking at a cached copy.
 
 ## Prevent
 
 Deploy only what already runs locally, and deploy small changes
-often; a failure right after a small change is easy to blame on the
-right thing.
+often. When a failure follows a small change, you can be confident
+about which change caused it.
 
 ## Understand
 

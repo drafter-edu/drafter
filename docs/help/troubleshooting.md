@@ -10,8 +10,9 @@ outcome: Diagnose problems by symptom.
 
 # Troubleshooting
 
-Organized by what you can see. If you have an actual error message,
-the [error index](errors/index.md) is faster.
+This page is organized by what you can see on the screen. If you
+have an actual error message, the [error index](errors/index.md)
+is a faster place to look.
 
 ## The page is blank
 
@@ -39,15 +40,15 @@ all.
 - Make sure the route mutates the state it was given rather than a
   fresh copy: `state.score = state.score + 1`, not
   `state = State(...)`.
-- A button inside a page that never re-renders looks dead. The route
-  should end by returning a page that shows the change, usually
-  `return index(state)`.
+- If the page never re-renders, the button appears to do nothing
+  even when the route ran. The route should end by returning a page
+  that shows the change, usually `return index(state)`.
 
 ## My changes are not appearing
 
-The classic save-and-reload loop, in order:
+Work through the classic save-and-reload steps, in order:
 
-1. Save the file. Unsaved changes run nowhere.
+1. Save the file. Changes you have not saved never run.
 2. If you ran the program yourself, stop it and run it again;
    the site is built from the code as it was when you started it.
    (The `drafter` command watches your file and restarts for you.)
@@ -73,22 +74,24 @@ go before it, and behavior goes in routes.
 
 ## The first load is slow
 
-Behind the scenes, the browser downloads and boots a complete Python
-before your first page appears; expect a few seconds on the first
-visit. If it never loads, check the browser's network connection, and
-whether the terminal shows the site actually started.
+Behind the scenes, the browser downloads and starts a complete copy
+of Python before your first page appears, so expect a delay of a
+few seconds on the first visit. If the page never loads at all,
+check the browser's network connection, and check whether the
+terminal shows that the site actually started.
 
 ## Tests pass but the app misbehaves
 
-Tests exercise the routes you wrote them for; the misbehavior is
-probably on a path without one. Reproduce the bad behavior by hand,
+Tests only exercise the routes you wrote them for, so the
+misbehavior is probably on a path that has no test yet. Reproduce
+the bad behavior by hand,
 note which route ran, and write a failing assertion for it before
 fixing it. See [Test a feature](../add/test-a-feature.md).
 
 ## Still stuck?
 
 - [The debug panel in depth](debug-panel.md) shows your app's state
-  and history while you poke at it.
+  and history while you interact with it.
 - [Print and the console](printing-and-console.md) is the fastest way
   to see what a route actually received.
 - If you believe Drafter itself misbehaved, see

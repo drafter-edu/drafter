@@ -17,9 +17,9 @@ Group: [Layout](../index.md#layout)
 ## Description
 
 A `Row` is a [Div](div.md) that arranges its contents side by side
-instead of stacked, with everything vertically centered. It is the
-simple answer to "these belong on one line": a label with its box,
-buttons in a strip, columns in a card.
+instead of stacked, with everything vertically centered. Use it when
+several pieces of content belong on one line, such as a label next
+to its text box, a strip of buttons, or the columns of a card.
 
 ## Syntax
 
@@ -63,22 +63,24 @@ start_server()
 
 ## Notes
 
-- Under the hood a `Row` is a `div` with flexbox
+- Internally, a `Row` is a `div` that uses flexbox
   (`display: flex; flex-direction: row; align-items: center`), so
-  every flexbox trick applies via `style_` keywords:
-  `style_gap="12px"` spaces children, and
-  `style_justify_content="space-between"` pushes them apart.
-- Rows do not wrap by default; too many wide children overflow.
-  `style_flex_wrap="wrap"` allows wrapping.
+  any flexbox technique can be applied through `style_` keywords:
+  `style_gap="12px"` adds space between the children, and
+  `style_justify_content="space-between"` spreads them apart.
+- Rows do not wrap by default, so children that are too wide will
+  overflow the row. Setting `style_flex_wrap="wrap"` allows the
+  contents to wrap onto additional lines.
 - In tests, a `Row` compares equal to a plain `Div` with the same
   contents and settings, so refactoring between them does not break
   structural assertions.
 
 ## Related components
 
-- [Div (Box)](div.md): the stacked default.
-- [Table](../data/table.md): when the side-by-side things are
-  actually rows and columns of data.
+- [Div (Box)](div.md): the same kind of container, without the
+  side-by-side layout.
+- [Table](../data/table.md): a better fit when the side-by-side
+  content is really rows and columns of data.
 
 ## External links
 

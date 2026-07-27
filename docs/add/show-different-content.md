@@ -21,13 +21,13 @@ every item in a list.
 ## Before you start
 
 You can build a page that shows values from state. When you finish
-this page, your routes will branch, and several buttons will share
-one route politely.
+this page, your routes will be able to branch, and several buttons
+will be able to share a single route.
 
 ## The smallest version
 
-An `if` inside the route. The route runs fresh on every visit, so the
-branch is re-decided every time:
+The smallest version is an `if` statement inside the route. The route
+runs fresh on every visit, so the branch is decided again every time:
 
 ```python drafter height=240
 from drafter import *
@@ -69,9 +69,9 @@ def wait(state: State) -> Page:
 start_server(State(2))
 ```
 
-Compute what varies into a variable (`status`), then build one
-content list. Keeping the `Page(...)` call single and flat is kinder
-to future you than duplicating it in each branch.
+Compute the part that varies into a variable (`status`), then build
+one content list. Keeping a single, flat `Page(...)` call is easier
+to maintain than duplicating the call in each branch.
 
 ## Recipe: a helper that returns components
 
@@ -120,9 +120,9 @@ def read_all(state: State) -> Page:
 start_server(State(0))
 ```
 
-Routes return pages; helpers return everything smaller. The rule of
-thumb: as soon as an `if` in a route wants to produce components, it
-wants to be a helper.
+Routes return pages, while helpers return the smaller pieces. As a
+rule of thumb, when an `if` in a route needs to produce components
+rather than a string, move that `if` into a helper function.
 
 ## Recipe: one route for many items
 
@@ -182,36 +182,39 @@ with no new code. This is the pattern the
 
 ## Variations
 
-- Branch on an argument instead of state:
+- To branch on an argument instead of state, put
   `Argument("mode", "simple")` on one button and
-  `Argument("mode", "expert")` on another, one route reading `mode`.
-- Show a section only sometimes by appending to the content list
-  inside an `if`, instead of computing a string.
-- Handle the empty case first: `if not state.pets:` return a page
-  that says so, then write the normal page below it.
+  `Argument("mode", "expert")` on another, and have one route read
+  `mode`.
+- To show a section only sometimes, append to the content list
+  inside an `if` instead of computing a string.
+- Handle the empty case first: begin the route with
+  `if not state.pets:` and return a page that says the list is
+  empty, then write the normal page below that check.
 
 ## Common problems
 
-- **Both branches show at once, or neither**: the branch must choose
-  what goes *into* the content list; check that you are not
-  accidentally appending in both arms.
+- **Both branches show at once, or neither**: the `if` must choose
+  what goes *into* the content list. Check that you are not
+  accidentally appending in both branches.
 - **`missing parameter` on the shared route**: every button targeting
   it must carry the `Argument` it expects.
 - **The route finds "a mystery"**: the argument's value did not match
-  any item; compare exact spelling and case of the names.
+  any item. Compare the exact spelling and capitalization of the
+  names.
 - **You duplicated a page in two branches and they drifted**: compute
   the differences into variables or helpers, keep one `Page(...)`.
 
 ## Understand it
 
-[Dynamic pages](../concepts/dynamic-pages.md): the concept behind
-every recipe here.
+[Dynamic pages](../concepts/dynamic-pages.md) explains the concept
+behind every recipe on this page.
 
 ## See another example
 
-The [Shop](../examples/shop.md) drives an inventory with arguments;
-the [Login flow](../examples/login.md) branches an entire page on
-state.
+The [Shop](../examples/shop.md) drives an inventory with arguments,
+and the [Login flow](../examples/login.md) branches an entire page
+on state.
 
 ## Look it up
 

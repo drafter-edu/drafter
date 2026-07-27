@@ -20,15 +20,15 @@ the program from now on.
 
 One fact makes all of this possible: every route is a plain function. It
 takes a `State`, returns a `Page`, and you can call it yourself and check
-the result. Drafter's `assert_` functions make those checks easy to
-write, and they are built in.
+the result. Drafter's `assert_` functions are built in and make those
+checks quick to write.
 
-Tests go after your routes and before `start_server(...)`. They run at
-every startup. A passing test prints a `SUCCESS` line; a failing one
-prints a `FAILURE` explaining exactly what differed, and **never crashes
-your program**; the rest of your tests keep running. Every result also
-appears in the debug panel's **Tests** tab with a side-by-side
-comparison.
+Tests go after your routes and before `start_server(...)`, and they run
+at every startup. A passing test prints a `SUCCESS` line. A failing test
+prints a `FAILURE` line explaining exactly what differed, and it **never
+crashes your program**: the rest of your tests keep running. Every
+result also appears in the debug panel's **Tests** tab with a
+side-by-side comparison.
 
 ## The smallest version
 
@@ -66,9 +66,9 @@ assert_has(index(State(5)), Button("Click me!", "add_point"))
 start_server(State(0))
 ```
 
-Read them aloud: adding a point to a score of 5 gives 6; the page shows
-the score; the page has the button. Three facts that matter, checked in
-three lines.
+Read the tests aloud: adding a point to a score of 5 gives 6, the page
+shows the score, and the page has the button. Each line checks one fact
+that matters.
 
 ## Pick the assertion that matches what you care about
 
@@ -115,8 +115,8 @@ assert_has(page, Button("Click me!", "add_point"))
 assert_not_has(page, "Game Over")
 ```
 
-A failed text search shows what text the page *did* have, which makes
-typos easy to spot. (`assert_in` and `assert_not_in` are the same checks
+A failed text search shows what text the page *did* have, which helps
+you spot typos. (`assert_in` and `assert_not_in` are the same checks
 with the arguments flipped, needle first.)
 
 ## Recipe: zoom in on one component
@@ -139,8 +139,8 @@ fancy = Button("Click me!", "add_point", style_color="red")
 assert_style(fancy, "color", "red")
 ```
 
-It sees styles set on the component itself (helpers, `style_` keywords);
-themes and CSS files are invisible to it.
+It sees styles set on the component itself, through helpers or `style_`
+keywords. Styles from themes and CSS files are invisible to it.
 
 ## Loose by default, strict when you want
 
@@ -160,11 +160,11 @@ assignment is all about styling.
 
 ## Common problems
 
-- **Your tests do not run**: they must sit before `start_server(...)`;
-  nothing after that line runs.
+- **Your tests do not run**: they must sit before `start_server(...)`,
+  because nothing after that line runs.
 - **A test broke after you restyled a page**: the test is checking more
-  than it cares about. Narrow it: `assert_page` → `assert_has` or
-  `assert_state`.
+  than it cares about. Narrow it, for example by replacing
+  `assert_page` with `assert_has` or `assert_state`.
 - **`assert_has` cannot find text that is clearly in a table**: text
   search does not reach inside a `Table`'s rows; use a component needle,
   as in [Show a collection](show-a-collection.md).
@@ -173,20 +173,20 @@ assignment is all about styling.
 
 ## Understand it
 
-Routes are callable functions returning inspectable pages:
-[Routes and pages](../concepts/routes-and-pages.md) and
+Routes are functions you can call, and the pages they return can be
+inspected. See [Routes and pages](../concepts/routes-and-pages.md) and
 [State](../concepts/state.md).
 
 ## See another example
 
-Every guided project tests as it builds; the
+Every guided project tests as it builds. The
 [virtual pet's mood tests](../tutorials/virtual-pet.md) are a good
 pattern to copy.
 
 ## Look it up
 
-[Testing functions](../reference/testing-functions.md): every assertion
-with its flags and failure output.
+[Testing functions](../reference/testing-functions.md) lists every
+assertion with its flags and failure output.
 
 ## Fix a problem
 

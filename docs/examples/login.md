@@ -13,10 +13,11 @@ outcome: See conditional pages driven by state (and why this is not security).
 
 ## What it does
 
-A site whose front page changes depending on whether you are "logged
-in": one version greets a visitor and offers a login form, the other
-greets a user by name and offers logout. One boolean in state drives
-the whole personality of the app.
+This example is a site whose front page changes depending on whether
+the visitor is "logged in". One version greets a visitor and offers
+a login form; the other greets the user by name and offers a logout
+button. A single boolean in the state determines which version
+appears.
 
 !!! warning "This is a simulation, not security"
     Everything in a Drafter app, including this password check, runs
@@ -113,30 +114,33 @@ start_server(State("", False))
 
 ## The code
 
-`check_password` is a plain helper: it answers a question and touches
-nothing. The routes split the flow into moments: `index` branches on
-`logged_in`, `ask_login` shows the form, `finish_login` decides, and
-`do_logout` flips the flag. The whole "login system" is one boolean
-and one string in state.
+`check_password` is a plain helper function: it answers a yes-or-no
+question and changes nothing. The four routes divide the flow into
+steps: `index` branches on `logged_in`, `ask_login` shows the form,
+`finish_login` checks the password and updates the state, and
+`do_logout` sets the flag back to `False`. The entire "login system"
+amounts to one boolean and one string in the state.
 
 ## How it works
 
-`index` is a dynamic page in the sense of
-[the concept](../concepts/dynamic-pages.md): same route, two
-personalities, chosen by state. The branch builds a `body` list and
-one shared `Page(state, body)` returns it, so the two versions cannot
+`index` builds a dynamic page in the sense described in
+[the concept](../concepts/dynamic-pages.md): the same route returns
+two different versions of the page, chosen by the state. Each branch
+builds a `body` list, and a single shared `Page(state, body)` at the
+end wraps whichever list was chosen, so the two versions cannot
 drift apart structurally.
 
 The password box, `TextBox("password", "", "password")`, uses the
-third parameter (`kind`) to get dots instead of visible characters.
-That is politeness toward shoulder-surfers, and the only real
-security property this app has.
+third parameter (`kind`) to show dots instead of visible characters.
+Masking the input protects against someone reading over the
+visitor's shoulder, and that is the only real security property this
+app has.
 
-Note what `finish_login` does with failure: it does not log the
-attempt, lock the account, or even keep the wrong password; it just
-shows a page with a way back. The username *is* kept (`state.username
-= username`), so the form is prefilled on retry, a small kindness
-copied from real sites.
+Notice how `finish_login` handles failure: it does not log the
+attempt, lock the account, or keep the wrong password. It only shows
+a page with a way back. The username *is* kept (`state.username =
+username`), so the form is prefilled when the visitor tries again, a
+convenience that real sites also provide.
 
 ## Make it yours
 
@@ -154,30 +158,32 @@ copied from real sites.
 
 ## Tests
 
-Three assertions cover the three outcomes that matter: right
-password flips the flag, wrong password shows the failure page
-without flipping it, and logout flips it back. `finish_login` is
-easy to test precisely because `check_password` is a helper; rules
-that live in helpers are rules tests can reach without pages getting
-involved.
+The three assertions cover the three outcomes that matter: a correct
+password sets the flag to `True`, a wrong password shows the failure
+page without changing the flag, and logging out resets it to
+`False`. `finish_login` can be tested this directly because
+`check_password` is a separate helper; rules that live in helper
+functions can be tested without involving any pages.
 
 ## Likely errors
 
-- **Everyone can log in**: `check_password` must return `False` at
-  the end; without the final `return False`, Python returns `None`,
-  which is falsy, so this particular bug hides. The tests catch its
-  siblings (a stray `return True`).
+- **Everyone can log in**: `check_password` must reject every
+  combination it does not recognize, so a stray `return True` lets
+  everyone in; the tests catch that mistake. Forgetting the final
+  `return False` happens to be harmless, because Python then returns
+  `None`, which also counts as false.
 - **The private page forgot its guard**: every route is reachable by
   its address, whether or not any button points at it. A
   members-only route must itself check `state.logged_in`; the login
-  page is decoration, not a wall.
+  page does not prevent anyone from visiting other routes directly.
 - **`missing parameter` on `finish_login`**: both boxes must be on
   the submitting page, named exactly `username` and `password`.
 
 ## Related
 
-- [Security honestly](../extend/security.md): what Drafter can and
-  cannot protect, without comfort.
-- [Show different content](../add/show-different-content.md): the
-  branching pattern.
-- [Dynamic pages](../concepts/dynamic-pages.md): the concept.
+- [Security honestly](../extend/security.md) explains what Drafter
+  can and cannot protect.
+- [Show different content](../add/show-different-content.md) covers
+  the branching pattern used in `index`.
+- [Dynamic pages](../concepts/dynamic-pages.md) explains the
+  underlying concept.

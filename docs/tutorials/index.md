@@ -10,8 +10,9 @@ outcome: Choose the next project in the spine.
 
 # Guided Projects
 
-Each project below produces an app. They take one or two sittings to write, and teach the skills the next project
-assumes. Do them in order.
+Each project below produces a working app. A project takes one or two
+sittings to write and teaches the skills that the next project assumes,
+so work through them in order.
 
 | #   | Project                                  | You build                                            | You learn                                    | Time         |
 | --- | ---------------------------------------- | ---------------------------------------------------- | -------------------------------------------- | ------------ |
@@ -22,20 +23,20 @@ assumes. Do them in order.
 
 ## Before you start
 
-You should have finished [Start](../start/index.md): you can build a page
-with a button, run it, and find the debug panel. That is all project 1
-assumes.
+You should have finished [Start](../start/index.md), which means you can
+build a page with a button, run it, and find the debug panel. Project 1
+assumes nothing beyond those skills.
 
 ## Skipping ahead
 
 Each project opens by letting you try the finished app, so you can judge
 whether you already know what it teaches. If you can read project 1's code
-and predict what every route does, move to project 2. If forms hold no
-mysteries for you, move to project 3.
+and predict what every route does, move to project 2. If you are already
+comfortable with forms, move to project 3.
 
 ## After the projects
 
-The projects end where your own work begins:
+Once the projects are done, you are ready to build something of your own.
 [Your Project](../your-project/index.md) walks you from an idea to a
-deployed app, and [Add to Your App](../add/index.md) has a recipe for each
-feature you will want along the way.
+deployed app, and [Add to Your App](../add/index.md) collects recipes for
+the features you are likely to want along the way.

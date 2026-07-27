@@ -14,38 +14,38 @@ error_text: "Circular Reference"
 
 ## The error
 
-Not an error page: the text `Circular Reference` appears inside a
-recorded page or state in the debug panel's History tab, right
-where a real value should be, and any
+This one does not arrive as an error page. Instead, the text
+`Circular Reference` appears inside a recorded page or state in the
+debug panel's History tab, right where a real value should be, and any
 [frozen test](../../add/freeze-pages.md) copied from it fails or
 looks wrong.
 
 ## What it means
 
 Drafter writes out your state as Python code you can paste into
-tests. That only works for values that can be written down, and a
-*circular reference*, two objects that each contain the other,
-cannot be: writing it out would never finish. Drafter puts the
-marker text where the cycle began instead of hanging.
+tests. That only works for values that can be written down. A
+*circular reference*, where two objects each contain the other,
+cannot be written down: the process would never finish. Instead of
+hanging, Drafter puts the marker text where the cycle began.
 
 ## Where to look
 
-Your state's structure, especially dataclasses whose fields hold
-other dataclasses or lists of them. Somewhere, following the fields
-in a loop comes back to where it started.
+Look at your state's structure, especially dataclasses whose fields
+hold other dataclasses or lists of them. Somewhere, following the
+fields leads in a loop back to where it started.
 
 ## Check
 
-The classic ways a cycle sneaks in:
+Cycles usually appear in one of these ways:
 
 - **A list appended to itself**: `items.append(items)`.
 - **A back-pointer**: a `Pet` holding its `Owner` while the `Owner`
   holds its pets.
 - **Self-reference**: an object stored in one of its own fields.
 
-Then the real question: did you *mean* it? Cycles are legitimate
-for genuinely graph-shaped data; most course apps do not need them
-and got one by accident.
+Once you find the cycle, ask whether you intended it. Cycles are
+legitimate for genuinely graph-shaped data, but most course apps do
+not need them and only acquire one by accident.
 
 ## Fix
 
@@ -68,9 +68,9 @@ New history entries show real values where the marker used to be
 ## Prevent
 
 Prefer names and positions over object back-pointers in state, and
-glance at the History tab's recorded state early; the marker shows
-up the moment a cycle exists, long before it becomes a confusing
-test.
+check the History tab's recorded state early in development. The
+marker appears as soon as a cycle exists, long before it turns into
+a confusing test.
 
 ## Understand
 

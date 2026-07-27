@@ -95,9 +95,9 @@ Each item in the content list is either a string or a component:
   of the [component list](components/index.md)) render as their HTML.
 
 A single string or component is quietly wrapped in a list for you, but
-anything else, a number, a dataclass, a list of lists, produces a
-friendly error naming the route that returned it. The most common
-version is forgetting `str()` around a number. See
+anything else (a number, a dataclass, a list of lists) produces a
+friendly error that names the route that returned it. The most common
+mistake is forgetting `str()` around a number. See
 [Page content must be a list](../help/errors/page-content-invalid.md).
 
 ## What Drafter verifies
@@ -109,7 +109,7 @@ Before showing a page, Drafter checks it:
   [points to non-existent page](../help/errors/route-not-found.md)
   error, rather than rendering a dead control.
 - **Input names should be unique.** Two form components with the same
-  `name` on one page would fight over the same parameter; see
+  `name` on one page would both try to fill the same parameter; see
   [Two components share a name](../help/errors/duplicate-component-name.md).
 
 ## Notes

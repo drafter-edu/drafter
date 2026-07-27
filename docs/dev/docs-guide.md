@@ -120,11 +120,11 @@ Run all of these locally before pushing:
 | Strict build (links, nav, demo compiles, redirects)          | `uv run drafter-docs build --strict` |
 
 The coverage gate is report-only until the reference layer lands (plan
-Phase E), then becomes blocking.
+Phase E); after that it becomes blocking.
 
 ## Style rules
 
-From STUDENT_DOCS_PLAN.md §3 and §6, the short version:
+These rules are the short version of STUDENT_DOCS_PLAN.md §3 and §6:
 
 - Student example code uses only the audience's known constructs: no
   dicts, exceptions, comprehensions, lambdas, or `break`.

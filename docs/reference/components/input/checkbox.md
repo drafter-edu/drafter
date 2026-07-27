@@ -17,9 +17,9 @@ Group: [Input](../index.md#input)
 ## Description
 
 A `CheckBox` collects a yes/no answer. The receiving route's parameter
-should be annotated `bool`: it arrives as `True` when the box is
-checked and `False` when it is not, including when the visitor leaves
-it untouched.
+should be annotated `bool`: the value arrives as `True` when the box
+is checked and `False` when it is not, including when the visitor
+leaves the box untouched.
 
 ## Syntax
 
@@ -77,7 +77,7 @@ start_server(State(False, False))
 
 ## Notes
 
-- An unchecked box still sends its answer: the parameter receives
+- An unchecked box still submits a value: the parameter receives
   `False`, not nothing. (Behind the scenes, Drafter adds a hidden
   companion field so the unchecked state is submitted too.)
 - Passing the current state value as `default_value` keeps the box
@@ -97,7 +97,8 @@ words toggles it.
 
 - [RelatedCheckBox](relatedcheckbox.md): many related yes/nos,
   received as one list.
-- [RadioButtonGroup](radiobuttongroup.md): pick exactly one.
+- [RadioButtonGroup](radiobuttongroup.md): choose exactly one option
+  instead.
 
 ## External links
 

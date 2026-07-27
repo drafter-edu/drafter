@@ -16,11 +16,11 @@ Group: [Input](../index.md#input)
 
 ## Description
 
-A `FileUpload` is the file-picker input: the visitor chooses a file
-from their device, and when the form submits, the file's contents
-arrive at the route as a parameter. What type arrives is decided by
-the parameter's annotation; the full table is in the
-[files how-to](../../../add/files.md).
+A `FileUpload` is a file-picker input. The visitor chooses a file
+from their device, and when the form is submitted, the file's
+contents arrive at the route as a parameter. The parameter's type
+annotation decides what form the contents take; the full table of
+annotations is in the [files how-to](../../../add/files.md).
 
 ## Syntax
 
@@ -74,26 +74,29 @@ start_server(State(0))
 
 ## Notes
 
-- Annotation decides delivery: `str` for text, `bytes` for
-  anything, `Picture` for images,
+- The parameter's annotation decides how the file is delivered:
+  annotate `str` to receive text, `bytes` to receive any file's raw
+  data, `Picture` to receive an image, or one of the
   [file types](../../data-types/file-types.md) when the filename
-  matters. Add `| None` to make an empty picker deliver `None`.
-- `accept` is guidance for the picker, not enforcement; a
-  determined visitor can still choose anything, which is why wrong
-  types produce [friendly errors](../../../help/errors/file-decode-error.md)
-  rather than chaos.
-- The route runs when a button submits, not when the file is
-  chosen.
+  matters too. Add `| None` so that an empty picker delivers
+  `None`.
+- `accept` is guidance for the picker, not enforcement; a visitor
+  can still choose any file. A file of the wrong type produces a
+  [friendly error](../../../help/errors/file-decode-error.md).
+- The route runs when a button submits the form, not at the moment
+  the file is chosen.
 
 ## Accessibility
 
 Label the control with what you expect ("A .txt file of your
-story:"), since "Choose file" alone says nothing about purpose.
+story:"), since the browser's built-in "Choose file" text says
+nothing about what the file is for.
 
 ## Related components
 
-- [Download](download.md): files in the other direction.
-- [Camera](../capture/camera.md): a different way pictures arrive.
+- [Download](download.md): sending files to the visitor instead.
+- [Camera](../capture/camera.md): another way to bring pictures
+  into the app.
 
 ## External links
 

@@ -11,10 +11,11 @@ outcome: See the whole road from idea to deployed app.
 
 # Your Project
 
-You have built the guided projects; now you are building your own thing.
-This section is the road from "I have an idea" to "here is my link",
-one step at a time. Start here even if your course handed you a spec:
-the steps are the same, you just skip choosing the topic.
+You have finished the guided projects, and now you are ready to build a
+project of your own. This section walks you from an initial idea to a
+deployed app you can share with a link, one step at a time. Start here
+even if your course handed you a spec: the steps are the same, except
+that choosing the topic has been done for you.
 
 | Step | You will | Done when |
 | ---- | -------- | --------- |
@@ -27,12 +28,13 @@ the steps are the same, you just skip choosing the topic.
 | 7. [Improve the design](improve-the-design.md) | Make it pleasant and usable | Someone else can use it unaided |
 | 8. [Deploy and submit](deploy/index.md) | Put it on the web | Your link works on another device |
 
-Along the way, [Add to Your App](../add/index.md) is your recipe book:
-whenever the next feature is "let them upload a picture" or "show a
-table", there is a page for exactly that.
+Along the way, keep [Add to Your App](../add/index.md) nearby as your
+recipe book. Whenever the next feature you want is "let the user upload
+a picture" or "show a table", you will find a page there for exactly
+that task.
 
 ## Want inspiration?
 
-The [project gallery](gallery/index.md) has complete finished projects
-you can try in your browser, read the code of, and remix into something
-of your own.
+The [project gallery](gallery/index.md) collects finished projects that
+you can try in your browser. You can also read their code and remix
+them into something of your own.

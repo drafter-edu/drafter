@@ -14,12 +14,13 @@ outcome: Diagnose and retry failed deploys.
 !!! note "Only here because something broke?"
     Good, you are in the right place. If your deployment actually
     **succeeded** (a green checkmark, and the site works), you do not
-    need this page at all; head back to
+    need this page at all. Head back to
     [finish checking your site](github-pages.md#step-4-find-your-url-and-check-your-site).
 
-A red X in the Actions tab means the deployment failed. That is normal,
-fixable, and always explained somewhere in a log. This page is the path
-from red X to green checkmark.
+A red X in the Actions tab means the deployment failed. Failures at
+this stage are normal and fixable, and the cause is always recorded
+somewhere in a log. This page walks you from the red X to a green
+checkmark.
 
 ## Read the error
 
@@ -45,21 +46,23 @@ counts, so a history of red is fine once the top one is green.
 
 ## The usual suspects
 
-- **Pages not enabled.** The log complains about Pages or permissions,
-  and the fix is Settings → Pages → Source → **GitHub Actions**, then
-  run the workflow again. This is the most common first-deploy failure.
+- **Pages not enabled.** The log reports an error about Pages or
+  permissions. The fix is Settings → Pages → Source → **GitHub
+  Actions**, and then running the workflow again. This is the most
+  common failure on a first deploy.
 - **A syntax error in your code.** The log shows a Python traceback.
   Fix the code locally (where you can run it), then commit the fixed
   `main.py` and redeploy. If it does not run on your computer, it will
   not deploy.
 - **A missing file.** Your program opens a file or shows an image that
   was never uploaded to the repository. Upload it next to `main.py` and
-  redeploy. Details:
+  redeploy. For details, see
   [works locally, 404s deployed](../../help/errors/missing-asset-on-deploy.md).
-- **A wrong filename.** The deploy expects your program in `main.py`,
-  exactly. Renaming it breaks the build; put your code in `main.py`.
+- **A wrong filename.** The deploy workflow expects your program to be
+  named `main.py`, exactly. Renaming the file breaks the build, so keep
+  your code in `main.py`.
 - **An import the browser cannot satisfy.** Not every third-party
-  library works in the deployed runtime; see
+  library works in the deployed runtime. See
   [a library import fails in the browser](../../help/errors/package-import-error.md).
 
 ## The deployment dashboard
@@ -70,17 +73,17 @@ take your deployed URL and add `dashboard/` to the end, like
 
 Errors and warnings appear at the top, followed by quick links (the
 site, the logs, the repository, your tests) and the full build log of
-every step Drafter took. When a deploy half-works, the dashboard is the
-fastest way to see which half.
+every step Drafter took. When a deploy partly works, the dashboard is
+the fastest way to see which parts succeeded and which failed.
 
 ??? example "Show the dashboard"
     ![The deployment dashboard, with status at the top, quick links in the middle, and the build log below](images/deployment_dashboard.png)
 
 ## Retry
 
-Deployments do not rerun themselves. After every fix: **Actions** tab,
-select the deploy workflow, **Run workflow**. Then watch the new run at
-the top of the list.
+Deployments do not rerun themselves. After every fix, go to the
+**Actions** tab, select the deploy workflow, and click **Run workflow**.
+Then watch the new run at the top of the list.
 
 ## Still stuck?
 
@@ -88,5 +91,5 @@ the top of the list.
 - Compare your repository against [the publish steps](github-pages.md)
   one by one; most stubborn failures are a skipped step.
 - Bring the exact error line from the log to
-  [Getting help](../../help/index.md); "deployment failed" is
-  undebuggable, but the real error text is.
+  [Getting help](../../help/index.md). A report of "deployment failed"
+  is not enough information to debug with, but the real error text is.

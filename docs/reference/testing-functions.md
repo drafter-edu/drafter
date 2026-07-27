@@ -26,11 +26,11 @@ outcome: Look up every assertion.
 
 # Testing functions
 
-Every assertion Drafter ships. They all behave the same way: print
-SUCCESS or FAILURE (with every difference found), return `True` or
-`False`, and never crash your program. They run where they are
-written, before `start_server(...)`, and report into the debug
-panel's Tests tab. The how-to is
+This page lists every assertion Drafter ships. They all behave the
+same way: each prints SUCCESS or FAILURE (with every difference
+found), returns `True` or `False`, and never crashes your program.
+Assertions run where they are written, before `start_server(...)`,
+and report into the debug panel's Tests tab. The how-to is
 [Test a feature](../add/test-a-feature.md).
 
 ## Shared flags
@@ -44,9 +44,9 @@ Every assertion accepts these keyword flags:
 | `strict_styles` | off | Make style differences count as failures. |
 | `quiet` | `False` | Suppress the SUCCESS line on passing tests. |
 
-By default, matching is forgiving on purpose: case-insensitive
-text, styles ignored. Change the defaults for a whole file with
-`set_assertion_defaults`, below.
+By default, matching is deliberately forgiving: text comparisons
+ignore case, and styles are left out of comparisons entirely. Change
+the defaults for a whole file with `set_assertion_defaults`, below.
 
 ## Comparing whole things
 
@@ -56,9 +56,9 @@ text, styles ignored. Change the defaults for a whole file with
 assert_equal(save_task(State([]), "nap"), Page(State(["nap"]), [...]))
 ```
 
-The general-purpose comparison: any two values, numbers, strings,
-lists, dataclasses, components, or whole pages, with every
-difference reported. This is what
+The general-purpose comparison. It accepts any two values (numbers,
+strings, lists, dataclasses, components, or whole pages) and reports
+every difference it finds. This is what
 [frozen page tests](../add/freeze-pages.md) use.
 
 ### assert_page
@@ -67,8 +67,8 @@ difference reported. This is what
 assert_page(index(State(3)), Page(State(3), ["Score: 3\n", Button("Play", "play")]))
 ```
 
-Like `assert_equal`, but says what you mean when both sides are
-pages: state and content both compared.
+Like `assert_equal`, but written for the case where both sides are
+pages: the state and the content are both compared.
 
 ### assert_state
 
@@ -77,7 +77,8 @@ assert_state(feed(State(5)), State(4))
 ```
 
 Compares only the state. Either side can be a page (its state is
-extracted) or a bare state value. The workhorse for testing rules.
+extracted) or a bare state value. This is the assertion you will use
+most often for testing your app's rules.
 
 ### assert_content
 
@@ -101,7 +102,7 @@ Check that content appears *somewhere* in the page. The needle can
 be a string (matched against page text, partial matches included)
 or a component (matched structurally, position ignored). `assert_in`
 is the same check with the arguments in `needle in page` order.
-Text needles do not reach inside `Table` rows; use a component
+Text needles do not match text inside `Table` rows; use a component
 needle (`assert_has(page, Table([...]))`) for tables.
 
 ### assert_not_has and assert_not_in
@@ -118,8 +119,8 @@ The same searches, passing when the needle is absent.
 assert_has_regex(results(state), r"scored \d+ out of \d+")
 ```
 
-Match page text against a regular expression, for when the wording
-varies but the shape should not.
+Match page text against a regular expression. This is useful when
+the exact wording varies but the overall pattern should not.
 
 ## Inspecting one component
 
@@ -148,8 +149,8 @@ styles by default; this one exists to test them.
 assert_children(BulletedList(["a", "b"]), ["a", "b"])
 ```
 
-Check what is nested inside a component: list items, a Div's
-contents.
+Check what is nested inside a component, such as the items of a
+list or the contents of a Div.
 
 ### assert_text
 
@@ -178,9 +179,10 @@ keyword arguments, so spell them out (`strict_styles=True`).
 - Assertions return booleans and print failures rather than raising,
   so one failing test never hides the ones after it.
 - Failing tests do not stop the site from starting; they report in
-  the terminal and the debug panel. Read the Tests tab.
-- Routes are host-callable functions: build a state, call the route,
-  assert on the result. No clicking is ever required to test logic.
+  the terminal and in the debug panel's Tests tab.
+- Routes are ordinary functions you can call directly: build a
+  state, call the route, and assert on the result. You never need to
+  click through the app to test its logic.
 - A `Page` is a dataclass with `state` and `content` fields, so when
   no assertion fits, inspect the pieces yourself:
   `assert_equal(index(State(5)).state.score, 5)`.

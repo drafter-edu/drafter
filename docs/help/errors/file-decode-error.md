@@ -22,15 +22,16 @@ type should be bytes instead?
 
 ## What it means
 
-A route parameter annotated `str` promises "this upload will be
-text", and the uploaded file was not: images, PDFs, spreadsheets,
-and zip files are bytes that no text decoding can make sense of.
-The route did not run.
+A route parameter annotated `str` tells Drafter to treat the upload
+as text, and the uploaded file was not text. Images, PDFs,
+spreadsheets, and zip files are binary data that cannot be decoded
+as text. The route did not run.
 
 ## Where to look
 
-The route receiving the upload, and the filename in the message,
-which usually gives the game away (`.jpg` is never text).
+Look at the route receiving the upload, and at the filename in the
+message, which usually reveals the problem (a `.jpg` file is never
+text).
 
 ## Check
 
@@ -39,9 +40,10 @@ which usually gives the game away (`.jpg` is never text).
   `FileUpload("notes", accept=".txt")`.
 - **Your app actually wants binary files**: then the annotation is
   the problem, not the file.
-- **A text file in a strange encoding**: rare, but a file saved in
-  a non-UTF-8 encoding decodes wrongly or not at all; `bytes` plus
-  deliberate decoding handles it.
+- **A text file in a strange encoding**: this is rare, but a file
+  saved in a non-UTF-8 encoding decodes wrongly or not at all.
+  Annotating the parameter as `bytes` and decoding it yourself
+  handles this case.
 
 ## Fix
 
@@ -53,11 +55,12 @@ def receive(state: State, upload: bytes) -> Page:
     ...
 ```
 
-`bytes` accepts anything; `Picture` decodes images; the
-[file types](../../reference/data-types/file-types.md) carry
-contents plus filename. Keep `str` only when the app genuinely
-wants text, and pair it with an `accept` filter so wrong files are
-hard to choose.
+A `bytes` parameter accepts any file, a `Picture` parameter decodes
+images, and the
+[file types](../../reference/data-types/file-types.md) carry the
+contents along with the filename. Keep `str` only when the app
+genuinely wants text, and pair it with an `accept` filter so wrong
+files are hard to choose.
 
 ## Confirm
 

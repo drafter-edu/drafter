@@ -10,14 +10,14 @@ outcome: Find an example by goal, concept, or component.
 
 # Examples
 
-Complete, runnable programs to read, run, and take apart. Every
-worked example follows the same shape: try it, read the code, see how
-it works, then make it yours.
+Each example here is a complete, runnable program that you can read,
+run, and take apart. Every worked example follows the same structure:
+try it, read the code, see how it works, then make it yours.
 
 If you want a full application to study or remix, the
-[project gallery](../your-project/gallery/index.md) has those; the
-examples here are small on purpose, each built to show a handful of
-ideas clearly.
+[project gallery](../your-project/gallery/index.md) has those. The
+examples on this page are deliberately small; each one is built to
+show a handful of ideas clearly.
 
 ## Worked examples
 
@@ -35,30 +35,34 @@ ideas clearly.
 ## Playground
 
 The [playground](playground/index.md) holds collections of tiny
-editable demos, organized by topic: run them, change them, break
-them, all in the page.
+editable demos, organized by topic. You can run, change, and even
+break each demo directly in the page.
 
-- [Basics](playground/basics.md): hello, counters, first pages.
-- [Forms](playground/forms.md): every input type in miniature.
-- [Lists and tables](playground/lists-and-tables.md): showing data.
-- [Styling](playground/styling.md): themes, helpers, and CSS side by
-  side.
-- [Images and media](playground/media.md): pictures, sound, video,
-  plots.
-- [Interactive](playground/interactive.md): events and partial
-  updates.
-- [Camera, location, and sound](playground/sensors.md): device
-  features.
+- [Basics](playground/basics.md) starts with hello pages, counters,
+  and first apps.
+- [Forms](playground/forms.md) demonstrates every input type in
+  miniature.
+- [Lists and tables](playground/lists-and-tables.md) shows ways to
+  display data.
+- [Styling](playground/styling.md) puts themes, styling helpers, and
+  CSS side by side.
+- [Images and media](playground/media.md) covers pictures, sound,
+  video, and plots.
+- [Interactive](playground/interactive.md) demonstrates events and
+  partial updates.
+- [Camera, location, and sound](playground/sensors.md) explores
+  device features.
 
 ## How to use an example
 
 1. **Try it** in the embedded app to see the behavior.
 2. **Predict** what one change would do, then edit the code and check.
-3. **Copy it** into your own editor when you want to keep going; every
-   listing is complete, imports and `start_server(...)` included.
+3. **Copy it** into your own editor when you want to keep going.
+   Every listing is a complete program, including the imports and the
+   `start_server(...)` call.
 
-Looking for something these do not cover? The
-[Add to Your App](../add/index.md) task pages each carry their own
-smallest example, and the
+If none of these examples covers what you need, each task page in
+[Add to Your App](../add/index.md) includes its own small example,
+and the
 [component reference](../reference/components/index.md) has focused
-snippets per component.
+snippets for each component.

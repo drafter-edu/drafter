@@ -36,7 +36,7 @@ TextBox(name, default_value, kind)
 | --------- | ---- | ------- | ------- |
 | `name` | `str` | required | The field's name, which must match a parameter of the route that receives it. Must be a valid Python parameter name. |
 | `default_value` | `str`, `int`, or `float` | `""` | What the box contains before the visitor types. Converted to text for display. |
-| `kind` | `str` | `"text"` | The HTML input type: `"text"`, `"password"`, `"email"`, `"number"`, and friends. |
+| `kind` | `str` | `"text"` | The HTML input type: `"text"`, `"password"`, `"email"`, `"number"`, or another valid type. |
 
 Like every component, `TextBox` also accepts
 [styling and attribute keywords](../../keyword-attributes.md); useful
@@ -44,7 +44,7 @@ ones here include `placeholder` and `maxlength`.
 
 ## Examples
 
-Text in, text back out:
+This first example collects text and shows it back:
 
 ```python drafter height=220
 from drafter import *
@@ -116,8 +116,9 @@ start_server(State(0))
 - If the visitor types something that cannot become the annotated
   type, the route does not run; a friendly
   [conversion error](../../../help/errors/type-conversion-int.md)
-  explains the problem. Typing `2.5` for an `int` parameter suggests
-  using `float`.
+  explains the problem. For example, `2.5` cannot become an `int`;
+  if decimal values should be accepted, annotate the parameter as
+  `float`.
 - A box whose `name` matches no parameter of the target route produces
   a warning; a route parameter no box fills produces a
   [missing parameter](../../../help/errors/missing-parameter.md) error.

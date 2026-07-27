@@ -17,10 +17,11 @@ Group: [Input](../index.md#input)
 ## Description
 
 A `RadioButtonGroup` shows every option with a round button beside
-it; the visitor picks exactly one, and the chosen text arrives at
-the route under the group's name. It is a
-[SelectBox](selectbox.md) with everything on display: better when
-options are few and comparing them matters.
+it. The visitor picks exactly one, and the chosen option's text
+arrives at the route as a parameter with the group's name. It
+offers the same kind of choice as a [SelectBox](selectbox.md), but
+with every option visible, which works better when the options are
+few and the visitor benefits from comparing them.
 
 ## Syntax
 
@@ -73,24 +74,26 @@ start_server(State("golden"))
 
 ## Notes
 
-- With no `default_value`, nothing starts selected, and a visitor
-  can submit without choosing; give a default when the parameter
-  has no default of its own.
+- With no `default_value`, no option starts selected, so a visitor
+  can submit the form without choosing. Give the group a default
+  when the route parameter has no default of its own.
 - Radio buttons are for choices that are genuinely exclusive; if
-  choosing several should be legal, that is
-  [RelatedCheckBox](relatedcheckbox.md).
-- More than five or six options starts crowding a page; that is the
-  signal to switch to a [SelectBox](selectbox.md).
+  choosing several options should be allowed, use
+  [RelatedCheckBox](relatedcheckbox.md) instead.
+- More than five or six options starts to crowd the page; at that
+  point, switch to a [SelectBox](selectbox.md).
 
 ## Accessibility
 
 The group renders each option labeled, so clicking an option's text
 selects it. Introduce the group with a visible question ("Current
-roast:") so its purpose is announced, not inferred.
+roast:") so its purpose is stated rather than left for the visitor
+to infer.
 
 ## Related components
 
-- [SelectBox](selectbox.md): the compact form of the same choice.
+- [SelectBox](selectbox.md): a compact dropdown for the same kind
+  of choice.
 - [CheckBox](checkbox.md): a single yes/no instead.
 
 ## External links

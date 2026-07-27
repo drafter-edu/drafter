@@ -76,8 +76,8 @@ start_server(State("Day 1: Domino the cat refused to be observed."))
 ## Notes
 
 - The visitor's line breaks arrive in the parameter as `"\n"`
-  characters in the string. Showing them again as separate lines needs
-  [PreformattedText](../text/pre.md) or splitting the string yourself;
+  characters in the string. To show them again as separate lines, use
+  [PreformattedText](../text/pre.md) or split the string yourself;
   a plain string on a page runs its lines together.
 - The parameter should be annotated `str`; a text area is for prose,
   not numbers.

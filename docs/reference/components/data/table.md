@@ -16,10 +16,11 @@ Group: [Data display](../index.md#data-display)
 
 ## Description
 
-A `Table` renders rows and columns. Its favorite food is a list of
-dataclasses: field names become the header row and each instance
-becomes a row, which makes it the one-line display for exactly the
-nested data most projects keep in state.
+A `Table` renders rows and columns. It works best with a list of
+dataclasses: the field names become the header row, and each
+instance becomes a row of the table. Since most projects keep
+exactly this kind of nested data in state, a `Table` can often
+display it with a single line of code.
 
 ## Syntax
 
@@ -72,30 +73,32 @@ start_server()
 ## Notes
 
 - Rows usually come straight from state
-  (`Table(state.expeditions)`), so the table re-renders itself as
-  the list grows; the [pet registry](../../../examples/pet-registry.md)
-  is the worked example.
-- Cell values render like page content: numbers need no `str()`
-  here, and components can live in cells.
+  (`Table(state.expeditions)`), so the table reflects the list each
+  time the page renders; the
+  [pet registry](../../../examples/pet-registry.md) shows this
+  pattern in a complete project.
+- Cell values render the same way page content does: numbers do not
+  need `str()`, and cells can contain components.
 - In tests, match tables structurally:
-  `assert_has(page, Table([Expedition("the couch", 1, True)]))`
-  finds nothing when given a text needle, because text matching
-  does not reach inside rows.
-- An empty list renders an empty table; decide whether "no rows
-  yet" deserves a message instead.
+  `assert_has(page, Table([Expedition("the couch", 1, True)]))`.
+  Searching for the cell text instead finds nothing, because text
+  matching does not reach inside rows.
+- An empty list renders as an empty table; consider whether your
+  page should show a message instead when there are no rows yet.
 
 ## Accessibility
 
-Keep the header row honest (every column named) since screen
-readers navigate cells by their column names; prefer one table per
-kind of data over one mega-table.
+Name every column in the header row, since screen readers navigate
+cells by their column names. Prefer one table per kind of data over
+a single large table that mixes several kinds.
 
 ## Related components
 
 - [BulletedList](../lists/bulletedlist.md) and
-  [NumberedList](../lists/numberedlist.md): one-column collections.
-- [DefinitionList](../lists/definitionlist.md): one record's
-  fields as term/value pairs.
+  [NumberedList](../lists/numberedlist.md): lists for displaying
+  one-column collections.
+- [DefinitionList](../lists/definitionlist.md): displays one
+  record's fields as term/value pairs.
 
 ## External links
 

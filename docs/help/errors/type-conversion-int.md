@@ -48,16 +48,16 @@ The hint at the end of the message distinguishes the causes:
 - **"use float instead of int"**: the text was a number, but not a
   whole one (`"2.5"`).
 
-Then decide the real question: should this field only ever hold whole
-numbers?
+Then consider the underlying question: should this field only ever
+hold whole numbers?
 
 ## Fix
 
 Match the annotation to what the field means:
 
 - A count or a whole quantity: keep `int`, and consider
-  `TextBox("age", 0, "number")`, whose `"number"` kind makes the
-  browser steer input toward digits.
+  `TextBox("age", 0, "number")`, whose `"number"` kind tells the
+  browser to guide the visitor toward entering digits.
 - A measurement or money: annotate `float` instead.
 - Free text that sometimes holds a number: annotate `str` and convert
   yourself when it matters, checking `isdigit()` first, as the

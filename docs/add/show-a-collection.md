@@ -13,15 +13,16 @@ outcome: Display lists and tables from state.
 
 ## Goal
 
-Your state holds a list of things, a to-do list, a team roster, an
-inventory, and you want the page to show all of them, however many there
-are.
+Your state holds a list of things, such as a to-do list, a team roster,
+or an inventory, and you want the page to show every item, however many
+there are.
 
 ## Before you start
 
-You can keep values in state. The pattern here: the collection is a
-**list in state**, and the page builds its display from that list fresh
-each time, so adding or removing items just works.
+You can keep values in state. One pattern runs through this page: the
+collection is a **list in state**, and the page rebuilds its display
+from that list on every visit, so adding or removing items requires no
+extra display code.
 
 ## The smallest version
 
@@ -210,14 +211,15 @@ assert_has(index(State([])), "empty")
 start_server(State([]))
 ```
 
-This one also shows the add-an-item pattern with real input: the
-`TextBox` value arrives as a parameter, and the route appends it.
+This example also shows how to add items from real input: the
+`TextBox` value arrives as a parameter, and the route appends it to the
+list.
 
 ## Common problems
 
-- **The page shows the list weirdly, all run together**: you put the raw
-  list into the content directly. Wrap it: `BulletedList(state.chores)`,
-  not `state.chores`.
+- **The list displays oddly, with items run together**: you put the raw
+  list into the content directly. Wrap it in a component:
+  `BulletedList(state.chores)`, not `state.chores`.
 - **An error when removing an item**: the list was empty. Guard with
   `if state.chores:` before `pop`, as the first recipe does.
 - **The table's columns look wrong**: `Table` reads column names from
@@ -228,13 +230,14 @@ This one also shows the add-an-item pattern with real input: the
 
 ## Understand it
 
-[State](../concepts/state.md): nested dataclasses and lists as your
-app's memory.
+[State](../concepts/state.md) covers nested dataclasses and lists as
+your app's memory.
 
 ## See another example
 
-[Pet registry](../examples/pet-registry.md): add and view records with a
-table, and the [to-do list](../examples/todo-list.md) for add and remove.
+The [pet registry](../examples/pet-registry.md) adds and views records
+with a table, and the [to-do list](../examples/todo-list.md) shows
+adding and removing items.
 
 ## Look it up
 

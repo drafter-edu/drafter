@@ -29,21 +29,21 @@ tries to use the broken state.
 ## What it means
 
 Every route receives the state and passes it onward through the
-`Page` it returns. One of your routes handed back something of a
+`Page` it returns. One of your routes returned something of a
 different type than your `State` class, most often `None`, and from
-then on every route is working with the wrong thing.
+then on every route receives that wrong value instead of your state.
 
 ## Where to look
 
-The route that ran right before the warning appeared; the debug
-panel's history shows which one that was. Look at the `Page(...)` it
-returned.
+Look at the route that ran right before the warning appeared; the
+debug panel's history shows which one that was. Examine the
+`Page(...)` it returned.
 
 ## Check
 
 - **A `Page` without state**: in a stateful app, `Page(["..."])`
-  quietly means state `None`. Every route in a stateful app must
-  return `Page(state, [...])` with the state first.
+  silently sets the state to `None`. Every route in a stateful app
+  must return `Page(state, [...])` with the state first.
 - **Returning the wrong value**: `Page(state.score, [...])` carries a
   number onward instead of the whole state.
 - **Rebuilding instead of mutating**: a route that does
@@ -52,8 +52,8 @@ returned.
 
 ## Fix
 
-Give the returned `Page` the state, mutated but the same object and
-type:
+Pass the state to the returned `Page`. You can change its fields,
+but it should remain the same object and type:
 
 ```python
 @route
@@ -73,13 +73,14 @@ your `State` with its fields after every click. An
 
 ## Prevent
 
-One habit covers it: every route takes `state` first and returns
-`Page(state, [...])` first. When a route has nothing to remember, it
-still passes the state through untouched.
+One habit prevents this error: every route takes `state` as its
+first parameter and returns `Page(state, [...])` with the state
+first. When a route has nothing to remember, it still passes the
+state through untouched.
 
-A related situation: after you edit the `State` class itself (adding
-or removing a field), old saved or replayed state no longer fits the
-new class. Restart the app so it rebuilds state from
+A related situation arises after you edit the `State` class itself
+(adding or removing a field): old saved or replayed state no longer
+fits the new class. Restart the app so it rebuilds state from
 `start_server(State(...))`, and update any tests that construct the
 old shape.
 

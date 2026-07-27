@@ -10,14 +10,14 @@ symbols:
   - route
   - Page
   - Button
-outcome: Build and run a working counter site in about 20 minutes.
+outcome: Build and run a working counter site in about 10 minutes.
 ---
 
 # Build your first app
 
 ## What you'll build
 
-A counter website: it shows a number, and three buttons change it. 
+You will build a counter website that shows a number and gives you three buttons to change it. 
 By the end you will have used every core piece of Drafter.
 
 ## What you need
@@ -32,7 +32,7 @@ it; your site opens in the browser.
 
 ## Step 0: Start the server
 
-Behold! the shortest possible Drafter program:
+Here is the shortest possible Drafter program:
 
 ```python drafter height=220
 from drafter import *
@@ -43,18 +43,19 @@ start_server()
 `#!python start_server()` launches your site. We have not written any pages yet, so
 Drafter shows a default page to prove the server is up.
 
-When you run this page in Thonny, you will also see the debug panel. 
-You can see what this looks like in the screenshot below.
-The Debug Panel has a lot of features, but we can ignore them for now.
+When you run this program in Thonny, you will also see the debug panel. 
+The screenshot below shows what this looks like.
+The debug panel has many features, but you can ignore them for now.
 
 ![Debug panel](./drafter_debug_hello_world.png)
 
 ## Step 1: Add your main page
 
-A page in Drafter is created by a function. Marking a function with `#!python @route` tells
-Drafter that the function should be reachable in the browser and returns a page - any function that returns a page is known as a route.
-The function named `#!python index` is your site's main route,
-and every Drafter site should have one.
+Every page in Drafter is created by a function. Marking a function with
+`#!python @route` tells Drafter that the function builds a page and
+should be reachable in the browser. A function registered this way is
+known as a route. The route named `#!python index` is your site's main
+route, and every Drafter site should have one.
 
 ```python drafter height=220
 from drafter import *
@@ -178,9 +179,9 @@ Button("+1", "increment")
 ```
 
 This button shows `#!python +1` and runs the `#!python increment` route when clicked. 
-Notice that we didn't call the function directly (which would involve parentheses), but instead gave its name as a string?
-Drafter will call the function for us when the button is clicked.
-This delayed execution is essential to how Drafter works: the page is built, sent to the browser, and then the user clicks a button. The function doesn't run until the user clicks!
+Notice that we did not call the function directly, which would require parentheses. Instead, we gave its name as a string, and
+Drafter calls the function for us when the button is clicked.
+This delayed execution is essential to how Drafter works: the page is built and sent to the browser, and the function does not run until the user clicks the button.
 
 Let's see how this looks in a complete program:
 
@@ -235,7 +236,7 @@ loop your app is running:
 
 ## Step 6: Prove it works with tests
 
-You can check your pages without clicking anything, because pages are
+You can check your pages without clicking anything, because routes are
 ordinary functions you can call. Drafter's `#!python assert_` functions compare
 what a page produced with what you expected, and report SUCCESS or
 FAILURE.
@@ -312,8 +313,8 @@ the docs use:
 
 - The functions marked with `#!python @route` are **routes**. Each route returns a page
   of your site. See [How Drafter works](how-drafter-works.md).
-- The dataclass your app remembers is its **state**. Buttons changed it;
-  the page displayed it.
+- The dataclass that holds what your app remembers is its **state**.
+  The buttons changed it, and the page displayed it.
 - The `assert_` lines are **tests**. They call routes like ordinary
   functions and check the results.
 

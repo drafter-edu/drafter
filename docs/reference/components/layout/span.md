@@ -16,8 +16,9 @@ Group: [Layout](../index.md#layout)
 
 ## Description
 
-A `Span` groups content *inline*: it flows along with surrounding
-text instead of starting a new line the way a [Div](div.md) does.
+A `Span` groups content *inline*, meaning it flows along with the
+surrounding text instead of starting a new line the way a
+[Div](div.md) does.
 Use it to style or tag a few words inside a sentence, or to give a
 [Fragment](../../fragment.md) a small inline target.
 
@@ -63,18 +64,20 @@ start_server()
 
 ## Notes
 
-- Everything here stays on one line: spans join the sentence, and
-  the fragment swaps three words without disturbing it.
+- Everything in the example stays on one line: the spans become part
+  of the sentence, and the fragment replaces three words without
+  disturbing the rest of it.
 - The [styling helpers](../../styling-functions.md) wrap strings in
-  inline text automatically, so `bold("word")` already does the
-  common case; reach for `Span` when grouping several things or
-  attaching an `id`/`classes`.
+  inline text automatically, so `bold("word")` already covers the
+  most common case. Use `Span` when you need to group several pieces
+  of content or attach an `id`/`classes`.
 
 ## Related components
 
-- [Div (Box)](div.md): the block-level sibling.
+- [Div (Box)](div.md): the block-level equivalent.
 - [Inline text semantics](../text/inline-styles.md): Strong,
-  Emphasis, and friends, when the grouping has meaning.
+  Emphasis, and related components, for when the grouping carries
+  meaning.
 
 ## External links
 

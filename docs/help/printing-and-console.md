@@ -13,12 +13,12 @@ outcome: Use print() to see what is happening.
 
 ## Goal
 
-You want `print()` to tell you what your app is doing, and a place
-to poke at your running program by hand.
+You want to use `print()` to see what your app is doing, and you
+want a place to experiment with your running program by hand.
 
 ## Before you start
 
-Nothing beyond a running app. `print()` in a Drafter app does not
+You need nothing beyond a running app. `print()` in a Drafter app does not
 disappear; it goes to the **Console**, a small terminal-style panel
 that appears in the page footer the first time your program prints
 (while debug mode is on, which is the default during development).
@@ -61,15 +61,17 @@ and messages Python writes to `stderr` (like warnings) appear in
 red. The 🖨️ Console button in the footer opens and closes the
 panel, with Clear and Hide buttons to tidy up.
 
-Printing is the quickest answer to "did this route even run?" and
-"what value actually arrived?": print the parameters at the top of
-a suspicious route and click.
+Printing is the quickest way to answer two common questions: "did
+this route even run?" and "what value actually arrived?" Print the
+parameters at the top of the route you suspect, then click the
+button that should trigger it.
 
 ## The console is a real Python prompt
 
-The console is also a REPL: type Python next to the `>>>` prompt
-and press Enter. It shares variables with your program, so your
-`State` class and route functions are right there:
+The console is also a REPL, a prompt where you can type Python code
+and run it immediately: type next to the `>>>` prompt and press
+Enter. The REPL shares variables with your program, so your `State`
+class and route functions are already available:
 
 ```text
 >>> state = State(clicks=10)
@@ -95,25 +97,27 @@ variable):
 | `toast` | Each printed line pops up briefly as a corner notification. |
 | `devtools` | No on-page console; output goes only to the browser developer tools. |
 
-For a production site that still shows printed output:
+To run a production site that still shows printed output, use
 `drafter my_site.py --production --console-mode hover`.
 
 ## Common problems
 
-- **Nothing prints**: the route did not run (is the button wired to
-  it?), or you are looking at the browser console while the output
-  went to the footer panel, or the other way around.
-- **The console is gone in production**: that is the `auto` mode
-  working as designed; `hide_debug_information()` hides the footer.
-  Output still reaches the browser's developer tools, or pick a
-  louder mode from the table.
+- **Nothing prints**: either the route did not run (check that the
+  button is wired to it), or you are looking in the wrong place:
+  perhaps at the browser console while the output went to the
+  footer panel, or the other way around.
+- **The console is gone in production**: that is how the `auto`
+  mode is designed to behave; `hide_debug_information()` hides the
+  footer. Output still reaches the browser's developer tools, or
+  you can choose a more visible mode from the table above.
 - **Prints flood the console**: a `print` inside a route that runs
-  on every keystroke (`on_input`) or every render earns its volume.
-  Print inside the branch you care about, and remove debugging
-  prints once they have answered their question.
+  on every keystroke (`on_input`) or on every render will produce a
+  line every time. Move the `print` inside the branch you care
+  about, and remove debugging prints once they have told you what
+  you needed to know.
 
 ## Next steps
 
 The [debug panel](debug-panel.md) shows state and history without
-any printing; between it and the console, most "what is happening?"
-questions have a tool.
+any printing. Between the panel and the console, you have a tool
+for most "what is happening?" questions.

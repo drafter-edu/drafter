@@ -16,9 +16,10 @@ Group: [Text](../index.md#text)
 
 ## Description
 
-A `Header` renders a heading: big for page titles, smaller for section
-titles. The level, 1 through 6, controls both the size and the
-document structure that screen readers and search use to navigate.
+A `Header` renders a heading, such as a page title or a section
+title. The heading level, from 1 through 6, controls both the size of
+the text and the document structure that screen readers and search
+engines use to navigate the page.
 
 ## Syntax
 
@@ -32,7 +33,7 @@ Header(body, level)
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
 | `body` | content | required | The heading text (or other content). |
-| `level` | `int` | `1` | The heading level: 1 is the biggest, 6 the smallest. Anything outside 1-6 raises a friendly error. |
+| `level` | `int` | `1` | The heading level. Level 1 is the largest and level 6 is the smallest. A level outside 1-6 raises a friendly error. |
 
 Like every component, `Header` also accepts
 [styling and attribute keywords](../../keyword-attributes.md).
@@ -59,21 +60,24 @@ start_server()
 
 ## Notes
 
-- Headers already sit on their own line; no `"\n"` needed around them.
-- Use levels in order without skipping: one level-1 header for the
-  page, level 2 for its sections, level 3 inside those. That
-  hierarchy, not the visual size, is what assistive tech navigates by.
+- A `Header` already appears on its own line, so you do not need to
+  add `"\n"` around it.
+- Use heading levels in order, without skipping any. A page should
+  have one level-1 header for its title, level-2 headers for its
+  sections, and level-3 headers inside those sections. Assistive
+  technology navigates by this hierarchy, not by the visual size of
+  the text.
 - A level outside 1-6 raises
   [Header level must be between 1 and 6](../../../help/errors/header-level-invalid.md).
-- To make text merely bigger without meaning "section title", use
+- To make text larger without marking it as a section title, use
   [large_font or change_text_size](../../styling-functions.md)
   instead of a Header.
 
 ## Related components
 
-- [Text](text.md) and [Paragraph](paragraph.md): body text.
-- [HorizontalRule](../layout/horizontalrule.md): another way to mark
-  a boundary.
+- [Text](text.md) and [Paragraph](paragraph.md) display body text.
+- [HorizontalRule](../layout/horizontalrule.md) is another way to
+  mark a boundary between parts of a page.
 
 ## External links
 

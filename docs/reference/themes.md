@@ -11,22 +11,22 @@ outcome: Preview and choose among all 20 themes.
 
 # Theme catalog
 
-Every theme, live. Each preview below is the same tiny app with one
-line changed:
+This page shows every theme as a live preview. Each preview below is
+the same tiny app with one line changed:
 
 ```python
 set_website_style("terminal")
 ```
 
-Pick by browsing, then write the name into your own
-`set_website_style(...)` call; the how-to is
+Browse until you find a look you like, then write its name into your
+own `set_website_style(...)` call; the how-to is
 [Use a theme](../add/change-appearance/themes.md). Each preview is
-editable, so you can add your own content to see how it dresses up.
-The debug panel's theme switcher is the other quick way to compare
-themes on your real app.
+editable, so you can add your own content to see how the theme
+styles it. The debug panel's theme switcher is another quick way to
+compare themes on your own app.
 
-Credit where due: most themes are ports of open-source classless
-stylesheets, linked from each entry.
+Most themes are ports of open-source classless stylesheets; each
+entry links to the original project.
 
 ## default
 

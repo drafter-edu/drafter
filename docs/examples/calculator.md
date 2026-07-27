@@ -13,11 +13,13 @@ outcome: See forms and state working together in one small app.
 
 ## What it does
 
-An adding machine: two boxes, one button, one answer. Type two
-numbers, press Add, and the sum appears; type something that is not a
-number and the machine says so instead of crashing. Small as it is,
-it exercises the whole loop of a Drafter app: form values travel to a
-route, the route updates state, and the page shows the result.
+This example is an adding machine with two text boxes, an Add
+button, and a line that shows the answer. When you type two numbers
+and press Add, the sum appears. When you type something that is not
+a number, the page reports the problem instead of crashing. Even
+though the app is small, it exercises the whole loop of a Drafter
+app: form values travel to a route, the route updates the state, and
+the page shows the result.
 
 ## Try it
 
@@ -70,7 +72,7 @@ start_server(State("", "", ""))
 
 ## The code
 
-Three pieces do all the work:
+The work is divided among three pieces:
 
 - **The `State`** holds both typed values and the result, all as
   strings.
@@ -82,12 +84,12 @@ Three pieces do all the work:
 
 ## How it works
 
-The deliberate design decision is that everything in the state is a
+The key design decision is that everything in the state is a
 `str`, even though this is a calculator. The visitor might type
-anything, and the app wants to remember exactly what they typed, wrong
-or not, so the boxes stay filled after every press. The `add` route
-checks `isdigit()` before converting, so the conversion can never
-fail; bad input becomes a message rather than an error.
+anything, and the app stores exactly what they typed, valid or not,
+so the boxes stay filled after every press. The `add` route checks
+`isdigit()` before converting, so the conversion can never fail.
+Bad input produces a message on the page rather than an error.
 
 Compare that with annotating the parameters as `int`: Drafter would
 convert for you, but a visitor typing "cat" would hit the friendly
@@ -95,9 +97,10 @@ convert for you, but a visitor typing "cat" would hit the friendly
 your calmer in-page message. Both designs are legitimate; this one
 treats bad input as a normal case rather than a mistake.
 
-The last line of `add`, `return index(state)`, is a habit worth
-stealing: after changing state, reuse the route that already knows how
-to display it.
+The last line of `add`, `return index(state)`, demonstrates a
+pattern worth adopting: after a route changes the state, it can call
+the route that already builds the right page for that state, instead
+of duplicating the display code.
 
 ## Make it yours
 
@@ -122,12 +125,12 @@ starts and appear in the debug panel's Tests tab:
 
 - `assert_state(add(...), State("3", "4", "7"))` checks the logic:
   calling the route with typed values produces the right state.
-- The second checks the failure path: "cat" lands as
-  `"not a number!"`.
-- `assert_has(index(...), Button("Add", "add"))` checks the page
-  offers the button.
+- The second assertion checks the failure path: submitting "cat"
+  produces the result `"not a number!"`.
+- `assert_has(index(...), Button("Add", "add"))` checks that the
+  page includes the button.
 
-Testing routes is just calling functions; see
+Testing a route means calling it like any other function; see
 [Test a feature](../add/test-a-feature.md).
 
 ## Likely errors
@@ -146,10 +149,10 @@ Testing routes is just calling functions; see
 
 ## Related
 
-- [Ask the user for information](../add/ask-for-information.md): the
-  how-to behind the form.
-- [Remember a score or choice](../add/remember-things.md): the
-  how-to behind the state.
-- [Big form](forms.md): every input type at once.
-- [Forms and input](../concepts/forms-and-input.md): why the box
-  names become parameters.
+- [Ask the user for information](../add/ask-for-information.md) is
+  the how-to guide behind the form.
+- [Remember a score or choice](../add/remember-things.md) is the
+  how-to guide behind the state.
+- [Big form](forms.md) shows every core input type in one form.
+- [Forms and input](../concepts/forms-and-input.md) explains why the
+  box names become parameters.

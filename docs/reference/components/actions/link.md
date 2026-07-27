@@ -16,11 +16,12 @@ Group: [Actions](../index.md#actions)
 
 ## Description
 
-A `Link` is ordinary clickable text that goes somewhere: another route
-in your app, or an external website. Use a `Link` for going places
-("About", "Read the rules"); use a [Button](button.md) for doing
-things. Like a button, clicking a link to one of your own routes
-submits the form fields on the page.
+A `Link` is ordinary clickable text that navigates to another route
+in your app or to an external website. Use a `Link` when the visitor
+is going to another page ("About", "Read the rules"); use a
+[Button](button.md) when the visitor is performing an action. Like a
+button, clicking a link to one of your own routes submits the form
+fields on the page.
 
 ## Syntax
 
@@ -106,8 +107,10 @@ links out of context.
 
 ## Related components
 
-- [Button](button.md): the doing-things counterpart.
-- [Argument](argument.md): extra values a link can carry.
+- [Button](button.md): the counterpart component for performing
+  actions.
+- [Argument](argument.md): extra values a link can deliver to its
+  route.
 
 ## External links
 

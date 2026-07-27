@@ -18,9 +18,9 @@ Group: [Actions](../index.md#actions)
 
 A `Button` is a clickable control that runs a route. When clicked, it
 gathers the values of any form fields on the page, sends them along,
-and shows whatever page the target route returns. Use a `Button` for
-doing things ("Feed", "Submit", "Play"); use a [Link](link.md) for
-going places.
+and shows whatever page the target route returns. Use a `Button` when
+the visitor is performing an action ("Feed", "Submit", "Play"); use a
+[Link](link.md) when the visitor is navigating to another page.
 
 ## Syntax
 
@@ -46,7 +46,8 @@ Like every component, `Button` also accepts
 
 ## Examples
 
-The smallest button changes state and shows the result:
+In its most basic form, a button runs a route that changes the state
+and shows the result:
 
 ```python drafter height=200
 from drafter import *
@@ -108,8 +109,8 @@ def greet(state: State, visitor: str) -> Page:
 start_server(State("Hello, whoever you are!"))
 ```
 
-With `arguments`, several buttons can share one route and tell it
-which was clicked:
+With `arguments`, several buttons can share one route while
+identifying which button was clicked:
 
 ```python drafter height=220
 from drafter import *
@@ -160,8 +161,10 @@ keyboard-operable by default; do not replace them with styled text.
 
 ## Related components
 
-- [Link](link.md): the going-places counterpart.
-- [Argument](argument.md): the values a button can carry.
+- [Link](link.md): the counterpart component for navigating to
+  another page.
+- [Argument](argument.md): extra values a button can deliver to its
+  route.
 - Inputs like [TextBox](../input/textbox.md) supply the form values a
   button submits.
 

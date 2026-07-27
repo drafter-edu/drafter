@@ -11,11 +11,12 @@ outcome: Tinker with every input type.
 
 # Forms
 
-Every input, one at a time, each in a tiny app. The pattern is
-always the same: the input's `name` matches a parameter of the route
-the button targets. Edit freely; reloading resets everything.
+This page demonstrates each input component in its own tiny app.
+The pattern is always the same: the input's `name` matches a
+parameter of the route the button targets. Edit freely, and reload
+the page to reset everything.
 
-The full story for all of these:
+The full story for all of these demos is in
 [Ask the user for information](../../add/ask-for-information.md) and
 [Forms and input](../../concepts/forms-and-input.md).
 
@@ -88,7 +89,8 @@ start_server(State(10))
 
 ## CheckBox: a yes or no
 
-Unchecked arrives as `False`, not as nothing.
+When the box is unchecked, the parameter arrives as `False` rather
+than being left out.
 
 ```python drafter height=220
 from drafter import *
@@ -121,7 +123,8 @@ start_server(State(False))
 
 ## SelectBox: one from a dropdown
 
-Add a fourth flavor. Then make the default something else.
+Try adding a fourth flavor, then changing the default to something
+else.
 
 ```python drafter height=240
 from drafter import *
@@ -155,7 +158,8 @@ start_server(State("vanilla"))
 
 ## RadioButtonGroup: one, with all options visible
 
-The same choice as a `SelectBox`, but every option shows at once.
+This offers the same kind of choice as a `SelectBox`, but every
+option is visible at once.
 
 ```python drafter height=260
 from drafter import *
@@ -189,7 +193,8 @@ start_server(State("small"))
 
 ## RelatedCheckBox: choose several, receive a list
 
-Checkboxes sharing a name arrive together as one list parameter.
+Checkboxes that share a name arrive together as a single list
+parameter.
 
 ```python drafter height=280
 from drafter import *
@@ -260,7 +265,8 @@ start_server(State("buy more snacks"))
 ## DateInput and TimeInput: calendars and clocks
 
 Date and time fields arrive as text in ISO form (`2026-07-27`,
-`13:30`); annotate `str` and slice, or see the
+`13:30`). You can annotate the parameters as `str` and slice out the
+pieces you need, or see the
 [DateInput reference](../../reference/components/input/dateinput.md)
 for richer types.
 
@@ -298,6 +304,7 @@ start_server(State("not planned yet"))
 
 ## Where next
 
-- [Big form](../forms.md): several inputs cooperating on one page.
-- [Lists and tables](lists-and-tables.md): displaying what forms
-  collect.
+- [Big form](../forms.md) shows several inputs working together on
+  one page.
+- [Lists and tables](lists-and-tables.md) shows how to display the
+  data that forms collect.

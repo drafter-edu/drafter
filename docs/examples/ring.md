@@ -13,10 +13,10 @@ outcome: See stateless multi-page navigation.
 
 ## What it does
 
-Three pages joined in a ring: the first links to the second, the
-second to the third, and the third back to the first. There is no
-state at all; this is navigation in its purest form, and the smallest
-app with more than one page.
+This example joins three pages in a ring: the first links to the
+second, the second links to the third, and the third links back to
+the first. There is no state at all, so the example shows nothing
+but navigation. It is the smallest app that has more than one page.
 
 ## Try it
 
@@ -59,11 +59,12 @@ start_server()
 
 ## The code
 
-Each page is one route: a function with `@route` returning a `Page`.
-With nothing to remember, the routes take no parameters and each
-`Page` gets only a content list. Every page holds exactly one `Link`,
-whose target names the next route as a string: `"waterfall"`,
-`"summit"`, `"index"`.
+Each page comes from its own route: a function marked with `@route`
+that returns a `Page`. Because there is nothing to remember, the
+routes take no parameters and each `Page` receives only a content
+list. Every page contains exactly one `Link`, and each link's target
+names the next route as a string: `"waterfall"`, `"summit"`,
+`"index"`.
 
 ## How it works
 
@@ -78,8 +79,8 @@ becoming a dead link a visitor finds later.
 
 ## Make it yours
 
-1. **Modify**: rewrite the trail: three stops of your own, with your
-   own descriptions.
+1. **Modify**: rewrite the trail with three stops of your own,
+   described in your own words.
 2. **Modify**: swap the `Link`s for `Button`s. When does each feel
    right?
 3. **Complete**: add a fourth stop between the waterfall and the
@@ -92,9 +93,10 @@ becoming a dead link a visitor finds later.
 
 ## Tests
 
-One `assert_has` per page checks that each offers the link onward,
-which is exactly what makes the ring a ring. If a change breaks the
-chain, the failing test names the page that lost its way out.
+There is one `assert_has` per page, checking that each page offers
+the link to the next stop; those links are what make the ring a
+ring. If a change breaks the chain, the failing test identifies
+which page is missing its link.
 
 ## Likely errors
 
@@ -104,15 +106,15 @@ chain, the failing test names the page that lost its way out.
   error.
 - **Forgetting `@route`** on a function makes its name invalid as a
   target; the same error points at every link that mentions it.
-- **Two routes with the same name**: Python silently keeps only the
-  second function, so one page of your ring simply vanishes.
+- **Two routes with the same name**: Python keeps only the second
+  function, so one page of your ring disappears without any warning.
 
 ## Related
 
-- [Add and connect pages](../add/pages.md): the how-to, including
-  shared headers and always-a-way-back.
-- [Routes and pages](../concepts/routes-and-pages.md): what a route
-  is.
+- [Add and connect pages](../add/pages.md) is the how-to guide,
+  covering shared headers and making sure every page has a way back.
+- [Routes and pages](../concepts/routes-and-pages.md) explains what
+  a route is.
 - [Link](../reference/components/actions/link.md) and
-  [Button](../reference/components/actions/button.md): the two ways
-  to connect pages.
+  [Button](../reference/components/actions/button.md) are the two
+  components that connect pages.

@@ -13,9 +13,10 @@ outcome: Build a first interactive app where buttons change displayed data.
 
 ## What you'll build
 
-A virtual pet. It has hunger and energy, a mood that depends on both, and
-three buttons: feed it, play with it, and let it rest. Every click changes
-the pet's numbers, and the numbers change its mood.
+You will build a virtual pet. The pet has a hunger level, an energy
+level, and a mood that depends on both. Three buttons let you feed the
+pet, play with it, and let it rest. Every click changes the pet's
+numbers, and those numbers determine its mood.
 
 ## Try the finished app
 
@@ -92,8 +93,8 @@ start_server(State(5, 5))
 
 ## Step 1: The pet's data
 
-Start with what the pet remembers: hunger and energy. No buttons yet, only
-a page that shows the values.
+Start with what the pet remembers: its hunger and its energy. There are
+no buttons yet, only a page that shows the two values.
 
 ```python drafter height=220
 from drafter import *
@@ -117,14 +118,10 @@ def index(state: State) -> Page:
 start_server(State(5, 5))
 ```
 
-This is the counter pattern from your first app, with two numbers instead
-of one. `State(5, 5)` names the fields, which keeps them
-straight when there is more than one.
-
 ## Step 2: Feed the pet
 
 Feeding reduces hunger by 2, but hunger should never go below zero. A
-negative hunger does not mean anything.
+negative hunger value would not mean anything.
 
 ```python drafter height=260
 from drafter import *
@@ -162,9 +159,9 @@ until hunger reaches 0? Click and check.
 
 ## Step 3: Play and rest
 
-Two more actions with a twist: playing costs energy and makes the pet
-hungrier, resting restores energy. Actions that push in different
-directions are what make the pet feel alive.
+Next come two more actions. Playing costs energy and makes the pet
+hungrier, while resting restores energy. Actions that push the numbers
+in different directions are what make the pet feel alive.
 
 ```python drafter height=300
 from drafter import *
@@ -216,16 +213,17 @@ def rest(state: State) -> Page:
 start_server(State(5, 5))
 ```
 
-Each button's function does one job: change the numbers its action is
-about, keep them in range, and hand back to `index` to redraw the page.
+Each button's function has one job. It changes the numbers that its
+action affects, keeps them in range, and then calls `index` to redraw
+the page.
 
 ## Step 4: Give the pet a mood
 
 The mood is not stored anywhere. It is **computed** from hunger and energy
-each time the page is drawn. That deserves its own function, because
-`index` should not be crowded with mood rules. Add tests while you are at
-it: the mood rules are exactly the kind of logic that quietly breaks
-later.
+each time the page is drawn. Computing the mood deserves its own
+function, because `index` should not be crowded with mood rules. Add
+tests while you are at it; the mood rules are exactly the kind of logic
+that quietly breaks later.
 
 ```python drafter height=340
 from drafter import *
@@ -291,11 +289,10 @@ assert_has(index(State(5, 5)), "Mood: happy")
 start_server(State(5, 5))
 ```
 
-Notice `pet_mood` has no `@route`. It is a plain helper function: routes
-return pages, helpers return everything else. Read the third test
-carefully; it
-checks the "never below zero" rule from Step 2, feeding a pet whose hunger
-is already 1.
+Notice that `pet_mood` has no `@route`. It is a plain helper function:
+routes return pages, while helper functions return everything else. Read
+the third test carefully; it checks the "never below zero" rule from
+Step 2 by feeding a pet whose hunger is already 1.
 
 ## Step 5: Break it, watch a test catch it
 
@@ -317,7 +314,8 @@ the bug; the tests checked the rules the moment the program started.
   is missing or checks the wrong direction. Compare with Step 3.
 - **The mood never changes**: make sure the page shows
   `pet_mood(state)`, freshly computed, and that you did not store a mood
-  value in `State`. Stored moods go stale; computed moods cannot.
+  value in `State`. A stored mood can go stale, but a computed mood
+  cannot.
 - **`State(...)` complains about arguments**: the order of the values in
   `State(5, 5)` must match the dataclass fields exactly.
 
@@ -326,10 +324,11 @@ the bug; the tests checked the rules the moment the program started.
 You have now used every idea from Start on a real app, plus two new ones:
 
 - **State** is your app's memory: the pet's hunger and energy. Buttons
-  changed it, the page displayed it, and reloading resets it. The full
+  change it, the page displays it, and reloading resets it. The full
   story is in [State](../concepts/state.md).
-- **Routes** are your pages and actions: `index`, `feed`, `play`, `rest`.
-  How they connect is [Routes and pages](../concepts/routes-and-pages.md).
+- **Routes** are the functions that return your pages and respond to
+  your buttons: `index`, `feed`, `play`, and `rest`. How they connect is
+  explained in [Routes and pages](../concepts/routes-and-pages.md).
 - **Helper functions** like `pet_mood` keep routes short. Rules that
   compute something from state belong in helpers, where tests can reach
   them easily.
@@ -357,8 +356,8 @@ enough.
 
     ---
 
-    Multiple pages, text boxes, and values that travel from one page to
-    another.
+    The next project adds more pages, text boxes, and values that travel
+    from one page to another.
 
     [Build a story maker](story-maker.md)
 

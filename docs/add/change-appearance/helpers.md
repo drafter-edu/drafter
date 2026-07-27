@@ -24,7 +24,8 @@ styled.
 
 ## The smallest version
 
-Wrap content in a styling function. Wrap the wrapper to combine effects:
+Wrap a piece of content in a styling function to style it, and wrap the
+result in another styling function to combine effects:
 
 ```python drafter height=260
 from drafter import *
@@ -73,8 +74,9 @@ the [font list](../../reference/fonts.md).
 
 ## Recipe: style components, not just text
 
-Helpers accept any component. A button can be big and green; a whole
-group can get a border by wrapping a `Div`:
+Helpers accept any component, not only text. A button can be large and
+green, and a whole group of content can get a border when you wrap it
+in a `Div`:
 
 ```python drafter height=300
 from drafter import *
@@ -150,10 +152,10 @@ def press(state: State) -> Page:
 start_server(State(0))
 ```
 
-Helpers and keywords do the same job; helpers read better for one or two
-changes, keywords keep everything in one place when a component needs
-several. These are the moments where keyword arguments are the right
-tool, because every `style_` setting is optional.
+Helpers and keywords do the same job. Helpers read better when you make
+one or two changes, while keywords keep everything in one place when a
+component needs several. Keyword arguments suit this situation well
+because every `style_` setting is optional.
 
 ## Common problems
 
@@ -163,16 +165,18 @@ tool, because every `style_` setting is optional.
 - **A color or size seems ignored**: the value may be invalid CSS. Use a
   [named color](../../reference/colors.md) and include units on sizes
   (`"20px"`, not `20`).
-- **The theme overrides your style**: themes are strong. Your inline
-  styles usually win, but if one does not, try the same change as a
-  `style_` keyword, or a quieter theme.
+- **The theme overrides your style**: themes apply many rules of their
+  own. Your inline styles usually win, but when one does not, try
+  making the same change with a `style_` keyword, or pick a quieter
+  theme.
 - **A keyword seems misspelled**: remember the underscore rule.
   `style_background_color`, not `style_backgroundcolor`.
 
 ## Understand it
 
-Styling changes presentation only; state and routes are untouched. The
-three tiers are on [Change the appearance](index.md).
+Styling changes presentation only, and leaves state and routes
+untouched. The three tiers are described on
+[Change the appearance](index.md).
 
 ## See another example
 
@@ -181,13 +185,12 @@ plus targeted helpers to a finished project.
 
 ## Look it up
 
-[Styling functions](../../reference/styling-functions.md): every helper
-with its exact signature and CSS effect.
+[Styling functions](../../reference/styling-functions.md) lists every
+helper with its exact signature and CSS effect.
 
 ## Fix a problem
 
-Styles are invisible to most tests by design (cosmetic changes should
-not break them); see
-[Test a feature](../test-a-feature.md) for `assert_style` when you *do*
-want to check one. For display oddities, start at
-[Troubleshooting](../../help/troubleshooting.md).
+Styles are invisible to most tests by design, so cosmetic changes do
+not break them. See [Test a feature](../test-a-feature.md) for
+`assert_style` when you *do* want to check one. For display oddities,
+start at [Troubleshooting](../../help/troubleshooting.md).

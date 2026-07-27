@@ -35,12 +35,13 @@ print("Welcome to my site!")  # never printed
 
 `start_server(...)` does not finish and move on; it hands your whole
 program over to Drafter, which runs your routes from then on. The
-lines after it are waiting for a moment that never comes. This is by
-design, not a bug.
+lines after it would only run if the call returned, and it never
+does. This is by design, not a bug.
 
 ## Where to look
 
-The bottom of your file: anything after `start_server(...)`.
+Look at the bottom of your file, at anything after the
+`start_server(...)` call.
 
 ## Check
 
@@ -55,8 +56,8 @@ What was the code after the call trying to do?
 
 ## Fix
 
-Move the code where it belongs. Configuration and tests up, behavior
-into routes:
+Move the code where it belongs: configuration and tests go before
+the call, and behavior goes inside routes.
 
 ```python
 from drafter import *

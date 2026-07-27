@@ -18,13 +18,14 @@ hand.
 
 ## Before you start
 
-Nothing to know beyond running an app. A theme is a complete, ready-made
-look, colors, fonts, spacing, button styles, applied to every page at
-once.
+You only need to know how to run an app. A theme is a complete,
+ready-made look (colors, fonts, spacing, and button styles) applied to
+every page at once.
 
 ## The smallest version
 
-One line, placed after the imports and before `start_server(...)`:
+Applying a theme takes one line, placed after the imports and before
+`start_server(...)`:
 
 ```python drafter height=300
 from drafter import *
@@ -68,7 +69,8 @@ again.
 
 ## The theme names
 
-Every valid name, with the stylesheet each is based on:
+This table lists every valid name, along with the stylesheet each theme
+is based on:
 
 | Name | Based on |
 | ---- | -------- |
@@ -100,7 +102,8 @@ one.
 
 While your app is running with the debug panel open, the panel's theme
 switcher lets you preview themes live without editing code. When you
-find one you like, write it into `set_website_style(...)` so it sticks.
+find one you like, write its name into `set_website_style(...)` to make
+the choice permanent.
 
 ## Common problems
 
@@ -108,17 +111,17 @@ find one you like, write it into `set_website_style(...)` so it sticks.
   `start_server(...)`. Top of the file, right after imports.
 - **A misspelled name**: the error lists every valid theme and suggests
   the closest match to what you typed.
-- **You want no styling at all**: that is a theme too:
+- **You want no styling at all**: there is a theme for that as well,
   `set_website_style("none")`.
 - **The theme clashes with your own styling**: strong themes style
   everything. Either accept the theme's choices, pick a quieter theme
-  (`simple`, `sakura`, `water`), or go to `none` plus
+  (`simple`, `sakura`, `water`), or switch to `none` and add
   [custom CSS](custom-css.md).
 
 ## Understand it
 
-Themes are stylesheets applied over your content; they never change your
-state or routes. The tier system is on
+Themes are stylesheets applied over your content, and they never change
+your state or routes. The tier system is described on
 [Change the appearance](index.md).
 
 ## See another example
@@ -134,6 +137,6 @@ real project.
 
 ## Fix a problem
 
-A bad theme name produces a friendly error with suggestions; for
-anything odder, start at
+A bad theme name produces a friendly error with suggestions. For
+anything stranger, start at
 [Troubleshooting](../../help/troubleshooting.md).

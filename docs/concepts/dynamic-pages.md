@@ -24,27 +24,27 @@ and branch, loop over a list to decide how much content to make, or
 receive an argument telling it which of many similar pages to build
 this time.
 
-That last trick deserves attention, because it changes how you design
-apps. Without it, a quiz with ten questions wants ten routes. With
-it, one `ask` route serves any question, because the question is
-*data* (an item in a list) rather than *code* (a hand-written route).
-Adding an eleventh question means adding a list item, not writing a
-function.
+That last technique deserves attention, because it changes how you
+design apps. Without arguments, a quiz with ten questions would need
+ten routes. With them, one `ask` route can serve any question,
+because each question is *data* (an item in a list) rather than
+*code* (a hand-written route). To add an eleventh question, you add
+an item to the list instead of writing a new function.
 
-Three tools make routes dynamic, and they compose:
+Three tools make routes dynamic, and they can be combined:
 
-- **Conditionals**: `if state.score > 5:` show one thing, otherwise
-  another.
-- **Loops**: build the content list piece by piece with `append`, one
-  piece per item of data.
+- **Conditionals**: write `if state.score > 5:` to show one thing
+  when the condition holds and something else otherwise.
+- **Loops**: build the content list piece by piece with `append`,
+  adding one piece per item of data.
 - **[Argument](../reference/components/actions/argument.md)**: a
   button that carries a value, so several buttons can share one route
-  and tell it apart which was clicked.
+  and the route can still tell which button was clicked.
 
 ## See it
 
-One route, three buttons, three different pages, chosen by an
-argument and the state together:
+In the example below, three buttons share one route, and the page
+you see next is chosen by an argument and the state together:
 
 ```python drafter height=320
 from drafter import *
@@ -96,10 +96,10 @@ start_server(State([
 ]))
 ```
 
-Cause and effect: the loop makes one line per pet, the `if` decides
-what that line says, and each Feed button carries its pet's name so
-the single `feed` route knows which pet to change. Watch the page
-reshape itself as you feed them.
+Trace the cause and effect: the loop makes one line per pet, the
+`if` decides what that line says, and each Feed button carries its
+pet's name, which tells the single `feed` route which pet to change.
+As you feed the pets, watch the page rebuild to match the new state.
 
 ## What this means for your code
 
@@ -109,12 +109,12 @@ reshape itself as you feed them.
 - When several buttons differ only in *which thing* they act on, give
   them one route and an `Argument` naming the thing. Route-per-button
   is for buttons that do different *kinds* of things.
-- Look things up by a value from an argument with a loop and an `if`,
-  as `feed` does. The argument is plain data; nothing but your code
-  connects it to the pet.
-- Empty cases are part of the design: what does the page show when
-  the list has nothing in it? Decide, and show something on purpose.
-- Dynamic routes are still just functions, so tests drive them
+- To look up an item using a value from an argument, use a loop and
+  an `if`, as `feed` does. The argument is plain data; nothing but
+  your code connects it to the pet.
+- Empty cases are part of the design. Decide what the page should
+  show when the list has nothing in it, and show that on purpose.
+- Dynamic routes are still ordinary functions, so tests can call them
   directly: the `assert_state` above checks feeding by name without
   clicking anything.
 
@@ -123,25 +123,26 @@ reshape itself as you feed them.
 - **"I need a route for every page the visitor can see."** You need
   a route for every *kind* of page. One route can produce a thousand
   pages if the differences come from data.
-- **"The argument is magic."** `Argument("pet_name", pet.name)` just
+- **"The argument is magic."** `Argument("pet_name", pet.name)`
   fills the parameter `pet_name`, exactly like a form field with that
-  name would. Same contract, different source.
+  name would. The contract is the same; only the source of the value
+  differs.
 - **"The page updated wrong, so state must be broken."** Usually the
   state is right and the route's branches do not cover it. Check the
   debug panel's Current tab, then re-read the route asking "what does
   it build for *this* state?"
 - **"I changed the list but the page did not change."** Pages are
-  built when a route runs. Mutate the state, then re-render by
+  built when a route runs. Change the state, then rebuild the page by
   returning `index(state)` again.
 
 ## Go deeper
 
 - [Show different content](../add/show-different-content.md) and
-  [Show a collection of items](../add/show-a-collection.md): the
-  task pages.
-- [Make a quiz game](../tutorials/quiz-game.md): a whole app built on
-  this idea.
-- [Live updates](live-updates.md): changing *part* of a page instead
-  of rebuilding it all.
-- [The Shop example](../examples/shop.md): arguments driving an
+  [Show a collection of items](../add/show-a-collection.md) are the
+  task pages that put this idea to work.
+- [Make a quiz game](../tutorials/quiz-game.md) walks through a whole
+  app built on this idea.
+- [Live updates](live-updates.md) explains how to change *part* of a
+  page instead of rebuilding all of it.
+- [The Shop example](../examples/shop.md) uses arguments to manage an
   inventory.

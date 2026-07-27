@@ -685,12 +685,10 @@ class ClientServer:
                     request,
                     data={"payload": payload},
                     status_code=STATUS_ERROR,
-                    friendly_title=possible_state_update_issue.friendly_title
-                    or None,
+                    friendly_title=possible_state_update_issue.friendly_title or None,
                     friendly_message=possible_state_update_issue.friendly_message
                     or None,
-                    friendly_steps=possible_state_update_issue.friendly_steps
-                    or None,
+                    friendly_steps=possible_state_update_issue.friendly_steps or None,
                     source="client_server.handle_state_updates",
                 )
             try:

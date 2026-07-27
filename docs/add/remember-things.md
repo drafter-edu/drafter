@@ -13,14 +13,14 @@ outcome: Keep information between clicks and pages.
 
 ## Goal
 
-You want your app to keep a value, a score, a name, a chosen option,
-between clicks and across pages.
+You want your app to keep a value between clicks and across pages: a
+score, a name, or a chosen option.
 
 ## Before you start
 
-You can build pages with buttons. Everything remembered lives in your
-`State` dataclass, so "remember something new" always starts the same
-way: **add a field**.
+You can build pages with buttons. Everything your app remembers lives
+in your `State` dataclass, so remembering something new always starts
+the same way: **add a field**.
 
 ## The smallest version
 
@@ -71,9 +71,10 @@ assert_state(lose_point(State(3, 9)), State(2, 9))
 start_server(State(0, 0))
 ```
 
-Score a few points, lose a few, and watch `best` stay put: it only ever
-grows, because only `add_point` assigns it, and it checks first. Deciding
-**which routes may change a field** is most of state design.
+Score a few points, then lose a few, and notice that `best` never goes
+down. It only ever grows, because `add_point` is the only route that
+assigns it, and that route compares the score first. Deciding **which
+routes may change a field** is most of the work of state design.
 
 ## Recipe: save a choice, use it on another page
 
@@ -119,10 +120,10 @@ assert_state(save_difficulty(State("easy"), "hard"), State("hard"))
 start_server(State("normal"))
 ```
 
-Two details worth copying: the `SelectBox` gets `state.difficulty` as its
-starting value, so the form shows the current choice; and
-`save_difficulty` does the saving, then hands off to `game` to build the
-page, keeping each route to one job.
+Two details here are worth copying. The `SelectBox` receives
+`state.difficulty` as its starting value, so the form shows the current
+choice. And `save_difficulty` only does the saving, then calls `game`
+to build the page, which keeps each route to one job.
 
 ## Recipe: reset to the starting values
 
@@ -176,10 +177,10 @@ start_server(new_game())
 
 ## What survives a reload
 
-Nothing. State lives in the browser's memory, and reloading the tab
-starts the app from `start_server(...)`'s values again. For course
-projects that is normal and fine; say so on the page if your users might
-be surprised. The full story is in
+Nothing does. State lives in the browser's memory, and reloading the
+tab starts the app again from the values in `start_server(...)`. For
+course projects, that behavior is normal and expected. If your users
+might be surprised by it, say so on the page. The full story is in
 [How Drafter works](../start/how-drafter-works.md).
 
 ## Common problems
@@ -188,23 +189,25 @@ be surprised. The full story is in
   or a route assigns the field unconditionally. Check the debug panel's
   History tab to see which route changed it.
 - **A field never changes**: no route assigns it, or the route that
-  should is never reached. History again.
+  should assign it is never reached. The History tab shows which routes
+  actually ran.
 - **You added a field and old tests broke**: every `State(...)` call in
   your tests needs the new field's value too. The test failure lists the
   difference.
-- **Two pages disagree about a value**: they cannot, if both read state.
-  If one looks stale, it is showing text you built from an old value
-  instead of reading `state` fresh in the route.
+- **Two pages disagree about a value**: two pages that both read state
+  cannot actually disagree. If one looks stale, it is showing text that
+  was built from an old value instead of reading `state` fresh in the
+  route.
 
 ## Understand it
 
-[State](../concepts/state.md): the state loop, what belongs in fields,
-and what the back button does to them.
+[State](../concepts/state.md) explains the state loop, what belongs in
+fields, and what the back button does to them.
 
 ## See another example
 
-The [virtual pet](../tutorials/virtual-pet.md): three fields, four
-routes, and range rules.
+The [virtual pet](../tutorials/virtual-pet.md) manages three fields
+and four routes, with rules that keep values in range.
 
 ## Look it up
 

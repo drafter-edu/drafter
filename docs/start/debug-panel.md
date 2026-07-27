@@ -13,11 +13,12 @@ outcome: Read state, history, and test results in the debugger.
 
 ## What you'll build
 
-Still nothing new; something better. Below every Drafter app you run, there
-is a **debug panel** that shows what your app is doing: the current state,
-every page visit so far, and your test results. Learning to read it now
-will save you hours later, because most "why is my app doing that?"
-questions are answered by looking at it.
+This step adds nothing new to your app. Instead, you will learn to read
+the **debug panel** that appears below every Drafter app you run. The
+panel shows what your app is doing: the current state, every page visit
+so far, and your test results. Learning to read it now will save you
+hours later, because most "why is my app doing that?" questions can be
+answered by looking at it.
 
 ## What you need
 
@@ -76,7 +77,7 @@ will use most often are:
   state at each moment. If something went wrong three clicks ago, History
   lets you look back at exactly what happened.
 
-The other three tabs, for when you need them:
+You will need the other three tabs less often:
 
 - **Overview** lists all your routes and how they connect.
 - **Tests** shows the results of your `assert_` lines. The two tests in
@@ -91,7 +92,7 @@ You can `print(...)` from inside a route to see what is happening while it
 runs.
 
 ???+ note
-    Not seeing anything print? You won't see printing in the browser version. You have to run this in Thonny!
+    If nothing seems to print, remember that printed output does not appear in the browser version of this demo. Run the program in Thonny to see it.
 
 
 Run this, click the button, and watch:
@@ -127,9 +128,9 @@ def double_count(state: State) -> Page:
 start_server(State(1))
 ```
 
-The printed lines appear in the app's console area rather than vanishing.
-Printing the state before and after a change is the simplest debugging
-tool you have, and it works everywhere.
+The printed lines appear in the app's console area instead of
+disappearing. Printing the state before and after a change is the most
+basic debugging tool you have, and it works everywhere.
 [Print and the console](../help/printing-and-console.md) covers the
 details.
 
@@ -173,8 +174,8 @@ mode; nothing is wrong.
 
     ---
 
-    You have built, broken, fixed, and inspected an app. Five minutes of
-    naming what actually happened.
+    You have built, broken, fixed, and inspected an app. The next page
+    spends five minutes naming what actually happened.
 
     [How Drafter works](how-drafter-works.md)
 

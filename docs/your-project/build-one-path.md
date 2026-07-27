@@ -14,9 +14,9 @@ outcome: Get a thin end-to-end slice working first.
 ## Goal
 
 You want a version of your app that does one real thing, start to
-finish, before any second feature exists. Builders call this a
-*walking skeleton*: all the bones, none of the muscle, and it
-already walks.
+finish, before any second feature exists. Developers call this a
+*walking skeleton*: it has all the bones and none of the muscle,
+but it already walks.
 
 ## Before you start
 
@@ -24,12 +24,14 @@ You have [sketches](sketch-the-pages.md) and a
 [written State](plan-your-data.md). Pick the single most important
 path through your sketches: for a tracker, "add an entry and see it
 listed"; for a store, "buy one thing"; for a story, "make one
-choice". Not the fanciest path, the *load-bearing* one.
+choice". You are not looking for the fanciest path, but for the
+*load-bearing* one.
 
 ## Step 1: The skeleton file
 
-Start every project the same way: `State` (from the last step), an
-`index` route showing almost nothing, and `start_server`.
+Start every project the same way: the `State` dataclass from the
+last step, an `index` route that shows almost nothing, and a call
+to `start_server`.
 
 ```python drafter height=200
 from drafter import *
@@ -65,10 +67,11 @@ not exist, and from here every change is small.
 
 ## Step 2: One route at a time along the path
 
-Add the chosen path's pages in click order, running after each.
-For the tracker path that means: the add-entry form page, then the
-save route, then making `index` show the list. Each addition is one
-route or one component, and the app runs between every pair.
+Add the chosen path's pages in the order a user would click through
+them, and run the app after each addition. For the tracker path,
+that means adding the add-entry form page, then the save route,
+then the list display in `index`. Each addition is one route or one
+component, and the app should run correctly after every one.
 
 ```python drafter height=340
 from drafter import *
@@ -129,37 +132,40 @@ assert_state(
 start_server(State([], 100.0))
 ```
 
-That is a complete walking skeleton: one path, one test, everything
-else still missing on purpose. Notice what it is *not*: no goal
-progress, no deleting, no styling. Those are features, and features
-come [one at a time](add-features.md), later.
+That is a complete walking skeleton: one path, one test, and
+everything else still missing on purpose. Notice what it does *not*
+have: no goal progress, no way to delete an entry, no styling.
+Those are features, and features come later,
+[one at a time](add-features.md).
 
 ## Step 3: Prove it end to end
 
 Click the whole path like a stranger would, and write one test for
 its central rule (the `assert_state` above). This is also the
-moment to make your first commit, or at least a copy of the file
-that works; every later experiment deserves a safe floor to fall
-back to.
+moment to make your first commit, or at least to save a copy of
+the working file. Every later experiment deserves a known-good
+version to fall back to.
 
 ## Common problems
 
-- **Building all pages before any path**: five beautiful
-  disconnected pages demo worse than two connected ones. Depth
-  first, then breadth.
-- **The slice keeps widening**: "while I'm in here I'll add
-  categories" is how skeletons die. Write the temptation on your
-  stretch list and stay on the path.
-- **Stuck on one route for an hour**: shrink the ambition: make
-  the route return a hard-coded page, get the click working, then
-  make it real. Motion beats polish at this stage.
-- **The plan survived contact and changed**: fine, expected, and
-  cheap: update the sketch and the `State`, which is exactly why
-  they are paper and one dataclass rather than finished code.
+- **Building all pages before any path**: five beautiful but
+  disconnected pages make a worse demo than two connected ones. Go
+  deep first, then broad.
+- **The slice keeps widening**: "while I'm in here, I'll add
+  categories" is how walking skeletons stall. Write the tempting
+  feature on your stretch list and stay on the path.
+- **Stuck on one route for an hour**: shrink the goal. Make the
+  route return a hard-coded page, get the click working, and then
+  make the page real. Progress matters more than polish at this
+  stage.
+- **The plan changed once you started building**: that is normal
+  and expected. Update the sketch and the `State`; they are cheap
+  to change, which is exactly why they are paper and one dataclass
+  rather than finished code.
 
 ## You are ready for the next step when
 
-The path works by clicking, one test pins its rule, and a safe
-copy exists. Then grow it with
-[Add features one at a time](add-features.md), keeping
-[tests coming](test-as-you-go.md) as you go.
+You can click through the whole path, one test pins down its
+central rule, and a saved working copy exists. Then grow the app
+with [Add features one at a time](add-features.md), and keep
+[writing tests](test-as-you-go.md) as you go.

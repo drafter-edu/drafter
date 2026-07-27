@@ -17,9 +17,10 @@ Group: [Input](../index.md#input)
 ## Description
 
 `RelatedCheckBox`es are checkboxes that belong together: they share
-one name, and everything checked arrives at the route as a single
-list parameter. Use them for "choose any of these"; a lone yes/no
-is a plain [CheckBox](checkbox.md).
+one name, and the values of all the checked boxes arrive at the
+route as a single list parameter. Use them when the visitor may
+choose any number of options; for a single yes/no answer, use a
+plain [CheckBox](checkbox.md).
 
 ## Syntax
 
@@ -78,10 +79,10 @@ start_server(State([]))
 - The receiving parameter should be annotated `list[str]`; with
   nothing checked it receives an empty list, not an error.
 - The group is deliberately exempt from the
-  [duplicate-name rule](../../../help/errors/duplicate-component-name.md):
-  sharing the name is the mechanism.
-- The list preserves only which values were checked, not any order
-  of clicking.
+  [duplicate-name rule](../../../help/errors/duplicate-component-name.md),
+  because sharing one name is exactly how the boxes form a group.
+- The list records which values were checked, not the order in
+  which the visitor clicked them.
 
 ## Accessibility
 

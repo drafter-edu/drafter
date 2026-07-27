@@ -11,14 +11,15 @@ outcome: See styling approaches side by side.
 
 # Styling
 
-The three tiers of styling (themes, helpers and keywords, real CSS),
-each in a demo you can push on. The full story starts at
+This page shows the three tiers of styling (themes, helpers and
+keywords, and real CSS), each in a demo you can experiment with. The
+full story starts at
 [Change the appearance](../../add/change-appearance/index.md).
 
 ## Tier 1: a theme changes everything
 
-One line restyles the whole site. Swap `"brutal"` for `"latex"`,
-`"98"`, or anything in the
+A single line restyles the whole site. Try swapping `"brutal"` for
+`"latex"`, `"98"`, or anything else in the
 [theme catalog](../../reference/themes.md).
 
 ```python drafter height=300
@@ -43,7 +44,8 @@ start_server()
 
 ## Tier 2a: helpers wrap one thing
 
-Each helper styles only what it wraps. Wrap the wrappers.
+Each helper styles only the content it wraps. Helpers can also wrap
+each other, so try nesting them.
 
 ```python drafter height=240
 from drafter import *
@@ -65,12 +67,14 @@ def index() -> Page:
 start_server()
 ```
 
-Full list: [Styling functions](../../reference/styling-functions.md).
+The full list is in
+[Styling functions](../../reference/styling-functions.md).
 
 ## Tier 2b: style keywords on any component
 
-Every component accepts `style_*` keywords; underscores become CSS
-hyphens (`style_background_color` sets `background-color`).
+Every component accepts `style_*` keywords. The underscores in a
+keyword become hyphens in the CSS property name, so
+`style_background_color` sets `background-color`.
 
 ```python drafter height=240
 from drafter import *
@@ -94,13 +98,13 @@ def index() -> Page:
 start_server()
 ```
 
-Full list of keywords:
+The full list of keywords is in
 [Keywords every component accepts](../../reference/keyword-attributes.md).
 
 ## Tier 3: classes and real CSS
 
-Define a rule once with `add_website_css`, apply it anywhere with
-`classes`. Change the rule and watch every card follow.
+Define a rule once with `add_website_css`, then apply it anywhere
+with `classes`. Change the rule, and every card updates to match.
 
 ```python drafter height=300
 from drafter import *
@@ -127,12 +131,13 @@ def index() -> Page:
 start_server()
 ```
 
-Full story: [Custom CSS](../../add/change-appearance/custom-css.md).
+The full story is in
+[Custom CSS](../../add/change-appearance/custom-css.md).
 
 ## The box model, visualized
 
-Margin is space outside the border; padding is space inside it.
-Change the three numbers and watch the boxes breathe.
+Margin is the space outside the border, and padding is the space
+inside it. Change the three numbers and watch how the boxes shift.
 
 ```python drafter height=320
 from drafter import *
@@ -159,13 +164,13 @@ def index() -> Page:
 start_server()
 ```
 
-The friendly explanation with diagrams:
+For a friendlier explanation with diagrams, see
 [Design basics](../../add/change-appearance/design-basics.md).
 
 ## Rows: side by side instead of stacked
 
-`Row` lays its contents out horizontally. Put more things in the
-row, or nest a `Row` inside a `Row`.
+`Row` lays its contents out horizontally. Try putting more things in
+the row, or nesting a `Row` inside another `Row`.
 
 ```python drafter height=240
 from drafter import *
@@ -193,7 +198,7 @@ start_server()
 
 ## Where next
 
-- [Change the appearance](../../add/change-appearance/index.md):
-  choosing a tier deliberately.
-- [Styling gotchas](../../add/change-appearance/gotchas.md): the
-  weird parts, before they find you.
+- [Change the appearance](../../add/change-appearance/index.md)
+  helps you choose a tier deliberately.
+- [Styling gotchas](../../add/change-appearance/gotchas.md) explains
+  the surprising parts before you run into them.

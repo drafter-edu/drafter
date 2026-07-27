@@ -18,10 +18,10 @@ maybe changed by your code.
 
 ## Before you start
 
-You can build a form. Two ideas carry this page: the `Image`
-component *shows* a picture, and the `Picture` type *is* one, a
-value you can store in state, pass around, and transform like any
-other value.
+You can build a form. This page rests on two ideas: the `Image`
+component *shows* a picture, while the `Picture` type *is* one, a
+value you can store in state, pass to functions, and transform like
+any other value.
 
 ## Recipe: show an image
 
@@ -44,8 +44,8 @@ def index() -> Page:
 start_server()
 ```
 
-The two numbers are width and height in pixels; leave them off to
-use the image's own size.
+The two numbers are the width and height in pixels. Leave them off
+to use the image's own size.
 
 ## Recipe: let visitors upload a picture
 
@@ -85,13 +85,14 @@ def update(state: State, new_portrait: Picture | None) -> Page:
 start_server(State(Picture.new(160, 120, "lightsteelblue")))
 ```
 
-A `Picture` in the content list displays itself; `Picture.new(width,
-height, color)` makes a blank one to start from.
+A `Picture` placed in the content list displays itself, and
+`Picture.new(width, height, color)` creates a blank picture to start
+from.
 
 ## Recipe: transform a picture
 
-`Picture` values answer to transformation methods, each returning a
-changed copy:
+`Picture` values provide transformation methods, each of which
+returns a changed copy:
 
 ```python drafter height=300
 from drafter import *
@@ -136,23 +137,24 @@ def drain(state: State) -> Page:
 start_server(State(Picture.new(150, 100, "tomato")))
 ```
 
-Always assign the result: `state.art.rotate(90)` alone makes a
-rotated copy and drops it. The full method list is on the
+Always assign the result: `state.art.rotate(90)` on its own creates
+a rotated copy and then discards it. The full method list is on the
 [Picture reference page](../reference/data-types/picture.md).
 
 ## Recipe: let visitors keep the result
 
-`Download("Save it", "art.png", state.art)` offers the picture as a
-file; the [photo editor example](../examples/photo-editor.md) puts
-the whole pipeline together, upload to transform to download.
+`Download("Save it", "art.png", state.art)` offers the picture to
+the visitor as a file. The
+[photo editor example](../examples/photo-editor.md) puts the whole
+pipeline together, from upload to transformation to download.
 
 ## Variations
 
 - Show image files bundled with your app by name:
   `Image("logo.png")`.
-- Build pictures from scratch pixel by pixel or with drawing
+- Build pictures from scratch, pixel by pixel or with drawing
   helpers; the [Picture reference](../reference/data-types/picture.md)
-  covers the tools.
+  covers those tools.
 - Size with styling instead of pixels:
   `change_width(Image("big.png"), "50%")`.
 
@@ -162,25 +164,26 @@ the whole pipeline together, upload to transform to download.
   travel with your site; put it in the repository next to `main.py`.
   See [works locally, 404s deployed](../help/errors/missing-asset-on-deploy.md).
 - **Upload errors on a non-image**: a file that cannot be decoded
-  stops the route with a friendly error naming the parameter;
-  `accept="image/*"` steers the picker but does not guarantee.
+  stops the route with a friendly error naming the parameter.
+  `accept="image/*"` steers the file picker toward images but does
+  not guarantee an image is chosen.
 - **A URL image shows nothing**: the address must point straight at
-  an image (ending .png, .jpg, and friends), not at a page
-  containing one, and the visitor needs to be online.
+  an image (ending in .png, .jpg, or another image extension), not
+  at a page containing one, and the visitor needs to be online.
 - **Transformations seem to do nothing**: the result was not
   assigned back to state.
 
 ## Understand it
 
-Pictures are values, like numbers and strings: stored in state,
-passed to functions, compared in tests. [State](../concepts/state.md)
-explains the storage half.
+Pictures are values, like numbers and strings: they can be stored
+in state, passed to functions, and compared in tests.
+[State](../concepts/state.md) explains the storage half.
 
 ## See another example
 
-The [photo editor](../examples/photo-editor.md), and the
-[media playground](../examples/playground/media.md) once you want
-sound and video too.
+The [photo editor](../examples/photo-editor.md) covers pictures, and
+the [media playground](../examples/playground/media.md) adds sound
+and video.
 
 ## Look it up
 

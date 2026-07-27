@@ -13,10 +13,12 @@ outcome: Upload and transform images.
 
 ## What it does
 
-A tiny photo editor: upload a picture, shrink it, rotate it, drain
-its color, download the result. It shows the whole life of an image
-in a Drafter app: in through `FileUpload`, living in state as a
-`Picture`, changed by transformations, out through `Download`.
+This example is a small photo editor. You can upload a picture,
+shrink it, rotate it, convert it to grayscale, and download the
+result. The app demonstrates the whole life cycle of an image in a
+Drafter app: the image comes in through a `FileUpload`, lives in the
+state as a `Picture`, is changed by transformations, and goes out
+through a `Download`.
 
 ## Try it
 
@@ -86,27 +88,27 @@ start_server(State(Picture.new(60, 40, "salmon")))
 ## The code
 
 The state holds exactly one thing: the current `Picture`. Every
-route follows the same rhythm: replace `state.photo` with a
-transformed version, then show the page again. `update_photo` is the
-only route with a parameter, because it is the only one receiving
-something from a form.
+route follows the same pattern: it replaces `state.photo` with a
+transformed version, then shows the page again. `update_photo` is
+the only route with a parameter, because it is the only route that
+receives a value from a form.
 
 ## How it works
 
-Three type tricks carry this app:
+Three details about types make this app work:
 
 - **A `Picture` in page content displays itself.** The line
-  `state.photo` in the content list renders as an image, no `Image`
-  component required (though
+  `state.photo` in the content list renders as an image, with no
+  `Image` component required (though
   [Image](../reference/components/media/image.md) exists for more
   control).
 - **`new_photo: Picture | None`** is how uploads become pictures.
   Annotating the parameter as `Picture` makes Drafter decode the
-  uploaded file into one; the `| None` half means "no file chosen"
-  arrives as `None` instead of an error, which the route checks
-  before replacing anything.
+  uploaded file into one. The `| None` part means that pressing
+  Upload with no file chosen delivers `None` instead of raising an
+  error, and the route checks for `None` before replacing anything.
 - **Transformations return new pictures.** `scale`, `rotate`, and
-  `grayscale` do not change a picture in place; they hand back a
+  `grayscale` do not change a picture in place; they return a
   changed copy, which is why every route assigns:
   `state.photo = state.photo.scale(0.5)`.
 
@@ -127,16 +129,16 @@ made from scratch.
    method.
 4. **Combine**: keep `original: Picture` in state alongside `photo`,
    set it on upload, and add a real "Reset" button.
-5. **Create**: a meme maker: this app plus a `TextBox` and the
-   Picture reference's text-drawing tools.
+5. **Create**: build a meme maker by combining this app with a
+   `TextBox` and the text-drawing tools from the Picture reference.
 
 ## Tests
 
 One `assert_equal` covers the transformation pipeline: shrinking a
 known swatch produces exactly the page that a half-size swatch would
 produce. Pixel-level equality makes image code surprisingly
-testable; build small `Picture.new(...)` swatches in tests rather
-than loading files.
+testable. In your own tests, build small `Picture.new(...)` swatches
+rather than loading files.
 
 ## Likely errors
 
@@ -144,21 +146,22 @@ than loading files.
   image stops the route with a friendly conversion error naming the
   parameter. The `accept="image/*"` on the `FileUpload` steers the
   file picker toward images but is a convenience, not a guarantee.
-- **Forgetting the `| None`**: with plain `Picture`, pressing Upload
-  with no file chosen becomes an error instead of a quiet no-op.
+- **Forgetting the `| None`**: with a plain `Picture` annotation,
+  pressing Upload with no file chosen raises an error instead of
+  quietly doing nothing.
 - **Expecting transformations to mutate**: `state.photo.rotate(90)`
   alone does nothing visible; without the assignment, the rotated
   copy is thrown away.
-- **Deploying and losing the photo**: state resets on reload like
-  always; a deployed editor starts from the built-in swatch, not
-  from anything a visitor uploaded last time.
+- **Deploying and losing the photo**: the state resets on reload, as
+  it always does, so a deployed editor starts from the built-in
+  swatch rather than from anything a visitor uploaded earlier.
 
 ## Related
 
-- [Use pictures](../add/pictures.md): the how-to for images
-  end-to-end.
-- [Picture](../reference/data-types/picture.md): every
+- [Use pictures](../add/pictures.md) is the how-to guide for images
+  from start to finish.
+- [Picture](../reference/data-types/picture.md) documents every
   transformation and constructor.
 - [FileUpload](../reference/components/input/fileupload.md) and
-  [Download](../reference/components/input/download.md): the doors
-  in and out.
+  [Download](../reference/components/input/download.md) are the
+  components that bring files in and send them out.

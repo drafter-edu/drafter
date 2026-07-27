@@ -15,16 +15,16 @@ outcome: Move files in and out of the app.
 
 ## Goal
 
-You want files crossing your app's boundary: visitors handing files
-in, your app handing files out, and your code reading data files it
-shipped with.
+You want to move files across your app's boundary: visitors handing
+files in, your app handing files out, and your code reading data
+files that were bundled with it.
 
 ## Before you start
 
-You can build a form. The one mental adjustment: your app lives in
-the browser, so "files" means the visitor's files (which they must
-explicitly choose) and files bundled with your app, not a hard
-drive your code can wander.
+You can build a form. One mental adjustment is needed: your app
+lives in the browser, so "files" means the visitor's files (which
+they must explicitly choose) and files bundled with your app. Your
+code cannot browse a hard drive on its own.
 
 ## Recipe: receive a file
 
@@ -65,7 +65,7 @@ def inspect(state: State, poem_file: str) -> Page:
 start_server(State(""))
 ```
 
-The annotation table:
+Each annotation produces a different kind of value:
 
 | Annotation | What the route receives |
 | ---------- | ----------------------- |
@@ -80,8 +80,8 @@ attribute delivers a list.
 
 ## Recipe: offer a download
 
-`Download` is the reverse door: text (or bytes) your app built,
-offered as a file.
+`Download` works in the opposite direction: it offers text (or
+bytes) your app built as a file the visitor can save.
 
 ```python drafter height=280
 from drafter import *
@@ -119,9 +119,10 @@ def record(state: State, entry: str) -> Page:
 start_server(State(["Day 1: Captain ignored me."]))
 ```
 
-The three arguments: link text, the filename to save as, and the
-contents. Rebuild the contents each render, as here, so the
-download always reflects the current state.
+The three arguments are the link text, the filename to save as, and
+the contents. Rebuild the contents every time the page renders, as
+this example does, so the download always reflects the current
+state.
 
 ## Recipe: read a bundled data file
 
@@ -132,22 +133,23 @@ with open("questions.txt") as data_file:
     lines = data_file.readlines()
 ```
 
-Keep the file next to your program. When you deploy, it must travel
-too: upload it to the repository, and if the build needs telling,
-the `--additional-paths` flag lists extra files to bundle (see
-[Command line](../reference/cli.md)). The helper
-`get_drafter_path("questions.txt")` resolves a name to wherever the
-app's files actually live, useful in the rare case plain `open`
-cannot find what you bundled.
+Keep the file next to your program. When you deploy, the file must
+be deployed too: upload it to the repository, and if the build
+needs to be told about it, the `--additional-paths` flag lists
+extra files to bundle (see [Command line](../reference/cli.md)).
+The helper `get_drafter_path("questions.txt")` resolves a name to
+wherever the app's files actually live, which helps in the rare
+case where plain `open` cannot find a file you bundled.
 
 ## Variations
 
-- Uploaded text with unusual characters: annotate `bytes` and
-  decode deliberately, or accept the friendly error; see
+- If uploaded text may contain unusual characters, annotate the
+  parameter as `bytes` and decode it deliberately, or accept the
+  friendly error; see
   [Uploaded file couldn't be read as text](../help/errors/file-decode-error.md).
-- Downloads of structured data: build CSV text with a loop
-  (`row = name + "," + str(score)`), name the file `.csv`, and
-  spreadsheets open it.
+- To offer structured data as a download, build CSV text with a
+  loop (`row = name + "," + str(score)`) and give the file a `.csv`
+  name so spreadsheet programs can open it.
 
 ## Common problems
 
@@ -155,25 +157,25 @@ cannot find what you bundled.
   is pressed, and the parameter holds the file chosen *then*.
   Nothing arrives ahead of time.
 - **`str` upload errors on a binary file**: a file that is not
-  text cannot arrive as `str`; annotate `bytes` (or catch it in
-  design: `accept=".txt"`).
+  text cannot arrive as `str`. Annotate the parameter as `bytes`,
+  or steer the picker toward text files with `accept=".txt"`.
 - **A bundled file 404s after deploy**: it never made it into the
   repository, or the name differs in case. See
   [works locally, 404s deployed](../help/errors/missing-asset-on-deploy.md).
 - **Nothing survives reload**: files a visitor uploads live in
-  state, and state resets on reload like always. The download
-  button is how visitors keep things.
+  state, and state resets on reload as it always does. The download
+  button is how visitors keep a permanent copy.
 
 ## Understand it
 
-[How Drafter works](../start/how-drafter-works.md): the app's whole
-world lives in the browser tab, which is why files must be
-explicitly handed in and out.
+[How Drafter works](../start/how-drafter-works.md) explains that
+the app runs entirely inside the browser tab, which is why files
+must be explicitly handed in and out.
 
 ## See another example
 
 The [photo editor](../examples/photo-editor.md) runs the whole
-loop for images.
+upload-and-download loop for images.
 
 ## Look it up
 

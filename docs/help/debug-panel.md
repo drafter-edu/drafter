@@ -13,9 +13,9 @@ outcome: Use all five debugger tabs.
 
 ## Goal
 
-You want the debug panel to earn its screen space: watching state,
-replaying history, reading tests, and answering "what is my app
-actually doing?"
+You want to get the full value out of the debug panel: watching
+state, replaying history, reading test results, and answering the
+question "what is my app actually doing?"
 
 ## Before you start
 
@@ -38,40 +38,43 @@ look like at score 10?" without clicking ten times.
 
 ## History: everything that happened
 
-Every visit is listed: the route call that ran (with its actual
-arguments), the response it produced, and the state snapshot after
-it. Expanding a visit's Response shows the returned `Page(...)`
+The History tab lists every visit: the route call that ran (with
+its actual arguments), the response it produced, and the state
+snapshot taken afterward. Expanding a visit's Response shows the returned `Page(...)`
 written as Python, which is what
 [freezing a page](../add/freeze-pages.md) copies.
 
-Colored markers flag visits that raised errors or warnings, so
-"when did this go wrong?" is a scroll, not an archaeology dig. The
-history can also replay a visit: re-dispatching the same request
-against your current code, which is exactly what you want after
-fixing a bug ("does that click work now?").
+Colored markers flag the visits that raised errors or warnings, so
+you can scroll back and find the moment something went wrong. The
+history can also replay a visit, which re-dispatches the same
+request against your current code. Replaying is exactly the check
+you want after fixing a bug: does that click work now?
 
 ## Overview: the app from above
 
-The routes list shows every registered route with its parameters:
-your app's table of contents. Check it when a button claims a route
-does not exist, or when you suspect a route never got its `@route`.
+The routes list shows every registered route with its parameters.
+Think of it as a table of contents for your app. Check it when
+clicking a button reports that a route does not exist, or when you
+suspect a route function is missing its `@route` decorator.
 (A visual route graph is planned for this tab but not finished.)
 
 ## Tests: your assertions, live
 
 Every assertion that ran at startup is here with its result, line
 number, and, for failures, the full difference report. Two buttons
-matter more than they look: **copy** and **download**, which export
-every test the app has run as a ready-to-save Python file, useful
-once [frozen tests](../add/freeze-pages.md) start accumulating.
+here are more useful than they may first appear: **copy** and
+**download**, which export every test the app has run as a
+ready-to-save Python file. They become valuable once
+[frozen tests](../add/freeze-pages.md) start accumulating.
 
-Tests re-run when your program restarts, not when you click around;
-a green list plus broken clicking means the broken part has no test
-yet.
+Tests re-run when your program restarts, not while you click around
+the app. If the test list is all green but clicking still breaks
+something, the broken behavior does not have a test yet.
 
 ## Environment: the machinery
 
-The grab-bag tab, for questions about the world your app runs in:
+This tab collects several kinds of information about the
+environment your app runs in:
 
 - **Files**: what the app's file system holds, for checking that a
   data file or image is actually where `open(...)` expects it.
@@ -89,10 +92,10 @@ The grab-bag tab, for questions about the world your app runs in:
 
 ## The menus
 
-The header menubar above the tabs holds the view controls (hiding
-the frame, the live site-theme switcher for
-[trying themes](../add/change-appearance/themes.md)) and the Help
-menu, whose **Download Bug Report** item packages up
+The header menubar above the tabs holds the view controls: an
+option to hide the frame, and the live site-theme switcher for
+[trying themes](../add/change-appearance/themes.md). It also holds
+the Help menu, whose **Download Bug Report** item packages up
 [everything a bug report needs](bug-reports.md).
 
 ## Common problems

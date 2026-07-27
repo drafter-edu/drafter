@@ -12,9 +12,9 @@ outcome: Know how state-only responses work.
 
 # Update
 
-An `Update` is a route's way of changing state while showing nothing:
-no new page, no fragment, no visible reaction at all. The page the
-visitor sees stays exactly as it is; only the app's memory changes.
+Returning an `Update` changes the state without showing anything new:
+no page, no fragment, and no visible reaction at all. The page the
+visitor sees stays exactly as it is; only the stored state changes.
 
 ## Syntax
 
@@ -28,8 +28,10 @@ Update(new_state)
 
 ## Example
 
-A silent draft-saver: every keystroke stores the text, nothing on
-screen reacts, and the Show button proves the state kept up.
+This example saves a draft silently. Every keystroke stores the
+current text without changing anything on screen, and the
+**Show what was saved** button displays the stored draft to confirm
+that the state kept up.
 
 ```python drafter height=280
 from drafter import *
@@ -71,25 +73,27 @@ start_server(State(""))
 
 ## Notes
 
-- **Nothing renders.** If you expected something visible, you wanted
-  a [Fragment](fragment.md). `Update` is for bookkeeping: saving
-  drafts, recording that something was seen, counting quietly.
+- **Nothing renders.** If you expected something visible to change,
+  use a [Fragment](fragment.md) instead. `Update` is for bookkeeping
+  tasks such as saving drafts, recording that something was seen, or
+  counting events without displaying them.
 - **The whole state is replaced** with the value you pass. The usual
   pattern mutates the existing state and passes it back
   (`state.draft = text` then `Update(state)`), which keeps the type
   stable; handing back a different kind of value causes the
   [state type problem](../help/errors/state-mismatch.md).
-- **The visitor cannot tell it happened**, which is the feature and
-  the trap. Anything the visitor should notice deserves a fragment
-  or a page.
+- **The visitor cannot tell that anything happened.** That is the
+  point of `Update`, but it can also be a trap: if the visitor
+  should notice a change, return a fragment or a page instead.
 - **In tests**, check the stored value through the payload's
   `state_update` attribute
   (`assert_equal(remember(State(""), "hi").state_update, State("hi"))`),
-  or simply call the route on a state you hold and inspect that
-  state afterward, since the route mutated it.
+  or call the route on a state you hold and inspect that state
+  afterward, since the route mutated it.
 
 ## Related
 
 - [Fragment](fragment.md): change part of the page instead.
-- [Live updates](../concepts/live-updates.md): the concept.
+- [Live updates](../concepts/live-updates.md): the concept behind
+  state-only responses.
 - [State](../concepts/state.md): what "the current state" means.

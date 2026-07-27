@@ -11,7 +11,7 @@ outcome: Look up safe fonts.
 
 # HTML Fonts
 
-A list of common web-safe fonts.
+This table lists common web-safe fonts.
 
 <table>
   <thead>

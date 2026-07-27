@@ -11,12 +11,13 @@ outcome: Tinker with hello, counter, and multi-page demos.
 
 # Basics
 
-Six tiny apps, growing one idea at a time. Edit anything; reloading
-the page resets every demo.
+This page collects six tiny apps, and each one adds a single new
+idea. Edit anything you like. Reloading the page resets every demo.
 
 ## The smallest possible app
 
-One route, one page, one string. Change the greeting.
+The whole app is a single route that returns a page containing one
+string. Try changing the greeting.
 
 ```python drafter height=160
 from drafter import *
@@ -30,12 +31,12 @@ def index() -> Page:
 start_server()
 ```
 
-Full story: [Build your first app](../../start/first-app.md).
+The full story is in [Build your first app](../../start/first-app.md).
 
 ## Text stays on one line unless you say otherwise
 
-Strings sit side by side until a `"\n"` breaks the line. Move the
-`"\n"`s around.
+Strings appear side by side on the same line until a `"\n"` starts
+a new one. Move the `"\n"`s around and see how the lines change.
 
 ```python drafter height=180
 from drafter import *
@@ -56,7 +57,8 @@ start_server()
 
 ## A button that changes state
 
-The classic counter. Make it count by 10. Make it count down.
+This is the classic counter app. See if you can make it count by 10,
+or make it count down instead.
 
 ```python drafter height=200
 from drafter import *
@@ -85,11 +87,12 @@ def add_one(state: State) -> Page:
 start_server(State(0))
 ```
 
-Full story: [State](../../concepts/state.md).
+The full story is in [State](../../concepts/state.md).
 
 ## The starting state is yours to choose
 
-Same counter, different beginning. Start it at 100. Start it at -5.
+This is the same counter with a different starting value. Change the
+starting value to 100, or to -5.
 
 ```python drafter height=200
 from drafter import *
@@ -120,7 +123,8 @@ start_server(State(40))
 
 ## Two pages, connected
 
-A `Button` and a `Link`, each naming a route. Add a third page.
+This app connects two pages with a `Button` and a `Link`, each of
+which names the route it leads to. Try adding a third page.
 
 ```python drafter height=200
 from drafter import *
@@ -145,12 +149,12 @@ def kitchen() -> Page:
 start_server()
 ```
 
-Full story: [Add and connect pages](../../add/pages.md).
+The full story is in [Add and connect pages](../../add/pages.md).
 
 ## An emoji button
 
-Button labels are just strings, and strings can be emoji. Change the
-moods.
+Button labels are ordinary strings, and strings can contain emoji.
+Try changing the moods.
 
 ```python drafter height=200
 from drafter import *
@@ -188,7 +192,7 @@ start_server(State("undecided"))
 
 ## Where next
 
-- [Build your first app](../../start/first-app.md) walks the counter
-  properly.
-- [Forms](forms.md) is the next collection: inputs instead of
-  buttons.
+- [Build your first app](../../start/first-app.md) walks through the
+  counter step by step.
+- [Forms](forms.md) is the next collection, where inputs take the
+  place of buttons.

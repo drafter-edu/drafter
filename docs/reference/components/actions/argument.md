@@ -16,11 +16,11 @@ Group: [Actions](../index.md#actions)
 
 ## Description
 
-An `Argument` is a value a button or link carries to its route,
-filling a parameter by name, exactly the way a form field would.
-It is how several buttons share one route and still tell it apart
-which was clicked, the backbone of the
-[one-route-many-items pattern](../../../add/show-different-content.md).
+An `Argument` is an extra value that a button or link delivers to
+its route, filling a parameter by name exactly the way a form field
+would. Arguments let several buttons share one route while still
+telling that route which button was clicked, which is the basis of
+the [one-route-many-items pattern](../../../add/show-different-content.md).
 
 ## Syntax
 
@@ -72,23 +72,25 @@ start_server(State("nothing yet"))
 - A button accepts a single `Argument`, a list of them, or a list
   of `(name, value)` pairs; several arguments fill several
   parameters.
-- Arguments render as hidden inputs, so their values ride along
-  with the form like any other field, and share the same rules:
-  a name colliding with a real input's name is a
+- Arguments render as hidden inputs, so their values are submitted
+  with the form like any other field and follow the same rules: an
+  argument whose name collides with a real input's name causes a
   [duplicate-name error](../../../help/errors/duplicate-component-name.md),
-  and a name matching no parameter is
+  and an argument whose name matches no parameter of the route is
+  the reverse of the
   [missing-parameter](../../../help/errors/missing-parameter.md)
-  territory in reverse.
-- Values must be JSON-safe (text, numbers, booleans, lists);
-  passing whole dataclasses is not supported: pass a name or index
-  and look the object up in the route, as the
+  problem.
+- Values must be JSON-safe (text, numbers, booleans, or lists of
+  those). Passing a whole dataclass is not supported; instead, pass
+  a name or index and look the object up inside the route, as the
   [shop example](../../../examples/shop.md) does.
 
 ## Related components
 
-- [Button](button.md) and [Link](link.md): the carriers.
+- [Button](button.md) and [Link](link.md): the components that
+  carry arguments to a route.
 - [Show different content](../../../add/show-different-content.md):
-  the how-to built on this component.
+  the how-to guide built around this component.
 
 ## External links
 

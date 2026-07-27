@@ -13,19 +13,19 @@ outcome: Understand what deployment is and see the three steps.
 
 ## Goal
 
-Your app works on your computer. You want a real link, one that works on
-anyone's phone or laptop, whether or not your computer is on.
+Your app works on your computer. Now you want a real link that works on
+anyone's phone or laptop, whether or not your own computer is turned on.
 
 ## Before you start
 
 You need a working app and a GitHub account. Expect the whole process to
 take about half an hour the first time, most of it waiting and checking.
 
-Two things to understand before starting, so nothing later is
-mysterious:
+Two ideas are worth understanding before you start, so that nothing
+later comes as a surprise:
 
 - **Deploying means compiling.** Drafter turns your program into a
-  static website: files that any web server can hand out. Your Python
+  static website: a set of files that any web server can serve. Your Python
   still runs in each visitor's browser, exactly as it does now. There is
   still no backend, and state still resets on reload.
 - **`localhost` links are not shareable.** The address your app has
@@ -62,17 +62,17 @@ checklist for the rest.
   on your machine. Share the deployed `github.io` URL, and test it from
   another device first.
 - **You shared the repository link instead**: the code lives at
-  `github.com/...`; the running site lives at `...github.io/...`. Share
-  the second.
+  `github.com/...`, while the running site lives at `...github.io/...`.
+  Share the site link, not the code link.
 - **The deployment failed**: go to
-  [Fix a failed deployment](troubleshooting.md); the error log almost
+  [Fix a failed deployment](troubleshooting.md). The error log almost
   always names the problem.
 
 ## Understand it
 
 [How Drafter works](../../start/how-drafter-works.md) and
-[How the web works](../../concepts/how-the-web-works.md): why there is
-no server to rent and nothing to install.
+[How the web works](../../concepts/how-the-web-works.md) explain why
+there is no server to rent and nothing to install.
 
 ## See another example
 
@@ -81,7 +81,7 @@ exactly this way.
 
 ## Look it up
 
-[Site configuration](../../reference/site-config.md) for every
+See [Site configuration](../../reference/site-config.md) for every
 `set_...` function used in preparation.
 
 ## Fix a problem
@@ -91,7 +91,7 @@ exactly this way.
 
 ## Next steps
 
-This page was the overview; the work starts now.
+This page was the overview. The work starts with the first step below.
 
 <div class="grid cards" markdown>
 

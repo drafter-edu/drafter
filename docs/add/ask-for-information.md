@@ -18,13 +18,13 @@ those values delivered to your code.
 
 ## Before you start
 
-You can build pages with buttons. The one rule this page uses everywhere:
-an input's **name** becomes the **parameter** with the same name in the
-route the button goes to.
+You can build pages with buttons. One rule appears everywhere on this
+page: an input's **name** becomes the **parameter** with the same name
+in the route the button goes to.
 
 ## The smallest version
 
-One question, one answer:
+This form asks one question and delivers one answer:
 
 ```python drafter height=240
 from drafter import *
@@ -161,8 +161,8 @@ and fix it.
 
 ## Recipe: longer text
 
-`TextArea` is `TextBox` for paragraphs. Same name-to-parameter contract,
-more room to type:
+`TextArea` works like `TextBox` but gives the visitor room to type
+several lines. The name-to-parameter contract is the same:
 
 ```python drafter height=300
 from drafter import *
@@ -208,20 +208,22 @@ the visitor an edit loop instead of a blank box.
   spelling and underscores.
 - **A number arrives as text**: the parameter has no annotation. Write
   `tickets: int`.
-- **The value vanishes after the next click**: parameters last one call.
-  Save into a `state` field, as every recipe above does.
+- **The value vanishes after the next click**: a parameter's value only
+  lasts for that one route call. Save it into a `state` field, as every
+  recipe above does.
 - **Two buttons, one form**: both target routes receive the same inputs,
   so both need the matching parameters.
 
 ## Understand it
 
-[Forms and input](../concepts/forms-and-input.md): the name-to-parameter
-contract and the type conversion table.
+[Forms and input](../concepts/forms-and-input.md) explains the
+name-to-parameter contract and includes the type conversion table.
 
 ## See another example
 
-[Big form](../examples/forms.md): every core input in one place, and the
-[story maker](../tutorials/story-maker.md) for forms driving a whole app.
+[Big form](../examples/forms.md) shows every core input in one place,
+and the [story maker](../tutorials/story-maker.md) shows forms driving a
+whole app.
 
 ## Look it up
 

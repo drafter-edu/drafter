@@ -10,16 +10,16 @@ outcome: Look up terms in stable, plain language.
 
 # Glossary
 
-The words these docs use, each with its plain meaning and a link to
-the page that tells the whole story. The docs use these words
-consistently, so if a sentence confuses you, the confusing word is
-probably here.
+This page lists the words these docs use, each with its plain
+meaning and a link to the page that explains it fully. The docs use
+these words consistently, so if a sentence confuses you, the
+confusing word is probably defined here.
 
 **argument**: An extra value a button or link carries to its route, filling a
   parameter by name. In wider Python, "argument" also means any
   value passed to a function; Drafter's
-  [Argument](components/actions/argument.md) component is the
-  page-sized version of the same idea.
+  [Argument](components/actions/argument.md) component applies the
+  same idea to pages.
 
 **component**: Anything you can put in a page's content list besides a plain
   string: buttons, text boxes, images, tables. The
@@ -29,8 +29,8 @@ probably here.
   of values. Your `State` is one; so is each record in a list like
   the [pet registry's](../examples/pet-registry.md) pets.
 
-**debug panel**: The tool strip Drafter shows under your app while you develop:
-  current state, page history, tests, and more.
+**debug panel**: The tool strip Drafter shows under your app while you develop. It
+  includes the current state, page history, tests, and more.
   [Tour](../start/debug-panel.md); [in depth](../help/debug-panel.md).
 
 **deploy**: To turn your project into a public website with a real address, by
@@ -41,7 +41,7 @@ probably here.
   calling a route: typing, choosing, hovering, clicking.
   [Live updates](../concepts/live-updates.md).
 
-**fragment**: A route's answer that replaces one part of the page instead of all
+**fragment**: A return value that replaces one part of the page instead of all
   of it. [Fragment](fragment.md).
 
 **page**: What a route returns: the state to carry forward plus the list of
@@ -68,14 +68,15 @@ probably here.
   their names become addresses.
   [Routes and pages](../concepts/routes-and-pages.md).
 
-**server**: The program that answers a browser's requests. During development
-  that role is played on your computer; after loading a deployed
-  Drafter app, your own program plays it from inside the browser
-  tab. [How Drafter works](../start/how-drafter-works.md).
+**server**: The program that answers a browser's requests. During development,
+  that role is played by a program on your computer; once a deployed
+  Drafter app has loaded, your own program plays that role from
+  inside the browser tab.
+  [How Drafter works](../start/how-drafter-works.md).
 
 **state**: Your app's memory: one value, almost always a dataclass, passed to
-  every route and carried by every page. Lost on reload, on purpose.
-  [State](../concepts/state.md).
+  every route and carried by every page. State is lost on reload, by
+  design. [State](../concepts/state.md).
 
 **theme**: A ready-made look for the whole site, applied by name with one
   line. [Catalog](themes.md).
@@ -86,7 +87,7 @@ probably here.
 
 ## Words these docs avoid
 
-A few terms you will meet elsewhere, mapped to what the docs say
-instead: a *view* or *handler* is a **route**; a *model* is your
-**State**; *the front end* is the whole app, since Drafter has no
-back end; *widgets* or *elements* are **components**.
+You will meet a few terms elsewhere that these docs replace with
+their own vocabulary: a *view* or *handler* is a **route**; a
+*model* is your **State**; *the front end* is the whole app, since
+Drafter has no back end; *widgets* or *elements* are **components**.

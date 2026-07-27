@@ -72,21 +72,23 @@ start_server(State(["rope", "lantern"]))
 
 ## Notes
 
-- Items that are not strings need converting first: build a list of
-  strings with a loop (`for pet in state.pets:` ... `names.append(pet.name)`)
-  and pass that. For rows of structured data, a
-  [Table](../data/table.md) is usually clearer.
-- An empty list renders as nothing at all. If "nothing" deserves an
-  explanation, use an `if` in your route to show a message like
+- Items that are not strings need to be converted first: build a
+  list of strings with a loop (`for pet in state.pets:` ...
+  `names.append(pet.name)`) and pass that list instead. For rows of
+  structured data, a [Table](../data/table.md) is usually clearer.
+- An empty list renders as nothing at all. If an empty list deserves
+  an explanation, use an `if` in your route to show a message like
   `"Nothing packed yet.\n"` instead of the empty list.
 - In tests, compare structurally:
   `assert_has(index(State(["rope"])), BulletedList(["rope"]))`.
 
 ## Related components
 
-- [NumberedList](numberedlist.md): when order matters.
-- [Table](../data/table.md): rows with multiple columns.
-- [DefinitionList](definitionlist.md): term and definition pairs.
+- [NumberedList](numberedlist.md): numbers the items, for when
+  order matters.
+- [Table](../data/table.md): displays rows with multiple columns.
+- [DefinitionList](definitionlist.md): displays term and definition
+  pairs.
 
 ## External links
 

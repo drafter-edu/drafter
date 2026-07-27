@@ -35,8 +35,8 @@ your own app.
 3. **Expand the visit's Response.** It shows the complete
    `Page(...)` your route returned, written out as Python you can
    copy.
-4. **Assemble the test** above `start_server(...)`: the call on the
-   left, the page on the right.
+4. **Assemble the test** above `start_server(...)`, with the route
+   call as the first argument and the copied page as the second.
 
 The result looks like this (from the compliment machine in
 [Finish and test an app](../tutorials/finishing.md)):
@@ -64,18 +64,18 @@ Freeze pages that are **finished and stable**: the results screen,
 the landing page, a formatted report. The freeze protects work you
 do not intend to touch again.
 
-Prefer hand-written assertions for pages still changing, and for big
-busy pages, where a frozen test fails on every tweak and trains you
-to ignore failures. A couple of `assert_has` checks on the parts
-that matter
-(`assert_has(results(state), "You scored 3 out of 3.")`) age far
-better there.
+For pages that are still changing, and for large, busy pages, prefer
+hand-written assertions. A frozen test on such a page fails on every
+small tweak, which trains you to ignore failures. A couple of
+`assert_has` checks on the parts that matter
+(`assert_has(results(state), "You scored 3 out of 3.")`) hold up far
+better.
 
 ## Updating a stale frozen test
 
 When you *deliberately* redesign a frozen page, its test fails, and
-should: that is the "did you mean to change this?" question being
-asked. Answer it by re-freezing: visit the redesigned page, copy the
+it should: the test is asking whether you meant to change the page.
+Answer by re-freezing: visit the redesigned page, copy the
 new `Page(...)` from the History tab, and replace the old expected
 value. Delete frozen tests for pages that no longer exist.
 
@@ -92,16 +92,16 @@ value. Delete frozen tests for pages that no longer exist.
 - **The frozen page is huge and the test is unreadable**: freeze
   smaller pages, or switch that page to a few `assert_has` checks.
 - **Every tiny styling tweak breaks a frozen test**: that is the
-  deal you signed. Freeze after the styling pass, not before; the
-  [finishing tutorial](../tutorials/finishing.md) orders the steps
-  that way on purpose.
+  trade-off freezing makes. Freeze after the styling pass, not
+  before; the [finishing tutorial](../tutorials/finishing.md) orders
+  the steps that way on purpose.
 
 ## Understand it
 
 Frozen tests are regression tests: the concept is introduced at the
 end of [Test a feature](test-a-feature.md), and
-[Finish and test an app](../tutorials/finishing.md) walks the whole
-freeze-break-fix loop.
+[Finish and test an app](../tutorials/finishing.md) walks through
+the whole cycle of freezing a page, breaking it, and fixing it.
 
 ## See another example
 

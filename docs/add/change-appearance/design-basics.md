@@ -13,8 +13,9 @@ outcome: Apply spacing, color, and typography deliberately.
 
 ## In one sentence
 
-Good-looking pages come from a few teachable habits, generous
-space, restrained color, clear text hierarchy, not from talent.
+Good-looking pages come from a few teachable habits (generous
+space, restrained color, and clear text hierarchy) rather than from
+talent.
 
 ## The idea
 
@@ -27,18 +28,21 @@ and padding (space inside it), group related things close together,
 and let unrelated things drift apart. When a page feels wrong and
 you cannot say why, the answer is usually "not enough space."
 
-**Color wants restraint.** One main color plus one accent goes a
-long way; a page with six colors has none. Two hard rules ride
-along: text must contrast strongly with its background (squint; if
-the text fades, so will your users), and color can never be the
-only carrier of meaning, because not everyone sees it; pair color
-with words or symbols ("Error: ..." in red, not just red).
+**Color needs restraint.** One main color plus one accent goes a
+long way, while a page with six colors has no clear emphasis at
+all. Two hard rules come with color. First, text must contrast
+strongly with its background; squint at the page, and if the text
+fades for you, it will fade for your users. Second, color can never
+be the only carrier of meaning, because not everyone perceives
+color; pair it with words or symbols, such as writing "Error: ..."
+in red rather than relying on red alone.
 
 **Typography is hierarchy.** Sizes should mean something: one page
-title, section headings below it, body text below that, in
+title, section headings below it, and body text below that, with
 [Header](../../reference/components/text/header.md) levels used in
-order. Long lines tire eyes; if text spans the whole window,
-constrain it (`change_width(..., "40em")` is a fine ceiling).
+order. Long lines tire the eyes, so if text spans the whole window,
+constrain its width (`change_width(..., "40em")` is a reasonable
+ceiling).
 
 **The box model is how CSS thinks about space.** Every element is a
 box: content, wrapped in padding, wrapped in a border, wrapped in
@@ -47,8 +51,9 @@ margin. The helpers map straight onto it: `change_padding`,
 
 ## See it
 
-The same content twice: crowded, then spaced and ranked. The only
-differences are space, one accent color, and heading levels:
+This demo shows the same content twice: first crowded, then spaced
+and ranked. The only differences are space, one accent color, and
+heading levels:
 
 ```python drafter height=420
 from drafter import *
@@ -92,24 +97,25 @@ def index() -> Page:
 start_server()
 ```
 
-Cause and effect: the designed version ranks its headings (one
-level 1, sections at 2), boxes each section with padding, caps the
-line length, and spends its single accent color on the one fact
-that matters most.
+Compare cause and effect: the designed version ranks its headings
+(one at level 1, sections at level 2), boxes each section with
+padding, caps the line length, and spends its single accent color
+on the one fact that matters most.
 
 ## What this means for your code
 
 - Apply a [theme](themes.md) first; themes embody most of these
-  rules already, and your job shrinks to not fighting them.
+  rules already, so your main job becomes not fighting them.
 - Reach for space before decoration: a `change_margin` fixes more
   pages than a `change_color`.
 - Keep a tiny palette: pick two colors from the
-  [color table](../../reference/colors.md) and stay loyal.
-- Use `Header` levels for structure, styling functions for
-  emphasis; never a `Header` just to make text big.
-- Check contrast and colorblind-safety once per project: gray on
-  white and red-vs-green meanings are the classic failures, and
-  color-only meaning locks some users out entirely.
+  [color table](../../reference/colors.md) and use only those.
+- Use `Header` levels for structure and styling functions for
+  emphasis. Never use a `Header` only to make text bigger.
+- Check contrast and colorblind-safety once per project: gray text
+  on a white background and red-versus-green distinctions are the
+  classic failures, and meaning carried only by color locks some
+  users out entirely.
 
 ## Where people get confused
 
@@ -119,17 +125,18 @@ that matters most.
   away; padding pushes your own border away from your content. A
   background color fills padding but not margin, which is how to
   tell them apart on screen.
-- **"It looks fine on my screen."** Yours is one size. Narrow the
-  window and watch what happens; capped line widths and flexible
-  layouts (see [Row](../../reference/components/layout/row.md))
-  survive the squeeze.
+- **"It looks fine on my screen."** Your screen is only one of many
+  sizes. Narrow the window and watch what happens: capped line
+  widths and flexible layouts (see
+  [Row](../../reference/components/layout/row.md)) hold up when the
+  window shrinks.
 
 ## Go deeper
 
 - [MDN's box model introduction](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Box_model)
   and [web.dev's design basics](https://web.dev/learn/design/)
   continue where this page stops.
-- [Custom CSS](custom-css.md): the same ideas with real CSS
+- [Custom CSS](custom-css.md) applies the same ideas with real CSS
   selectors.
-- [Improve the design](../../your-project/improve-the-design.md):
-  a usability pass for your project.
+- [Improve the design](../../your-project/improve-the-design.md)
+  walks through a usability pass for your project.

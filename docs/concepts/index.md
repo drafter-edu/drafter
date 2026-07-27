@@ -10,10 +10,11 @@ outcome: See how the ideas fit together.
 
 # Concepts
 
-The ideas behind Drafter, each explained once, properly. You do not
-need to read these in advance; the tutorials and task pages link to
-each concept at the moment you have already used it and it deserves a
-name. Come here when you want the full story, or the overview.
+These pages explain the ideas behind Drafter, each in one place. You
+do not need to read them in advance; the tutorials and task pages
+link to each concept once you have already used the idea and it
+deserves a name. Come here when you want a complete explanation or a
+broader overview.
 
 ## The ladder
 
@@ -36,7 +37,7 @@ Each idea builds on the ones above it:
 - The **task pages** in Add to Your App open with working code and
   link here under "Understand it".
 - The **reference** states exact behavior without explanation, and
-  links here for the why.
+  links here for the reasoning behind it.
 
 If a concept page ever leaves you more confused than you arrived,
 that is a documentation bug we want to know about; see

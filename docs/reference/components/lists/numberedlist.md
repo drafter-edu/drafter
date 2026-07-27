@@ -17,8 +17,9 @@ Group: [Lists](../index.md#lists)
 ## Description
 
 A `NumberedList` turns a Python list into a numbered list on the
-page: 1, 2, 3, one item per entry. Use it when the order is the
-point: steps, rankings, a queue.
+page, with one numbered line (1, 2, 3, ...) per entry. Use it when
+the order matters, as it does for steps in a process, rankings, or
+a queue.
 
 ## Syntax
 
@@ -68,16 +69,19 @@ start_server(State(["Ada", "Babbage", "Captain", "Domino"]))
 
 ## Notes
 
-- The numbers come from position, not from your data; removing the
-  first item renumbers the rest, as the example shows.
-- Everything else behaves like [BulletedList](bulletedlist.md):
-  build strings with a loop for structured items, and an empty list
-  renders as nothing.
+- The numbers come from each item's position, not from your data,
+  so removing the first item renumbers the rest, as the example
+  shows.
+- In every other way, a `NumberedList` behaves like a
+  [BulletedList](bulletedlist.md): structured items should be
+  converted to strings with a loop, and an empty list renders as
+  nothing.
 
 ## Related components
 
-- [BulletedList](bulletedlist.md): when order does not matter.
-- [Table](../data/table.md): rows with multiple columns.
+- [BulletedList](bulletedlist.md): shows the items with bullets,
+  for when order does not matter.
+- [Table](../data/table.md): displays rows with multiple columns.
 
 ## External links
 

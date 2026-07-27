@@ -13,10 +13,11 @@ outcome: Add and remove items from list state.
 
 ## What it does
 
-A to-do list with three pages: the list itself, a page for adding a
-task, and a page for removing one by its number. It is the smallest
-honest version of a whole family of apps (inventories, journals,
-playlists): a list in state, and routes that grow and shrink it.
+This example is a to-do list with three pages: the list itself, a
+page for adding a task, and a page for removing a task by its
+number. It is a minimal version of a whole family of apps, including
+inventories, journals, and playlists: each keeps a list in the state
+and provides routes that grow and shrink the list.
 
 ## Try it
 
@@ -98,28 +99,30 @@ start_server(State(["walk Babbage", "feed Captain"]))
 
 ## The code
 
-The state is one field: `tasks`, a list of strings. Around it, the
-routes pair up: `ask_new_task` shows the form, `save_task` receives
-its value; `ask_remove_task` shows the form, `remove_task` acts on
-it. Every path ends by handing the visitor back to `index`, directly
-or through a button.
+The state is one field: `tasks`, a list of strings. The routes work
+in pairs around it: `ask_new_task` shows a form and `save_task`
+receives its value, while `ask_remove_task` shows a form and
+`remove_task` acts on it. Every path ends by returning the visitor
+to `index`, either directly or through a button.
 
 ## How it works
 
-Two details carry the design:
+Two details are central to the design.
 
-**People count from one, lists from zero.** The page shows tasks
-numbered 1, 2, 3 (that is what `NumberedList` renders), so
-`remove_task` translates: `state.tasks.pop(position - 1)`. Forgetting
-the `- 1` removes the wrong task, off by one, every time.
+**People count from one, but lists count from zero.** The page shows
+tasks numbered 1, 2, 3 (that is what `NumberedList` renders), so
+`remove_task` translates between the two numbering systems with
+`state.tasks.pop(position - 1)`. Forgetting the `- 1` removes the
+wrong task every time, off by one.
 
-**Bad input is a page, not a crash.** The number arrives as a string
-and the route asks two questions before acting: is it digits, and is
-it in range? Anything else falls through to an apologetic page with
-a way back. Notice the parameter is annotated `str`, not `int`, so
-the route sees whatever was typed and gets to be polite about it;
-compare with the [calculator](calculator.md), which makes the same
-choice for the same reason.
+**Bad input becomes a page, not a crash.** The number arrives as a
+string, and the route checks two things before acting: whether the
+text is all digits, and whether the number is in range. Any other
+input leads to an error page with a way back. Notice that the
+parameter is annotated `str`, not `int`, so the route receives
+exactly what was typed and can respond politely. The
+[calculator](calculator.md) makes the same choice for the same
+reason.
 
 ## Make it yours
 
@@ -134,33 +137,36 @@ choice for the same reason.
    [bold](../reference/styling-functions.md), and let the add form
    set it with a `CheckBox`.
 5. **Create**: turn it into a packing list, a reading queue, or a
-   chore rotation; the bones do not change.
+   chore rotation. The underlying structure stays the same.
 
 ## Tests
 
-Three assertions, one per behavior worth protecting: adding appends,
-removing translates the visitor's one-based number correctly (`"2"`
-removes `"b"`), and a bad number produces the error page rather than
-an exception. The off-by-one test is the important one; it fails
-loudly if the `- 1` ever disappears.
+There are three assertions, one for each behavior worth protecting:
+adding a task appends it to the list, removing translates the
+visitor's one-based number correctly (`"2"` removes `"b"`), and a
+bad number produces the error page rather than an exception. The
+off-by-one test is the most important of the three; it fails
+immediately if the `- 1` ever disappears.
 
 ## Likely errors
 
 - **`IndexError` on remove**: the range check `1 <= position <=
   len(state.tasks)` is missing or wrong; without it, `pop` runs on
   positions that do not exist.
-- **A `conversion error` page you did not design**: the `number`
-  parameter got annotated `int`; typing "two" then bypasses your
-  polite fallback. Keep it `str` and convert inside the route.
+- **A `conversion error` page you did not design**: this happens
+  when the `number` parameter is annotated `int`, so typing "two"
+  triggers Drafter's conversion error before your polite fallback
+  can run. Keep the annotation as `str` and convert inside the
+  route.
 - **The list never changes**: `save_task` must `append` to
   `state.tasks`, not to a local copy, and the route must return a
   freshly built page (`return index(state)`), not a stale one.
 
 ## Related
 
-- [Show a collection of items](../add/show-a-collection.md): the
-  how-to behind the list display.
-- [Pet registry](pet-registry.md): the same shape with dataclasses
-  in the list.
-- [NumberedList](../reference/components/lists/numberedlist.md):
-  why the numbering starts at 1.
+- [Show a collection of items](../add/show-a-collection.md) is the
+  how-to guide behind the list display.
+- [Pet registry](pet-registry.md) uses the same structure with
+  dataclasses in the list.
+- [NumberedList](../reference/components/lists/numberedlist.md)
+  explains why the numbering starts at 1.

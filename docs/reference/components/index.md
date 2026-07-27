@@ -33,7 +33,7 @@ text.
 
 ## Actions
 
-Clickable things that run a route.
+Clickable controls that run a route.
 
 | Component | One line |
 | --------- | -------- |
@@ -122,7 +122,7 @@ Structure and spacing.
 
 ## Time
 
-Components that make things happen on a schedule.
+Components that trigger actions on a schedule.
 
 | Component | One line |
 | --------- | -------- |
@@ -160,5 +160,5 @@ Components that make things happen on a schedule.
   `style_*`, `classes`, `id`, and events work on all of these.
 - [Styling functions](../styling-functions.md): wrap any component to
   restyle it.
-- [Add to Your App](../../add/index.md): task pages that show these
-  components doing real work.
+- [Add to Your App](../../add/index.md): task pages that show how
+  these components are used in complete applications.

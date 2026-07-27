@@ -38,9 +38,9 @@ memorizing:
 
 - **State is temporary.** It lives in the browser's memory. Reloading the
   page restarts the app from its initial state. For a course project, that
-  is normally fine, and it means you never have to clean up a database. Trust us,
-  databases are like a whole thing and you'll spend a lot of your life dealing with them;
-  better to hold off until you need one.
+  is normally fine, and it means you never have to clean up a database.
+  Databases bring plenty of complexity of their own, so it is better to
+  hold off on them until you actually need one.
 - **Each visitor gets their own app.** If two people open your site, they
   each get an independent copy with independent state. They cannot see
   each other's clicks.
@@ -79,8 +79,8 @@ start_server(State(0))
 ```
 
 Click the button a few times, then reload your browser tab on your own
-computer and watch the count start over. That is state living, and dying,
-in memory.
+computer and watch the count start over. The count resets because state
+lives only in memory.
 
 ## What this means for your code
 
@@ -94,24 +94,27 @@ in memory.
 
 ## Where people get confused
 
-- **"My app saves things, right?"** No. State is memory, not storage.
-  Close or reload the tab and it resets. We'll eventually learn how to
-  save things to *local storage* in the browser, but that will be much later.
+- **"My app saves things, right?"** No. State is held in memory, not
+  saved to storage, so closing or reloading the tab resets it. You will
+  eventually learn how to save values to *local storage* in the browser,
+  but that comes much later.
 - **"The server crashed"**: there is no server. If the app breaks, the
   cause is in your program, and the error message on the page plus the
   debug panel will point to it.
-- **"Two players can share the score"**: each browser tab is its own
-  world. Multiplayer needs a real backend, which is
+- **"Two players can share the score"**: each browser tab runs its own
+  independent copy of the app. Multiplayer needs a real backend, which is
   [beyond Drafter](../extend/security.md).
 
 ## Go deeper
 
-- [State](../concepts/state.md): designing what your app remembers.
-- [Routes and pages](../concepts/routes-and-pages.md): how pages connect.
-- [Python in the browser](../extend/pyodide.md): how the browser runs
-  Python at all, and what its limits are.
-- [Security honestly](../extend/security.md): exactly what is and is not
-  protected.
+- [State](../concepts/state.md) covers designing what your app
+  remembers.
+- [Routes and pages](../concepts/routes-and-pages.md) explains how
+  pages connect.
+- [Python in the browser](../extend/pyodide.md) describes how the
+  browser runs Python at all, and what its limits are.
+- [Security honestly](../extend/security.md) spells out exactly what is
+  and is not protected.
 
 <div class="grid cards" markdown>
 
@@ -119,8 +122,8 @@ in memory.
 
     ---
 
-    You know the pieces. Now build something worth showing: a virtual
-    pet, first.
+    You know the pieces. The guided projects help you build something
+    worth showing, starting with a virtual pet.
 
     [Go to Guided Projects](../tutorials/index.md)
 

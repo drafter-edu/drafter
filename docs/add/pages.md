@@ -24,9 +24,10 @@ header, and always offer a way back.
 
 ## The smallest version
 
-A new page is a new route: a function with `@route` that returns a
-`Page`. Connect pages with `Button` (an action to click) or `Link` (an
-ordinary text link). Both name their target route as a string:
+To add a page, add a route: a function marked with `@route` that
+returns a `Page`. Connect pages with `Button` (an action to click) or
+`Link` (an ordinary text link). Both name their target route as a
+string:
 
 ```python drafter height=260
 from drafter import *
@@ -60,16 +61,17 @@ def rules() -> Page:
 start_server()
 ```
 
-When to use which: a `Button` looks like an action and is best for doing
-things ("Play", "Submit", "Feed"); a `Link` looks like text and is best
-for going places ("Read the rules", "About"). Either can point to any
-route.
+Which one should you use? A `Button` looks like an action, so it works
+best for doing things ("Play", "Submit", "Feed"). A `Link` looks like
+ordinary text, so it works best for going places ("Read the rules",
+"About"). Either one can point to any route.
 
 ## Recipe: a shared header on every page
 
 When several pages repeat the same top content, write a helper function
 that returns the shared components, and start each page's list with it.
-A list plus a list glues them together:
+Adding the helper's list to the page's own list combines them into one
+content list:
 
 ```python drafter height=300
 from drafter import *
@@ -102,17 +104,17 @@ def about() -> Page:
 start_server()
 ```
 
-Change the header helper once, and every page changes. This is the same
-helper-function habit from the
+When you change the header helper, every page that uses it changes with
+it. This is the same helper-function habit from the
 [virtual pet's mood](../tutorials/virtual-pet.md), applied to content.
 
 ## Recipe: always offer a way back
 
 Every page a visitor can reach should have a button or link leading
 somewhere, usually back to `index`. A page with no way out forces the
-browser's back button, which works but feels like a dead end. Walk your
-own app: from `index`, can you reach every page and return without
-touching the browser controls?
+visitor to use the browser's back button, which works but feels like a
+dead end. Try walking through your own app: starting from `index`, can
+you reach every page and return without touching the browser controls?
 
 ## Common problems
 
@@ -122,21 +124,22 @@ touching the browser controls?
 - **You wrote a route but cannot see it**: nothing links to it yet. A
   route becomes reachable when some page names it, or when you visit its
   address directly.
-- **Two functions with the same name**: Python keeps only the second one,
-  silently. Every route needs its own name.
+- **Two functions with the same name**: Python silently keeps only the
+  second definition. Every route needs its own name.
 - **Your pages have state but the new one errors**: if your app has a
   `State`, every route that page connects to should take `state` as its
   first parameter and pass it along in `Page(state, [...])`.
 
 ## Understand it
 
-[Routes and pages](../concepts/routes-and-pages.md): what a route is, how
-names become addresses, and how Drafter verifies connections.
+[Routes and pages](../concepts/routes-and-pages.md) explains what a
+route is, how names become addresses, and how Drafter verifies
+connections.
 
 ## See another example
 
-[Three linked pages](../examples/ring.md): a minimal ring of pages you
-can walk in a circle.
+[Three linked pages](../examples/ring.md) shows a minimal ring of pages
+you can walk around in a circle.
 
 ## Look it up
 

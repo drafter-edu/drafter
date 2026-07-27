@@ -124,15 +124,15 @@ Its sibling `update_attr` sets an HTML attribute instead of a style:
 update_attr(TextBox("guess"), "placeholder", "Type a number")
 ```
 
-Both return the component, so calls chain. Remember units in style
-values; `"20"` is not a size, `"20px"` is.
+Both return the component, so calls can be nested. Remember to
+include units in style values: `"20"` is not a size, but `"20px"` is.
 
 ## Notes
 
 - Helpers change how content looks, never what it is. Styling a value
-  does not change your state, and styled components still compare as
-  their underlying content plus settings in tests. `assert_style` can
-  check styles directly; see
+  does not change your state, and in tests, styled components are
+  still compared by their underlying content and settings.
+  `assert_style` can check styles directly; see
   [Testing functions](testing-functions.md).
 - The same effects are available as `style_*` keyword arguments on any
   component (`Button("Go", "index", style_color="red")`); see

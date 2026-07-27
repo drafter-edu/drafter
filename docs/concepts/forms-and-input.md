@@ -53,8 +53,8 @@ the value, and the visitor can go back and correct it.
 
 ## See it
 
-The contract in its smallest form. Follow the name `new_name` from the
-`TextBox`, to the button's target route, to the parameter:
+Here is the contract in its smallest form. Follow the name `new_name`
+from the `TextBox`, to the button's target route, to the parameter:
 
 ```python drafter height=240
 from drafter import *
@@ -91,12 +91,13 @@ start_server(State(""))
 ```
 
 The test at the bottom shows something useful: because routes are
-functions, you can hand them input values directly. No typing, no
-clicking, and the contract still holds.
+functions, you can hand them input values directly. The test never
+types or clicks anything, and the contract still holds.
 
-Several inputs on one page become several parameters, and annotations do
-the converting. Type numbers into this one, then try typing `abc` into a
-box to see the conversion error:
+Several inputs on one page become several parameters, and the
+annotations handle the conversions. Type numbers into the example
+below, then try typing `abc` into one of the boxes to see the
+conversion error:
 
 ```python drafter height=260
 from drafter import *
@@ -141,9 +142,9 @@ number is expected.
   parameter names. `new_name` and `first` read well; `textbox1` does not.
 - The button's target route must accept one parameter per input on the
   page, matching each name exactly.
-- Annotate every input parameter. `#!python age: int` gets you a number
-  or a clear error; an unannotated parameter gets you text you must
-  convert yourself.
+- Annotate every input parameter. With `#!python age: int`, the route
+  receives a number or a clear error; without an annotation, it
+  receives text that you must convert yourself.
 - Store what matters into `state` inside the route. Parameters live only
   for that one call; state is what persists to the next page.
 - Test form routes by calling them directly with sample values, as both
@@ -156,8 +157,8 @@ number is expected.
   them character by character; the error message names the parameter it
   expected.
 - **"The value is a string even though it is a number"**: the parameter
-  has no type annotation. Text is the default; annotations opt into
-  conversion.
+  has no type annotation. Values arrive as text unless an annotation
+  asks Drafter to convert them.
 - **"Where did my typed value go after the next click?"** Parameters are
   delivered once, to one route. If the value should live longer, assign
   it to a `state` field.
@@ -167,10 +168,11 @@ number is expected.
 
 ## Go deeper
 
-- [Ask the user for information](../add/ask-for-information.md): recipes
-  for every input component.
-- [State](state.md): where values go when they need to outlive the click.
-- [Type conversion errors](../help/errors/type-conversion-int.md): the
-  error entry for failed conversions.
-- [Dynamic pages](dynamic-pages.md): routes whose output depends on
-  their inputs.
+- [Ask the user for information](../add/ask-for-information.md) has
+  recipes for every input component.
+- [State](state.md) explains where to keep values that need to outlive
+  a single click.
+- [Type conversion errors](../help/errors/type-conversion-int.md) is
+  the error entry for failed conversions.
+- [Dynamic pages](dynamic-pages.md) covers routes whose output depends
+  on their inputs.

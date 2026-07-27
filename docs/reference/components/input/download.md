@@ -16,10 +16,12 @@ Group: [Input](../index.md#input)
 
 ## Description
 
-A `Download` is a link that saves a file when clicked: contents
-your app built, offered under a filename you choose. It is the only
-way anything survives a visitor closing the tab, since
-[state does not](../../../concepts/state.md).
+A `Download` is a link that saves a file to the visitor's device
+when clicked. Your app builds the file's contents and chooses the
+filename it is saved under. Because
+[state does not survive closing the tab](../../../concepts/state.md),
+a downloaded file is the only way for information from your app to
+outlast the visit.
 
 ## Syntax
 
@@ -80,19 +82,20 @@ start_server(State(["Meeting began late."]))
   the download always matches the current state.
 - The extension should match the contents: `.txt` for text, `.png`
   for a `Picture`, `.csv` for comma-separated rows.
-- Downloads go to the visitor's device under their browser's rules
-  (usually the downloads folder); your app never finds out whether
-  they kept it.
+- The visitor's browser decides where downloads are saved (usually
+  the downloads folder); your app is not told whether the visitor
+  kept the file.
 
 ## Accessibility
 
-Say what the file is in the text ("Save the notes"), not "click
-here"; download links surprise people, so the label should promise
-one.
+Make the link text say what the file is ("Save the notes"), not
+"click here". An unexpected download can surprise the visitor, so
+the text should make clear that clicking saves a file.
 
 ## Related components
 
-- [FileUpload](fileupload.md): the door in.
+- [FileUpload](fileupload.md): receiving files from the visitor
+  instead.
 - [Picture](../../data-types/picture.md): images as downloadable
   values.
 

@@ -11,13 +11,15 @@ outcome: Tinker with data display.
 
 # Lists and tables
 
-Five small apps about showing collections. Edit anything; reloading
-resets everything. The full story is
+This page has five small apps about showing collections of data.
+Edit anything you like, and reload the page to reset the demos. The
+full story is
 [Show a collection of items](../../add/show-a-collection.md).
 
 ## Bulleted and numbered
 
-Same data, two components. Swap them and see which reads better.
+The same kind of data appears in two different components. Try
+swapping them and see which one reads better.
 
 ```python drafter height=260
 from drafter import *
@@ -39,8 +41,8 @@ start_server()
 
 ## A list that grows from state
 
-The list component re-renders whatever the state holds. Add
-something ridiculous.
+Each time the page is built, the list component displays whatever
+the state currently holds. Add something ridiculous to the list.
 
 ```python drafter height=280
 from drafter import *
@@ -108,8 +110,8 @@ start_server()
 
 ## DefinitionList: labeled facts
 
-One dataclass instance, rendered as term and definition pairs. Feed
-it a different dataclass.
+A single dataclass instance is rendered as pairs of terms and
+definitions. Try giving it a different dataclass.
 
 ```python drafter height=280
 from drafter import *
@@ -136,8 +138,9 @@ start_server()
 
 ## ProgressBar and Meter: numbers as pictures
 
-A `ProgressBar` shows completion; a `Meter` shows a measurement in a
-range. Click and watch both move.
+A `ProgressBar` shows how much of a task is complete, while a
+`Meter` shows a measurement within a range. Click the button and
+watch both change.
 
 ```python drafter height=280
 from drafter import *
@@ -174,5 +177,7 @@ start_server(State(3))
 
 ## Where next
 
-- [Pet registry](../pet-registry.md): tables over real nested data.
-- [To-do list](../todo-list.md): growing and shrinking list state.
+- The [Pet registry](../pet-registry.md) example uses tables to
+  display real nested data.
+- The [To-do list](../todo-list.md) example grows and shrinks a list
+  kept in state.

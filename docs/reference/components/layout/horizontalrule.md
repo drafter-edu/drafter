@@ -16,10 +16,10 @@ Group: [Layout](../index.md#layout)
 
 ## Description
 
-A `HorizontalRule` draws a line across the page: a visible divider
-between one part of a page and the next. Use it where a page changes
-topic, such as between displayed results and the form that changes
-them.
+A `HorizontalRule` draws a line across the page, giving you a
+visible divider between one part of a page and the next. Use it
+where a page changes topic, such as between displayed results and
+the form that changes them.
 
 ## Syntax
 
@@ -68,18 +68,20 @@ start_server(State(0))
 
 ## Notes
 
-- The rule sits on its own line automatically; no breaks needed
-  around it.
+- The rule sits on its own line automatically, so you do not need
+  line breaks around it.
 - Its color and thickness come from the [theme](../../themes.md);
   restyle one with `style_` keywords if needed
   (`HorizontalRule(style_border="1px dashed gray")`).
-- A rule is decoration with a hint of meaning ("new topic"). For real
-  sectioning with titles, use [Header](../text/header.md).
+- A rule is mostly decorative, though it does suggest a shift to a
+  new topic. To divide a page into titled sections, use
+  [Header](../text/header.md).
 
 ## Related components
 
-- [LineBreak](linebreak.md): a new line without a visible divider.
-- [Header](../text/header.md): titled sections.
+- [LineBreak](linebreak.md): starts a new line without drawing a
+  visible divider.
+- [Header](../text/header.md): gives a section a title.
 
 ## External links
 

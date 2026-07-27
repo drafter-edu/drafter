@@ -47,9 +47,9 @@ Two important boundaries:
 - **State resets on reload.** It lives in the browser's memory. Closing or
   reloading the tab starts over from the initial state, as
   [How Drafter works](../start/how-drafter-works.md) explains.
-- **Fields should be simple.** Use `int`, `str`, `bool`, `float`, lists,
-  and other dataclasses. A list of dataclasses is the right shape for
-  collections: a to-do list, a quiz's questions, a shop's inventory.
+- **Fields should hold basic values.** Use `int`, `str`, `bool`, `float`,
+  lists, and other dataclasses. A list of dataclasses is the right shape
+  for collections: a to-do list, a quiz's questions, a shop's inventory.
 
 ## See it
 
@@ -127,8 +127,8 @@ start_server(State([Pet("Ada", "woof"), Pet("Captain", "meow")]))
 
 ## What this means for your code
 
-- One `State` dataclass per app. If you are tempted to make a second one,
-  you probably want a nested dataclass inside `State` instead.
+- Use one `State` dataclass per app. If you are tempted to make a second
+  one, you probably want a nested dataclass inside `State` instead.
 - Design state by asking, for each page you sketch, "what changes here?"
   Whatever changes must be a field.
 - Compute what you can instead of storing it. A pet's mood that depends on
@@ -151,21 +151,26 @@ start_server(State([Pet("Ada", "woof"), Pet("Captain", "meow")]))
   had. That is usually what users expect, but it can surprise you while
   testing: your latest click is not "lost", you are looking at an earlier
   moment. The History tab shows exactly this timeline. Note that going
-  backward means *replaying the route* that built that page, not *undoing the last route*.
-  If you want to "undo" a click, you need to write a route that does that - subtracting a point, removing the last pet, etc.
+  backward means *replaying the route* that built that page, not *undoing
+  the last route*. If you want to "undo" a click, you need to write a
+  route that reverses it, such as one that subtracts a point or removes
+  the last pet.
 - **"Why not a global variable?"** Global variables are invisible to
   Drafter: they are not shown in the debugger, not carried in history, and
   not checked by `assert_state`. Everything the app remembers belongs in
-  `State`, where the tools can see it. Global variables are bad and evil you should never use them
-  unless you know exactly what you are doing. And trust me, if you think you need a global variable, you probably don't.
-- **"Can I store a dictionary?"** Absolutely! Drafter supports dictionaries, sets, and other built-in types.
+  `State`, where the tools can see it. Avoid global variables unless you
+  know exactly what you are doing; if you think you need one, you
+  probably do not.
+- **"Can I store a dictionary?"** Yes. Drafter supports dictionaries,
+  sets, and other built-in types.
 
 ## Go deeper
 
-- [Remember a score or choice](../add/remember-things.md): recipes for
-  common state patterns.
-- [Show a collection of items](../add/show-a-collection.md): lists of
-  dataclasses on pages.
-- [How Drafter works](../start/how-drafter-works.md): where state lives
-  and why it resets.
-- [Test a feature](../add/test-a-feature.md): `assert_state` and friends.
+- [Remember a score or choice](../add/remember-things.md) has recipes
+  for common state patterns.
+- [Show a collection of items](../add/show-a-collection.md) shows how
+  to display lists of dataclasses on pages.
+- [How Drafter works](../start/how-drafter-works.md) explains where
+  state lives and why it resets.
+- [Test a feature](../add/test-a-feature.md) covers `assert_state` and
+  the related testing functions.

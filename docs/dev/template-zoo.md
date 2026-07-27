@@ -12,9 +12,9 @@ search:
 
 # Template zoo
 
-Every design-system element on one page, with dummy content, for visual and
-accessibility review (STUDENT_DOCS_PLAN.md Phase C). This page renders in
-the Developer zone; open any student page for the light/dark student
+This page collects every design-system element in one place, with dummy
+content, for visual and accessibility review (STUDENT_DOCS_PLAN.md Phase C).
+It renders in the Developer zone; open any student page for the light/dark student
 schemes and any Teach page for the navy scheme. The zone banner above is
 the live one for this page.
 

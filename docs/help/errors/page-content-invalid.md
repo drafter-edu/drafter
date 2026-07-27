@@ -22,33 +22,35 @@ Found int instead.
 The friendly version: "The content you returned in this Page was an
 int, but it needs to be text, a component, or a list of those." A
 related message appears when the list itself is fine but one item
-inside it is not: the verification names the route and the offending
+inside it is not; that message names the route and the offending
 item.
 
 ## What it means
 
-A `Page` shows a list of strings and components, and something you
-put in (or in place of) that list was neither: a number, a dataclass,
-a nested list. Drafter stopped rather than guess how to display it.
+A `Page` displays a list of strings and components. Something you
+put into that list, or in place of the list itself, was neither a
+string nor a component: perhaps a number, a dataclass, or a nested
+list. Drafter stopped rather than guess how to display it.
 
 ## Where to look
 
-The route named in the message. Look at the `Page(...)` call it
-returns and read the content list item by item.
+Start with the route named in the message. Look at the `Page(...)`
+call it returns and read the content list item by item.
 
 ## Check
 
-- **A bare value**: `Page(state, state.score)` hands the content slot
-  a number. Content must be a list.
+- **A bare value**: `Page(state, state.score)` passes a number where
+  the content list belongs. Content must be a list.
 - **A number in the list**: `Page(state, ["Score:", state.score])`;
   every non-text value needs `str()` around it.
 - **A dataclass in the list**: `Page(state, [state.pet])`; show its
   fields (`state.pet.name`) or use a component like
   [Table](../../reference/components/data/table.md) built for
   structured data.
-- **A missing comma**: two adjacent strings without a comma become
-  one string (fine), but a component next to a string without its
-  comma is a syntax error before this error can even appear.
+- **A missing comma**: two adjacent strings without a comma merge
+  into one string, which Python allows, but a component next to a
+  string without its comma is a syntax error that would appear
+  before this one.
 
 ## Fix
 
@@ -70,13 +72,13 @@ The page renders. A structural test pins it down:
 
 ## Prevent
 
-Say `str()` reflexively whenever a number or other value joins page
-content, and keep the content list flat: helper functions that
-produce several components should return a list you add with `+`, not
-nest as an item.
+Get in the habit of wrapping `str()` around any number or other
+value that goes into page content, and keep the content list flat:
+helper functions that produce several components should return a
+list you add with `+`, not nest as an item.
 
 ## Understand
 
 [Page](../../reference/page.md) documents exactly what content can
-hold; [Routes and pages](../../concepts/routes-and-pages.md) is the
-concept behind it.
+hold; [Routes and pages](../../concepts/routes-and-pages.md)
+explains the underlying concept.

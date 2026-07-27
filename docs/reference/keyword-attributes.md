@@ -67,14 +67,14 @@ the component so a CSS rule from
 `id="scoreboard"` gives the component a unique name on the page.
 Ids are how a [Fragment](fragment.md) finds its target
 (`target="#scoreboard"`) and how a [Label](components/input/label.md)
-attaches to an input. One id per page per name; duplicates confuse
-targeting.
+attaches to an input. Use each id only once per page; when two
+components share an id, targeting becomes unreliable.
 
 ## `on_*`: events that call routes
 
 Keywords like `on_click`, `on_input`, and `on_change` name a route
 (as a string, or the function itself) to run when that event
-happens. The supported events: `blur`, `change`, `focus`, `input`,
+happens. The supported events are `blur`, `change`, `focus`, `input`,
 `keydown`, `keyup`, `keypress`, `mouseenter`, `mouseleave`,
 `mouseover`, `mouseout`, `click`, and `dblclick`. The concept, with
 a worked demo, is [Live updates](../concepts/live-updates.md).
@@ -84,22 +84,22 @@ a worked demo, is [Live updates](../concepts/live-updates.md).
 Each component also understands the HTML attributes that make sense
 for its element: `placeholder="Type here"` or `maxlength=20` on a
 `TextBox`, `rows=6` on a `TextArea`, `accept="image/*"` on a
-`FileUpload`, `disabled=True` on a `Button`. A shared baseline
-(`id`, `title`, `hidden`, `data_*` attributes, and friends) works
-everywhere. Underscores become hyphens on the way out, so
-`data_role="hero"` renders as `data-role="hero"`.
+`FileUpload`, `disabled=True` on a `Button`. A shared baseline of
+attributes (`id`, `title`, `hidden`, `data_*` attributes, and
+similar) works on every component. Underscores become hyphens on the
+way out, so `data_role="hero"` renders as `data-role="hero"`.
 
-A keyword the component does not recognize as an attribute is
-treated as a CSS style instead (that rule is what makes bare
-`color="red"` work), so an unsupported attribute quietly becomes a
-meaningless style rather than an error.
+If a component does not recognize a keyword as an attribute, Drafter
+treats the keyword as a CSS style instead. This rule is what makes
+bare `color="red"` work, but it also means an unsupported attribute
+quietly becomes a meaningless style rather than an error.
 
 ## Notes
 
-- **Spelling matters silently.** A misspelled `style_colour` or
-  `on_clik` is not an error; it lands as a CSS property no browser
-  recognizes and does nothing visible. When a keyword seems ignored,
-  check its spelling first.
+- **Misspellings fail silently.** A misspelled `style_colour` or
+  `on_clik` is not an error: it becomes a CSS property that no
+  browser recognizes, so it has no visible effect. When a keyword
+  seems to be ignored, check its spelling first.
 - **Boolean attributes render bare**: `disabled=True` renders as
   `disabled`, the way HTML expects, and `disabled=False` omits the
   attribute entirely.
@@ -111,7 +111,7 @@ meaningless style rather than an error.
 
 - [Styling functions](styling-functions.md): the same styles as
   wrapper functions.
-- [Custom CSS](../add/change-appearance/custom-css.md): making
-  `classes` do work.
-- [Live updates](../concepts/live-updates.md): making `on_*` do
-  work.
+- [Custom CSS](../add/change-appearance/custom-css.md): how to write
+  CSS rules that use your `classes`.
+- [Live updates](../concepts/live-updates.md): how to handle `on_*`
+  events with routes.

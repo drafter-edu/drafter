@@ -13,14 +13,16 @@ outcome: Work with nested data as a list of dataclasses.
 
 ## What it does
 
-A registry of pets: each pet is a dataclass with a name, species, and
-age, the state holds a list of them, and a `Table` shows the whole
-collection at once. New pets arrive through a form whose fields map
-one-to-one onto the dataclass.
+This example keeps a registry of pets. Each pet is a dataclass with
+a name, a species, and an age; the state holds a list of pets; and a
+`Table` shows the whole collection at once. New pets are added
+through a form whose fields map one-to-one onto the dataclass
+fields.
 
-This is the *nested data* pattern, and it is the shape of most final
-projects: a dataclass for the thing, a list of them in state, pages
-to view and add.
+This is the *nested data* pattern, and it is the structure behind
+most final projects: a dataclass that describes one kind of thing, a
+list of those objects in the state, and pages to view the collection
+and add to it.
 
 ## Try it
 
@@ -97,72 +99,77 @@ start_server(State([
 
 ## The code
 
-Two dataclasses with different jobs: `Pet` describes one thing;
-`State` holds the app's whole memory, which here is just the list of
-pets. `Table(state.pets)` does the display work: give it a list of
-dataclasses and it makes a header row from the field names and a row
-per pet.
+The two dataclasses have different jobs. `Pet` describes a single
+pet, while `State` holds the app's whole memory, which in this case
+is only the list of pets. `Table(state.pets)` handles the display:
+given a list of dataclasses, it builds a header row from the field
+names and one row per pet.
 
-The form and the dataclass mirror each other on purpose: three
-fields, three inputs, three parameters. `save_pet` is one line of
-actual work: build the `Pet`, append it.
+The form and the dataclass deliberately mirror each other: three
+dataclass fields, three form inputs, and three route parameters.
+`save_pet` does its work in a single line: it builds the `Pet` and
+appends it to the list.
 
 ## How it works
 
-The interesting move is in `save_pet`'s signature:
-`age: int`. The text box delivers text, the annotation converts it,
-and the `Pet` gets a real number. That matters later: an age stored
-as `"3"` would sort and compare as text.
+The most important detail is in `save_pet`'s signature: `age: int`.
+The text box delivers text, but the annotation tells Drafter to
+convert it, so the `Pet` receives a real number. The conversion
+matters later, because an age stored as the string `"3"` would sort
+and compare as text.
 
 Note what `index` does *not* do: it does not show the pets. Keeping
 the big table on its own page keeps the front page fast to read, and
-it means the table page can grow features (sorting, filtering)
-without crowding the entrance.
+it leaves room for the table page to grow features (sorting,
+filtering) later.
 
 ## Make it yours
 
 1. **Modify**: add Babbage the small black mutt to the starting
    data.
-2. **Modify**: add a `vaccinated: bool` field, a `CheckBox` on the
-   form, and watch the table grow a column by itself.
-3. **Complete**: show the oldest pet's name on the front page (a
-   loop, a comparison, no sorting needed).
+2. **Modify**: add a `vaccinated: bool` field and a `CheckBox` on
+   the form, and notice that the table gains a column automatically.
+3. **Complete**: show the oldest pet's name on the front page. A
+   loop and a comparison are enough; no sorting is needed.
 4. **Combine**: add per-pet detail pages using an `Argument` with
-   the pet's name, the pattern from
+   the pet's name, following the pattern from
    [Show different content](../add/show-different-content.md).
-5. **Create**: this app with different nouns is a library, a garden
-   log, or a team roster. Rename, adjust fields, go.
+5. **Create**: with different nouns, this app becomes a library, a
+   garden log, or a team roster. Rename the dataclasses, adjust the
+   fields, and build from there.
 
 ## Tests
 
 The first test checks the whole add path: calling `save_pet` with
 form values yields a state containing the constructed `Pet`. The
-second checks display structurally: the page contains the expected
-`Table`. Testing tables needs the component form,
-`assert_has(page, Table([...]))`; a text needle does not reach
-inside a table's rows.
+second checks the display structurally: the page must contain the
+expected `Table`. Testing a table requires the component form,
+`assert_has(page, Table([...]))`, because searching for a plain
+string will not match content inside a table's rows.
 
 ## Likely errors
 
-- **Ages that refuse to convert**: typing "three" into the age box
-  stops the route with a
+- **An age that cannot be converted**: typing "three" into the age
+  box stops the route with a
   [conversion error](../help/errors/type-conversion-int.md). If you
-  would rather handle it politely, annotate `str` and convert
-  yourself, as the [to-do list](todo-list.md) does with numbers.
+  would rather handle bad input politely, annotate the parameter as
+  `str` and convert the value yourself, as the
+  [to-do list](todo-list.md) does with numbers.
 - **A `Pet` in the page content**: `Page` cannot render a bare
-  dataclass; it goes in a `Table`, or you show its fields as
+  dataclass. Put the pet in a `Table`, or show its fields as
   strings. See
   [Page content must be a list](../help/errors/page-content-invalid.md).
 - **Field order mixed up**: `Pet(name, species, age)` takes its
-  values in dataclass field order; swapping them produces pets aged
-  "dog".
+  values in dataclass field order, so swapping the values produces
+  nonsense, such as a pet whose age is "dog".
 
 ## Related
 
-- [Show a collection of items](../add/show-a-collection.md): the
-  how-to for lists and tables.
-- [Table](../reference/components/data/table.md): what it accepts
-  and renders.
-- [To-do list](todo-list.md): the same shape with plain strings.
-- [State](../concepts/state.md): why nested dataclasses are the
-  recommended way to grow state.
+- [Show a collection of items](../add/show-a-collection.md) is the
+  how-to guide for lists and tables.
+- [Table](../reference/components/data/table.md) describes what the
+  component accepts and renders.
+- [To-do list](todo-list.md) uses the same structure with plain
+  strings.
+- [State](../concepts/state.md) explains why nested dataclasses are
+  the recommended way to grow state.

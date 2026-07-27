@@ -10,9 +10,10 @@ outcome: Find authoritative details fast.
 
 # Reference
 
-Exact details, organized for lookup. If you know roughly what you are
-looking for, this is the place; if you are still deciding what to add
-to your app, start from [Add to Your App](../add/index.md) instead.
+This section collects exact details, organized for lookup. If you know
+roughly what you are looking for, this is the place to search. If you
+are still deciding what to add to your app, start from
+[Add to Your App](../add/index.md) instead.
 
 ## Components
 
@@ -25,7 +26,7 @@ Everything you can put on a page.
 
 ## Core functions and types
 
-The machinery every app uses.
+The functions and types that every app relies on.
 
 - [route](route.md): the decorator that registers a function as a
   route.
@@ -37,7 +38,8 @@ The machinery every app uses.
 
 ## Partial updates
 
-For apps that change part of a page instead of the whole thing.
+For apps that change part of a page instead of replacing the whole
+page.
 
 - [Fragment](fragment.md): replace one part of the current page.
 - [Update](update.md): change state without rendering anything.

@@ -22,7 +22,7 @@ it apply everywhere.
 You have used [styling helpers](helpers.md) and know the
 [box model](design-basics.md). CSS adds one idea to what you
 already do: a *selector* says which elements a rule applies to, so
-styling stops being per-component.
+you no longer have to style one component at a time.
 
 ## The smallest version
 
@@ -54,12 +54,13 @@ def index() -> Page:
 start_server()
 ```
 
-Change the rule once and every `notice` follows. That is the whole
-trade: a little setup, then consistency for free.
+Change the rule once, and every `notice` changes with it. That is
+the trade CSS offers: a little setup in exchange for consistency.
 
 ## Selectors 101
 
-The four you need, in order of usefulness:
+You need only four kinds of selector, listed here in order of
+usefulness:
 
 | Selector | Applies to | Example |
 | -------- | ---------- | ------- |
@@ -68,9 +69,9 @@ The four you need, in order of usefulness:
 | `.a .b` | Things tagged `b` inside things tagged `a` | `.card .title` |
 | `#name` | The one component with `id="name"` | `#scoreboard` |
 
-Tag selectors plus the component reference's "External links" tell
-you what to target: a `Header(...)` at level 1 is an `h1`, every
-`Button` is a `button`.
+To find which tag a component renders as, check the "External
+links" section of its reference page: a `Header(...)` at level 1 is
+an `h1`, and every `Button` is a `button`.
 
 ```python drafter height=260
 from drafter import *
@@ -98,45 +99,46 @@ add_website_css(".notice", "border: 2px solid navy;")
 add_website_css(".notice { border: 2px solid navy; }")
 ```
 
-With two arguments, the first is the selector and the second the
-declarations to wrap in braces. With one argument, you are handing
-over raw CSS, several rules at once if you like.
+With two arguments, the first is the selector and the second is the
+declarations that belong inside the braces. With one argument, you
+are handing over raw CSS, which can contain several rules at once.
 
 ## Style tags inside a page
 
-CSS from `add_website_css` applies sitewide. For a rule only one
-page needs, the `Page`'s `css` parameter injects it with that page
-only; it is an advanced corner documented on
+CSS from `add_website_css` applies to the whole site. When only one
+page needs a rule, the `Page`'s `css` parameter attaches the rule
+to that page alone. This is an advanced feature documented on
 [Page](../../reference/page.md).
 
 ## Where this sits with themes
 
-Themes are CSS too, loaded before yours, so your rules usually win
-when they target the same thing precisely. A theme with strong
-opinions can still surprise you; when your rule seems ignored, see
-the [specificity gotcha](gotchas.md). Building a look entirely your
-own is easiest from `set_website_style("none")`, the blank slate.
+Themes are CSS too, and they load before yours, so your rules
+usually win when they target the same element precisely. A strongly
+opinionated theme can still override you; when your rule seems to
+be ignored, see the [specificity gotcha](gotchas.md). To build a
+look entirely your own, start from `set_website_style("none")`, the
+blank slate.
 
 ## Common problems
 
-- **The rule does nothing**: check the selector against the
-  rendered reality: `classes="notice"` pairs with `.notice` (dot in
-  the selector, not in the keyword), and misspelled selectors fail
-  silently.
+- **The rule does nothing**: check the selector against what is
+  actually rendered. `classes="notice"` pairs with `.notice` (the
+  dot belongs in the selector, not in the keyword), and a
+  misspelled selector fails silently.
 - **The rule styles too much**: `button` styles every button,
-  including ones you forgot; prefer classes for anything less than
-  a sitewide decision.
-- **The theme fights back**: see
-  [Styling gotchas](gotchas.md) for specificity and the escape
-  hatches.
+  including ones you forgot about. Prefer classes for anything less
+  than a sitewide decision.
+- **The theme overrides your rule**: see
+  [Styling gotchas](gotchas.md) for specificity and the ways around
+  it.
 - **It styles the debug panel too**: broad selectors like `body`
-  reach Drafter's own furniture; target your content instead (the
-  [gotchas page](gotchas.md) names the right container).
+  also reach Drafter's own interface. Target your content instead;
+  the [gotchas page](gotchas.md) names the right container.
 
 ## Understand it
 
-[Design basics](design-basics.md) is the why behind the rules;
-selectors are the only new machinery here.
+[Design basics](design-basics.md) explains the reasoning behind the
+rules. Selectors are the only new machinery on this page.
 
 ## See another example
 
@@ -150,4 +152,5 @@ and [classes](../../reference/keyword-attributes.md).
 
 ## Fix a problem
 
-[Styling gotchas](gotchas.md): the weird parts, collected.
+[Styling gotchas](gotchas.md) collects the surprising parts of
+styling in one place.

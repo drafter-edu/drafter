@@ -18,8 +18,8 @@ Group: [Layout](../index.md#layout)
 
 ## Description
 
-A `Div` is a box around content: invisible by itself, and the
-standard thing to style, space, and tag with
+A `Div` is a box around content. It is invisible on its own, but it
+is the standard component to style, space, and tag with
 [classes](../../keyword-attributes.md). When several pieces of
 content should be treated as one unit (a card, a section, a panel),
 wrap them in a `Div`.
@@ -33,9 +33,11 @@ Div(content, more_content, ...)
 ## Parameters
 
 `Div` takes any number of strings and components as positional
-arguments, its contents in order. Like every component, it accepts
-[styling and attribute keywords](../../keyword-attributes.md),
-which is usually the point of using one.
+arguments, which become its contents in order. Like every component,
+it accepts
+[styling and attribute keywords](../../keyword-attributes.md);
+applying those is usually the reason to use a `Div` in the first
+place.
 
 ## Examples
 
@@ -67,8 +69,8 @@ def index() -> Page:
 start_server()
 ```
 
-A helper returning a styled `Div`, as here, is how repeated visual
-units stay consistent.
+Writing a helper function that returns a styled `Div`, as this
+example does, keeps repeated visual units consistent.
 
 ## Notes
 
@@ -76,15 +78,16 @@ units stay consistent.
   inline grouping use [Span](span.md), and for side-by-side layout
   use [Row](row.md).
 - `Box` and `Division` are aliases for the same component.
-- Unstyled `Div`s do nothing visible; if you are wrapping without
-  styling or classing, you probably do not need the wrapper.
+- An unstyled `Div` does nothing visible; if you are wrapping
+  content without adding styling or a class, you probably do not
+  need the wrapper.
 
 ## Related components
 
-- [Span](span.md): the inline sibling.
-- [Row](row.md): a Div that lays out horizontally.
+- [Span](span.md): groups content inline instead of in a block.
+- [Row](row.md): a `Div` that arranges its contents side by side.
 - [Custom CSS](../../../add/change-appearance/custom-css.md):
-  classes plus Divs, the card pattern.
+  shows how classes and `Div`s combine into the card pattern.
 
 ## External links
 

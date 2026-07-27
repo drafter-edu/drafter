@@ -19,7 +19,7 @@ requests from inside the browser itself.
 
 ## The idea
 
-Three characters, three jobs:
+The web has three main participants, each with its own job:
 
 - **The browser** (Chrome, Firefox, Safari) is a program on your
   device that asks for pages, receives them as HTML, and draws them.
@@ -28,9 +28,11 @@ Three characters, three jobs:
 - **A URL** is the address that connects them: which server to ask,
   and for what.
 
-When you visit a normal website, the conversation loops: browser
-requests, server responds, browser renders, you click, browser
-requests again. The server is the app; the browser is its display.
+When you visit a typical website, the conversation repeats: the
+browser requests a page, the server responds, the browser renders
+the result, and each click starts another request. In that
+arrangement, the server is the application and the browser is its
+display.
 
 ### Reading a URL
 
@@ -48,12 +50,12 @@ scheme     host           path         query
 
 ### Where Drafter fits
 
-A deployed Drafter app bends the usual story. The server (GitHub
+A deployed Drafter app changes this arrangement. The server (GitHub
 Pages) hands over one package: the page, the Python runtime, and your
 program. After that, the "server" your buttons talk to is your own
-program, running inside the browser tab. Clicking Feed does not cross
-the internet; it calls your route function a few millimeters from
-where you clicked.
+program, running inside the browser tab. Clicking a button does not
+send a request across the internet; it calls your route function
+right there in the tab.
 
 That is why these docs keep saying there is no backend: after
 loading, there is no distant computer running your code. Everything
@@ -61,7 +63,7 @@ the app knows and does lives in the visitor's tab.
 
 ## See it
 
-Two versions of the same click:
+The diagram below shows the same click handled both ways:
 
 ```text
 A classic web app:                 A Drafter app, deployed:
@@ -89,16 +91,16 @@ network again: the package comes from the server.)
 - **`localhost` addresses are private and temporary.** While you
   develop, your app's address looks like `http://localhost:8080`.
   `localhost` always means "this same device", so the address is
-  meaningless to anyone else, and it dies when your program stops.
-  Sharing your app means [deploying it](../your-project/deploy/index.md),
-  which mints a real host name.
+  meaningless to anyone else, and it stops working when your program
+  stops. To share your app, [deploy it](../your-project/deploy/index.md),
+  which gives it a real host name.
 - **Each visitor gets their own app.** With no shared server, two
   people using your deployed app are running two separate copies;
   nothing one does is visible to the other. A shared high-score
   board needs a real backend, which is
   [beyond Drafter on purpose](../teach/why-drafter.md).
 - **Reload starts over.** State lives in the tab's memory, so
-  reloading is a fresh copy of the app. See
+  reloading starts a fresh copy of the app. See
   [State](state.md).
 - **Nothing in your app is secret.** The whole program ships to
   every visitor's browser, where anyone can read it. Never put a
@@ -108,21 +110,22 @@ network again: the package comes from the server.)
 ## Where people get confused
 
 - **"My site is running, here is the localhost link."** That link
-  reaches your device only, and only while the program runs. Deploy
-  to share.
+  reaches your device only, and only while the program runs. To share
+  the app, deploy it.
 - **"The server saves my data."** There is no server after loading;
   nothing is saved anywhere unless you build saving into the app.
 - **"HTTPS means my login page is secure."** HTTPS encrypts the
   connection. It says nothing about your app's logic; a simulated
   login is still a simulation, delivered securely.
 - **"If I hide the code, visitors can't see it."** Delivering the
-  app means delivering the code. Obscurity is not protection.
+  app means delivering the code, and making the code harder to read
+  does not make it secret.
 
 ## Go deeper
 
-- [How Drafter works](../start/how-drafter-works.md): the runtime
-  model, from your side of the keyboard.
-- [Deploy and submit](../your-project/deploy/index.md): turning
-  localhost into a real address.
-- [Python in the browser](../extend/pyodide.md): how a browser runs
-  Python at all.
+- [How Drafter works](../start/how-drafter-works.md) explains the
+  same runtime model from the programmer's point of view.
+- [Deploy and submit](../your-project/deploy/index.md) shows how to
+  turn a localhost address into a real one.
+- [Python in the browser](../extend/pyodide.md) describes how a
+  browser can run Python at all.

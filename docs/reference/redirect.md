@@ -12,11 +12,11 @@ outcome: Navigate from inside a route.
 
 # Redirect
 
-A `Redirect` is a route's way of answering "actually, go run that
-other route." Where `return index(state)` builds the other page
-*inside* the current request, a `Redirect` makes the browser
-properly navigate: the address updates and the back button learns a
-new entry.
+Returning a `Redirect` tells the browser to leave the current route
+and run a different one. Where `return index(state)` builds the
+other page *inside* the current request, a `Redirect` makes the
+browser perform a real navigation: the address bar updates, and the
+destination is added to the browser history.
 
 ## Syntax
 
@@ -34,9 +34,11 @@ Redirect("route_name", None, some_parameter="value")
 
 ## Example
 
-A submit route that does its work, then sends the visitor to a
-proper thank-you page whose address they can bookmark and whose back
-button behaves:
+In this example, the `sign` route records the signature, then
+redirects the visitor to a thank-you page. Because the redirect is a
+real navigation, the thank-you page has its own address that the
+visitor can bookmark, and the back button treats it as a page of its
+own:
 
 ```python drafter height=280
 from drafter import *
@@ -80,9 +82,9 @@ start_server(State([]))
 
 ## Notes
 
-- **When to prefer plain calling**: `return index(state)` is
-  simpler and right for most "show the front page again" endings.
-  Reach for `Redirect` when the destination should be a real
+- **When to prefer plain calling**: `return index(state)` is the
+  right ending for most routes that finish by showing the front page
+  again. Use `Redirect` when the destination should be a real
   navigation: the address bar updates, and pressing back from the
   destination returns *here* rather than skipping it.
 - **Kwargs fill parameters**: `Redirect("thanks", state,
@@ -100,4 +102,4 @@ start_server(State([]))
   payloads.
 - [Live updates](../concepts/live-updates.md): where redirects fit
   among the payloads.
-- [route](route.md): how targets resolve.
+- [route](route.md): how route names are matched to routes.

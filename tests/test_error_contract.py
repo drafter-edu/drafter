@@ -427,9 +427,7 @@ class TestVisitLifecycle:
         def duplicate_handler():
             return Page(None, [TextBox("answer"), TextBox("answer")])
 
-        request, response = self._visit(
-            started_server, "duplicates", duplicate_handler
-        )
+        request, response = self._visit(started_server, "duplicates", duplicate_handler)
         assert response.status_code == STATUS_ERROR
         envelope = response.errors[0]
         assert envelope.id == "payload.verification_failed"

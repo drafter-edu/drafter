@@ -13,8 +13,8 @@ outcome: Get the site live.
 
 ## Goal
 
-Your prepared app, live on the web with a shareable URL, hosted for free
-by GitHub Pages.
+By the end of this page, your prepared app will be live on the web with
+a shareable URL, hosted for free by GitHub Pages.
 
 ## Before you start
 
@@ -37,8 +37,8 @@ You need three things:
     unlocks student benefits and makes it easier for instructors to
     recognize you.
 
-The flow is: put your code in the repository, turn on Pages, run the
-workflow, get your URL.
+The overall flow has four parts: put your code in the repository, turn
+on Pages, run the workflow, and collect your URL.
 
 ## Step 1: Put your code in the repository
 
@@ -68,9 +68,9 @@ workflow, get your URL.
     ![The commit dialog with a text field for the commit message and a Commit changes button](images/deployment_github_commit.png)
 
 Your whole program lives in `main.py`. If your app uses other files,
-images, data files, add them too: **Add file**, then **Upload files**,
-drag them in next to `main.py`, and commit. Every file your program
-opens must be here, or it will
+such as images or data files, add them too: click **Add file**, then
+**Upload files**, drag the files in next to `main.py`, and commit.
+Every file your program opens must be here, or it will
 [404 on the live site](../../help/errors/missing-asset-on-deploy.md).
 
 ??? example "Show the upload screen"
@@ -103,8 +103,8 @@ of a failed first deployment.
 
 The deployment takes a minute or two. Watch its progress in the Actions
 tab: a green checkmark means success. A red X means something needs
-fixing; [Fix a failed deployment](troubleshooting.md) walks you from
-the red X to the exact error and back here.
+fixing, and [Fix a failed deployment](troubleshooting.md) explains how
+to find the exact error and get back on track.
 
 ??? example "Show the Actions tab"
     ![The Actions tab listing workflow runs, with the deploy workflow in the left sidebar](images/deployment_github_actions.png)
@@ -121,13 +121,13 @@ the red X to the exact error and back here.
     ![A successful workflow run showing a green checkmark and the deployed site URL](images/deployment_github_success.png)
 
 The URL looks like `https://your-username.github.io/your-repository/`.
-That is your site's address; share that one, not the `github.com`
+That is your site's address. Share that one, not the `github.com`
 repository link and not any `localhost` address.
 
 **Does everything work, on both devices?** Then congratulations: you
-built a piece of software and shipped it to the web, where anyone on
+built a piece of software and published it on the web, where anyone on
 Earth can use it. That is not a small thing. Save the URL somewhere you
-will find it again; this link belongs in a portfolio.
+will find it again, because this link belongs in a portfolio.
 
 One more thing before you celebrate too hard: if this project is for a
 course, **you are probably not done yet**. Courses usually have their
@@ -136,25 +136,28 @@ instructions now and finish those while everything is fresh.
 
 ## Updating a deployed site
 
-The site redeploys when you tell it to, not on every commit. To ship a
-change: edit or upload the files (Step 1), then run the workflow again
-(Step 3). The newest run in the Actions list is the one that counts.
+The site redeploys only when you run the workflow, not on every commit.
+To publish a change, edit or upload the files (Step 1), then run the
+workflow again (Step 3). The newest run in the Actions list determines
+what is live.
 
 ## Common problems
 
-- **The first run fails immediately**: Pages is probably not enabled;
-  redo Step 2, then run the workflow again.
-- **The site is up but a picture or file is missing**: it was never
-  uploaded to the repository. Upload it next to `main.py` and redeploy.
+- **The first run fails immediately**: Pages is probably not enabled.
+  Redo Step 2, then run the workflow again.
+- **The site is up but a picture or file is missing**: the file was
+  never uploaded to the repository. Upload it next to `main.py` and
+  redeploy.
 - **The site shows an old version**: you committed changes but did not
   run the workflow again, or the browser cached the old page. Redeploy,
   then hard-refresh.
-- Anything else: [Fix a failed deployment](troubleshooting.md) walks the
-  error logs.
+- For anything else, [Fix a failed deployment](troubleshooting.md)
+  shows how to read the error logs.
 
 ## Understand it
 
-[Deploy and submit](index.md): what compiling to a static site means.
+[Deploy and submit](index.md) explains what compiling to a static site
+means.
 
 ## See another example
 

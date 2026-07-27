@@ -16,11 +16,12 @@ Group: [Input](../index.md#input)
 
 ## Description
 
-A `SelectBox` is a dropdown: the visitor picks exactly one option
-from a list you define, and the chosen text arrives at the route as
-a parameter with the box's name. Use it when the options are many
-or the page is tight; when all options deserve to be visible at
-once, use [RadioButtonGroup](radiobuttongroup.md).
+A `SelectBox` is a dropdown menu. The visitor picks exactly one
+option from a list you define, and the chosen option's text arrives
+at the route as a parameter with the box's name. Use it when there
+are many options or little room on the page; when all the options
+should be visible at once, use a
+[RadioButtonGroup](radiobuttongroup.md).
 
 ## Syntax
 
@@ -79,21 +80,23 @@ start_server(State("aquarium"))
   cannot type something unexpected.
 - Passing the current state value as the default, as above, keeps
   the box showing what was last chosen.
-- Options are display text and value at once; to show friendly
-  labels but receive codes, you have outgrown `SelectBox` politely
-  and want a lookup in the route instead.
+- Each option is both the display text and the submitted value.
+  `SelectBox` cannot show one label while sending a different code;
+  if you need that, receive the label and look up the matching code
+  inside the route.
 
 ## Accessibility
 
-Give the box a visible label ("Current destination:" text or a
-[Label](label.md)); a bare dropdown floating in space reads as a
-mystery to everyone, screen readers most of all.
+Give the box a visible label (the "Current destination:" text or a
+[Label](label.md)); without one, the dropdown's purpose is unclear
+to everyone, and especially to screen-reader users.
 
 ## Related components
 
-- [RadioButtonGroup](radiobuttongroup.md): same choice, all options
-  visible.
-- [RelatedCheckBox](relatedcheckbox.md): choose several.
+- [RadioButtonGroup](radiobuttongroup.md): the same kind of choice
+  with all options visible.
+- [RelatedCheckBox](relatedcheckbox.md): choose several options
+  instead.
 
 ## External links
 

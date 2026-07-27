@@ -36,25 +36,27 @@ from the error, in quotes.
 
 ## Not an error, but broken anyway
 
-- Code after `start_server()` never runs:
+- If code placed after `start_server()` never runs, nothing is wrong:
   [that is how start_server works](nothing-after-start-server.md).
-- No error message at all, wrong behavior:
-  [Troubleshooting](../troubleshooting.md), organized by symptom.
+- If there is no error message but the app behaves incorrectly, see
+  [Troubleshooting](../troubleshooting.md), which is organized by symptom.
 
 ## Python's own errors
 
-`SyntaxError`, `NameError`, `TypeError`, `IndexError`, and friends
-are Python speaking, not Drafter. Drafter's error page explains the
-common ones in plain language above the traceback; read the friendly
-part first, then go to the line it names. The habits in
-[Reading an error page](../index.md#reading-an-error-page) apply.
+`SyntaxError`, `NameError`, `TypeError`, `IndexError`, and similar
+messages come from Python itself, not from Drafter. Drafter's error
+page explains the common ones in plain language above the traceback.
+Read that friendly explanation first, then go to the line it names.
+The habits in
+[Reading an error page](../index.md#reading-an-error-page) apply
+here as well.
 
 ## How these pages work
 
 Every entry follows the same eight steps: the error verbatim, what it
 means, where to look, how to check which cause you have, the fix, how
-to confirm, how to prevent it, and a link to the concept that repairs
-the misunderstanding. If your error is not listed and the friendly
-message does not get you unstuck, consider a
-[bug report](../bug-reports.md); the index grows from real student
-errors.
+to confirm, how to prevent it, and a link to the concept page that
+addresses the underlying misunderstanding. If your error is not
+listed and the friendly message does not resolve the problem,
+consider a [bug report](../bug-reports.md); this index grows from
+the errors students actually encounter.

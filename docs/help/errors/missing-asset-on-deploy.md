@@ -34,16 +34,16 @@ such file" answer.
 
 ## Where to look
 
-The repository on GitHub. Compare the files listed there against
-every filename your program mentions.
+Look at the repository on GitHub. Compare the files listed there
+against every filename your program mentions.
 
 ## Check
 
 - **The file was never uploaded**: it exists on your computer but not
   in the repository listing.
 - **The name differs**: `Ada.PNG` uploaded, `ada.png` in the code.
-  Deployed sites are case-sensitive even where your own computer is
-  forgiving.
+  Deployed sites treat filenames as case-sensitive even if your own
+  computer does not.
 - **The path differs**: the code says `images/ada.png`, but the file
   was uploaded to the repository root (or the reverse).
 
@@ -68,7 +68,8 @@ through the pages that show images or open files.
 
 ## Understand
 
-[What deploying means](../../your-project/deploy/index.md): the
-deployed site is exactly the repository's contents, nothing more.
+[What deploying means](../../your-project/deploy/index.md) explains
+that the deployed site contains exactly what is in the repository
+and nothing more.
 [Fix a failed deployment](../../your-project/deploy/troubleshooting.md)
-covers the wider failure family.
+covers the broader set of deployment failures.

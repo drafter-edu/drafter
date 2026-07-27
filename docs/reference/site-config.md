@@ -109,9 +109,10 @@ duration in seconds (0.5 by default).
 set_button_spinners(True)
 ```
 
-While a pressed button's request is being processed, the button shows
-a small spinner and is temporarily disabled. Helpful when a route does
-slow work and users might click twice.
+When spinners are turned on, a pressed button shows a small spinner
+and is temporarily disabled while its request is being processed.
+This is helpful when a route does slow work and a visitor might
+otherwise click twice.
 
 ## Adding raw content
 
@@ -185,7 +186,8 @@ app rather than your debugger.
 show_debug_information()
 ```
 
-Turns the debug panel back on; the default during development.
+Turns the debug panel back on. The panel is on by default during
+development.
 
 ### set_error_page
 
@@ -193,10 +195,10 @@ Turns the debug panel back on; the default during development.
 set_error_page("Oh no!", "Something broke. Try the home page.", False)
 ```
 
-Customizes the built-in error page: a custom heading, a custom
-friendly message, and whether technical details (the error message and
-traceback) are shown. Deployed sites often pass `False` so visitors
-never see a traceback.
+Customizes the built-in error page. The three arguments set the
+heading, the friendly message shown to visitors, and whether technical
+details (the error message and traceback) are shown. Deployed sites
+often pass `False` so visitors never see a traceback.
 
 ### deploy_site
 
@@ -215,6 +217,6 @@ used.
   exist as keyword arguments there; the functions above are the
   clearer form.
 - [Change the appearance](../add/change-appearance/index.md): the
-  styling tiers in how-to form.
+  styling tiers, presented as how-to guides.
 - [Prepare for release](../your-project/deploy/prepare.md): which of
   these to call before you deploy.

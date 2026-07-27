@@ -41,12 +41,12 @@ your state changes.
 Pages connect through their content. A `#!python Button("Play", "play")`
 or a `#!python Link("About this site", "about")` names the route to go to.
 Clicking runs that route, and the `Page` it returns replaces the current
-one. That is all navigation is: functions naming other functions.
+one. Navigation is nothing more than functions naming other functions.
 
 ## See it
 
-A three-page site. Every page can reach the other two, so you can walk in
-a circle:
+Here is a three-page site. Every page can reach the other two, so you
+can walk in a circle:
 
 ```python drafter height=240
 from drafter import *
@@ -112,22 +112,23 @@ Link `Play` points to non-existent page `play`.
 
 - **"Where do I write the URL?"** You do not. The function name is the
   address. `@route` handles the mapping.
-- **"Can two routes share a name?"** No. One name, one page. Two functions
-  with the same name is also a Python mistake: the second quietly replaces
-  the first.
-- **"My button does nothing"**: buttons never do nothing; they either
-  navigate or show an error. If the page will not display, read the error
-  text; it usually names a missing or misspelled route.
-- **"Which route runs first?"** `index`, always. The order you define
-  routes in the file does not matter to visitors, only to readers of your
-  code, so keep `index` first for their sake.
+- **"Can two routes share a name?"** No; each name belongs to exactly one
+  route. Defining two functions with the same name is also a Python
+  mistake: the second definition quietly replaces the first.
+- **"My button does nothing"**: a button always does something; it either
+  navigates or produces an error. If the page will not display, read the
+  error text; it usually names a missing or misspelled route.
+- **"Which route runs first?"** `index` always runs first. The order you
+  define routes in the file does not matter to visitors, only to readers
+  of your code, so keep `index` first for their sake.
 
 ## Go deeper
 
-- [Add and connect pages](../add/pages.md): recipes for linking pages.
-- [State](state.md): what travels between your pages.
-- [Dynamic pages](dynamic-pages.md): one route that renders many
-  different pages.
+- [Add and connect pages](../add/pages.md) has recipes for linking
+  pages together.
+- [State](state.md) explains what travels between your pages.
+- [Dynamic pages](dynamic-pages.md) shows how one route can render
+  many different pages.
 - [route (reference)](../reference/route.md) and
-  [Page (reference)](../reference/page.md): exact behavior and
-  parameters.
+  [Page (reference)](../reference/page.md) document exact behavior
+  and parameters.

@@ -10,7 +10,7 @@ outcome: Choose the right help path.
 
 # Help
 
-Something is wrong. Start from what you can see:
+When something goes wrong, start from what you can see:
 
 - **You have an error message.** Look it up in the
   [error index](errors/index.md), which is organized by the words in
@@ -45,12 +45,14 @@ three things:
 3. The smallest piece of code that shows the problem.
 
 The debug panel's bug-report download bundles most of this
-automatically; even when your problem is a homework question rather
-than a Drafter bug, the bundle is a fine thing to hand a helper.
+automatically. Even when your problem is a homework question rather
+than a Drafter bug, the bundle gives a helper most of what they
+need.
 
 ## The five-minute checklist
 
-Before deep debugging, the classics:
+Before you settle in for any deep debugging, run through the
+classic checks:
 
 - Did you save the file? Is the running app actually the saved
   version?

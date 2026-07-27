@@ -13,11 +13,11 @@ outcome: Edit a running app, see the result, and recover from a first error.
 
 ## What you'll build
 
-Nothing new. Instead, you will practice the loop you will use hundreds of
-times: **edit the code, save, reload, see the change**. Then you will break
-the app on purpose, read the error, and fix it. Knowing how breakage looks
-when you caused it deliberately makes it far less alarming when it happens
-by accident.
+This step adds nothing new to the app. Instead, you will practice the
+loop you will use hundreds of times: **edit the code, save, reload, see
+the change**. Then you will break the app on purpose, read the error, and
+fix it. Knowing what breakage looks like when you cause it deliberately
+makes it far less alarming when it happens by accident.
 
 ## What you need
 
@@ -63,8 +63,8 @@ On your computer, the loop is:
 3. **Look**: the site reloads with your change.
 
 Try it now: change `"Current count: "` to a message of your own, save, and
-run. The page shows your text. That round trip is the whole rhythm of
-building with Drafter.
+run. The page shows your text. That round trip is the rhythm you will
+follow whenever you build with Drafter.
 
 ## Step 2: Add a second button
 

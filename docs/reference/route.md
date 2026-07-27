@@ -37,8 +37,8 @@ def some_name(state: State) -> Page: ...
 
 The route registered from `def feed(...)` is what
 `Button("Feed", "feed")` points at, and what the browser shows as the
-page's address. The route named `index` is special: it is the front
-page, shown when your app starts, and every app must have one.
+page's address. The route named `index` is special: it builds the
+front page shown when your app starts, and every app must have one.
 
 ```python drafter height=220
 from drafter import *
@@ -68,9 +68,9 @@ start_server()
 When a route runs, Drafter fills its parameters in a fixed order:
 
 1. **State comes first.** If the first parameter is named `state`, it
-   receives the current state. (If you name it something else, Drafter
-   can usually still tell, but `state` is the convention and the docs
-   use it everywhere.)
+   receives the current state. (Drafter can usually still identify the
+   state parameter if you name it something else, but `state` is the
+   convention and the docs use it everywhere.)
 2. **Form values bind by name.** Each input component's `name` must
    match a parameter: `TextBox("guess")` fills a parameter called
    `guess`. The parameter's type annotation controls conversion, so
@@ -118,19 +118,20 @@ start_server(State("none yet"))
 
 ## Notes
 
-- **Route names must be unique.** Defining two functions with the same
-  name keeps only the second, silently; Python does that, not Drafter.
+- **Route names must be unique.** If you define two functions with the
+  same name, Python silently keeps only the second definition; this is
+  Python's behavior, not Drafter's.
 - **Routes are ordinary functions.** You can call one from another
   (`return index(state)`) and call them directly in tests
   (`assert_state(save(State("x"), "Ada", 4), State("Ada (4 years old)"))`).
 - **Custom addresses** from `@route("...")` are normalized before
-  matching: extra slashes are trimmed, and in the heavily cleaned form
-  only letters, numbers, and underscores survive. Buttons and links can
-  target the custom address string.
+  matching: extra slashes are trimmed, and in the most heavily cleaned
+  form, only letters, numbers, and underscores are kept. Buttons and
+  links can target the custom address string.
 - **Advanced injection (L4):** parameters named `_server`,
   `_configuration`, or `_request` receive framework objects instead of
-  form values. You will not need these outside of
-  [Extend](../extend/index.md) territory.
+  form values. You will not need these outside of the advanced
+  material in [Extend](../extend/index.md).
 
 ## Related
 
@@ -138,4 +139,4 @@ start_server(State("none yet"))
 - [Routes and pages](../concepts/routes-and-pages.md): the concept.
 - [Add and connect pages](../add/pages.md): the how-to.
 - [Link or button points to an unknown route](../help/errors/route-not-found.md):
-  the classic mistake.
+  the most common routing mistake.

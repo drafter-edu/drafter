@@ -13,19 +13,21 @@ outcome: Build a data-driven branching app from a list of dataclasses.
 
 ## What you'll build
 
-A quiz about the pets. Three questions live in a list; one route shows
-whichever question is next; each answer is a button; right and wrong
-answers get different responses; and a score builds toward a results
-page that changes with how you did.
+You will build a quiz about the pets. The three questions are stored in
+a list, and a single route shows whichever question is next. Each answer
+choice is a button, and right and wrong answers receive different
+responses. A score accumulates as you play, and the results page at the
+end changes depending on how well you did.
 
 The new idea is that the *data drives the pages*. In the story maker,
 every page had its own route. Here, one `ask` route serves every
-question, because the questions are values in a list and the app just
+question, because the questions are values in a list and the app
 keeps track of which one you are on.
 
 ## Try the finished app
 
-Take the quiz once honestly and once wrongly, and watch what changes:
+Take the quiz twice, once answering honestly and once choosing wrong
+answers on purpose, and watch what changes:
 
 ```python drafter height=400
 from drafter import *
@@ -127,16 +129,17 @@ start_server(State(QUESTIONS, 0, 0))
 
 ## What you need
 
-You have finished [the story maker](story-maker.md): you can build
-forms whose values arrive as route parameters. Budget one or two
-sittings; the quiz grows in four steps, each runnable.
+You should have finished [the story maker](story-maker.md), which means
+you can build forms whose values arrive as route parameters. Budget one
+or two sittings; the quiz grows in four steps, and each step is a
+runnable program.
 
 ## Step 1: The questions are data
 
 A quiz question has three parts: the prompt, the options, and the
-right answer. That is a dataclass. The whole quiz is a list of them,
-and the state carries the list plus a `position`: which question is
-next.
+right answer. Those three parts fit naturally into a dataclass. The
+whole quiz is a list of these questions, and the state carries the
+list along with a `position` that records which question is next.
 
 ```python drafter height=280
 from drafter import *
@@ -179,9 +182,9 @@ def index(state: State) -> Page:
 start_server(State(QUESTIONS, 0))
 ```
 
-**What this means**: `state.questions[state.position]` is the whole
-trick of this project. The page does not know anything about pets; it
-shows whatever question the position points at.
+**What this means**: `state.questions[state.position]` is the central
+idea of this project. Nothing in the route is specific to pets; the
+page shows whatever question the position points at.
 
 **Predict first**: change the last line to
 `start_server(State(QUESTIONS, 2))`. What will the page show? Run it
@@ -191,7 +194,7 @@ the 0 back. Step 3 will make running out of questions mean something.)
 
 ## Step 2: One route, every question
 
-Rename the question display into its own `ask` route, show the options
+Move the question display into its own `ask` route, show the options
 with a `BulletedList`, and add a Skip button that moves the position
 forward. One route now serves every question.
 
@@ -263,21 +266,21 @@ def restart(state: State) -> Page:
 start_server(State(QUESTIONS, 0))
 ```
 
-**What this means**: `ask` now has a branch. If the position has run
-off the end of the list, it shows an ending instead of a question.
-One route, several completely different pages: which one you get
-depends on state. Drafter calls pages like this *dynamic*, and you
-will meet the idea again everywhere.
+**What this means**: `ask` now has a branch. If the position has moved
+past the end of the list, the route returns an ending page instead of
+a question. One route can now produce several completely different
+pages, and which one you get depends on state. Drafter calls pages
+like this *dynamic*, and you will meet the idea again and again.
 
 **Predict first**: add a fourth `Question(...)` to the list. How many
 skips until the ending page? Check.
 
 ## Step 3: Answers are buttons
 
-Skip was a placeholder. Real quizzes answer. Replace the
-`BulletedList` with one `Button` per option, built in a loop, and give
-every button the same target: a new `check` route. The button carries
-which option it was via an `Argument`.
+The Skip button was a placeholder; a real quiz lets the player answer.
+Replace the `BulletedList` with one `Button` per option, built in a
+loop, and give every button the same target: a new `check` route. An
+`Argument` on each button records which option it represents.
 
 Replace `ask` and `skip` with:
 
@@ -391,19 +394,26 @@ def restart(state: State) -> Page:
     return index(state)
 
 
+assert_state(check(State(QUESTIONS, 0, 0), "a cat"),
+             State(QUESTIONS, 1, 1))
+assert_state(check(State(QUESTIONS, 0, 0), "a dog"),
+             State(QUESTIONS, 1, 0))
+assert_has(results(State(QUESTIONS, 3, 3)), "You scored 3 out of 3.")
+
 start_server(State(QUESTIONS, 0))
 ```
 
 **What this means**: every answer button points at the same `check`
-route; the `Argument("chosen", option)` is what makes them different.
+route, and the `Argument("chosen", option)` is what distinguishes them.
 When a button is clicked, its argument fills `check`'s `chosen`
 parameter, exactly the way a text box's contents filled a parameter in
 the story maker. Then `check` compares `chosen` against the right
 answer and branches.
 
 **Predict first**: in `check`, what happens to the position when the
-answer is wrong? Is that what a quiz should do? (It moves forward
-either way; a question is asked once, right or wrong.)
+answer is wrong? Is that what a quiz should do? (The position moves
+forward either way; each question is asked exactly once, whether the
+answer was right or wrong.)
 
 ## Step 4: Keep score, vary the ending
 
@@ -421,9 +431,9 @@ assert_has(results(State(QUESTIONS, 3, 3)), "You scored 3 out of 3.")
 ```
 
 Add them to your copy, above `start_server(...)`. The first two pin
-down the scoring rule from both sides: a right answer moves the
-position and the score, a wrong answer moves only the position. The
-third checks the results page for a perfect run.
+down the scoring rule from both sides: a right answer advances both
+the position and the score, while a wrong answer advances only the
+position. The third checks the results page for a perfect run.
 
 **Break it on purpose**: change `check` to add 2 points per correct
 answer, run the app, and open the debug panel's Tests tab. The first
@@ -439,8 +449,8 @@ Fix it and watch the tests go green.
 - **The same question repeats forever**: nothing moves
   `state.position` forward. It should advance exactly once, inside
   `check`.
-- **Every answer says correct**: compare `chosen == question.answer`
-  against the question *before* moving the position, and check that
+- **Every answer says correct**: make sure `chosen == question.answer`
+  uses the question fetched *before* the position moves, and check that
   each option string matches its `answer` exactly, including case.
 - **A `missing parameter` error on `check`**: the answer buttons must
   each carry `[Argument("chosen", option)]`; without it, nothing fills
@@ -452,18 +462,20 @@ Fix it and watch the tests go green.
 
 Two ideas got names while you built this:
 
-- **Dynamic pages**: one route that renders differently depending on
-  state and arguments. `ask` shows any question; `results` changes
-  its verdict; `check` branches on right and wrong. The full idea is
-  [Dynamic pages](../concepts/dynamic-pages.md).
-- **Arguments**: extra values a button carries to its route, filling
-  parameters by name, just like form fields do. Details on the
+- **Dynamic pages**: a dynamic page comes from one route that renders
+  differently depending on state and arguments. Here, `ask` shows
+  whichever question is next, `results` changes its verdict with the
+  score, and `check` branches on right and wrong answers. The full
+  idea is explained in [Dynamic pages](../concepts/dynamic-pages.md).
+- **Arguments**: an argument is an extra value that a button carries
+  to its route, filling a parameter by name in the same way a form
+  field does. Details are on the
   [Argument](../reference/components/actions/argument.md) reference
   page.
 
-And one older idea grew: your state now contains a **list of
-dataclasses**. The quiz's whole personality lives in `QUESTIONS`;
-change the data and the same code runs a different quiz.
+One older idea also grew: your state now contains a **list of
+dataclasses**. Everything specific to this quiz lives in `QUESTIONS`;
+if you change the data, the same code runs a different quiz.
 
 ## Make it yours
 
@@ -473,10 +485,10 @@ change the data and the same code runs a different quiz.
 3. Add a `wrong: list[str]` field collecting the prompts of missed
    questions, and show them on the results page with a
    `BulletedList`.
-4. Harder: a branching story is this same program wearing a costume.
-   Each "question" is a scene, each "option" leads somewhere, and
-   instead of a score you track which scene comes next. Sketch the
-   `Scene` dataclass and try it.
+4. Harder: a branching story has the same structure as this program.
+   Each "question" becomes a scene, each "option" leads to another
+   scene, and instead of a score you track which scene comes next.
+   Sketch the `Scene` dataclass and try it.
 
 ## Next steps
 
@@ -492,8 +504,8 @@ dynamic pages beyond quizzes.
 
     ---
 
-    Take the quiz (or any app) from "works" to "finished": frozen
-    regression tests, a theme, and production settings.
+    Take the quiz (or any app) from working to finished by adding
+    frozen regression tests, a theme, and production settings.
 
     [Finish and test an app](finishing.md)
 
