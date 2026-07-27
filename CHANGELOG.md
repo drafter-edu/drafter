@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-07-27
+
+-   Fast bug fix for themes not getting built into released bundles, which caused the deployed site to not load correctly.
+
 ## [2.0.0] - 2026-07-27
 
 -   Complete rewrite of the entire system. Deployment now happens through Skulpt or Pyodide, with no backend server required.
