@@ -69,7 +69,7 @@ def index(state: State) -> Page:
     state.visits = state.visits + 1
     return Page(state, [
         "This page has been built " + str(state.visits) + " times.",
-        Button("Build it again", index)
+        Button("Build it again", "index")
     ])
 
 

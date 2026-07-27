@@ -66,11 +66,11 @@ class State:
 def index(state: State) -> Page:
     return Page(state, [
         "The zoo says: " + state.message,
-        Button("Visit again", index),
+        Button("Visit again", "index"),
     ])
 
 
-start_server(State(message="hello"))
+start_server(State("hello"))
 ```
 
 ## Admonitions

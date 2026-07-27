@@ -37,7 +37,7 @@ class State:
 def index(state: State) -> Page:
     return Page(state, [
         "You have clicked " + str(state.clicks) + " times.",
-        Button("Click me!", add_click),
+        Button("Click me!", "add_click"),
     ])
 
 
@@ -47,7 +47,7 @@ def add_click(state: State) -> Page:
     return index(state)
 
 
-start_server(State(clicks=0))
+start_server(State(0))
 ```
 
 That is a complete Drafter program. Try clicking the button above, then

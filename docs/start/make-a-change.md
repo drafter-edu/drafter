@@ -117,7 +117,8 @@ In your copy, misspell the function name inside the button, like this:
 Button("+10", "ad_ten")
 ```
 
-Save and run. Python stops immediately with an error like:
+Save and run. When the page tries to display, Drafter stops it and shows
+an error like:
 
 ```text
 Problem Displaying This Page
@@ -127,9 +128,11 @@ payload.verification_failed: Payload verification failed for URL index: While ve
 Link `+10` points to non-existent page `ad_ten`.  
 ```
 
-Read it slowly. The last line indicates the problem (`add_ten` is not defined). Drafter also shows errors like this on the page
-itself, with a plain-language explanation and suggested steps, so a broken
-app tells you what went wrong instead of showing a blank screen.
+Read it slowly. The last line names the exact problem: the `+10` button
+points to a page called `ad_ten`, and no route with that name exists.
+Drafter checks every link and button on a page before showing it, so a
+broken app tells you what went wrong instead of showing a blank screen or
+a dead button.
 
 ## Step 4: Undo it
 
@@ -146,14 +149,16 @@ language; you can search it with the exact text of your error message.
   after saving, and that you edited the same file you are running.
 - **The site shows an old version**: stop the program and run it again; a
   fresh run always reflects the current code.
-- **You cannot find the broken line**: the last line of the error message
-  names the line number. Start there, not at the top of the file.
+- **You cannot find the broken spot**: the last line of the error message
+  names what is wrong (here, the button label and the missing page name).
+  Search your file for that name; do not start reading from the top.
 
 ## Name it
 
 - The rhythm you practiced is the **edit, save, reload loop**.
-- The error you caused is a **NameError**, Python's way of saying a name
-  is used before anything with that name exists.
+- The error you caused is a **link verification error**: before showing a
+  page, Drafter checks that every button and link points to a route that
+  actually exists.
 
 ## Make it yours
 

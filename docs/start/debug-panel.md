@@ -42,8 +42,8 @@ class State:
 def index(state: State) -> Page:
     return Page(state, [
         "Current count: " + str(state.count),
-        Button("+1", increment),
-        Button("Reset", reset_count)
+        Button("+1", "increment"),
+        Button("Reset", "reset_count")
     ])
 
 
@@ -112,7 +112,7 @@ class State:
 def index(state: State) -> Page:
     return Page(state, [
         "Current count: " + str(state.count),
-        Button("Double it", double_count)
+        Button("Double it", "double_count")
     ])
 
 

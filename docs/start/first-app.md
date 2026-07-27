@@ -254,8 +254,8 @@ class State:
 def index(state: State) -> Page:
     return Page(state, [
         "Current count: " + str(state.count),
-        Button("+1", increment),
-        Button("Reset", reset_count)
+        Button("+1", "increment"),
+        Button("Reset", "reset_count")
     ])
 
 
@@ -284,7 +284,7 @@ the site opens. You will see where their results appear in the
 [next step](debug-panel.md).
 For now, if you run this in Thonny, you will see the following appear in the console:
 
-```
+```text
 SUCCESS at line 31 (assert_state)
 SUCCESS at line 32 (assert_state)
 SUCCESS at line 33 (assert_has)
@@ -294,9 +294,9 @@ SUCCESS at line 33 (assert_has)
 
 - **The page shows an error about `#!python Page` content**: the content must be a
   list, even for one item. Write `#!python Page(["Hello"])`, not `#!python Page("Hello")`.
-- **`#!python NameError` on a button's function**: the function name in
-  `Button("+1", increment)` must exactly match a function you defined.
-  Check the spelling.
+- **The page shows a "points to non-existent page" error**: the name in
+  `Button("+1", "increment")` must exactly match a route function you
+  defined with `@route`. Check the spelling.
 - **You changed `#!python State` and things broke**: the fields in `#!python State(...)`
   must match the dataclass definition. `#!python State(0)` works because `#!python State`
   has exactly one field.

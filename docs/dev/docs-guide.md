@@ -100,10 +100,12 @@ start_server()
   by default.
 - Examples must be complete and copyable: include imports, the `State`
   dataclass, and an explicit `start_server(...)` call.
-- Static fences that should still execute in CI are marked
-  `python test=true`. Error-entry repros are static fences marked
-  `python test=true repro`; the harness expects them to raise the page's
-  `error_text` instead of succeeding.
+- **Caution**: fence parameters are only stripped from `python drafter`
+  fences. On a plain `python` fence, anything after the language renders
+  as part of the code block. The planned `test=true` / `repro` markers for
+  static fences need plugin support first; until then, do not use them.
+  The fence harness (`tests/test_docs_fences.py`) still recognizes them,
+  so error-entry repros are blocked on that plugin change.
 
 ## The CI gates
 
@@ -126,6 +128,11 @@ From STUDENT_DOCS_PLAN.md §3 and §6, the short version:
 
 - Student example code uses only the audience's known constructs: no
   dicts, exceptions, comprehensions, lambdas, or `break`.
+- Button and Link targets are route names as strings, no slashes:
+  `Button("Feed", "feed")`, never `Button("Feed", feed)`.
+- No keyword arguments in basic examples and tutorials: `State(5, 5)`,
+  not `State(hunger=5, energy=5)`. Keywords appear only for genuinely
+  optional parameters.
 - Names are plain-English PEP 8; the canonical name glossary keeps
   `State`, `index`, `state` consistent site-wide.
 - Tests in examples use `assert_state`, `assert_has`, and `assert_in`, not
