@@ -384,17 +384,22 @@ def _swap_asset_href(current_href: str, from_path: str, to_path: str) -> str:
     return to_path
 
 
-def swap_debug_mode(root):
-    """Toggle the global Drafter stylesheet between debug and non-debug.
+def swap_debug_mode(root, in_debug_mode: bool):
+    """Ensure the global Drafter stylesheet matches the given debug mode.
 
     Finds the existing debug or non-debug <link> under the root (by its
-    Drafter tag class) and swaps it to the other variant, rewriting its href
-    in place (preserving any path prefix) and exchanging its class. Does
-    nothing if neither link is present.
+    Drafter tag class) and, if it does not match `in_debug_mode`, swaps it
+    to the other variant, rewriting its href in place (preserving any path
+    prefix) and exchanging its class. Idempotent: configuration events can
+    be replayed after the initial render already reflects the setting, so
+    a link that already matches is left untouched. Does nothing if neither
+    link is present.
 
     Args:
         root: Node to search for the stylesheet link (a document, shadow
             root, or element supporting querySelector).
+        in_debug_mode: The desired debug mode; True selects the debug
+            stylesheet, False the deploy stylesheet.
     """
     debug_css = GLOBAL_DRAFTER_CSS_PATHS[True].url
     non_debug_css = GLOBAL_DRAFTER_CSS_PATHS[False].url
@@ -402,14 +407,14 @@ def swap_debug_mode(root):
     existing_non_debug_link = root.querySelector(
         f"link.{DRAFTER_TAG_CLASSES['NON_DEBUG_CSS']}"
     )
-    if existing_debug_link:
+    if existing_debug_link and not in_debug_mode:
         current_href = existing_debug_link.getAttribute("href")
         existing_debug_link.setAttribute(
             "href", _swap_asset_href(current_href, debug_css, non_debug_css)
         )
         existing_debug_link.classList.remove(DRAFTER_TAG_CLASSES["DEBUG_CSS"])
         existing_debug_link.classList.add(DRAFTER_TAG_CLASSES["NON_DEBUG_CSS"])
-    elif existing_non_debug_link:
+    elif existing_non_debug_link and in_debug_mode:
         current_href = existing_non_debug_link.getAttribute("href")
         existing_non_debug_link.setAttribute(
             "href", _swap_asset_href(current_href, non_debug_css, debug_css)
