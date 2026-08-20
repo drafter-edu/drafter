@@ -15,13 +15,13 @@ Welcome. This section takes you from nothing installed to a working app you
 understand, in five short steps. Do them in order; each one builds on the
 last.
 
-| Step | What you will do | Time |
-| ---- | ---------------- | ---- |
-| 1. [Get Drafter running](install.md) | Install Drafter and verify it works | 10 min |
-| 2. [Build your first app](first-app.md) | Build and run a working counter site | 20 min |
-| 3. [Make one visible change](make-a-change.md) | Edit a running app, break it, and fix it | 10 min |
-| 4. [See inside your app](debug-panel.md) | Read state, history, and tests in the debugger | 10 min |
-| 5. [How Drafter works](how-drafter-works.md) | Understand what you have been doing | 5 min |
+| Step                                           | What you will do                               |
+| ---------------------------------------------- | ---------------------------------------------- |
+| 1. [Get Drafter running](install.md)           | Install Drafter and verify it works            |
+| 2. [Build your first app](first-app.md)        | Build and run a working counter site           |
+| 3. [Make one visible change](make-a-change.md) | Edit a running app, break it, and fix it       |
+| 4. [See inside your app](debug-panel.md)       | Read state, history, and tests in the debugger |
+| 5. [How Drafter works](how-drafter-works.md)   | Understand what you have been doing            |
 
 ## What you should already know
 
