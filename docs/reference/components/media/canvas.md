@@ -32,11 +32,11 @@ Canvas(canvas_id, width=400, height=200)
 
 ## Parameters
 
-| Parameter | Type | Default | Meaning |
-| --------- | ---- | ------- | ------- |
+| Parameter   | Type  | Default  | Meaning                                            |
+| ----------- | ----- | -------- | -------------------------------------------------- |
 | `canvas_id` | `str` | required | The id your drawing code uses to find the surface. |
-| `width` | `int` | `300` | Drawing surface width in pixels. |
-| `height` | `int` | `150` | Drawing surface height in pixels. |
+| `width`     | `int` | `300`    | Drawing surface width in pixels.                   |
+| `height`    | `int` | `150`    | Drawing surface height in pixels.                  |
 
 ## Examples
 
