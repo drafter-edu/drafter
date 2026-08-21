@@ -34,6 +34,12 @@ the app whenever you save the file.
 | `--host HOST` | `localhost` | Serve to other devices: `--host 0.0.0.0` lets your phone on the same network open the app. |
 | `--no-open-browser` | opens | Do not open a browser tab automatically. |
 | `--no-reloader` | on | Stop watching the file for changes. |
+| `--skip` | off | Do not start the server or compile anything: `start_server(...)` returns immediately. Lets a test runner import the file without launching the site. |
+
+Setting the `DRAFTER_SKIP` environment variable does the same thing
+as `--skip`, which is handy when the command being run is not
+`drafter` itself; for example, a unit test runner such as `pytest`
+importing your file.
 
 ## Appearance and production
 

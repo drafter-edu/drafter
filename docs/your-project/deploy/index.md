@@ -38,8 +38,9 @@ later comes as a surprise:
 1. **[Prepare for release](prepare.md)**: add the finishing settings to
    your code (site title, site information, hiding the debugger) and
    test locally.
-2. **[Publish on GitHub Pages](github-pages.md)**: put your code in a
-   GitHub repository and run the deploy workflow.
+2. **[Publish on GitHub Pages](github-pages.md)**: create a repository
+   from Drafter's template, put your code in it, and run the deploy
+   workflow.
 3. **Verify**: open your new link on a different device and click
    through the whole app. If something went wrong,
    [fix the failed deployment](troubleshooting.md).

@@ -44,6 +44,7 @@ def start_server(
     cdn_skulpt_std: str | None = None,
     cdn_skulpt_drafter: str | None = None,
     # Custom overrides
+    skip: bool | None = None,
     argv: list[str] | None = None,
     **extra_configuration,
 ) -> None:
@@ -87,6 +88,10 @@ def start_server(
             warning.
         cdn_skulpt_drafter: Deprecated and ignored; passing a value
             prints a warning.
+        skip: If True, do nothing at all — do not start the server or
+            compile anything. Useful for running unit tests against a
+            site file. Also settable via the DRAFTER_SKIP environment
+            variable, the --skip flag, or a config file.
         argv: Command-line argument override passed into the system
             configuration.
         **extra_configuration: Additional configuration parameters.
@@ -141,12 +146,22 @@ def start_server(
             "Warning: 'cdn_skulpt_drafter' parameter is no longer used and will be ignored."
         )
     # Custom overrides
+    if skip is not None:
+        parameters["skip"] = skip
     if argv is not None:
         parameters["argv"] = argv
     parameters.update(extra_configuration)
 
     system = get_system_configuration()
     system.merge_in_args(parameters)
+
+    # DRAFTER_SKIP / --skip / skip=True: do nothing, so the site file can be
+    # imported (e.g., by unit tests) without starting a server or compiling.
+    if system.bootstrap.skip:
+        if system.bootstrap.verbose:
+            print("Skipping server startup because the skip setting is enabled.")
+        return
+
     server = server or get_main_server()
 
     # Primary dispatch based on execution context

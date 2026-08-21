@@ -70,6 +70,7 @@ All options other than the state are keyword arguments.
 | `host`          | `str`  | Which network interface the local development server binds.                                                                                                            |
 | `open_browser`  | `bool` | Whether running locally opens a browser tab automatically.                                                                                                             |
 | `engine`        | `str`  | Which in-browser Python runs your code; `"pyodide"` is the default and the one these docs cover.                                                                       |
+| `skip`          | `bool` | Do nothing at all: no server, no compilation. Meant for test runners; see the note below.                                                                              |
 
 Several options exist in two forms: a `start_server` keyword and a
 configuration function (`set_website_style`, `set_website_title`,
@@ -86,6 +87,11 @@ accidentally use both.
   after the call never executes.
 - **Tests run first.** Assertions written above `start_server` execute
   before the site starts.
+- **Skipping the server for tests.** Setting the `DRAFTER_SKIP`
+  environment variable (or passing `skip=True`, or running with the
+  `--skip` flag) makes `start_server` return immediately without
+  starting the server or compiling anything, so a unit test runner
+  can import your file without launching the site.
 - **Old v1 options are ignored.** Parameters from Drafter v1 such as
   `cdn_skulpt` print a warning and do nothing.
 - **Command-line flags** can override some of these when you run

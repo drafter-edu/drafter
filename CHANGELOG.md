@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.3] - 2026-08-21
+
+-   Restored the `DRAFTER_SKIP` setting from v1: when enabled, `start_server()` does nothing (no server, no compilation), so a site file can be imported by a unit test runner. Available as the `DRAFTER_SKIP` environment variable, the `--skip` command line flag, a config file setting (under `bootstrap`), or `start_server(skip=True)`.
+-   Updated the deployment instructions to link the official deployment repository template ([drafter-deployment-template-v1](https://github.com/drafter-edu/drafter-deployment-template-v1/generate)).
+
 ## [2.0.2] - 2026-07-27
 
 -   Fast bug fix for themes not getting built into released bundles, which caused the deployed site to not load correctly.

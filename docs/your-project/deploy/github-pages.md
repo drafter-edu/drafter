@@ -18,15 +18,11 @@ a shareable URL, hosted for free by GitHub Pages.
 
 ## Before you start
 
-You need three things:
+You need two things:
 
 - A **GitHub account**: [create one here](https://github.com/signup) if
   you do not have one.
 - Your [prepared](prepare.md) program.
-- A repository that includes Drafter's deploy workflow. Courses usually
-  provide a template link that creates this repository for you, with a
-  `main.py` file and the workflow already in place; use your course's
-  link if you have one.
 
 !!! note "Choosing a GitHub username"
     Your username will be part of your site's URL and visible to anyone
@@ -37,10 +33,26 @@ You need three things:
     unlocks student benefits and makes it easier for instructors to
     recognize you.
 
-The overall flow has four parts: put your code in the repository, turn
-on Pages, run the workflow, and collect your URL.
+The overall flow has five parts: create the repository, put your code
+in it, turn on Pages, run the workflow, and collect your URL.
 
-## Step 1: Put your code in the repository
+## Step 1: Create the repository from the template
+
+1. Open
+   [Drafter's deployment template](https://github.com/drafter-edu/drafter-deployment-template-v1/generate)
+   (sign in to GitHub if it asks).
+2. Leave **Owner** as your account and give the repository a name. The
+   name becomes part of your site's URL, so pick something short and
+   descriptive: `pet-adoption-site` beats `final-project-attempt3`.
+3. Keep the repository **Public**; GitHub Pages requires it on free
+   accounts.
+4. Click **Create repository**.
+
+The new repository arrives with a starter `main.py` and Drafter's
+deploy workflow already in place, so you never have to set those up
+yourself.
+
+## Step 2: Put your code in the repository
 
 1. Open your repository on GitHub and go to the **Code** tab.
 2. Click `main.py`, then the pencil icon to edit it.
@@ -76,7 +88,7 @@ Every file your program opens must be here, or it will
 ??? example "Show the upload screen"
     ![The GitHub upload page, with a drag-and-drop area for adding files to the repository](images/deployment_github_upload2.png)
 
-## Step 2: Turn on GitHub Pages
+## Step 3: Turn on GitHub Pages
 
 1. Go to the repository's **Settings** tab.
 2. Open the **Pages** section in the left sidebar.
@@ -94,7 +106,7 @@ of a failed first deployment.
 
     ![The Pages settings screen with the Source dropdown set to GitHub Actions](images/deployment_github_pages.png)
 
-## Step 3: Run the deploy workflow
+## Step 4: Run the deploy workflow
 
 1. Go to the **Actions** tab.
 2. Select the deploy workflow in the left sidebar (named something like
@@ -109,7 +121,7 @@ to find the exact error and get back on track.
 ??? example "Show the Actions tab"
     ![The Actions tab listing workflow runs, with the deploy workflow in the left sidebar](images/deployment_github_actions.png)
 
-## Step 4: Find your URL and check your site
+## Step 5: Find your URL and check your site
 
 1. Click into the successful (green) run; the deployed URL is shown in
    its summary.
@@ -137,14 +149,14 @@ instructions now and finish those while everything is fresh.
 ## Updating a deployed site
 
 The site redeploys only when you run the workflow, not on every commit.
-To publish a change, edit or upload the files (Step 1), then run the
-workflow again (Step 3). The newest run in the Actions list determines
+To publish a change, edit or upload the files (Step 2), then run the
+workflow again (Step 4). The newest run in the Actions list determines
 what is live.
 
 ## Common problems
 
 - **The first run fails immediately**: Pages is probably not enabled.
-  Redo Step 2, then run the workflow again.
+  Redo Step 3, then run the workflow again.
 - **The site is up but a picture or file is missing**: the file was
   never uploaded to the repository. Upload it next to `main.py` and
   redeploy.

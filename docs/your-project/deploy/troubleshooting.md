@@ -15,7 +15,7 @@ outcome: Diagnose and retry failed deploys.
     Good, you are in the right place. If your deployment actually
     **succeeded** (a green checkmark, and the site works), you do not
     need this page at all. Head back to
-    [finish checking your site](github-pages.md#step-4-find-your-url-and-check-your-site).
+    [finish checking your site](github-pages.md#step-5-find-your-url-and-check-your-site).
 
 A red X in the Actions tab means the deployment failed. Failures at
 this stage are normal and fixable, and the cause is always recorded

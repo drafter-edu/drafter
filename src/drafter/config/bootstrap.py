@@ -30,6 +30,11 @@ class BootstrapConfiguration(BaseConfiguration):
             the semicolon-separated DRAFTER_CONFIG_FILE environment variable
             or by repeating the --config-file flag.
         verbose: Whether to enable verbose output.
+        skip: Whether start_server() should do nothing at all (no server,
+            no compilation). Useful for running unit tests against a site
+            file without actually launching anything. Set via the
+            DRAFTER_SKIP environment variable, the --skip flag, a config
+            file, or start_server(skip=True).
     """
 
     path: str | None = (
@@ -42,6 +47,7 @@ class BootstrapConfiguration(BaseConfiguration):
         None
     )
     verbose: bool = False
+    skip: bool = False  # If True, start_server() does nothing (for unit tests)
 
     @staticmethod
     def get_key() -> str:
@@ -88,7 +94,8 @@ class BootstrapConfiguration(BaseConfiguration):
         """Extract bootstrap settings from environment variables.
 
         Reads DRAFTER_ENTRY (path), DRAFTER_MODE (mode), DRAFTER_CONFIG_FILE
-        (semicolon-separated list of config files), and DRAFTER_VERBOSE.
+        (semicolon-separated list of config files), DRAFTER_VERBOSE, and
+        DRAFTER_SKIP.
 
         Args:
             env_vars: A dictionary of environment variables.
@@ -102,6 +109,7 @@ class BootstrapConfiguration(BaseConfiguration):
         result.get_string_if_exists("DRAFTER_MODE", "mode")
         result.get_string_list_if_exists("DRAFTER_CONFIG_FILE", "config_file", ";")
         result.get_bool_if_exists("DRAFTER_VERBOSE", "verbose")
+        result.get_bool_if_exists("DRAFTER_SKIP", "skip")
         return result.as_dict()
 
     @staticmethod
@@ -110,7 +118,7 @@ class BootstrapConfiguration(BaseConfiguration):
 
         Adds the positional `path` argument directly to the parser, then adds
         the "Bootstrap Configuration" group with --compile, --config-file
-        (repeatable), and --verbose.
+        (repeatable), --verbose, and --skip.
 
         Args:
             parser: An argparse.ArgumentParser instance to extend.
@@ -139,6 +147,11 @@ class BootstrapConfiguration(BaseConfiguration):
         group.add_argument(
             "--verbose", action="store_true", help="Enable verbose output"
         )
+        group.add_argument(
+            "--skip",
+            action="store_true",
+            help="Do not start the server or compile anything (e.g., for running unit tests)",
+        )
         return group
 
     @staticmethod
@@ -163,4 +176,6 @@ class BootstrapConfiguration(BaseConfiguration):
             result["config_file"] = parsed_args["config_file"]
         if parsed_args.get("verbose"):
             result["verbose"] = True
+        if parsed_args.get("skip"):
+            result["skip"] = True
         return result
