@@ -126,8 +126,6 @@ class TestStartServerSkips:
         injected_system()
         serve_app_once = MagicMock()
         monkeypatch.setattr(drafter.launch, "get_main_server", MagicMock())
-        monkeypatch.setattr(
-            "drafter.app.app_server.serve_app_once", serve_app_once
-        )
+        monkeypatch.setattr("drafter.app.app_server.serve_app_once", serve_app_once)
         start_server()
         serve_app_once.assert_called_once()
