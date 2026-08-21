@@ -7986,6 +7986,11 @@ it <a href="../../help/errors/nothing-after-start-server/">never runs</a>.</p>
 <td><code>str</code></td>
 <td>Which in-browser Python runs your code; <code>"pyodide"</code> is the default and the one these docs cover.</td>
 </tr>
+<tr>
+<td><code>skip</code></td>
+<td><code>bool</code></td>
+<td>Do nothing at all: no server, no compilation. Meant for test runners; see the note below.</td>
+</tr>
 </tbody>
 </table>
 <p>Several options exist in two forms: a <code>start_server</code> keyword and a
@@ -8002,6 +8007,11 @@ accidentally use both.</p>
   after the call never executes.</li>
 <li><strong>Tests run first.</strong> Assertions written above <code>start_server</code> execute
   before the site starts.</li>
+<li><strong>Skipping the server for tests.</strong> Setting the <code>DRAFTER_SKIP</code>
+  environment variable (or passing <code>skip=True</code>, or running with the
+  <code>--skip</code> flag) makes <code>start_server</code> return immediately without
+  starting the server or compiling anything, so a unit test runner
+  can import your file without launching the site.</li>
 <li><strong>Old v1 options are ignored.</strong> Parameters from Drafter v1 such as
   <code>cdn_skulpt</code> print a warning and do nothing.</li>
 <li><strong>Command-line flags</strong> can override some of these when you run

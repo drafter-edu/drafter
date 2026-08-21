@@ -7615,8 +7615,17 @@ the app whenever you save the file.</p>
 <td>on</td>
 <td>Stop watching the file for changes.</td>
 </tr>
+<tr>
+<td><code>--skip</code></td>
+<td>off</td>
+<td>Do not start the server or compile anything: <code>start_server(...)</code> returns immediately. Lets a test runner import the file without launching the site.</td>
+</tr>
 </tbody>
 </table>
+<p>Setting the <code>DRAFTER_SKIP</code> environment variable does the same thing
+as <code>--skip</code>, which is handy when the command being run is not
+<code>drafter</code> itself; for example, a unit test runner such as <code>pytest</code>
+importing your file.</p>
 <h2 id="appearance-and-production">Appearance and production</h2>
 <table>
 <thead>
