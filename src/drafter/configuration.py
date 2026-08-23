@@ -9,6 +9,7 @@ import os
 import sys
 from collections import defaultdict
 
+from drafter.app.source_recovery import is_placeholder_script_argument
 from drafter.config.app_builder import AppBuilderConfiguration
 from drafter.config.app_common import AppCommonConfiguration
 from drafter.config.app_server import AppServerConfiguration
@@ -120,7 +121,11 @@ def configure_system(
 
     ##### Detect main path if missing and we're in a CLI context
     if not is_web() and bootstrap_config.path is None:
-        if len(original_arguments) > 0:
+        # `python -c ...` (which is how Thonny runs an unsaved buffer) leaves
+        # "-c" in sys.argv[0]; that is not a path, so never treat it as one.
+        if len(original_arguments) > 0 and not is_placeholder_script_argument(
+            original_arguments[0]
+        ):
             bootstrap_config.path = original_arguments[0]
             modified_args[bootstrap_config.get_key()]["path"] = original_arguments[0]
         else:

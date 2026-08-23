@@ -5,7 +5,9 @@ file watching, and pre-rendering of initial pages.
 """
 
 import asyncio
+import html
 import json
+import os
 import webbrowser
 from pathlib import Path
 
@@ -17,11 +19,17 @@ from starlette.staticfiles import StaticFiles
 
 from drafter.app.error_log import append_error_log_entry, build_log_entry
 from drafter.app.hacks import DRAFTER_LOG_CONFIG_FOR_UVICORN
+from drafter.app.source_recovery import (
+    UNSAVED_SOURCE_FILENAME,
+    main_file_is_available,
+    recover_main_source,
+)
 from drafter.app.watcher import ReloadHub, WatchedPath, _watch_and_reload, ws_endpoint
 from drafter.client_server.client_server import ClientServer
 from drafter.config.system import SystemConfiguration
 from drafter.config.urls import INTERNAL_ROUTES, determine_assets_url
 from drafter.configuration import get_system_config_modifications
+from drafter.data.errors import StudentFacingError
 from drafter.scaffolding.templating import render_index_html
 from drafter.scaffolding.utils import pkg_assets_dir
 from drafter.version import CURRENT_DRAFTER_VERSION
@@ -38,15 +46,25 @@ async def index(req) -> Response:
     """
     app: Starlette = req.app  # type: ignore
     system: SystemConfiguration = app.state.system
-    user_code = app.state.user_path.read_text(encoding="utf-8")
-    html = render_index_html(
+    user_source: str | None = getattr(app.state, "user_source", None)
+    if user_source is not None:
+        # The source was recovered from memory (e.g., an unsaved Thonny
+        # buffer); there is no file to read or to serve over HTTP, so it
+        # must be inlined regardless of the inline_py setting.
+        user_code = user_source
+        inline_py = True
+    else:
+        inline_py = system.app_server.inline_py
+        try:
+            user_code = app.state.user_path.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            return _missing_main_file_response(app.state.user_path)
+    page = render_index_html(
         system=system,
         modified_system=get_system_config_modifications(),
-        inline_py=system.app_server.inline_py,
-        user_code=user_code if system.app_server.inline_py else None,
-        python_url=str(app.state.user_path)
-        if not system.app_server.inline_py
-        else None,
+        inline_py=inline_py,
+        user_code=user_code if inline_py else None,
+        python_url=str(app.state.user_path) if not inline_py else None,
         dev_ws_url=system.app_server.ws_url,
         assets_url="/" + determine_assets_url(system.app_common.override_asset_url),
         compiled_body=app.state.compiled_body,
@@ -54,7 +72,42 @@ async def index(req) -> Response:
         pyodide_drafter_path=system.app_common.pyodide_drafter_path
         or f"drafter=={CURRENT_DRAFTER_VERSION}",
     )
-    return HTMLResponse(html)
+    return HTMLResponse(page)
+
+
+def _missing_main_file_response(user_path: Path) -> Response:
+    """Build a friendly error page for when the main file cannot be read.
+
+    The file can go missing after startup (renamed, moved, or deleted while
+    the server is running); a plain 500 with a traceback is not helpful to
+    a student in that situation.
+
+    Args:
+        user_path: The path the server expected to find the main file at.
+
+    Returns:
+        An HTMLResponse with status 500 explaining what happened.
+    """
+    shown_path = html.escape(str(user_path))
+    body = f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Drafter could not find your file</title>
+<style>
+body {{ font-family: system-ui, sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.5; }}
+code {{ background: #eee; padding: 0.1em 0.3em; border-radius: 3px; }}
+</style></head><body>
+<h1>Drafter could not find your file</h1>
+<p>The server is running, but it can no longer find your Python file at:</p>
+<p><code>{shown_path}</code></p>
+<p>This usually happens when the file was renamed, moved, or deleted while
+Drafter was running.</p>
+<h2>What to try</h2>
+<ul>
+<li>Make sure your file is saved at the path above, then refresh this page.</li>
+<li>If you renamed or moved it, stop Drafter and run the file again from its new location.</li>
+</ul>
+</body></html>"""
+    return HTMLResponse(body, status_code=500)
 
 
 async def list_user_files(req) -> Response:
@@ -141,7 +194,10 @@ async def record_error_log(req) -> Response:
 
 
 def make_app(
-    system: SystemConfiguration, server: ClientServer, initial_state
+    system: SystemConfiguration,
+    server: ClientServer,
+    initial_state,
+    user_source: str | None = None,
 ) -> Starlette:
     """Build the Starlette application for the development server.
 
@@ -158,6 +214,10 @@ def make_app(
             prerendering is enabled.
         initial_state: Initial application state passed to the client server
             for prerendering.
+        user_source: The student's main source when it had to be recovered
+            from memory (e.g., an unsaved Thonny buffer) instead of read
+            from `bootstrap.path`. When given, the index page always inlines
+            this text and the (nonexistent) main file is not watched.
 
     Returns:
         Configured Starlette application ready to be served by uvicorn.
@@ -168,9 +228,9 @@ def make_app(
     user_path = user_directory / system.bootstrap.get_main_filename()
 
     # Determine watches and routes
-    watch_paths = [
-        WatchedPath(user_path, False),
-    ]
+    watch_paths = []
+    if user_source is None:
+        watch_paths.append(WatchedPath(user_path, False))
     routes = [
         Route("/", index),
         WebSocketRoute("/" + INTERNAL_ROUTES["WS"], ws_endpoint),
@@ -194,7 +254,9 @@ def make_app(
         )
     # Serve user files if enabled
     if system.app_server.serve_adjacent_files:
-        watch_paths.append(WatchedPath(user_directory, False))
+        # With in-memory source there is no file to re-read on a change, so
+        # edits to adjacent files can only trigger a plain page reload.
+        watch_paths.append(WatchedPath(user_directory, user_source is not None))
         routes.append(Route("/" + INTERNAL_ROUTES["LIST_FILES"], list_user_files))
         routes.append(
             Mount(
@@ -213,11 +275,68 @@ def make_app(
     app.state.system = system
     app.state.user_directory = user_directory
     app.state.user_path = user_path
+    app.state.user_source = user_source
     app.state.hub = ReloadHub()
     app.state.watch_paths = watch_paths
     app.state.compiled_body = compiled_body
     app.state.compiled_headers = compiled_headers
     return app
+
+
+def _resolve_main_source(system: SystemConfiguration) -> str | None:
+    """Make sure the student's main source is obtainable before serving.
+
+    If `bootstrap.path` names a readable file, nothing needs to happen and
+    None is returned (the file is read on each request). Otherwise the
+    source is recovered from memory when possible (running an unsaved file
+    in Thonny), in which case `bootstrap.path` is pointed at a synthetic
+    filename in the current directory so that relative paths and the error
+    log keep working. If neither is possible, fail up front with a friendly
+    error rather than letting the first browser request 500.
+
+    Args:
+        system: The system configuration; `bootstrap.path` may be updated.
+
+    Returns:
+        The recovered source text, or None when the file on disk should be
+        used.
+
+    Raises:
+        StudentFacingError: If there is no file and no source to recover.
+    """
+    path = system.bootstrap.path
+    if main_file_is_available(path):
+        return None
+    user_source = recover_main_source(path)
+    if user_source is None:
+        if path is None:
+            detail = "no path to the main file was provided"
+        else:
+            detail = f"the main file {path!r} does not exist"
+        raise StudentFacingError(
+            "Drafter cannot start the server because "
+            + detail
+            + ". If you are using Thonny, save your file (Ctrl+S) before running it.",
+            title="Drafter could not find your file",
+            friendly=(
+                "Drafter needs to know which Python file holds your website, "
+                "but it could not find one. This usually happens when you run "
+                "a file that has not been saved yet."
+            ),
+            steps=(
+                "Save your file (Ctrl+S / Cmd+S) with a name ending in .py, then run it again.",
+                "If you are running from a terminal, check that the filename you typed is spelled correctly.",
+            ),
+        )
+    # Give the recovered source a home so the rest of the system (relative
+    # paths, the error log, the browser) has a filename to refer to.
+    system.bootstrap.path = os.path.join(os.getcwd(), UNSAVED_SOURCE_FILENAME)
+    print(
+        "Note: your file has not been saved, so Drafter is using the code "
+        "directly from your editor. Save your file to enable automatic "
+        "restarts when you make changes."
+    )
+    return user_source
 
 
 def serve_app_once(
@@ -246,11 +365,7 @@ def serve_app_once(
         None. Prints an error message and returns early if the main user
         file path is missing or prerendering configuration fails.
     """
-    if system.bootstrap.path is None:
-        print(
-            "Error: Cannot start server because the path to the main user file is not specified."
-        )
-        return
+    user_source = _resolve_main_source(system)
 
     # Configure the server if prerendering is needed
     if system.app_common.prerender_initial_page:
@@ -258,7 +373,7 @@ def serve_app_once(
         if possible_error:
             print("Error during prerendering configuration:", possible_error)
             return
-    app = make_app(system, server, initial_state)
+    app = make_app(system, server, initial_state, user_source=user_source)
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
