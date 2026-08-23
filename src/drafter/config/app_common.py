@@ -52,7 +52,9 @@ class AppCommonConfiguration(BaseConfiguration):
         engine: Python execution engine ("skulpt" or "pyodide").
         show_filename_as: Display name for main file in UI (if different).
         prerender_initial_page: Prerender initial page on server start.
-        load_packages_automatically: Automatically load system and project packages.
+        load_packages_automatically: Automatically load packages detected in
+            the student's code. Independent of (and in addition to) the
+            explicit system/project package lists.
         system_packages: List of system packages to load.
         project_packages: List of project-specific packages to load.
         pyodide_drafter_path: Optional custom path to the Drafter Pyodide package. If building from local, this is the relative path to the file (to be used as a URL). If using a CDN, this will be the full path to the wheel on PyPi or other CDN.
@@ -229,10 +231,21 @@ class AppCommonConfiguration(BaseConfiguration):
                 "image file (svg, png, ico, ...) adjacent to your site"
             ),
         )
+        # Both flags share the load_packages_automatically dest; the None
+        # default lets parse_args report the setting only when a flag was
+        # explicitly given, so lower-precedence sources are not overridden.
         group.add_argument(
             "--load-packages-automatically",
             action="store_true",
-            help="Load Python packages detected in students' code automatically on startup. This will be in addition to whatever are explicitly listed in the --system-packages and --project-packages options.",
+            default=None,
+            help="Load Python packages detected in students' code automatically on startup (the default). This is in addition to whatever are explicitly listed in the --system-packages and --project-packages options.",
+        )
+        group.add_argument(
+            "--no-load-packages-automatically",
+            action="store_false",
+            dest="load_packages_automatically",
+            default=None,
+            help="Do not detect packages from students' code; only load the packages explicitly listed in the --system-packages and --project-packages options.",
         )
         group.add_argument(
             "--project-packages",
@@ -300,8 +313,10 @@ class AppCommonConfiguration(BaseConfiguration):
             result["site_title"] = parsed_args["site_title"]
         if parsed_args.get("favicon"):
             result["favicon"] = parsed_args["favicon"]
-        if parsed_args.get("load_packages_automatically"):
-            result["load_packages_automatically"] = True
+        if parsed_args.get("load_packages_automatically") is not None:
+            result["load_packages_automatically"] = parsed_args[
+                "load_packages_automatically"
+            ]
         if parsed_args.get("project_packages"):
             result["project_packages"] = list(parsed_args["project_packages"])
         if parsed_args.get("system_packages"):

@@ -257,6 +257,18 @@ describe("setupEnvironment package handling", () => {
 		expect(loadPackage).not.toHaveBeenCalled();
 	});
 
+	test("automatic loading and explicit packages both apply when both are set", async () => {
+		await setupEnvironment({
+			code: "import math",
+			loadPackagesAutomatically: true,
+			explicitPackageList: ["combined-pkg"],
+		});
+		expect(loadPackagesFromImports).toHaveBeenCalledTimes(1);
+		expect(loadPackagesFromImports).toHaveBeenCalledWith("import math");
+		expect(install).toHaveBeenCalledTimes(1);
+		expect(install).toHaveBeenCalledWith("combined-pkg");
+	});
+
 	test("does nothing when neither package option is set", async () => {
 		await setupEnvironment({ code: "print('hi')" });
 		expect(install).not.toHaveBeenCalled();

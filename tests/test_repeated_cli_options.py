@@ -95,6 +95,23 @@ class TestAppCommonRepeatedOptions:
         result = parse(AppCommonConfiguration, [])
         assert "project_packages" not in result
         assert "system_packages" not in result
+        assert "load_packages_automatically" not in result
+
+    def test_automatic_loading_flags(self):
+        enabled = parse(AppCommonConfiguration, ["--load-packages-automatically"])
+        assert enabled["load_packages_automatically"] is True
+        disabled = parse(AppCommonConfiguration, ["--no-load-packages-automatically"])
+        assert disabled["load_packages_automatically"] is False
+
+    def test_explicit_packages_combine_with_automatic_loading(self):
+        # The two mechanisms are independent: explicit packages may be
+        # declared while automatic detection stays enabled.
+        result = parse(
+            AppCommonConfiguration,
+            ["--load-packages-automatically", "--project-packages", "wordfreq"],
+        )
+        assert result["load_packages_automatically"] is True
+        assert result["project_packages"] == ["wordfreq"]
 
     def test_env_vars_still_semicolon_separated(self):
         result = AppCommonConfiguration.parse_env_variables(

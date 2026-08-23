@@ -129,9 +129,11 @@ declare packages on the command line:
 drafter my_app.py --project-packages wordfreq --project-packages emoji
 ```
 
-`--system-packages` similarly controls the base set Drafter
-itself loads, and `--load-packages-automatically` turns the
-detection off entirely if you want full manual control.
+Declared packages load in addition to automatic detection, not
+instead of it. `--system-packages` similarly controls the base
+set Drafter itself loads, and `--no-load-packages-automatically`
+turns the detection off entirely if you want full manual
+control.
 
 ## Common problems
 

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - **Breaking (CLI):** List-valued command line options are no longer semicolon-separated; repeat the flag once per entry instead (e.g., `--additional-paths pets.csv --additional-paths words.txt` rather than `--additional-paths "pets.csv;words.txt"`). Affects `--external-pages`, `--additional-header-content`, `--additional-style-content`, `--additional-css-content`, `--additional-js-content`, `--additional-script-content`, `--project-packages`, `--system-packages`, and `--additional-paths`. The corresponding `DRAFTER_*` environment variables remain semicolon-separated, since an environment variable cannot be repeated.
+- Fixed automatic package loading and explicit package lists being mutually exclusive: explicitly listed `--project-packages` are now installed in addition to (rather than only in the absence of) automatic import detection, matching the documented behavior. Added `--no-load-packages-automatically` to turn off detection and load only the explicitly listed packages, which was previously impossible from the command line.
 - If used in thonny, should try to recover the source code if it's available. Otherwise, provides a friendlier error.
 - Updated pyodide to new version
 - More control over pyodide url/branch/release

@@ -794,8 +794,10 @@ export async function setupEnvironment(options: DrafterInitOptions) {
 				context: { phase: "setup" },
 			});
 		}
-	} else if (options.explicitPackageList) {
-		// TODO: Handle the semicolon-separated list of packages
+	}
+	// Explicit packages install in addition to (not instead of) automatic
+	// loading, covering dependencies that import scanning cannot see.
+	if (options.explicitPackageList) {
 		const loaded = [];
 		for (const pkg of options.explicitPackageList) {
 			if (requestedPackageSpecs.has(pkg)) {
