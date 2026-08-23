@@ -202,9 +202,11 @@ the 0 back. Step 3 will make running out of questions mean something.)
 
 Move the question display into its own `ask` route, show the options
 with a `BulletedList`, and add a Skip button that moves the position
-forward. One route now serves every question.
+forward. One route now serves every question. The highlighted lines
+are the ones that are new or changed since Step 1, and later steps
+highlight their changes the same way.
 
-```python drafter height=320
+```python drafter hl_lines="32-33 37-62" height=320
 from drafter import *
 from dataclasses import dataclass
 
@@ -290,7 +292,7 @@ loop, and give every button the same target: a new `check` route. An
 
 Replace `ask` and `skip` with:
 
-```python
+```python hl_lines="4-11 14-30"
 @route
 def ask(state: State) -> Page:
     question = state.questions[state.position]
@@ -325,7 +327,7 @@ def check(state: State, chosen: str) -> Page:
 
 Here is the whole program at this stage, runnable:
 
-```python drafter height=360
+```python drafter hl_lines="40-47 50-66" height=360
 from drafter import *
 from dataclasses import dataclass
 

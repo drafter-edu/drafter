@@ -138,9 +138,10 @@ during the call that receives it, but state lasts from page to page.
 
 A page can hold several inputs. When the button is clicked, all of them
 are delivered to the target route, each matched to the parameter with the
-same name:
+same name. The highlighted lines are the ones that are new or changed
+since Step 1, and later steps highlight their changes the same way:
 
-```python drafter height=340
+```python drafter hl_lines="8-9 15 17-20 27 29-30 32-35 39" height=340
 from drafter import *
 from dataclasses import dataclass
 
@@ -193,7 +194,7 @@ to change the words, the boxes are empty. The fix uses an idea you
 already know from the pet. The words are stored in state, so pass each
 one to its `TextBox` as the starting value.
 
-```python drafter height=340
+```python drafter hl_lines="16 18 20 39" height=340
 from drafter import *
 from dataclasses import dataclass
 
@@ -246,7 +247,7 @@ without any new typing. `another_story` takes no extra parameters because
 it needs nothing from the page; everything it uses comes from state. Add
 tests for both story routes while you are here:
 
-```python drafter height=400
+```python drafter hl_lines="35 40-47 50-52" height=400
 from drafter import *
 from dataclasses import dataclass
 

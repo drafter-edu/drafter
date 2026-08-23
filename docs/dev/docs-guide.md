@@ -96,6 +96,9 @@ start_server()
   at build time; a compile failure fails the build.
 - `hl_lines` highlights lines in the rendered source; `height` overrides
   the iframe height. These are the only fence parameters the plugin knows.
+- Tutorial step listings use `hl_lines` to mark the lines that are new or
+  changed since the previous step's listing, so repeated code reads as a
+  diff. Recount the line numbers whenever a listing is edited.
 - All demos on a page share one Pyodide runtime, and embeds are editable
   by default.
 - Examples must be complete and copyable: include imports, the `State`

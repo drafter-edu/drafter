@@ -121,9 +121,11 @@ start_server(State(5, 5))
 ## Step 2: Feed the pet
 
 Feeding reduces hunger by 2, but hunger should never go below zero. A
-negative hunger value would not mean anything.
+negative hunger value would not mean anything. From here on, each
+step's listing highlights the lines that are new or changed since the
+previous step.
 
-```python drafter height=260
+```python drafter hl_lines="15-16 20-25" height=260
 from drafter import *
 from dataclasses import dataclass
 
@@ -163,7 +165,7 @@ Next come two more actions. Playing costs energy and makes the pet
 hungrier, while resting restores energy. Actions that push the numbers
 in different directions are what make the pet feel alive.
 
-```python drafter height=300
+```python drafter hl_lines="16-18 30-44" height=300
 from drafter import *
 from dataclasses import dataclass
 
@@ -225,7 +227,7 @@ function, because `index` should not be crowded with mood rules. Add
 tests while you are at it; the mood rules are exactly the kind of logic
 that quietly breaks later.
 
-```python drafter height=340
+```python drafter hl_lines="11-16 24 56-59" height=340
 from drafter import *
 from dataclasses import dataclass
 

@@ -27,9 +27,10 @@ is the real assignment.
 ## Try the finished app
 
 This is the compliment machine *after* finishing: it has a theme, a
-title, and no debug panel. The starting version appears in Step 1.
+title, and no debug panel. The starting version appears in Step 1,
+and the highlighted lines are everything that finishing added.
 
-```python drafter height=300
+```python drafter hl_lines="4-6 39-45" height=300
 from drafter import *
 from dataclasses import dataclass
 
