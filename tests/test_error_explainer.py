@@ -111,7 +111,7 @@ class TestIdAndCategoryExplanations:
             pass
 
         explanation = explain(
-            UnknownError("odd"), "payload.formatting_failed", "payload"
+            UnknownError("odd"), "payload.uncurated_failure", "payload"
         )
         assert explanation.title == CATEGORY_EXPLANATIONS["payload"][0]
         assert explanation.message == CATEGORY_EXPLANATIONS["payload"][1]

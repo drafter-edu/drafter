@@ -39,7 +39,9 @@ class State:
 @route
 def index(state: State) -> Page:
     """The dashboard: numbers and booleans go straight into the content."""
-    average = round(state.score / state.rounds_played, 2) if state.rounds_played else 0.0
+    average = (
+        round(state.score / state.rounds_played, 2) if state.rounds_played else 0.0
+    )
     return Page(
         state,
         [

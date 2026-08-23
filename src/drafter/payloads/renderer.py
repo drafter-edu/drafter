@@ -8,7 +8,6 @@ CSS/JS assets and recording rendering errors.
 
 import html
 from dataclasses import dataclass
-from typing import Optional
 
 from drafter.components import Component
 from drafter.components.images import Image
@@ -16,13 +15,53 @@ from drafter.components.planning.render_plan import NewlineMode, RenderPlan
 from drafter.components.utilities.attributes import parse_extra_settings
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.data.images import Picture
+from drafter.data.paths import PathItem, render_debug_path, render_student_path
 from drafter.history.state import SiteState
+from drafter.payloads.content_errors import short_repr, unsupported_content_error
 
 
 class RenderError(Exception):
-    """Exception raised during component rendering."""
+    """Exception raised during component rendering.
 
-    pass
+    When the wrapped exception carries a student-friendly tier (the
+    `friendly_title`/`friendly_message`/`friendly_steps` attributes of a
+    `StudentFacingError`), `wrap` copies those attributes onto the
+    RenderError so the central error explainer still finds them.
+    """
+
+    # Only set by `wrap` when the cause carried them; a plain RenderError
+    # has no friendly tier (these are annotations, not class attributes).
+    friendly_title: str
+    friendly_message: str
+    friendly_steps: tuple[str, ...]
+
+    @classmethod
+    def wrap(cls, message: str, cause: BaseException, student_path: str):
+        """Build a RenderError around `cause`, preserving its friendly tier.
+
+        Args:
+            message: Technical message for the new error.
+            cause: The exception raised while rendering the component.
+            student_path: Student-level location phrase; appended to the
+                carried friendly message when both are present.
+
+        Returns:
+            RenderError: With the cause's `friendly_*` attributes copied
+            over (absent when the cause carried none).
+        """
+        error = cls(message)
+        friendly_message = getattr(cause, "friendly_message", "")
+        if friendly_message and student_path:
+            friendly_message += f" This happened while showing {student_path}."
+        if friendly_message:
+            error.friendly_message = friendly_message
+        friendly_title = getattr(cause, "friendly_title", "")
+        if friendly_title:
+            error.friendly_title = friendly_title
+        friendly_steps = getattr(cause, "friendly_steps", ())
+        if friendly_steps:
+            error.friendly_steps = tuple(friendly_steps)
+        return error
 
 
 @dataclass
@@ -36,7 +75,8 @@ class Renderer:
         state: Current application state for component context.
         configuration: Server configuration for rendering context.
         errors: Accumulated rendering errors.
-        component_stack: Path to current component for error reporting.
+        component_stack: Structured `PathItem` path to the value currently
+            being rendered, for error reporting (see `drafter.data.paths`).
         depth: Current indentation level.
         parts: Accumulated HTML string fragments.
         assets: Collected CSS and JS asset URLs.
@@ -54,7 +94,7 @@ class Renderer:
         self.state = state
         self.configuration = configuration
         self.errors: list[RenderError] = []
-        self.component_stack: list[Optional[str]] = []
+        self.component_stack: list[PathItem] = []
         self.depth = 0
         self.parts: list[str] = []
         self.assets: dict[str, set[str]] = {"css": set(), "js": set()}
@@ -104,15 +144,15 @@ class Renderer:
             component: String, number, boolean, list, Component, or RenderPlan to render.
 
         Raises:
-            RenderError: If component rendering encounters an error.
-            TypeError: If component type is unsupported.
+            RenderError: If component rendering encounters an error; carries
+                the friendly tier of the underlying exception when present.
+            StudentFacingError: If the component type is unsupported page
+                content, with the location phrased from `component_stack`.
 
         TODO:
             Handle errors more gracefully with logging.
         """
         # TODO: Handle errors gracefully and log them
-        # print(self.component_stack, component)
-        # print(self.depth, component, self.in_convert_newlines_mode())
         if isinstance(component, (str, int, float, bool)):
             # Plain values (numbers and booleans) display as their text form.
             text = component if isinstance(component, str) else str(component)
@@ -126,18 +166,25 @@ class Renderer:
             self.render(Image(component))
         elif isinstance(component, list):
             for child_index, child in enumerate(component):
-                self.component_stack.append(f"[{child_index}]")
+                self.component_stack.append(PathItem("index", str(child_index)))
                 self.render(child)
                 self.new_line()
                 self.component_stack.pop()
         elif isinstance(component, (Component, RenderPlan)):
             if isinstance(component, Component):
+                self.component_stack.append(
+                    PathItem("component", type(component).__name__)
+                )
                 # Get the rendering plan for the component
                 try:
                     plan = component.plan(self)
                 except Exception as e:
-                    error = RenderError(
-                        f"Error rendering component {component} at {self.component_stack}: {e}"
+                    error = RenderError.wrap(
+                        f"Error rendering component {type(component).__name__} "
+                        f"({short_repr(component)}) at "
+                        f"{render_debug_path(self.component_stack)}: {e}",
+                        e,
+                        render_student_path(self.component_stack),
                     )
                     self.errors.append(error)
                     raise error from e
@@ -151,7 +198,10 @@ class Renderer:
 
             # Render based on the kind of plan
             if plan.kind == "tag":
-                self.component_stack.append(plan.tag_name)
+                if plan.semantic_label:
+                    self.component_stack.append(PathItem("label", plan.semantic_label))
+                else:
+                    self.component_stack.append(PathItem("tag", plan.tag_name or ""))
                 attrs = ""
                 if plan.attributes:
                     parsed_attrs = parse_extra_settings(
@@ -166,9 +216,12 @@ class Renderer:
                 # TODO: Handle COLLAPSE_WHITESPACE if needed
                 self.depth += 1
                 old_depth = 0
+                child_kind = "index" if plan.children_are_content else "child"
                 if plan.children:
                     for child_index, child in enumerate(plan.children):
-                        self.component_stack.append(f"[{child_index}]")
+                        self.component_stack.append(
+                            PathItem(child_kind, str(child_index))
+                        )
                         if plan.collapse_whitespace:
                             old_depth = self.depth
                             self.depth = 0
@@ -185,9 +238,12 @@ class Renderer:
                     self.write(f"</{plan.tag_name}>")
                 self.component_stack.pop()
             elif plan.kind == "fragment":
+                item_kind = "index" if plan.children_are_content else "child"
                 if plan.items:
                     for item_index, item in enumerate(plan.items):
-                        self.component_stack.append(f"[{item_index}]")
+                        self.component_stack.append(
+                            PathItem(item_kind, str(item_index))
+                        )
                         self.render(item)
                         self.component_stack.pop()
             elif plan.kind == "emit":
@@ -196,10 +252,11 @@ class Renderer:
             elif plan.kind == "raw":
                 if plan.raw_html:
                     self.write(plan.raw_html)
+
+            if isinstance(component, Component):
+                self.component_stack.pop()
         else:
-            raise TypeError(
-                f"Unsupported page content type: {type(component)}\nAt {self.component_stack}"
-            )
+            raise unsupported_content_error(component, list(self.component_stack))
 
 
 def render(

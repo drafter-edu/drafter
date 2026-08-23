@@ -550,7 +550,7 @@ class ClientServer:
             raise self.make_visit_error(
                 "payload.verification_failed",
                 CATEGORY_PAYLOAD,
-                f"Payload verification failed for URL {request.url}: {possible_incorrect_type.message}",
+                f"Payload verification failed for the page '{request.url}': {possible_incorrect_type.message}",
                 request,
                 data={"payload": payload},
                 status_code=STATUS_ERROR,
@@ -567,7 +567,7 @@ class ClientServer:
             raise self.make_visit_error(
                 "payload.verification_failed",
                 CATEGORY_PAYLOAD,
-                f"Payload verification failed for URL {request.url}: {e}",
+                f"Payload verification failed for the page '{request.url}': {e}",
                 request,
                 data={"payload": payload},
                 status_code=STATUS_ERROR,
@@ -577,7 +577,7 @@ class ClientServer:
             raise self.make_visit_error(
                 "payload.verification_failed",
                 CATEGORY_PAYLOAD,
-                f"Payload verification failed for URL {request.url}: {possible_failure.message}",
+                f"Payload verification failed for the page '{request.url}': {possible_failure.message}",
                 request,
                 data={"payload": payload},
                 status_code=STATUS_ERROR,
@@ -613,7 +613,7 @@ class ClientServer:
             raise self.make_visit_error(
                 "payload.rendering_failed",
                 CATEGORY_PAYLOAD,
-                f"Payload rendering failed for URL {request.url}: {e}",
+                f"Payload rendering failed for the page '{request.url}': {e}",
                 request,
                 data={"payload": payload},
                 status_code=STATUS_ERROR,
@@ -648,7 +648,7 @@ class ClientServer:
             raise self.make_visit_error(
                 "payload.formatting_failed",
                 CATEGORY_PAYLOAD,
-                f"Payload formatting failed for URL {request.url}: {e}",
+                f"Payload formatting failed for the page '{request.url}': {e}",
                 request,
                 data={"payload": payload},
                 status_code=STATUS_ERROR,
@@ -681,7 +681,7 @@ class ClientServer:
                 raise self.make_visit_error(
                     "payload.state_verification_failed",
                     CATEGORY_PAYLOAD,
-                    f"State verification failed for URL {request.url}: {possible_state_update_issue.message}",
+                    f"State verification failed for the page '{request.url}': {possible_state_update_issue.message}",
                     request,
                     data={"payload": payload},
                     status_code=STATUS_ERROR,
@@ -703,7 +703,7 @@ class ClientServer:
                 raise self.make_visit_error(
                     "payload.state_update_failed",
                     CATEGORY_PAYLOAD,
-                    f"Failed to update server state from payload for URL {request.url}: {e}",
+                    f"Failed to update server state from payload for the page '{request.url}': {e}",
                     request,
                     data={"updated_state": updated_state},
                     status_code=STATUS_ERROR,
@@ -810,7 +810,7 @@ class ClientServer:
                     envelope = self.make_visit_error(
                         "system.response_creation_failed",
                         CATEGORY_SYSTEM,
-                        f"Failed to create success response for URL {request.url}: {e}",
+                        f"Failed to create success response for the page '{request.url}': {e}",
                         request,
                         status_code=STATUS_ERROR,
                         exception=e,
@@ -899,7 +899,7 @@ class ClientServer:
             raise self.make_visit_error(
                 "payload.target_retrieval_failed",
                 CATEGORY_PAYLOAD,
-                f"Payload target retrieval failed for URL {request.url}: {e}",
+                f"Payload target retrieval failed for the page '{request.url}': {e}",
                 request,
                 data={"payload": payload},
                 status_code=STATUS_ERROR,
@@ -934,7 +934,7 @@ class ClientServer:
             raise self.make_visit_error(
                 "payload.message_retrieval_failed",
                 CATEGORY_PAYLOAD,
-                f"Payload message retrieval failed for URL {request.url}: {e}",
+                f"Payload message retrieval failed for the page '{request.url}': {e}",
                 request,
                 data={"payload": payload},
                 status_code=STATUS_ERROR,

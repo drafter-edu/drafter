@@ -83,6 +83,28 @@ ID_EXPLANATIONS: dict[str, tuple[str, str, tuple[str, ...]]] = {
         "",
         (),
     ),
+    "payload.rendering_failed": (
+        "Page Content Problem",
+        "Drafter could not turn the content your route returned into a web page.",
+        (
+            "Read the technical message to see which value caused the problem "
+            "and where it is in your content.",
+            "Check the content you returned from your route for values that "
+            "are not text, numbers, booleans, images, or Drafter components.",
+            "To display an unusual value as text, wrap it in `str(...)`.",
+        ),
+    ),
+    "payload.formatting_failed": (
+        "Page Content Problem",
+        "Drafter could not format the content your route returned for display "
+        "in the history panel.",
+        (
+            "Read the technical message to see which value caused the problem "
+            "and where it is in your content.",
+            "Check the content you returned from your route for values that "
+            "are not text, numbers, booleans, images, or Drafter components.",
+        ),
+    ),
     "system.error_page_failed": (
         "Something Went Very Wrong",
         "Drafter hit a second problem while trying to show you the error page itself.",

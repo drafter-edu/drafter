@@ -57,11 +57,22 @@ class RenderPlan:
         items: For "fragment" kind, the items to render without a wrapper tag.
         emitter: For "emit" kind, function that generates content.
         raw_html: For "raw" kind, the raw HTML string.
+        semantic_label: Optional human phrase for this plan node (e.g.
+            ``row index 0`` on a Table's tr), recorded in error paths so
+            students see locations in terms of the component they wrote
+            instead of internal HTML tags.
+        children_are_content: Whether positions in `children`/`items`
+            correspond directly to items the user wrote (True for a
+            component's own content list; False for generated structure
+            like a Table's thead/tbody). Controls whether error paths
+            phrase those positions as user-visible indexes.
     """
 
     kind: Literal["tag", "fragment", "emit", "raw"]
     # Common
     assets: AssetBundle | None = None
+    semantic_label: str | None = None
+    children_are_content: bool = False
 
     # "tag" specific
     tag_name: str | None = None

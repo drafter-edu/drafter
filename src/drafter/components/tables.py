@@ -41,6 +41,10 @@ class Table(Component):
 
     tag = "table"
 
+    # The table's plan children are generated thead/tbody structure, not the
+    # user's rows; the row/cell plans carry semantic labels instead.
+    CHILDREN_ARE_CONTENT = False
+
     ARGUMENTS = [
         ComponentArgument("rows", is_content=True),
         ComponentArgument("header", kind="keyword", default_value=None),
@@ -60,36 +64,45 @@ class Table(Component):
         self.extra_settings = kwargs
         # self.reformat_as_tabular()
 
-    def render_tr(self, row_content, context):
+    def render_tr(self, row_content, context, label=None):
         """Render a table row (tr) element.
 
         Args:
             row_content: Content for the row cells.
             context: Rendering context.
+            label: Optional semantic label (e.g. "row index 0") recorded in
+                error paths.
 
         Returns:
             RenderPlan for the tr element.
         """
-        return RenderPlan(kind="tag", tag_name="tr", children=row_content)
+        return RenderPlan(
+            kind="tag", tag_name="tr", children=row_content, semantic_label=label
+        )
 
-    def render_td(self, cell_content, context):
+    def render_td(self, cell_content, context, label=None):
         """Render a table cell (td) element.
 
         Args:
             cell_content: Content for the cell.
             context: Rendering context.
+            label: Optional semantic label (e.g. "column index 1") recorded
+                in error paths.
 
         Returns:
             RenderPlan for the td element.
         """
-        return RenderPlan(kind="tag", tag_name="td", children=[cell_content])
+        return RenderPlan(
+            kind="tag", tag_name="td", children=[cell_content], semantic_label=label
+        )
 
-    def render_td_code(self, cell_content, context):
+    def render_td_code(self, cell_content, context, label=None):
         """Render a table cell with code formatting.
 
         Args:
             cell_content: Content for the cell.
             context: Rendering context.
+            label: Optional semantic label recorded in error paths.
 
         Returns:
             RenderPlan for td element with code child.
@@ -101,6 +114,7 @@ class Table(Component):
                 children=[cell_content],
             ),
             context,
+            label=label,
         )
 
     def get_tbody_from_dataclass(self, context) -> tuple[RenderPlan, RenderPlan | None]:
@@ -113,16 +127,25 @@ class Table(Component):
             Tuple of (tbody_plan, thead_plan) showing dataclass fields.
         """
         tbody_rows = []
-        for field in fields(self.rows):  # type: ignore
+        for row_index, field in enumerate(fields(self.rows)):  # type: ignore
             value = getattr(self.rows, field.name)
             tbody_rows.append(
                 self.render_tr(
                     [
-                        self.render_td_code(field.name, context),
-                        self.render_td_code(field.type.__name__, context),  # type: ignore
-                        self.render_td_code(safe_repr(value), context),
+                        self.render_td_code(
+                            field.name, context, label="column index 0"
+                        ),
+                        self.render_td_code(
+                            field.type.__name__,  # type: ignore[union-attr]
+                            context,
+                            label="column index 1",
+                        ),
+                        self.render_td_code(
+                            safe_repr(value), context, label="column index 2"
+                        ),
                     ],
                     context,
+                    label=f"row index {row_index}",
                 )
             )
         tbody = RenderPlan(kind="tag", tag_name="tbody", children=tbody_rows)
@@ -143,22 +166,34 @@ class Table(Component):
         # Add rows
         tbody_rows = []
         had_dataclasses = False
-        for row in self.rows:
+        for row_index, row in enumerate(self.rows):
             if is_dataclass(row):
                 had_dataclasses = True
                 tbody_rows.append(
                     self.render_tr(
                         [
-                            self.render_td(getattr(row, attr), context)
+                            self.render_td(
+                                getattr(row, attr),
+                                context,
+                                label=f"column '{attr}'",
+                            )
                             for attr in row.__dataclass_fields__
                         ],
                         context,
+                        label=f"row index {row_index}",
                     )
                 )
             elif isinstance(row, list):
                 tbody_rows.append(
                     self.render_tr(
-                        [self.render_td(cell, context) for cell in row], context
+                        [
+                            self.render_td(
+                                cell, context, label=f"column index {cell_index}"
+                            )
+                            for cell_index, cell in enumerate(row)
+                        ],
+                        context,
+                        label=f"row index {row_index}",
                     )
                 )
 
@@ -185,13 +220,15 @@ class Table(Component):
                 RenderPlan(
                     kind="tag",
                     tag_name="tr",
+                    semantic_label="header row",
                     children=[
                         RenderPlan(
                             kind="tag",
                             tag_name="th",
                             children=[cell],
+                            semantic_label=f"column index {cell_index}",
                         )
-                        for cell in header
+                        for cell_index, cell in enumerate(header)
                     ],
                 )
             ],

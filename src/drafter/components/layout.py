@@ -351,6 +351,9 @@ class DefinitionList(Component):
 
     ARGUMENTS = [ComponentArgument("items", is_content=True)]
 
+    # Children are generated dt/dd pairs carrying their own semantic labels.
+    CHILDREN_ARE_CONTENT = False
+
     def __init__(self, items, **extra_settings):
         """Initialize definition list component.
 
@@ -434,12 +437,22 @@ class DefinitionList(Component):
             return str(value)
 
         children: list[PageContent | RenderPlan] = []
-        for term, definition in self._get_pairs():
+        for pair_index, (term, definition) in enumerate(self._get_pairs()):
             children.append(
-                RenderPlan(kind="tag", tag_name="dt", children=[as_content(term)])
+                RenderPlan(
+                    kind="tag",
+                    tag_name="dt",
+                    children=[as_content(term)],
+                    semantic_label=f"term index {pair_index}",
+                )
             )
             children.append(
-                RenderPlan(kind="tag", tag_name="dd", children=[as_content(definition)])
+                RenderPlan(
+                    kind="tag",
+                    tag_name="dd",
+                    children=[as_content(definition)],
+                    semantic_label=f"definition index {pair_index}",
+                )
             )
         return children
 
@@ -499,10 +512,19 @@ class _HtmlList(Component):
 
     ARGUMENTS = [ComponentArgument("items", is_content=True)]
 
+    # Children are generated li wrappers; each carries its item's index as a
+    # semantic label for error paths.
+    CHILDREN_ARE_CONTENT = False
+
     def get_children(self, context) -> list[PageContent | RenderPlan]:
         return [
-            RenderPlan(kind="tag", tag_name="li", children=[item])
-            for item in self.items
+            RenderPlan(
+                kind="tag",
+                tag_name="li",
+                children=[item],
+                semantic_label=f"item index {item_index}",
+            )
+            for item_index, item in enumerate(self.items)
         ]
 
 

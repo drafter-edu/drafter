@@ -277,6 +277,13 @@ class Component:
     SELF_CLOSING_TAG: ClassVar[bool] = False
     NEWLINE_MODE: ClassVar[str] = NewlineMode.CONVERT_TO_BR
 
+    # Whether positions in this component's plan children correspond directly
+    # to items the user wrote (the default `get_children` collects declared
+    # content arguments, so yes). Components that generate structural children
+    # instead (e.g. Table's thead/tbody) set this to False so error paths do
+    # not phrase those positions as user-visible indexes.
+    CHILDREN_ARE_CONTENT: ClassVar[bool] = True
+
     ALLOWS_SHARED_NAME: bool = False
 
     # Constants
@@ -346,6 +353,7 @@ class Component:
             newline_mode=newline_mode
             if newline_mode is not None
             else self.NEWLINE_MODE,
+            children_are_content=self.CHILDREN_ARE_CONTENT,
         )
 
     def _handle_event(self, attribute_key, attribute_value):

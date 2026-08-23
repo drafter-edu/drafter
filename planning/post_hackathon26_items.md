@@ -2,12 +2,12 @@
 
 - [X] If you run a file without saving, it will run a crashed site. This is what happens basically by default in thonny.
 - [X] If you save in the top-level directory, it starts recursively watching all files on your entire hard drive. This also causes an infinite loop. (Watch policy with safety checks + safe mode; see watch_* settings in AppServerConfiguration.)
-- [ ] The table example does not work
-- [ ] Tables should support numbers
+- [X] The table example does not work
+- [X] Tables should support numbers
 - [ ] Table is weird when there is a button inside. Looks like there might be some empty space or something?
 - [ ] Pressing back arrow in browser goes to previous interactive code, not previous page in documentation. We should add a flag to disable the History feature, and then disable it in the documentation.
 - [X] Semicolons have to be escaped to be used on shells, so they shouldn't be used as the separators
-- [ ] Load packages automatically prevents explicit package list
+- [X] Load packages automatically prevents explicit package list
 - [ ] Pilgram was not being inferred automatically
 - [ ] The letter "B" is broken in documentation search (not sure why that letter in particular)
 - [ ] The import js should work at the top level. It can still error if you try to call anything outside of pyodide, but just importing it shouldn't break anything.

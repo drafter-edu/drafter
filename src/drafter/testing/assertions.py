@@ -24,6 +24,7 @@ from typing import Any
 
 from drafter.components.page_content import Component
 from drafter.components.text import Text
+from drafter.data.paths import PathItem, render_path
 from drafter.payloads.kinds.fragment import Fragment
 from drafter.testing.normalize import (
     LIST_GENERATOR_TYPES,
@@ -48,22 +49,6 @@ class ComparisonSettings:
     precision: int = 4
     exact_strings: bool = False
     strict_styles: bool = False
-
-
-@dataclass
-class PathItem:
-    """One step in the path from a compared root value to a nested value.
-
-    Attributes:
-        kind: The kind of step (e.g., `index`, `key`, `set`, `item`,
-            `attributes`, `positional`, `keys`, `children`), used by
-            `render_path` to phrase the location.
-        name: The label for the step, such as the index, key, or component
-            name.
-    """
-
-    kind: str
-    name: str
 
 
 @dataclass
@@ -476,54 +461,6 @@ def compare_mappings(
         if diff:
             all_differences.extend(diff)
     return all_differences
-
-
-def render_path(path: list[PathItem]) -> str:
-    """Format a Difference path as a human-readable location phrase.
-
-    Walks the PathItems in order, merging `attributes` and `positional`
-    steps with the step that follows them, quoting `key`/`item`/`set`
-    names, prefixing `index` steps with the word "index", and joining the
-    resulting pieces with spaces.
-
-    Args:
-        path: The PathItems leading to the mismatch.
-
-    Returns:
-        str: The formatted location phrase.
-    """
-    message = []
-    remaining_parts = path[:]
-    while remaining_parts:
-        path_item = remaining_parts.pop(0)
-        if path_item.kind == "attributes":
-            if remaining_parts:
-                next_path_item = remaining_parts.pop(0)
-                message.append(f"{path_item.name} {next_path_item.name}")
-            else:
-                message.append(f"{path_item.name}")
-        elif path_item.kind == "positional":
-            if remaining_parts:
-                next_path_item = remaining_parts.pop(0)
-                if next_path_item.kind == "keys":
-                    message.append(f"{path_item.name}")
-                else:
-                    message.append(f"{path_item.name} {next_path_item.name}")
-            else:
-                message.append(f"{path_item.name}")
-        elif path_item.kind == "children":
-            message.append(f"{path_item.name} children")
-        elif path_item.kind == "key":
-            message.append(f"'{path_item.name}'")
-        elif path_item.kind == "item":
-            message.append(f"'{path_item.name}'")
-        elif path_item.kind == "set":
-            message.append(f"'{path_item.name}'")
-        elif path_item.kind == "index":
-            message.append(f"index '{path_item.name}'")
-        else:
-            message.append(f"{path_item.kind} '{path_item.name}'")
-    return " ".join(message)
 
 
 def render_difference(difference: Difference) -> str:
