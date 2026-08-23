@@ -134,9 +134,16 @@ with open("questions.txt") as data_file:
 ```
 
 Keep the file next to your program. When you deploy, the file must
-be deployed too: upload it to the repository, and if the build
-needs to be told about it, the `--additional-paths` flag names an
-extra file to bundle, repeated once per file (see
+be deployed too: upload it to the repository, and tell the build
+about it with `add_website_file`, which also checks right away that
+the file really exists (and suggests similarly named files if not):
+
+```python
+add_website_file("questions.txt")
+```
+
+The `--additional-paths` command line flag does the same job from
+outside the code, repeated once per file (see
 [Command line](../reference/cli.md)).
 The helper `get_drafter_path("questions.txt")` resolves a name to
 wherever the app's files actually live, which helps in the rare

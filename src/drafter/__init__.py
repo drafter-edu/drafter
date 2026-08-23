@@ -132,7 +132,11 @@ from drafter.data.files import DrafterBinaryFile, DrafterTextFile
 from drafter.data.images import Picture
 from drafter.deploy import (
     add_website_css,
+    add_website_css_file,
+    add_website_file,
     add_website_header,
+    add_website_js,
+    add_website_js_file,
     deploy_site,
     get_site_information,
     hide_debug_information,
@@ -323,6 +327,10 @@ __all__ = [
     "set_browser_history",
     "add_website_header",
     "add_website_css",
+    "add_website_css_file",
+    "add_website_js",
+    "add_website_js_file",
+    "add_website_file",
     "set_site_information",
     "get_site_information",
     "deploy_site",

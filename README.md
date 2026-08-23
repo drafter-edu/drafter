@@ -284,6 +284,9 @@ There are also imperative helpers (importable from `drafter`) that reconfigure t
 | `hide_debug_information()` / `show_debug_information()`               | Toggle the debug panel.                                                 |
 | `add_website_header(html)`                                            | Inject raw HTML into `<head>`.                                          |
 | `add_website_css(selector, css)`                                      | Add a CSS rule (or raw CSS if only one argument is given).              |
+| `add_website_css_file(path)` / `add_website_js_file(path)`            | Link a stylesheet / script from a file next to the program or a URL.    |
+| `add_website_js(code)`                                                | Run raw JavaScript when the site loads.                                 |
+| `add_website_file(*filenames)`                                        | Declare files the site needs so they are checked and copied on build.   |
 | `set_site_information(author, description, sources, planning, links)` | Attach site metadata shown on the About page.                           |
 | `deploy_site(image_folder)`                                           | Prepare for deployment (hides debug information).                       |
 

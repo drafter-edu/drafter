@@ -19,6 +19,24 @@ INTERNAL_FILES = {"DRAFTER_PYODIDE_FILE": "drafter-pyodide.zip"}
 loaded into Pyodide."""
 
 
+def is_absolute_url(url: str) -> bool:
+    """Whether a URL already says where it lives, so it must not be
+    remapped into the assets folder.
+
+    Recognizes scheme URLs (`http://`, `https://`, any `scheme:`-prefixed
+    `data:`/`blob:` URI), protocol-relative `//host/...` URLs, and
+    root-relative `/path` URLs.
+
+    Args:
+        url: The URL or path to inspect.
+
+    Returns:
+        True for absolute/root-relative URLs, False for relative paths.
+    """
+    url = str(url).strip()
+    return "://" in url or url.startswith(("//", "/", "data:", "blob:"))
+
+
 def determine_assets_url(override_asset_url) -> str:
     """Determine the asset URL based on override setting.
 

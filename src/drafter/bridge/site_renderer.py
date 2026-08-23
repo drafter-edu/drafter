@@ -15,6 +15,7 @@ from drafter.bridge.dom import (
     add_js,
     add_link,
     add_link_to_shadow,
+    add_script_link,
     add_style,
     add_style_to_shadow,
     insert_html_before,
@@ -206,6 +207,10 @@ class SiteRenderer:
 
             for js_code in initial_site_data.additional_js:
                 add_js(root, js_code, with_class=DRAFTER_TAG_CLASSES["THEME"])
+            for script_url in initial_site_data.additional_scripts:
+                add_script_link(
+                    root, script_url, with_class=DRAFTER_TAG_CLASSES["THEME"]
+                )
             for header in initial_site_data.additional_header:
                 add_header(root, header)
 

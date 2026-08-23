@@ -129,6 +129,28 @@ def add_js(
     return script
 
 
+def add_script_link(root, src: str, with_class: str = "") -> None:
+    """Create a `<script src=...>` element in the document head so the
+    browser loads and runs an external JavaScript file.
+
+    Unlike `add_js`, the element stays in the document (the browser needs
+    it there to fetch the file). It is tagged with the given class so
+    `remove_existing_theme` can clear it before the site is set up again.
+
+    Args:
+        root: Node used to resolve the owning document.
+        src: URL of the script file (full URL or path relative to the page).
+        with_class: Optional class attribute to set on the element.
+    """
+    document = get_document(root)
+    script = document.createElement("script")
+    script.setAttribute("src", src)
+    if with_class:
+        script.setAttribute("class", with_class)
+    head = document.head or document.documentElement
+    head.appendChild(script)
+
+
 def add_style(
     root,
     css: str,

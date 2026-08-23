@@ -51,6 +51,48 @@ def build_zip(
     print(f"Built zip file at {output_zip}")
 
 
+def copy_adjacent_file(
+    reference: str, base_dir: Path, output_directory: Path, label: str = "file"
+) -> Path | None:
+    """Copy a file referenced by the user's program into the built site.
+
+    URLs and data URIs need no copying and are skipped. Relative paths
+    resolve against `base_dir` (the folder holding the main file) and land
+    at the same relative location under `output_directory`, so links that
+    worked during development keep working when deployed. A missing file
+    prints a warning instead of failing the build.
+
+    Args:
+        reference: The path or URL as the program referenced it.
+        base_dir: Folder containing the user's main file.
+        output_directory: Root of the built site.
+        label: What the reference is (for log messages).
+
+    Returns:
+        The destination path when a file was copied, otherwise None.
+    """
+    if not reference or "://" in reference or reference.startswith(("data:", "//")):
+        return None
+    source_path = Path(reference)
+    if not source_path.is_absolute():
+        source_path = base_dir / source_path
+    if not source_path.exists():
+        print(f"Warning: {label} not found: {reference}")
+        return None
+    try:
+        relative_path = source_path.relative_to(base_dir)
+    except ValueError:
+        relative_path = Path(source_path.name)
+    dest_path = output_directory / relative_path
+    print(f"- Copying {label} {source_path} to {dest_path}")
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+    if source_path.is_dir():
+        shutil.copytree(source_path, dest_path, dirs_exist_ok=True)
+    else:
+        shutil.copy2(source_path, dest_path)
+    return dest_path
+
+
 def iter_additional_paths(pattern: str, base_dir: Path):
     """Resolve a glob pattern for additional paths to include in a build.
 
@@ -216,22 +258,15 @@ def compile_site(
     # need no copying.
     favicons = {system.app_common.favicon, server.get_config_setting("favicon")}
     for favicon in favicons:
-        if not favicon or "://" in favicon or favicon.startswith(("data:", "//")):
-            continue
-        favicon_path = Path(favicon)
-        if not favicon_path.is_absolute():
-            favicon_path = base_dir / favicon_path
-        if not favicon_path.exists():
-            print(f"Warning: favicon file not found: {favicon}")
-            continue
-        try:
-            relative_path = favicon_path.relative_to(base_dir)
-        except ValueError:
-            relative_path = Path(favicon_path.name)
-        dest_path = output_directory / relative_path
-        print(f"- Copying favicon {favicon_path} to {dest_path}")
-        dest_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(favicon_path, dest_path)
+        copy_adjacent_file(favicon, base_dir, output_directory, label="favicon")
+
+    # Files registered with add_website_file() / add_website_css_file() /
+    # add_website_js_file() (or the matching config settings) ship with the
+    # build too, next to index.html so relative links keep working.
+    for website_file in server.get_config_setting("additional_files") or []:
+        copy_adjacent_file(
+            website_file, base_dir, output_directory, label="website file"
+        )
 
     if system.bootstrap.verbose:
         print(f"Assets copied to {dest_assets_dir}")

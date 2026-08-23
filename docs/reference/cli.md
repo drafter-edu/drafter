@@ -70,7 +70,10 @@ journey.
 | Flag | Default | What it does |
 | ---- | ------- | ------------ |
 | `--output-directory DIR` | `dist` | Build somewhere else. |
-| `--additional-paths PATH` | none | Bundle an extra file your code `open()`s; repeat the flag for each file: `--additional-paths pets.csv --additional-paths words.txt`. Forgetting this is the classic works-locally, [404s-deployed](../help/errors/missing-asset-on-deploy.md) mistake. |
+| `--additional-paths PATH` | none | Bundle an extra file your code `open()`s; repeat the flag for each file: `--additional-paths pets.csv --additional-paths words.txt`. Forgetting this is the classic works-locally, [404s-deployed](../help/errors/missing-asset-on-deploy.md) mistake. The in-code form is [`add_website_file`](site-config.md#add_website_file). |
+| `--additional-files PATH` | none | Same idea as `--additional-paths`, but through the site configuration: the flag version of `add_website_file(...)`. Repeat once per file. |
+| `--additional-css-files PATH_OR_URL` | none | Link a stylesheet (a `.css` file next to your program, or a URL) into every page; the flag version of `add_website_css_file(...)`. Repeat once per entry. |
+| `--additional-js-files PATH_OR_URL` | none | Load a script (a `.js` file next to your program, or a URL) on every page; the flag version of `add_website_js_file(...)`. Repeat once per entry. |
 | `--zip-output` | off | Zip the built site, convenient for uploading. |
 
 ## Libraries

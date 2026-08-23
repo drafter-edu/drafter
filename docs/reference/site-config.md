@@ -15,6 +15,10 @@ symbols:
   - set_button_spinners
   - add_website_header
   - add_website_css
+  - add_website_css_file
+  - add_website_js
+  - add_website_js_file
+  - add_website_file
   - set_site_information
   - get_site_information
   - hide_debug_information
@@ -136,6 +140,64 @@ Adds CSS to every page. With one argument, the text is raw CSS. With
 two, the first is a selector and the second is the rule body to wrap
 in braces. The how-to, including the selectors you need, is
 [Custom CSS](../add/change-appearance/custom-css.md).
+Passing a file name such as `"style.css"` is a mistake this function
+catches and reports; use `add_website_css_file` for files.
+
+### add_website_css_file
+
+```python
+add_website_css_file("style.css")
+add_website_css_file("https://fonts.googleapis.com/css2?family=Lora")
+```
+
+Links a stylesheet into every page. The argument is either the name of
+a `.css` file next to your Python program (a subfolder path such as
+`"static/style.css"` also works) or a full URL. Files next to your
+program are checked immediately: a missing file raises an error that
+names the folder Drafter searched and suggests similarly named files,
+so `"style.css"` when the file is `"styles.css"` is caught at once
+rather than silently ignored. The file is registered as a website file
+(see `add_website_file`), so it is copied into the built site when you
+deploy. Your stylesheet is linked after the theme's, so its rules win
+ties.
+
+### add_website_js
+
+```python
+add_website_js("console.log('Site loaded');")
+```
+
+Runs JavaScript code once, when the site first loads. Like
+`add_website_css`, it takes code, not a file name.
+
+### add_website_js_file
+
+```python
+add_website_js_file("app.js")
+add_website_js_file("https://cdn.example.com/library.js")
+```
+
+Loads a JavaScript file on every page, from a `.js` file next to your
+program or from a full URL. Local files get the same checks and
+suggestions as `add_website_css_file`, and are registered as website
+files for deployment.
+
+### add_website_file
+
+```python
+add_website_file("words.txt", "images/logo.png")
+```
+
+Declares files next to your program that the site needs at runtime:
+data files you `open()`, images, fonts, and so on. Each name is
+checked immediately (with suggestions when a similarly named file
+exists), and the files are copied into the built site when you
+deploy. This is the in-code equivalent of the
+[`--additional-paths`](cli.md#building-for-deployment) flag, and the
+way to prevent the
+[works locally, 404s deployed](../help/errors/missing-asset-on-deploy.md)
+problem. Only files inside your program's folder can be added:
+absolute paths, `..` paths, and URLs are rejected with an explanation.
 
 ## Site information
 

@@ -5,8 +5,12 @@ such as debug information visibility, site title, theme, framing, custom
 header/CSS content, and site metadata.
 """
 
+from typing import Any
+
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import get_main_server
+from drafter.data.errors import StudentFacingError
+from drafter.files.website_files import is_url, resolve_website_file
 
 
 def hide_debug_information(server: ClientServer | None = None):
@@ -286,11 +290,208 @@ def add_website_css(
     if server is None:
         server = get_main_server()
     if css is None:
+        _reject_filename_given_as_code(selector, "add_website_css", "css")
         # Treat selector as raw CSS content
         server.reconfigure(additional_style_content=selector)
     else:
         # Create a CSS rule from selector and content
         server.reconfigure(additional_style_content=f"{selector} {{{css}}}\n")
+
+
+def _reject_filename_given_as_code(content: str, function_name: str, kind: str):
+    """Raise a helpful error when a file name was passed to an inline helper.
+
+    `add_website_css("style.css")` is a common slip: the student meant to
+    link the file, but the helper would inject the literal text "style.css"
+    as CSS and silently do nothing useful.
+
+    Args:
+        content: The argument the inline helper received.
+        function_name: The inline helper's name (for the message).
+        kind: "css" or "js", selecting the file-based helper to suggest.
+
+    Raises:
+        StudentFacingError: If `content` is a bare file name or URL.
+    """
+    if not isinstance(content, str):
+        return
+    stripped = content.strip()
+    if not stripped or any(ch.isspace() for ch in stripped):
+        return
+    if any(marker in stripped for marker in "{};()"):
+        return
+    extensions = (".css",) if kind == "css" else (".js", ".mjs")
+    if not stripped.lower().endswith(extensions) and not is_url(stripped):
+        return
+    language = "CSS" if kind == "css" else "JavaScript"
+    file_helper = f"{function_name}_file"
+    example = (
+        "add_website_css('h1', 'color: red;')"
+        if kind == "css"
+        else "add_website_js('console.log(\"hello\");')"
+    )
+    raise StudentFacingError(
+        f"{function_name}: got a file name or URL ({stripped!r}) instead of"
+        f" {language} code",
+        friendly=(
+            f"{function_name} expects {language} code written directly in your"
+            f" program, but '{stripped}' looks like the name of a file or a URL."
+            f" Adding it as {language} would do nothing."
+        ),
+        steps=(
+            f"To add a {language} file to every page, use"
+            f" {file_helper}('{stripped}') instead.",
+            f"To write {language} directly, pass the code itself, for example"
+            f" {example}.",
+        ),
+        title=f"File Name Given Instead of {language}",
+    )
+
+
+def _add_registered_file(server: ClientServer, key: str, value: str) -> None:
+    """Append `value` to the list-valued config `key` unless already present.
+
+    Args:
+        server: The server whose configuration is updated.
+        key: A list-valued configuration key (e.g. `additional_files`).
+        value: The path or URL to register.
+    """
+    current = server.get_config_setting(key) or []
+    if value in current:
+        return
+    update: dict[str, Any] = {key: value}
+    server.reconfigure(**update)
+
+
+def add_website_css_file(path: str, server: ClientServer | None = None):
+    """
+    Adds a CSS file to every page.
+
+    `path` may be the path to a CSS file next to the student's program,
+    or a full URL to a stylesheet.
+
+    A file next to the program is checked right away: if it cannot be
+    found, a friendly error explains where Drafter looked and suggests
+    similarly named files. The file is also registered like
+    `add_website_file`, so it travels with the site when it is built.
+
+    Args:
+        path: The path of a `.css` file next to your program (such as
+            `"style.css"` or `"static/style.css"`), or a full URL.
+        server: The server to configure. If None, uses the main server.
+
+    Raises:
+        StudentFacingError: If the path is not a string, looks like CSS code
+            rather than a file name, is not a `.css` file, or cannot be found.
+    """
+    if server is None:
+        server = get_main_server()
+    resolved = resolve_website_file(path, "add_website_css_file", kind="css")
+    if not is_url(resolved):
+        _add_registered_file(server, "additional_files", resolved)
+    _add_registered_file(server, "additional_css_files", resolved)
+
+
+def add_website_js(js: str, server: ClientServer | None = None):
+    """
+    Adds JavaScript code to every page. The code runs once, when the site
+    first loads, before any page content is shown.
+
+    Args:
+        js: The raw JavaScript code to run.
+        server: The server to configure. If None, uses the main server.
+
+    Raises:
+        StudentFacingError: If the argument looks like a file name or URL
+            rather than code (use `add_website_js_file` for those).
+    """
+    if server is None:
+        server = get_main_server()
+    _reject_filename_given_as_code(js, "add_website_js", "js")
+    server.reconfigure(additional_js_content=js)
+
+
+def add_website_js_file(path: str, server: ClientServer | None = None):
+    """
+    Adds a JavaScript file to every page.
+
+    `path` may be the path to a `.js` file next to the student's program,
+    or a full URL to a script. Files next to the program are checked right
+    away (with suggestions for similarly named files when missing) and are
+    registered like `add_website_file`, so they travel with the built site.
+
+    Args:
+        path: The path of a `.js` file next to your program (such as
+            `"app.js"`), or a full URL.
+        server: The server to configure. If None, uses the main server.
+
+    Raises:
+        StudentFacingError: If the path is not a string, looks like
+            JavaScript code rather than a file name, is not a `.js` file,
+            or cannot be found.
+    """
+    if server is None:
+        server = get_main_server()
+    resolved = resolve_website_file(path, "add_website_js_file", kind="js")
+    if not is_url(resolved):
+        _add_registered_file(server, "additional_files", resolved)
+    _add_registered_file(server, "additional_js_files", resolved)
+
+
+def add_website_file(*filenames: str, server: ClientServer | None = None):
+    """
+    Registers files next to the student's program as part of the website,
+    so that they are copied into the built site when it is deployed.
+
+    Use this for files the site needs at runtime (data files that are
+    `open()`ed, images, fonts, and so on). Each file is checked right
+    away; a missing file raises a friendly error that suggests similarly
+    named files.
+
+    Args:
+        filenames: One or more paths, relative to your program's folder
+            (such as `"words.txt"` or `"images/logo.png"`).
+        server: The server to configure. If None, uses the main server.
+
+    Raises:
+        StudentFacingError: If no filenames are given, or if any path is
+            not a string, is a URL or absolute path, or cannot be found.
+    """
+    if server is None:
+        server = get_main_server()
+    if not filenames:
+        raise StudentFacingError(
+            "add_website_file: no filenames were given",
+            friendly=(
+                "add_website_file needs at least one file name, but it was called"
+                " with nothing."
+            ),
+            steps=("Call it like add_website_file('words.txt', 'logo.png').",),
+            title="No Website Files Given",
+        )
+    resolved_paths = []
+    for filename in filenames:
+        if isinstance(filename, str) and is_url(filename):
+            raise StudentFacingError(
+                "add_website_file: expected a file next to your program, got a"
+                f" URL: {filename!r}",
+                friendly=(
+                    "add_website_file only works with files next to your program,"
+                    f" but '{filename}' is a URL. Files on other websites do not"
+                    " need to be added; your site can use them directly."
+                ),
+                steps=(
+                    "Remove this call, and use the URL directly where you need it"
+                    " (for example in Image(...), add_website_css_file(...), or"
+                    " add_website_js_file(...)).",
+                ),
+                title="Website File Must Be Next to Your Program",
+            )
+        resolved_paths.append(
+            resolve_website_file(filename, "add_website_file", kind="file")
+        )
+    for resolved in resolved_paths:
+        _add_registered_file(server, "additional_files", resolved)
 
 
 def deploy_site(image_folder="images", server: ClientServer | None = None):

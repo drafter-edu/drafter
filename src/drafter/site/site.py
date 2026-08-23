@@ -10,7 +10,7 @@ templates and the well-known Drafter element ids and classes.
 from dataclasses import dataclass
 
 from drafter.config.client_server import ClientServerConfiguration
-from drafter.config.urls import determine_assets_url
+from drafter.config.urls import determine_assets_url, is_absolute_url
 from drafter.site.headers import CSSLink
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.styling.themes import get_theme_system
@@ -161,13 +161,15 @@ class Site:
             urls: Individual asset URLs to remap.
             configuration: The current ClientServerConfiguration.
 
+        Absolute URLs (`http://...`, `https://...`, `//cdn...`, `data:`
+        URIs, or root-relative `/...` paths) are left untouched, since they
+        already say where they live.
+
         Returns:
             list[str]: List of remapped asset URLs.
         """
-        return [
-            f"{determine_assets_url(configuration.override_asset_url)}/{url}"
-            for url in urls
-        ]
+        assets_url = determine_assets_url(configuration.override_asset_url)
+        return [url if is_absolute_url(url) else f"{assets_url}/{url}" for url in urls]
 
     def render_error_fallback(self, envelope) -> InitialSiteData:
         """Render a minimal error page for failures during site setup.
@@ -275,6 +277,13 @@ class Site:
                 *configuration.additional_css_content, configuration=configuration
             )
             additional_css.extend([CSSLink(url=url) for url in remapped_additional_css])
+        # Stylesheet files added with add_website_css_file(): full URLs, or
+        # files next to the user's program (served from the site's root), so
+        # they are linked verbatim rather than remapped to the assets folder.
+        if configuration.additional_css_files:
+            additional_css.extend(
+                [CSSLink(url=url) for url in configuration.additional_css_files]
+            )
         # Add raw style content if present
         if configuration.additional_style_content:
             additional_styles.extend(configuration.additional_style_content)
@@ -289,6 +298,9 @@ class Site:
 
         if configuration.additional_script_content:
             additional_scripts.extend(configuration.additional_script_content)
+        # Script files added with add_website_js_file(), loaded verbatim.
+        if configuration.additional_js_files:
+            additional_scripts.extend(configuration.additional_js_files)
 
         return InitialSiteData(
             site_html=site_html,

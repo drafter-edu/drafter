@@ -42,6 +42,15 @@ class ClientServerConfiguration(BaseConfiguration):
         additional_css_content: List of external CSS URLs.
         additional_js_content: List of inline JavaScript strings.
         additional_script_content: List of external JS URLs.
+        additional_css_files: List of stylesheet URLs, or paths to CSS files
+            next to the user's program, linked into every page verbatim (no
+            asset-URL remapping). Filled by `add_website_css_file()`.
+        additional_js_files: List of script URLs, or paths to JavaScript
+            files next to the user's program, loaded on every page verbatim.
+            Filled by `add_website_js_file()`.
+        additional_files: List of paths (relative to the user's program) of
+            files the site needs at runtime, copied into the built site.
+            Filled by `add_website_file()`.
         use_shadow_dom: Wrap app in Shadow DOM to prevent CSS conflicts.
         root_element_id: ID prefix for root element.
         system_routes: Dict mapping route names to handler callables.
@@ -97,6 +106,9 @@ class ClientServerConfiguration(BaseConfiguration):
     additional_js_content: list[str] = field(default_factory=list)
     # Linked JavaScript Content
     additional_script_content: list[str] = field(default_factory=list)
+    additional_css_files: list[str] = field(default_factory=list)
+    additional_js_files: list[str] = field(default_factory=list)
+    additional_files: list[str] = field(default_factory=list)
     # Shadow DOM CSS
     use_shadow_dom: bool = False
     # Id of the DOM element the app renders into; also used as the instance
@@ -183,6 +195,15 @@ class ClientServerConfiguration(BaseConfiguration):
         )
         result.get_string_list_if_exists(
             "DRAFTER_ADDITIONAL_SCRIPT_CONTENT", "additional_script_content", ";"
+        )
+        result.get_string_list_if_exists(
+            "DRAFTER_ADDITIONAL_CSS_FILES", "additional_css_files", ";"
+        )
+        result.get_string_list_if_exists(
+            "DRAFTER_ADDITIONAL_JS_FILES", "additional_js_files", ";"
+        )
+        result.get_string_list_if_exists(
+            "DRAFTER_ADDITIONAL_FILES", "additional_files", ";"
         )
         result.get_bool_if_exists("DRAFTER_USE_SHADOW_DOM", "use_shadow_dom")
         result.get_string_if_exists("DRAFTER_ROOT_ELEMENT_ID", "root_element_id")
@@ -300,6 +321,33 @@ class ClientServerConfiguration(BaseConfiguration):
             type=str,
             action="append",
             help="External JS URL; repeat the flag for multiple URLs",
+        )
+        group.add_argument(
+            "--additional-css-files",
+            type=str,
+            action="append",
+            help=(
+                "Stylesheet URL or CSS file next to the main file, linked into "
+                "every page; repeat the flag for multiple entries"
+            ),
+        )
+        group.add_argument(
+            "--additional-js-files",
+            type=str,
+            action="append",
+            help=(
+                "Script URL or JavaScript file next to the main file, loaded on "
+                "every page; repeat the flag for multiple entries"
+            ),
+        )
+        group.add_argument(
+            "--additional-files",
+            type=str,
+            action="append",
+            help=(
+                "File next to the main file that the site needs (copied into "
+                "the built site); repeat the flag for multiple entries"
+            ),
         )
         group.add_argument(
             "--use-shadow-dom",
@@ -427,6 +475,15 @@ class ClientServerConfiguration(BaseConfiguration):
             result["additional_script_content"] = [
                 content.strip() for content in parsed_args["additional_script_content"]
             ]
+        for files_key in (
+            "additional_css_files",
+            "additional_js_files",
+            "additional_files",
+        ):
+            if parsed_args.get(files_key):
+                result[files_key] = [
+                    content.strip() for content in parsed_args[files_key]
+                ]
         if parsed_args.get("use_shadow_dom"):
             result["use_shadow_dom"] = True
         if parsed_args.get("root_element_id"):
@@ -478,6 +535,9 @@ class ClientServerConfiguration(BaseConfiguration):
             "additional_css_content": self.additional_css_content,
             "additional_js_content": self.additional_js_content,
             "additional_script_content": self.additional_script_content,
+            "additional_css_files": self.additional_css_files,
+            "additional_js_files": self.additional_js_files,
+            "additional_files": self.additional_files,
             "use_shadow_dom": self.use_shadow_dom,
             "root_element_id": self.root_element_id,
             "system_routes": list(self.system_routes.keys()),
@@ -515,6 +575,9 @@ class ClientServerConfiguration(BaseConfiguration):
             additional_css_content=list(self.additional_css_content),
             additional_js_content=list(self.additional_js_content),
             additional_script_content=list(self.additional_script_content),
+            additional_css_files=list(self.additional_css_files),
+            additional_js_files=list(self.additional_js_files),
+            additional_files=list(self.additional_files),
             use_shadow_dom=self.use_shadow_dom,
             server_name=self.server_name,
             root_element_id=self.root_element_id,
@@ -549,6 +612,20 @@ class ClientServerConfiguration(BaseConfiguration):
 
     SITE_INFORMATION_KEYS = ("author", "description", "sources", "planning", "links")
 
+    #: Configuration keys whose values are lists that `update_configuration`
+    #: appends to (rather than replaces). Each Drafter instance resets these
+    #: to empty lists before its code runs (see `configure_instance`).
+    LIST_CONTENT_KEYS = (
+        "additional_css_content",
+        "additional_style_content",
+        "additional_js_content",
+        "additional_script_content",
+        "additional_header_content",
+        "additional_css_files",
+        "additional_js_files",
+        "additional_files",
+    )
+
     def update_configuration(self, key: str, value):
         """
         Updates a specific configuration key with a new value.
@@ -571,13 +648,7 @@ class ClientServerConfiguration(BaseConfiguration):
             # TODO: InvalidConfigurationKeyError
             raise ValueError(f"Invalid configuration key: {key}")
         # TODO: Add validation for specific keys if necessary (e.g., theme should be a valid theme name)
-        if key in (
-            "additional_css_content",
-            "additional_style_content",
-            "additional_js_content",
-            "additional_script_content",
-            "additional_header_content",
-        ):
+        if key in self.LIST_CONTENT_KEYS:
             current_value = getattr(self, key)
             if isinstance(current_value, list):
                 current_value.append(value)

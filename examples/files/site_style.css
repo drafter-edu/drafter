@@ -1,0 +1,21 @@
+/* Site-wide stylesheet, linked with add_website_css_file("files/site_style.css"). */
+
+.fortune-card {
+    border: 2px solid darkslateblue;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 12px 0;
+    background-color: ghostwhite;
+    font-family: Georgia, serif;
+    font-size: 1.2em;
+}
+
+.fortune-count {
+    color: dimgray;
+    font-style: italic;
+}
+
+.fortune-button {
+    border-radius: 999px;
+    padding: 8px 20px;
+}

@@ -245,11 +245,5 @@ def configure_instance(
     # *appended* to by add_website_css()/add_website_js()/etc. Without a reset,
     # one instance's injected CSS/JS would accumulate and leak into every
     # instance configured after it. Give each instance a clean slate.
-    for field_name in (
-        "additional_css_content",
-        "additional_style_content",
-        "additional_js_content",
-        "additional_script_content",
-        "additional_header_content",
-    ):
+    for field_name in system.client_server.LIST_CONTENT_KEYS:
         setattr(system.client_server, field_name, [])

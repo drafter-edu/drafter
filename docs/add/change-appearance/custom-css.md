@@ -103,6 +103,37 @@ With two arguments, the first is the selector and the second is the
 declarations that belong inside the braces. With one argument, you
 are handing over raw CSS, which can contain several rules at once.
 
+## Keep the CSS in its own file
+
+Once you have more than a few rules, a separate `style.css` file next
+to your program is easier to edit, and your editor will highlight it
+properly. `add_website_css_file` links it into every page:
+
+```python
+from drafter import *
+
+add_website_css_file("style.css")
+```
+
+```css
+/* style.css, saved in the same folder as your program */
+.notice {
+    border: 2px solid darkslateblue;
+    border-radius: 8px;
+    padding: 12px;
+}
+```
+
+The argument can also be a full URL, such as a stylesheet from a
+font service. When you name a file, Drafter checks that it exists as
+soon as the line runs; a typo like `"styles.css"` for `style.css`
+produces an error that suggests the right name instead of silently
+doing nothing. The file is remembered for deployment too, so it is
+copied into the built site.
+
+The same pair exists for JavaScript: `add_website_js` for code written
+in your program, `add_website_js_file` for a `.js` file or URL.
+
 ## Style tags inside a page
 
 CSS from `add_website_css` applies to the whole site. When only one
@@ -121,6 +152,9 @@ blank slate.
 
 ## Common problems
 
+- **`add_website_css("style.css")` complains**: that function takes
+  CSS, not a file name. Use `add_website_css_file("style.css")` to
+  link a file.
 - **The rule does nothing**: check the selector against what is
   actually rendered. `classes="notice"` pairs with `.notice` (the
   dot belongs in the selector, not in the keyword), and a
@@ -147,7 +181,8 @@ the three tiers side by side, cards included.
 
 ## Look it up
 
-[add_website_css](../../reference/site-config.md#add_website_css)
+[add_website_css](../../reference/site-config.md#add_website_css),
+[add_website_css_file](../../reference/site-config.md#add_website_css_file),
 and [classes](../../reference/keyword-attributes.md).
 
 ## Fix a problem

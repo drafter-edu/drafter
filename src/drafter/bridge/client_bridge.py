@@ -13,6 +13,13 @@ from typing import Any
 
 from drafter.bridge.context import DomContext
 from drafter.bridge.dom import (
+    add_header,
+    add_js,
+    add_link,
+    add_link_to_shadow,
+    add_script_link,
+    add_style,
+    add_style_to_shadow,
     set_favicon,
     swap_debug_mode,
     update_subtle_debug_entry,
@@ -33,6 +40,7 @@ from drafter.bridge.snapshot import (
     serialize_state_snapshot,
 )
 from drafter.config.client_server import ClientServerConfiguration
+from drafter.config.urls import determine_assets_url, is_absolute_url
 from drafter.data.details.config import UpdatedConfigurationEvent
 from drafter.data.details.state import UpdatedStateEvent
 from drafter.data.request import Request
@@ -41,6 +49,7 @@ from drafter.data.telemetry import TelemetryRecord
 from drafter.monitor.audit import log_record
 from drafter.site.initial_site_data import InitialSiteData
 from drafter.site.site import (
+    DRAFTER_TAG_CLASSES,
     DRAFTER_TAG_IDS,
 )
 from drafter.styling.themes import get_theme_system
@@ -112,6 +121,18 @@ class ClientBridge:
         # panel forever (an unbounded synchronous recursion that freezes the
         # tab). While True, incoming events are not forwarded to the panel.
         self._forwarding_debug_event = False
+        # (key, value) pairs of list-valued content (extra CSS, JS, headers,
+        # files) already reflected in the page. Seeded from the configuration
+        # at setup, since the initial render includes everything configured
+        # before start_server(); the UpdatedConfiguration events for those
+        # calls are replayed afterwards and must not inject them twice.
+        self._applied_content: set[tuple[str, str]] = set()
+
+    def _seed_applied_content(self) -> None:
+        """Record every configured content entry as already on the page."""
+        for key in ClientServerConfiguration.LIST_CONTENT_KEYS:
+            for value in getattr(self.configuration, key, None) or []:
+                self._applied_content.add((key, str(value)))
 
     def setup_site(self, initial_site_data: InitialSiteData) -> None:
         """Build the initial site DOM and prepare instance-scoped machinery.
@@ -131,6 +152,7 @@ class ClientBridge:
         if initial_site_data.favicon:
             self.set_site_favicon(initial_site_data.favicon)
         self.site_renderer.setup(initial_site_data)
+        self._seed_applied_content()
         update_subtle_debug_entry(
             self.site_renderer.get_scope(),
             self.configuration.in_debug_mode,
@@ -639,6 +661,13 @@ class ClientBridge:
             elif event.get("key") == "favicon":
                 self.configuration.favicon = str(event.get("value"))
                 self.set_site_favicon(self.configuration.favicon)
+            elif event.get("key") == "site_title":
+                self.configuration.site_title = str(event.get("value"))
+                self.set_site_title(self.configuration.site_title)
+            elif event.get("key") in ClientServerConfiguration.LIST_CONTENT_KEYS:
+                self._apply_content_update(
+                    str(event.get("key")), str(event.get("value"))
+                )
             elif event.get("key") == "theme":
                 self.configuration.theme = str(event.get("value"))
                 self._refresh_site_theme()
@@ -676,6 +705,65 @@ class ClientBridge:
         return handled
 
     ### Specialized Helpers
+
+    def _apply_content_update(self, key: str, value: str) -> None:
+        """Reflect an appended content entry (CSS, JS, header, file) on the page.
+
+        Entries configured before `start_server()` are already part of the
+        initial render, so their replayed events are no-ops. An entry added
+        while the site is running is injected live: stylesheet links and
+        styles go into the renderer's scope (the shadow root when shadow DOM
+        is on), scripts and headers into the document. Registered plain
+        files (`additional_files`) only matter to the build, so nothing is
+        injected for them.
+
+        Args:
+            key: One of `ClientServerConfiguration.LIST_CONTENT_KEYS`.
+            value: The appended entry.
+        """
+        if (key, value) in self._applied_content:
+            return
+        self._applied_content.add((key, value))
+        current = getattr(self.configuration, key, None)
+        if isinstance(current, list) and value not in current:
+            current.append(value)
+        if key == "additional_files":
+            return
+        try:
+            scope = self.site_renderer.get_scope()
+            theme_class = DRAFTER_TAG_CLASSES["THEME"]
+            in_shadow = bool(getattr(self.site_renderer, "use_shadow_dom", False))
+            if key in ("additional_css_files", "additional_css_content"):
+                url = value
+                if key == "additional_css_content" and not is_absolute_url(url):
+                    url = (
+                        f"{determine_assets_url(self.configuration.override_asset_url)}"
+                        f"/{url}"
+                    )
+                if in_shadow:
+                    add_link_to_shadow(scope, url, with_class=theme_class)
+                else:
+                    add_link(scope, url, with_class=theme_class)
+            elif key == "additional_style_content":
+                if in_shadow:
+                    add_style_to_shadow(scope, value, with_class=theme_class)
+                else:
+                    add_style(scope, value, with_class=theme_class)
+            elif key == "additional_js_content":
+                add_js(scope, value, with_class=theme_class)
+            elif key in ("additional_js_files", "additional_script_content"):
+                add_script_link(scope, value, with_class=theme_class)
+            elif key == "additional_header_content":
+                add_header(scope, value)
+        except Exception as e:
+            report_bridge_error(
+                "client.content_update_failed",
+                "Could not add the new site content to the page",
+                "bridge.client_bridge._apply_content_update",
+                f"Key: {key}; value: {value!r}",
+                exception=e,
+                phase="event_dispatch",
+            )
 
     def set_site_title(self, title: str) -> None:
         """Set the site title, updating the document and debug panel.

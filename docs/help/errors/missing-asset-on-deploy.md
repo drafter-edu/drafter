@@ -66,6 +66,15 @@ Keep every asset in the same folder as your program from the start,
 use lowercase filenames with no spaces, and after any deploy, click
 through the pages that show images or open files.
 
+Declare the files your site needs with
+[`add_website_file`](../../reference/site-config.md#add_website_file)
+(stylesheets and scripts added with `add_website_css_file` and
+`add_website_js_file` are declared automatically). Drafter then
+checks each name while you develop, so a misspelled or missing file
+is an error you see immediately, with a suggestion when a similarly
+named file exists, and the build copies the files into the deployed
+site.
+
 ## Understand
 
 [What deploying means](../../your-project/deploy/index.md) explains
