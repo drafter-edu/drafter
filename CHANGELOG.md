@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- If used in thonny, should try to recover the source code if it's available. Otherwise, provides a friendlier error.
+- Updated pyodide to new version
+- More control over pyodide url/branch/release
+
 ## [2.0.3] - 2026-08-21
 
 -   Restored the `DRAFTER_SKIP` setting from v1: when enabled, `start_server()` does nothing (no server, no compilation), so a site file can be imported by a unit test runner. Available as the `DRAFTER_SKIP` environment variable, the `--skip` command line flag, a config file setting (under `bootstrap`), or `start_server(skip=True)`.
