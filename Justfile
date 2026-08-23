@@ -69,6 +69,9 @@ build-js:
 build: build-js
     uv build
 
+publish: build
+    uv publish
+
 # Build the documentation site into site/ (demos are compiled from js/dist)
 docs: build-js
     uv run drafter-docs build
