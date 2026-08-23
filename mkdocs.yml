@@ -180,6 +180,7 @@ nav:
   - HTML colors: reference/colors.md
   - Fonts: reference/fonts.md
   - Command line: reference/cli.md
+  - Live reload: reference/live-reload.md
 - Help:
   - help/index.md
   - Troubleshooting: help/troubleshooting.md

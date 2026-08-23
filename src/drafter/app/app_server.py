@@ -24,7 +24,14 @@ from drafter.app.source_recovery import (
     main_file_is_available,
     recover_main_source,
 )
-from drafter.app.watcher import ReloadHub, WatchedPath, _watch_and_reload, ws_endpoint
+from drafter.app.watch_policy import build_watch_plan, safe_mode_notice
+from drafter.app.watcher import (
+    ReloadHub,
+    WatchedPath,
+    WatchSet,
+    _watch_and_reload,
+    ws_endpoint,
+)
 from drafter.client_server.client_server import ClientServer
 from drafter.config.system import SystemConfiguration
 from drafter.config.urls import INTERNAL_ROUTES, determine_assets_url
@@ -161,6 +168,38 @@ MAX_ERROR_REPORT_BYTES = 256 * 1024
 """Reject browser error reports larger than this many bytes."""
 
 
+class TrackingStaticFiles(StaticFiles):
+    """StaticFiles that reports each file it successfully serves.
+
+    Used when the watch policy is in safe mode: the main file's directory
+    is not watched recursively, so files the site actually uses (helpers,
+    images, data files) are discovered here as they are served and added
+    to the live-reload watch set.
+    """
+
+    def __init__(self, *args, on_serve=None, **kwargs) -> None:
+        """Initialize like StaticFiles with an extra serve callback.
+
+        Args:
+            args: Positional arguments passed to the StaticFiles initializer.
+            on_serve: Called with the absolute Path of each successfully
+                served file; exceptions from it are swallowed.
+            kwargs: Keyword arguments passed to the StaticFiles initializer.
+        """
+        super().__init__(*args, **kwargs)
+        self.on_serve = on_serve
+
+    async def get_response(self, path: str, scope) -> Response:
+        """Serve a file, reporting it to `on_serve` on success."""
+        response = await super().get_response(path, scope)
+        if self.on_serve is not None and 200 <= response.status_code < 300:
+            try:
+                self.on_serve(Path(self.directory) / path)  # type: ignore[arg-type]
+            except Exception:
+                pass
+        return response
+
+
 async def record_error_log(req) -> Response:
     """Receive a browser error report and append it to the shared debug log.
 
@@ -227,10 +266,20 @@ def make_app(
 
     user_path = user_directory / system.bootstrap.get_main_filename()
 
-    # Determine watches and routes
-    watch_paths = []
-    if user_source is None:
-        watch_paths.append(WatchedPath(user_path, False))
+    # Apply the watch policy (recursive watching with safety checks, safe
+    # mode, explicit paths, manifest). With in-memory source there is no
+    # main file to watch or to re-read on a change, so adjacent-file edits
+    # can only trigger a plain page reload.
+    plan = build_watch_plan(
+        system, user_directory, user_path, main_file_on_disk=user_source is None
+    )
+    for warning in plan.warnings:
+        print("Warning:", warning)
+    if plan.safe_mode_reason is not None:
+        print(safe_mode_notice(system.bootstrap.get_main_filename()))
+    watch_paths = list(plan.paths)
+    watch_set = WatchSet(watch_paths, plan.ignore_rules)
+
     routes = [
         Route("/", index),
         WebSocketRoute("/" + INTERNAL_ROUTES["WS"], ws_endpoint),
@@ -245,6 +294,7 @@ def make_app(
         )
         if assets_dir.exists():
             watch_paths.append(WatchedPath(assets_dir, True))
+            watch_set.add(WatchedPath(assets_dir, True))
         routes.append(
             Mount(
                 "/" + INTERNAL_ROUTES["ASSETS"],
@@ -254,14 +304,23 @@ def make_app(
         )
     # Serve user files if enabled
     if system.app_server.serve_adjacent_files:
-        # With in-memory source there is no file to re-read on a change, so
-        # edits to adjacent files can only trigger a plain page reload.
-        watch_paths.append(WatchedPath(user_directory, user_source is not None))
+        if plan.track_served_files and system.app_server.use_reloader:
+            # Safe mode: each file the site actually uses joins the watch
+            # set as it is served (a served-file change re-pushes the
+            # student's code unless the source only lives in memory).
+            user_files_app: StaticFiles = TrackingStaticFiles(
+                directory=str(user_directory),
+                on_serve=lambda served: watch_set.add_watched_file(
+                    served, full_reload=user_source is not None
+                ),
+            )
+        else:
+            user_files_app = StaticFiles(directory=str(user_directory))
         routes.append(Route("/" + INTERNAL_ROUTES["LIST_FILES"], list_user_files))
         routes.append(
             Mount(
                 "/",
-                app=StaticFiles(directory=str(user_directory)),
+                app=user_files_app,
                 name="user_files",
             ),
         )
@@ -278,6 +337,8 @@ def make_app(
     app.state.user_source = user_source
     app.state.hub = ReloadHub()
     app.state.watch_paths = watch_paths
+    app.state.watch_set = watch_set
+    app.state.watch_plan = plan
     app.state.compiled_body = compiled_body
     app.state.compiled_headers = compiled_headers
     return app
@@ -378,16 +439,18 @@ def serve_app_once(
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    # Background watcher task
+    # Background watcher task (never started when the reloader is disabled)
     async def supervisor():
-        watcher = asyncio.create_task(
-            _watch_and_reload(
-                app.state.hub,
-                app.state.watch_paths,
-                system,
-                app.state.user_path,
+        watcher = None
+        if system.app_server.use_reloader:
+            watcher = asyncio.create_task(
+                _watch_and_reload(
+                    app.state.hub,
+                    app.state.watch_set,
+                    system,
+                    app.state.user_path,
+                )
             )
-        )
         try:
             uvicorn_config = uvicorn.Config(
                 app,
@@ -408,7 +471,8 @@ def serve_app_once(
                 )
             await server.serve()
         finally:
-            watcher.cancel()
+            if watcher is not None:
+                watcher.cancel()
 
     try:
         asyncio.run(supervisor())

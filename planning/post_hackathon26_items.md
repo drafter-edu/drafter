@@ -1,7 +1,7 @@
 # Showstoppers
 
-- [ ] If you run a file without saving, it will run a crashed site. This is what happens basically by default in thonny.
-- [ ] If you save in the top-level directory, it starts recursively watching all files on your entire hard drive. This also causes an infinite loop.
+- [X] If you run a file without saving, it will run a crashed site. This is what happens basically by default in thonny.
+- [X] If you save in the top-level directory, it starts recursively watching all files on your entire hard drive. This also causes an infinite loop. (Watch policy with safety checks + safe mode; see watch_* settings in AppServerConfiguration.)
 - [ ] The table example does not work
 - [ ] Tables should support numbers
 - [ ] Table is weird when there is a button inside. Looks like there might be some empty space or something?

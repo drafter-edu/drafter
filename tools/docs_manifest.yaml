@@ -743,6 +743,13 @@ pages:
     audience: S
     priority: P2
     outcome: Know the student-relevant command-line flags.
+  - path: reference/live-reload.md
+    title: Live reload
+    template: reference
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Know what Drafter watches for changes and how to control it.
 
   # ---- Reference components (§5.8) ----
   - path: reference/components/actions/button.md

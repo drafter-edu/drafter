@@ -33,8 +33,15 @@ the app whenever you save the file.
 | `--port PORT` | `8000` | Serve on a different port, for when 8000 is taken by another program (or a classmate's app on a shared machine). |
 | `--host HOST` | `localhost` | Serve to other devices: `--host 0.0.0.0` lets your phone on the same network open the app. |
 | `--no-open-browser` | opens | Do not open a browser tab automatically. |
-| `--no-reloader` | on | Stop watching the file for changes. |
+| `--no-reloader` | on | Stop watching your files for changes. |
 | `--skip` | off | Do not start the server or compile anything: `start_server(...)` returns immediately. Lets a test runner import the file without launching the site. |
+
+Drafter normally watches your program's whole folder so that saving
+any project file reloads the site, and falls back to watching only
+your program and the files your site uses when the folder is large or
+broad (like Downloads). The [live reload](live-reload.md) page covers
+that behavior and its flags, such as `--watch-path`,
+`--ignore-watch-path`, and `--watch-manifest`.
 
 Setting the `DRAFTER_SKIP` environment variable does the same thing
 as `--skip`, which is handy when the command being run is not

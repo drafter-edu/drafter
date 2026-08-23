@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - If used in thonny, should try to recover the source code if it's available. Otherwise, provides a friendlier error.
 - Updated pyodide to new version
 - More control over pyodide url/branch/release
+- Live reload now runs safety checks before recursively watching the main file's folder. If the folder is a filesystem root, the home directory, a broad location (Desktop, Documents, Downloads, ...), or exceeds configurable size limits (`watch_max_files`, `watch_max_directories`, `watch_max_depth`), Drafter prints a notice and switches to a safe mode that watches the main file, explicitly configured paths, and files the site actually serves — instead of the entire folder. New `app_server` settings control the policy: `watch_adjacent_files`, `watch_recursively`, `watch_safe_mode`, `watch_served_files`, `watch_broad_locations`, `watch_paths`, `ignore_watch_paths`, `watch_manifest` (a JSON file listing project files/directories/globs to watch, optionally with ignores), and the `watch_force_recursive` escape hatch. Drafter-generated files (like `drafter-debug.log`) can never trigger reloads.
+- Fixed `use_reloader=False` so the file watcher genuinely never starts.
 
 ## [2.0.3] - 2026-08-21
 

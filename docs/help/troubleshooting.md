@@ -55,6 +55,11 @@ Work through the classic save-and-reload steps, in order:
 3. Refresh the browser tab.
 4. If a syntax error crept in, the old site keeps running while the
    terminal shows the error; fix it and save again.
+5. If you edited a helper file (not your main program) and the
+   terminal printed "Drafter noticed that ... is in a large or broad
+   folder" at startup, only files your site has already used reload
+   automatically. Move the project into its own small folder, or see
+   [live reload](../reference/live-reload.md).
 
 ## The site will not start
 

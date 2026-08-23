@@ -70,6 +70,7 @@ All options other than the state are keyword arguments.
 | `host`          | `str`  | Which network interface the local development server binds.                                                                                                            |
 | `open_browser`  | `bool` | Whether running locally opens a browser tab automatically.                                                                                                             |
 | `engine`        | `str`  | Which in-browser Python runs your code; `"pyodide"` is the default and the one these docs cover.                                                                       |
+| `use_reloader`  | `bool` | Whether saving a file restarts the site automatically. [Live reload](live-reload.md) covers this and the finer-grained `watch_...` options.                            |
 | `skip`          | `bool` | Do nothing at all: no server, no compilation. Meant for test runners; see the note below.                                                                              |
 
 Several options exist in two forms: a `start_server` keyword and a
@@ -92,6 +93,10 @@ accidentally use both.
   `--skip` flag) makes `start_server` return immediately without
   starting the server or compiling anything, so a unit test runner
   can import your file without launching the site.
+- **Watching a large folder.** If your program sits in a broad folder
+  like Downloads or your home directory, Drafter prints a notice and
+  watches only your program and the files your site uses, instead of
+  the entire folder. [Live reload](live-reload.md) has the details.
 - **Old v1 options are ignored.** Parameters from Drafter v1 such as
   `cdn_skulpt` print a warning and do nothing.
 - **Command-line flags** can override some of these when you run

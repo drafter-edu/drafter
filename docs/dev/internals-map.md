@@ -27,7 +27,7 @@ together; the root `ARCHITECTURE.md` holds the deep detail.
 | Routing, parameter binding, type conversion | `router/` | `parameters/conversion.py` (the converter registry) |
 | Client server (routing, state, history, testing) | `client_server/` | `client_server.py`, `commands.py` (the lazy `MAIN_SERVER` and instance registry) |
 | Bridge (DOM, form collection, events) | `bridge/` | `bridger.py`, `events.py` (form pipeline, `data-transform` decoding) |
-| Dev server and hot reload | `app/` | `app_server.py`, `watcher.py` |
+| Dev server and hot reload | `app/` | `app_server.py`, `watcher.py`, `watch_policy.py` (safety checks and safe mode for the watch set) |
 | Static site builder | `builder/` | `build.py` (`compile_site`) |
 | Site shell and DOM ids | `site/` | `site.py` (`DRAFTER_TAG_IDS`, the `--` suffix convention) |
 | Configuration system | `config/` | dataclasses mirroring the CLI flags |
