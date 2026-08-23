@@ -80,6 +80,9 @@ class NavigationController:
     request_log: dict[int, Request]
     get_app_state: Callable[[], Any] | None
     set_app_state: Callable[[Any], None] | None
+    #: True once the owning bridge has been torn down; navigation is then
+    #: dropped instead of dispatched (see teardown).
+    torn_down: bool = False
 
     def __init__(self, runtime):
         self.history = BrowserHistory(runtime)
@@ -90,6 +93,20 @@ class NavigationController:
         self.request_log = {}
         self.get_app_state = None
         self.set_app_state = None
+        self.torn_down = False
+
+    def teardown(self) -> None:
+        """Stop this controller from dispatching any further navigation.
+
+        A click or form submit collects its form data through a promise
+        chain, so the navigation it triggers can land *after* the instance
+        has been discarded (reset before a re-run). Dispatching such a stale
+        visit would re-pin the dead server as the current one (so the next
+        run's routes and start_server attach to it) and re-render the dead
+        instance's page into the live root. After teardown, navigate and
+        handle_popstate drop their requests instead.
+        """
+        self.torn_down = True
 
     def set_navigation_func(self, func: Callable[[Request], Response]) -> None:
         """Install the callback used to perform visits.
@@ -242,6 +259,9 @@ class NavigationController:
         Args:
             event: The popstate event from the browser.
         """
+        if self.torn_down:
+            debug_log("client.popstate_ignored_torn_down")
+            return
         if not self.browser_history_enabled:
             debug_log("client.popstate_ignored_history_disabled")
             return
@@ -318,6 +338,11 @@ class NavigationController:
             RuntimeError: If the navigation function has not been set via
                 `set_navigation_func`.
         """
+        if self.torn_down:
+            # A stale request from a discarded instance (e.g. a click whose
+            # form-data promise resolved after the reset); see teardown.
+            debug_log("client.navigate_ignored_torn_down", request)
+            return None
         if self.navigation_func is None:
             raise RuntimeError("Navigation function not set in ClientBridge.")
         debug_log("client.initiate_request", request)

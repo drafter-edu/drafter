@@ -516,12 +516,16 @@ class ClientBridge:
     def teardown(self) -> None:
         """Disconnect this bridge from the browser so a successor can replace it.
 
-        Removes the EventManager's window/document listeners and drops the
-        debug panel reference. Called when the instance is being discarded
-        (reset before an editor-driven re-run, or embed detach); without it,
-        the old bridge's global listeners keep routing browser events into a
-        bridge whose DOM no longer exists.
+        Removes the EventManager's window/document listeners, stops the
+        NavigationController from dispatching any further requests, and
+        drops the debug panel reference. Called when the instance is being
+        discarded (reset before an editor-driven re-run, or embed detach);
+        without it, the old bridge's global listeners keep routing browser
+        events into a bridge whose DOM no longer exists, and an in-flight
+        click (its form data is collected through a promise chain) could
+        still dispatch a visit on the dead instance after the reset.
         """
+        self.navigator.teardown()
         try:
             self.events.teardown()
         except Exception as e:

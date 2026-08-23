@@ -189,3 +189,60 @@ class TestResetServerTeardown:
 
         assert commands.MAIN_SERVER is None
         assert "embed-test-2" not in commands._INSTANCE_CLEANUPS
+
+
+class TestTornDownNavigation:
+    """A click collects its form data through a promise chain, so its
+    navigation can land after the instance was reset. It must be dropped:
+    dispatching it would re-pin the dead server as current (the next run's
+    routes and start_server would attach to it) and re-render the dead
+    instance's page into the live root."""
+
+    def _navigator(self):
+        from drafter.bridge.navigation import NavigationController
+
+        navigator = NavigationController(MagicMock())
+        visit = MagicMock(name="visit")
+        navigator.set_navigation_func(visit)
+        navigator.history = MagicMock()
+        return navigator, visit
+
+    def test_navigate_after_teardown_is_dropped(self):
+        from drafter.data.request import Request
+
+        navigator, visit = self._navigator()
+        navigator.teardown()
+
+        result = navigator.navigate(Request("link", "update", {}, {}, ""))
+
+        assert result is None
+        visit.assert_not_called()
+        navigator.history.add_to_history.assert_not_called()
+
+    def test_popstate_after_teardown_is_dropped(self):
+        navigator, visit = self._navigator()
+        navigator.teardown()
+
+        navigator.handle_popstate(SimpleNamespace(state=SimpleNamespace(request_id=1)))
+
+        visit.assert_not_called()
+        navigator.history.convert_popstate_to_request.assert_not_called()
+
+    def test_navigate_before_teardown_still_dispatches(self):
+        from drafter.data.request import Request
+
+        navigator, visit = self._navigator()
+        navigator.navigate(Request("link", "update", {}, {}, ""))
+        visit.assert_called_once()
+
+    def test_bridge_teardown_disables_navigator(self):
+        bridge = ClientBridge.__new__(ClientBridge)
+        bridge.navigator = MagicMock()
+        bridge.events = MagicMock()
+        bridge.debug_panel = MagicMock()
+
+        bridge.teardown()
+
+        bridge.navigator.teardown.assert_called_once()
+        bridge.events.teardown.assert_called_once()
+        assert bridge.debug_panel is None

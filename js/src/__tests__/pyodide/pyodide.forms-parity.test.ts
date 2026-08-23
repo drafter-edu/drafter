@@ -805,8 +805,11 @@ describe("Drafter Form Components Tests (Pyodide parity)", () => {
 			const button = await app.findByRole("button", { name: /update/i });
 			await userEvent.click(button);
 
-			// The text should be properly escaped and displayed
-			await app.findByText(/Text: Test <>&/);
+			// The text should be properly escaped and displayed. The pre-click
+			// page already contains "Text: Test <>&\"'", so exclude that suffix;
+			// otherwise this passes before the update lands and the in-flight
+			// click leaks into the next test.
+			await app.findByText(/Text: Test <>&(?!")/);
 		});
 	});
 

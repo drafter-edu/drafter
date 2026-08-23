@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `use_reloader=False` so the file watcher genuinely never starts.
 - Fixed second double loop in app server that didn't let us auto launch browser.
 - Rendering errors inside nested page content now report their location in the student's vocabulary instead of internal HTML tags: an unsupported value in a table cell says "the Table at index 1, row index 0, column index 1" rather than `At ['[1]', 'table', '[1]', 'tbody', ...]`, with advice tailored to the offending value (`None` suggests a missing `return`, a bare function suggests `Link`/`Button`, a tuple suggests a list, and so on). The full internal path is still available in the technical details. Components that raise a `StudentFacingError` while rendering also keep their friendly explanation instead of falling back to the generic "Type Mismatch" text.
+- Fixed a race when an instance is reset (editor re-run, documentation demo restart) while a click or form submit is still in flight: the torn-down bridge could still dispatch that navigation afterwards, re-pinning the discarded server as the current one (so the next run's routes and `start_server()` silently attached to it) or re-rendering the old page over the new one. A torn-down bridge now drops any further navigation and popstate events.
 
 ## [2.0.3] - 2026-08-21
 
