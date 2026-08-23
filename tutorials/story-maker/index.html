@@ -5858,6 +5858,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -8162,7 +8190,8 @@ during the call that receives it, but state lasts from page to page.</p>
 <h2 id="step-2-three-blanks-three-parameters">Step 2: Three blanks, three parameters</h2>
 <p>A page can hold several inputs. When the button is clicked, all of them
 are delivered to the target route, each matched to the parameter with the
-same name:</p>
+same name. The highlighted lines are the ones that are new or changed
+since Step 1, and later steps highlight their changes the same way:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
@@ -8170,39 +8199,39 @@ same name:</p>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
     <span class="n">hero</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">place</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">thing</span><span class="p">:</span> <span class="nb">str</span>
-
+<span class="hll">    <span class="n">place</span><span class="p">:</span> <span class="nb">str</span>
+</span><span class="hll">    <span class="n">thing</span><span class="p">:</span> <span class="nb">str</span>
+</span>
 
 <span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="s2">&quot;A hero:&quot;</span><span class="p">,</span>
-        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;hero&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">A place:&quot;</span><span class="p">,</span>
-        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;place&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">An object:&quot;</span><span class="p">,</span>
-        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;thing&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+<span class="hll">        <span class="s2">&quot;A hero:&quot;</span><span class="p">,</span>
+</span>        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;hero&quot;</span><span class="p">),</span>
+<span class="hll">        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">A place:&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;place&quot;</span><span class="p">),</span>
+</span><span class="hll">        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">An object:&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;thing&quot;</span><span class="p">),</span>
+</span>        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Tell the story&quot;</span><span class="p">,</span> <span class="s2">&quot;story&quot;</span><span class="p">)</span>
     <span class="p">])</span>
 
 
 <span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">story</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">hero</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">place</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">thing</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">=</span> <span class="n">hero</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">place</span> <span class="o">=</span> <span class="n">place</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">thing</span> <span class="o">=</span> <span class="n">thing</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="s2">&quot;Long ago, &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">+</span> <span class="s2">&quot; traveled to &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">place</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Nobody there had ever seen &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">thing</span> <span class="o">+</span> <span class="s2">&quot; before.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;By sunset, &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">+</span> <span class="s2">&quot; was famous.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the words&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
+<span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">story</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">hero</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">place</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">thing</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span>    <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">=</span> <span class="n">hero</span>
+<span class="hll">    <span class="n">state</span><span class="o">.</span><span class="n">place</span> <span class="o">=</span> <span class="n">place</span>
+</span><span class="hll">    <span class="n">state</span><span class="o">.</span><span class="n">thing</span> <span class="o">=</span> <span class="n">thing</span>
+</span>    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+<span class="hll">        <span class="s2">&quot;Long ago, &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">+</span> <span class="s2">&quot; traveled to &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">place</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="s2">&quot;Nobody there had ever seen &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">thing</span> <span class="o">+</span> <span class="s2">&quot; before.&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="s2">&quot;By sunset, &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">+</span> <span class="s2">&quot; was famous.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the words&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
+</span>    <span class="p">])</span>
 
 
-<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
-</code></pre></div>
+<span class="hll"><span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+</span></code></pre></div>
 <div class="drafter-demo" data-drafter-demo="story-maker-3-68507434b917">
   <iframe src="../../drafter-demos/story-maker-3-68507434b917/index.html" title="Drafter Demo story-maker-3-68507434b917" name="story-maker-3-68507434b917" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
 </div>
@@ -8230,12 +8259,12 @@ one to its <code>TextBox</code> as the starting value.</p>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="s2">&quot;A hero:&quot;</span><span class="p">,</span>
-        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;hero&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span><span class="p">),</span>
-        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">A place:&quot;</span><span class="p">,</span>
-        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;place&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">place</span><span class="p">),</span>
-        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">An object:&quot;</span><span class="p">,</span>
-        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;thing&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">thing</span><span class="p">),</span>
-        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+<span class="hll">        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;hero&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span><span class="p">),</span>
+</span>        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">A place:&quot;</span><span class="p">,</span>
+<span class="hll">        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;place&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">place</span><span class="p">),</span>
+</span>        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">An object:&quot;</span><span class="p">,</span>
+<span class="hll">        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;thing&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">thing</span><span class="p">),</span>
+</span>        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Tell the story&quot;</span><span class="p">,</span> <span class="s2">&quot;story&quot;</span><span class="p">)</span>
     <span class="p">])</span>
 
@@ -8253,8 +8282,8 @@ one to its <code>TextBox</code> as the starting value.</p>
     <span class="p">])</span>
 
 
-<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;the library&quot;</span><span class="p">,</span> <span class="s2">&quot;a tiny robot&quot;</span><span class="p">))</span>
-</code></pre></div>
+<span class="hll"><span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;the library&quot;</span><span class="p">,</span> <span class="s2">&quot;a tiny robot&quot;</span><span class="p">))</span>
+</span></code></pre></div>
 <div class="drafter-demo" data-drafter-demo="story-maker-4-939e20d52925">
   <iframe src="../../drafter-demos/story-maker-4-939e20d52925/index.html" title="Drafter Demo story-maker-4-939e20d52925" name="story-maker-4-939e20d52925" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
 </div>
@@ -8301,25 +8330,25 @@ tests for both story routes while you are here:</p>
         <span class="s2">&quot;Long ago, &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">+</span> <span class="s2">&quot; traveled to &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">place</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Nobody there had ever seen &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">thing</span> <span class="o">+</span> <span class="s2">&quot; before.&quot;</span><span class="p">,</span>
         <span class="s2">&quot;By sunset, &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">+</span> <span class="s2">&quot; was famous.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Tell it differently&quot;</span><span class="p">,</span> <span class="s2">&quot;another_story&quot;</span><span class="p">),</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the words&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
+<span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Tell it differently&quot;</span><span class="p">,</span> <span class="s2">&quot;another_story&quot;</span><span class="p">),</span>
+</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the words&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
     <span class="p">])</span>
 
 
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">another_story</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="s2">&quot;Deep in &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">place</span> <span class="o">+</span> <span class="s2">&quot;, something glittered.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;It was &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">thing</span> <span class="o">+</span> <span class="s2">&quot;, lost for a hundred years.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Only &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">+</span> <span class="s2">&quot; knew what it could do.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the words&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
+<span class="hll"><span class="nd">@route</span>
+</span><span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">another_story</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+</span><span class="hll">        <span class="s2">&quot;Deep in &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">place</span> <span class="o">+</span> <span class="s2">&quot;, something glittered.&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="s2">&quot;It was &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">thing</span> <span class="o">+</span> <span class="s2">&quot;, lost for a hundred years.&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="s2">&quot;Only &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">+</span> <span class="s2">&quot; knew what it could do.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the words&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
+</span><span class="hll">    <span class="p">])</span>
+</span>
 
-
-<span class="n">assert_has</span><span class="p">(</span><span class="n">story</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;the moon&quot;</span><span class="p">,</span> <span class="s2">&quot;a spoon&quot;</span><span class="p">),</span> <span class="s2">&quot;Ada traveled to the moon&quot;</span><span class="p">)</span>
-<span class="n">assert_state</span><span class="p">(</span><span class="n">story</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;the moon&quot;</span><span class="p">,</span> <span class="s2">&quot;a spoon&quot;</span><span class="p">),</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;the moon&quot;</span><span class="p">,</span> <span class="s2">&quot;a spoon&quot;</span><span class="p">))</span>
-<span class="n">assert_has</span><span class="p">(</span><span class="n">another_story</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;the moon&quot;</span><span class="p">,</span> <span class="s2">&quot;a spoon&quot;</span><span class="p">)),</span> <span class="s2">&quot;Deep in the moon&quot;</span><span class="p">)</span>
-
+<span class="hll"><span class="n">assert_has</span><span class="p">(</span><span class="n">story</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;the moon&quot;</span><span class="p">,</span> <span class="s2">&quot;a spoon&quot;</span><span class="p">),</span> <span class="s2">&quot;Ada traveled to the moon&quot;</span><span class="p">)</span>
+</span><span class="hll"><span class="n">assert_state</span><span class="p">(</span><span class="n">story</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;the moon&quot;</span><span class="p">,</span> <span class="s2">&quot;a spoon&quot;</span><span class="p">),</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;the moon&quot;</span><span class="p">,</span> <span class="s2">&quot;a spoon&quot;</span><span class="p">))</span>
+</span><span class="hll"><span class="n">assert_has</span><span class="p">(</span><span class="n">another_story</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;the moon&quot;</span><span class="p">,</span> <span class="s2">&quot;a spoon&quot;</span><span class="p">)),</span> <span class="s2">&quot;Deep in the moon&quot;</span><span class="p">)</span>
+</span>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;the library&quot;</span><span class="p">,</span> <span class="s2">&quot;a tiny robot&quot;</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="story-maker-5-8ac0e5a3133e">

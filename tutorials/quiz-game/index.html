@@ -5858,6 +5858,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -8223,7 +8251,9 @@ the 0 back. Step 3 will make running out of questions mean something.)</p>
 <h2 id="step-2-one-route-every-question">Step 2: One route, every question</h2>
 <p>Move the question display into its own <code>ask</code> route, show the options
 with a <code>BulletedList</code>, and add a Skip button that moves the position
-forward. One route now serves every question.</p>
+forward. One route now serves every question. The highlighted lines
+are the ones that are new or changed since Step 1, and later steps
+highlight their changes the same way.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
@@ -8255,38 +8285,38 @@ forward. One route now serves every question.</p>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;The Pet Quiz&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;Three questions. No pressure.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Start the quiz&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
+<span class="hll">        <span class="s2">&quot;Three questions. No pressure.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Start the quiz&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">)</span>
+</span>    <span class="p">])</span>
 
 
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">ask</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-            <span class="s2">&quot;That was the last question!</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Back to the start&quot;</span><span class="p">,</span> <span class="s2">&quot;restart&quot;</span><span class="p">)</span>
-        <span class="p">])</span>
-    <span class="n">question</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">position</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Question &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
-        <span class="n">question</span><span class="o">.</span><span class="n">prompt</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">BulletedList</span><span class="p">(</span><span class="n">question</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Skip&quot;</span><span class="p">,</span> <span class="s2">&quot;skip&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
-
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">skip</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">ask</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">restart</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-
+<span class="hll"><span class="nd">@route</span>
+</span><span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">ask</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll">    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">):</span>
+</span><span class="hll">        <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+</span><span class="hll">            <span class="s2">&quot;That was the last question!</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Back to the start&quot;</span><span class="p">,</span> <span class="s2">&quot;restart&quot;</span><span class="p">)</span>
+</span><span class="hll">        <span class="p">])</span>
+</span><span class="hll">    <span class="n">question</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">position</span><span class="p">]</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+</span><span class="hll">        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Question &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+</span><span class="hll">        <span class="n">question</span><span class="o">.</span><span class="n">prompt</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">BulletedList</span><span class="p">(</span><span class="n">question</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
+</span><span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Skip&quot;</span><span class="p">,</span> <span class="s2">&quot;skip&quot;</span><span class="p">)</span>
+</span><span class="hll">    <span class="p">])</span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="hll"><span class="nd">@route</span>
+</span><span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">skip</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll">    <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">ask</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="hll"><span class="nd">@route</span>
+</span><span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">restart</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll">    <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+</span>
 
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">QUESTIONS</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
@@ -8310,34 +8340,34 @@ loop, and give every button the same target: a new <code>check</code> route. An
 <div class="highlight"><pre><span></span><code><span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ask</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="n">question</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">position</span><span class="p">]</span>
-    <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Question &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
-        <span class="n">question</span><span class="o">.</span><span class="n">prompt</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-    <span class="p">]</span>
-    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">question</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
-        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s2">&quot;check&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;chosen&quot;</span><span class="p">,</span> <span class="n">option</span><span class="p">)]))</span>
-        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+<span class="hll">    <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+</span><span class="hll">        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Question &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+</span><span class="hll">        <span class="n">question</span><span class="o">.</span><span class="n">prompt</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span class="hll">    <span class="p">]</span>
+</span><span class="hll">    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">question</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s2">&quot;check&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;chosen&quot;</span><span class="p">,</span> <span class="n">option</span><span class="p">)]))</span>
+</span><span class="hll">        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+</span>
 
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">chosen</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="n">question</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">position</span><span class="p">]</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="n">chosen</span> <span class="o">==</span> <span class="n">question</span><span class="o">.</span><span class="n">answer</span><span class="p">:</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Correct!&quot;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Not quite. It was &quot;</span> <span class="o">+</span> <span class="n">question</span><span class="o">.</span><span class="n">answer</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-            <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Next question&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">)</span>
-        <span class="p">])</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Back to the start&quot;</span><span class="p">,</span> <span class="s2">&quot;restart&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
-</code></pre></div>
+<span class="hll"><span class="nd">@route</span>
+</span><span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">chosen</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll">    <span class="n">question</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">position</span><span class="p">]</span>
+</span><span class="hll">    <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span class="hll">    <span class="k">if</span> <span class="n">chosen</span> <span class="o">==</span> <span class="n">question</span><span class="o">.</span><span class="n">answer</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Correct!&quot;</span>
+</span><span class="hll">    <span class="k">else</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Not quite. It was &quot;</span> <span class="o">+</span> <span class="n">question</span><span class="o">.</span><span class="n">answer</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
+</span><span class="hll">    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">):</span>
+</span><span class="hll">        <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+</span><span class="hll">            <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Next question&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">)</span>
+</span><span class="hll">        <span class="p">])</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+</span><span class="hll">        <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Back to the start&quot;</span><span class="p">,</span> <span class="s2">&quot;restart&quot;</span><span class="p">)</span>
+</span><span class="hll">    <span class="p">])</span>
+</span></code></pre></div>
 <p>Here is the whole program at this stage, runnable:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
@@ -8378,34 +8408,34 @@ loop, and give every button the same target: a new <code>check</code> route. An
 <span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ask</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="n">question</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">position</span><span class="p">]</span>
-    <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Question &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
-        <span class="n">question</span><span class="o">.</span><span class="n">prompt</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-    <span class="p">]</span>
-    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">question</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
-        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s2">&quot;check&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;chosen&quot;</span><span class="p">,</span> <span class="n">option</span><span class="p">)]))</span>
-        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+<span class="hll">    <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+</span><span class="hll">        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Question &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+</span><span class="hll">        <span class="n">question</span><span class="o">.</span><span class="n">prompt</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span class="hll">    <span class="p">]</span>
+</span><span class="hll">    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">question</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s2">&quot;check&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;chosen&quot;</span><span class="p">,</span> <span class="n">option</span><span class="p">)]))</span>
+</span><span class="hll">        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+</span>
 
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">chosen</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="n">question</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">position</span><span class="p">]</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="n">chosen</span> <span class="o">==</span> <span class="n">question</span><span class="o">.</span><span class="n">answer</span><span class="p">:</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Correct!&quot;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Not quite. It was &quot;</span> <span class="o">+</span> <span class="n">question</span><span class="o">.</span><span class="n">answer</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-            <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Next question&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">)</span>
-        <span class="p">])</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Back to the start&quot;</span><span class="p">,</span> <span class="s2">&quot;restart&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
-
+<span class="hll"><span class="nd">@route</span>
+</span><span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">chosen</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll">    <span class="n">question</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">position</span><span class="p">]</span>
+</span><span class="hll">    <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span class="hll">    <span class="k">if</span> <span class="n">chosen</span> <span class="o">==</span> <span class="n">question</span><span class="o">.</span><span class="n">answer</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Correct!&quot;</span>
+</span><span class="hll">    <span class="k">else</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Not quite. It was &quot;</span> <span class="o">+</span> <span class="n">question</span><span class="o">.</span><span class="n">answer</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
+</span><span class="hll">    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">):</span>
+</span><span class="hll">        <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+</span><span class="hll">            <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Next question&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">)</span>
+</span><span class="hll">        <span class="p">])</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+</span><span class="hll">        <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Back to the start&quot;</span><span class="p">,</span> <span class="s2">&quot;restart&quot;</span><span class="p">)</span>
+</span><span class="hll">    <span class="p">])</span>
+</span>
 
 <span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">restart</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>

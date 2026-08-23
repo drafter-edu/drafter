@@ -5858,6 +5858,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -8052,14 +8080,15 @@ machine so that they stay short. If you built the
 is the real assignment.</p>
 <h2 id="try-the-finished-app">Try the finished app</h2>
 <p>This is the compliment machine <em>after</em> finishing: it has a theme, a
-title, and no debug panel. The starting version appears in Step 1.</p>
+title, and no debug panel. The starting version appears in Step 1,
+and the highlighted lines are everything that finishing added.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
-<span class="n">set_website_title</span><span class="p">(</span><span class="s2">&quot;The Compliment Machine&quot;</span><span class="p">)</span>
-<span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;sakura&quot;</span><span class="p">)</span>
-<span class="n">hide_debug_information</span><span class="p">()</span>
-
+<span class="hll"><span class="n">set_website_title</span><span class="p">(</span><span class="s2">&quot;The Compliment Machine&quot;</span><span class="p">)</span>
+</span><span class="hll"><span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;sakura&quot;</span><span class="p">)</span>
+</span><span class="hll"><span class="n">hide_debug_information</span><span class="p">()</span>
+</span>
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
@@ -8091,14 +8120,14 @@ title, and no debug panel. The starting version appears in Step 1.</p>
     <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
 
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">index</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
-             <span class="n">Page</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">[</span>
-                 <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;The Compliment Machine&quot;</span><span class="p">),</span>
-                 <span class="s2">&quot;Your code is looking sharp today.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-                 <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Another, please&quot;</span><span class="p">,</span> <span class="s2">&quot;another&quot;</span><span class="p">)</span>
-             <span class="p">]))</span>
-<span class="n">assert_state</span><span class="p">(</span><span class="n">another</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-
+<span class="hll"><span class="n">assert_equal</span><span class="p">(</span><span class="n">index</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+</span><span class="hll">             <span class="n">Page</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">[</span>
+</span><span class="hll">                 <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;The Compliment Machine&quot;</span><span class="p">),</span>
+</span><span class="hll">                 <span class="s2">&quot;Your code is looking sharp today.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">                 <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Another, please&quot;</span><span class="p">,</span> <span class="s2">&quot;another&quot;</span><span class="p">)</span>
+</span><span class="hll">             <span class="p">]))</span>
+</span><span class="hll"><span class="n">assert_state</span><span class="p">(</span><span class="n">another</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+</span>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="finishing-1-80b3b6473caa">

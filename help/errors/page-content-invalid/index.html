@@ -23,7 +23,7 @@
     
     
       
-        <title>Page content must be a list of strings or components - Drafter Documentation</title>
+        <title>Page content must be a list of strings, numbers, booleans, or components - Drafter Documentation</title>
       
     
     
@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#page-content-must-be-a-list-of-strings-or-components" class="md-skip">
+        <a href="#page-content-must-be-a-list-of-strings-numbers-booleans-or-components" class="md-skip">
           Skip to content
         </a>
       
@@ -106,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Page content must be a list of strings or components
+              Page content must be a list of strings, numbers, booleans, or components
             
           </span>
         </div>
@@ -5685,6 +5685,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -7641,56 +7669,65 @@
 
 
 
-<h1 id="page-content-must-be-a-list-of-strings-or-components">Page content must be a list of strings or components</h1>
+<h1 id="page-content-must-be-a-list-of-strings-numbers-booleans-or-components">Page content must be a list of strings, numbers, booleans, or components</h1>
 <h2 id="the-error">The error</h2>
-<div class="highlight"><pre><span></span><code>The content of a Page must be a list of strings or components.
-Found int instead.
+<div class="highlight"><pre><span></span><code>The content of a Page must be a list of strings, numbers, booleans, or components.
+Found Pet instead.
 </code></pre></div>
-<p>The friendly version: "The content you returned in this Page was an
-int, but it needs to be text, a component, or a list of those." A
-related message appears when the list itself is fine but one item
-inside it is not; that message names the route and the offending
-item.</p>
+<p>The friendly version: "The content you returned in this Page was a
+Pet, but it needs to be text, a number, a boolean, a component, or a
+list of those." A related message appears when the list itself is
+fine but one item inside it is not; that message names the route and
+the offending item.</p>
 <h2 id="what-it-means">What it means</h2>
-<p>A <code>Page</code> displays a list of strings and components. Something you
-put into that list, or in place of the list itself, was neither a
-string nor a component: perhaps a number, a dataclass, or a nested
-list. Drafter stopped rather than guess how to display it.</p>
+<p>A <code>Page</code> displays a list of strings, numbers, booleans, and
+components. Something you put into that list, or in place of the
+list itself, was none of those: perhaps a dataclass, a dictionary,
+or a nested list. Drafter stopped rather than guess how to display
+it.</p>
 <h2 id="where-to-look">Where to look</h2>
 <p>Start with the route named in the message. Look at the <code>Page(...)</code>
 call it returns and read the content list item by item.</p>
 <h2 id="check">Check</h2>
 <ul>
-<li><strong>A bare value</strong>: <code>Page(state, state.score)</code> passes a number where
-  the content list belongs. Content must be a list.</li>
-<li><strong>A number in the list</strong>: <code>Page(state, ["Score:", state.score])</code>;
-  every non-text value needs <code>str()</code> around it.</li>
 <li><strong>A dataclass in the list</strong>: <code>Page(state, [state.pet])</code>; show its
   fields (<code>state.pet.name</code>) or use a component like
   <a href="../../../reference/components/data/table/">Table</a> built for
   structured data.</li>
+<li><strong>A nested list</strong>: <code>Page(state, ["Pets:", state.names])</code> puts a
+  whole list inside the content list. Join it into one string
+  (<code>", ".join(state.names)</code>) or use
+  <a href="../../../reference/components/lists/bulletedlist/">BulletedList</a>.</li>
+<li><strong>A dictionary in the list</strong>: pull out the values you want to
+  show, or hand the whole thing to a component built for it.</li>
 <li><strong>A missing comma</strong>: two adjacent strings without a comma merge
   into one string, which Python allows, but a component next to a
   string without its comma is a syntax error that would appear
   before this one.</li>
 </ul>
+<p>Plain numbers and booleans are fine on their own: <code>Page(state,
+["Score:", state.score])</code> displays the score directly, no <code>str()</code>
+needed.</p>
 <h2 id="fix">Fix</h2>
-<p>Convert values to strings and keep everything inside one flat list:</p>
+<p>Keep everything inside one flat list of strings, numbers, booleans,
+and components:</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="s2">&quot;Score: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">score</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Score:&quot;</span><span class="p">,</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">score</span><span class="p">,</span>
         <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Play&quot;</span><span class="p">,</span> <span class="s2">&quot;play&quot;</span><span class="p">)</span>
     <span class="p">])</span>
 </code></pre></div>
 <h2 id="confirm">Confirm</h2>
 <p>The page renders. A structural test pins it down:
-<code>assert_has(index(State(3)), "Score: 3")</code>.</p>
+<code>assert_has(index(State(3)), "3")</code>.</p>
 <h2 id="prevent">Prevent</h2>
-<p>Get in the habit of wrapping <code>str()</code> around any number or other
-value that goes into page content, and keep the content list flat:
-helper functions that produce several components should return a
-list you add with <code>+</code>, not nest as an item.</p>
+<p>Keep the content list flat: helper functions that produce several
+components should return a list you add with <code>+</code>, not nest as an
+item. Structured values (dataclasses, dictionaries, lists) need to
+be unpacked into their parts or given to a component that knows how
+to display them.</p>
 <h2 id="understand">Understand</h2>
 <p><a href="../../../reference/page/">Page</a> documents exactly what content can
 hold; <a href="../../../concepts/routes-and-pages/">Routes and pages</a>

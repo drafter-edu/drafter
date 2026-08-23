@@ -5183,6 +5183,50 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#add_website_css_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_website_css_file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_website_js" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_website_js
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_website_js_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_website_js_file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_website_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_website_file
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5957,6 +6001,34 @@
     
   
     Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
   
 
     
@@ -7796,6 +7868,50 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#add_website_css_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_website_css_file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_website_js" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_website_js
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_website_js_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_website_js_file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_website_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_website_file
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -8342,7 +8458,49 @@ anything else that belongs there. The text is not wrapped or escaped.</p>
 <p>Adds CSS to every page. With one argument, the text is raw CSS. With
 two, the first is a selector and the second is the rule body to wrap
 in braces. The how-to, including the selectors you need, is
-<a href="../../add/change-appearance/custom-css/">Custom CSS</a>.</p>
+<a href="../../add/change-appearance/custom-css/">Custom CSS</a>.
+Passing a file name such as <code>"style.css"</code> is a mistake this function
+catches and reports; use <code>add_website_css_file</code> for files.</p>
+<h3 id="add_website_css_file">add_website_css_file</h3>
+<div class="highlight"><pre><span></span><code><span class="n">add_website_css_file</span><span class="p">(</span><span class="s2">&quot;style.css&quot;</span><span class="p">)</span>
+<span class="n">add_website_css_file</span><span class="p">(</span><span class="s2">&quot;https://fonts.googleapis.com/css2?family=Lora&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Links a stylesheet into every page. The argument is either the name of
+a <code>.css</code> file next to your Python program (a subfolder path such as
+<code>"static/style.css"</code> also works) or a full URL. Files next to your
+program are checked immediately: a missing file raises an error that
+names the folder Drafter searched and suggests similarly named files,
+so <code>"style.css"</code> when the file is <code>"styles.css"</code> is caught at once
+rather than silently ignored. The file is registered as a website file
+(see <code>add_website_file</code>), so it is copied into the built site when you
+deploy. Your stylesheet is linked after the theme's, so its rules win
+ties.</p>
+<h3 id="add_website_js">add_website_js</h3>
+<div class="highlight"><pre><span></span><code><span class="n">add_website_js</span><span class="p">(</span><span class="s2">&quot;console.log(&#39;Site loaded&#39;);&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Runs JavaScript code once, when the site first loads. Like
+<code>add_website_css</code>, it takes code, not a file name.</p>
+<h3 id="add_website_js_file">add_website_js_file</h3>
+<div class="highlight"><pre><span></span><code><span class="n">add_website_js_file</span><span class="p">(</span><span class="s2">&quot;app.js&quot;</span><span class="p">)</span>
+<span class="n">add_website_js_file</span><span class="p">(</span><span class="s2">&quot;https://cdn.example.com/library.js&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Loads a JavaScript file on every page, from a <code>.js</code> file next to your
+program or from a full URL. Local files get the same checks and
+suggestions as <code>add_website_css_file</code>, and are registered as website
+files for deployment.</p>
+<h3 id="add_website_file">add_website_file</h3>
+<div class="highlight"><pre><span></span><code><span class="n">add_website_file</span><span class="p">(</span><span class="s2">&quot;words.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;images/logo.png&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Declares files next to your program that the site needs at runtime:
+data files you <code>open()</code>, images, fonts, and so on. Each name is
+checked immediately (with suggestions when a similarly named file
+exists), and the files are copied into the built site when you
+deploy. This is the in-code equivalent of the
+<a href="../cli/#building-for-deployment"><code>--additional-paths</code></a> flag, and the
+way to prevent the
+<a href="../../help/errors/missing-asset-on-deploy/">works locally, 404s deployed</a>
+problem. Only files inside your program's folder can be added:
+absolute paths, <code>..</code> paths, and URLs are rejected with an explanation.</p>
 <h2 id="site-information">Site information</h2>
 <h3 id="set_site_information">set_site_information</h3>
 <div class="highlight"><pre><span></span><code><span class="n">set_site_information</span><span class="p">(</span>

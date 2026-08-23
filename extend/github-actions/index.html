@@ -5712,6 +5712,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -7832,7 +7860,7 @@ minute or two to become reachable; later ones are faster.</p>
 <li>
 <p><strong>Your app opens data files.</strong> Bundle them into the build by
   extending the compile line:</p>
-<div class="highlight"><pre><span></span><code><span class="go">uvx drafter main.py --compile --output-directory _site --production --additional-paths &quot;pets.csv;words.txt&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="go">uvx drafter main.py --compile --output-directory _site --production --additional-paths pets.csv --additional-paths words.txt</span>
 </code></pre></div>
 </li>
 <li>

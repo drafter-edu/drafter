@@ -5781,6 +5781,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -7987,6 +8015,11 @@ it <a href="../../help/errors/nothing-after-start-server/">never runs</a>.</p>
 <td>Which in-browser Python runs your code; <code>"pyodide"</code> is the default and the one these docs cover.</td>
 </tr>
 <tr>
+<td><code>use_reloader</code></td>
+<td><code>bool</code></td>
+<td>Whether saving a file restarts the site automatically. <a href="../live-reload/">Live reload</a> covers this and the finer-grained <code>watch_...</code> options.</td>
+</tr>
+<tr>
 <td><code>skip</code></td>
 <td><code>bool</code></td>
 <td>Do nothing at all: no server, no compilation. Meant for test runners; see the note below.</td>
@@ -8012,6 +8045,10 @@ accidentally use both.</p>
   <code>--skip</code> flag) makes <code>start_server</code> return immediately without
   starting the server or compiling anything, so a unit test runner
   can import your file without launching the site.</li>
+<li><strong>Watching a large folder.</strong> If your program sits in a broad folder
+  like Downloads or your home directory, Drafter prints a notice and
+  watches only your program and the files your site uses, instead of
+  the entire folder. <a href="../live-reload/">Live reload</a> has the details.</li>
 <li><strong>Old v1 options are ignored.</strong> Parameters from Drafter v1 such as
   <code>cdn_skulpt</code> print a warning and do nothing.</li>
 <li><strong>Command-line flags</strong> can override some of these when you run

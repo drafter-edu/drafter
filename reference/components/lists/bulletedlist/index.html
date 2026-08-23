@@ -5818,6 +5818,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -7979,7 +8007,7 @@ your state when order does not matter.</p>
 <td><code>items</code></td>
 <td><code>list</code></td>
 <td>required</td>
-<td>One entry per bullet. Items can be strings or components; each gets its own line automatically.</td>
+<td>One entry per bullet. Items can be strings, numbers, booleans, or components; each gets its own line automatically.</td>
 </tr>
 </tbody>
 </table>
@@ -8022,7 +8050,8 @@ your state when order does not matter.</p>
 
 <h2 id="notes">Notes</h2>
 <ul>
-<li>Items that are not strings need to be converted first: build a
+<li>Numbers and booleans display as their text form, but structured
+  items (like dataclasses) need to be converted first: build a
   list of strings with a loop (<code>for pet in state.pets:</code> ...
   <code>names.append(pet.name)</code>) and pass that list instead. For rows of
   structured data, a <a href="../../data/table/">Table</a> is usually clearer.</li>

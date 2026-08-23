@@ -5803,6 +5803,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -7954,7 +7982,7 @@ whatever page was on screen before.</p>
 <tr>
 <td><code>content</code></td>
 <td><code>list</code></td>
-<td>A list of strings and components, rendered in order. Must be a list, even for a single item.</td>
+<td>A list of strings, numbers, booleans, and components, rendered in order. Must be a list, even for a single item.</td>
 </tr>
 </tbody>
 </table>
@@ -8015,18 +8043,20 @@ next route receives the current values:</p>
 </div>
 
 <h2 id="what-content-can-hold">What content can hold</h2>
-<p>Each item in the content list is either a string or a component:</p>
+<p>Each item in the content list is a string, a number, a boolean, or a
+component:</p>
 <ul>
 <li><strong>Strings</strong> render as text. Drafter does not add line breaks between
   items; end a string with <code>"\n"</code> where you want the next item to start
   on a new line.</li>
+<li><strong>Numbers and booleans</strong> (<code>int</code>, <code>float</code>, <code>bool</code>) render as their
+  text form, so <code>state.score</code> works directly without <code>str()</code>.</li>
 <li><strong>Components</strong> (<code>Button</code>, <code>TextBox</code>, <code>Header</code>, <code>Image</code>, and the rest
   of the <a href="../components/">component list</a>) render as their HTML.</li>
 </ul>
-<p>A single string or component is quietly wrapped in a list for you, but
-anything else (a number, a dataclass, a list of lists) produces a
-friendly error that names the route that returned it. The most common
-mistake is forgetting <code>str()</code> around a number. See
+<p>A single string, value, or component is quietly wrapped in a list for
+you, but anything else (a dataclass, a dictionary, a list of lists)
+produces a friendly error that names the route that returned it. See
 <a href="../../help/errors/page-content-invalid/">Page content must be a list</a>.</p>
 <h2 id="what-drafter-verifies">What Drafter verifies</h2>
 <p>Before showing a page, Drafter checks it:</p>

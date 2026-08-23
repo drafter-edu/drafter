@@ -1396,6 +1396,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#keep-the-css-in-its-own-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keep the CSS in its own file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#style-tags-inside-a-page" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5871,6 +5882,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -7636,6 +7675,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#keep-the-css-in-its-own-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keep the CSS in its own file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#style-tags-inside-a-page" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -8170,6 +8220,29 @@ an <code>h1</code>, and every <code>Button</code> is a <code>button</code>.</p>
 <p>With two arguments, the first is the selector and the second is the
 declarations that belong inside the braces. With one argument, you
 are handing over raw CSS, which can contain several rules at once.</p>
+<h2 id="keep-the-css-in-its-own-file">Keep the CSS in its own file</h2>
+<p>Once you have more than a few rules, a separate <code>style.css</code> file next
+to your program is easier to edit, and your editor will highlight it
+properly. <code>add_website_css_file</code> links it into every page:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">add_website_css_file</span><span class="p">(</span><span class="s2">&quot;style.css&quot;</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c">/* style.css, saved in the same folder as your program */</span>
+<span class="p">.</span><span class="nc">notice</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="kc">darkslateblue</span><span class="p">;</span>
+<span class="w">    </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="kt">px</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The argument can also be a full URL, such as a stylesheet from a
+font service. When you name a file, Drafter checks that it exists as
+soon as the line runs; a typo like <code>"styles.css"</code> for <code>style.css</code>
+produces an error that suggests the right name instead of silently
+doing nothing. The file is remembered for deployment too, so it is
+copied into the built site.</p>
+<p>The same pair exists for JavaScript: <code>add_website_js</code> for code written
+in your program, <code>add_website_js_file</code> for a <code>.js</code> file or URL.</p>
 <h2 id="style-tags-inside-a-page">Style tags inside a page</h2>
 <p>CSS from <code>add_website_css</code> applies to the whole site. When only one
 page needs a rule, the <code>Page</code>'s <code>css</code> parameter attaches the rule
@@ -8184,6 +8257,9 @@ look entirely your own, start from <code>set_website_style("none")</code>, the
 blank slate.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
+<li><strong><code>add_website_css("style.css")</code> complains</strong>: that function takes
+  CSS, not a file name. Use <code>add_website_css_file("style.css")</code> to
+  link a file.</li>
 <li><strong>The rule does nothing</strong>: check the selector against what is
   actually rendered. <code>classes="notice"</code> pairs with <code>.notice</code> (the
   dot belongs in the selector, not in the keyword), and a
@@ -8205,7 +8281,8 @@ rules. Selectors are the only new machinery on this page.</p>
 <p>The <a href="../../../examples/playground/styling/">styling playground</a> has
 the three tiers side by side, cards included.</p>
 <h2 id="look-it-up">Look it up</h2>
-<p><a href="../../../reference/site-config/#add_website_css">add_website_css</a>
+<p><a href="../../../reference/site-config/#add_website_css">add_website_css</a>,
+<a href="../../../reference/site-config/#add_website_css_file">add_website_css_file</a>,
 and <a href="../../../reference/keyword-attributes/">classes</a>.</p>
 <h2 id="fix-a-problem">Fix a problem</h2>
 <p><a href="../gotchas/">Styling gotchas</a> collects the surprising parts of

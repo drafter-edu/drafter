@@ -5712,6 +5712,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -7740,6 +7768,9 @@ STUDENT_DOCS_PLAN.md §7).</p>
   at build time; a compile failure fails the build.</li>
 <li><code>hl_lines</code> highlights lines in the rendered source; <code>height</code> overrides
   the iframe height. These are the only fence parameters the plugin knows.</li>
+<li>Tutorial step listings use <code>hl_lines</code> to mark the lines that are new or
+  changed since the previous step's listing, so repeated code reads as a
+  diff. Recount the line numbers whenever a listing is edited.</li>
 <li>All demos on a page share one Pyodide runtime, and embeds are editable
   by default.</li>
 <li>Examples must be complete and copyable: include imports, the <code>State</code>

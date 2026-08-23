@@ -5712,6 +5712,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -8101,11 +8129,13 @@ uses a dictionary, which your course may not have covered.)</p>
 <p>Automatic detection covers imports it can see in your file. When
 it misses (a dynamic import, or a dependency of your own module),
 declare packages on the command line:</p>
-<div class="highlight"><pre><span></span><code><span class="go">drafter my_app.py --project-packages &quot;wordfreq;emoji&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="go">drafter my_app.py --project-packages wordfreq --project-packages emoji</span>
 </code></pre></div>
-<p><code>--system-packages</code> similarly controls the base set Drafter
-itself loads, and <code>--load-packages-automatically</code> turns the
-detection off entirely if you want full manual control.</p>
+<p>Declared packages load in addition to automatic detection, not
+instead of it. <code>--system-packages</code> similarly controls the base
+set Drafter itself loads, and <code>--no-load-packages-automatically</code>
+turns the detection off entirely if you want full manual
+control.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
 <li><strong>Works locally, fails deployed</strong>: the library is probably in

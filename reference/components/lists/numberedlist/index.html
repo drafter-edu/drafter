@@ -5818,6 +5818,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -7980,7 +8008,7 @@ a queue.</p>
 <td><code>items</code></td>
 <td><code>list</code></td>
 <td>required</td>
-<td>One entry per numbered line. Items can be strings or components.</td>
+<td>One entry per numbered line. Items can be strings, numbers, booleans, or components.</td>
 </tr>
 </tbody>
 </table>
@@ -8024,9 +8052,9 @@ a queue.</p>
   so removing the first item renumbers the rest, as the example
   shows.</li>
 <li>In every other way, a <code>NumberedList</code> behaves like a
-  <a href="../bulletedlist/">BulletedList</a>: structured items should be
-  converted to strings with a loop, and an empty list renders as
-  nothing.</li>
+  <a href="../bulletedlist/">BulletedList</a>: numbers and booleans display as
+  their text form, structured items should be converted to strings
+  with a loop, and an empty list renders as nothing.</li>
 </ul>
 <h2 id="related-components">Related components</h2>
 <ul>

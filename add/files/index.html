@@ -5858,6 +5858,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -8169,9 +8197,14 @@ state.</p>
     <span class="n">lines</span> <span class="o">=</span> <span class="n">data_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
 </code></pre></div>
 <p>Keep the file next to your program. When you deploy, the file must
-be deployed too: upload it to the repository, and if the build
-needs to be told about it, the <code>--additional-paths</code> flag lists
-extra files to bundle (see <a href="../../reference/cli/">Command line</a>).
+be deployed too: upload it to the repository, and tell the build
+about it with <code>add_website_file</code>, which also checks right away that
+the file really exists (and suggests similarly named files if not):</p>
+<div class="highlight"><pre><span></span><code><span class="n">add_website_file</span><span class="p">(</span><span class="s2">&quot;questions.txt&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>The <code>--additional-paths</code> command line flag does the same job from
+outside the code, repeated once per file (see
+<a href="../../reference/cli/">Command line</a>).
 The helper <code>get_drafter_path("questions.txt")</code> resolves a name to
 wherever the app's files actually live, which helps in the rare
 case where plain <code>open</code> cannot find a file you bundled.</p>

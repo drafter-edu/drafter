@@ -12,7 +12,7 @@
         <link rel="prev" href="../fonts/">
       
       
-        <link rel="next" href="../../help/">
+        <link rel="next" href="../live-reload/">
       
       
         
@@ -5792,6 +5792,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -7613,7 +7641,7 @@ the app whenever you save the file.</p>
 <tr>
 <td><code>--no-reloader</code></td>
 <td>on</td>
-<td>Stop watching the file for changes.</td>
+<td>Stop watching your files for changes.</td>
 </tr>
 <tr>
 <td><code>--skip</code></td>
@@ -7622,6 +7650,12 @@ the app whenever you save the file.</p>
 </tr>
 </tbody>
 </table>
+<p>Drafter normally watches your program's whole folder so that saving
+any project file reloads the site, and falls back to watching only
+your program and the files your site uses when the folder is large or
+broad (like Downloads). The <a href="../live-reload/">live reload</a> page covers
+that behavior and its flags, such as <code>--watch-path</code>,
+<code>--ignore-watch-path</code>, and <code>--watch-manifest</code>.</p>
 <p>Setting the <code>DRAFTER_SKIP</code> environment variable does the same thing
 as <code>--skip</code>, which is handy when the command being run is not
 <code>drafter</code> itself; for example, a unit test runner such as <code>pytest</code>
@@ -7675,9 +7709,24 @@ journey.</p>
 <td>Build somewhere else.</td>
 </tr>
 <tr>
-<td><code>--additional-paths LIST</code></td>
+<td><code>--additional-paths PATH</code></td>
 <td>none</td>
-<td>Bundle extra files your code <code>open()</code>s, separated by semicolons: <code>--additional-paths "pets.csv;words.txt"</code>. Forgetting this is the classic works-locally, <a href="../../help/errors/missing-asset-on-deploy/">404s-deployed</a> mistake.</td>
+<td>Bundle an extra file your code <code>open()</code>s; repeat the flag for each file: <code>--additional-paths pets.csv --additional-paths words.txt</code>. Forgetting this is the classic works-locally, <a href="../../help/errors/missing-asset-on-deploy/">404s-deployed</a> mistake. The in-code form is <a href="../site-config/#add_website_file"><code>add_website_file</code></a>.</td>
+</tr>
+<tr>
+<td><code>--additional-files PATH</code></td>
+<td>none</td>
+<td>Same idea as <code>--additional-paths</code>, but through the site configuration: the flag version of <code>add_website_file(...)</code>. Repeat once per file.</td>
+</tr>
+<tr>
+<td><code>--additional-css-files PATH_OR_URL</code></td>
+<td>none</td>
+<td>Link a stylesheet (a <code>.css</code> file next to your program, or a URL) into every page; the flag version of <code>add_website_css_file(...)</code>. Repeat once per entry.</td>
+</tr>
+<tr>
+<td><code>--additional-js-files PATH_OR_URL</code></td>
+<td>none</td>
+<td>Load a script (a <code>.js</code> file next to your program, or a URL) on every page; the flag version of <code>add_website_js_file(...)</code>. Repeat once per entry.</td>
 </tr>
 <tr>
 <td><code>--zip-output</code></td>
@@ -7697,9 +7746,9 @@ journey.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>--project-packages LIST</code></td>
+<td><code>--project-packages PKG</code></td>
 <td>none</td>
-<td>Name third-party packages your app needs when automatic detection misses them, separated by semicolons. <a href="../../extend/packages/">Third-party libraries</a> explains when.</td>
+<td>Name a third-party package your app needs when automatic detection misses it; repeat the flag for each package. <a href="../../extend/packages/">Third-party libraries</a> explains when.</td>
 </tr>
 </tbody>
 </table>
@@ -7768,13 +7817,13 @@ journey.</p>
         
         
           
-          <a href="../../help/" class="md-footer__link md-footer__link--next" aria-label="Next: Help">
+          <a href="../live-reload/" class="md-footer__link md-footer__link--next" aria-label="Next: Live reload">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Help
+                Live reload
               </div>
             </div>
             <div class="md-footer__button md-icon">

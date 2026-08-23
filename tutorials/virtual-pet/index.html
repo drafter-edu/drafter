@@ -5869,6 +5869,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/live-reload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live reload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -8168,7 +8196,9 @@ no buttons yet, only a page that shows the two values.</p>
 
 <h2 id="step-2-feed-the-pet">Step 2: Feed the pet</h2>
 <p>Feeding reduces hunger by 2, but hunger should never go below zero. A
-negative hunger value would not mean anything.</p>
+negative hunger value would not mean anything. From here on, each
+step's listing highlights the lines that are new or changed since the
+previous step.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
@@ -8183,18 +8213,18 @@ negative hunger value would not mean anything.</p>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="s2">&quot;Hunger: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">hunger</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Energy: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Feed&quot;</span><span class="p">,</span> <span class="s2">&quot;feed&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
+<span class="hll">        <span class="s2">&quot;Energy: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Feed&quot;</span><span class="p">,</span> <span class="s2">&quot;feed&quot;</span><span class="p">)</span>
+</span>    <span class="p">])</span>
 
 
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">feed</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">-</span> <span class="mi">2</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-
+<span class="hll"><span class="nd">@route</span>
+</span><span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">feed</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll">    <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">-</span> <span class="mi">2</span>
+</span><span class="hll">    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+</span>
 
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 </code></pre></div>
@@ -8223,10 +8253,10 @@ in different directions are what make the pet feel alive.</p>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="s2">&quot;Hunger: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">hunger</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Energy: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Feed&quot;</span><span class="p">,</span> <span class="s2">&quot;feed&quot;</span><span class="p">),</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Play&quot;</span><span class="p">,</span> <span class="s2">&quot;play&quot;</span><span class="p">),</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Rest&quot;</span><span class="p">,</span> <span class="s2">&quot;rest&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
+<span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Feed&quot;</span><span class="p">,</span> <span class="s2">&quot;feed&quot;</span><span class="p">),</span>
+</span><span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Play&quot;</span><span class="p">,</span> <span class="s2">&quot;play&quot;</span><span class="p">),</span>
+</span><span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Rest&quot;</span><span class="p">,</span> <span class="s2">&quot;rest&quot;</span><span class="p">)</span>
+</span>    <span class="p">])</span>
 
 
 <span class="nd">@route</span>
@@ -8237,22 +8267,22 @@ in different directions are what make the pet feel alive.</p>
     <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
 
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">-</span> <span class="mi">3</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">+</span> <span class="mi">2</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">rest</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">+</span> <span class="mi">3</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
-        <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="mi">10</span>
-    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-
+<span class="hll"><span class="nd">@route</span>
+</span><span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll">    <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">-</span> <span class="mi">3</span>
+</span><span class="hll">    <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">+</span> <span class="mi">2</span>
+</span><span class="hll">    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="hll"><span class="nd">@route</span>
+</span><span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">rest</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll">    <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">+</span> <span class="mi">3</span>
+</span><span class="hll">    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="mi">10</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+</span>
 
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 </code></pre></div>
@@ -8279,21 +8309,21 @@ that quietly breaks later.</p>
     <span class="n">energy</span><span class="p">:</span> <span class="nb">int</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">pet_mood</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;hungry&quot;</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;sleepy&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;happy&quot;</span>
-
+<span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">pet_mood</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span class="hll">    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">hunger</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
+</span><span class="hll">        <span class="k">return</span> <span class="s2">&quot;hungry&quot;</span>
+</span><span class="hll">    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">energy</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+</span><span class="hll">        <span class="k">return</span> <span class="s2">&quot;sleepy&quot;</span>
+</span><span class="hll">    <span class="k">return</span> <span class="s2">&quot;happy&quot;</span>
+</span>
 
 <span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
         <span class="s2">&quot;Hunger: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">hunger</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Energy: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Mood: &quot;</span> <span class="o">+</span> <span class="n">pet_mood</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Feed&quot;</span><span class="p">,</span> <span class="s2">&quot;feed&quot;</span><span class="p">),</span>
+<span class="hll">        <span class="s2">&quot;Mood: &quot;</span> <span class="o">+</span> <span class="n">pet_mood</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Feed&quot;</span><span class="p">,</span> <span class="s2">&quot;feed&quot;</span><span class="p">),</span>
         <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Play&quot;</span><span class="p">,</span> <span class="s2">&quot;play&quot;</span><span class="p">),</span>
         <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Rest&quot;</span><span class="p">,</span> <span class="s2">&quot;rest&quot;</span><span class="p">)</span>
     <span class="p">])</span>
@@ -8324,11 +8354,11 @@ that quietly breaks later.</p>
     <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
 
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">pet_mood</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span> <span class="s2">&quot;hungry&quot;</span><span class="p">)</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">pet_mood</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="s2">&quot;sleepy&quot;</span><span class="p">)</span>
-<span class="n">assert_state</span><span class="p">(</span><span class="n">feed</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span> <span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
-<span class="n">assert_has</span><span class="p">(</span><span class="n">index</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span> <span class="s2">&quot;Mood: happy&quot;</span><span class="p">)</span>
-
+<span class="hll"><span class="n">assert_equal</span><span class="p">(</span><span class="n">pet_mood</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span> <span class="s2">&quot;hungry&quot;</span><span class="p">)</span>
+</span><span class="hll"><span class="n">assert_equal</span><span class="p">(</span><span class="n">pet_mood</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="s2">&quot;sleepy&quot;</span><span class="p">)</span>
+</span><span class="hll"><span class="n">assert_state</span><span class="p">(</span><span class="n">feed</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span> <span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+</span><span class="hll"><span class="n">assert_has</span><span class="p">(</span><span class="n">index</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span> <span class="s2">&quot;Mood: happy&quot;</span><span class="p">)</span>
+</span>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="virtual-pet-5-5a97619266a0">
