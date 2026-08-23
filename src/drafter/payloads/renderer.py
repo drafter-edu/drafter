@@ -1,9 +1,9 @@
 """Rendering of component hierarchies into HTML strings.
 
 Provides the `Renderer` class and the `render` convenience function, which
-recursively convert strings, lists, `Component` instances, and
-`RenderPlan` objects into indented HTML while collecting CSS/JS assets and
-recording rendering errors.
+recursively convert strings, numbers, booleans, lists, `Component`
+instances, and `RenderPlan` objects into indented HTML while collecting
+CSS/JS assets and recording rendering errors.
 """
 
 import html
@@ -96,11 +96,12 @@ class Renderer:
     def render(self, component):
         """Recursively render a component to HTML.
 
-        Handles strings (escaped), lists (iterated), Components (planned),
-        and RenderPlans (direct output). Manages indentation and asset tracking.
+        Handles strings, numbers, and booleans (escaped text), lists
+        (iterated), Components (planned), and RenderPlans (direct output).
+        Manages indentation and asset tracking.
 
         Args:
-            component: String, list, Component, or RenderPlan to render.
+            component: String, number, boolean, list, Component, or RenderPlan to render.
 
         Raises:
             RenderError: If component rendering encounters an error.
@@ -112,12 +113,14 @@ class Renderer:
         # TODO: Handle errors gracefully and log them
         # print(self.component_stack, component)
         # print(self.depth, component, self.in_convert_newlines_mode())
-        if isinstance(component, str):
+        if isinstance(component, (str, int, float, bool)):
+            # Plain values (numbers and booleans) display as their text form.
+            text = component if isinstance(component, str) else str(component)
             if self.in_convert_newlines_mode():
-                escaped = html.escape(component).replace("\n", "<br>")
+                escaped = html.escape(text).replace("\n", "<br>")
                 self.write(escaped)
             else:
-                self.write(html.escape(component))
+                self.write(html.escape(text))
         elif isinstance(component, Picture):
             # A Picture value nested anywhere in content displays as an Image.
             self.render(Image(component))

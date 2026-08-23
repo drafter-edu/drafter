@@ -1286,7 +1286,7 @@ pages:
     priority: P0
     outcome: Understand why code after start_server() never runs.
   - path: help/errors/page-content-invalid.md
-    title: Page content must be a list of strings or components
+    title: Page content must be a list of strings, numbers, booleans, or components
     template: error
     level: L1
     audience: S

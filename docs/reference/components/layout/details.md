@@ -34,7 +34,7 @@ Details(summary, content, more_content, open=True)
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
 | `summary` | string or component | required | The always-visible clickable line. |
-| `*content` | strings or components | required | What reveals when opened. |
+| `*content` | strings, numbers, booleans, or components | required | What reveals when opened. |
 | `open` | `bool` | `False` | Start expanded instead of collapsed. |
 | `group` | `str` | none | Name relating several `Details`; within a group, opening one closes the others (an accordion). |
 

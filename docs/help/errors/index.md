@@ -23,7 +23,7 @@ from the error, in quotes.
 | `expects int but got` | [Could not convert text to an int](type-conversion-int.md) |
 | `expects float but got`, or another type | [Could not convert a value to the parameter's type](type-conversion-other.md) |
 | `type changed from ... to ...` | [State doesn't match the State class](state-mismatch.md) |
-| `must be a list of strings or components` | [Page content must be a list of strings or components](page-content-invalid.md) |
+| `must be a list of strings, numbers, booleans, or components` | [Page content must be a list of strings, numbers, booleans, or components](page-content-invalid.md) |
 | Two components share a `name` | [Two components share a name](duplicate-component-name.md) |
 | SelectBox default not among the options | [SelectBox default not in options](selectbox-default-missing.md) |
 | `Header level must be between 1 and 6` | [Header level must be 1-6](header-level-invalid.md) |

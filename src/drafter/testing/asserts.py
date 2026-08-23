@@ -67,11 +67,12 @@ def _unwrap_state(value: Any) -> Any:
 
 
 def _unwrap_content(value: Any) -> tuple[list | None, str | None]:
-    """Extract a content list from a page, component, string, or list.
+    """Extract a content list from a page, component, plain value, or list.
 
     Args:
         value: A Page/Fragment (its content is used), a single component
-            or string (wrapped in a list), or a list/tuple of content.
+            or plain value (a string, number, or boolean, wrapped in a
+            list), or a list/tuple of content.
 
     Returns:
         A tuple of (content list, error message). Exactly one of the two
@@ -79,12 +80,13 @@ def _unwrap_content(value: Any) -> tuple[list | None, str | None]:
     """
     if isinstance(value, Fragment):
         return list(value.content), None
-    if isinstance(value, (Component, str)):
+    if isinstance(value, (Component, str, int, float, bool)):
         return [value], None
     if isinstance(value, (list, tuple)):
         return list(value), None
     return None, (
-        f"a Page, a list of content, a component, or a string was expected, "
+        f"a Page, a list of content, a component, or a plain value (string, "
+        f"number, or boolean) was expected, "
         f"but this was a {make_type_name(value)}: {shorten_value(value)}"
     )
 

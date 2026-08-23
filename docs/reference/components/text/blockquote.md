@@ -32,7 +32,7 @@ BlockQuote(cite, text)
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
 | `cite` | `str` or `None` | required | The URL the quote comes from, recorded invisibly for the curious. Pass `None` when there is no source URL. |
-| `*content` | strings or components | required | The quoted text. |
+| `*content` | strings, numbers, booleans, or components | required | The quoted text. |
 
 ## Examples
 

@@ -2,10 +2,10 @@
 
 There are three main types defined here:
 - `Component`: The base class for all content that can be added to a page. It provides methods for verifying the component's state, parsing extra settings into HTML attributes and styles, updating styles and attributes, and planning how the component will be rendered.
-- `Content`: A type alias that represents either a `Component` or a string. This allows for flexibility in content representation.
+- `Content`: A type alias that represents either a `Component` or a plain value (a string, integer, float, or boolean). This allows for flexibility in content representation.
 - `PageContent`: A type alias that represents either a single `Content` item or a list of `Content` items. This allows for multiple pieces of content to be grouped together for a page.
 
-Note that `str` is also considered a valid `Content` type, allowing for simple text content to be used directly without needing to create a `Component` instance.
+Note that plain values (`str`, `int`, `float`, and `bool`) are also considered valid `Content` types, allowing simple text and values to be used directly without needing to create a `Component` instance; non-string values are displayed as their text form.
 
 To create custom components, subclass the `Component` class. A subclass declares
 its constructor parameters via the `ARGUMENTS` class variable (a list of
@@ -654,8 +654,14 @@ class Component:
         return self
 
 
-Content = Union[Component, str]
-"""Type alias for page content: a component or string."""
+PlainContent = str | int | float | bool
+"""Type alias for plain (non-Component) values allowed directly in page content."""
+
+PLAIN_CONTENT_TYPES = (str, int, float, bool)
+"""Tuple of plain value types allowed directly in page content, for isinstance checks."""
+
+Content = Union[Component, PlainContent]
+"""Type alias for page content: a component or a plain value (string, integer, float, or boolean)."""
 
 PageContent = Union[Content, Sequence[Content]]
 """Type alias for page content: a content item or list of content items."""
@@ -668,22 +674,22 @@ def normalize_page_content(content: PageContent) -> list[Content]:
         content: The PageContent to normalize.
 
     Returns:
-        A list of Content items (Component or str).
+        A list of Content items (Component, str, int, float, or bool).
     """
-    if isinstance(content, (Component, str)):
+    if isinstance(content, (Component, *PLAIN_CONTENT_TYPES)):
         return [content]
     elif isinstance(content, Sequence):
         return list(content)
     else:
         raise StudentFacingError(
-            f"Invalid PageContent: expected Component, str, or a sequence of these, but got {type(content).__name__}.",
+            f"Invalid PageContent: expected Component, str, int, float, bool, or a sequence of these, but got {type(content).__name__}.",
             friendly=(
                 "The content you put on this page was a "
                 f"{type(content).__name__}, but page content has to be text, "
-                "a component, or a list of those."
+                "a number, a boolean, a component, or a list of those."
             ),
             steps=(
-                "Wrap plain values in str() to display them as text.",
+                "Convert other values with str() to display them as text.",
                 "Put multiple pieces of content in a list, like "
                 "['Hello', Button('Go', go)].",
             ),
@@ -700,25 +706,25 @@ def validate_page_content(content: Any) -> tuple[bool, str]:
         A tuple (is_valid, error_message). is_valid is True if valid, False otherwise.
         error_message is empty if valid, or contains details if invalid.
     """
-    if isinstance(content, (Component, str)):
+    if isinstance(content, (Component, *PLAIN_CONTENT_TYPES)):
         return True, ""
     # Prevent string-like binary objects (especially empty ones) from being
     # treated as valid empty sequences:
     elif isinstance(content, (bytes, bytearray, memoryview)):
         return (
             False,
-            f"Invalid PageContent: expected Component, str, or a sequence of these, but got binary data instead ({type(content).__name__}).",
+            f"Invalid PageContent: expected Component, str, int, float, bool, or a sequence of these, but got binary data instead ({type(content).__name__}).",
         )
     elif isinstance(content, Sequence):
         for index, item in enumerate(content):
-            if not isinstance(item, (Component, str)):
+            if not isinstance(item, (Component, *PLAIN_CONTENT_TYPES)):
                 return (
                     False,
-                    f"Invalid PageContent: item at index {index} is of type {type(item).__name__}, expected Component or string.",
+                    f"Invalid PageContent: item at index {index} is of type {type(item).__name__}, expected Component, string, number, or boolean.",
                 )
         return True, ""
     else:
         return (
             False,
-            f"Invalid PageContent: expected Component, str, a list of Component or string, but instead got {type(content).__name__}.",
+            f"Invalid PageContent: expected Component, str, int, float, bool, or a list of these, but instead got {type(content).__name__}.",
         )

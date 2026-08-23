@@ -30,7 +30,7 @@ BulletedList(items)
 
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
-| `items` | `list` | required | One entry per bullet. Items can be strings or components; each gets its own line automatically. |
+| `items` | `list` | required | One entry per bullet. Items can be strings, numbers, booleans, or components; each gets its own line automatically. |
 
 Like every component, `BulletedList` also accepts
 [styling and attribute keywords](../../keyword-attributes.md).
@@ -72,7 +72,8 @@ start_server(State(["rope", "lantern"]))
 
 ## Notes
 
-- Items that are not strings need to be converted first: build a
+- Numbers and booleans display as their text form, but structured
+  items (like dataclasses) need to be converted first: build a
   list of strings with a loop (`for pet in state.pets:` ...
   `names.append(pet.name)`) and pass that list instead. For rows of
   structured data, a [Table](../data/table.md) is usually clearer.

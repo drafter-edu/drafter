@@ -34,7 +34,7 @@ Paragraph(text, more_content, ...)
 
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
-| `*content` | strings or components | required | The paragraph's content, usually one string, optionally mixed with inline components. |
+| `*content` | strings, numbers, booleans, or components | required | The paragraph's content, usually one string, optionally mixed with inline components. |
 
 ## Examples
 

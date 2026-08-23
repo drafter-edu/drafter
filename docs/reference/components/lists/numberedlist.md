@@ -31,7 +31,7 @@ NumberedList(items)
 
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
-| `items` | `list` | required | One entry per numbered line. Items can be strings or components. |
+| `items` | `list` | required | One entry per numbered line. Items can be strings, numbers, booleans, or components. |
 
 Like every component, `NumberedList` also accepts
 [styling and attribute keywords](../../keyword-attributes.md).
@@ -73,9 +73,9 @@ start_server(State(["Ada", "Babbage", "Captain", "Domino"]))
   so removing the first item renumbers the rest, as the example
   shows.
 - In every other way, a `NumberedList` behaves like a
-  [BulletedList](bulletedlist.md): structured items should be
-  converted to strings with a loop, and an empty list renders as
-  nothing.
+  [BulletedList](bulletedlist.md): numbers and booleans display as
+  their text form, structured items should be converted to strings
+  with a loop, and an empty list renders as nothing.
 
 ## Related components
 

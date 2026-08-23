@@ -30,7 +30,7 @@ Span(content, more_content, ...)
 
 ## Parameters
 
-`Span` takes any number of strings and components as positional
+`Span` takes any number of strings, numbers, booleans, and components as positional
 arguments. Like every component, it accepts
 [styling and attribute keywords](../../keyword-attributes.md).
 

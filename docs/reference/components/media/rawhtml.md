@@ -39,7 +39,7 @@ For `HtmlTag`:
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
 | `tag` | `str` | required | The HTML tag name, like `"u"` or `"cite"`. |
-| `*content` | strings or components | required | Normal Drafter content, escaped and safe as always. |
+| `*content` | strings, numbers, booleans, or components | required | Normal Drafter content, escaped and safe as always. |
 
 For `RawHTML`:
 

@@ -16,7 +16,8 @@ components you are most likely to need come first.
 
 Strings are not on this list, but remember that they are the most
 common page content of all: any string in a content list renders as
-text.
+text. Plain numbers and booleans work the same way, rendering as
+their text form.
 
 ## If you want to...
 

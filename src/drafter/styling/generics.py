@@ -3,15 +3,16 @@
 Provides the general-purpose `update_style` and `update_attr` primitives that the
 other helpers are built on.
 
-Each helper also accepts a plain string (which is wrapped in a new Text
-component) or a list of components (each element is updated).
+Each helper also accepts a plain value (a string, number, or boolean, which
+is wrapped in a new Text component) or a list of components (each element is
+updated).
 """
 
 from collections.abc import Sequence
 from typing import TypeVar, overload
 
 from drafter.components import Component, PageContent, Text
-from drafter.components.page_content import Content
+from drafter.components.page_content import PLAIN_CONTENT_TYPES, Content
 
 ComponentT = TypeVar("ComponentT", bound=Component)
 ContentT = TypeVar("ContentT", bound=Content)
@@ -27,7 +28,7 @@ def update_style(
 
 @overload
 def update_style(
-    component: str,
+    component: str | int | float | bool,
     style: str,
     value: str,
 ) -> Text: ...
@@ -73,32 +74,32 @@ def update_style(
     - font-size
 
     Args:
-        component: The component to update. May also be a string (which is
-            wrapped in a new Text component) or a list of components (each
-            element is updated).
+        component: The component to update. May also be a plain value (a
+            string, number, or boolean, which is wrapped in a new Text
+            component) or a list of components (each element is updated).
         style: The name of the style property to change
         value: The value to set the style property to (should be a string).
 
     Returns:
         The updated component. If a component was given, the original
-        component is updated in place and returned. If a string was given,
-        a new Text component wrapping it is returned. If a list was given,
-        a new list of the updated elements is returned.
+        component is updated in place and returned. If a plain value was
+        given, a new Text component wrapping it is returned. If a list was
+        given, a new list of the updated elements is returned.
     """
-    if isinstance(component, (Component, str)):
+    if isinstance(component, (Component, *PLAIN_CONTENT_TYPES)):
         return _update_style_item(component, style, value)
 
     return [_update_style_item(item, style, value) for item in component]
 
 
 def _update_style_item(component: Content, style: str, value: str) -> Component:
-    if isinstance(component, str):
-        result: Component = Text(component)
-    elif isinstance(component, Component):
+    if isinstance(component, Component):
         result = component
+    elif isinstance(component, PLAIN_CONTENT_TYPES):
+        result = Text(component)
     else:
         raise TypeError(
-            f"Invalid PageContent item: expected Component or str, but got {type(component).__name__}."
+            f"Invalid PageContent item: expected Component, str, int, float, or bool, but got {type(component).__name__}."
         )
     result.update_style(style, value)
     return result
@@ -114,7 +115,7 @@ def update_attr(
 
 @overload
 def update_attr(
-    component: str,
+    component: str | int | float | bool,
     attr: str,
     value: str,
 ) -> Text: ...
@@ -157,32 +158,32 @@ def update_attr(
     - title
 
     Args:
-        component: The component to update. May also be a string (which is
-            wrapped in a new Text component) or a list of components (each
-            element is updated).
+        component: The component to update. May also be a plain value (a
+            string, number, or boolean, which is wrapped in a new Text
+            component) or a list of components (each element is updated).
         attr: The name of the attribute to change
         value: The value to set the attribute to (should be a string).
 
     Returns:
         The updated component. If a component was given, the original
-        component is updated in place and returned. If a string was given,
-        a new Text component wrapping it is returned. If a list was given,
-        a new list of the updated elements is returned.
+        component is updated in place and returned. If a plain value was
+        given, a new Text component wrapping it is returned. If a list was
+        given, a new list of the updated elements is returned.
     """
-    if isinstance(component, (Component, str)):
+    if isinstance(component, (Component, *PLAIN_CONTENT_TYPES)):
         return _update_attr_item(component, attr, value)
 
     return [_update_attr_item(item, attr, value) for item in component]
 
 
 def _update_attr_item(component: Content, attr: str, value: str) -> Component:
-    if isinstance(component, str):
-        result: Component = Text(component)
-    elif isinstance(component, Component):
+    if isinstance(component, Component):
         result = component
+    elif isinstance(component, PLAIN_CONTENT_TYPES):
+        result = Text(component)
     else:
         raise TypeError(
-            f"Invalid PageContent item: expected Component or str, but got {type(component).__name__}."
+            f"Invalid PageContent item: expected Component, str, int, float, or bool, but got {type(component).__name__}."
         )
     result.update_attr(attr, value)
     return result

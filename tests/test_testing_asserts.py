@@ -231,9 +231,18 @@ def test_assert_content_failure_shows_location(capsys):
 
 
 def test_assert_content_rejects_non_content(capsys):
-    assert assert_content(42, ["Hello"]) is False
+    assert assert_content({"score": 42}, ["Hello"]) is False
     output = capsys.readouterr().out
     assert "could not be understood as page content" in output
+
+
+def test_assert_content_accepts_plain_int(capsys):
+    # Plain numbers and booleans are valid page content, so a bare int is
+    # unwrapped and compared rather than rejected outright.
+    assert assert_content(42, [42]) is True
+    assert assert_content(42, ["Hello"]) is False
+    output = capsys.readouterr().out
+    assert "could not be understood as page content" not in output
 
 
 def test_assert_content_length_mismatch(capsys):
@@ -329,9 +338,15 @@ def test_assert_not_in_flipped_arguments():
 
 
 def test_assert_has_rejects_unsearchable_page(capsys):
-    assert assert_has(42, "anything") is False
+    assert assert_has({"score": 42}, "anything") is False
     output = capsys.readouterr().out
     assert "could not be searched" in output
+
+
+def test_assert_has_searches_plain_int():
+    # Plain numbers are valid page content, so a bare int is searchable.
+    assert assert_has(42, "42") is True
+    assert assert_has(Page(None, ["Score:", 42]), "42") is True
 
 
 # ---------------------------------------------------------------------------

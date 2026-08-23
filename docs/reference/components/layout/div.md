@@ -32,7 +32,7 @@ Div(content, more_content, ...)
 
 ## Parameters
 
-`Div` takes any number of strings and components as positional
+`Div` takes any number of strings, numbers, booleans, and components as positional
 arguments, which become its contents in order. Like every component,
 it accepts
 [styling and attribute keywords](../../keyword-attributes.md);

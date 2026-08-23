@@ -26,7 +26,7 @@ Page(content)
 | Parameter | Type | Meaning |
 | --------- | ---- | ------- |
 | `state` | any | The state to carry forward, almost always your `State` dataclass. When you pass only one argument, the state is `None`. |
-| `content` | `list` | A list of strings and components, rendered in order. Must be a list, even for a single item. |
+| `content` | `list` | A list of strings, numbers, booleans, and components, rendered in order. Must be a list, even for a single item. |
 
 Two more parameters, `css` and `js`, accept raw CSS and JavaScript to
 inject when the page renders. They are for advanced use; see
@@ -86,18 +86,20 @@ start_server()
 
 ## What content can hold
 
-Each item in the content list is either a string or a component:
+Each item in the content list is a string, a number, a boolean, or a
+component:
 
 - **Strings** render as text. Drafter does not add line breaks between
   items; end a string with `"\n"` where you want the next item to start
   on a new line.
+- **Numbers and booleans** (`int`, `float`, `bool`) render as their
+  text form, so `state.score` works directly without `str()`.
 - **Components** (`Button`, `TextBox`, `Header`, `Image`, and the rest
   of the [component list](components/index.md)) render as their HTML.
 
-A single string or component is quietly wrapped in a list for you, but
-anything else (a number, a dataclass, a list of lists) produces a
-friendly error that names the route that returned it. The most common
-mistake is forgetting `str()` around a number. See
+A single string, value, or component is quietly wrapped in a list for
+you, but anything else (a dataclass, a dictionary, a list of lists)
+produces a friendly error that names the route that returned it. See
 [Page content must be a list](../help/errors/page-content-invalid.md).
 
 ## What Drafter verifies

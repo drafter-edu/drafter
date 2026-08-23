@@ -32,7 +32,7 @@ InlineCode(text)
 
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
-| `*content` | strings or components | required | The code to display, usually one short string. |
+| `*content` | strings, numbers, booleans, or components | required | The code to display, usually one short string. |
 
 ## Examples
 

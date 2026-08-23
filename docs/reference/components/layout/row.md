@@ -29,7 +29,7 @@ Row(content, more_content, ...)
 
 ## Parameters
 
-`Row` takes any number of strings and components as positional
+`Row` takes any number of strings, numbers, booleans, and components as positional
 arguments, laid out left to right. Like every component, it accepts
 [styling and attribute keywords](../../keyword-attributes.md).
 

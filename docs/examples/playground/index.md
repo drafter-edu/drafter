@@ -47,8 +47,8 @@ If a page has many demos, give the first click a moment.
 1. Predict before you run. Say what you expect out loud, then check.
 2. Change one thing at a time. When a change surprises you, that is
    the interesting part.
-3. Break things on purpose. Misspell a route name, remove a `str()`,
-   and read the error you get. Errors met on purpose are easier to
-   fix when they arrive by accident, and
+3. Break things on purpose. Misspell a route name, put a whole
+   dataclass in a content list, and read the error you get. Errors
+   met on purpose are easier to fix when they arrive by accident, and
    [the error index](../../help/errors/index.md) explains the common
    ones.

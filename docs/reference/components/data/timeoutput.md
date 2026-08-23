@@ -32,7 +32,7 @@ TimeOutput(text, datetime="2026-07-25")
 
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
-| `*content` | strings or components | required | The human-readable version. |
+| `*content` | strings, numbers, booleans, or components | required | The human-readable version. |
 | `datetime` | `str`, or a `date`/`time`/`datetime` object | none | The machine-readable form, as ISO text (`"2026-07-25"`, `"14:30"`) or an object that converts itself. |
 
 ## Examples

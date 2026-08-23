@@ -33,7 +33,7 @@ Output(name, content)
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
 | `name` | `str` | required | The region's name, which doubles as its id for fragment targeting. |
-| `content` | strings or components | required | What the region shows before any update arrives. |
+| `content` | strings, numbers, booleans, or components | required | What the region shows before any update arrives. |
 | `for_id` | `str` or a form component | none | The input this result was computed from, recorded for assistive technology. |
 
 ## Examples

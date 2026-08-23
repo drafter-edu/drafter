@@ -24,15 +24,16 @@ class Page(Fragment):
     - The ``state``, which is the current value of the backend server for this user's session. This is used to
       restore the state of the page when the user navigates back to it. Typically, this will be a dataclass
       or a dictionary, but could also be a list, primitive value, or even None.
-    - The ``content``, which is a list of strings and components that will be rendered to the user.
+    - The ``content``, which is a list of strings, numbers, booleans, and components that will be rendered to the user.
 
-    The content of a page can be any combination of strings and components. Strings will be rendered as paragraphs,
-    while components will be rendered as their respective HTML. Components should be classes that inherit from
+    The content of a page can be any combination of strings, numbers, booleans, and components. Strings will be
+    rendered as paragraphs, numbers and booleans will be rendered as their text form, and components will be rendered
+    as their respective HTML. Components should be classes that inherit from
     ``drafter.components.PageContent``. If the content is not a list, a ValueError will be raised.
 
     Args:
         state: The state of the page. If only one argument is provided, this will default to be ``None``.
-        content: The content of the page. Must always be provided as a list of strings and components.
+        content: The content of the page. Must always be provided as a list of strings, numbers, booleans, and components.
         css: Optional CSS content to inject dynamically when this page is rendered.
         js: Optional JavaScript content to inject dynamically when this page is rendered.
     """
@@ -106,9 +107,9 @@ class Page(Fragment):
                 if not is_valid:
                     return VerificationFailure(
                         f"The server did not return a valid Page() object from {original_function}.\n"
-                        f"Instead of a list of strings or content objects, the content field was:\n"
+                        f"Instead of a list of strings, numbers, booleans, or content objects, the content field was:\n"
                         f" {self.content!r}\n"
-                        f"One of those items is not a string or a content object. Instead, it was:\n"
+                        f"One of those items is not a string, number, boolean, or content object. Instead, it was:\n"
                         f" {item!r}\n"
                         f"Validation error: {error_message}\n"
                         f"Make sure you return a Page object with the new state and the list of strings/content objects.",
@@ -117,12 +118,13 @@ class Page(Fragment):
                             f"One of the items in the content list of the "
                             f"Page returned from `{original_function}` is a "
                             f"{type(item).__name__}, but every item has to "
-                            "be text or a component."
+                            "be text, a number, a boolean, or a component."
                         ),
                         friendly_steps=(
                             "Find the item shown in the technical message "
-                            "above and replace it with text or a component.",
-                            "Convert plain values to text with str().",
+                            "above and replace it with text, a number, a "
+                            "boolean, or a component.",
+                            "Convert other values to text with str().",
                         ),
                     )
 

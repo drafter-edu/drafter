@@ -179,16 +179,19 @@ class Text(Component):
         ComponentArgument("body", is_content=True),
     ]
 
-    def __init__(self, body: str, **extra_settings):
+    def __init__(self, body: str | int | float | bool, **extra_settings):
         """Initialize text component.
 
         Args:
-            body: The text content to display.
+            body: The text content to display. Numbers and booleans are
+                converted to their text form.
             **extra_settings: Additional HTML attributes and styles.
         """
-        self.body = body
         if "body" in extra_settings:
-            self.body = extra_settings.pop("body")
+            body = extra_settings.pop("body")
+        if isinstance(body, (int, float, bool)):
+            body = str(body)
+        self.body = body
         self.extra_settings = extra_settings
 
     def __eq__(self, other):
@@ -206,6 +209,9 @@ class Text(Component):
             )
         elif isinstance(other, str):
             return self.extra_settings == {} and self.body == other
+        elif isinstance(other, (int, float, bool)):
+            # Plain values are stringified at construction, so compare the text form
+            return self.extra_settings == {} and self.body == str(other)
         return NotImplemented
 
     def __hash__(self):

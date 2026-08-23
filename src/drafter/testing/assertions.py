@@ -672,16 +672,19 @@ def compare_drafter_types(
     expected_attributes: dict[str, Any] = {}
     expected_positional: dict[str, Any] = {}
 
-    if isinstance(actual, Text) and isinstance(expected, str):
+    if isinstance(actual, Text) and isinstance(expected, (str, int, float, bool)):
         do_comparison = True
         component_name = "text"
         actual_attributes, actual_positional = actual.get_fields()
-        expected_attributes = {"body": expected}
+        # Text stringifies plain bodies, so compare against the text form
+        expected_attributes = {
+            "body": expected if isinstance(expected, str) else str(expected)
+        }
 
-    if isinstance(actual, str) and isinstance(expected, Text):
+    if isinstance(actual, (str, int, float, bool)) and isinstance(expected, Text):
         do_comparison = True
         component_name = "text"
-        actual_attributes = {"body": actual}
+        actual_attributes = {"body": actual if isinstance(actual, str) else str(actual)}
         expected_attributes, expected_positional = expected.get_fields()
 
     if isinstance(actual, Component) and isinstance(expected, Component):

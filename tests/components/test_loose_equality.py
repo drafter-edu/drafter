@@ -63,6 +63,38 @@ snippets = {
             ["Expected type str but got type Button"],
         ),
     },
+    "plain_values": {
+        "text_equals_int": (
+            """Text(5)""",
+            """5""",
+            [],
+        ),
+        "int_equals_text": (
+            """5""",
+            """Text(5)""",
+            [],
+        ),
+        "text_equals_bool": (
+            """Text(True)""",
+            """True""",
+            [],
+        ),
+        "text_of_int_equals_str": (
+            """Text(5)""",
+            """'5'""",
+            [],
+        ),
+        "int_is_not_str": (
+            """5""",
+            """'5'""",
+            ["Expected type str but got type int"],
+        ),
+        "div_with_plain_number_content": (
+            """Div('Score:', 42)""",
+            """Div('Score:', 42, style_color='blue')""",
+            [],
+        ),
+    },
     "div": {
         "simple_div": (
             """Div('Hello World')""",

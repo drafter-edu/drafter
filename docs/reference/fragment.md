@@ -29,7 +29,7 @@ Fragment(content)
 | Parameter | Type | Meaning |
 | --------- | ---- | ------- |
 | `state` | any | The state to carry forward, exactly as in `Page`. With one argument, the state is `None`. |
-| `content` | `list` | Strings and components, same rules as [Page content](page.md#what-content-can-hold). |
+| `content` | `list` | Strings, numbers, booleans, and components, same rules as [Page content](page.md#what-content-can-hold). |
 | `target` | `str` or `None` | Where the content is placed. A CSS-style selector such as `"#counter"` (an element with `id="counter"`) or `".score"` (elements with that class). `None`, the default, targets the element that triggered the request. |
 | `css`, `js` | `str` | Advanced: raw CSS/JavaScript to inject with the fragment. |
 

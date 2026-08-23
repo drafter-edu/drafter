@@ -1,9 +1,9 @@
 """The `Fragment` payload: partial-page content injected into a target element.
 
 `Fragment` is the workhorse payload — `Page` builds on it. It carries a
-state value, a list of content chunks (strings and components), an
-optional injection `Target`, and optional CSS/JS to apply alongside the
-rendered content.
+state value, a list of content chunks (strings, numbers, booleans, and
+components), an optional injection `Target`, and optional CSS/JS to apply
+alongside the rendered content.
 """
 
 from dataclasses import dataclass
@@ -13,6 +13,7 @@ from typing import Any
 from drafter.components import Component
 from drafter.components.images import Image
 from drafter.components.links import LinkContent
+from drafter.components.page_content import PLAIN_CONTENT_TYPES
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.data.channel import Message
 from drafter.data.errors import StudentFacingError
@@ -38,7 +39,7 @@ class Fragment(ResponsePayload):
 
     Args:
         state: The state of the fragment. If only one argument is provided, this will default to be ``None``.
-        content: The content of the fragment. Must always be provided as a list of strings and components.
+        content: The content of the fragment. Must always be provided as a list of strings, numbers, booleans, and components.
         target: The target element to inject into. Can be a Target instance, a string ID/selector, or None. In most cases, using `None` will target the original element that launched the request.
         css: Optional CSS content to inject dynamically when this fragment is rendered.
         js: Optional JavaScript content to inject dynamically when this fragment is rendered.
@@ -63,23 +64,25 @@ class Fragment(ResponsePayload):
             # A Picture value displays as an Image component, the same way
             # strings display as text.
             self.content = [Image(content)]
-        elif isinstance(content, (str, Component)):
-            # If the content is a single string, convert it to a list with that string as the only element.
+        elif isinstance(content, (*PLAIN_CONTENT_TYPES, Component)):
+            # If the content is a single plain value or component, convert it
+            # to a list with that value as the only element.
             self.content = [content]
         elif not isinstance(content, list):
             incorrect_type = type(content).__name__
             raise StudentFacingError(
-                f"The content of a {self.__class__.__name__} must be a list of strings or components."
+                f"The content of a {self.__class__.__name__} must be a list of strings, numbers, booleans, or components."
                 f" Found {incorrect_type} instead.",
                 friendly=(
                     "The content you returned in this "
                     f"{self.__class__.__name__} was a {incorrect_type}, but "
-                    "it needs to be text, a component, or a list of those."
+                    "it needs to be text, a number, a boolean, a component, "
+                    "or a list of those."
                 ),
                 steps=(
                     "Wrap the content in a list, like "
                     f"{self.__class__.__name__}(state, ['Hello!']).",
-                    "Convert plain values to text with str() before "
+                    "Convert other values to text with str() before "
                     "putting them on the page.",
                 ),
             )
@@ -89,16 +92,16 @@ class Fragment(ResponsePayload):
                 for chunk in content
             ]
             for index, chunk in enumerate(self.content):
-                if not isinstance(chunk, (str, Component)):
+                if not isinstance(chunk, (*PLAIN_CONTENT_TYPES, Component)):
                     incorrect_type = type(chunk).__name__
                     raise StudentFacingError(
-                        f"The content of a {self.__class__.__name__} must be a list of strings or components."
+                        f"The content of a {self.__class__.__name__} must be a list of strings, numbers, booleans, or components."
                         f" Found {incorrect_type} at index {index} instead.",
                         friendly=(
                             f"Item number {index} in this "
                             f"{self.__class__.__name__}'s content list is a "
                             f"{incorrect_type}, but every item needs to be "
-                            "text or a component."
+                            "text, a number, a boolean, or a component."
                         ),
                         steps=(
                             f"Look at item {index} of your content list and "
