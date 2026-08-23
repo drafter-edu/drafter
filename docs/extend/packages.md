@@ -126,7 +126,7 @@ it misses (a dynamic import, or a dependency of your own module),
 declare packages on the command line:
 
 ```console
-drafter my_app.py --project-packages "wordfreq;emoji"
+drafter my_app.py --project-packages wordfreq --project-packages emoji
 ```
 
 `--system-packages` similarly controls the base set Drafter

@@ -237,12 +237,14 @@ class AppCommonConfiguration(BaseConfiguration):
         group.add_argument(
             "--project-packages",
             type=str,
-            help="List of project-specific Python packages to load (semicolon-separated)",
+            action="append",
+            help="Project-specific Python package to load; repeat the flag for multiple packages",
         )
         group.add_argument(
             "--system-packages",
             type=str,
-            help=f"List of system-specific Python packages to load (semicolon-separated). The defaults ('{';'.join(DEFAULT_SYSTEM_PACKAGES)}') are usually fine, but you can override them if needed.",
+            action="append",
+            help=f"System-specific Python package to load; repeat the flag for multiple packages. The defaults ({', '.join(repr(p) for p in DEFAULT_SYSTEM_PACKAGES)}) are usually fine, but you can override them if needed.",
         )
         group.add_argument(
             "--pyodide-url",
@@ -272,8 +274,8 @@ class AppCommonConfiguration(BaseConfiguration):
     def parse_args(parsed_args: dict) -> dict:
         """Extract common app settings from parsed command line arguments.
 
-        The --project-packages and --system-packages values are split on
-        semicolons into lists.
+        The repeatable --project-packages and --system-packages flags arrive
+        as lists, one entry per use of the flag.
 
         Args:
             parsed_args: A dictionary of parsed command line arguments.
@@ -301,9 +303,9 @@ class AppCommonConfiguration(BaseConfiguration):
         if parsed_args.get("load_packages_automatically"):
             result["load_packages_automatically"] = True
         if parsed_args.get("project_packages"):
-            result["project_packages"] = parsed_args["project_packages"].split(";")
+            result["project_packages"] = list(parsed_args["project_packages"])
         if parsed_args.get("system_packages"):
-            result["system_packages"] = parsed_args["system_packages"].split(";")
+            result["system_packages"] = list(parsed_args["system_packages"])
         if parsed_args.get("pyodide_url"):
             result["pyodide_url"] = parsed_args["pyodide_url"]
         if parsed_args.get("pyodide_version"):

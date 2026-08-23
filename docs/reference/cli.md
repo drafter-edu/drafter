@@ -70,14 +70,14 @@ journey.
 | Flag | Default | What it does |
 | ---- | ------- | ------------ |
 | `--output-directory DIR` | `dist` | Build somewhere else. |
-| `--additional-paths LIST` | none | Bundle extra files your code `open()`s, separated by semicolons: `--additional-paths "pets.csv;words.txt"`. Forgetting this is the classic works-locally, [404s-deployed](../help/errors/missing-asset-on-deploy.md) mistake. |
+| `--additional-paths PATH` | none | Bundle an extra file your code `open()`s; repeat the flag for each file: `--additional-paths pets.csv --additional-paths words.txt`. Forgetting this is the classic works-locally, [404s-deployed](../help/errors/missing-asset-on-deploy.md) mistake. |
 | `--zip-output` | off | Zip the built site, convenient for uploading. |
 
 ## Libraries
 
 | Flag | Default | What it does |
 | ---- | ------- | ------------ |
-| `--project-packages LIST` | none | Name third-party packages your app needs when automatic detection misses them, separated by semicolons. [Third-party libraries](../extend/packages.md) explains when. |
+| `--project-packages PKG` | none | Name a third-party package your app needs when automatic detection misses it; repeat the flag for each package. [Third-party libraries](../extend/packages.md) explains when. |
 
 ## Related
 

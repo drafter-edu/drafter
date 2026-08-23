@@ -177,7 +177,7 @@ minute or two to become reachable; later ones are faster.
   extending the compile line:
 
     ```console
-    uvx drafter main.py --compile --output-directory _site --production --additional-paths "pets.csv;words.txt"
+    uvx drafter main.py --compile --output-directory _site --production --additional-paths pets.csv --additional-paths words.txt
     ```
 
 - **Your app imports third-party packages.** The throwaway

@@ -135,8 +135,9 @@ with open("questions.txt") as data_file:
 
 Keep the file next to your program. When you deploy, the file must
 be deployed too: upload it to the repository, and if the build
-needs to be told about it, the `--additional-paths` flag lists
-extra files to bundle (see [Command line](../reference/cli.md)).
+needs to be told about it, the `--additional-paths` flag names an
+extra file to bundle, repeated once per file (see
+[Command line](../reference/cli.md)).
 The helper `get_drafter_path("questions.txt")` resolves a name to
 wherever the app's files actually live, which helps in the rare
 case where plain `open` cannot find a file you bundled.

@@ -106,8 +106,8 @@ All flags below work with the `drafter` command (and `python -m drafter`). Flags
 | `--override-asset-url URL`      | off                           | Custom base URL for assets. When building, also names the output assets folder.                                                                                  |
 | `--site-title TITLE`            | `Drafter App Server`          | Browser tab title.                                                                                                                                               |
 | `--load-packages-automatically` | on                            | Automatically load Python packages detected in the student's code, in addition to `--system-packages` / `--project-packages`.                                    |
-| `--system-packages LIST`        | `bakery;pillow`               | Semicolon-separated system packages to load in the browser engine (matplotlib is installed on demand when imported or when `MatPlotLibPlot` is used).            |
-| `--project-packages LIST`       | (none)                        | Semicolon-separated project-specific packages to load.                                                                                                           |
+| `--system-packages PKG`         | `bakery`, `pillow`            | System package to load in the browser engine; repeat the flag for multiple packages (matplotlib is installed on demand when imported or when `MatPlotLibPlot` is used). |
+| `--project-packages PKG`        | (none)                        | Project-specific package to load; repeat the flag for multiple packages.                                                                                         |
 | `--pyodide-url URL`             | `https://cdn.jsdelivr.net/pyodide` | Base URL to load Pyodide from; the version and branch are appended.                                                                                        |
 | `--pyodide-version VERSION`     | `v314.0.5`                    | Pyodide version to load (e.g. `v314.0.5` or `dev`).                                                                                                              |
 | `--pyodide-branch BRANCH`       | `full`                        | Pyodide distribution branch: `full` or `debug`.                                                                                                                  |
@@ -124,12 +124,12 @@ All flags below work with the `drafter` command (and `python -m drafter`). Flags
 | `--theme NAME`                     | `default`        | Site theme. Bundled themes: `default`, `dark`, `none`.                                                           |
 | `--server-name NAME`               | `MAIN_SERVER`    | Internal server identifier.                                                                                      |
 | `--deploy-image-path PATH`         | (empty)          | Path prefix for images on the deployed site.                                                                     |
-| `--external-pages LIST`            | (none)           | Semicolon-separated external links (`URL` or `URL Text`) shown in the generated site (e.g., a GitHub repo link). |
-| `--additional-header-content LIST` | (none)           | Semicolon-separated raw HTML strings injected into `<head>`.                                                     |
-| `--additional-style-content LIST`  | (none)           | Semicolon-separated inline CSS strings.                                                                          |
-| `--additional-css-content LIST`    | (none)           | Semicolon-separated external CSS URLs.                                                                           |
-| `--additional-js-content LIST`     | (none)           | Semicolon-separated inline JavaScript strings.                                                                   |
-| `--additional-script-content LIST` | (none)           | Semicolon-separated external JS URLs.                                                                            |
+| `--external-pages LINK`            | (none)           | External link (`URL` or `URL Text`) shown in the generated site (e.g., a GitHub repo link); repeatable.          |
+| `--additional-header-content HTML` | (none)           | Raw HTML string injected into `<head>`; repeatable.                                                              |
+| `--additional-style-content CSS`   | (none)           | Inline CSS string; repeatable.                                                                                   |
+| `--additional-css-content URL`     | (none)           | External CSS URL; repeatable.                                                                                    |
+| `--additional-js-content JS`       | (none)           | Inline JavaScript string; repeatable.                                                                            |
+| `--additional-script-content URL`  | (none)           | External JS URL; repeatable.                                                                                     |
 | `--use-shadow-dom`                 | off              | Wrap the app in a Shadow DOM to isolate it from page CSS.                                                        |
 | `--root-element-id ID`             | `drafter-root--` | ID prefix for Drafter's root element.                                                                            |
 | `--newlines-to-br`                 | on               | Convert newlines in text content to `<br>` tags.                                                                 |
@@ -154,13 +154,13 @@ All flags below work with the `drafter` command (and `python -m drafter`). Flags
 | `--create-404 {always,never,if_missing}`   | `if_missing` | Whether to generate a `404.html`.                                                                                                                                            |
 | `--zip-output`                             | off          | Zip the output directory after building.                                                                                                                                     |
 | `--warn-missing-info`                      | on           | Warn if `set_site_information` was never called.                                                                                                                             |
-| `--additional-paths LIST`                  | (none)       | Semicolon-separated extra files to bundle into the built site (e.g., files your code `open`s).                                                                               |
+| `--additional-paths PATH`                  | (none)       | Extra file to bundle into the built site (e.g., a file your code `open`s); repeat the flag for multiple files.                                                               |
 | `--pyodide-package-style {build,cdn,pypi}` | `pypi`       | Where the built page gets the Drafter Pyodide package: a local build, a CDN, or PyPI.                                                                                        |
 | `--shared-runtime`                         | off          | Compile the page to attach to a Drafter host in its parent page, sharing one Pyodide runtime across many embedded demos (iframes); boots its own runtime only as a fallback. |
 
 ## Environment variables
 
-Every setting can also be provided via environment variables. Boolean variables accept `1`, `true`, or `yes` (case-insensitive) for true; anything else is false. List-valued variables are semicolon-separated.
+Every setting can also be provided via environment variables. Boolean variables accept `1`, `true`, or `yes` (case-insensitive) for true; anything else is false. List-valued variables are semicolon-separated (unlike the corresponding CLI flags, which are instead repeated once per entry).
 
 ### General
 

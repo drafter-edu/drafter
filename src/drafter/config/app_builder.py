@@ -134,7 +134,8 @@ class AppBuilderConfiguration(BaseConfiguration):
         group.add_argument(
             "--additional-paths",
             type=str,
-            help="Semicolon-separated list of additional file paths to make available in the built site (e.g., for `open`)",
+            action="append",
+            help="Additional file path to make available in the built site (e.g., for `open`); repeat the flag for multiple files",
         )
         group.add_argument(
             "--pyodide-package-style",
@@ -153,7 +154,8 @@ class AppBuilderConfiguration(BaseConfiguration):
     def parse_args(parsed_args: dict) -> dict:
         """Extract app builder settings from parsed command line arguments.
 
-        The --additional-paths value is split on semicolons into a list.
+        The repeatable --additional-paths flag arrives as a list, one entry
+        per use of the flag.
 
         Args:
             parsed_args: A dictionary of parsed command line arguments.
@@ -173,7 +175,7 @@ class AppBuilderConfiguration(BaseConfiguration):
         if parsed_args.get("warn_missing_info"):
             result["warn_missing_info"] = True
         if parsed_args.get("additional_paths"):
-            result["additional_paths"] = parsed_args["additional_paths"].split(";")
+            result["additional_paths"] = list(parsed_args["additional_paths"])
         if parsed_args.get("pyodide_package_style"):
             result["pyodide_package_style"] = parsed_args["pyodide_package_style"]
         if parsed_args.get("shared_runtime"):

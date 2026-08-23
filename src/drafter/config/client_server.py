@@ -72,7 +72,8 @@ class ClientServerConfiguration(BaseConfiguration):
     site_title: str = "Drafter Application"
     favicon: str = ""
     information: SiteInformation | None = None
-    # Parse semicolon-separated format: "URL Text;URL Text;URL;..."
+    # Entries are "URL" or "URL Text"; the env var is semicolon-separated,
+    # while the CLI flag is repeated once per entry
     external_pages: list[str | tuple[str, str]] | None = None
     framed: bool = True
     theme: str = "default"
@@ -255,32 +256,38 @@ class ClientServerConfiguration(BaseConfiguration):
         group.add_argument(
             "--external-pages",
             type=str,
-            help="Semicolon-separated list of external page links (URL or 'URL Text' tuples)",
+            action="append",
+            help="External page link (URL or 'URL Text' tuple); repeat the flag for multiple links",
         )
         group.add_argument(
             "--additional-header-content",
             type=str,
-            help="Semicolon-separated list of HTML strings for <head> section",
+            action="append",
+            help="HTML string for <head> section; repeat the flag for multiple entries",
         )
         group.add_argument(
             "--additional-style-content",
             type=str,
-            help="Semicolon-separated list of inline CSS strings",
+            action="append",
+            help="Inline CSS string; repeat the flag for multiple entries",
         )
         group.add_argument(
             "--additional-css-content",
             type=str,
-            help="Semicolon-separated list of external CSS URLs",
+            action="append",
+            help="External CSS URL; repeat the flag for multiple URLs",
         )
         group.add_argument(
             "--additional-js-content",
             type=str,
-            help="Semicolon-separated list of inline JavaScript strings",
+            action="append",
+            help="Inline JavaScript string; repeat the flag for multiple entries",
         )
         group.add_argument(
             "--additional-script-content",
             type=str,
-            help="Semicolon-separated list of external JS URLs",
+            action="append",
+            help="External JS URL; repeat the flag for multiple URLs",
         )
         group.add_argument(
             "--use-shadow-dom",
@@ -340,9 +347,9 @@ class ClientServerConfiguration(BaseConfiguration):
         """Extract client server settings from parsed command line arguments.
 
         Note the inversions: --production sets `in_debug_mode` to False, and
-        --no-frame sets `framed` to False. Semicolon-separated options
-        (external pages and the additional content lists) are split into lists
-        with each entry stripped of surrounding whitespace.
+        --no-frame sets `framed` to False. Repeatable options (external pages
+        and the additional content lists) arrive as lists, with each entry
+        stripped of surrounding whitespace.
 
         Args:
             parsed_args: A dictionary of parsed command line arguments.
@@ -374,34 +381,29 @@ class ClientServerConfiguration(BaseConfiguration):
             result["deploy_image_path"] = parsed_args["deploy_image_path"]
         if parsed_args.get("external_pages"):
             result["external_pages"] = [
-                page.strip() for page in parsed_args["external_pages"].split(";")
+                page.strip() for page in parsed_args["external_pages"]
             ]
         if parsed_args.get("override_asset_url"):
             result["override_asset_url"] = parsed_args["override_asset_url"]
         if parsed_args.get("additional_header_content"):
             result["additional_header_content"] = [
-                content.strip()
-                for content in parsed_args["additional_header_content"].split(";")
+                content.strip() for content in parsed_args["additional_header_content"]
             ]
         if parsed_args.get("additional_style_content"):
             result["additional_style_content"] = [
-                content.strip()
-                for content in parsed_args["additional_style_content"].split(";")
+                content.strip() for content in parsed_args["additional_style_content"]
             ]
         if parsed_args.get("additional_css_content"):
             result["additional_css_content"] = [
-                content.strip()
-                for content in parsed_args["additional_css_content"].split(";")
+                content.strip() for content in parsed_args["additional_css_content"]
             ]
         if parsed_args.get("additional_js_content"):
             result["additional_js_content"] = [
-                content.strip()
-                for content in parsed_args["additional_js_content"].split(";")
+                content.strip() for content in parsed_args["additional_js_content"]
             ]
         if parsed_args.get("additional_script_content"):
             result["additional_script_content"] = [
-                content.strip()
-                for content in parsed_args["additional_script_content"].split(";")
+                content.strip() for content in parsed_args["additional_script_content"]
             ]
         if parsed_args.get("use_shadow_dom"):
             result["use_shadow_dom"] = True
