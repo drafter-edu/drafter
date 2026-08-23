@@ -233,6 +233,14 @@ def configure_instance(
     if use_shadow_dom is not None:
         system.client_server.use_shadow_dom = use_shadow_dom
 
+    # Embedded instances share their host page's history stack and URL (even
+    # inside an iframe, pushState entries join the top window's session
+    # history), so the back button must keep navigating the host page — a
+    # documentation reader pressing back expects the previous docs page, not
+    # the demo's previous state. An embed that really wants history can
+    # re-enable it explicitly through its configuration.
+    system.client_server.browser_history = False
+
     # These per-app content lists live on the shared system config and are
     # *appended* to by add_website_css()/add_website_js()/etc. Without a reset,
     # one instance's injected CSS/JS would accumulate and leak into every

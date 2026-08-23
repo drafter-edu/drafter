@@ -99,6 +99,9 @@ class ClientBridge:
             self.runtime, configuration.root_element_id, configuration.root_element_id
         )
         self.navigator = NavigationController(self.runtime)
+        self.navigator.browser_history_enabled = getattr(
+            configuration, "browser_history", True
+        )
         self.events = EventManager(self.runtime)
         self.events.button_spinners = getattr(configuration, "button_spinners", False)
         self.debug_panel = None
@@ -142,7 +145,8 @@ class ClientBridge:
     def setup_events(self, hooks: ServerHooks) -> None:
         """Install the injected server hooks and register DOM event handlers.
 
-        Wires the hooks' visit callback into the NavigationController,
+        Wires the hooks' visit callback and state accessors (for browser
+        history time travel) into the NavigationController,
         registers the Drafter custom events (toggle-frame, toggle-debug-mode,
         evict-persistent, navigate, replay, save/load-state, set-theme) and
         the browser popstate event, binds the "Q" hotkey to debug-mode
@@ -158,6 +162,7 @@ class ClientBridge:
         """
         self.hooks = hooks
         self.navigator.set_navigation_func(hooks.visit)
+        self.navigator.set_state_accessors(hooks.get_state, hooks.set_state)
         self.events.setup_events(
             {
                 "drafter-toggle-frame": lambda event: hooks.toggle_frame(),

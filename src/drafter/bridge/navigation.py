@@ -11,12 +11,15 @@ import json
 from collections.abc import Callable
 from typing import Any
 
-from drafter.bridge.error_handling import report_bridge_error
+from drafter.bridge.error_handling import report_bridge_error, report_bridge_warning
 from drafter.bridge.history import BrowserHistory
 from drafter.bridge.log import debug_log
+from drafter.bridge.snapshot import deserialize_state_snapshot
 from drafter.constants import SUBMIT_BUTTON_KEY
+from drafter.data.details.state import UpdatedStateEvent
 from drafter.data.request import Request
 from drafter.data.response import Response
+from drafter.monitor.audit import log_record
 
 
 class NavigationController:
@@ -31,9 +34,25 @@ class NavigationController:
         history: The BrowserHistory that mirrors requests into the
             browser's history stack.
 
+        browser_history_enabled: Whether navigation is mirrored into the
+            browser's history stack at all (the `browser_history`
+            configuration setting). When False — embedded instances such as
+            documentation demos, which share their host page's history and
+            URL — no entries are pushed, the original entry is not stamped,
+            and popstate events are ignored, leaving the browser's back
+            button to the host page. The request log and replay features
+            are unaffected.
+
         navigation_func: The callback that performs a visit for a Request
             and returns its Response; None until set_navigation_func is
             called.
+
+        get_app_state: Returns the application's current state; None until
+            set_state_accessors is called. Used (with set_app_state) to
+            restore history-entry state snapshots on back/forward.
+
+        set_app_state: Replaces the application's current state; None until
+            set_state_accessors is called.
 
         redirect_loop_stack: Reprs of the redirect payloads currently being
             followed, used to detect redirect loops.
@@ -54,17 +73,23 @@ class NavigationController:
     REQUEST_LOG_LIMIT = 100
 
     history: BrowserHistory
+    browser_history_enabled: bool = True
     navigation_func: Callable[[Request], Response] | None = None
     redirect_loop_stack: list[str]
     last_request: Request | None
     request_log: dict[int, Request]
+    get_app_state: Callable[[], Any] | None
+    set_app_state: Callable[[Any], None] | None
 
     def __init__(self, runtime):
         self.history = BrowserHistory(runtime)
+        self.browser_history_enabled = True
         self.redirect_loop_stack = []
         self.navigation_func = None
         self.last_request = None
         self.request_log = {}
+        self.get_app_state = None
+        self.set_app_state = None
 
     def set_navigation_func(self, func: Callable[[Request], Response]) -> None:
         """Install the callback used to perform visits.
@@ -74,6 +99,24 @@ class NavigationController:
                 returns the resulting Response.
         """
         self.navigation_func = func
+
+    def set_state_accessors(
+        self,
+        get_app_state: Callable[[], Any],
+        set_app_state: Callable[[Any], None],
+    ) -> None:
+        """Install the application-state accessors used for history time
+        travel: the BrowserHistory captures a snapshot of the state into
+        each entry it pushes, and handle_popstate restores an entry's
+        snapshot before replaying its route.
+
+        Args:
+            get_app_state: Returns the application's current state.
+            set_app_state: Replaces the application's current state.
+        """
+        self.get_app_state = get_app_state
+        self.set_app_state = set_app_state
+        self.history.set_state_provider(get_app_state)
 
     ### Redirect Handling
 
@@ -166,26 +209,93 @@ class NavigationController:
         """Issue the initial "page_load" request for the index route.
 
         The initial request is not added to the browser history, since the
-        browser already has an entry for the page itself.
+        browser already has an entry for the page itself; instead the
+        startup state is stamped onto that original entry (before the index
+        route runs and can mutate it), so backing all the way to the start
+        restores the app to how it began. When browser history is disabled,
+        the original entry is left completely untouched.
 
         Returns:
             The Response produced by the navigation function.
         """
+        if self.browser_history_enabled:
+            self.history.record_initial_state()
         initial_request = Request("page_load", "index", {}, {}, "")
         return self.navigate(initial_request, remember=False)
 
     def handle_popstate(self, event: Any):
-        """Replay a browser back/forward navigation.
+        """Replay a browser back/forward navigation as time travel.
 
-        Converts the popstate event into a Request via the BrowserHistory
-        and dispatches it without adding a new history entry (the browser
-        already moved within its stack).
+        First restores the entry's state snapshot (the application state as
+        it was before the entry's route originally ran), then converts the
+        popstate event into a Request via the BrowserHistory and dispatches
+        it without adding a new history entry (the browser already moved
+        within its stack). Re-running the route against the restored state
+        reproduces the original page; entries without a usable snapshot
+        fall back to replaying against the current state.
+
+        When browser history is disabled, does nothing: popstate events on
+        the shared window then belong to the host page (e.g. a
+        documentation site's own navigation), and reacting would hijack
+        them.
 
         Args:
             event: The popstate event from the browser.
         """
+        if not self.browser_history_enabled:
+            debug_log("client.popstate_ignored_history_disabled")
+            return
+        self._restore_state_from_entry(event)
         request = self.history.convert_popstate_to_request(event)
         self.navigate(request, False)
+
+    def _restore_state_from_entry(self, event: Any) -> None:
+        """Restore the application state stored in a popstate entry, if any.
+
+        Silently does nothing when the entry carries no snapshot (an entry
+        pushed before a snapshot could be captured, or the browser's
+        original entry before record_initial_state ran) or when no state
+        accessors are installed. A snapshot that can no longer be rebuilt
+        (e.g. the state class changed shape since the entry was pushed)
+        reports a bridge warning and leaves the current state in place, so
+        the navigation degrades to a plain replay instead of failing.
+        """
+        entry = getattr(event, "state", None) if event is not None else None
+        if entry is None:
+            return
+        state_json = getattr(entry, "state_json", None)
+        if not state_json:
+            return
+        if self.get_app_state is None or self.set_app_state is None:
+            return
+        route = getattr(entry, "url", None)
+        request_id = getattr(entry, "request_id", None)
+        try:
+            restored = deserialize_state_snapshot(str(state_json), self.get_app_state())
+        except Exception as e:
+            report_bridge_warning(
+                "bridge.history_state_restore_failed",
+                "Could not restore this page's saved state (your code may "
+                "have changed since it was visited); showing it with the "
+                "current state instead",
+                "bridge.navigation.handle_popstate",
+                f"Route: {route}",
+                exception=e,
+                route=route,
+                request_id=request_id,
+                phase="navigation",
+            )
+            return
+        # Restore BEFORE the route replays: argument preparation reads the
+        # current state when invoking the route handler.
+        self.set_app_state(restored)
+        log_record(
+            UpdatedStateEvent.from_state(restored),
+            "bridge.navigation.handle_popstate",
+            route=route,
+            request_id=request_id,
+        )
+        debug_log("client.restore_history_state", route, request_id)
 
     def navigate(
         self,
@@ -198,7 +308,8 @@ class NavigationController:
         Args:
             request: The Request to initiate.
             remember: Whether to add the request to the browser history
-                before dispatching it.
+                before dispatching it (ignored when browser history is
+                disabled).
 
         Returns:
             The Response produced by the navigation function.
@@ -211,7 +322,7 @@ class NavigationController:
             raise RuntimeError("Navigation function not set in ClientBridge.")
         debug_log("client.initiate_request", request)
         self._record_request(request)
-        if remember:
+        if remember and self.browser_history_enabled:
             self.history.add_to_history(request)
         next_visit = self.navigation_func(request)
         return next_visit

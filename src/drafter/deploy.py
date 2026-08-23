@@ -233,6 +233,27 @@ def set_button_spinners(enabled: bool = True, server: ClientServer | None = None
     server.reconfigure(button_spinners=bool(enabled))
 
 
+def set_browser_history(enabled: bool = True, server: ClientServer | None = None):
+    """
+    Enables or disables mirroring navigation into the browser's history
+    stack. When enabled (the default for standalone sites), the browser's
+    back/forward buttons time travel through the app, restoring each page's
+    state. When disabled, Drafter never touches the browser's history or
+    URL, so the back button leaves the page — the right behavior for an app
+    embedded in another page (documentation demos disable it
+    automatically).
+
+    Call before start_server(); the setting is read when the site boots.
+
+    Args:
+        enabled: Whether to mirror navigation into browser history.
+        server: The server to configure. If None, uses the main server.
+    """
+    if server is None:
+        server = get_main_server()
+    server.reconfigure(browser_history=bool(enabled))
+
+
 def add_website_header(header: str, server: ClientServer | None = None):
     """
     Adds additional header content to the website. This is useful for adding custom

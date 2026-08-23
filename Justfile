@@ -77,5 +77,6 @@ docs: build-js
 docs-serve:
     uv run drafter-docs serve
 
+
 # Run all checks: format, lint, and test
 validate: format lint check-docs test

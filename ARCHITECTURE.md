@@ -458,14 +458,31 @@ logging/debugging.
 ## History and Navigation
 
 We hijack the browser's back/forward buttons. `BrowserHistory` (`src/drafter/bridge/history.py`)
-pushes History API entries containing `{request_id, url, kwargs}` plus a `?route=` query parameter.
-On `popstate`, the entry is converted back into a `Request("back", url, kwargs, ...)` and replayed
-through the normal visit flow. State history itself is kept in memory on the server side in
-`SiteState` (`current`, `history`, `initial`).
+pushes History API entries containing `{request_id, url, kwargs, state_json}` plus a `?route=`
+query parameter, where `state_json` snapshots the application state as it was *before* the entry's
+route ran (`navigate` records history before invoking the route), using the same no-pickle JSON
+encoding as the debug panel's Save/Load feature (`snapshot.py`). On `popstate`, the
+`NavigationController` restores that snapshot (rebuilt against the running app's state class) and
+then converts the entry back into a `Request("back", url, kwargs, ...)` replayed through the normal
+visit flow — re-running the route against its original input state reproduces the original page
+(time travel). The initial page load stamps the startup state onto the browser's original entry via
+`replaceState` (`record_initial_state`), so backing to the start restores the initial state.
+Snapshots that cannot be captured (unencodable or oversized states) or restored (state class changed
+shape) degrade to replaying against the current state, with a bridge warning. State history itself
+is also kept in memory on the server side in `SiteState` (`current`, `history`, `initial`).
+
+The whole feature is gated by the `browser_history` configuration setting
+(`NavigationController.browser_history_enabled`): when disabled, no entries are pushed, the
+original entry is never stamped, and `handle_popstate` ignores events (the listener stays
+registered but no-ops), so Drafter never touches the shared window's history or URL.
+`configure_instance()` disables it for embedded multi-instance apps — even in an iframe, pushState
+entries join the top window's session history, so a docs reader pressing back would otherwise
+rewind the demo instead of leaving the docs page. Standalone sites default to enabled; embeds can
+opt back in through their configuration.
 
 Known gaps **[PLANNED]**:
 
-- Uploaded files and full form data are not yet restored on back/forward (`TODO: Restore the data dictionary` in `history.py`); uploads live only in memory for the request that carried them.
+- Uploaded files are not restored on back/forward; uploads live only in memory for the request that carried them.
 - There is no per-tab session ID (e.g., in `sessionStorage`) to restore continuity after the user
   navigates away to another site and returns.
 - Rather than stuffing state into `pushState` entries, the intended design is a documentId model

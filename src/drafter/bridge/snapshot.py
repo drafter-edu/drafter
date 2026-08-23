@@ -28,6 +28,19 @@ from drafter.router.parameters.conversion import CONVERTER_REGISTRY
 REFERENCE_KEY = "$drafter_ref"
 
 
+def encode_state_json(state: Any) -> str:
+    """Encode a state value as the snapshot JSON string.
+
+    Shared by the Save/Load feature and browser-history time travel, so a
+    state saved either way can be restored by deserialize_state_snapshot.
+
+    Raises:
+        Exception: Whatever ``json.dumps`` raises when the encoded state
+            still contains non-JSON data (callers report and fall back).
+    """
+    return json.dumps(encode_state_value(state))
+
+
 def encode_state_value(state: Any) -> Any:
     """Reduce a state value to plain JSON-ready data.
 
@@ -173,7 +186,7 @@ def serialize_state_snapshot(
         be reduced to simple data (an error is reported instead).
     """
     try:
-        state_json = json.dumps(encode_state_value(state))
+        state_json = encode_state_json(state)
     except Exception as e:
         report_bridge_error(
             "bridge.snapshot_encode_failed",

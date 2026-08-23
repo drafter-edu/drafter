@@ -55,6 +55,13 @@ class ClientServerConfiguration(BaseConfiguration):
         button_spinners: Whether pressed buttons show a loading spinner
             (and stop accepting clicks) until their request's response is
             committed.
+        browser_history: Whether Drafter navigation is mirrored into the
+            browser's history stack (making the back/forward buttons time
+            travel through the app). Disable for embedded instances — a
+            documentation page hosting live demos wants the back button to
+            leave the page, not rewind the demo, and an embedded app shares
+            its host page's history and URL. configure_instance() turns
+            this off automatically for multi-instance embeds.
         error_page_title: Custom heading for the built-in error page; ""
             uses the default ("Something Went Wrong").
         error_page_message: Custom friendly message for the error page; ""
@@ -105,6 +112,9 @@ class ClientServerConfiguration(BaseConfiguration):
     page_transition_duration: float = 0.5
     # Show a loading spinner on buttons while their request is processed
     button_spinners: bool = False
+    # Mirror navigation into the browser's history stack (back/forward
+    # buttons time travel); disabled for embedded instances
+    browser_history: bool = True
     # Custom heading for the error page ("" uses the default)
     error_page_title: str = ""
     # Custom friendly message for the error page ("" uses the default)
@@ -182,6 +192,7 @@ class ClientServerConfiguration(BaseConfiguration):
             "DRAFTER_PAGE_TRANSITION_DURATION", "page_transition_duration"
         )
         result.get_bool_if_exists("DRAFTER_BUTTON_SPINNERS", "button_spinners")
+        result.get_bool_if_exists("DRAFTER_BROWSER_HISTORY", "browser_history")
         result.get_string_if_exists("DRAFTER_ERROR_PAGE_TITLE", "error_page_title")
         result.get_string_if_exists("DRAFTER_ERROR_PAGE_MESSAGE", "error_page_message")
         result.get_bool_if_exists(
@@ -195,7 +206,8 @@ class ClientServerConfiguration(BaseConfiguration):
 
         Adds the "Client Server Configuration" group. Several flags are named
         for the opposite of their field: --production disables
-        `in_debug_mode`, and --no-frame disables `framed`. Other options
+        `in_debug_mode`, --no-frame disables `framed`, and
+        --no-browser-history disables `browser_history`. Other options
         include --theme, --subtle-debug-entry, --audit-logging,
         --external-pages, the --additional-*-content options,
         --use-shadow-dom, --root-element-id, and --newlines-to-br.
@@ -326,6 +338,15 @@ class ClientServerConfiguration(BaseConfiguration):
             ),
         )
         group.add_argument(
+            "--no-browser-history",
+            action="store_true",
+            help=(
+                "Do not mirror navigation into the browser's history stack "
+                "(the back/forward buttons then leave the page instead of "
+                "moving through the app)"
+            ),
+        )
+        group.add_argument(
             "--error-page-title",
             type=str,
             help="Custom heading shown on the error page",
@@ -346,8 +367,9 @@ class ClientServerConfiguration(BaseConfiguration):
     def parse_args(parsed_args: dict) -> dict:
         """Extract client server settings from parsed command line arguments.
 
-        Note the inversions: --production sets `in_debug_mode` to False, and
-        --no-frame sets `framed` to False. Repeatable options (external pages
+        Note the inversions: --production sets `in_debug_mode` to False,
+        --no-frame sets `framed` to False, and --no-browser-history sets
+        `browser_history` to False. Repeatable options (external pages
         and the additional content lists) arrive as lists, with each entry
         stripped of surrounding whitespace.
 
@@ -417,6 +439,8 @@ class ClientServerConfiguration(BaseConfiguration):
             result["page_transition_duration"] = parsed_args["page_transition_duration"]
         if parsed_args.get("button_spinners"):
             result["button_spinners"] = True
+        if parsed_args.get("no_browser_history"):
+            result["browser_history"] = False
         if parsed_args.get("error_page_title"):
             result["error_page_title"] = parsed_args["error_page_title"]
         if parsed_args.get("error_page_message"):
@@ -462,6 +486,7 @@ class ClientServerConfiguration(BaseConfiguration):
             "page_transition": self.page_transition,
             "page_transition_duration": self.page_transition_duration,
             "button_spinners": self.button_spinners,
+            "browser_history": self.browser_history,
             "error_page_title": self.error_page_title,
             "error_page_message": self.error_page_message,
             "error_page_show_details": self.error_page_show_details,
@@ -500,6 +525,7 @@ class ClientServerConfiguration(BaseConfiguration):
             page_transition=self.page_transition,
             page_transition_duration=self.page_transition_duration,
             button_spinners=self.button_spinners,
+            browser_history=self.browser_history,
             error_page_title=self.error_page_title,
             error_page_message=self.error_page_message,
             error_page_show_details=self.error_page_show_details,
