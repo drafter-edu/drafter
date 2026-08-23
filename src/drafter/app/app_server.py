@@ -436,9 +436,6 @@ def serve_app_once(
             return
     app = make_app(system, server, initial_state, user_source=user_source)
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
     # Background watcher task (never started when the reloader is disabled)
     async def supervisor():
         watcher = None
@@ -463,7 +460,7 @@ def serve_app_once(
             server = uvicorn.Server(uvicorn_config)
             if system.app_server.open_browser:
                 # Delay a touch to let server bind
-                loop.call_later(
+                asyncio.get_running_loop().call_later(
                     0.8,
                     lambda: webbrowser.open(
                         f"http://{system.app_server.host}:{system.app_server.port}/"
@@ -478,5 +475,3 @@ def serve_app_once(
         asyncio.run(supervisor())
     except KeyboardInterrupt:
         pass
-    finally:
-        loop.close()
