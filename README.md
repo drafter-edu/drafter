@@ -108,7 +108,9 @@ All flags below work with the `drafter` command (and `python -m drafter`). Flags
 | `--load-packages-automatically` | on                            | Automatically load Python packages detected in the student's code, in addition to `--system-packages` / `--project-packages`.                                    |
 | `--system-packages LIST`        | `bakery;pillow`               | Semicolon-separated system packages to load in the browser engine (matplotlib is installed on demand when imported or when `MatPlotLibPlot` is used).            |
 | `--project-packages LIST`       | (none)                        | Semicolon-separated project-specific packages to load.                                                                                                           |
-| `--pyodide-url URL`             | jsDelivr CDN (`v0.29.0/full`) | Custom URL to load Pyodide from.                                                                                                                                 |
+| `--pyodide-url URL`             | `https://cdn.jsdelivr.net/pyodide` | Base URL to load Pyodide from; the version and branch are appended.                                                                                        |
+| `--pyodide-version VERSION`     | `v314.0.5`                    | Pyodide version to load (e.g. `v314.0.5` or `dev`).                                                                                                              |
+| `--pyodide-branch BRANCH`       | `full`                        | Pyodide distribution branch: `full` or `debug`.                                                                                                                  |
 | `--pyodide-drafter-path PATH`   | (none)                        | Custom path/URL to the Drafter Pyodide package wheel.                                                                                                            |
 
 ### Site rendering and debugging

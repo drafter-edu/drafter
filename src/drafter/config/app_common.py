@@ -22,9 +22,18 @@ DEFAULT_SYSTEM_PACKAGES = ["bakery", "pillow"]
 Matplotlib is intentionally not preloaded; it is installed on demand when
 student code imports it or uses the `MatPlotLibPlot` component."""
 
-# "https://cdn.jsdelivr.net/pyodide/v0.29.0/debug/"
-DEFAULT_PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/"
-"""Default CDN URL that Pyodide is loaded from."""
+DEFAULT_PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide"
+"""Default base CDN URL that Pyodide is loaded from (without version/branch)."""
+
+DEFAULT_PYODIDE_VERSION = "v314.0.5"
+"""Default Pyodide version segment of the URL (e.g. "v314.0.5" or "dev")."""
+
+PyodideBranch = Literal["full", "debug"]
+"""Type alias for the Pyodide distribution branch: "full" (minified,
+production) or "debug" (unminified, with source maps)."""
+
+DEFAULT_PYODIDE_BRANCH: PyodideBranch = "full"
+"""Default Pyodide distribution branch."""
 
 
 @dataclass
@@ -47,7 +56,11 @@ class AppCommonConfiguration(BaseConfiguration):
         system_packages: List of system packages to load.
         project_packages: List of project-specific packages to load.
         pyodide_drafter_path: Optional custom path to the Drafter Pyodide package. If building from local, this is the relative path to the file (to be used as a URL). If using a CDN, this will be the full path to the wheel on PyPi or other CDN.
-        pyodide_url: URL to load Pyodide from.
+        pyodide_url: Base URL to load Pyodide from (e.g. the jsDelivr CDN root).
+            The version and branch are appended to this; see `get_pyodide_url`.
+        pyodide_version: Pyodide version segment of the URL, such as
+            "v314.0.5" or "dev".
+        pyodide_branch: Pyodide distribution branch, "full" (default) or "debug".
 
     """
 
@@ -64,6 +77,8 @@ class AppCommonConfiguration(BaseConfiguration):
     project_packages: list[str] | None = None
     pyodide_drafter_path: str | None = None
     pyodide_url: str | None = DEFAULT_PYODIDE_URL
+    pyodide_version: str | None = DEFAULT_PYODIDE_VERSION
+    pyodide_branch: PyodideBranch | None = DEFAULT_PYODIDE_BRANCH
 
     override_asset_url: bool | str = False
 
@@ -76,6 +91,29 @@ class AppCommonConfiguration(BaseConfiguration):
         # initialize defaults after construction instead of using a list default.
         if self.system_packages is None:
             self.system_packages = list(DEFAULT_SYSTEM_PACKAGES)
+        if self.pyodide_branch is not None and self.pyodide_branch not in (
+            "full",
+            "debug",
+        ):
+            raise ValueError(
+                f"pyodide_branch must be 'full' or 'debug', not {self.pyodide_branch!r}"
+            )
+
+    def get_pyodide_url(self) -> str:
+        """Compose the full URL that Pyodide is loaded from.
+
+        Joins `pyodide_url` (base), `pyodide_version`, and `pyodide_branch`
+        with slashes, falling back to the defaults for any that are unset and
+        ignoring duplicate slashes at the joins.
+
+        Returns:
+            The full Pyodide URL, e.g.
+            "https://cdn.jsdelivr.net/pyodide/v314.0.5/full".
+        """
+        base = (self.pyodide_url or DEFAULT_PYODIDE_URL).rstrip("/")
+        version = (self.pyodide_version or DEFAULT_PYODIDE_VERSION).strip("/")
+        branch = (self.pyodide_branch or DEFAULT_PYODIDE_BRANCH).strip("/")
+        return f"{base}/{version}/{branch}"
 
     @staticmethod
     def get_key() -> str:
@@ -92,7 +130,7 @@ class AppCommonConfiguration(BaseConfiguration):
 
         Reads the DRAFTER_-prefixed variables for the engine, prerendering,
         asset directory, filename display, local mounting, Pyodide Drafter
-        path, asset URL override, site title, favicon, automatic package
+        path, Pyodide URL/version/branch, asset URL override, site title, favicon, automatic package
         loading, and the semicolon-separated project/system package lists.
 
         Args:
@@ -114,6 +152,9 @@ class AppCommonConfiguration(BaseConfiguration):
         result.get_string_if_exists(
             "DRAFTER_PYODIDE_DRAFTER_PATH", "pyodide_drafter_path"
         )
+        result.get_string_if_exists("DRAFTER_PYODIDE_URL", "pyodide_url")
+        result.get_string_if_exists("DRAFTER_PYODIDE_VERSION", "pyodide_version")
+        result.get_string_if_exists("DRAFTER_PYODIDE_BRANCH", "pyodide_branch")
         result.get_string_if_exists("DRAFTER_OVERRIDE_ASSET_URL", "override_asset_url")
         result.get_string_if_exists("DRAFTER_SITE_TITLE", "site_title")
         result.get_string_if_exists("DRAFTER_FAVICON", "favicon")
@@ -134,8 +175,8 @@ class AppCommonConfiguration(BaseConfiguration):
 
         Adds the "App Common Configuration" group with options such as
         --engine, --prerender-initial-page, --asset-directory, --site-title,
-        --project-packages, --system-packages, --pyodide-url, and
-        --pyodide-drafter-path.
+        --project-packages, --system-packages, --pyodide-url,
+        --pyodide-version, --pyodide-branch, and --pyodide-drafter-path.
 
         Args:
             parser: An argparse.ArgumentParser instance to extend.
@@ -206,7 +247,18 @@ class AppCommonConfiguration(BaseConfiguration):
         group.add_argument(
             "--pyodide-url",
             type=str,
-            help=f"Custom URL for loading Pyodide (default: '{DEFAULT_PYODIDE_URL}')",
+            help=f"Base URL for loading Pyodide; the version and branch are appended (default: '{DEFAULT_PYODIDE_URL}')",
+        )
+        group.add_argument(
+            "--pyodide-version",
+            type=str,
+            help=f"Pyodide version to load, e.g. 'v314.0.5' or 'dev' (default: '{DEFAULT_PYODIDE_VERSION}')",
+        )
+        group.add_argument(
+            "--pyodide-branch",
+            type=str,
+            choices=["full", "debug"],
+            help=f"Pyodide distribution branch: 'full' or 'debug' (default: '{DEFAULT_PYODIDE_BRANCH}')",
         )
 
         group.add_argument(
@@ -254,6 +306,10 @@ class AppCommonConfiguration(BaseConfiguration):
             result["system_packages"] = parsed_args["system_packages"].split(";")
         if parsed_args.get("pyodide_url"):
             result["pyodide_url"] = parsed_args["pyodide_url"]
+        if parsed_args.get("pyodide_version"):
+            result["pyodide_version"] = parsed_args["pyodide_version"]
+        if parsed_args.get("pyodide_branch"):
+            result["pyodide_branch"] = parsed_args["pyodide_branch"]
         if parsed_args.get("pyodide_drafter_path"):
             result["pyodide_drafter_path"] = parsed_args["pyodide_drafter_path"]
         return result

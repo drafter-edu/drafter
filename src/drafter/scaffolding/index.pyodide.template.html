@@ -1,6 +1,6 @@
 {% extends "index.base.template.html" %}
 {% block scripts %}
-  <script src="{{ system.app_common.pyodide_url | tojson }}/pyodide.js"></script>
+  <script src="{{ system.app_common.get_pyodide_url() }}/pyodide.js"></script>
   <script src="{{ static('js/drafter.pyodide.js') }}"></script>
 {% endblock scripts %}
 {% block initialization %}
@@ -36,7 +36,7 @@
             loadPackagesAutomatically: {{ system.app_common.load_packages_automatically | tojson }},
             explicitPackageList: {{ system.app_common.project_packages | tojson }},
             bootSettings: {
-              pyodideUrl: absolute({{ system.app_common.pyodide_url | tojson }}),
+              pyodideUrl: absolute({{ system.app_common.get_pyodide_url() | tojson }}),
               systemPackages: {{ system.app_common.system_packages | tojson }},
               drafterPath: drafterPath && !drafterPath.startsWith("drafter") ? absolute(drafterPath) : drafterPath,
               mountDrafterLocally: {{ system.app_common.mount_drafter_locally | tojson }},
@@ -55,7 +55,7 @@
       {% endif %}
       // 1) Load Pyodide
       await window.Drafter.setupPyodide({
-        pyodideUrl: {{ system.app_common.pyodide_url | tojson }},
+        pyodideUrl: {{ system.app_common.get_pyodide_url() | tojson }},
         systemPackages: {{ system.app_common.system_packages | tojson }},
       }, {{ system.bootstrap.verbose | tojson }});
 

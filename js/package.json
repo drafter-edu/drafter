@@ -69,7 +69,7 @@
 		"leaflet": "^1.9.4",
 		"lit": "^3.3.1",
 		"parse5": "^8.0.1",
-		"pyodide": "^0.29.0",
+		"pyodide": "^314.0.5",
 		"string-diff-viewer": "^0.4.4"
 	},
 	"browserslist": [

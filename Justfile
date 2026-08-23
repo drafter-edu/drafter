@@ -51,6 +51,9 @@ test-js:
 test-js-integration:
     cd js && npm run test:integration
 
+watch-js:
+    cd js && npm run watch
+
 # Run Python tests
 test-py:
     uv run pytest --verbose --color=yes tests

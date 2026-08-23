@@ -37,6 +37,9 @@ def start_server(
     open_browser: bool | None = None,
     inline_py: bool | None = None,
     use_reloader: bool | None = None,
+    pyodide_url: str | None = None,
+    pyodide_version: str | None = None,
+    pyodide_branch: str | None = None,
     # Aliases for compatibility with older versions
     reloader: bool | None = None,
     # Unused parameters that we want to keep for compatibility but not actually use
@@ -79,6 +82,9 @@ def start_server(
         open_browser: Auto-open browser in dev mode.
         inline_py: Inline code in HTML vs. load via HTTP.
         use_reloader: Enable file watcher and auto-reload.
+        pyodide_url: Base URL to load Pyodide from (default: jsDelivr CDN).
+        pyodide_version: Pyodide version segment, e.g. "v314.0.5" or "dev".
+        pyodide_branch: Pyodide distribution branch, "full" or "debug".
         reloader: Deprecated alias for `use_reloader`, kept for
             compatibility with older versions; used only when
             `use_reloader` is not given.
@@ -134,6 +140,12 @@ def start_server(
         parameters["use_reloader"] = reloader
     elif use_reloader is not None:
         parameters["use_reloader"] = use_reloader
+    if pyodide_url is not None:
+        parameters["pyodide_url"] = pyodide_url
+    if pyodide_version is not None:
+        parameters["pyodide_version"] = pyodide_version
+    if pyodide_branch is not None:
+        parameters["pyodide_branch"] = pyodide_branch
     # Handle deprecated parameters that are no longer used but we want to keep for compatibility
     if cdn_skulpt is not None:
         print("Warning: 'cdn_skulpt' parameter is no longer used and will be ignored.")

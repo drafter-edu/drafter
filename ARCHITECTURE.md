@@ -847,7 +847,9 @@ Here are the parts of Drafter that have to be hosted:
   `skulpt-drafter.js` (the Skulpt-precompiled Drafter Python, produced by `npm run precompile`,
   which already includes `--minify`).
 - **Pyodide**: not vendored. Pyodide core is loaded from a CDN by default
-  (`DEFAULT_PYODIDE_URL`, currently jsdelivr; overridable via `pyodide_url`/`--pyodide-url`), and
+  (`DEFAULT_PYODIDE_URL` base + `pyodide_version` + `pyodide_branch`, composed by
+  `AppCommonConfiguration.get_pyodide_url()`; overridable via `--pyodide-url`,
+  `--pyodide-version`, `--pyodide-branch` or the matching `DRAFTER_PYODIDE_*` env vars), and
   the Pyodide-compiled Drafter ships as `drafter-pyodide.zip`, via PyPI/micropip, or via CDN
   depending on `pyodide_package_style`.
 - **Precompiled headers/body**: the pre-rendered initial page content (see The First Page). These
