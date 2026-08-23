@@ -169,9 +169,10 @@ class Router:
         }
 
     def reset(self) -> None:
-        """Reset router state (currently a no-op).
+        """Reset router state. Note that this does not remove routes or signatures,
+        because those are meant to survive server resets.
 
-        Does not remove routes or signatures.
+        Currently, this method is a no-op.
         """
 
     def clear(self) -> None:
