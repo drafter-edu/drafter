@@ -14,7 +14,9 @@ def index(state: State) -> Page:
         state,
         [
             "Your current balance is:",
-            state.balance,
+            # A dict is not valid page content (plain numbers and strings
+            # are), so this render fails on purpose.
+            {"balance": state.balance},
             Button("Withdraw", start_withdraw),
             # Button("Deposit", start_deposit)
         ],

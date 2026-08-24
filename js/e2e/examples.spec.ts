@@ -45,6 +45,12 @@ const SKIP_EXAMPLES = [
 	// Calls unittest.main() at module level, which sys.exit()s the runner.
 	"unittest_full_state.py",
 	"testing_example.py",
+	// Imports pilgram at module level (a micropip install) while turning
+	// automatic package loading off, so the harness cannot satisfy it.
+	"pilgram_test.py",
+	// Registers files/site_style.css etc. from a sibling directory; the
+	// harness writes a single main.py per run, so the files do not exist.
+	"website_files.py",
 ];
 const INTENTIONAL_ERROR_EXAMPLES = [
 	"error_non_string_page.py",
@@ -105,7 +111,8 @@ async function runInPage(
 				// is a more precise signal than scanning the text for "error" (the
 				// form text includes the debug menubar and any page copy that
 				// legitimately uses the word, e.g. custom_error_page.py).
-				const errorPage = formBody?.querySelector(".error-page") ?? null;
+				const errorPage =
+					formBody?.querySelector(".error-page") ?? null;
 				const formText = formBody?.textContent ?? "";
 				if (!presentErrors) {
 					if (!debugPanel) {

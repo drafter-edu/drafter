@@ -51,6 +51,9 @@ test-js:
 test-js-integration:
     cd js && npm run test:integration
 
+test-e2e:
+    cd js && npm run test:e2e
+
 watch-js:
     cd js && npm run watch
 
@@ -59,7 +62,7 @@ test-py:
     uv run pytest --verbose --color=yes tests
 
 # Run all tests
-test: test-js test-js-integration test-py
+test: test-js test-js-integration test-py test-e2e
 
 # Build JS assets into js/dist (needed by the compiler, docs, and packaging)
 build-js:

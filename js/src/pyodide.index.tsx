@@ -217,6 +217,26 @@ export function interruptActiveRun() {
 }
 
 let interruptEscalationTimer: ReturnType<typeof setTimeout> | null = null;
+// Number of student runs whose runPythonAsync has not settled yet.
+let activeStudentRuns = 0;
+
+/**
+ * A stop-signal that was consumed by the interpreter but never raised into a
+ * running coroutine stays "tripped" inside Python's signal machinery and is
+ * raised as KeyboardInterrupt by whatever Python runs next, which would kill
+ * the cancel snippet or an unrelated run at compile time. Run a no-op to
+ * absorb it first. Never throws.
+ */
+async function drainPendingInterrupt(pyodide: any): Promise<void> {
+	try {
+		await pyodide.runPythonAsync("pass");
+	} catch (error) {
+		console.debug(
+			"[Drafter AppServer Scaffolding] Absorbed a pending interrupt:",
+			error,
+		);
+	}
+}
 
 /**
  * The interrupt signal is only checked while Python bytecode is executing.
@@ -226,11 +246,17 @@ let interruptEscalationTimer: ReturnType<typeof setTimeout> | null = null;
  * Python ever runs again — so the signal sits unconsumed forever, the run's
  * promise never settles, and the runtime work queue is bricked behind it.
  *
- * Escalation closes that race: if the signal is still unconsumed after a
- * grace period (proof the loop went idle instead of raising into the run),
- * clear it and cancel the orphaned tasks directly so the run settles with
- * CancelledError. Callers treating "interrupted" should accept both
- * KeyboardInterrupt and CancelledError.
+ * Since Pyodide 314 there is a second shape of the same failure: the signal
+ * IS consumed (the buffer resets to 0) but the resulting KeyboardInterrupt is
+ * never delivered into a coroutine that is only ever resumed by event-loop
+ * timer callbacks — it stays pending until the next runPythonAsync call.
+ * The run keeps spinning and its promise never settles.
+ *
+ * Escalation closes both races: if, after a grace period, the signal is
+ * still unconsumed OR a student run is still active, drain any pending
+ * KeyboardInterrupt and cancel the orphaned tasks directly so the run
+ * settles with CancelledError. Callers treating "interrupted" should accept
+ * both KeyboardInterrupt and CancelledError.
  */
 function scheduleInterruptEscalation(buffer: Int32Array, pyodide: any) {
 	if (interruptEscalationTimer !== null) {
@@ -238,27 +264,32 @@ function scheduleInterruptEscalation(buffer: Int32Array, pyodide: any) {
 	}
 	interruptEscalationTimer = setTimeout(() => {
 		interruptEscalationTimer = null;
-		if (Atomics.load(buffer, 0) !== 2) {
-			// Consumed: the normal interrupt path delivered KeyboardInterrupt.
+		const unconsumed = Atomics.load(buffer, 0) === 2;
+		if (!unconsumed && activeStudentRuns === 0) {
+			// Consumed and the run settled: the normal interrupt path
+			// delivered KeyboardInterrupt.
 			return;
 		}
 		// Clear the signal first so the cancel snippet below (and the next
 		// legitimate run) is not itself killed at compile time.
 		Atomics.store(buffer, 0, 0);
-		pyodide
-			.runPythonAsync(
-				[
-					"import asyncio",
-					"for _drafter_task in asyncio.all_tasks() - {asyncio.current_task()}:",
-					"    _drafter_task.cancel()",
-				].join("\n"),
-			)
-			.catch((error: unknown) => {
+		void (async () => {
+			try {
+				await drainPendingInterrupt(pyodide);
+				await pyodide.runPythonAsync(
+					[
+						"import asyncio",
+						"for _drafter_task in asyncio.all_tasks() - {asyncio.current_task()}:",
+						"    _drafter_task.cancel()",
+					].join("\n"),
+				);
+			} catch (error) {
 				console.warn(
 					"[Drafter AppServer Scaffolding] Interrupt escalation failed:",
 					error,
 				);
-			});
+			}
+		})();
 	}, 1000);
 }
 
@@ -970,6 +1001,10 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 	if (isConfiguredInstance) {
 		runOptions.globals = pyodide.toPy({ __name__: "__main__" });
 	}
+	// A stop-signal consumed by the interpreter but never delivered (see
+	// scheduleInterruptEscalation) would otherwise be raised into this run.
+	await drainPendingInterrupt(pyodide);
+	activeStudentRuns += 1;
 	try {
 		const result = await pyodide.runPythonAsync(codeToRun, runOptions);
 		return result;
@@ -992,6 +1027,8 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 			targetDocument: options.targetWindow?.document,
 			rootElementId: options.rootElementId,
 		});
+	} finally {
+		activeStudentRuns -= 1;
 	}
 }
 
