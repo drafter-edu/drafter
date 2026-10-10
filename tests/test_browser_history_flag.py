@@ -106,6 +106,7 @@ class TestNavigationGating:
     def make_navigator(self, enabled):
         navigator = NavigationController(MagicMock())
         navigator.history = MagicMock()
+        navigator.history.initial_route_from_url.return_value = None
         navigator.browser_history_enabled = enabled
         dispatched = []
         navigator.set_navigation_func(

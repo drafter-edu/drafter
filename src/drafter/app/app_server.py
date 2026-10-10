@@ -13,7 +13,13 @@ from pathlib import Path
 
 import uvicorn
 from starlette.applications import Starlette
-from starlette.responses import HTMLResponse, JSONResponse, Response
+from starlette.responses import (
+    HTMLResponse,
+    JSONResponse,
+    PlainTextResponse,
+    RedirectResponse,
+    Response,
+)
 from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 
@@ -39,7 +45,64 @@ from drafter.configuration import get_system_config_modifications
 from drafter.data.errors import StudentFacingError
 from drafter.scaffolding.templating import render_index_html
 from drafter.scaffolding.utils import pkg_assets_dir
+from drafter.site.deep_links import build_deep_link_url
 from drafter.version import CURRENT_DRAFTER_VERSION
+
+
+def deep_link_target(path: str, query_string: str = "") -> str | None:
+    """Decide where a request for an unknown path should go.
+
+    Mirrors the deployed site's `404.html`: a path without a file extension
+    (`/--about`, `/guess`) names a route, so the visitor is sent to the index
+    page with that route in its `route` query parameter. A path whose last
+    segment has an extension (`/pets.csv`, `/missing.png`) names a file, and
+    stays a real 404 so fetches and Pyodide's module probes see the failure.
+    Drafter's own reserved paths are never treated as routes.
+
+    Args:
+        path: The requested URL path, with its leading slash.
+        query_string: The request's query string without the leading `?`.
+
+    Returns:
+        The redirect URL (such as `/?route=--about`), or None when the path
+        should remain a 404.
+
+    Example:
+        ```python
+        deep_link_target("/--about")  # '/?route=--about'
+        deep_link_target("/pets.csv")  # None
+        ```
+    """
+    route = path.strip("/")
+    if not route:
+        return None
+    if route.split("/", 1)[0] in INTERNAL_ROUTES.values():
+        return None
+    if "." in route.rsplit("/", 1)[-1]:
+        return None
+    return build_deep_link_url(route, query_string)
+
+
+async def not_found(req, exc: Exception) -> Response:
+    """Serve 404s for the development server, redirecting route-like paths.
+
+    Installed as the application's handler for status 404 (both unmatched
+    routes and files missing from the user directory), so that visiting
+    `http://localhost:8080/--about` opens the About page the same way the
+    deployed site's `404.html` does.
+
+    Args:
+        req: Starlette request object for the missing path.
+        exc: The HTTPException that produced the 404 (unused).
+
+    Returns:
+        A temporary redirect to the index page for route-like paths, or a
+        plain 404 response for file-like and reserved paths.
+    """
+    target = deep_link_target(req.url.path, req.url.query)
+    if target is None:
+        return PlainTextResponse("Not Found", status_code=404)
+    return RedirectResponse(url=target, status_code=302)
 
 
 async def index(req) -> Response:
@@ -329,8 +392,9 @@ def make_app(
         compiled_body, compiled_headers = server.precompile_server(initial_state)
     else:
         compiled_body, compiled_headers = "", ""
-    # Create app and assign state
-    app = Starlette(routes=routes)
+    # Create app and assign state. Unknown route-like paths (e.g. /--about)
+    # redirect into the index page's ?route= form; see not_found.
+    app = Starlette(routes=routes, exception_handlers={404: not_found})
     app.state.system = system
     app.state.user_directory = user_directory
     app.state.user_path = user_path

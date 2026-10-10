@@ -136,6 +136,12 @@ The URL looks like `https://your-username.github.io/your-repository/`.
 That is your site's address. Share that one, not the `github.com`
 repository link and not any `localhost` address.
 
+While you are checking, add `--about` to the end of that address, like
+`https://your-username.github.io/your-repository/--about`. That opens
+the about page you filled in with `set_site_information(...)`, so you
+can confirm the author, description, and links all look right. Courses
+often ask for exactly this link.
+
 **Does everything work, on both devices?** Then congratulations: you
 built a piece of software and published it on the web, where anyone on
 Earth can use it. That is not a small thing. Save the URL somewhere you

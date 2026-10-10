@@ -19,7 +19,57 @@ from drafter.config.urls import INTERNAL_FILES, determine_assets_url
 from drafter.configuration import get_system_config_modifications
 from drafter.scaffolding.templating import render_index_html
 from drafter.scaffolding.utils import pkg_assets_dir, pkg_package_root, pkg_root
+from drafter.site.deep_links import DEPLOYED_404_TEMPLATE_HTML
 from drafter.version import CURRENT_DRAFTER_VERSION
+
+CREATE_404_OPTIONS = ("always", "never", "if_missing")
+"""Accepted values of the `create_404` builder setting: always write the
+deep-link `404.html`, never write it, or write it only when the output
+directory has none yet (the default, which leaves a hand-made page alone)."""
+
+NOT_FOUND_FILENAME = "404.html"
+"""Name of the not-found page GitHub Pages serves for paths that are not
+real files; the builder fills it with the deep-link redirect."""
+
+
+def write_404_page(
+    output_directory: Path, create_404: str, verbose: bool = False
+) -> Path | None:
+    """Write the deep-link `404.html` into the built site when configured.
+
+    GitHub Pages serves `404.html` for any path that is not a real file, so
+    this page is what turns `https://user.github.io/repo/--about` into the
+    index page opened on the `--about` route.
+
+    Args:
+        output_directory: Root of the built site, next to `index.html`.
+        create_404: One of `CREATE_404_OPTIONS`: `"always"` overwrites any
+            existing page, `"never"` writes nothing, and `"if_missing"`
+            writes the page only when the directory has no `404.html`.
+        verbose: Whether to print where the page was written.
+
+    Returns:
+        The path of the written page, or None when nothing was written.
+
+    Raises:
+        ValueError: If `create_404` is not one of `CREATE_404_OPTIONS`.
+    """
+    if create_404 not in CREATE_404_OPTIONS:
+        raise ValueError(
+            f"create_404 must be one of {', '.join(CREATE_404_OPTIONS)!s}; "
+            f"got {create_404!r}."
+        )
+    not_found_path = output_directory / NOT_FOUND_FILENAME
+    if create_404 == "never":
+        return None
+    if create_404 == "if_missing" and not_found_path.exists():
+        if verbose:
+            print(f"Keeping existing {not_found_path}")
+        return None
+    not_found_path.write_text(DEPLOYED_404_TEMPLATE_HTML, encoding="utf-8")
+    if verbose:
+        print(f"Not-found page written to {not_found_path}")
+    return not_found_path
 
 
 def build_zip(
@@ -222,6 +272,12 @@ def compile_site(
     main_output_path.write_text(true_page, encoding="utf-8")
     if system.bootstrap.verbose:
         print(f"Main page written to {main_output_path}")
+
+    # The not-found page lets a deployed site open directly on a route
+    # (e.g. /repo/--about) by redirecting into index.html's ?route= form.
+    write_404_page(
+        output_directory, system.app_builder.create_404, system.bootstrap.verbose
+    )
 
     # Copy over all assets to the output directory
     src_assets_dir = (

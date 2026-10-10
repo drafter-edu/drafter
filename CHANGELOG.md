@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-10-10
+
+- Fixed the `--about` pages and `create_404` settings
+
 ## [2.1.0] - 2026-08-23
 
 - New `add_website_css_file(path)` and `add_website_js_file(path)` link a stylesheet or script into every page, from a file next to the student's program or a full URL, alongside `add_website_js(code)` for inline JavaScript (matching `add_website_css`). New `add_website_file(*filenames)` declares other files the site needs (data files, images, fonts). Files next to the program are validated as soon as the call runs: a missing file raises a student-facing error that names the folder searched and suggests similarly named files (a capitalization slip, a different extension, a typo, or the same name in a subfolder); absolute paths, `..` paths, wrong extensions, and CSS/JS code passed where a file name was expected get their own explanations. `add_website_css`/`add_website_js` now catch a bare file name or URL passed as "code" and point at the `_file` variant. Registered files ship with `--compile` builds automatically, next to `index.html`. Also available as the `additional_css_files`, `additional_js_files`, and `additional_files` settings (`--additional-css-files`, `--additional-js-files`, `--additional-files` flags; `DRAFTER_ADDITIONAL_*` environment variables). Absolute URLs given to `additional_css_content` are no longer mangled by the assets-folder remapping, and external scripts (`additional_script_content`) are now actually loaded with `<script src>` tags. The client bridge now handles the replayed `site_title` and content-list configuration events instead of reporting "Unhandled configuration update event"; content added after `start_server()` is injected into the running page.

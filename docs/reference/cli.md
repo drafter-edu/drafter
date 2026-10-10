@@ -74,6 +74,7 @@ journey.
 | `--additional-files PATH` | none | Same idea as `--additional-paths`, but through the site configuration: the flag version of `add_website_file(...)`. Repeat once per file. |
 | `--additional-css-files PATH_OR_URL` | none | Link a stylesheet (a `.css` file next to your program, or a URL) into every page; the flag version of `add_website_css_file(...)`. Repeat once per entry. |
 | `--additional-js-files PATH_OR_URL` | none | Load a script (a `.js` file next to your program, or a URL) on every page; the flag version of `add_website_js_file(...)`. Repeat once per entry. |
+| `--create-404 MODE` | `if_missing` | Whether to write a `404.html` next to `index.html`. That page is what lets a visitor open your deployed site directly on a route, such as your address plus `--about`. `if_missing` leaves a `404.html` you made yourself alone; `always` overwrites it; `never` skips it. |
 | `--zip-output` | off | Zip the built site, convenient for uploading. |
 
 ## Libraries

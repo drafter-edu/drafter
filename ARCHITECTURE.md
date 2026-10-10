@@ -374,7 +374,8 @@ configuration, and `cli.py` basically just runs the student's file. (The old `do
          passed to the template as `modified_system`).
       7. The True Page executes the student's code (go to Initialization).
    3. If we're in `compile_site` mode:
-      1. `compile_site` generates the static site files, including the pre-rendered initial page.
+      1. `compile_site` generates the static site files, including the pre-rendered initial page
+         and (by default) the deep-link `404.html` described under History and Navigation.
       2. The generated files can be deployed to any static hosting service.
       3. When a user visits the site, steps 4.2.5–4.2.7 happen the same way (minus the WebSocket).
 5. Initialization Phase (now inside Skulpt/Pyodide)
@@ -467,6 +468,20 @@ then converts the entry back into a `Request("back", url, kwargs, ...)` replayed
 visit flow — re-running the route against its original input state reproduces the original page
 (time travel). The initial page load stamps the startup state onto the browser's original entry via
 `replaceState` (`record_initial_state`), so backing to the start restores the initial state.
+
+The same `?route=` parameter doubles as the **deep link** format (`src/drafter/site/deep_links.py`):
+the initial request (`do_initial_request`) opens the route named in the page's URL instead of the
+index, and stamps that route onto the original entry so backing to the start returns to it. A
+deployed site is a single `index.html`, so `https://user.github.io/repo/--about` is a missing file
+there; the static builder writes a `404.html` (`DEPLOYED_404_TEMPLATE_HTML`, controlled by the
+`create_404` builder setting) that GitHub Pages serves for such paths and that redirects to
+`/repo/?route=--about`. The development server mirrors this with a 404 handler (`not_found` in
+`app/app_server.py`) that redirects extension-less paths the same way while leaving missing files as
+real 404s (Pyodide probes for modules as `.py` files relative to the page). Embedded instances with
+browser history disabled never read the URL, since it belongs to the host page. Tearing an instance
+down (`NavigationController.teardown`, run before an editor-driven re-run) strips the `?route=` it
+left behind, so the successor starts at its index rather than deep-linking into the dead instance's
+last route.
 Snapshots that cannot be captured (unencodable or oversized states) or restored (state class changed
 shape) degrade to replaying against the current state, with a bridge warning. State history itself
 is also kept in memory on the server side in `SiteState` (`current`, `history`, `initial`).

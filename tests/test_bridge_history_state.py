@@ -333,10 +333,11 @@ class TestTimeTravelRoundTrip:
         box = StateBox(GameState(score=0, name="Ada"))
         navigator, timeline = make_navigator(box)
         navigator.history = MagicMock()
+        navigator.history.initial_route_from_url.return_value = None
 
         navigator.do_initial_request()
 
-        navigator.history.record_initial_state.assert_called_once()
+        navigator.history.record_initial_state.assert_called_once_with("index")
         assert timeline[-1][1].url == "index"
         # The initial request itself is never pushed onto the stack.
         navigator.history.add_to_history.assert_not_called()

@@ -105,8 +105,28 @@ class NavigationController:
         run's routes and start_server attach to it) and re-render the dead
         instance's page into the live root. After teardown, navigate and
         handle_popstate drop their requests instead.
+
+        The page's URL is also cleared of the `route` parameter this
+        instance's navigation left behind, so a successor started in the
+        same page opens at its index rather than deep-linking into the dead
+        instance's last route. Embedded instances with browser history
+        disabled never touched the URL, so nothing is cleared for them.
         """
         self.torn_down = True
+        if not self.browser_history_enabled:
+            return
+        try:
+            self.history.clear_route_from_url()
+        except Exception as e:
+            report_bridge_warning(
+                "bridge.teardown_url_cleanup_failed",
+                "Could not remove the route from the page's URL while "
+                "shutting down the previous instance",
+                "bridge.navigation.teardown",
+                f"Exception: {repr(e)}",
+                exception=e,
+                phase="setup",
+            )
 
     def set_navigation_func(self, func: Callable[[Request], Response]) -> None:
         """Install the callback used to perform visits.
@@ -223,21 +243,30 @@ class NavigationController:
         return self.navigate(request, remember)
 
     def do_initial_request(self):
-        """Issue the initial "page_load" request for the index route.
+        """Issue the initial "page_load" request.
+
+        The request visits the index route unless the page's URL names
+        another route in its `route` query parameter (a deep link such as
+        `/?route=--about`, which is also where a deployed site's `404.html`
+        sends paths like `/--about`).
 
         The initial request is not added to the browser history, since the
         browser already has an entry for the page itself; instead the
-        startup state is stamped onto that original entry (before the index
-        route runs and can mutate it), so backing all the way to the start
-        restores the app to how it began. When browser history is disabled,
-        the original entry is left completely untouched.
+        startup state (and the route opened) is stamped onto that original
+        entry before the route runs and can mutate the state, so backing all
+        the way to the start restores the app to how it began. When browser
+        history is disabled (embedded instances sharing their host page's
+        URL), the URL is not consulted and the original entry is left
+        completely untouched.
 
         Returns:
             The Response produced by the navigation function.
         """
+        route = "index"
         if self.browser_history_enabled:
-            self.history.record_initial_state()
-        initial_request = Request("page_load", "index", {}, {}, "")
+            route = self.history.initial_route_from_url() or "index"
+            self.history.record_initial_state(route)
+        initial_request = Request("page_load", route, {}, {}, "")
         return self.navigate(initial_request, remember=False)
 
     def handle_popstate(self, event: Any):

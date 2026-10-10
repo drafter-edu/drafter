@@ -22,6 +22,7 @@ from drafter.bridge.log import debug_log
 from drafter.bridge.runtime import RuntimeAdapter
 from drafter.bridge.snapshot import encode_state_json
 from drafter.data.request import Request
+from drafter.site.deep_links import ROUTE_QUERY_PARAM
 
 
 class BrowserHistory:
@@ -105,7 +106,7 @@ class BrowserHistory:
             return None
         return state_json
 
-    def record_initial_state(self) -> None:
+    def record_initial_state(self, route: str = "index") -> None:
         """Stamp the startup state onto the browser's original history entry.
 
         The initial page load is never pushed (the browser already has an
@@ -113,16 +114,54 @@ class BrowserHistory:
         the start would replay the index route against the accumulated
         current state. Replacing the original entry's state with a snapshot
         of the just-constructed startup state lets that final "back" restore
-        the app to how it began. Does nothing when the state cannot be
-        captured.
+        the app to how it began. The entry also remembers which route the
+        page opened on, so a deep-linked start (see `initial_route_from_url`)
+        comes back as that route rather than the index. Does nothing when
+        the state cannot be captured.
+
+        Args:
+            route: The route the initial page load visits.
         """
-        state_json = self._capture_state_json("index", None)
+        state_json = self._capture_state_json(route, None)
         if state_json is None:
             return
         self.runtime.history_replace_state(
-            {"state_json": state_json}, "", self._current_href()
+            {"state_json": state_json, "url": route}, "", self._current_href()
         )
-        debug_log("client.record_initial_state")
+        debug_log("client.record_initial_state", route)
+
+    def initial_route_from_url(self) -> str | None:
+        """Read the deep-linked route from the page's own URL, if any.
+
+        A visitor can open the site directly on a route through the `route`
+        query parameter (`/?route=--about`), which is also where the
+        deployed site's `404.html` sends paths like `/--about`.
+
+        Returns:
+            The route named by the query parameter, or None when the URL
+            carries no (or an empty) route parameter.
+        """
+        full_url = self.runtime.create_url(self._current_href())
+        route = full_url.searchParams.get(ROUTE_QUERY_PARAM)
+        if not route:
+            return None
+        return str(route)
+
+    def clear_route_from_url(self) -> None:
+        """Drop the `route` query parameter from the page's URL.
+
+        Called when an instance is torn down, so that a successor started in
+        the same page (an editor-driven re-run, or the next app in a test
+        harness) begins at its index instead of re-opening whatever route
+        the discarded instance last visited. Does nothing when the URL
+        carries no route parameter.
+        """
+        full_url = self.runtime.create_url(self._current_href())
+        if full_url.searchParams.get(ROUTE_QUERY_PARAM) is None:
+            return
+        full_url.searchParams.delete(ROUTE_QUERY_PARAM)
+        self.runtime.history_replace_state({}, "", full_url.toString())
+        debug_log("client.clear_route_from_url")
 
     def _current_href(self) -> str:
         """The href of the window this instance renders into (may be an iframe)."""
@@ -169,7 +208,7 @@ class BrowserHistory:
             state["state_json"] = state_json
         full_url = self.runtime.create_url(self._current_href())
         # js.document.title = f"{self.site_title} - {url}"
-        full_url.searchParams.set("route", url)
+        full_url.searchParams.set(ROUTE_QUERY_PARAM, url)
         self.runtime.history_push_state(state, "", full_url.toString())
         debug_log("client.add_to_history", state, request)
 
@@ -179,9 +218,11 @@ class BrowserHistory:
         If the event carries state with a request id (i.e. an entry this
         instance pushed), rebuilds a "back" Request for the stored route and
         kwargs and re-syncs the visible URL's ``route`` query parameter via
-        replaceState. Otherwise (no usable state, e.g. the original entry),
-        strips the ``route`` parameter and falls back to a "back" Request
-        for the index route.
+        replaceState. Otherwise (no request id, e.g. the browser's original
+        entry), replays the route that entry was stamped with by
+        `record_initial_state` (a deep-linked start), or, when the entry
+        carries no route at all, strips the ``route`` parameter and falls
+        back to a "back" Request for the index route.
 
         Restoring the entry's state snapshot is not done here: the
         NavigationController restores it before dispatching the returned
@@ -211,13 +252,35 @@ class BrowserHistory:
             debug_log("client.handle_popstate_with_state", request_id, url)
             # js.document.title = f"{self.site_title} - {url}"
             full_url = self.runtime.create_url(self._current_href())
-            full_url.searchParams.set("route", url)
+            full_url.searchParams.set(ROUTE_QUERY_PARAM, url)
             self.runtime.history_replace_state(event.state, "", full_url.toString())
             return Request("back", url, kwargs, {}, "", "")
-        else:
-            debug_log("client.handle_popstate_no_state_or_request_id", event)
-            # js.document.title = self.site_title
+        initial_route = self._stamped_initial_route(event)
+        if initial_route is not None:
+            debug_log("client.handle_popstate_initial_entry", initial_route)
             full_url = self.runtime.create_url(self._current_href())
-            full_url.searchParams.delete("route")
-            self.runtime.history_replace_state({}, "", full_url.toString())
-            return Request("back", "index", {}, {}, "", "")
+            full_url.searchParams.set(ROUTE_QUERY_PARAM, initial_route)
+            self.runtime.history_replace_state(event.state, "", full_url.toString())
+            return Request("back", initial_route, {}, {}, "", "")
+        debug_log("client.handle_popstate_no_state_or_request_id", event)
+        # js.document.title = self.site_title
+        full_url = self.runtime.create_url(self._current_href())
+        full_url.searchParams.delete(ROUTE_QUERY_PARAM)
+        self.runtime.history_replace_state({}, "", full_url.toString())
+        return Request("back", "index", {}, {}, "", "")
+
+    @staticmethod
+    def _stamped_initial_route(event: Any) -> str | None:
+        """The route `record_initial_state` stamped onto the original entry.
+
+        Returns:
+            The stamped route, or None when the event's entry has no state
+            or no route (an entry Drafter never stamped).
+        """
+        state = getattr(event, "state", None) if event is not None else None
+        if state is None:
+            return None
+        route = getattr(state, "url", None)
+        if not route:
+            return None
+        return str(route)
