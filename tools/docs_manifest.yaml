@@ -257,6 +257,13 @@ pages:
     audience: S
     priority: P0
     outcome: See the whole road from idea to deployed app.
+  - path: your-project/what-drafter-can-do.md
+    title: What Drafter can do
+    template: how-to
+    level: L2
+    audience: S
+    priority: P1
+    outcome: Discover features you have not met yet and find a project idea that excites you.
   - path: your-project/choose-an-idea.md
     title: Choose a manageable idea
     template: how-to
