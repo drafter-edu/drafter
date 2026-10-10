@@ -7757,6 +7757,11 @@ journey.</p>
 <td>Load a script (a <code>.js</code> file next to your program, or a URL) on every page; the flag version of <code>add_website_js_file(...)</code>. Repeat once per entry.</td>
 </tr>
 <tr>
+<td><code>--create-404 MODE</code></td>
+<td><code>if_missing</code></td>
+<td>Whether to write a <code>404.html</code> next to <code>index.html</code>. That page is what lets a visitor open your deployed site directly on a route, such as your address plus <code>--about</code>. <code>if_missing</code> leaves a <code>404.html</code> you made yourself alone; <code>always</code> overwrites it; <code>never</code> skips it.</td>
+</tr>
+<tr>
 <td><code>--zip-output</code></td>
 <td>off</td>
 <td>Zip the built site, convenient for uploading.</td>

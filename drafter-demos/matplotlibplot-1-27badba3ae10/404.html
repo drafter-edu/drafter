@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecting to the site</title>
+    <script>
+      // Drafter deep-link redirect for GitHub Pages project sites.
+      // GitHub serves this page for any path that is not a real file, such as
+      // https://user.github.io/repo/--about. The site itself lives in
+      // index.html, so the extra path is handed to it as a query parameter:
+      // https://user.github.io/repo/?route=--about
+      (function () {
+        // Project sites live one path segment below the domain (/repo/).
+        var pathSegmentsToKeep = 1;
+        var l = window.location;
+        var segments = l.pathname.split("/");
+        var base = segments.slice(0, 1 + pathSegmentsToKeep).join("/") + "/";
+        var route = segments.slice(1 + pathSegmentsToKeep).join("/");
+        var query = "?route=" + encodeURIComponent(route);
+        if (l.search) {
+          query += "&" + l.search.slice(1);
+        }
+        var target = l.protocol + "//" + l.host + base + query + l.hash;
+        if (target !== l.href) {
+          l.replace(target);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to the site...</p>
+  </body>
+</html>
