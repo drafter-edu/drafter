@@ -3,14 +3,17 @@
 The fence info line may carry optional parameters (on drafter blocks and
 plain code fences alike)::
 
-    ```python drafter hl_lines="2-4 7" height=300
+    ```python drafter hl_lines="2-4 7" height=300 source=collapsed
     ...
     ```
 
 ``hl_lines`` highlights the given lines/ranges in the rendered source block
 (via pymdownx.highlight) and ``height`` sets the embedded demo iframe's
 height, overriding the plugin's ``iframe_height`` option for that block
-(bare numbers are pixels; CSS lengths like ``20em`` also work).
+(bare numbers are pixels; CSS lengths like ``20em`` also work). ``source``
+controls how a demo's source block is presented: ``shown`` (the default),
+``collapsed`` (tucked into a closed "Show the code" block, via
+pymdownx.details), or ``hidden`` (only the demo is shown).
 """
 
 from __future__ import annotations
@@ -45,9 +48,15 @@ PARAM_RE = re.compile(r"""(?P<key>[A-Za-z_][\w-]*)=(?P<value>"[^"]*"|'[^']*'|\S+
 """Regular expression matching ``key=value`` parameters in a fence info string."""
 
 # Parameters the plugin understands on a fence info line, e.g.
-# ```python drafter hl_lines="2-4 7" height=300
-KNOWN_PARAMS = frozenset({"hl_lines", "height"})
+# ```python drafter hl_lines="2-4 7" height=300 source=collapsed
+KNOWN_PARAMS = frozenset({"hl_lines", "height", "source"})
 """Fence parameters handled by this plugin (all others pass through untouched)."""
+
+SOURCE_MODES = frozenset({"shown", "collapsed", "hidden"})
+"""Accepted values for the ``source`` fence parameter on drafter blocks."""
+
+COLLAPSED_SOURCE_TITLE = "Show the code"
+"""Summary label on the closed block wrapping a ``source=collapsed`` demo."""
 
 HL_LINES_TOKEN_RE = re.compile(r"^\d+(-\d+)?$")
 """A single hl_lines entry: a line number or an inclusive ``start-end`` range."""
@@ -147,15 +156,18 @@ class DrafterCodeBlockPlugin(BasePlugin):
 
             if not self._is_drafter_block(info):
                 if params:
-                    # Plain fences still get hl_lines support; height only
-                    # applies to demo iframes.
-                    if "height" in params:
-                        LOGGER.warning(
-                            "Ignoring height=%s on a non-drafter code block "
-                            "in %s; height only applies to embedded demos.",
-                            params["height"],
-                            page.file.src_uri,
-                        )
+                    # Plain fences still get hl_lines support; height and
+                    # source only apply to demos.
+                    for demo_only_param in ("height", "source"):
+                        if demo_only_param in params:
+                            LOGGER.warning(
+                                "Ignoring %s=%s on a non-drafter code block "
+                                "in %s; %s only applies to embedded demos.",
+                                demo_only_param,
+                                params[demo_only_param],
+                                page.file.src_uri,
+                                demo_only_param,
+                            )
                     return self._apply_block_params(info, code, params)
                 return match.group(0)
 
@@ -184,10 +196,13 @@ class DrafterCodeBlockPlugin(BasePlugin):
                 )
                 return f"{match.group(0)}{failure}"
 
-            if self.config["show_source"]:
-                source_block = self._build_source_block(info, code, params)
-                return f"{source_block}\n\n{iframe_html}"
-            return iframe_html
+            source_mode = self._normalized_source_mode(params.get("source"))
+            if not self.config["show_source"] or source_mode == "hidden":
+                return iframe_html
+            source_block = self._build_source_block(info, code, params)
+            if source_mode == "collapsed":
+                source_block = self._collapse_source_block(source_block)
+            return f"{source_block}\n\n{iframe_html}"
 
         result = FENCE_RE.sub(replace_block, markdown)
         if block_counter["value"] > 0:
@@ -403,10 +418,38 @@ class DrafterCodeBlockPlugin(BasePlugin):
         )
         return None
 
+    def _normalized_source_mode(self, value: str | None) -> str:
+        """Validate a ``source`` value, falling back to ``shown``."""
+        if value is None:
+            return "shown"
+        mode = value.lower()
+        if mode in SOURCE_MODES:
+            return mode
+        LOGGER.warning(
+            "Ignoring invalid source value %r in fenced code block "
+            "(expected one of: %s).",
+            value,
+            ", ".join(sorted(SOURCE_MODES)),
+        )
+        return "shown"
+
     def _build_source_block(self, info: str, code: str, params: dict[str, str]) -> str:
         return self._apply_block_params(
             self._normalized_source_info(info), code, params
         )
+
+    def _collapse_source_block(self, source_block: str) -> str:
+        """Wrap a source fence in a closed pymdownx.details block.
+
+        The fence is indented so it nests inside the details block, which
+        starts closed; readers expand it to see the code. The editable-demo
+        script looks for the source block inside preceding wrappers, so
+        its pencil button keeps working.
+        """
+        indented = "\n".join(
+            f"    {line}" if line else "" for line in source_block.split("\n")
+        )
+        return f'??? note "{COLLAPSED_SOURCE_TITLE}"\n\n{indented}'
 
     def _normalized_source_info(self, info: str) -> str:
         marker = self.config["marker"].lower()

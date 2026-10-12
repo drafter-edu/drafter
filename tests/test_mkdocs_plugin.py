@@ -155,6 +155,67 @@ def test_params_on_plain_fence_apply_without_demo():
     assert '```python hl_lines="2"\nprint("hi")\n```' in result
 
 
+def test_source_collapsed_wraps_source_in_closed_details_block():
+    plugin = make_plugin()
+    page = make_page()
+    markdown = '```python drafter source=collapsed hl_lines="2"\nline1\n\nline3\n```\n'
+    result = run_page_markdown(plugin, page, markdown)
+    expected = (
+        '??? note "Show the code"\n'
+        "\n"
+        '    ```python hl_lines="2"\n'
+        "    line1\n"
+        "\n"
+        "    line3\n"
+        "    ```\n"
+        "\n"
+        '<div class="drafter-demo"'
+    )
+    assert expected in result
+    assert "source=" not in result
+    assert "<iframe" in result
+
+
+def test_source_hidden_omits_source_block():
+    plugin = make_plugin()
+    page = make_page()
+    markdown = "```python drafter source=hidden\ncode\n```\n"
+    result = run_page_markdown(plugin, page, markdown)
+    assert "```" not in result
+    assert "code" not in result.replace("data-drafter-demo", "")
+    assert "<iframe" in result
+    assert page.file.src_uri in plugin._pages_with_demos
+
+
+def test_source_shown_is_default_and_case_insensitive():
+    plugin = make_plugin()
+    page = make_page()
+    markdown = "```python drafter source=SHOWN\ncode\n```\n"
+    result = run_page_markdown(plugin, page, markdown)
+    assert "```python\ncode\n```\n\n<div" in result
+    assert "???" not in result
+
+
+def test_invalid_source_value_falls_back_to_shown():
+    plugin = make_plugin()
+    page = make_page()
+    markdown = "```python drafter source=sometimes\ncode\n```\n"
+    result = run_page_markdown(plugin, page, markdown)
+    assert "```python\ncode\n```" in result
+    assert "???" not in result
+    assert "source" not in result
+    assert "<iframe" in result
+
+
+def test_source_param_stripped_from_plain_fence():
+    plugin = make_plugin()
+    page = make_page()
+    markdown = "```python source=hidden\nprint('hi')\n```\n"
+    result = run_page_markdown(plugin, page, markdown)
+    assert result == "```python\nprint('hi')\n```\n"
+    assert not plugin._pages_with_demos
+
+
 def test_plain_fence_without_params_untouched():
     plugin = make_plugin()
     page = make_page()

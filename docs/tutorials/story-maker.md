@@ -23,7 +23,7 @@ tell more than one story.
 Fill in the blanks, tell the story, then tell it differently without
 retyping anything:
 
-```python drafter height=380
+```python drafter height=380 source=hidden
 from drafter import *
 from dataclasses import dataclass
 

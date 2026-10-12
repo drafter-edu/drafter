@@ -95,7 +95,10 @@ start_server()
 - The drafter-codeblocks plugin compiles each one into a sandboxed iframe
   at build time; a compile failure fails the build.
 - `hl_lines` highlights lines in the rendered source; `height` overrides
-  the iframe height. These are the only fence parameters the plugin knows.
+  the iframe height; `source` controls the source block: `shown` (default),
+  `collapsed` (a closed "Show the code" block above the demo, for a
+  finished-app preview whose code the page explains later), or `hidden`
+  (demo only). These are the only fence parameters the plugin knows.
 - Tutorial step listings use `hl_lines` to mark the lines that are new or
   changed since the previous step's listing, so repeated code reads as a
   diff. Recount the line numbers whenever a listing is edited.
