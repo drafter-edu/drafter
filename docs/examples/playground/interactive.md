@@ -175,7 +175,7 @@ def hungrier(state: State) -> Fragment:
     else:
         mood = "CAPTAIN REQUIRES SALMON. (" \
                + str(state.hunger) + ")"
-    return Fragment([mood], target="#status")
+    return Fragment(state, [mood], target="#status")
 
 
 start_server(State(0))

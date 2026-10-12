@@ -282,7 +282,7 @@ def hungrier(state: State) -> Fragment:
         mood = "Captain is content."
     else:
         mood = "Captain demands salmon. (" + str(state.hunger) + ")"
-    return Fragment([mood], target="#status")
+    return Fragment(state, [mood], target="#status")
 
 
 @route
@@ -321,7 +321,7 @@ Microphone("mic", threshold=0.4, on_loud="noise", visualize="bars")
 def noise(state: State, volume: float) -> Fragment:
     if volume > state.record:
         state.record = volume
-    return Fragment(["Loudest so far: " + str(round(state.record, 2))],
+    return Fragment(state, ["Loudest so far: " + str(round(state.record, 2))],
                     target="#result")
 ```
 

@@ -74,7 +74,7 @@ def index(state: State) -> Page:
 @route
 def advance(state: State) -> Fragment:
     state.position = (state.position + 1) % len(CAPTIONS)
-    return Fragment([CAPTIONS[state.position]], target="#caption")
+    return Fragment(state, [CAPTIONS[state.position]], target="#caption")
 
 
 start_server(State(0))

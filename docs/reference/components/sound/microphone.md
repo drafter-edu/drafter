@@ -76,7 +76,7 @@ def index(state: State) -> Page:
 @route
 def bark(state: State) -> Fragment:
     state.barks = state.barks + 1
-    return Fragment(["Barks detected: " + str(state.barks)],
+    return Fragment(state, ["Barks detected: " + str(state.barks)],
                     target="#count")
 
 

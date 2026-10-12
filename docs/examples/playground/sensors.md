@@ -172,9 +172,9 @@ def index(state: State) -> Page:
 def noise(state: State, volume: float) -> Fragment:
     if volume > state.record_volume:
         state.record_volume = volume
-        return Fragment(["A new record! He twitched an ear."],
+        return Fragment(state, ["A new record! He twitched an ear."],
                         target="#result")
-    return Fragment(["Not your loudest. He sleeps on."],
+    return Fragment(state, ["Not your loudest. He sleeps on."],
                     target="#result")
 
 
