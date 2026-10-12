@@ -8145,16 +8145,16 @@ count:</p>
 <span class="k">def</span><span class="w"> </span><span class="nf">noise</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">volume</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fragment</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">volume</span> <span class="o">&gt;</span> <span class="n">state</span><span class="o">.</span><span class="n">record_volume</span><span class="p">:</span>
         <span class="n">state</span><span class="o">.</span><span class="n">record_volume</span> <span class="o">=</span> <span class="n">volume</span>
-        <span class="k">return</span> <span class="n">Fragment</span><span class="p">([</span><span class="s2">&quot;A new record! He twitched an ear.&quot;</span><span class="p">],</span>
+        <span class="k">return</span> <span class="n">Fragment</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;A new record! He twitched an ear.&quot;</span><span class="p">],</span>
                         <span class="n">target</span><span class="o">=</span><span class="s2">&quot;#result&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Fragment</span><span class="p">([</span><span class="s2">&quot;Not your loudest. He sleeps on.&quot;</span><span class="p">],</span>
+    <span class="k">return</span> <span class="n">Fragment</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;Not your loudest. He sleeps on.&quot;</span><span class="p">],</span>
                     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;#result&quot;</span><span class="p">)</span>
 
 
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
 </code></pre></div>
-<div class="drafter-demo" data-drafter-demo="sensors-4-6d738e93f6f4">
-  <iframe src="../../../drafter-demos/sensors-4-6d738e93f6f4/index.html" title="Drafter Demo sensors-4-6d738e93f6f4" name="sensors-4-6d738e93f6f4" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
+<div class="drafter-demo" data-drafter-demo="sensors-4-36d146008afe">
+  <iframe src="../../../drafter-demos/sensors-4-36d146008afe/index.html" title="Drafter Demo sensors-4-36d146008afe" name="sensors-4-36d146008afe" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
 </div>
 
 <h2 id="fanfare-on-demand">Fanfare on demand</h2>

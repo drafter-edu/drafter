@@ -25,7 +25,7 @@ def hungrier(state: State) -> Fragment:
         mood = "Captain is content."
     else:
         mood = "Captain demands salmon. (" + str(state.hunger) + ")"
-    return Fragment([mood], target="#status")
+    return Fragment(state, [mood], target="#status")
 
 
 @route

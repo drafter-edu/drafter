@@ -8544,7 +8544,7 @@ milliseconds, so one second is <code>1000</code>.</p>
         <span class="n">mood</span> <span class="o">=</span> <span class="s2">&quot;Captain is content.&quot;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">mood</span> <span class="o">=</span> <span class="s2">&quot;Captain demands salmon. (&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">hunger</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
-    <span class="k">return</span> <span class="n">Fragment</span><span class="p">([</span><span class="n">mood</span><span class="p">],</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;#status&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Fragment</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span><span class="n">mood</span><span class="p">],</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;#status&quot;</span><span class="p">)</span>
 
 
 <span class="nd">@route</span>
@@ -8555,8 +8555,8 @@ milliseconds, so one second is <code>1000</code>.</p>
 
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
-<div class="drafter-demo" data-drafter-demo="what-drafter-can-do-3-7bd0c894910c">
-  <iframe src="../../drafter-demos/what-drafter-can-do-3-7bd0c894910c/index.html" title="Drafter Demo what-drafter-can-do-3-7bd0c894910c" name="what-drafter-can-do-3-7bd0c894910c" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 240px;" ></iframe>
+<div class="drafter-demo" data-drafter-demo="what-drafter-can-do-3-92ae045cf93f">
+  <iframe src="../../drafter-demos/what-drafter-can-do-3-92ae045cf93f/index.html" title="Drafter Demo what-drafter-can-do-3-92ae045cf93f" name="what-drafter-can-do-3-92ae045cf93f" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 240px;" ></iframe>
 </div>
 
 <p>Normally a timer is part of the page that made it, so leaving the
@@ -8578,7 +8578,7 @@ draw a live volume meter, waveform, or bars.</p>
 <span class="k">def</span><span class="w"> </span><span class="nf">noise</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">volume</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fragment</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">volume</span> <span class="o">&gt;</span> <span class="n">state</span><span class="o">.</span><span class="n">record</span><span class="p">:</span>
         <span class="n">state</span><span class="o">.</span><span class="n">record</span> <span class="o">=</span> <span class="n">volume</span>
-    <span class="k">return</span> <span class="n">Fragment</span><span class="p">([</span><span class="s2">&quot;Loudest so far: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">record</span><span class="p">,</span> <span class="mi">2</span><span class="p">))],</span>
+    <span class="k">return</span> <span class="n">Fragment</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;Loudest so far: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">record</span><span class="p">,</span> <span class="mi">2</span><span class="p">))],</span>
                     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;#result&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p><strong>Project sparks</strong>: a clap-to-start game, a "shout meter" contest,

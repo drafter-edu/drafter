@@ -22,7 +22,7 @@ def index(state: State) -> Page:
 @route
 def tick(state: State) -> Fragment:
     state.treats = state.treats + 1
-    return Fragment(["Treats: " + str(state.treats)],
+    return Fragment(state, ["Treats: " + str(state.treats)],
                     target="#score")
 
 

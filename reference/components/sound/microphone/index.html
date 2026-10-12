@@ -8098,14 +8098,14 @@ visitor can refuse.</p>
 <span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">bark</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fragment</span><span class="p">:</span>
     <span class="n">state</span><span class="o">.</span><span class="n">barks</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">barks</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">Fragment</span><span class="p">([</span><span class="s2">&quot;Barks detected: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">barks</span><span class="p">)],</span>
+    <span class="k">return</span> <span class="n">Fragment</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;Barks detected: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">barks</span><span class="p">)],</span>
                     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;#count&quot;</span><span class="p">)</span>
 
 
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
-<div class="drafter-demo" data-drafter-demo="microphone-1-669d41664048">
-  <iframe src="../../../../drafter-demos/microphone-1-669d41664048/index.html" title="Drafter Demo microphone-1-669d41664048" name="microphone-1-669d41664048" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
+<div class="drafter-demo" data-drafter-demo="microphone-1-7ba32459fd2c">
+  <iframe src="../../../../drafter-demos/microphone-1-7ba32459fd2c/index.html" title="Drafter Demo microphone-1-7ba32459fd2c" name="microphone-1-7ba32459fd2c" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
 </div>
 
 <h2 id="notes">Notes</h2>

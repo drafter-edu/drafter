@@ -8187,7 +8187,7 @@ itself never restarts:</p>
 <span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">tick</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fragment</span><span class="p">:</span>
     <span class="n">state</span><span class="o">.</span><span class="n">treats</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">treats</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">Fragment</span><span class="p">([</span><span class="s2">&quot;Treats: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">treats</span><span class="p">)],</span>
+    <span class="k">return</span> <span class="n">Fragment</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;Treats: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">treats</span><span class="p">)],</span>
                     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;#score&quot;</span><span class="p">)</span>
 
 
@@ -8199,8 +8199,8 @@ itself never restarts:</p>
 
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
-<div class="drafter-demo" data-drafter-demo="timers-2-ef243db454d8">
-  <iframe src="../../drafter-demos/timers-2-ef243db454d8/index.html" title="Drafter Demo timers-2-ef243db454d8" name="timers-2-ef243db454d8" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
+<div class="drafter-demo" data-drafter-demo="timers-2-b86460ba58a0">
+  <iframe src="../../drafter-demos/timers-2-b86460ba58a0/index.html" title="Drafter Demo timers-2-b86460ba58a0" name="timers-2-b86460ba58a0" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
 </div>
 
 <h2 id="giving-the-visitor-control">Giving the visitor control</h2>

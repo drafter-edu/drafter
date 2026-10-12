@@ -8104,64 +8104,6 @@ tell more than one story.</p>
 <h2 id="try-the-finished-app">Try the finished app</h2>
 <p>Fill in the blanks, tell the story, then tell it differently without
 retyping anything:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-
-
-<span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
-    <span class="n">hero</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">place</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">thing</span><span class="p">:</span> <span class="nb">str</span>
-
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="s2">&quot;Fill in the blanks, then tell the story.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;A hero:&quot;</span><span class="p">,</span>
-        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;hero&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span><span class="p">),</span>
-        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">A place:&quot;</span><span class="p">,</span>
-        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;place&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">place</span><span class="p">),</span>
-        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">An object:&quot;</span><span class="p">,</span>
-        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;thing&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">thing</span><span class="p">),</span>
-        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Tell the story&quot;</span><span class="p">,</span> <span class="s2">&quot;story&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
-
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">story</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">hero</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">place</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">thing</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">=</span> <span class="n">hero</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">place</span> <span class="o">=</span> <span class="n">place</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">thing</span> <span class="o">=</span> <span class="n">thing</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="s2">&quot;Long ago, &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">+</span> <span class="s2">&quot; traveled to &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">place</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Nobody there had ever seen &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">thing</span> <span class="o">+</span> <span class="s2">&quot; before.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;By sunset, &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">+</span> <span class="s2">&quot; was famous.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Tell it differently&quot;</span><span class="p">,</span> <span class="s2">&quot;another_story&quot;</span><span class="p">),</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the words&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
-
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">another_story</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="s2">&quot;Deep in &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">place</span> <span class="o">+</span> <span class="s2">&quot;, something glittered.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;It was &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">thing</span> <span class="o">+</span> <span class="s2">&quot;, lost for a hundred years.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Only &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span> <span class="o">+</span> <span class="s2">&quot; knew what it could do.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Tell the first story&quot;</span><span class="p">,</span> <span class="s2">&quot;story_again&quot;</span><span class="p">),</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Change the words&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
-
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">story_again</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">story</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">hero</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">place</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">thing</span><span class="p">)</span>
-
-
-<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;the library&quot;</span><span class="p">,</span> <span class="s2">&quot;a tiny robot&quot;</span><span class="p">))</span>
-</code></pre></div>
 <div class="drafter-demo" data-drafter-demo="story-maker-1-39ba0e511030">
   <iframe src="../../drafter-demos/story-maker-1-39ba0e511030/index.html" title="Drafter Demo story-maker-1-39ba0e511030" name="story-maker-1-39ba0e511030" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 380px;" ></iframe>
 </div>

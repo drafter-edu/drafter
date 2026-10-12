@@ -11,7 +11,7 @@
     <script>window.DRAFTER_ENGINE = "pyodide";</script>
     
       <!-- Additional header content from precompilation -->
-      <link type="text/css" rel="stylesheet" href="../_shared/css/drafter_deploy.css" class="drafter-non-debug-css-- drafter-precompiled-headers--">
+      <link type="text/css" rel="stylesheet" href="../_shared/css/drafter_deploy.css" class="drafter-precompiled-headers-- drafter-non-debug-css--">
 <link type="text/css" rel="stylesheet" href="../_shared/css/default.css" class="drafter-precompiled-headers--">
 <link type="text/css" rel="stylesheet" href="../_shared/css/diff2html.min.css" class="drafter-precompiled-headers--">
       <!-- End of additional header content -->
@@ -59,24 +59,23 @@
       
         <!-- Precompiled body content -->
         <div class="drafter-body--"><h1>
-  Tamagotchi Minute
+  Bark Counter
 </h1>
-<drafter-clock data--drafter-handlers="{&quot;tick&quot;: &quot;hungrier&quot;}" data-drafter-persist-key="drafter-clock:3fce5b03" id="drafter-component-140165892567936" interval="2000" role="clock" show="False">
-</drafter-clock>
-<output aria-label="status" id="status" name="status">
-  Captain is content.
+<output aria-label="count" id="count" name="count">
+  Barks detected: 0
 
 </output>
 <br>
-<button data-nav="feed" formaction="#" id="drafter-component-140165892568944" name="--submit-button" type="submit" value="&amp;quot;Feed#drafter-component-140165892568944&amp;quot;">
-  Feed
-</button>
+<drafter-microphone cooldown="500" data--drafter-handlers="{&quot;loud&quot;: &quot;bark&quot;}" id="drafter-component-139828814198304" name="mic" threshold="0.6">
+</drafter-microphone>
+<br>
+Every loud noise counts as one bark. Ada disputes the methodology.
 </div>
       
     </div>
-    <script>window.DRAFTER_CONFIGURATION = {"app_builder": {"additional_paths": [], "create_404": "if_missing", "output_directory": "/home/runner/work/drafter/drafter/site/drafter-demos/what-drafter-can-do-3-7bd0c894910c", "output_filename": "index.html", "pyodide_package_style": "pypi", "shared_runtime": true, "warn_missing_info": true, "zip_output": false}, "app_common": {"asset_directory": false, "engine": "pyodide", "favicon": "", "load_packages_automatically": true, "mount_drafter_locally": false, "override_asset_url": "../_shared", "prerender_initial_page": true, "project_packages": null, "pyodide_branch": "full", "pyodide_drafter_path": null, "pyodide_url": "https://cdn.jsdelivr.net/pyodide", "pyodide_version": "v314.0.5", "show_filename_as": false, "site_title": "Drafter App Server", "system_packages": ["bakery", "pillow"]}, "app_server": {"host": "localhost", "ignore_watch_paths": [], "inline_py": true, "open_browser": true, "port": 8000, "serve_adjacent_files": true, "use_reloader": true, "watch_adjacent_files": true, "watch_broad_locations": false, "watch_force_recursive": false, "watch_manifest": null, "watch_max_depth": 20, "watch_max_directories": 200, "watch_max_files": 1000, "watch_paths": [], "watch_recursively": true, "watch_safe_mode": true, "watch_served_files": true}, "bootstrap": {"config_file": null, "mode": "compile_site", "path": "/tmp/mkdocs-drafter-bbmu0072/what-drafter-can-do-3-7bd0c894910c.py", "skip": false, "verbose": true}, "client_server": {"additional_css_content": [], "additional_css_files": [], "additional_files": [], "additional_header_content": [], "additional_js_content": [], "additional_js_files": [], "additional_script_content": [], "additional_style_content": [], "browser_history": true, "button_spinners": false, "console_mode": "auto", "deploy_image_path": "", "enable_audit_logging": true, "enable_subtle_debug_entry": true, "error_page_message": "", "error_page_show_details": true, "error_page_title": "", "external_pages": null, "favicon": "", "framed": true, "in_debug_mode": false, "information": null, "newlines_to_br": true, "override_asset_url": "../_shared", "page_transition": "none", "page_transition_duration": 0.5, "root_element_id": "drafter-root--", "server_name": "MAIN_SERVER", "site_title": "Drafter Application", "system_routes": [], "theme": "default", "use_shadow_dom": false}};</script>
+    <script>window.DRAFTER_CONFIGURATION = {"app_builder": {"additional_paths": [], "create_404": "if_missing", "output_directory": "/home/runner/work/drafter/drafter/site/drafter-demos/microphone-1-7ba32459fd2c", "output_filename": "index.html", "pyodide_package_style": "pypi", "shared_runtime": true, "warn_missing_info": true, "zip_output": false}, "app_common": {"asset_directory": false, "engine": "pyodide", "favicon": "", "load_packages_automatically": true, "mount_drafter_locally": false, "override_asset_url": "../_shared", "prerender_initial_page": true, "project_packages": null, "pyodide_branch": "full", "pyodide_drafter_path": null, "pyodide_url": "https://cdn.jsdelivr.net/pyodide", "pyodide_version": "v314.0.5", "show_filename_as": false, "site_title": "Drafter App Server", "system_packages": ["bakery", "pillow"]}, "app_server": {"host": "localhost", "ignore_watch_paths": [], "inline_py": true, "open_browser": true, "port": 8000, "serve_adjacent_files": true, "use_reloader": true, "watch_adjacent_files": true, "watch_broad_locations": false, "watch_force_recursive": false, "watch_manifest": null, "watch_max_depth": 20, "watch_max_directories": 200, "watch_max_files": 1000, "watch_paths": [], "watch_recursively": true, "watch_safe_mode": true, "watch_served_files": true}, "bootstrap": {"config_file": null, "mode": "compile_site", "path": "/tmp/mkdocs-drafter-_xnpr566/microphone-1-7ba32459fd2c.py", "skip": false, "verbose": true}, "client_server": {"additional_css_content": [], "additional_css_files": [], "additional_files": [], "additional_header_content": [], "additional_js_content": [], "additional_js_files": [], "additional_script_content": [], "additional_style_content": [], "browser_history": true, "button_spinners": false, "console_mode": "auto", "deploy_image_path": "", "enable_audit_logging": true, "enable_subtle_debug_entry": true, "error_page_message": "", "error_page_show_details": true, "error_page_title": "", "external_pages": null, "favicon": "", "framed": true, "in_debug_mode": false, "information": null, "newlines_to_br": true, "override_asset_url": "../_shared", "page_transition": "none", "page_transition_duration": 0.5, "root_element_id": "drafter-root--", "server_name": "MAIN_SERVER", "site_title": "Drafter Application", "system_routes": [], "theme": "default", "use_shadow_dom": false}};</script>
     
-      <script>window.DRAFTER_MODIFIED_CONFIGURATION = {"app_builder": {"output_directory": "/home/runner/work/drafter/drafter/site/drafter-demos/what-drafter-can-do-3-7bd0c894910c", "output_filename": "index.html", "pyodide_package_style": "pypi", "shared_runtime": true}, "app_common": {"override_asset_url": "../_shared"}, "app_server": {}, "bootstrap": {"mode": "compile_site", "path": "/tmp/mkdocs-drafter-bbmu0072/what-drafter-can-do-3-7bd0c894910c.py", "verbose": true}, "client_server": {"enable_subtle_debug_entry": true, "in_debug_mode": false, "override_asset_url": "../_shared"}};</script>
+      <script>window.DRAFTER_MODIFIED_CONFIGURATION = {"app_builder": {"output_directory": "/home/runner/work/drafter/drafter/site/drafter-demos/microphone-1-7ba32459fd2c", "output_filename": "index.html", "pyodide_package_style": "pypi", "shared_runtime": true}, "app_common": {"override_asset_url": "../_shared"}, "app_server": {}, "bootstrap": {"mode": "compile_site", "path": "/tmp/mkdocs-drafter-_xnpr566/microphone-1-7ba32459fd2c.py", "verbose": true}, "client_server": {"enable_subtle_debug_entry": true, "in_debug_mode": false, "override_asset_url": "../_shared"}};</script>
     
     <script type="text/python" id="user-code">from drafter import *
 from dataclasses import dataclass
@@ -84,34 +83,28 @@ from dataclasses import dataclass
 
 @dataclass
 class State:
-    hunger: int
+    barks: int
 
 
 @route
 def index(state: State) -> Page:
     return Page(state, [
-        Header("Tamagotchi Minute"),
-        Clock(2000, "hungrier", show=False),
-        Output("status", ["Captain is content."]),
+        Header("Bark Counter"),
+        Output("count", ["Barks detected: " + str(state.barks)]),
         "\n",
-        Button("Feed", "feed")
+        Microphone("mic", threshold=0.6, cooldown=500,
+                   on_loud="bark"),
+        "\n",
+        "Every loud noise counts as one bark. Ada disputes "
+        "the methodology."
     ])
 
 
 @route
-def hungrier(state: State) -> Fragment:
-    state.hunger = state.hunger + 1
-    if state.hunger < 3:
-        mood = "Captain is content."
-    else:
-        mood = "Captain demands salmon. (" + str(state.hunger) + ")"
-    return Fragment([mood], target="#status")
-
-
-@route
-def feed(state: State) -> Page:
-    state.hunger = 0
-    return index(state)
+def bark(state: State) -> Fragment:
+    state.barks = state.barks + 1
+    return Fragment(state, ["Barks detected: " + str(state.barks)],
+                    target="#count")
 
 
 start_server(State(0))
@@ -151,7 +144,7 @@ start_server(State(0))
             window: window,
             code: document.getElementById('user-code')?.textContent || '',
             instanceId: window.name ? `embed-${window.name}` : undefined,
-            studentFilename: "what-drafter-can-do-3-7bd0c894910c.py",
+            studentFilename: "microphone-1-7ba32459fd2c.py",
             loadPackagesAutomatically: true,
             explicitPackageList: null,
             bootSettings: {
@@ -193,9 +186,9 @@ start_server(State(0))
       // 5) Initial run of student's code
       await window.Drafter.startPyodideAppServerSession({
         devWsUrl: null,
-        pythonUrl: "what-drafter-can-do-3-7bd0c894910c.py",
+        pythonUrl: "microphone-1-7ba32459fd2c.py",
         inlineCode: document.getElementById('user-code')?.textContent || '',
-        studentFilename: "what-drafter-can-do-3-7bd0c894910c.py",
+        studentFilename: "microphone-1-7ba32459fd2c.py",
         loadPackagesAutomatically: true,
         explicitPackageList: null,
       });
