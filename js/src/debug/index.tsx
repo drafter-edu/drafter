@@ -124,6 +124,7 @@ export class DebugPanel {
 			this.containerId,
 			this.instanceId,
 			this.root,
+			() => this.testingPanel.clearRegressionTests(),
 		);
 		this.logPanel = new LogPanel(
 			this.containerId,

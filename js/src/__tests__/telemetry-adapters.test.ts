@@ -469,10 +469,10 @@ describe("TestCaseEvent", () => {
 		};
 	}
 
-	function copyTests(): jest.Mock<(text: string) => Promise<void>> {
-		const writeText = jest.fn<(text: string) => Promise<void>>(() =>
-			Promise.resolve(),
-		);
+	function copyTests(
+		write: () => Promise<void> = () => Promise.resolve(),
+	): jest.Mock<(text: string) => Promise<void>> {
+		const writeText = jest.fn<(text: string) => Promise<void>>(write);
 		Object.defineProperty(window.navigator, "clipboard", {
 			value: { writeText },
 			configurable: true,
@@ -542,6 +542,82 @@ describe("TestCaseEvent", () => {
 		expect(writeText.mock.calls[0][0]).toContain(
 			"No pages have been visited yet",
 		);
+	});
+
+	// The copy handler awaits the clipboard before reporting the result.
+	async function flushCopy(): Promise<void> {
+		for (let i = 0; i < 3; i++) {
+			await Promise.resolve();
+		}
+	}
+
+	function copyStatus(): string | null | undefined {
+		return container().querySelector(".drafter-debug-copy-tests-status")
+			?.textContent;
+	}
+
+	test("Copy Regression Tests briefly confirms the copy", async () => {
+		jest.useFakeTimers();
+		try {
+			createPanel();
+
+			copyTests();
+			await flushCopy();
+			expect(copyStatus()).toBe("Copied!");
+
+			jest.advanceTimersByTime(2000);
+			expect(copyStatus()).toBe("");
+		} finally {
+			jest.useRealTimers();
+		}
+	});
+
+	test("Copy Regression Tests reports when copying is impossible", async () => {
+		jest.useFakeTimers();
+		// Neither the Clipboard API nor the execCommand fallback works.
+		const execCommand = jest.fn(() => false);
+		Object.defineProperty(document, "execCommand", {
+			value: execCommand,
+			configurable: true,
+		});
+		try {
+			createPanel();
+
+			copyTests(() => Promise.reject(new Error("not allowed")));
+			await flushCopy();
+
+			expect(execCommand).toHaveBeenCalledWith("copy");
+			expect(copyStatus()).toContain("Could not copy");
+		} finally {
+			jest.runOnlyPendingTimers();
+			jest.useRealTimers();
+			delete (document as { execCommand?: unknown }).execCommand;
+		}
+	});
+
+	test("clearing the page history also clears the regression tests", async () => {
+		const panel = createPanel();
+		panel.handleEvent(visit({}));
+		const confirmSpy = jest
+			.spyOn(window, "confirm")
+			.mockImplementation(() => true);
+
+		try {
+			(
+				container().querySelector(
+					".drafter-debug-clear-history-btn",
+				) as HTMLButtonElement
+			).click();
+		} finally {
+			confirmSpy.mockRestore();
+		}
+
+		const writeText = copyTests();
+		await Promise.resolve();
+
+		const source = writeText.mock.calls[0][0];
+		expect(source).not.toContain(GENERATED_TEST);
+		expect(source).toContain("No pages have been visited yet");
 	});
 
 	test("Download Tests downloads the generated tests as a .py file", async () => {

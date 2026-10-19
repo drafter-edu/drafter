@@ -4,9 +4,13 @@ import type { TestCaseEvent } from "../telemetry/tests";
 import type { ResponseEvent } from "../telemetry/requests";
 import type { ReactElement } from "jsx-dom";
 
+/** How long the "Copied!" status stays visible after copying tests. */
+const COPY_STATUS_MS = 2000;
+
 export class TestPanel extends Panel {
 	private tests: TestCaseEvent[] = [];
 	private regressionTests: string[] = [];
+	private copyStatusTimer: ReturnType<typeof setTimeout> | null = null;
 
 	constructor(
 		containerId: string,
@@ -69,6 +73,10 @@ export class TestPanel extends Panel {
 							<button class="drafter-debug-download-tests-btn drafter-debug-button--">
 								Download Tests (.py)
 							</button>
+							<span
+								class="drafter-debug-copy-tests-status"
+								role="status"
+							></span>
 						</div>
 					</div>
 				</div>
@@ -133,10 +141,17 @@ export class TestPanel extends Panel {
 		return lines.join("\n");
 	}
 
+	/** Forget the visit tests (the history they came from was cleared). */
+	public clearRegressionTests(): void {
+		this.regressionTests = [];
+	}
+
 	private async copyAllTests(): Promise<void> {
 		const source = this.buildTestSource();
+		let copied: boolean;
 		try {
 			await navigator.clipboard.writeText(source);
+			copied = true;
 		} catch {
 			// Clipboard API unavailable (e.g. insecure context): fall back
 			// to a transient textarea + execCommand copy.
@@ -145,11 +160,36 @@ export class TestPanel extends Panel {
 			document.body.appendChild(scratch);
 			scratch.select();
 			try {
-				document.execCommand("copy");
+				copied = document.execCommand("copy");
+			} catch {
+				copied = false;
 			} finally {
 				scratch.remove();
 			}
 		}
+		this.showCopyStatus(
+			copied
+				? "Copied!"
+				: "Could not copy; use Download Tests (.py) instead.",
+		);
+	}
+
+	/** Briefly announce the copy result next to the buttons. */
+	private showCopyStatus(message: string): void {
+		const status = this.getContentElement().querySelector(
+			".drafter-debug-copy-tests-status",
+		);
+		if (!status) {
+			return;
+		}
+		status.textContent = message;
+		if (this.copyStatusTimer !== null) {
+			clearTimeout(this.copyStatusTimer);
+		}
+		this.copyStatusTimer = setTimeout(() => {
+			status.textContent = "";
+			this.copyStatusTimer = null;
+		}, COPY_STATUS_MS);
 	}
 
 	private downloadAllTests(): void {

@@ -255,6 +255,9 @@ test.describe("debug panel regression tests", () => {
 		];
 
 		await page.locator(".drafter-debug-copy-tests-btn").click();
+		await expect(
+			page.locator(".drafter-debug-copy-tests-status"),
+		).toHaveText("Copied!");
 		const copied = await page.evaluate(() => navigator.clipboard.readText());
 		for (const line of expected) {
 			expect(copied).toContain(line);

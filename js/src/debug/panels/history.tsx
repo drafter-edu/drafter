@@ -19,10 +19,15 @@ export class HistoryPanel extends Panel {
 	/** Unclaimed snapshots beyond this bound are dropped, oldest first. */
 	private readonly maxPendingSnapshots = 100;
 
+	/**
+	 * @param onClear Called after the history is cleared, so panels derived
+	 *   from it (the Tests tab's regression tests) can start fresh too.
+	 */
 	constructor(
 		containerId: string,
 		instanceId: number,
 		root: ParentNode = document,
+		private readonly onClear: () => void = () => {},
 	) {
 		super(
 			containerId,
@@ -95,6 +100,7 @@ export class HistoryPanel extends Panel {
 		this.pendingStateSnapshots.clear();
 		this.currentPage = 1;
 		this.renderPage();
+		this.onClear();
 	}
 
 	private renderPage(): void {
