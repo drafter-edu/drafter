@@ -451,11 +451,25 @@ describe("TestCaseEvent", () => {
 		expect(summary?.textContent).toContain("Failed: 1");
 	});
 
-	test("Copy All Tests writes a runnable Python file to the clipboard", async () => {
-		const panel = createPanel();
-		panel.handleEvent(TEST_CASE_EVENT as TestCaseEvent);
-		panel.handleEvent(TEST_CASE_EVENT_FAILED as TestCaseEvent);
+	// What ClientServer.visit actually puts in formatted_page_content for a
+	// successful Page visit (captured from a real run).
+	const GENERATED_TEST = [
+		"assert_equal(go(State(name='Ada', count=0), 'Bob'),",
+		"    Page(State(name='Ada', count=1), [",
+		"        Header('Bob'),",
+		"        Link('back', 'index'),",
+		"    ]))",
+	].join("\n");
 
+	function visit(overrides: Partial<ResponseEvent>): ResponseEvent {
+		return {
+			...(RESPONSE_EVENT as ResponseEvent),
+			formatted_page_content: GENERATED_TEST,
+			...overrides,
+		};
+	}
+
+	function copyTests(): jest.Mock<(text: string) => Promise<void>> {
 		const writeText = jest.fn<(text: string) => Promise<void>>(() =>
 			Promise.resolve(),
 		);
@@ -463,31 +477,82 @@ describe("TestCaseEvent", () => {
 			value: { writeText },
 			configurable: true,
 		});
-
 		(
 			container().querySelector(
 				".drafter-debug-copy-tests-btn",
 			) as HTMLButtonElement
 		).click();
+		return writeText;
+	}
+
+	test("Copy Regression Tests copies the tests generated from page visits", async () => {
+		const panel = createPanel();
+		panel.handleEvent(visit({ request_id: 1, response_id: 2 }));
+		// The student's own assert_equal results are not regression tests.
+		panel.handleEvent(TEST_CASE_EVENT as TestCaseEvent);
+
+		const writeText = copyTests();
 		await Promise.resolve();
 
 		expect(writeText).toHaveBeenCalledTimes(1);
 		const source = writeText.mock.calls[0][0];
 		expect(source).toContain("from drafter import *");
-		expect(source).toContain(
+		expect(source).toContain(GENERATED_TEST);
+		expect(source).not.toContain(
 			(TEST_CASE_EVENT as TestCaseEvent).caller,
 		);
-		expect(source).toContain(
-			(TEST_CASE_EVENT_FAILED as TestCaseEvent).caller,
-		);
-		expect(source).toContain("# Line 42 - passed");
 	});
 
-	test("Download Tests builds a .py blob download", () => {
+	test("regression tests skip errors, non-test payloads, and duplicate visits", async () => {
 		const panel = createPanel();
-		panel.handleEvent(TEST_CASE_EVENT as TestCaseEvent);
+		panel.handleEvent(visit({ request_id: 1 }));
+		panel.handleEvent(visit({ request_id: 2 }));
+		// Error responses carry the rendered error page HTML instead.
+		panel.handleEvent(
+			visit({
+				request_id: 3,
+				has_errors: true,
+				status_code: "not_found",
+				formatted_page_content: '<div class="error-page">Not Found</div>',
+			}),
+		);
+		// Payloads without a test form (e.g. Redirect) fall back to the body.
+		panel.handleEvent(
+			visit({
+				request_id: 4,
+				payload_type: "Redirect",
+				formatted_page_content: "",
+			}),
+		);
 
-		const createObjectURL = jest.fn(() => "blob:test-url");
+		const writeText = copyTests();
+		await Promise.resolve();
+
+		const source = writeText.mock.calls[0][0];
+		expect(source.split("assert_equal(")).toHaveLength(2);
+		expect(source).not.toContain("error-page");
+	});
+
+	test("Copy Regression Tests explains when nothing has been visited", async () => {
+		createPanel();
+
+		const writeText = copyTests();
+		await Promise.resolve();
+
+		expect(writeText.mock.calls[0][0]).toContain(
+			"No pages have been visited yet",
+		);
+	});
+
+	test("Download Tests downloads the generated tests as a .py file", async () => {
+		const panel = createPanel();
+		panel.handleEvent(visit({}));
+
+		const blobs: Blob[] = [];
+		const createObjectURL = jest.fn((blob: Blob) => {
+			blobs.push(blob);
+			return "blob:test-url";
+		});
 		const revokeObjectURL = jest.fn();
 		const urlGlobal = URL as unknown as {
 			createObjectURL?: unknown;
@@ -497,9 +562,12 @@ describe("TestCaseEvent", () => {
 		const originalRevoke = urlGlobal.revokeObjectURL;
 		urlGlobal.createObjectURL = createObjectURL;
 		urlGlobal.revokeObjectURL = revokeObjectURL;
+		const clicked: HTMLAnchorElement[] = [];
 		const clickSpy = jest
 			.spyOn(HTMLAnchorElement.prototype, "click")
-			.mockImplementation(() => {});
+			.mockImplementation(function (this: HTMLAnchorElement) {
+				clicked.push(this);
+			});
 
 		try {
 			(
@@ -515,6 +583,16 @@ describe("TestCaseEvent", () => {
 
 		expect(createObjectURL).toHaveBeenCalledTimes(1);
 		expect(revokeObjectURL).toHaveBeenCalledWith("blob:test-url");
+		expect(clicked).toHaveLength(1);
+		expect(clicked[0].download).toBe("drafter_tests.py");
+		expect(blobs[0].type).toBe("text/x-python");
+		// jsdom's Blob has no text(); FileReader reads it instead.
+		const contents = await new Promise<string>((resolve) => {
+			const reader = new FileReader();
+			reader.onload = () => resolve(reader.result as string);
+			reader.readAsText(blobs[0]);
+		});
+		expect(contents).toContain(GENERATED_TEST);
 	});
 });
 

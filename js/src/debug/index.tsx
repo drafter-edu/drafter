@@ -629,6 +629,7 @@ export class DebugPanel {
 			case "ResponseEvent":
 				handled = this.historyPanel?.addResponse(typed) ?? false;
 				this.currentPanel?.setPageContent(typed.formatted_page_content);
+				this.testingPanel?.recordVisit(typed);
 				break;
 			case "UpdatedState":
 				this.statePanel?.renderState(typed.representation);

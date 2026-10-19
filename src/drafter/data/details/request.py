@@ -133,9 +133,9 @@ class ResponseEvent(TelemetryRecord):
         duration_ms: Time taken to process the request in milliseconds
         response_id: Unique identifier for this response
         request_id: ID of the associated request
-        formatted_page_content: The rendered HTML content of the page
-            (falls back to the raw response body when no formatted body
-            is available)
+        formatted_page_content: The payload formatted as an `assert_equal`
+            regression test for the visit (falls back to the raw response
+            body when the payload has no formatted form, e.g. on errors)
         kind: Event-type discriminator, always "ResponseEvent"
     """
 
@@ -179,8 +179,9 @@ class ResponseEvent(TelemetryRecord):
 
         Args:
             response: The Response to summarize.
-            formatted_body: The rendered HTML page content; the raw
-                response body is used instead when this is empty.
+            formatted_body: The payload formatted as an `assert_equal`
+                regression test; the raw response body is used instead
+                when this is empty.
             duration_ms: Time taken to process the request in milliseconds.
 
         Returns:

@@ -209,3 +209,69 @@ test("Download component produces a real browser download", async ({
 	}
 	expect(Buffer.concat(chunks).toString("utf-8")).toBe("downloaded content");
 });
+
+const REGRESSION_APP = `
+from drafter import *
+
+@dataclass
+class State:
+    clicks: int
+
+@route
+def index(state: State):
+    return Page(state, [
+        "Clicked " + str(state.clicks) + " times",
+        Button("Click", add_click),
+    ])
+
+@route
+def add_click(state: State):
+    state.clicks += 1
+    return index(state)
+
+start_server(State(0))
+`;
+
+test.describe("debug panel regression tests", () => {
+	test.use({ permissions: ["clipboard-read", "clipboard-write"] });
+
+	test("Copy and Download export the tests generated from page visits", async ({
+		page,
+	}) => {
+		await page.goto("/harness.html");
+		await page.evaluate(async (code) => {
+			await window.runExample(code);
+		}, REGRESSION_APP);
+		await page.getByRole("button", { name: "Click" }).click();
+		await expect(page.locator("#drafter-root--")).toContainText(
+			"Clicked 1 times",
+		);
+
+		await page.getByRole("tab", { name: "Tests" }).click();
+		const expected = [
+			"assert_equal(index(State(clicks=0)),",
+			"assert_equal(add_click(State(clicks=0)),",
+			"Page(State(clicks=1), [",
+		];
+
+		await page.locator(".drafter-debug-copy-tests-btn").click();
+		const copied = await page.evaluate(() => navigator.clipboard.readText());
+		for (const line of expected) {
+			expect(copied).toContain(line);
+		}
+
+		const downloadPromise = page.waitForEvent("download");
+		await page.locator(".drafter-debug-download-tests-btn").click();
+		const download = await downloadPromise;
+		expect(download.suggestedFilename()).toBe("drafter_tests.py");
+		const stream = await download.createReadStream();
+		const chunks: Buffer[] = [];
+		for await (const chunk of stream) {
+			chunks.push(chunk as Buffer);
+		}
+		// The OS clipboard may rewrite newlines (CRLF on Windows).
+		expect(Buffer.concat(chunks).toString("utf-8")).toBe(
+			copied.replace(/\r\n/g, "\n"),
+		);
+	});
+});
