@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2026-10-19
+
+- Fixed auto-play audio and media (`Tone`, `Melody`, `Sound`, `Audio`, `Video`) never starting when a route returned it inside a `Fragment`, such as a piano key that plays a hidden `Tone(note, auto_play=True, show=False)` into an `Output` area. The `drafter-page-loaded` event now fires after Fragment updates too, with a new `fragment` field in its `detail` (true for Fragment updates, false for full page loads) so listeners can tell them apart.
+- Fixed the first auto-play sound after a click staying silent, which also made the next click play the previous sound late. Auto-play components now start the browser's audio right away when the browser allows it (normally once the visitor has interacted with the page). If the browser is still blocking sound, the "Enable sound" prompt now appears even for components with `show=False`, instead of being hidden.
+- Fixed importing a local package (a folder with an `__init__.py`, as in projects set up with a `pyproject.toml`) crashing in the browser with `ModuleNotFoundError` even though it worked in regular Python. Packages, their submodules, and relative imports inside them now load in the browser just like single-file modules.
+
 ## [2.1.1] - 2026-10-10
 
 - Fixed the `--about` pages and `create_404` settings
