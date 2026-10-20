@@ -50,12 +50,17 @@ class RemoteFinder(importlib.abc.MetaPathFinder):
     """
 
     def find_spec(self, fullname, path=None, target=None):
-        """Try to fetch the module as a remote `.py` file.
+        """Try to fetch the module as a remote `.py` file or package.
 
         Maps the dotted module name to a relative URL (e.g., `pkg.mod`
-        becomes `pkg/mod.py`) and fetches it synchronously. On success,
-        the name is recorded in `EXTERNAL_IMPORTS` and a spec backed by a
-        `RemoteLoader` holding the source is returned.
+        becomes `pkg/mod.py`) and fetches it synchronously. If there is no
+        such file, tries the name as a package folder instead
+        (`pkg/mod/__init__.py`), so a student's `import my_project` works
+        in the browser for a `my_project/` folder just as it does in
+        regular Python. On success, the name is recorded in
+        `EXTERNAL_IMPORTS` and a spec backed by a `RemoteLoader` holding
+        the source is returned; package specs are marked as packages so
+        their submodules and relative imports resolve.
 
         Args:
             fullname: Dotted name of the module being imported.
@@ -63,26 +68,25 @@ class RemoteFinder(importlib.abc.MetaPathFinder):
             target: Ignored (standard finder protocol argument).
 
         Returns:
-            A module spec when the fetch succeeds with HTTP 200, or None
-            (letting the import fail normally) on any error or non-200
-            response.
+            A module spec when a fetch succeeds with HTTP 200, or None
+            (letting the import fail normally) when neither the module file
+            nor the package's `__init__.py` could be fetched.
         """
-        module_path = fullname.split(".")
-        path = "/".join(module_path) + ".py"
-        url = path
-
-        try:
-            response = pyxhr.get(url)
+        base_url = "/".join(fullname.split("."))
+        candidates = ((base_url + ".py", False), (base_url + "/__init__.py", True))
+        for url, is_package in candidates:
+            try:
+                response = pyxhr.get(url)
+            except Exception:
+                continue
             if response.status_code != 200:
-                return None
-            text = response.text
-
-            loader = RemoteLoader(text)
+                continue
+            loader = RemoteLoader(response.text)
             EXTERNAL_IMPORTS.add(fullname)
-            return importlib.util.spec_from_loader(fullname, loader)
-
-        except Exception:
-            return None
+            return importlib.util.spec_from_loader(
+                fullname, loader, origin=url, is_package=is_package
+            )
+        return None
 
 
 def expire_remote_imports():
