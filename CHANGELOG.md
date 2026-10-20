@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.3] - 2026-10-20
+
+- The local development server now opens the site in Chrome when it is installed, then Firefox, and only then the computer's default browser, so a fresh Mac no longer lands in Safari. A new `browser` setting picks a specific browser instead: `start_server(browser="firefox")`, the `--browser` command line flag, the `DRAFTER_BROWSER` environment variable, or a config file entry under `app_server`. Accepted names are `chrome`, `firefox`, `safari`, `edge`, `default` (the computer's usual browser), or any name Python's `webbrowser` module knows. A browser that cannot be found prints a warning and falls back to the default.
+
 ## [2.1.2] - 2026-10-19
 
 - Fixed auto-play audio and media (`Tone`, `Melody`, `Sound`, `Audio`, `Video`) never starting when a route returned it inside a `Fragment`, such as a piano key that plays a hidden `Tone(note, auto_play=True, show=False)` into an `Output` area. The `drafter-page-loaded` event now fires after Fragment updates too, with a new `fragment` field in its `detail` (true for Fragment updates, false for full page loads) so listeners can tell them apart.
