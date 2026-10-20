@@ -225,7 +225,7 @@ class TestResolveMainSource:
         """No uvicorn, no browser, no prerender when the file is missing."""
         started = MagicMock()
         monkeypatch.setattr(app_server, "make_app", started)
-        monkeypatch.setattr(app_server.webbrowser, "open", started)
+        monkeypatch.setattr(app_server, "open_in_browser", started)
         system = make_system("-c")
         server = MagicMock()
         with pytest.raises(StudentFacingError):

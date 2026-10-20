@@ -216,6 +216,7 @@ Every setting can also be provided via environment variables. Boolean variables 
 | `DRAFTER_HOST`                 | string | `--host`                                           |
 | `DRAFTER_USE_RELOADER`         | bool   | Inverse of `--no-reloader`.                        |
 | `DRAFTER_OPEN_BROWSER`         | bool   | Inverse of `--no-open-browser`.                    |
+| `DRAFTER_BROWSER`              | string | `--browser`                                        |
 | `DRAFTER_INLINE_PY`            | bool   | Inverse of `--no-inline-py`.                       |
 | `DRAFTER_SERVE_ADJACENT_FILES` | bool   | Inverse of `--no-serve-adjacent-files`.            |
 

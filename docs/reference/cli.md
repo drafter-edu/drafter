@@ -33,6 +33,7 @@ the app whenever you save the file.
 | `--port PORT` | `8000` | Serve on a different port, for when 8000 is taken by another program (or a classmate's app on a shared machine). |
 | `--host HOST` | `localhost` | Serve to other devices: `--host 0.0.0.0` lets your phone on the same network open the app. |
 | `--no-open-browser` | opens | Do not open a browser tab automatically. |
+| `--browser NAME` | Chrome, then Firefox, then the system default | Open the site in a particular browser: `chrome`, `firefox`, `safari`, `edge`, or `default` for whatever your computer normally uses. |
 | `--no-reloader` | on | Stop watching your files for changes. |
 | `--skip` | off | Do not start the server or compile anything: `start_server(...)` returns immediately. Lets a test runner import the file without launching the site. |
 

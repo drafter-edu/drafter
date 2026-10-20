@@ -35,6 +35,7 @@ def start_server(
     host: str | None = None,
     prerender_initial_page: bool | None = None,
     open_browser: bool | None = None,
+    browser: str | None = None,
     inline_py: bool | None = None,
     use_reloader: bool | None = None,
     pyodide_url: str | None = None,
@@ -80,6 +81,10 @@ def start_server(
         host: Server host for dev mode.
         prerender_initial_page: Prerender initial page on startup.
         open_browser: Auto-open browser in dev mode.
+        browser: Which browser to open in dev mode: "chrome", "firefox",
+            "safari", "edge", or "default" for the system default. When not
+            given, Chrome is used if installed, then Firefox, then the
+            system default.
         inline_py: Inline code in HTML vs. load via HTTP.
         use_reloader: Enable file watcher and auto-reload.
         pyodide_url: Base URL to load Pyodide from (default: jsDelivr CDN).
@@ -134,6 +139,8 @@ def start_server(
         parameters["prerender_initial_page"] = prerender_initial_page
     if open_browser is not None:
         parameters["open_browser"] = open_browser
+    if browser is not None:
+        parameters["browser"] = browser
     if inline_py is not None:
         parameters["inline_py"] = inline_py
     if reloader is not None and use_reloader is None:

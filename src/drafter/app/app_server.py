@@ -8,7 +8,6 @@ import asyncio
 import html
 import json
 import os
-import webbrowser
 from pathlib import Path
 
 import uvicorn
@@ -23,6 +22,7 @@ from starlette.responses import (
 from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 
+from drafter.app.browser_launch import open_in_browser
 from drafter.app.error_log import append_error_log_entry, build_log_entry
 from drafter.app.hacks import DRAFTER_LOG_CONFIG_FOR_UVICORN
 from drafter.app.source_recovery import (
@@ -526,8 +526,9 @@ def serve_app_once(
                 # Delay a touch to let server bind
                 asyncio.get_running_loop().call_later(
                     0.8,
-                    lambda: webbrowser.open(
-                        f"http://{system.app_server.host}:{system.app_server.port}/"
+                    lambda: open_in_browser(
+                        f"http://{system.app_server.host}:{system.app_server.port}/",
+                        system.app_server.browser,
                     ),
                 )
             await server.serve()

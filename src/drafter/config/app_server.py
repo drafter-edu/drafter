@@ -25,6 +25,10 @@ class AppServerConfiguration(BaseConfiguration):
         use_reloader: Enable auto-reloader for code changes. When False, the
             file watcher never starts at all.
         open_browser: Automatically open web browser on start.
+        browser: Which browser to open the site in: "chrome", "firefox",
+            "safari", "edge", "default" (the system default), or any name
+            Python's `webbrowser` module recognizes. When None, Chrome is
+            used if installed, then Firefox, then the system default.
         inline_py: Inline user code in HTML vs. load via HTTP request.
         serve_adjacent_files: Serve files from user directory.
         watch_adjacent_files: Automatically watch files next to the main
@@ -63,6 +67,7 @@ class AppServerConfiguration(BaseConfiguration):
     host: str = "localhost"
     use_reloader: bool = True
     open_browser: bool = True
+    browser: str | None = None
     inline_py: bool = True
     serve_adjacent_files: bool = True
     # Automatic watching
@@ -98,7 +103,7 @@ class AppServerConfiguration(BaseConfiguration):
         """Extract development server settings from environment variables.
 
         Reads DRAFTER_PORT, DRAFTER_HOST, DRAFTER_USE_RELOADER,
-        DRAFTER_OPEN_BROWSER, DRAFTER_INLINE_PY,
+        DRAFTER_OPEN_BROWSER, DRAFTER_BROWSER, DRAFTER_INLINE_PY,
         DRAFTER_SERVE_ADJACENT_FILES, and the DRAFTER_WATCH_* family
         (DRAFTER_WATCH_ADJACENT_FILES, DRAFTER_WATCH_RECURSIVELY,
         DRAFTER_WATCH_SAFE_MODE, DRAFTER_WATCH_SERVED_FILES,
@@ -123,6 +128,7 @@ class AppServerConfiguration(BaseConfiguration):
         result.get_string_if_exists("DRAFTER_HOST", "host")
         result.get_bool_if_exists("DRAFTER_USE_RELOADER", "use_reloader")
         result.get_bool_if_exists("DRAFTER_OPEN_BROWSER", "open_browser")
+        result.get_string_if_exists("DRAFTER_BROWSER", "browser")
         result.get_bool_if_exists("DRAFTER_INLINE_PY", "inline_py")
         result.get_bool_if_exists(
             "DRAFTER_SERVE_ADJACENT_FILES", "serve_adjacent_files"
@@ -158,7 +164,8 @@ class AppServerConfiguration(BaseConfiguration):
         Adds the "App Server Configuration" group with --port and --host
         (which have argparse defaults, unlike most other options), the
         negative flags --no-reloader, --no-open-browser, --no-inline-py, and
-        --no-serve-adjacent-files, which store False on their fields, and
+        --no-serve-adjacent-files, which store False on their fields,
+        --browser to name the browser the site opens in, and
         the watch-policy options (--no-watch-adjacent-files,
         --no-watch-recursively, --no-watch-safe-mode,
         --no-watch-served-files, --watch-max-files, --watch-max-directories,
@@ -189,6 +196,16 @@ class AppServerConfiguration(BaseConfiguration):
             action="store_false",
             dest="open_browser",
             help="Do not automatically open web browser on start",
+        )
+        group.add_argument(
+            "--browser",
+            type=str,
+            default=None,
+            help=(
+                "Browser to open the site in (chrome, firefox, safari, edge, or "
+                "default); when omitted, Chrome is used if installed, then "
+                "Firefox, then the system default"
+            ),
         )
         group.add_argument(
             "--no-inline-py",
@@ -307,6 +324,8 @@ class AppServerConfiguration(BaseConfiguration):
             result["use_reloader"] = parsed_args["use_reloader"]
         if parsed_args.get("open_browser") is not None:
             result["open_browser"] = parsed_args["open_browser"]
+        if parsed_args.get("browser") is not None:
+            result["browser"] = parsed_args["browser"]
         if parsed_args.get("inline_py") is not None:
             result["inline_py"] = parsed_args["inline_py"]
         if parsed_args.get("serve_adjacent_files") is not None:

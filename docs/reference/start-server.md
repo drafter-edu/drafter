@@ -69,6 +69,7 @@ All options other than the state are keyword arguments.
 | `port`          | `int`  | Which port the local development server listens on, when running from the command line.                                                                                |
 | `host`          | `str`  | Which network interface the local development server binds.                                                                                                            |
 | `open_browser`  | `bool` | Whether running locally opens a browser tab automatically.                                                                                                             |
+| `browser`       | `str`  | Which browser opens the tab: `"chrome"`, `"firefox"`, `"safari"`, `"edge"`, or `"default"` for your computer's usual browser. Unset, Drafter uses Chrome if installed, then Firefox, then the default.  |
 | `engine`        | `str`  | Which in-browser Python runs your code; `"pyodide"` is the default and the one these docs cover.                                                                       |
 | `use_reloader`  | `bool` | Whether saving a file restarts the site automatically. [Live reload](live-reload.md) covers this and the finer-grained `watch_...` options.                            |
 | `skip`          | `bool` | Do nothing at all: no server, no compilation. Meant for test runners; see the note below.                                                                              |
