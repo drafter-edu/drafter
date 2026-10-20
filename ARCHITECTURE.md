@@ -250,7 +250,9 @@ The `ClientBridge.handle_response` path updates the DOM faithfully according to 
 1. Removes all page-specific content currently in place.
 2. Injects "before" channel content (e.g., styles).
 3. Registers the navigation callback and notifies the debug panel of the new route.
-4. Updates the body content (and, on full page loads, dispatches a page-loaded event).
+4. Updates the body content and dispatches the `drafter-page-loaded` event. Fragment injections
+   dispatch it too (with `detail.fragment` set to true), because auto-play audio/media and timers
+   wait for it before starting.
 5. Re-mounts navigation/interaction handlers.
 6. Injects "after" channel content (e.g., scripts).
 7. If the payload is a redirect, `NavigationController.handle_redirect` first checks a redirect-loop

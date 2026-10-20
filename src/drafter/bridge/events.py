@@ -513,12 +513,16 @@ class EventManager:
             self._register_hotkey(key_combo, activated(key_handler))
 
     def dispatch_page_loaded(
-        self, route: str, request_id: int, response_id: int
+        self, route: str, request_id: int, response_id: int, fragment: bool = False
     ) -> None:
         """Dispatch the drafter-page-loaded custom event on the window.
 
-        Fired after a page render so external code (e.g. tests or embedding
-        hosts) can observe that a route finished loading.
+        Fired after every committed render, so components that defer work
+        until their content is in place (auto-play audio and media, timers)
+        can start, and so external code (e.g. tests or embedding hosts) can
+        observe that a route finished loading. Listeners that only care
+        about full page loads can ignore events whose `fragment` detail is
+        true.
 
         Args:
             route: Name of the route that was rendered.
@@ -526,11 +530,15 @@ class EventManager:
             request_id: Identifier of the request that produced the page.
 
             response_id: Identifier of the response that was rendered.
+
+            fragment: Whether the render injected a Fragment into part of
+                the page rather than replacing the whole page.
         """
         detail = {
             "route": route,
             "requestId": request_id,
             "responseId": response_id,
+            "fragment": fragment,
         }
         event = self.runtime.create_custom_event(DRAFTER_PAGE_LOADED_EVENT, detail)
         self.runtime.dispatch_window_event(event)

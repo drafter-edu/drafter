@@ -572,11 +572,13 @@ class ClientBridge:
 
         Clears the previous page's page-specific content, applies the
         response's "before" channel, refreshes the navigation function and
-        the debug panel's route, and updates the site body. When the DOM was
-        updated, re-mounts navigation handlers and (for full page loads)
-        dispatches the page-loaded event. Finally applies the "after"
-        channel and, if the payload is a redirect, follows it via the
-        NavigationController.
+        the debug panel's route, and updates the site body. When the body was
+        replaced, re-mounts navigation handlers. Whenever the response
+        rendered content, dispatches the page-loaded event (flagged as a
+        fragment unless the response replaced the whole page), so components
+        inserted by a Fragment, like an auto-playing Tone, can start.
+        Finally applies the "after" channel and, if the payload is a
+        redirect, follows it via the NavigationController.
 
         Args:
             response: The Response produced by visiting a route.
@@ -600,13 +602,19 @@ class ClientBridge:
             )
             self.events.mount_navigation(self.navigator.navigate)
             self.events.mount_bug_report_download(self._download_bug_report)
+        # update_site only reports body replacements as updates, so check for
+        # injected content directly: Fragments dispatch too, or components
+        # waiting for this event (auto-play audio and media, timers) would
+        # never start when a Fragment inserts them into an already-loaded page.
+        if updated or response.body is not None:
             # TODO: Improve this check for a full page load
-            if not response.target or response.target.is_page_load:
-                self.events.dispatch_page_loaded(
-                    route=response.url,
-                    request_id=response.request_id,
-                    response_id=response.id,
-                )
+            is_page_load = not response.target or response.target.is_page_load
+            self.events.dispatch_page_loaded(
+                route=response.url,
+                request_id=response.request_id,
+                response_id=response.id,
+                fragment=not is_page_load,
+            )
         self.site_renderer.apply_after_channel(response)
         if response.payload.is_redirect():
             self.navigator.handle_redirect(response, callback)
