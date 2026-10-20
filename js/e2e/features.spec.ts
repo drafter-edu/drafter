@@ -210,6 +210,63 @@ test("Download component produces a real browser download", async ({
 	expect(Buffer.concat(chunks).toString("utf-8")).toBe("downloaded content");
 });
 
+// Mirrors examples/piano.py: each key returns a Fragment holding a hidden,
+// auto-playing Tone. The tone used to wait forever for a page-loaded event
+// that only full page loads dispatched, so the piano made no sound.
+const FRAGMENT_TONE_APP = `
+from drafter import *
+hide_debug_information()
+
+@route
+def index() -> Page:
+    return Page([
+        Button("A4", "play_note", [Argument("note", "A4")]),
+        Output("sound_area", ["Click a key"]),
+    ])
+
+@route
+def play_note(note: str) -> Fragment:
+    return Fragment(
+        [Tone(note, duration=200, auto_play=True, show=False)],
+        target="#sound_area",
+    )
+
+start_server()
+`;
+
+test("an auto-play Tone inserted by a Fragment plays", async ({ page }) => {
+	await page.addInitScript(() => {
+		const started: number[] = [];
+		(window as unknown as { startedOscillators: number[] }).startedOscillators =
+			started;
+		const originalStart = OscillatorNode.prototype.start;
+		OscillatorNode.prototype.start = function (
+			this: OscillatorNode,
+			...args: [number?]
+		) {
+			started.push(Math.round(this.frequency.value));
+			return originalStart.apply(this, args);
+		};
+	});
+	await page.goto("/harness.html");
+	await page.evaluate(async (code) => {
+		await window.runExample(code);
+	}, FRAGMENT_TONE_APP);
+
+	await page.getByRole("button", { name: "A4" }).click();
+
+	await expect(page.locator("#sound_area drafter-tone")).toHaveCount(1);
+	await expect
+		.poll(() =>
+			page.evaluate(
+				() =>
+					(window as unknown as { startedOscillators: number[] })
+						.startedOscillators,
+			),
+		)
+		.toEqual([440]);
+});
+
 const REGRESSION_APP = `
 from drafter import *
 

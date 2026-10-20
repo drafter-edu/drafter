@@ -107,7 +107,9 @@ class Melody extends DrafterHTMLElement {
 	}
 
 	private syncVisibility(): void {
-		this.hidden = !this.shouldShow();
+		// The "Enable sound" prompt is shown even for show=False, or a
+		// hidden auto-play melody could never be heard.
+		this.hidden = !this.shouldShow() && this.state !== "locked";
 	}
 
 	private schedule(): ScheduledNote[] {
@@ -173,6 +175,7 @@ class Melody extends DrafterHTMLElement {
 		if (this.primaryButton === null || this.label === null) {
 			return;
 		}
+		this.syncVisibility();
 		const button = this.primaryButton;
 		button.hidden = false;
 		button.disabled = false;
@@ -388,6 +391,9 @@ class Melody extends DrafterHTMLElement {
 			this.updateControls();
 			return;
 		}
+		// Browsers let the context start without a fresh gesture once the
+		// user has interacted with the page, so try that before asking.
+		void audioBroker.requestUnlock();
 		if (audioBroker.isUnlocked()) {
 			this.play(0);
 			return;

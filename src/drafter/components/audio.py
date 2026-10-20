@@ -502,7 +502,9 @@ class Tone(Component):
         release: Milliseconds to fade out. Defaults to 50.
         auto_play: Whether to play as soon as the page loads instead of
             showing a play button. Defaults to False.
-        show: Whether to display the component. Defaults to True.
+        show: Whether to display the component. Defaults to True. A hidden
+            auto-play component still shows its "Enable sound" prompt while
+            the browser is blocking sound.
         effects: Optional list of effects (like :class:`Echo`) applied in order.
         on_start: Function or URL to call when the tone starts playing.
         on_finish: Function or URL to call when the tone finishes playing.
@@ -785,7 +787,9 @@ class Melody(Component):
             showing a play button. Defaults to False.
         controls: Whether to show play/pause and restart buttons. Defaults
             to False.
-        show: Whether to display the component. Defaults to True.
+        show: Whether to display the component. Defaults to True. A hidden
+            auto-play component still shows its "Enable sound" prompt while
+            the browser is blocking sound.
         effects: Optional list of effects (like :class:`Echo`) applied in order.
         on_note: Function or URL to call as each note starts.
         on_finish: Function or URL to call when the melody finishes.

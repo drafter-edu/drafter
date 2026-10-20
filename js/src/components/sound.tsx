@@ -279,6 +279,9 @@ class Sound extends DrafterHTMLElement {
 			this.startPlayback();
 			return;
 		}
+		// Browsers let the context start without a fresh gesture once the
+		// user has interacted with the page, so try that before asking.
+		void audioBroker.requestUnlock();
 		if (audioBroker.isUnlocked()) {
 			this.startPlayback();
 			return;

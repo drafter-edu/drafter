@@ -73,8 +73,12 @@ export class AudioBroker {
 	}
 
 	/**
-	 * Try to resume the shared context. Call this from within a user
-	 * gesture (e.g. a click handler); resolves true once running.
+	 * Try to resume the shared context; resolves true once running. Call it
+	 * from within a user gesture (e.g. a click handler) to guarantee the
+	 * unlock. Calling it outside a gesture is also safe: the browser starts
+	 * the context only if its autoplay policy allows (typically once the
+	 * user has interacted with the page), and otherwise leaves it suspended
+	 * until a later gesture.
 	 */
 	requestUnlock(): Promise<boolean> {
 		const context = this.getContext();

@@ -60,7 +60,13 @@ class FakeAnalyserNode extends FakeAudioNode {
 class FakeAudioContext {
 	static instances: FakeAudioContext[] = [];
 
-	state = "running";
+	/**
+	 * Simulates the browser autoplay policy blocking audio: contexts start
+	 * suspended and resume() stays pending (as in Chrome) until allowed.
+	 */
+	static autoplayBlocked = false;
+
+	state = FakeAudioContext.autoplayBlocked ? "suspended" : "running";
 
 	currentTime = 0;
 
@@ -83,6 +89,9 @@ class FakeAudioContext {
 	addEventListener = jest.fn();
 
 	resume = jest.fn(() => {
+		if (FakeAudioContext.autoplayBlocked) {
+			return new Promise<void>(() => {});
+		}
 		this.state = "running";
 		return Promise.resolve();
 	});
@@ -116,6 +125,7 @@ class FakeAudioContext {
 
 function installFakeAudioContext(): void {
 	FakeAudioContext.instances = [];
+	FakeAudioContext.autoplayBlocked = false;
 	Object.defineProperty(window, "AudioContext", {
 		configurable: true,
 		writable: true,
@@ -338,6 +348,7 @@ describe("drafter-sound", () => {
 	});
 
 	test("auto-play with a locked context reveals the enable prompt, which starts playback", async () => {
+		FakeAudioContext.autoplayBlocked = true;
 		const element = createElement("drafter-sound", {
 			src: "a.mp3",
 			"auto-play": "true",
@@ -347,9 +358,12 @@ describe("drafter-sound", () => {
 		expect(playMock).not.toHaveBeenCalled();
 
 		window.dispatchEvent(new CustomEvent("drafter-page-loaded"));
+		await flushMicrotasks();
 		expect(button.hidden).toBe(false);
 		expect(playMock).not.toHaveBeenCalled();
 
+		// The user's click is the gesture the browser was waiting for.
+		FakeAudioContext.autoplayBlocked = false;
 		button.click();
 		await flushMicrotasks();
 
@@ -360,6 +374,24 @@ describe("drafter-sound", () => {
 		// Harmless (playing an already-playing element), but a quirk of the
 		// production code worth knowing about.
 		expect(playMock.mock.calls.length).toBeGreaterThanOrEqual(1);
+	});
+
+	test("auto-play creates and unlocks the context when the browser allows it", async () => {
+		// Regression: a sound inserted by a Fragment after a button click
+		// found no AudioContext yet and waited for another gesture.
+		const element = createElement("drafter-sound", {
+			src: "a.mp3",
+			"auto-play": "true",
+		});
+		expect(FakeAudioContext.instances).toHaveLength(0);
+
+		window.dispatchEvent(
+			new CustomEvent("drafter-page-loaded", { detail: { fragment: true } }),
+		);
+		await flushMicrotasks();
+
+		expect(playMock).toHaveBeenCalled();
+		expect(getEnableButton(element).hidden).toBe(true);
 	});
 
 	test("auto-play starts on page load when the context is already unlocked", async () => {

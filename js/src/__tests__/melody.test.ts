@@ -52,7 +52,13 @@ class FakeGainNode extends FakeAudioNode {
 class FakeAudioContext {
 	static instances: FakeAudioContext[] = [];
 
-	state = "running";
+	/**
+	 * Simulates the browser autoplay policy blocking audio: contexts start
+	 * suspended and resume() stays pending (as in Chrome) until allowed.
+	 */
+	static autoplayBlocked = false;
+
+	state = FakeAudioContext.autoplayBlocked ? "suspended" : "running";
 
 	currentTime = 0;
 
@@ -71,6 +77,9 @@ class FakeAudioContext {
 	addEventListener = jest.fn();
 
 	resume = jest.fn(() => {
+		if (FakeAudioContext.autoplayBlocked) {
+			return new Promise<void>(() => {});
+		}
 		this.state = "running";
 		return Promise.resolve();
 	});
@@ -92,6 +101,7 @@ class FakeAudioContext {
 
 function installFakeAudioContext(): void {
 	FakeAudioContext.instances = [];
+	FakeAudioContext.autoplayBlocked = false;
 	Object.defineProperty(window, "AudioContext", {
 		configurable: true,
 		writable: true,
@@ -272,6 +282,7 @@ describe("drafter-melody (extended)", () => {
 	});
 
 	test("auto-play with a locked context shows the enable-sound prompt", async () => {
+		FakeAudioContext.autoplayBlocked = true;
 		const element = createElement("drafter-melody", {
 			notes: JSON.stringify([["C4", 1]]),
 			"auto-play": "true",
@@ -279,9 +290,12 @@ describe("drafter-melody (extended)", () => {
 		const button = getPrimaryButton(element);
 
 		window.dispatchEvent(new CustomEvent("drafter-page-loaded"));
+		await flushMicrotasks();
 		expect(button.textContent).toBe("🔊 Enable sound");
-		expect(FakeAudioContext.instances).toHaveLength(0);
+		expect(FakeAudioContext.instances[0].oscillators).toHaveLength(0);
 
+		// The user's click is the gesture the browser was waiting for.
+		FakeAudioContext.autoplayBlocked = false;
 		button.click();
 		await flushMicrotasks();
 
@@ -289,6 +303,49 @@ describe("drafter-melody (extended)", () => {
 		// hides the primary button.
 		expect(FakeAudioContext.instances[0].oscillators).toHaveLength(1);
 		expect(button.hidden).toBe(true);
+	});
+
+	test("auto-play creates and unlocks the context when the browser allows it", async () => {
+		// Regression: a melody inserted by a Fragment after a button click
+		// (examples/piano.py) found no AudioContext yet and waited for
+		// another gesture instead of playing.
+		const element = createElement("drafter-melody", {
+			notes: JSON.stringify([["C4", 1]]),
+			"auto-play": "true",
+			show: "False",
+		});
+		expect(FakeAudioContext.instances).toHaveLength(0);
+
+		window.dispatchEvent(
+			new CustomEvent("drafter-page-loaded", { detail: { fragment: true } }),
+		);
+		await flushMicrotasks();
+
+		expect(FakeAudioContext.instances[0].oscillators).toHaveLength(1);
+		expect(element.hidden).toBe(true);
+	});
+
+	test("a hidden auto-play melody still shows the enable-sound prompt while locked", async () => {
+		FakeAudioContext.autoplayBlocked = true;
+		const element = createElement("drafter-melody", {
+			notes: JSON.stringify([["C4", 1]]),
+			"auto-play": "true",
+			show: "False",
+		});
+		expect(element.hidden).toBe(true);
+
+		window.dispatchEvent(new CustomEvent("drafter-page-loaded"));
+		await flushMicrotasks();
+		expect(element.hidden).toBe(false);
+		expect(getPrimaryButton(element).textContent).toBe("🔊 Enable sound");
+
+		FakeAudioContext.autoplayBlocked = false;
+		getPrimaryButton(element).click();
+		await flushMicrotasks();
+
+		// Once sound is enabled, show=False hides the melody again.
+		expect(element.hidden).toBe(true);
+		expect(FakeAudioContext.instances[0].oscillators).toHaveLength(1);
 	});
 
 	test("auto-play starts on page load when the context is already unlocked", async () => {

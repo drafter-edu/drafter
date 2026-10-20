@@ -83,8 +83,10 @@ start_server(State())
   "Enable sound" prompt instead. Tones on later pages, after
   clicks, play freely.
 - `auto_play=True, show=False` is the sound-effect pattern: a
-  route returns a page containing an invisible automatic tone,
-  and the arrival plays it.
+  route returns a page (or a `Fragment`) containing an invisible
+  automatic tone, and the arrival plays it. If the browser is
+  still blocking sound, the "Enable sound" prompt appears anyway,
+  so the tone never fails silently.
 - A wrong waveform or an unpronounceable pitch stops the page
   with a friendly error listing the valid choices.
 

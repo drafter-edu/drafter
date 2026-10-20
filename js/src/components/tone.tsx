@@ -41,6 +41,9 @@ class Tone extends DrafterHTMLElement {
 
 	private waitingForPageLoad = false;
 
+	/** True while the "Enable sound" prompt is up; it overrides show=False. */
+	private promptingForSound = false;
+
 	private unsubscribeUnlock: (() => void) | null = null;
 
 	private handlePageLoaded = (_event: Event): void => {
@@ -96,7 +99,7 @@ class Tone extends DrafterHTMLElement {
 	}
 
 	private syncVisibility(): void {
-		this.hidden = !this.shouldShow();
+		this.hidden = !this.shouldShow() && !this.promptingForSound;
 	}
 
 	private buttonLabel(): string {
@@ -227,18 +230,27 @@ class Tone extends DrafterHTMLElement {
 			this.emitError("unavailable", AUDIO_UNSUPPORTED_ERROR);
 			return;
 		}
+		// Browsers let the context start without a fresh gesture once the
+		// user has interacted with the page (e.g. the click that produced
+		// this tone), so try that before asking for one.
+		void audioBroker.requestUnlock();
 		if (audioBroker.isUnlocked()) {
 			this.play();
 			return;
 		}
 		// The context is still locked: any interaction with the page (or
-		// this prompt button) will unlock it and start the tone.
+		// this prompt button) will unlock it and start the tone. The prompt
+		// is shown even for show=False, or the tone could never be heard.
+		this.promptingForSound = true;
+		this.syncVisibility();
 		if (this.button !== null) {
 			this.button.hidden = false;
 			this.button.textContent = "🔊 Enable sound";
 		}
 		this.unsubscribeUnlock = audioBroker.onUnlocked(() => {
 			this.unsubscribeUnlock = null;
+			this.promptingForSound = false;
+			this.syncVisibility();
 			if (this.button !== null) {
 				this.button.hidden = true;
 			}
@@ -281,6 +293,7 @@ class Tone extends DrafterHTMLElement {
 			this.unsubscribeUnlock = null;
 		}
 		this.waitingForPageLoad = false;
+		this.promptingForSound = false;
 		this.button = null;
 		this.statusArea = null;
 	}
