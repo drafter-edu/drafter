@@ -34,6 +34,13 @@ import { openStateEditor } from "./state_edit";
 import { openThemeSwitcher } from "./theme_switch";
 import { downloadBugReport, SaveLoadManager } from "./saveload";
 import { DevServerErrorReporter } from "./error_reporter";
+import {
+	isDevServerDocument,
+	ownerDocumentOf,
+	requestDevServerStop,
+} from "./dev_server";
+import { alertDialog, confirmDialog } from "../dialogs";
+import { t } from "../i18n";
 
 const DOCUMENTATION_URL = "https://drafter-edu.github.io/drafter/";
 
@@ -81,6 +88,9 @@ export class DebugPanel {
 	// Forwards error envelopes to the local dev server's debug log while the
 	// site is not in production mode.
 	private errorReporter = new DevServerErrorReporter();
+	// Whether this instance's page was served by the local development
+	// server, which is the only place the "Stop Server" control makes sense.
+	private devServer = false;
 
 	// The node to scope all debug DOM lookups to: the instance's shadow root
 	// when shadow DOM is on, else document. Lets concurrent instances each
@@ -95,6 +105,7 @@ export class DebugPanel {
 		root: ParentNode | null = document,
 	) {
 		this.root = root ?? document;
+		this.devServer = isDevServerDocument(ownerDocumentOf(this.root));
 		this.instanceId = DebugPanel.instanceCounter++;
 
 		this.headerBar = new DebugHeaderBar(
@@ -462,8 +473,10 @@ export class DebugPanel {
 						iconKey: "icon.about",
 						tooltipKey: "button.about.tooltip",
 						className: "drafter-menu-item-about",
+						separatorAfter: this.devServer,
 						action: () => this.navigate("--about"),
 					},
+					...this.createStopServerItems(),
 				],
 			},
 			{
@@ -584,6 +597,60 @@ export class DebugPanel {
 				],
 			},
 		];
+	}
+
+	/**
+	 * The Navigate menu's "Stop Server" item, present only when the page is
+	 * served by the local development server (deployed sites have no server
+	 * to stop).
+	 */
+	private createStopServerItems(): MenuItemDefinition[] {
+		if (!this.devServer) {
+			return [];
+		}
+		return [
+			{
+				labelKey: "menu.stop_server",
+				iconKey: "icon.stop_server",
+				tooltipKey: "menu.stop_server.tooltip",
+				className: "drafter-menu-item-stop-server",
+				action: () => {
+					void this.stopServer();
+				},
+			},
+		];
+	}
+
+	/**
+	 * Stop the local development server. Used by the Navigate menu, which
+	 * asks for confirmation first, and, via the client bridge, by the button
+	 * on the `--stop-server` system route's page, where the page itself is
+	 * the confirmation (`askFirst` false). Outside the development server
+	 * it only explains that there is nothing to stop. The outcome is shown
+	 * in a dialog; resolves to whether the server acknowledged the stop.
+	 */
+	public async stopServer(askFirst: boolean = true): Promise<boolean> {
+		const title = t("menu.stop_server.title");
+		if (!this.devServer) {
+			await alertDialog(t("menu.stop_server.not_dev_server"), { title });
+			return false;
+		}
+		if (askFirst) {
+			const accepted = await confirmDialog(t("menu.stop_server.confirm"), {
+				title,
+				confirmLabel: t("menu.stop_server.confirm_button"),
+				confirmVariant: "danger",
+			});
+			if (!accepted) {
+				return false;
+			}
+		}
+		const stopped = await requestDevServerStop();
+		await alertDialog(
+			t(stopped ? "menu.stop_server.stopped" : "menu.stop_server.failed"),
+			{ title },
+		);
+		return stopped;
 	}
 
 	private toggleFrame(): void {

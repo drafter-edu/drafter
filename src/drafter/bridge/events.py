@@ -434,16 +434,23 @@ class EventManager:
         self.mount_event_handlers(root, do_navigation)
         debug_log("client.mount_navigation_complete")
 
-    def mount_bug_report_download(self, callback: Callable[[], None]) -> None:
-        """Wire the bug-report page's download button to the given callback.
+    def _mount_well_known_button(
+        self, tag_key: str, callback: Callable[[], None], log_name: str
+    ) -> None:
+        """Attach a click listener to a system-route page button, once.
 
-        The button (rendered by the ``--bug-report`` system route with the
-        well-known BUG_REPORT_DOWNLOAD id) is regular page content, so this
-        runs after every page commit; pages without the button return
-        immediately, and a button that already has its listener (marked via
-        the mounted attribute) is left alone.
+        Buttons rendered by system routes with a well-known id (from
+        ``DRAFTER_TAG_IDS``) are regular page content, so this runs after
+        every page commit; pages without the button return immediately, and
+        a button that already has its listener (marked via the mounted
+        attribute) is left alone.
+
+        Args:
+            tag_key: The ``DRAFTER_TAG_IDS`` key naming the button's id.
+            callback: Called with no arguments when the button is clicked.
+            log_name: The debug-log entry recorded when the listener mounts.
         """
-        button = self.scope.querySelector("#" + DRAFTER_TAG_IDS["BUG_REPORT_DOWNLOAD"])
+        button = self.scope.querySelector("#" + DRAFTER_TAG_IDS[tag_key])
         if not button:
             return
         if button.getAttribute(HANDLERS_MOUNTED_ATTR):
@@ -451,7 +458,27 @@ class EventManager:
         wrapped_handler = self.runtime.wrap_event_handler(lambda event: callback())
         button.addEventListener("click", wrapped_handler)
         button.setAttribute(HANDLERS_MOUNTED_ATTR, "true")
-        debug_log("client.bug_report_download_mounted")
+        debug_log(log_name)
+
+    def mount_bug_report_download(self, callback: Callable[[], None]) -> None:
+        """Wire the bug-report page's download button to the given callback.
+
+        The button is rendered by the ``--bug-report`` system route with the
+        well-known BUG_REPORT_DOWNLOAD id.
+        """
+        self._mount_well_known_button(
+            "BUG_REPORT_DOWNLOAD", callback, "client.bug_report_download_mounted"
+        )
+
+    def mount_stop_server_button(self, callback: Callable[[], None]) -> None:
+        """Wire the stop-server page's button to the given callback.
+
+        The button is rendered by the ``--stop-server`` system route with the
+        well-known STOP_SERVER id.
+        """
+        self._mount_well_known_button(
+            "STOP_SERVER", callback, "client.stop_server_button_mounted"
+        )
 
     def mount_subtle_debug_entry(self, callback: Callable[[], None]) -> None:
         """Wire the subtle production debug-entry button to the debug toggle.

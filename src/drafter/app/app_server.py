@@ -295,6 +295,36 @@ async def record_error_log(req) -> Response:
     return JSONResponse({"ok": written})
 
 
+async def stop_server(req) -> Response:
+    """Stop the development server at the browser's request.
+
+    Reached by the debug panel's "Stop Server" menu item and the button on
+    the ``--stop-server`` system route (see js/src/debug/dev_server.ts).
+    Accepts only POST, so a stray link or prefetch cannot stop the server.
+    The actual shutdown is whatever callable `serve_app_once` stored on the
+    application state; the in-flight response is still delivered because
+    uvicorn finishes open requests before exiting.
+
+    Args:
+        req: Starlette request object.
+
+    Returns:
+        JSONResponse with {"ok": true}, or a 503 error when this
+        application was built without a way to stop its server (as in
+        tests that drive the app without uvicorn).
+    """
+    app: Starlette = req.app  # type: ignore
+    request_stop = getattr(app.state, "request_stop", None)
+    if request_stop is None:
+        return JSONResponse(
+            {"error": "This server cannot be stopped from the browser"},
+            status_code=503,
+        )
+    print("Stopping the server because the browser asked it to.")
+    request_stop()
+    return JSONResponse({"ok": True})
+
+
 def make_app(
     system: SystemConfiguration,
     server: ClientServer,
@@ -303,8 +333,9 @@ def make_app(
 ) -> Starlette:
     """Build the Starlette application for the development server.
 
-    Assembles routes for the index page, the live-reload websocket, static
-    assets, and (optionally) user file serving/listing; sets up file watch
+    Assembles routes for the index page, the live-reload websocket, the
+    error-log and stop-server endpoints, static assets, and (optionally)
+    user file serving/listing; sets up file watch
     paths; and optionally prerenders the initial page via the client server.
     The configuration, paths, reload hub, and prerendered content are stored
     on the application's state.
@@ -347,6 +378,7 @@ def make_app(
         Route("/", index),
         WebSocketRoute("/" + INTERNAL_ROUTES["WS"], ws_endpoint),
         Route("/" + INTERNAL_ROUTES["ERROR_LOG"], record_error_log, methods=["POST"]),
+        Route("/" + INTERNAL_ROUTES["STOP_SERVER"], stop_server, methods=["POST"]),
     ]
     # Handle default assets
     if not system.app_common.override_asset_url:
@@ -400,6 +432,8 @@ def make_app(
     app.state.user_path = user_path
     app.state.user_source = user_source
     app.state.hub = ReloadHub()
+    # Installed by serve_app_once once a uvicorn server exists; see stop_server.
+    app.state.request_stop = None
     app.state.watch_paths = watch_paths
     app.state.watch_set = watch_set
     app.state.watch_plan = plan
@@ -522,6 +556,12 @@ def serve_app_once(
                 reload=False,
             )
             server = uvicorn.Server(uvicorn_config)
+
+            def request_stop() -> None:
+                # uvicorn's serve loop polls this flag and shuts down cleanly.
+                server.should_exit = True
+
+            app.state.request_stop = request_stop
             if system.app_server.open_browser:
                 # Delay a touch to let server bind
                 asyncio.get_running_loop().call_later(

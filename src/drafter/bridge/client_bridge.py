@@ -563,6 +563,38 @@ class ClientBridge:
                 phase="event_dispatch",
             )
 
+    def _stop_dev_server(self) -> None:
+        """Ask the debug panel to stop the local development server.
+
+        Invoked by the button on the ``--stop-server`` system route's page
+        (see EventManager.mount_stop_server_button). The page itself is the
+        confirmation, so the panel is told not to ask again. Without a
+        debug panel (production mode) the request cannot be sent, which is
+        reported as a warning rather than failing silently.
+        """
+        if not self.debug_panel:
+            report_bridge_error(
+                "client.stop_server_unavailable",
+                "The server cannot be stopped from this page because the debug "
+                "panel is turned off; stop it from the terminal instead",
+                "bridge.client_bridge._stop_dev_server",
+                "The --stop-server page button requires the debug panel",
+                severity="warning",
+                phase="event_dispatch",
+            )
+            return
+        try:
+            self.debug_panel.stopServer(False)
+        except Exception as e:
+            report_bridge_error(
+                "client.stop_server_failed",
+                "Failed to send the stop request to the development server",
+                "bridge.client_bridge._stop_dev_server",
+                f"Exception: {repr(e)}",
+                exception=e,
+                phase="event_dispatch",
+            )
+
     ### Response Handling
 
     def handle_response(
@@ -602,6 +634,7 @@ class ClientBridge:
             )
             self.events.mount_navigation(self.navigator.navigate)
             self.events.mount_bug_report_download(self._download_bug_report)
+            self.events.mount_stop_server_button(self._stop_dev_server)
         # update_site only reports body replacements as updates, so check for
         # injected content directly: Fragments dispatch too, or components
         # waiting for this event (auto-play audio and media, timers) would

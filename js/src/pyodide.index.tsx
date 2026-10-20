@@ -17,6 +17,7 @@
 import { loadPyodide } from "pyodide";
 import { mountDirectory } from "./pyodide_bridge/directories";
 import { DebugPanel } from "./debug";
+import { markDevServerDocument } from "./debug/dev_server";
 import type { DrafterInitOptions } from "./bridge/engine";
 import { confirmDialog } from "./dialogs";
 import { clearDrafterSiteRoot, reportSystemError } from "./bridge/engine";
@@ -449,6 +450,11 @@ export async function createDrafterInstance(
 	// unique instanceId to stay distinguishable.
 	const instanceKey = options.instanceId ?? rootElementId;
 	const targetDocument = options.targetWindow?.document;
+	// Only the development server hands out a live-reload socket, so its
+	// presence is what lets the debug panel offer to stop that server.
+	if (options.devWsUrl) {
+		markDevServerDocument(targetDocument ?? document);
+	}
 
 	let latestStudentCode: string | null = null;
 	let runInProgress = false;

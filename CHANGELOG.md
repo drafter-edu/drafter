@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- The local development server can now be stopped from the browser. The debug panel's Navigate menu ends with **Stop Server…** (asks for confirmation first), and the new `--stop-server` system route shows a confirmation page with the same button, so `http://localhost:8000/--stop-server` works too. Stopping ends the Python program the same way as Ctrl+C in the terminal. The control only appears while the site is served by the development server; deployed sites have no server to stop. Behind the scenes this is a POST-only `__drafter_stop_server` endpoint, so a plain link or prefetch can never stop the server.
+
 ## [2.1.3] - 2026-10-20
 
 - The local development server now opens the site in Chrome when it is installed, then Firefox, and only then the computer's default browser, so a fresh Mac no longer lands in Safari. A new `browser` setting picks a specific browser instead: `start_server(browser="firefox")`, the `--browser` command line flag, the `DRAFTER_BROWSER` environment variable, or a config file entry under `app_server`. Accepted names are `chrome`, `firefox`, `safari`, `edge`, `default` (the computer's usual browser), or any name Python's `webbrowser` module knows. A browser that cannot be found prints a warning and falls back to the default.

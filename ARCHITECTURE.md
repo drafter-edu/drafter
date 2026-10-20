@@ -409,7 +409,8 @@ configuration, and `cli.py` basically just runs the student's file. (The old `do
    1. The `ClientServer` is started (`ClientServer.do_start`).
    2. The state is initialized from the initial state.
    3. Missing system routes are registered with the router (`src/drafter/router/system_routes.py`,
-      defaults in `src/drafter/router/defaults/`: about, bug-report, error, index, reload, reset).
+      defaults in `src/drafter/router/defaults/`: about, bug-report, error, index, reload, reset,
+      stop-server).
 10. Started Phase
     1. The `ClientBridge` creates the initial `Request`.
     2. The `ClientBridge` initiates a visit with the initial `Request`.
@@ -824,6 +825,13 @@ system; the Client (browser runtime) needs a virtual one.
   environment details, to a shared JSON Lines file `drafter-debug.log` next to the student's code
   (`src/drafter/app/error_log.py`, size-capped with best-effort trimming); the file watcher ignores
   that file so log writes never trigger reloads.
+- **Stopping from the browser**: the dev server exposes a POST-only `__drafter_stop_server`
+  endpoint that flips uvicorn's `should_exit` flag (installed on `app.state.request_stop` by
+  `serve_app_once`). The debug panel's Navigate menu offers "Stop Server" (with a confirmation)
+  only on documents the dev server served, which `createDrafterInstance` records whenever a
+  live-reload socket URL is present (`js/src/debug/dev_server.ts`); the `--stop-server` system
+  route renders the same request as a page button, wired by the bridge like the bug-report
+  download button (`EventManager.mount_stop_server_button` -> `DebugPanel.stopServer(false)`).
 - **Uploads**: uploaded files are read into memory (`RuntimeAdapter.handle_file_upload`) as
   `{filename, content, type, size}` dicts and injected into the request data.
 - **Native directory mounting**: Pyodide can mount a real local directory via `mountNativeFS`, with

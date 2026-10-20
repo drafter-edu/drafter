@@ -49,6 +49,11 @@ as `--skip`, which is handy when the command being run is not
 `drafter` itself; for example, a unit test runner such as `pytest`
 importing your file.
 
+To stop the server, press Ctrl+C in the terminal, or use the
+**Stop Server…** item in the debug panel's Navigate menu (also
+reachable at your site's address plus `--stop-server`). Both end
+the program the same way.
+
 ## Appearance and production
 
 | Flag | Default | What it does |

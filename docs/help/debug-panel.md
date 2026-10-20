@@ -98,6 +98,15 @@ option to hide the frame, and the live site-theme switcher for
 the Help menu, whose **Download Bug Report** item packages up
 [everything a bug report needs](bug-reports.md).
 
+While your app runs from your own computer, the Navigate menu ends
+with **Stop Server…**. After you confirm, it shuts down the Drafter
+program running in your terminal or editor, the same as pressing
+Ctrl+C there. The tab stays open but stops working until you run
+your program again. The same control lives at your site's address
+plus `--stop-server`, which is handy when the debug panel is
+hidden behind a small frame. Deployed sites have no server to stop,
+so the item does not appear there.
+
 ## Common problems
 
 - **The panel is gone**: debug mode is off. Remove or comment out
