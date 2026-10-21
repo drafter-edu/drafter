@@ -41,6 +41,7 @@ only a coarse outcome bucket used for responses and telemetry display.
 """
 
 import dataclasses
+import textwrap
 import traceback as _traceback_module
 from dataclasses import dataclass, field
 from typing import Any
@@ -290,6 +291,73 @@ class StudentFacingError(ValueError):
         self.friendly_title = title
         self.friendly_message = friendly
         self.friendly_steps = tuple(steps)
+
+
+TERMINAL_WIDTH = 78
+"""Column width used when printing a student-facing error to the terminal."""
+
+DEFAULT_TERMINAL_ERROR_TITLE = "Drafter could not start"
+"""Title used for a terminal error whose exception carries none."""
+
+
+def format_student_facing_error(error: StudentFacingError) -> str:
+    """Lay out a student-facing error for the terminal.
+
+    Used when a `StudentFacingError` escapes on the host (for example, the
+    development server's port is in use, or the main file cannot be found)
+    where there is no browser error page to show it in. The friendly
+    explanation comes first, then the numbered steps, then the concise
+    technical message as a final "Details" line.
+
+    Args:
+        error: The error to present.
+
+    Returns:
+        The text to print, with a leading and trailing blank line.
+
+    Example:
+        ```python
+        error = StudentFacingError(
+            "Port 8000 is already in use.",
+            title="Port already in use",
+            friendly="Another program is using port 8000.",
+            steps=("Stop the other program.", "Or choose another port."),
+        )
+        print(format_student_facing_error(error))
+        ```
+    """
+    title = error.friendly_title or DEFAULT_TERMINAL_ERROR_TITLE
+    rule = "=" * TERMINAL_WIDTH
+    explanation = error.friendly_message or str(error)
+    lines = [
+        "",
+        rule,
+        title,
+        rule,
+        textwrap.fill(explanation, TERMINAL_WIDTH),
+    ]
+    if error.friendly_steps:
+        lines.append("")
+        lines.append("What to try:")
+        for number, step in enumerate(error.friendly_steps, start=1):
+            prefix = f"  {number}. "
+            lines.append(
+                textwrap.fill(
+                    step,
+                    TERMINAL_WIDTH,
+                    initial_indent=prefix,
+                    subsequent_indent=" " * len(prefix),
+                )
+            )
+    if error.friendly_message and str(error) != error.friendly_message:
+        lines.append("")
+        lines.append(
+            textwrap.fill(
+                f"Details: {error}", TERMINAL_WIDTH, subsequent_indent="         "
+            )
+        )
+    lines.append("")
+    return "\n".join(lines)
 
 
 # ---------------------------------------------------------------------------

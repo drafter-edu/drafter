@@ -4,11 +4,13 @@ Provides the start_server() function which routes to either in-browser ClientSer
 or local development AppServer based on execution context.
 """
 
+import sys
 from typing import Any
 
 from drafter.client_server.commands import get_main_server
 from drafter.config.engines import EngineType
 from drafter.configuration import get_system_configuration
+from drafter.data.errors import StudentFacingError, format_student_facing_error
 from drafter.helpers.utils import is_web
 
 MaybeBoolStr = bool | str | None
@@ -106,6 +108,13 @@ def start_server(
         argv: Command-line argument override passed into the system
             configuration.
         **extra_configuration: Additional configuration parameters.
+
+    Raises:
+        SystemExit: In local development mode, when the server cannot start
+            for a reason that has a student-facing explanation (the main
+            file is missing, the port is in use). The explanation is
+            printed instead of a traceback; with the verbose setting on,
+            the original `StudentFacingError` propagates instead.
     """
     # Handle compatibility for old parameters
     parameters: dict[str, Any] = {}
@@ -195,4 +204,13 @@ def start_server(
     else:
         from drafter.app.app_server import serve_app_once
 
-        serve_app_once(system, server, initial_state)
+        try:
+            serve_app_once(system, server, initial_state)
+        except StudentFacingError as error:
+            # There is no browser error page yet on the host, so present the
+            # explanation in the terminal instead of a traceback (which the
+            # verbose setting restores for debugging).
+            if system.bootstrap.verbose:
+                raise
+            print(format_student_facing_error(error), file=sys.stderr)
+            raise SystemExit(1) from None
