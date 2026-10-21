@@ -9,12 +9,15 @@ INTERNAL_ROUTES = {
     "LIST_FILES": "__drafter_list_files",
     "ERROR_LOG": "__drafter_error_log",
     "STOP_SERVER": "__drafter_stop_server",
+    "STATUS": "__drafter_status",
 }
 """Reserved URL paths served by Drafter itself: the live-reload WebSocket
 ("WS"), static assets ("ASSETS"), the file listing endpoint ("LIST_FILES"),
 the browser error-report sink ("ERROR_LOG"), whose path is mirrored in
-js/src/debug/error_reporter.ts, and the shutdown endpoint ("STOP_SERVER"),
-whose path is mirrored in js/src/debug/dev_server.ts."""
+js/src/debug/error_reporter.ts, the shutdown endpoint ("STOP_SERVER"),
+whose path is mirrored in js/src/debug/dev_server.ts, and the identity
+endpoint ("STATUS") that a new run probes when its port is busy
+(src/drafter/app/ports.py)."""
 
 INTERNAL_FILES = {"DRAFTER_PYODIDE_FILE": "drafter-pyodide.zip"}
 """Reserved filenames used internally, such as the zipped Drafter package

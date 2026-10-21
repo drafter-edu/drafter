@@ -11,6 +11,11 @@ from drafter.config.base import BaseConfiguration
 from drafter.config.urls import INTERNAL_ROUTES
 from drafter.helpers.env_vars import EnvVars
 
+DEFAULT_PORT = 8000
+"""The port the development server uses unless one is chosen explicitly.
+When this port is busy, the server moves to the next free one; an
+explicitly chosen port is never moved."""
+
 
 @dataclass
 class AppServerConfiguration(BaseConfiguration):
@@ -63,7 +68,7 @@ class AppServerConfiguration(BaseConfiguration):
             file's directory even when a safety check would refuse it.
     """
 
-    port: int = 8000
+    port: int = DEFAULT_PORT
     host: str = "localhost"
     use_reloader: bool = True
     open_browser: bool = True
@@ -180,7 +185,10 @@ class AppServerConfiguration(BaseConfiguration):
         """
         group = parser.add_argument_group("App Server Configuration")
         group.add_argument(
-            "--port", type=int, default=8000, help="Port number for the server"
+            "--port",
+            type=int,
+            default=DEFAULT_PORT,
+            help="Port number for the server",
         )
         group.add_argument(
             "--host", type=str, default="localhost", help="Host address for the server"

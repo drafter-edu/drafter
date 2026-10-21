@@ -54,6 +54,14 @@ To stop the server, press Ctrl+C in the terminal, or use the
 reachable at your site's address plus `--stop-server`). Both end
 the program the same way.
 
+If you run your program again while an earlier run of the same file
+is still going, Drafter stops that earlier run first and keeps port
+8000. If something else holds port 8000 (another Drafter program, or
+a run that is stuck), Drafter uses the next free port instead and
+prints the new address. When you chose a port yourself with
+`--port`, Drafter never moves off it; it explains what is using the
+port and how to stop it.
+
 ## Appearance and production
 
 | Flag | Default | What it does |

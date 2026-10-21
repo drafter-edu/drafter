@@ -832,6 +832,11 @@ system; the Client (browser runtime) needs a virtual one.
   live-reload socket URL is present (`js/src/debug/dev_server.ts`); the `--stop-server` system
   route renders the same request as a page button, wired by the bridge like the bug-report
   download button (`EventManager.mount_stop_server_button` -> `DebugPanel.stopServer(false)`).
+- **Port pre-flight**: before uvicorn binds, `serve_app_once` calls `drafter.app.ports.prepare_port`,
+  which test-binds the configured address. When the port is busy it probes the `__drafter_status`
+  endpoint (version, main file, pid): an earlier run of the same file is asked to stop through
+  `__drafter_stop_server` and the port is reused; otherwise the default port moves to the next free
+  one (printed), while an explicitly chosen port raises a `StudentFacingError` naming the occupant.
 - **Uploads**: uploaded files are read into memory (`RuntimeAdapter.handle_file_upload`) as
   `{filename, content, type, size}` dicts and injected into the request data.
 - **Native directory mounting**: Pyodide can mount a real local directory via `mountNativeFS`, with

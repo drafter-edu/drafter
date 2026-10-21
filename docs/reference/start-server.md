@@ -66,7 +66,7 @@ All options other than the state are keyword arguments.
 | `favicon`       | `str`  | The small browser-tab icon: a URL or the path to an image file next to your program.                                                                                   |
 | `framed`        | `bool` | Whether the app sits inside Drafter's window frame. `set_website_framed(False)` is the usual way to turn this off for [deployment](../your-project/deploy/prepare.md). |
 | `in_debug_mode` | `bool` | Whether the debug panel appears. On by default while you develop; `hide_debug_information()` is the usual way to turn it off.                                          |
-| `port`          | `int`  | Which port the local development server listens on, when running from the command line.                                                                                |
+| `port`          | `int`  | Which port the local development server listens on, when running from the command line. The default port moves to the next free one when it is busy; a port you choose is never moved.  |
 | `host`          | `str`  | Which network interface the local development server binds.                                                                                                            |
 | `open_browser`  | `bool` | Whether running locally opens a browser tab automatically.                                                                                                             |
 | `browser`       | `str`  | Which browser opens the tab: `"chrome"`, `"firefox"`, `"safari"`, `"edge"`, or `"default"` for your computer's usual browser. Unset, Drafter uses Chrome if installed, then Firefox, then the default.  |

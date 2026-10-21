@@ -25,6 +25,7 @@ from starlette.staticfiles import StaticFiles
 from drafter.app.browser_launch import open_in_browser
 from drafter.app.error_log import append_error_log_entry, build_log_entry
 from drafter.app.hacks import DRAFTER_LOG_CONFIG_FOR_UVICORN
+from drafter.app.ports import prepare_port
 from drafter.app.source_recovery import (
     UNSAVED_SOURCE_FILENAME,
     main_file_is_available,
@@ -295,6 +296,31 @@ async def record_error_log(req) -> Response:
     return JSONResponse({"ok": written})
 
 
+async def server_status(req) -> Response:
+    """Identify this development server to another Drafter run.
+
+    When a new run finds its port busy it fetches this endpoint (see
+    drafter.app.ports.prepare_port) to tell an earlier Drafter run apart
+    from an unrelated program, and to learn which file that run serves so
+    it can safely take over the port.
+
+    Args:
+        req: Starlette request object.
+
+    Returns:
+        JSONResponse with the Drafter version ("drafter"), the main file
+        being served ("main_file"), and this process id ("pid").
+    """
+    app: Starlette = req.app  # type: ignore
+    return JSONResponse(
+        {
+            "drafter": CURRENT_DRAFTER_VERSION,
+            "main_file": str(app.state.user_path),
+            "pid": os.getpid(),
+        }
+    )
+
+
 async def stop_server(req) -> Response:
     """Stop the development server at the browser's request.
 
@@ -334,7 +360,7 @@ def make_app(
     """Build the Starlette application for the development server.
 
     Assembles routes for the index page, the live-reload websocket, the
-    error-log and stop-server endpoints, static assets, and (optionally)
+    error-log, stop-server, and status endpoints, static assets, and (optionally)
     user file serving/listing; sets up file watch
     paths; and optionally prerenders the initial page via the client server.
     The configuration, paths, reload hub, and prerendered content are stored
@@ -379,6 +405,7 @@ def make_app(
         WebSocketRoute("/" + INTERNAL_ROUTES["WS"], ws_endpoint),
         Route("/" + INTERNAL_ROUTES["ERROR_LOG"], record_error_log, methods=["POST"]),
         Route("/" + INTERNAL_ROUTES["STOP_SERVER"], stop_server, methods=["POST"]),
+        Route("/" + INTERNAL_ROUTES["STATUS"], server_status),
     ]
     # Handle default assets
     if not system.app_common.override_asset_url:
@@ -505,7 +532,9 @@ def serve_app_once(
 ):
     """Run the development server until it exits.
 
-    Validates that a main user file is configured, performs prerendering
+    Validates that a main user file is configured, makes sure the port is
+    usable (stopping an earlier run of the same file or moving off a busy
+    default port; see drafter.app.ports), performs prerendering
     configuration if enabled, builds the Starlette app via make_app, and
     serves it with uvicorn alongside a background file watcher that triggers
     live reloads. Optionally opens a web browser once the server has had a
@@ -523,8 +552,13 @@ def serve_app_once(
     Returns:
         None. Prints an error message and returns early if the main user
         file path is missing or prerendering configuration fails.
+
+    Raises:
+        StudentFacingError: If the main file cannot be found, or the
+            configured port is in use and cannot be taken over or moved.
     """
     user_source = _resolve_main_source(system)
+    prepare_port(system)
 
     # Configure the server if prerendering is needed
     if system.app_common.prerender_initial_page:
