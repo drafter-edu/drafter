@@ -5,6 +5,7 @@ to try installing from PyPI before a student's program runs.
 """
 
 import importlib.abc
+import importlib.metadata
 import importlib.util
 import sys
 
@@ -13,6 +14,7 @@ import pytest
 from drafter.helpers.imports import (
     find_imported_modules,
     find_missing_imports,
+    find_missing_requirements,
     is_importable,
 )
 
@@ -121,3 +123,35 @@ class TestFindMissingImports:
     @pytest.mark.parametrize("code", ["", "x = 1\n", "def broken(:\n"])
     def test_programs_without_usable_imports(self, code):
         assert find_missing_imports(code) == []
+
+
+class TestFindMissingRequirements:
+    def test_installed_requirements_are_not_reported(self):
+        # Everything Drafter itself requires is installed in the test venv.
+        assert find_missing_requirements(["drafter"]) == []
+
+    def test_unknown_distributions_are_ignored(self):
+        assert find_missing_requirements([MISSING, "also-not-real"]) == []
+
+    def test_reports_absent_requirements_once_and_sorted(self, monkeypatch):
+        def fake_requires(name):
+            if name == "chempy":
+                return [
+                    "numpy>=1.21",
+                    "sym>=0.3.7",
+                    'sphinx; extra == "docs"',
+                    "pytest",
+                    "sym>=0.3.7",
+                ]
+            raise importlib.metadata.PackageNotFoundError(name)
+
+        monkeypatch.setattr(importlib.metadata, "requires", fake_requires)
+
+        def fake_distribution(name):
+            if name in ("pytest",):
+                return object()
+            raise importlib.metadata.PackageNotFoundError(name)
+
+        monkeypatch.setattr(importlib.metadata, "distribution", fake_distribution)
+
+        assert find_missing_requirements(["chempy", "nope"]) == ["numpy", "sym"]

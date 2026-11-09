@@ -112,6 +112,8 @@ missing, the build stops with `ModuleNotFoundError`.
 | Flag | Default | What it does |
 | ---- | ------- | ------------ |
 | `--project-packages PKG` | none | Name a third-party package your app needs when automatic detection misses it; repeat the flag for each package. [Third-party libraries](../extend/packages.md) explains when. |
+| `--package-index URL` | none | An extra wheel index to search when a package has no wheel on PyPI: the address of a `wheels.json` file, with the wheel files in a `wheels/` folder beside it. Repeat the flag for several; they are searched in order, before Drafter's own index. See [Wheels Drafter hosts](../extend/packages.md#wheels-drafter-hosts). |
+| `--no-default-package-index` | off | Do not search Drafter's own wheel index (`https://drafter-edu.github.io/packages/wheels.json`). |
 
 ## Related
 

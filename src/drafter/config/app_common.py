@@ -36,6 +36,14 @@ DEFAULT_PYODIDE_BRANCH: PyodideBranch = "full"
 """Default Pyodide distribution branch."""
 
 
+DEFAULT_PACKAGE_INDEX = "https://drafter-edu.github.io/packages/wheels.json"
+"""Drafter's own wheel index: pure-Python wheels built for packages students
+use that PyPI only offers as source (ChemPy and its supporting packages, for
+example). Consulted after PyPI when a package or one of its dependencies has
+no installable wheel. The index is a JSON file listing wheel file names; the
+files live in a `wheels/` folder beside it."""
+
+
 @dataclass
 class AppCommonConfiguration(BaseConfiguration):
     """
@@ -57,6 +65,11 @@ class AppCommonConfiguration(BaseConfiguration):
             explicit system/project package lists.
         system_packages: List of system packages to load.
         project_packages: List of project-specific packages to load.
+        package_indexes: Extra wheel indexes (URLs of `wheels.json` files)
+            to search when a package or one of its dependencies has no
+            wheel on PyPI, in the order given. See `get_package_indexes`.
+        use_default_package_index: Whether Drafter's own wheel index
+            (`DEFAULT_PACKAGE_INDEX`) is searched after any extra indexes.
         pyodide_drafter_path: Optional custom path to the Drafter Pyodide package. If building from local, this is the relative path to the file (to be used as a URL). If using a CDN, this will be the full path to the wheel on PyPi or other CDN.
         pyodide_url: Base URL to load Pyodide from (e.g. the jsDelivr CDN root).
             The version and branch are appended to this; see `get_pyodide_url`.
@@ -77,6 +90,8 @@ class AppCommonConfiguration(BaseConfiguration):
 
     system_packages: list[str] | None = None
     project_packages: list[str] | None = None
+    package_indexes: list[str] | None = None
+    use_default_package_index: bool = True
     pyodide_drafter_path: str | None = None
     pyodide_url: str | None = DEFAULT_PYODIDE_URL
     pyodide_version: str | None = DEFAULT_PYODIDE_VERSION
@@ -93,6 +108,8 @@ class AppCommonConfiguration(BaseConfiguration):
         # initialize defaults after construction instead of using a list default.
         if self.system_packages is None:
             self.system_packages = list(DEFAULT_SYSTEM_PACKAGES)
+        if self.package_indexes is None:
+            self.package_indexes = []
         if self.pyodide_branch is not None and self.pyodide_branch not in (
             "full",
             "debug",
@@ -100,6 +117,25 @@ class AppCommonConfiguration(BaseConfiguration):
             raise ValueError(
                 f"pyodide_branch must be 'full' or 'debug', not {self.pyodide_branch!r}"
             )
+
+    def get_package_indexes(self) -> list[str]:
+        """The wheel indexes the browser searches, in order.
+
+        Extra indexes come first, in the order they were given, followed by
+        Drafter's own index unless `use_default_package_index` is off.
+        Duplicates are dropped.
+
+        Returns:
+            The list of `wheels.json` URLs to try after PyPI.
+        """
+        indexes: list[str] = []
+        for url in list(self.package_indexes or []) + (
+            [DEFAULT_PACKAGE_INDEX] if self.use_default_package_index else []
+        ):
+            cleaned = url.strip()
+            if cleaned and cleaned not in indexes:
+                indexes.append(cleaned)
+        return indexes
 
     def get_pyodide_url(self) -> str:
         """Compose the full URL that Pyodide is loaded from.
@@ -169,6 +205,12 @@ class AppCommonConfiguration(BaseConfiguration):
         result.get_string_list_if_exists(
             "DRAFTER_SYSTEM_PACKAGES", "system_packages", ";"
         )
+        result.get_string_list_if_exists(
+            "DRAFTER_PACKAGE_INDEXES", "package_indexes", ";"
+        )
+        result.get_bool_if_exists(
+            "DRAFTER_USE_DEFAULT_PACKAGE_INDEX", "use_default_package_index"
+        )
         return result.as_dict()
 
     @staticmethod
@@ -177,7 +219,8 @@ class AppCommonConfiguration(BaseConfiguration):
 
         Adds the "App Common Configuration" group with options such as
         --engine, --prerender-initial-page, --asset-directory, --site-title,
-        --project-packages, --system-packages, --pyodide-url,
+        --project-packages, --system-packages, --package-index,
+        --no-default-package-index, --pyodide-url,
         --pyodide-version, --pyodide-branch, and --pyodide-drafter-path.
 
         Args:
@@ -260,6 +303,26 @@ class AppCommonConfiguration(BaseConfiguration):
             help=f"System-specific Python package to load; repeat the flag for multiple packages. The defaults ({', '.join(repr(p) for p in DEFAULT_SYSTEM_PACKAGES)}) are usually fine, but you can override them if needed.",
         )
         group.add_argument(
+            "--package-index",
+            dest="package_indexes",
+            type=str,
+            action="append",
+            metavar="URL",
+            help=(
+                "Extra wheel index (a wheels.json URL) to search when a package "
+                "or one of its dependencies has no wheel on PyPI; repeat the flag "
+                f"for several. Drafter's own index ({DEFAULT_PACKAGE_INDEX}) is "
+                "always searched last unless --no-default-package-index is given."
+            ),
+        )
+        group.add_argument(
+            "--no-default-package-index",
+            dest="use_default_package_index",
+            action="store_false",
+            default=None,
+            help="Do not search Drafter's own wheel index for packages missing from PyPI",
+        )
+        group.add_argument(
             "--pyodide-url",
             type=str,
             help=f"Base URL for loading Pyodide; the version and branch are appended (default: '{DEFAULT_PYODIDE_URL}')",
@@ -321,6 +384,12 @@ class AppCommonConfiguration(BaseConfiguration):
             result["project_packages"] = list(parsed_args["project_packages"])
         if parsed_args.get("system_packages"):
             result["system_packages"] = list(parsed_args["system_packages"])
+        if parsed_args.get("package_indexes"):
+            result["package_indexes"] = list(parsed_args["package_indexes"])
+        if parsed_args.get("use_default_package_index") is not None:
+            result["use_default_package_index"] = parsed_args[
+                "use_default_package_index"
+            ]
         if parsed_args.get("pyodide_url"):
             result["pyodide_url"] = parsed_args["pyodide_url"]
         if parsed_args.get("pyodide_version"):

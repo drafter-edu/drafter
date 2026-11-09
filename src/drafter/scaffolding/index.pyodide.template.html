@@ -35,6 +35,7 @@
             studentFilename: {{ (system.app_common.show_filename_as if system.app_common.show_filename_as else system.bootstrap.get_main_filename()) | tojson }},
             loadPackagesAutomatically: {{ system.app_common.load_packages_automatically | tojson }},
             explicitPackageList: {{ system.app_common.project_packages | tojson }},
+            packageIndexes: {{ system.app_common.get_package_indexes() | tojson }},
             bootSettings: {
               pyodideUrl: absolute({{ system.app_common.get_pyodide_url() | tojson }}),
               systemPackages: {{ system.app_common.system_packages | tojson }},
@@ -81,6 +82,7 @@
         studentFilename: {{ (system.app_common.show_filename_as if system.app_common.show_filename_as else system.bootstrap.get_main_filename()) | tojson }},
         loadPackagesAutomatically: {{system.app_common.load_packages_automatically|tojson}},
         explicitPackageList: {{ system.app_common.project_packages | tojson }},
+        packageIndexes: {{ system.app_common.get_package_indexes() | tojson }},
       });
 
       // All done!

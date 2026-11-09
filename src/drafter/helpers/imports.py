@@ -14,7 +14,9 @@ PyPI, even though a package named `helpers` exists there.
 """
 
 import ast
+import importlib.metadata
 import importlib.util
+import re
 import sys
 
 
@@ -102,3 +104,54 @@ def find_missing_imports(code: str) -> list[str]:
         ```
     """
     return [name for name in find_imported_modules(code) if not is_importable(name)]
+
+
+REQUIREMENT_NAME_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+"""The project name at the front of a requirement such as `sym>=0.3.7`."""
+
+
+def find_missing_requirements(distributions: list[str]) -> list[str]:
+    """List the declared dependencies of installed packages that are absent.
+
+    Used after wheels are installed from a wheel index without dependency
+    resolution: the index supplies the pure-Python packages, and this
+    reports what else they declare they need, so the runtime can fetch
+    those (for example `sympy` from the browser's own distribution).
+
+    Requirements that apply only to an extra (`; extra == "docs"`) are
+    skipped. Other environment markers are not evaluated, so a requirement
+    meant for another platform may be reported; trying to install it is
+    harmless.
+
+    Args:
+        distributions: Installed distribution names to inspect. Names that
+            are not installed are ignored.
+
+    Returns:
+        The distinct missing requirement names, sorted.
+
+    Example:
+        ```python
+        find_missing_requirements(["chempy"])
+        # ['numpy', 'sympy'] when those are not installed yet
+        ```
+    """
+    missing: set[str] = set()
+    for distribution in distributions:
+        try:
+            requirements = importlib.metadata.requires(distribution) or []
+        except importlib.metadata.PackageNotFoundError:
+            continue
+        for text in requirements:
+            specifier, _, marker = text.partition(";")
+            if "extra" in marker:
+                continue
+            match = REQUIREMENT_NAME_PATTERN.match(specifier.strip())
+            if not match:
+                continue
+            name = match.group(0)
+            try:
+                importlib.metadata.distribution(name)
+            except importlib.metadata.PackageNotFoundError:
+                missing.add(name)
+    return sorted(missing)

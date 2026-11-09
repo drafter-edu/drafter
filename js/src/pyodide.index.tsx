@@ -22,6 +22,10 @@ import type { DrafterInitOptions } from "./bridge/engine";
 import { confirmDialog } from "./dialogs";
 import { clearDrafterSiteRoot, reportSystemError, installUncaughtErrorListeners } from "./bridge/engine";
 import {
+	installWithIndexes,
+	type PackageRuntime,
+} from "./package_index";
+import {
 	getStoredConfigurationOverrides,
 	initializeRuntimeConfigurationOverrides,
 	syncWindowConfigurationOverrides,
@@ -108,6 +112,8 @@ interface AppServerPyodideOptions {
 	studentFilename?: string;
 	loadPackagesAutomatically?: boolean;
 	explicitPackageList?: string[];
+	/** Wheel indexes (`wheels.json` URLs) searched when PyPI has no wheel. */
+	packageIndexes?: string[];
 	/** Root element this instance renders into. Defaults to "drafter-root--". */
 	rootElementId?: string;
 	/** Isolate this instance in a shadow root (default true unless set false). */
@@ -503,6 +509,7 @@ export async function createDrafterInstance(
 					loadPackagesAutomatically:
 						options.loadPackagesAutomatically,
 					explicitPackageList: options.explicitPackageList,
+					packageIndexes: options.packageIndexes,
 				};
 
 				try {
@@ -905,14 +912,108 @@ async function findMissingImports(pyodide: any, code: string): Promise<string[]>
 	}
 }
 
+const MISSING_REQUIREMENTS_SNIPPET = `
+import json as _json
+from drafter.helpers.imports import find_missing_requirements as _find_requirements
+_json.dumps(_find_requirements(list(__drafter_distributions)))
+`;
+
+const INSTALLED_DISTRIBUTIONS_SNIPPET = `
+import json as _json
+import importlib.metadata as _md
+_json.dumps(sorted({_d.metadata["Name"] for _d in _md.distributions() if _d.metadata["Name"]}))
+`;
+
 /**
- * Try to install, from PyPI, each library the student imports that Pyodide's
- * own package loading did not provide (seaborn is the usual example). A
- * library that cannot be installed is skipped quietly: its import then fails
- * in the student's program with the ordinary ModuleNotFoundError, whose
- * error page explains what to do.
+ * The live runtime as the wheel-index code sees it: micropip for installs
+ * and Python's own package metadata for what is installed and what the
+ * installed packages still need.
  */
-export async function installMissingImports(code: string): Promise<string[]> {
+function packageRuntime(pyodide: any, micropip: any): PackageRuntime {
+	return {
+		async install(specs, deps) {
+			if (typeof micropip.install?.callKwargs === "function") {
+				await micropip.install.callKwargs(specs, { deps });
+			} else {
+				await micropip.install(specs);
+			}
+		},
+		async missingRequirements(distributions) {
+			if (typeof pyodide?.runPythonAsync !== "function" || !pyodide.toPy) {
+				return [];
+			}
+			const globals = pyodide.toPy({ __drafter_distributions: distributions });
+			try {
+				const result = await pyodide.runPythonAsync(
+					MISSING_REQUIREMENTS_SNIPPET,
+					{ globals },
+				);
+				const names = JSON.parse(result);
+				return Array.isArray(names) ? names.map(String) : [];
+			} catch (error) {
+				console.warn(
+					"[Drafter] Could not check what the installed packages still need:",
+					error,
+				);
+				return [];
+			} finally {
+				globals.destroy?.();
+			}
+		},
+		async installedDistributions() {
+			if (typeof pyodide?.runPythonAsync !== "function") {
+				return new Set<string>();
+			}
+			try {
+				const names = JSON.parse(
+					await pyodide.runPythonAsync(INSTALLED_DISTRIBUTIONS_SNIPPET),
+				);
+				return new Set(
+					(Array.isArray(names) ? names : []).map((name: unknown) =>
+						String(name).trim().toLowerCase().replace(/[-_.]+/g, "-"),
+					),
+				);
+			} catch {
+				return new Set<string>();
+			}
+		},
+	};
+}
+
+/**
+ * Install one requirement: from PyPI, or from a wheel index that has it when
+ * PyPI cannot supply it (see package_index.ts). Logs what the index provided.
+ */
+async function installPackage(spec: string, indexes: string[]): Promise<void> {
+	const pyodide = (window as any).pyodide;
+	const micropip = (window as any).micropip;
+	const result = await installWithIndexes(
+		packageRuntime(pyodide, micropip),
+		spec,
+		indexes,
+	);
+	if (result.index) {
+		console.log(
+			`Installed ${spec} from the wheel index ${result.index}:`,
+			result.wheels.map((url) => url.split("/").pop()),
+			result.requirements.length > 0
+				? `plus ${result.requirements.join(", ")}`
+				: "",
+		);
+	}
+}
+
+/**
+ * Try to install each library the student imports that Pyodide's own
+ * package loading did not provide (seaborn is the usual example): from
+ * PyPI, then from the wheel indexes. A library that cannot be installed is
+ * skipped quietly: its import then fails in the student's program with the
+ * ordinary ModuleNotFoundError, whose error page explains what to do.
+ */
+export async function installMissingImports(
+	code: string,
+	indexes: string[] = [],
+): Promise<string[]> {
 	const pyodide = (window as any).pyodide;
 	const micropip = (window as any).micropip;
 	if (!micropip) {
@@ -924,7 +1025,7 @@ export async function installMissingImports(code: string): Promise<string[]> {
 			continue;
 		}
 		try {
-			await micropip.install(name);
+			await installPackage(name, indexes);
 			requestedPackageSpecs.add(name);
 			installed.push(name);
 		} catch (error) {
@@ -960,7 +1061,10 @@ export async function setupEnvironment(options: DrafterInitOptions) {
 			}
 			// Libraries outside Pyodide's own distribution (seaborn, for
 			// example) are not covered by loadPackagesFromImports.
-			await installMissingImports(options.code ?? "");
+			await installMissingImports(
+				options.code ?? "",
+				options.packageIndexes ?? [],
+			);
 		} catch (error) {
 			throw reportSystemError({
 				id: "runtime.package_load_failed",
@@ -980,7 +1084,7 @@ export async function setupEnvironment(options: DrafterInitOptions) {
 				continue;
 			}
 			try {
-				await (window as any).micropip.install(pkg);
+				await installPackage(pkg, options.packageIndexes ?? []);
 				requestedPackageSpecs.add(pkg);
 				loaded.push(pkg);
 			} catch (error) {
@@ -1213,6 +1317,8 @@ export interface DrafterHostRegistration {
 	studentFilename?: string;
 	loadPackagesAutomatically?: boolean;
 	explicitPackageList?: string[];
+	/** Wheel indexes (`wheels.json` URLs) searched when PyPI has no wheel. */
+	packageIndexes?: string[];
 	rootElementId?: string;
 	/** Defaults to false: the iframe already encapsulates HTML/CSS. */
 	useShadowDom?: boolean;
@@ -1295,6 +1401,7 @@ export class DrafterHost {
 			instanceId,
 			loadPackagesAutomatically: registration.loadPackagesAutomatically,
 			explicitPackageList: registration.explicitPackageList,
+			packageIndexes: registration.packageIndexes,
 		});
 		this.instances.set(instanceId, handle);
 		// Tear down when the embed's document goes away (reload or removal).
