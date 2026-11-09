@@ -206,6 +206,13 @@ pages:
     audience: S
     priority: P1
     outcome: Use real CSS with classes.
+  - path: add/change-appearance/css-frameworks.md
+    title: Use a CSS framework
+    template: how-to
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Style a site with Bootstrap or Tailwind classes.
   - path: add/change-appearance/gotchas.md
     title: Styling gotchas
     template: troubleshooting

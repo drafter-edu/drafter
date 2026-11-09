@@ -37,6 +37,7 @@ nav:
     - Styling functions and keywords: add/change-appearance/helpers.md
     - Design basics: add/change-appearance/design-basics.md
     - Custom CSS: add/change-appearance/custom-css.md
+    - Use a CSS framework: add/change-appearance/css-frameworks.md
     - Styling gotchas: add/change-appearance/gotchas.md
   - Add live behavior: add/live-behavior.md
   - Make things happen over time: add/timers.md
