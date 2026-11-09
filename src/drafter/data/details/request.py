@@ -94,8 +94,10 @@ class RequestParseEvent(TelemetryRecord):
         request_id: Unique identifier for this request
         representation: String representation of the parsed request
         arguments: Per-parameter provenance dicts (name, source,
-            source_detail, value, expected_type, converted, changed)
-            describing where each bound argument came from
+            source_detail, value, expected_type, converted, changed,
+            representation) describing where each bound argument came
+            from; `representation` is the describer's structured view of
+            the converted value, for thumbnails and the like, or None
         kind: Event-type discriminator, always "RequestParseEvent"
     """
 

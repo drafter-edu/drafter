@@ -752,6 +752,15 @@ on the event bus. The `ClientBridge` subscribes and currently reacts to changes 
 applied imperatively during site setup. **[PLANNED]**: reacting to more configuration keys
 (e.g., live title updates).
 
+Error reporting happens once per error object. `reportSystemError()` in `js/src/bridge/engine.ts`
+remembers every error it reports (a `WeakMap` keyed by the object) and skips the console and
+telemetry when the same object comes back through a higher layer or through the window `error` /
+`unhandledrejection` listeners that `installUncaughtErrorListeners()` adds to each window running
+an instance; a report that would show the error to the student still does so if no earlier report
+did. Downstream, `errorFingerprint()` in `js/src/debug/utils/errors.ts` (id, severity, first
+message line, raise site, route) lets the Current tab, the Log tab and the dev-server log sender
+fold repeats of one problem into a counter instead of listing them again.
+
 The favicon pipeline: the index template always renders a `<link rel="icon" id="drafter-favicon--">`
 whose href is `app_common.favicon` when set (CLI `--favicon` / `DRAFTER_FAVICON`), otherwise the
 built-in Drafter icon (`scaffolding/favicon.svg`, inlined as a data URI). The user-facing

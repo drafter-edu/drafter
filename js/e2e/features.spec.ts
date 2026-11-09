@@ -367,6 +367,62 @@ test("Convert HTML to Drafter loads its bundle on demand and converts", async ({
 	expect(transpilerRequests).toHaveLength(1);
 });
 
+// The History tab's visit rows are built from three events that arrive in
+// order (request, parse, response); only a real run shows the composed row.
+const HISTORY_APP = `
+from drafter import *
+
+@dataclass
+class State:
+    count: int
+
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        "Count: " + str(state.count),
+        TextBox("amount", "5"),
+        Button("Add", add),
+    ])
+
+@route
+def add(state: State, amount: int) -> Page:
+    state.count += amount
+    return index(state)
+
+start_server(State(0))
+`;
+
+test("the History tab shows each visit as a status, the call made, and its arguments", async ({
+	page,
+}) => {
+	await page.goto("/harness.html");
+	await page.evaluate(async (code) => {
+		await window.runExample(code);
+	}, HISTORY_APP);
+	await page.getByRole("button", { name: "Add" }).click();
+	await expect(page.locator("#drafter-root--")).toContainText("Count: 5");
+
+	const newest = page.locator(".history-event").first();
+	await expect(newest.locator(".drafter-history-status")).toHaveText("Success");
+	await expect(newest.locator(".drafter-history-call")).toHaveText(
+		"add(amount=5)",
+	);
+	await expect(newest.locator(".drafter-history-request-meta")).toHaveText(
+		/^\d+ ms$/,
+	);
+	// The form sent text; the int parameter received a number.
+	const argument = newest.locator(".drafter-history-arg").filter({
+		hasText: "amount",
+	});
+	await expect(argument).toContainText("form field");
+	await expect(argument.locator(".drafter-history-arg-converted")).toHaveText(
+		"→ 5",
+	);
+	await expect(
+		page.locator("[class*='drafter-debug-page-history-count']"),
+	).toHaveText("2 visits, newest first");
+});
+
 // Mirrors examples/piano.py: each key returns a Fragment holding a hidden,
 // auto-playing Tone. The tone used to wait forever for a page-loaded event
 // that only full page loads dispatched, so the piano made no sound.

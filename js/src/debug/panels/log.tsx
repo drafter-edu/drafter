@@ -7,6 +7,35 @@ interface LogEntry {
 }
 
 export class LogPanel extends Panel {
+	/** The most recent line, so an identical next line raises its count. */
+	private lastLine: { key: string; element: HTMLElement; count: number } | null =
+		null;
+
+	/**
+	 * Append a line, or when it repeats the previous line exactly, bump
+	 * that line's "×N" counter instead (a failing timer route would
+	 * otherwise fill the log with one line per tick).
+	 */
+	private appendLine(key: string, build: () => HTMLElement): void {
+		if (this.lastLine && this.lastLine.key === key) {
+			this.lastLine.count += 1;
+			let badge = this.lastLine.element.querySelector(
+				".drafter-debug-problem-count",
+			) as HTMLElement | null;
+			if (!badge) {
+				badge = (
+					<span class="drafter-debug-problem-count"></span>
+				) as HTMLElement;
+				this.lastLine.element.appendChild(badge);
+			}
+			badge.textContent = ` ×${this.lastLine.count}`;
+			return;
+		}
+		const element = build();
+		this.getContentElement().appendChild(element);
+		this.lastLine = { key, element, count: 1 };
+	}
+
 	constructor(containerId: string, instanceId: number, root: ParentNode = document) {
 		super(containerId, instanceId, "drafter-debug-log", "Event Log", root);
 	}
@@ -53,47 +82,45 @@ export class LogPanel extends Panel {
 	}
 
 	public renderLogWarning(warning: LogEntry): void {
-		const section = this.getContentElement();
 		const warningBullet = "\u26A0 "; // Unicode for warning sign
-
-		const newWarning = (
-			<div class="drafter-log-warning-item">
-				{warningBullet}
-				{warning.message}
-			</div>
+		this.appendLine(
+			`warning:${warning.message}`,
+			() =>
+				(
+					<div class="drafter-log-warning-item">
+						{warningBullet}
+						{warning.message}
+					</div>
+				) as HTMLElement,
 		);
-
-		section.appendChild(newWarning);
 	}
 
 	public renderLogError(error: LogEntry): void {
-		const section = this.getContentElement();
-
 		const errorBullet = "\u274C "; // Unicode for error
-
-		const newError = (
-			<div class="drafter-log-error-item">
-				{errorBullet}
-				{error.message}
-			</div>
+		this.appendLine(
+			`error:${error.message}`,
+			() =>
+				(
+					<div class="drafter-log-error-item">
+						{errorBullet}
+						{error.message}
+					</div>
+				) as HTMLElement,
 		);
-
-		section.appendChild(newError);
 	}
 
 	public renderLogInfo(info: LogEntry): void {
-		const section = this.getContentElement();
-
 		const bullet = "\u2022 "; // Unicode for bullet point
-
-		const newInfo = (
-			<div class="drafter-log-info-item">
-				{bullet}
-				{info.message}
-			</div>
+		this.appendLine(
+			`info:${info.message}`,
+			() =>
+				(
+					<div class="drafter-log-info-item">
+						{bullet}
+						{info.message}
+					</div>
+				) as HTMLElement,
 		);
-
-		section.appendChild(newInfo);
 	}
 
 	public renderLogDefault(message: string): void {

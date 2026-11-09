@@ -25,7 +25,8 @@
 			"value": "State(score=0)",
 			"expected_type": "",
 			"converted": null,
-			"changed": false
+			"changed": false,
+			"representation": null
 		},
 		{
 			"name": "name",
@@ -34,7 +35,14 @@
 			"value": "'Ada'",
 			"expected_type": "str",
 			"converted": null,
-			"changed": false
+			"changed": false,
+			"representation": {
+				"kind": "primitive",
+				"type": "str",
+				"value": "'Ada'",
+				"id": 140000001,
+				"complexity": 1
+			}
 		}
 	]
 }

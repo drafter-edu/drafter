@@ -214,7 +214,8 @@
 			"htmlconvert.failed": "Could not convert that HTML: {{message}}",
 			"htmlconvert.output_label": "Drafter code",
 			"htmlconvert.output_placeholder": "The converted Python will appear here.",
-			"htmlconvert.close": "Close"
+			"htmlconvert.close": "Close",
+			"current.problem_repeats": "This problem happened {{n}} times"
 		}
 	},
 	"es": {
@@ -406,7 +407,8 @@
 			"htmlconvert.failed": "No se pudo convertir ese HTML: {{message}}",
 			"htmlconvert.output_label": "Código de Drafter",
 			"htmlconvert.output_placeholder": "El Python convertido aparecerá aquí.",
-			"htmlconvert.close": "Cerrar"
+			"htmlconvert.close": "Cerrar",
+			"current.problem_repeats": "Este problema ocurrió {{n}} veces"
 		}
 	}
 }

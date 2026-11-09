@@ -20,7 +20,7 @@ import { DebugPanel } from "./debug";
 import { markDevServerDocument } from "./debug/dev_server";
 import type { DrafterInitOptions } from "./bridge/engine";
 import { confirmDialog } from "./dialogs";
-import { clearDrafterSiteRoot, reportSystemError } from "./bridge/engine";
+import { clearDrafterSiteRoot, reportSystemError, installUncaughtErrorListeners } from "./bridge/engine";
 import {
 	getStoredConfigurationOverrides,
 	initializeRuntimeConfigurationOverrides,
@@ -454,6 +454,12 @@ export async function createDrafterInstance(
 	// presence is what lets the debug panel offer to stop that server.
 	if (options.devWsUrl) {
 		markDevServerDocument(targetDocument ?? document);
+	}
+	// Errors that escape to the browser (in this window and in an embedded
+	// instance's own window) reach the debug panel too.
+	installUncaughtErrorListeners(window);
+	if (options.targetWindow && options.targetWindow !== window) {
+		installUncaughtErrorListeners(options.targetWindow);
 	}
 
 	let latestStudentCode: string | null = null;

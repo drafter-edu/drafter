@@ -10,6 +10,7 @@
  */
 import { collectSystemStatus } from "./saveload";
 import type { ErrorDetailsJson } from "./telemetry/errors";
+import { errorFingerprint } from "./utils/errors";
 
 /** Mirror of INTERNAL_ROUTES["ERROR_LOG"] in src/drafter/config/urls.py. */
 export const ERROR_LOG_PATH = "/__drafter_error_log";
@@ -27,6 +28,16 @@ const MAX_TEXT_LENGTH = 8000;
 
 /** Cap on friendly_steps entries kept per report. */
 const MAX_FRIENDLY_STEPS = 10;
+
+/** How many times one problem is written to the log per session before
+ * further repeats are only counted, keeping an error storm out of the file. */
+export const MAX_DELIVERIES_PER_PROBLEM = 3;
+
+/** A report as written to the log: the envelope plus how many times the
+ * same problem repeated while it waited in the batch. */
+export interface QueuedErrorReport extends ErrorDetailsJson {
+	repeat_count: number;
+}
 
 function truncate(text: string | null, limit: number): string | null {
 	if (typeof text !== "string" || text.length <= limit) {
@@ -117,7 +128,10 @@ function normalizeEnvelope(envelope: ErrorDetailsJson): ErrorDetailsJson {
 }
 
 export class DevServerErrorReporter {
-	private queue: ErrorDetailsJson[] = [];
+	private queue: QueuedErrorReport[] = [];
+	private queuedByFingerprint = new Map<string, QueuedErrorReport>();
+	/** How often each problem has been written to the log this session. */
+	private deliveries = new Map<string, number>();
 	private timer: ReturnType<typeof setTimeout> | null = null;
 	private disabled = false;
 	private inDebugMode = true;
@@ -134,10 +148,28 @@ export class DevServerErrorReporter {
 		if (this.disabled || !this.inDebugMode) {
 			return;
 		}
+		const fingerprint = errorFingerprint(envelope);
+		const queued = this.queuedByFingerprint.get(fingerprint);
+		if (queued) {
+			// The same problem again while the batch waits: count it on the
+			// report already queued instead of adding another copy.
+			queued.repeat_count += 1;
+			return;
+		}
+		const delivered = this.deliveries.get(fingerprint) ?? 0;
+		if (delivered >= MAX_DELIVERIES_PER_PROBLEM) {
+			return;
+		}
 		if (this.queue.length >= MAX_QUEUED_REPORTS) {
 			return;
 		}
-		this.queue.push(normalizeEnvelope(envelope));
+		const report: QueuedErrorReport = {
+			...normalizeEnvelope(envelope),
+			repeat_count: 1,
+		};
+		this.queue.push(report);
+		this.queuedByFingerprint.set(fingerprint, report);
+		this.deliveries.set(fingerprint, delivered + 1);
 		if (this.timer === null) {
 			this.timer = setTimeout(() => {
 				void this.flush();
@@ -155,6 +187,7 @@ export class DevServerErrorReporter {
 			return;
 		}
 		const reports = this.queue.splice(0);
+		this.queuedByFingerprint.clear();
 		const payload = {
 			kind: "drafter-error-report",
 			version: 1,

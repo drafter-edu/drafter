@@ -239,10 +239,18 @@ describe("RequestEvent / RequestParseEvent / ResponseEvent", () => {
 		const item = container().querySelector(".history-event") as HTMLElement;
 		expect(item).not.toBeNull();
 		expect(item.dataset.requestId).toBe("1");
-		expect(item.textContent).toContain("Visit:");
-		expect(item.textContent).toContain("via");
-		expect(item.textContent).toContain("click");
-		expect(item.textContent).toContain("(ID: 1)");
+		// The visit line: status, time, the call, Revisit. The action and id
+		// live in the expandable details.
+		expect(
+			item.querySelector(".drafter-history-status")?.textContent,
+		).toBe("Running…");
+		expect(item.querySelector(".drafter-history-call")?.textContent).toBe(
+			"index()",
+		);
+		const details = item.querySelector(".drafter-debug-provenance-details");
+		expect(details?.textContent).toContain("via");
+		expect(details?.textContent).toContain("click");
+		expect(details?.textContent).toContain("(ID: 1)");
 		expect(
 			item.querySelector(".drafter-history-request-url")?.textContent,
 		).toBe("index");
@@ -262,21 +270,33 @@ describe("RequestEvent / RequestParseEvent / ResponseEvent", () => {
 		);
 	});
 
-	test("RequestParseEvent renders a parameter provenance table", () => {
+	test("RequestParseEvent lists where each argument came from", () => {
 		const panel = createPanel();
 		panel.handleEvent(REQUEST_EVENT as RequestEvent);
 
 		panel.handleEvent(REQUEST_PARSE_EVENT as RequestParseEvent);
 
-		const table = container().querySelector(".drafter-debug-provenance");
-		expect(table).not.toBeNull();
-		const rows = Array.from(table!.querySelectorAll("tbody tr"));
+		const list = container().querySelector(".drafter-debug-provenance");
+		expect(list).not.toBeNull();
+		const rows = Array.from(list!.querySelectorAll(".drafter-history-arg"));
 		expect(rows).toHaveLength(2);
 		expect(rows[0].textContent).toContain("state");
 		expect(rows[0].textContent).toContain("current state");
 		expect(rows[1].textContent).toContain("name: str");
 		expect(rows[1].textContent).toContain("form field");
 		expect(rows[1].textContent).toContain("'Ada'");
+	});
+
+	test("RequestParseEvent turns the visit line into the call that was made", () => {
+		const panel = createPanel();
+		panel.handleEvent(REQUEST_EVENT as RequestEvent);
+
+		panel.handleEvent(REQUEST_PARSE_EVENT as RequestParseEvent);
+
+		// The state argument is always there, so it is left out.
+		expect(
+			container().querySelector(".drafter-history-call")?.textContent,
+		).toBe("index(name='Ada')");
 	});
 
 	test("history Revisit dispatches the url and kwargs for fallback replay", () => {
@@ -312,20 +332,27 @@ describe("RequestEvent / RequestParseEvent / ResponseEvent", () => {
 
 		const item = container().querySelector(".history-event") as HTMLElement;
 		expect(item.classList.contains("has-response")).toBe(true);
+		// The outcome is a word on the visit line, with the time taken.
+		const status = item.querySelector(".drafter-history-status");
+		expect(status?.textContent).toBe("Success");
+		expect(status?.classList.contains("is-ok")).toBe(true);
+		expect(
+			item.querySelector(".drafter-history-request-meta")?.textContent,
+		).toMatch(/^\d+ ms$/);
+		// The ids and raw status stay available, inside the details.
 		const summary = item.querySelector(
-			".drafter-debug-history-event-detail:last-of-type summary",
+			".drafter-debug-history-response-detail summary",
 		);
-		expect(summary?.textContent).toContain("ok");
-		expect(summary?.textContent).toContain("Request ID: 1");
-		expect(summary?.textContent).toContain("Response ID: 2");
-		// Green marker: no errors, no warnings.
-		expect(summary?.textContent).toContain("🟢");
+		expect(summary?.textContent).toContain("Page shown");
+		expect(summary?.textContent).toContain("request 1");
+		expect(summary?.textContent).toContain("response 2");
+		expect(summary?.textContent).toContain("status ok");
 		expect(item.querySelector("details pre")?.textContent).toContain(
 			"Hello, Ada!",
 		);
 	});
 
-	test("ResponseEvent with errors renders the red marker", () => {
+	test("ResponseEvent with errors marks the visit as an error", () => {
 		const panel = createPanel();
 		panel.handleEvent(REQUEST_EVENT as RequestEvent);
 		const fixture: ResponseEvent = {
@@ -336,7 +363,14 @@ describe("RequestEvent / RequestParseEvent / ResponseEvent", () => {
 
 		panel.handleEvent(fixture);
 
-		expect(container().textContent).toContain("🔴");
+		const status = container().querySelector(".drafter-history-status");
+		expect(status?.textContent).toBe("Error");
+		expect(status?.classList.contains("is-error")).toBe(true);
+		expect(
+			container().querySelector(
+				".drafter-debug-history-response-detail summary",
+			)?.textContent,
+		).toContain("Error page shown");
 	});
 
 	test("malformed: RequestParseEvent for an unknown request id is ignored", () => {

@@ -855,3 +855,8 @@ class TestRouterPipeline:
         assert by_name["answer"]["expected_type"] == "int"
         assert by_name["hint"]["source"] == "default"
         assert by_name["hint"]["value"] == "'none'"
+        # Each argument also carries the describer's structured view of its
+        # converted value, which the history tab draws.
+        assert by_name["answer"]["representation"]["kind"] == "primitive"
+        assert by_name["answer"]["representation"]["value"] == "5"
+        assert by_name["hint"]["representation"]["kind"] == "primitive"

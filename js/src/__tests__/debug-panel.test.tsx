@@ -49,7 +49,11 @@ import { reportSystemError, setSystemErrorSink } from "../bridge/engine";
 import { i18n } from "../i18n";
 import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrapper";
 import type { RouteAddedEvent } from "../debug/telemetry/routes";
-import type { RequestEvent, ResponseEvent } from "../debug/telemetry/requests";
+import type {
+	RequestEvent,
+	RequestParseEvent,
+	ResponseEvent,
+} from "../debug/telemetry/requests";
 import type {
 	InitialConfigurationEvent,
 	UpdatedConfigurationEvent,
@@ -64,6 +68,7 @@ import type { TelemetryRecord } from "../debug/telemetry";
 import ROUTE_ADDED from "./fixtures/telemetry/route-added.json";
 import REQUEST_EVENT from "./fixtures/telemetry/request-event.json";
 import RESPONSE_EVENT from "./fixtures/telemetry/response-event.json";
+import REQUEST_PARSE_EVENT from "./fixtures/telemetry/request-parse-event.json";
 import INITIAL_CONFIGURATION from "./fixtures/telemetry/initial-configuration.json";
 import UPDATED_CONFIGURATION from "./fixtures/telemetry/updated-configuration.json";
 import UPDATED_STATE from "./fixtures/telemetry/updated-state.json";
@@ -900,153 +905,194 @@ describe("history panel interactions", () => {
 		expect(historyList().children).toHaveLength(0);
 	});
 
-	test("pagination: six requests split into pages of five, newest first", () => {
+	test("the newest ten visits show, newest first, with a count line", () => {
 		const panel = createPanel();
-		for (let id = 1; id <= 6; id++) {
+		for (let id = 1; id <= 12; id++) {
 			panel.handleEvent(
 				requestEvent({ request_id: id, url: `page${id}` }),
 			);
 		}
 
-		let items = Array.from(
+		const items = Array.from(
 			historyList().querySelectorAll(".history-event"),
 		) as HTMLElement[];
-		expect(items).toHaveLength(5);
-		expect(items.map((item) => item.dataset.requestId)).toEqual([
-			"6",
-			"5",
-			"4",
-			"3",
-			"2",
-		]);
-
-		const pagination = container().querySelector(
-			"[class*='drafter-debug-page-history-pagination']",
-		) as HTMLElement;
+		expect(items).toHaveLength(10);
+		expect(items[0].dataset.requestId).toBe("12");
+		expect(items[9].dataset.requestId).toBe("3");
 		expect(
-			pagination.querySelector(".drafter-debug-page-history-page-label")
+			container().querySelector("[class*='drafter-debug-page-history-count']")
 				?.textContent,
-		).toContain("Page 1 of 2");
-		const [previous, next] = Array.from(
-			pagination.querySelectorAll(".drafter-debug-pagination-btn"),
-		) as HTMLButtonElement[];
-		expect(previous.disabled).toBe(true);
-		expect(next.disabled).toBe(false);
-
-		next.click();
-
-		items = Array.from(
-			historyList().querySelectorAll(".history-event"),
-		) as HTMLElement[];
-		expect(items).toHaveLength(1);
-		expect(items[0].dataset.requestId).toBe("1");
-		const [previous2, next2] = Array.from(
-			(
-				container().querySelector(
-					"[class*='drafter-debug-page-history-pagination']",
-				) as HTMLElement
-			).querySelectorAll(".drafter-debug-pagination-btn"),
-		) as HTMLButtonElement[];
-		expect(previous2.disabled).toBe(false);
-		expect(next2.disabled).toBe(true);
-
-		previous2.click();
-		expect(historyList().querySelectorAll(".history-event")).toHaveLength(
-			5,
-		);
+		).toBe("Showing the newest 10 of 12 visits");
 	});
 
-	test("pagination is replicated below the list and both bars work", () => {
+	test("'Show older visits' extends the list in place and names how many", () => {
 		const panel = createPanel();
-		for (let id = 1; id <= 6; id++) {
+		for (let id = 1; id <= 23; id++) {
 			panel.handleEvent(requestEvent({ request_id: id }));
 		}
+		const olderButton = () =>
+			container().querySelector(
+				".drafter-debug-history-older-btn",
+			) as HTMLButtonElement | null;
 
-		const bars = Array.from(
-			container().querySelectorAll(".drafter-debug-pagination-bar"),
+		expect(olderButton()?.textContent).toBe("Show 10 older visits");
+		olderButton()!.click();
+
+		expect(historyList().querySelectorAll(".history-event")).toHaveLength(20);
+		expect(olderButton()?.textContent).toBe("Show 3 older visits");
+		olderButton()!.click();
+
+		expect(historyList().querySelectorAll(".history-event")).toHaveLength(23);
+		expect(olderButton()).toBeNull();
+		expect(
+			container().querySelector("[class*='drafter-debug-page-history-count']")
+				?.textContent,
+		).toBe("23 visits, newest first");
+	});
+
+	test("with few visits there is no 'older' button and the count is plain", () => {
+		const panel = createPanel();
+		panel.handleEvent(requestEvent({ request_id: 1 }));
+
+		expect(
+			container().querySelector(".drafter-debug-history-older-btn"),
+		).toBeNull();
+		expect(
+			container().querySelector("[class*='drafter-debug-page-history-count']")
+				?.textContent,
+		).toBe("1 visit, newest first");
+	});
+
+	test("a new visit keeps the expanded list and appears at the top", () => {
+		const panel = createPanel();
+		for (let id = 1; id <= 12; id++) {
+			panel.handleEvent(requestEvent({ request_id: id }));
+		}
+		(
+			container().querySelector(
+				".drafter-debug-history-older-btn",
+			) as HTMLButtonElement
+		).click();
+
+		panel.handleEvent(requestEvent({ request_id: 13 }));
+
+		const items = Array.from(
+			historyList().querySelectorAll(".history-event"),
 		) as HTMLElement[];
-		expect(bars).toHaveLength(2);
-		// One bar above the list, one below it.
-		const list = historyList();
-		expect(
-			bars[0].compareDocumentPosition(list) &
-				Node.DOCUMENT_POSITION_FOLLOWING,
-		).toBeTruthy();
-		expect(
-			list.compareDocumentPosition(bars[1]) &
-				Node.DOCUMENT_POSITION_FOLLOWING,
-		).toBeTruthy();
-		// Both bars carry the same label and their own working buttons.
-		bars.forEach((bar) => {
-			expect(
-				bar.querySelector(".drafter-debug-page-history-page-label")
-					?.textContent,
-			).toContain("Page 1 of 2");
+		expect(items).toHaveLength(13);
+		expect(items[0].dataset.requestId).toBe("13");
+	});
+
+	test("a warning reported for a visit shows on its line", () => {
+		const panel = createPanel();
+		panel.handleEvent(requestEvent({ request_id: 5, url: "save" }));
+		panel.handleEvent({
+			kind: "request.unused_request_parameter",
+			metadata: { level: "warning" },
+			error: {
+				id: "request.unused_request_parameter",
+				category: "request",
+				severity: "warning",
+				message:
+					"The form field 'colour' was sent to 'save', but the function has no matching parameter.",
+				details: "",
+				traceback: null,
+				context: {
+					causation_id: null,
+					route: "save",
+					request_id: 5,
+					response_id: null,
+					dom_id: null,
+					phase: null,
+				},
+				status_code: "ok",
+				recoverable: true,
+			},
+		} as unknown as TelemetryRecord);
+		panel.handleEvent({
+			...(RESPONSE_EVENT as ResponseEvent),
+			request_id: 5,
+			has_warnings: true,
 		});
 
-		// The bottom bar's Next button paginates too.
-		const bottomNext = bars[1].querySelectorAll(
-			".drafter-debug-pagination-btn",
-		)[1] as HTMLButtonElement;
-		bottomNext.click();
+		const item = historyList().querySelector(".history-event") as HTMLElement;
+		const status = item.querySelector(".drafter-history-status");
+		expect(status?.textContent).toBe("1 warning");
+		expect(status?.classList.contains("is-warning")).toBe(true);
 		expect(
-			container().querySelector(".drafter-debug-page-history-page-label")
-				?.textContent,
-		).toContain("Page 2 of 2");
+			item.querySelector(".drafter-history-request-meta")?.textContent,
+		).toContain("'colour' was sent to 'save'");
 	});
 
-	test("a progress track shows how far through the results the page is", () => {
+	test("bulky arguments get a summary in the call and a preview below", () => {
 		const panel = createPanel();
-		for (let id = 1; id <= 8; id++) {
-			panel.handleEvent(requestEvent({ request_id: id }));
-		}
+		panel.handleEvent(requestEvent({ request_id: 1, url: "upload" }));
+		panel.handleEvent({
+			...(REQUEST_PARSE_EVENT as RequestParseEvent),
+			request_id: 1,
+			representation: "upload(state, portrait=<Picture>, ink=Color(...))",
+			arguments: [
+				{
+					name: "portrait",
+					source: "form_field",
+					source_detail: "portrait",
+					value: "{'__file_upload__': True, 'filename': 'ada.png', 'conte...",
+					expected_type: "Picture",
+					converted: "<Picture ada.png>",
+					changed: true,
+					representation: {
+						kind: "image",
+						type: "Picture",
+						id: 1,
+						complexity: 5,
+						value: "data:image/png;base64,AAAA",
+						filename: "ada.png",
+						width: 640,
+						height: 480,
+						mime: "image/png",
+					},
+				},
+				{
+					name: "ink",
+					source: "form_field",
+					source_detail: "ink",
+					value: "'#ff8800'",
+					expected_type: "Color",
+					converted: "Color(red=255, green=136, blue=0, alpha=255)",
+					changed: true,
+					representation: {
+						kind: "dataclass",
+						type: "Color",
+						id: 2,
+						complexity: 4,
+						fields: ["red", "green", "blue", "alpha"].map((name, i) => ({
+							name,
+							value: {
+								kind: "primitive",
+								type: "int",
+								value: [255, 136, 0, 255][i],
+								id: 10 + i,
+								complexity: 1,
+							},
+						})),
+					},
+				},
+			],
+		} as unknown as RequestParseEvent);
 
-		// Page 1 of 2 shows visits 1-5 of 8: 63% of the way through.
-		let progress = container().querySelector(
-			".drafter-debug-pagination-progress",
-		) as HTMLElement;
-		expect(progress.getAttribute("aria-valuenow")).toBe("63");
-		let fill = progress.querySelector(
-			".drafter-debug-pagination-progress-fill",
-		) as HTMLElement;
-		expect(fill.style.width).toBe("63%");
-
-		const next = container().querySelectorAll(
-			".drafter-debug-pagination-btn",
-		)[1] as HTMLButtonElement;
-		next.click();
-
-		// Page 2 reaches the end of the results.
-		progress = container().querySelector(
-			".drafter-debug-pagination-progress",
-		) as HTMLElement;
-		expect(progress.getAttribute("aria-valuenow")).toBe("100");
-		fill = progress.querySelector(
-			".drafter-debug-pagination-progress-fill",
-		) as HTMLElement;
-		expect(fill.style.width).toBe("100%");
-	});
-
-	test("a new request resets pagination to page 1", () => {
-		const panel = createPanel();
-		for (let id = 1; id <= 6; id++) {
-			panel.handleEvent(requestEvent({ request_id: id }));
-		}
-		const next = Array.from(
-			container().querySelectorAll(".drafter-debug-pagination-btn"),
-		)[1] as HTMLButtonElement;
-		next.click();
-
-		panel.handleEvent(requestEvent({ request_id: 7 }));
-
+		const item = historyList().querySelector(".history-event") as HTMLElement;
+		expect(item.querySelector(".drafter-history-call")?.textContent).toBe(
+			"upload(portrait=<Picture ada.png 640×480>, ink=Color(#ff8800))",
+		);
+		// The picture's thumbnail comes from the shared state renderer.
 		expect(
-			container().querySelector(".drafter-debug-page-history-page-label")
-				?.textContent,
-		).toContain("Page 1 of 2");
-		expect(
-			(historyList().querySelector(".history-event") as HTMLElement)
-				.dataset.requestId,
-		).toBe("7");
+			item.querySelector(".drafter-history-arg-preview img")?.getAttribute("src"),
+		).toBe("data:image/png;base64,AAAA");
+		// The color gets a swatch of itself.
+		const swatch = item.querySelector(
+			".drafter-history-arg-swatch",
+		) as HTMLElement;
+		expect(swatch.style.backgroundColor).toBe("rgb(255, 136, 0)");
 	});
 
 	test("clear history asks for confirmation and clears when accepted", () => {
@@ -1134,10 +1180,10 @@ describe("history panel interactions", () => {
 		// reliably across versions).
 		detailBlocks.forEach((details) => expect(details.open).toBe(false));
 		expect(detailBlocks[0].querySelector("summary")?.textContent).toBe(
-			"Request",
+			"Where these values came from",
 		);
 		expect(detailBlocks[1].querySelector("summary")?.textContent).toContain(
-			"Response:",
+			"Page shown",
 		);
 
 		detailBlocks[1].open = true;
