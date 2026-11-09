@@ -712,6 +712,14 @@ pages:
     priority: P2
     outcome: Use the camera result type.
     symbols: [Photo]
+  - path: reference/data-types/color.md
+    title: Color
+    template: reference
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Work with a color as red, green, blue, and alpha amounts.
+    symbols: [Color]
   - path: reference/data-types/location-types.md
     title: Location and map types
     template: reference

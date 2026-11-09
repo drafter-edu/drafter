@@ -3,7 +3,7 @@ Slider and ColorPicker inputs (drafter-edu/drafter#28)."""
 
 import pytest
 
-from drafter import ColorPicker, SelectBox, Slider
+from drafter import Color, ColorPicker, SelectBox, Slider
 from drafter.data.converter import ConversionContext
 from drafter.data.errors import StudentFacingError
 from drafter.payloads.renderer import render
@@ -111,10 +111,35 @@ class TestColorPicker:
         picker = ColorPicker("ink")
 
         assert picker.default_value == "#000000"
+        assert picker.alpha is False
         assert "value=" not in render(picker).flatten()
 
-    def test_hex_codes_are_normalized_to_lowercase(self):
-        assert ColorPicker("ink", "#FF8800").default_value == "#ff8800"
+    @pytest.mark.parametrize(
+        "written",
+        [
+            "#FF8800",
+            "#f80",
+            "#ff8800",
+            [255, 136, 0],
+            (255, 136, 0),
+            Color(255, 136, 0),
+        ],
+    )
+    def test_every_spelling_becomes_the_same_hex_code(self, written):
+        assert ColorPicker("ink", written).default_value == "#ff8800"
+
+    def test_color_names_are_accepted(self):
+        assert ColorPicker("ink", "tomato").default_value == "#ff6347"
+        assert ColorPicker("ink", "Steel Blue").default_value == "#4682b4"
+
+    def test_pickers_with_the_same_color_are_equal(self):
+        assert ColorPicker("ink", "red") == ColorPicker("ink", "#ff0000")
+        assert ColorPicker("ink", "red") != ColorPicker("ink", "blue")
+
+    def test_alpha_in_the_starting_color_is_dropped_without_alpha(self):
+        assert ColorPicker("ink", "#ff880080").default_value == "#ff8800"
+        assert ColorPicker("ink", [255, 136, 0, 128]).default_value == "#ff8800"
+        assert ColorPicker("ink", Color(255, 136, 0, 128)).default_value == "#ff8800"
 
     def test_submitted_color_arrives_as_text(self):
         result = convert("#ff8800", str)
@@ -122,15 +147,72 @@ class TestColorPicker:
         assert result.ok and result.value == "#ff8800"
 
     @pytest.mark.parametrize(
-        "bad_color", ["red", "ff8800", "#f80", "#ff88000", "#gg8800", "", None, 255]
+        "bad_color", ["tomatoe", "ff8800", "#ff88000", "#gg8800", "", None, 255, [1, 2]]
     )
-    def test_anything_but_six_digit_hex_is_rejected(self, bad_color):
+    def test_unreadable_colors_are_rejected(self, bad_color):
         with pytest.raises(StudentFacingError) as raised:
             ColorPicker("ink", bad_color)
 
-        assert "hex color like '#ff8800'" in str(raised.value)
+        assert raised.value.friendly_message
         assert raised.value.friendly_steps
 
     def test_name_must_be_a_valid_parameter_name(self):
         with pytest.raises(ValueError, match="2nd"):
             ColorPicker("2nd")
+
+
+class TestColorPickerAlpha:
+    def render(self, *args, **kwargs) -> str:
+        return render(ColorPicker(*args, alpha=True, **kwargs)).flatten()
+
+    def test_default_is_solid_black_with_alpha_digits(self):
+        assert ColorPicker("ink", alpha=True).default_value == "#000000ff"
+
+    def test_starting_color_keeps_its_alpha(self):
+        assert ColorPicker("ink", "#ff880080", alpha=True).default_value == (
+            "#ff880080"
+        )
+        assert ColorPicker("ink", [255, 136, 0, 64], alpha=True).default_value == (
+            "#ff880040"
+        )
+        assert ColorPicker("ink", Color(255, 136, 0, 0), alpha=True).default_value == (
+            "#ff880000"
+        )
+
+    def test_solid_starting_color_gets_full_alpha(self):
+        assert ColorPicker("ink", "tomato", alpha=True).default_value == "#ff6347ff"
+
+    def test_only_the_hidden_field_is_submitted(self):
+        html = self.render("ink", "#ff880080")
+
+        assert html.count('name="ink"') == 1
+        assert '<input name="ink" type="hidden" value="#ff880080"/>' in html
+
+    def test_swatch_shows_the_solid_part_and_slider_the_alpha(self):
+        html = self.render("ink", "#ff880080")
+
+        assert 'type="color" value="#ff8800"' in html
+        assert 'type="range" value="128"' in html
+        assert 'max="255" min="0"' in html
+
+    def test_both_controls_are_labelled_and_the_swatch_owns_the_id(self):
+        html = self.render("ink")
+
+        assert 'aria-label="ink" id="ink"' in html
+        assert 'aria-label="ink opacity"' in html
+        assert html.count('id="ink"') == 1
+
+    def test_styles_and_handlers_go_on_the_wrapper(self):
+        html = self.render("ink", on_change="recolor", style_margin="4px")
+
+        wrapper = html.split(">", 1)[0]
+        assert wrapper.startswith("<span")
+        assert "margin: 4px" in wrapper
+        assert "recolor" in wrapper
+
+    def test_repr_round_trips(self):
+        picker = ColorPicker("ink", "#ff880080", alpha=True)
+
+        assert repr(picker) == "ColorPicker('ink', '#ff880080', True)"
+        assert eval(repr(picker)) == picker
+        assert picker != ColorPicker("ink", "#ff8800")

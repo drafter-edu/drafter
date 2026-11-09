@@ -160,6 +160,11 @@ snippets = {
         "with_default": """ColorPicker('favorite', '#3366ff')""",
         "with_style": """ColorPicker('ink', style_width='80px')""",
         "with_handler": """ColorPicker('ink', '#ff8800', on_change='recolor')""",
+        "from_name": """ColorPicker('ink', 'tomato')""",
+        "from_short_hex": """ColorPicker('ink', '#f80')""",
+        "from_list": """ColorPicker('ink', [255, 136, 0])""",
+        "with_alpha": """ColorPicker('ink', '#ff880080', alpha=True)""",
+        "with_alpha_from_list": """ColorPicker('ink', [255, 136, 0, 64], alpha=True)""",
     },
     "link": {
         "simple": """Link('Click here', 'next_page')""",

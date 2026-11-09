@@ -247,6 +247,69 @@ test("a stylesheet that fails to load shows a dismissible notice", async ({
 	await expect(notice).toHaveCount(0);
 });
 
+// Slider and ColorPicker submit through real browser controls, which jsdom
+// only imitates: the range input's stepping, the color input's value
+// normalization, and (with alpha on) the inline handlers that keep the
+// hidden field in step with the swatch and the opacity slider.
+const PICKERS_APP = `
+from drafter import *
+hide_debug_information()
+
+@dataclass
+class State:
+    report: str
+
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        Output("report", [state.report]),
+        Slider("size", 0, 100, 25, step=5),
+        ColorPicker("plain", "tomato"),
+        ColorPicker("glass", [51, 102, 255, 255], alpha=True),
+        Button("Send", save),
+    ])
+
+@route
+def save(state: State, size: int, plain: list[int], glass: Color) -> Page:
+    state.report = (
+        "size=" + str(size)
+        + " plain=" + str(plain)
+        + " glass=" + str(glass.to_list(alpha=True))
+        + " hex=" + glass.to_hex()
+    )
+    return index(state)
+
+start_server(State("nothing sent yet"))
+`;
+
+test("Slider and ColorPicker deliver their values in the annotated forms", async ({
+	page,
+}) => {
+	await page.goto("/harness.html");
+	await page.evaluate(async (code) => {
+		await window.runExample(code);
+	}, PICKERS_APP);
+	const root = page.locator("#drafter-root--");
+	await expect(root).toContainText("nothing sent yet");
+
+	// Untouched controls submit their starting values: the named color and
+	// the list were both turned into hex codes for the browser.
+	await page.getByRole("button", { name: "Send" }).click();
+	await expect(root).toContainText(
+		"size=25 plain=[255, 99, 71] glass=[51, 102, 255, 255] hex=#3366ff",
+	);
+
+	// Change all three the way a visitor would.
+	await page.locator('input[name="size"]').fill("60");
+	await page.locator('input[name="plain"]').fill("#00ff00");
+	await page.locator("#glass").fill("#ff8800");
+	await page.getByLabel("glass opacity").fill("128");
+	await page.getByRole("button", { name: "Send" }).click();
+	await expect(root).toContainText(
+		"size=60 plain=[0, 255, 0] glass=[255, 136, 0, 128] hex=#ff880080",
+	);
+});
+
 // Mirrors examples/piano.py: each key returns a Fragment holding a hidden,
 // auto-playing Tone. The tone used to wait forever for a page-loaded event
 // that only full page loads dispatched, so the piano made no sound.

@@ -169,6 +169,7 @@ nav:
     - reference/data-types/index.md
     - Picture: reference/data-types/picture.md
     - Photo: reference/data-types/photo.md
+    - Color: reference/data-types/color.md
     - Location and map types: reference/data-types/location-types.md
     - File types: reference/data-types/file-types.md
     - Audio types: reference/data-types/audio-types.md

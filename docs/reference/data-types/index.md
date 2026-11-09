@@ -23,6 +23,10 @@ functions, and compare them in tests.
 - [Photo](photo.md): the value a
   [Camera](../components/capture/camera.md) passes to your route,
   combining a picture with a status.
+- [Color](color.md): a color as red, green, blue, and alpha amounts,
+  which is one of the forms a
+  [ColorPicker](../components/input/colorpicker.md) can pass to your
+  route.
 - [Location and map types](location-types.md): values that describe
   positions, used with [Map](../components/place/map.md) and
   [CurrentLocation](../components/place/currentlocation.md).

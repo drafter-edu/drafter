@@ -172,6 +172,17 @@ tests.colorpicker_with_default = """
 """
 
 
+tests.colorpicker_from_name = ColorPicker("favorite", "tomato")
+tests.colorpicker_from_name = """
+<input aria-label="favorite" id="favorite" name="favorite" type="color" value="#ff6347">
+"""
+
+tests.colorpicker_from_list = ColorPicker("favorite", [51, 102, 255])
+tests.colorpicker_from_list = """
+<input aria-label="favorite" id="favorite" name="favorite" type="color" value="#3366ff">
+"""
+
+
 tests.arguments_outside = Argument("secret_message", "It's a secret to everybody!")
 tests.arguments_outside = """
 <input data-transform='json-decode' id="secret_message" name="secret_message" type="hidden" value="&quot;It's a secret to everybody!&quot;">

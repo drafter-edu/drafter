@@ -130,6 +130,7 @@ from drafter.components import (
 
 # Handle configuration if needed
 from drafter.configuration import get_system_configuration
+from drafter.data.colors import Color
 from drafter.data.files import DrafterBinaryFile, DrafterTextFile
 from drafter.data.images import Picture
 from drafter.deploy import (
@@ -278,6 +279,7 @@ __all__ = [
     "TimeInput",
     "Slider",
     "ColorPicker",
+    "Color",
     "CurrentLocation",
     "Map",
     "MapLocation",

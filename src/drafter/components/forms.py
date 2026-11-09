@@ -9,7 +9,6 @@ Each field's `name` becomes a parameter of the route that the enclosing
 page submits to.
 """
 
-import re
 from dataclasses import dataclass
 from datetime import date, datetime, time
 from typing import Any
@@ -17,6 +16,7 @@ from typing import Any
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import NewlineMode, RenderPlan
 from drafter.components.utilities.validation import validate_parameter_name
+from drafter.data.colors import Color, to_color
 from drafter.data.errors import StudentFacingError
 
 
@@ -825,79 +825,179 @@ class Slider(FormComponent):
         self.extra_settings = kwargs
 
 
-HEX_COLOR_PATTERN = re.compile(r"#[0-9a-fA-F]{6}")
-"""The only color format a browser's color picker accepts as its starting
-value: a hash sign and six hexadecimal digits, such as `#ff8800`."""
+ALPHA_SLIDER_SCRIPT = (
+    "var h=this.parentNode.querySelector('input[type=hidden]');"
+    "h.value=h.value.slice(0,7)+('0'+Number(this.value).toString(16)).slice(-2);"
+)
+"""Inline handler for a ColorPicker's opacity slider: rewrites the last two
+hex digits of the hidden field that is actually submitted."""
+
+ALPHA_SWATCH_SCRIPT = (
+    "var h=this.parentNode.querySelector('input[type=hidden]');"
+    "h.value=this.value+h.value.slice(7);"
+)
+"""Inline handler for a ColorPicker's swatch when alpha is on: rewrites the
+first six hex digits of the hidden field, keeping its alpha digits."""
 
 
 @dataclass(repr=False)
 class ColorPicker(FormComponent):
     """A swatch that opens the browser's color chooser.
 
-    The chosen color arrives at the route as a string parameter with the
-    field's name, written as a hex code such as `"#ff8800"`. That string
-    can be used anywhere Drafter takes a color, like `style_color` or
-    `change_background_color`.
+    The chosen color arrives at the route as a parameter with the field's
+    name. Annotate that parameter as `str` to receive a hex code such as
+    `"#ff8800"`, as `Color` to receive a `Color` value with `red`,
+    `green`, `blue`, and `alpha` fields, or as `list[int]` to receive the
+    amounts as numbers.
+
+    With `alpha=True` a second control appears next to the swatch for how
+    see-through the color is, and the submitted color carries that amount
+    as well (`"#ff880080"`, a fourth list item, or `Color.alpha`).
 
     Attributes:
-        default_value: The color the picker starts on, as a `#rrggbb` hex
-            code.
+        default_value: The color the picker starts on, as a lowercase hex
+            code: `#rrggbb`, or `#rrggbbaa` when `alpha` is on.
+        alpha: Whether the picker also collects how see-through the color
+            is.
         tag: The HTML tag name, always 'input'.
 
     Example:
         ```python
-        ColorPicker("favorite_color", "#3366ff")
+        ColorPicker("favorite_color", "tomato")
         ```
     """
 
     default_value: str
+    alpha: bool
 
     tag = "input"
     SELF_CLOSING_TAG = True
     KNOWN_ATTRS = ["type", "name", "value"]
     DEFAULT_ATTRS = {"type": "color"}
-    RENAME_ATTRS = {"default_value": "value"}
+    RENAME_ATTRS = {"default_value": "value", "alpha": ""}
 
     ARGUMENTS = [
         ComponentArgument("name"),
         ComponentArgument("default_value", kind="keyword", default_value="#000000"),
+        ComponentArgument("alpha", kind="keyword", default_value=False),
     ]
 
-    def __init__(self, name: str, default_value: str = "#000000", **kwargs):
+    def __init__(
+        self,
+        name: str,
+        default_value: str | list[int] | tuple[int, ...] | Color = "#000000",
+        alpha: bool = False,
+        **kwargs,
+    ):
         """Initialize color picker component.
 
         Args:
             name: The form field name, matching a parameter of the route
                 that receives the form.
-            default_value: The starting color as a `#rrggbb` hex code.
-                Defaults to black (`"#000000"`).
+            default_value: The starting color, written any of these ways:
+                a hex code (`"#ff8800"` or the short `"#f80"`), a browser
+                color name (`"tomato"`), a list or tuple of red, green,
+                and blue amounts from 0 to 255 (`[255, 136, 0]`), or a
+                `Color`. Defaults to black.
+            alpha: Whether to also collect how see-through the color is.
+                When True, the starting color keeps its alpha amount (a
+                fourth list item, or the last two digits of an 8-digit
+                hex code) and the submitted color includes one. When
+                False (the default), any alpha amount in the starting
+                color is dropped and the submitted color is always solid.
             **kwargs: Additional HTML attributes and styles.
 
         Raises:
-            StudentFacingError: If `default_value` is not a `#rrggbb` hex
-                code. Browsers silently replace anything else with black,
+            StudentFacingError: If `default_value` cannot be read as a
+                color. A browser would silently replace it with black,
                 which would hide the mistake.
         """
         validate_parameter_name(name, "ColorPicker")
-        if not isinstance(default_value, str) or not HEX_COLOR_PATTERN.fullmatch(
-            default_value
-        ):
-            raise StudentFacingError(
-                f"ColorPicker default_value must be a hex color like '#ff8800', "
-                f"but got {default_value!r}.",
-                friendly=(
-                    f"The starting color you gave ColorPicker was "
-                    f"{default_value!r}. A color picker only understands "
-                    "colors written as a hash sign followed by six digits "
-                    "or letters a-f, like '#ff8800'. Color names such as "
-                    "'red' do not work here."
-                ),
-                steps=(
-                    "Write the color as a hex code, for example '#ff0000' for red.",
-                    "Search the web for 'color picker' to find the hex code "
-                    "of any color.",
-                ),
-            )
         self.name = name
-        self.default_value = default_value.lower()
+        self.alpha = bool(alpha)
+        self.default_value = to_color(default_value).to_hex(alpha=self.alpha)
         self.extra_settings = kwargs
+
+    def plan(self, context) -> RenderPlan:
+        """Plan the picker: one color input, or a group when alpha is on.
+
+        Browsers' color inputs only hold solid `#rrggbb` colors. With
+        alpha on, the value that is submitted therefore lives in a hidden
+        input holding the full `#rrggbbaa` code, and two visible controls
+        (the swatch and an opacity slider) each rewrite their part of it
+        as the visitor adjusts them.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            A tag RenderPlan for the single input, or for a span wrapping
+            the hidden input, the swatch, and the opacity slider.
+        """
+        if not self.alpha:
+            return self._plan_tag(context)
+
+        solid_part = self.default_value[:7]
+        alpha_amount = int(self.default_value[7:9], 16)
+        hidden_plan = RenderPlan(
+            kind="tag",
+            tag_name="input",
+            attributes={
+                "type": "hidden",
+                "name": self.name,
+                "value": self.default_value,
+            },
+            self_closing=True,
+            known_attributes=["type", "name", "value"],
+        )
+        swatch_plan = RenderPlan(
+            kind="tag",
+            tag_name="input",
+            attributes={
+                "type": "color",
+                "id": self.get_id(),
+                "value": solid_part,
+                "aria-label": self.name,
+                "oninput": ALPHA_SWATCH_SCRIPT,
+            },
+            self_closing=True,
+            known_attributes=["type", "id", "value", "aria-label", "oninput"],
+        )
+        slider_plan = RenderPlan(
+            kind="tag",
+            tag_name="input",
+            attributes={
+                "type": "range",
+                "min": 0,
+                "max": 255,
+                "value": alpha_amount,
+                "aria-label": f"{self.name} opacity",
+                "title": "Opacity",
+                "oninput": ALPHA_SLIDER_SCRIPT,
+            },
+            self_closing=True,
+            known_attributes=[
+                "type",
+                "min",
+                "max",
+                "value",
+                "aria-label",
+                "title",
+                "oninput",
+            ],
+        )
+        # The wrapper carries the styles and event handlers the student
+        # asked for; input and change events from the two visible controls
+        # bubble up to it. The id stays on the swatch, so a Label written
+        # for the picker still points at something a visitor can click.
+        attributes = self._handle_extra_settings({}, context, {})
+        attributes.pop("id", None)
+        return RenderPlan(
+            kind="tag",
+            tag_name="span",
+            attributes=attributes,
+            children=[hidden_plan, swatch_plan, slider_plan],
+            known_attributes=[],
+            newline_mode=NewlineMode.RETAIN,
+            children_are_content=False,
+        )
