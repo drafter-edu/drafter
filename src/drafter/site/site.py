@@ -42,6 +42,7 @@ DRAFTER_TAG_IDS = {
     "PADDING_V": "drafter-padding-v--",
     "PADDING_H": "drafter-padding-h--",
     "FAVICON": "drafter-favicon--",
+    "STYLESHEET_NOTICE": "drafter-stylesheet-notice--",
 }
 """Well-known element ids of the site frame structure, keyed by role.
 The trailing double hyphen marks them as Drafter-internal."""

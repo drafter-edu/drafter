@@ -209,7 +209,7 @@ def add_style(
 
 def add_link(
     root, css_link: str, is_page_specific: bool = False, with_class: str = ""
-) -> None:
+) -> Any:
     """Adds a link element to the page for CSS files.
 
     Creates a `<link rel="stylesheet">` element and appends it to the head
@@ -318,8 +318,17 @@ def insert_html_before(root, html_content: str, anchor) -> None:
     root.insertBefore(template.content, anchor)
 
 
-def add_link_to_shadow(shadow_root, css_link: str, with_class: str = "") -> None:
-    """Adds a link element to the shadow DOM for CSS files."""
+def add_link_to_shadow(shadow_root, css_link: str, with_class: str = "") -> Any:
+    """Adds a link element to the shadow DOM for CSS files.
+
+    Args:
+        shadow_root: The shadow root that receives the link.
+        css_link: URL of the CSS file to link.
+        with_class: Optional class attribute to set on the link element.
+
+    Returns:
+        The created `<link>` element that was appended to the shadow root.
+    """
     link = get_document(shadow_root).createElement("link")
     link.setAttribute("type", "text/css")
     link.setAttribute("rel", "stylesheet")
@@ -327,6 +336,69 @@ def add_link_to_shadow(shadow_root, css_link: str, with_class: str = "") -> None
     if with_class:
         link.setAttribute("class", with_class)
     shadow_root.appendChild(link)
+    return link
+
+
+STYLESHEET_NOTICE_TEXT = (
+    "Some of this page's styling did not load, so the page may look plain "
+    "or out of place. Try reloading the page. If it still looks wrong, the "
+    "file below may be missing, or your network may be blocking it."
+)
+"""Message shown in the page when a stylesheet could not be loaded."""
+
+STYLESHEET_NOTICE_STYLE = (
+    "display: block; margin: 0 0 8px 0; padding: 8px 12px; "
+    "border: 1px solid #b45309; border-radius: 4px; "
+    "background: #fffbeb; color: #1f2937; "
+    "font: 14px/1.4 system-ui, sans-serif; text-align: left;"
+)
+"""Inline styling for the stylesheet notice. It has to be inline: the
+notice exists precisely because a stylesheet is missing."""
+
+
+def show_stylesheet_notice(scope: Any, css_url: str) -> Any:
+    """Show, at the top of the site, that a stylesheet failed to load.
+
+    The first failure creates the notice; later failures add their file to
+    the same notice, and a file that is already listed is not repeated.
+    The notice is built from DOM nodes with `textContent` (never parsed as
+    HTML), so a stylesheet URL can never inject markup. Its Dismiss button
+    removes it without any Python listener.
+
+    Args:
+        scope: The node the site renders into (root element or shadow
+            root); the notice becomes its first child.
+        css_url: The stylesheet address that could not be loaded.
+
+    Returns:
+        The notice element.
+    """
+    document = get_document(scope)
+    notice = scope.querySelector("#" + DRAFTER_TAG_IDS["STYLESHEET_NOTICE"])
+    if not notice:
+        notice = document.createElement("div")
+        notice.setAttribute("id", DRAFTER_TAG_IDS["STYLESHEET_NOTICE"])
+        notice.setAttribute("role", "status")
+        notice.setAttribute("style", STYLESHEET_NOTICE_STYLE)
+        message = document.createElement("span")
+        message.textContent = STYLESHEET_NOTICE_TEXT
+        notice.appendChild(message)
+        files = document.createElement("ul")
+        files.setAttribute("style", "margin: 4px 0; padding-left: 20px;")
+        notice.appendChild(files)
+        dismiss = document.createElement("button")
+        dismiss.setAttribute("type", "button")
+        dismiss.setAttribute("onclick", "this.parentNode.remove()")
+        dismiss.textContent = "Dismiss"
+        notice.appendChild(dismiss)
+        scope.insertBefore(notice, scope.firstChild)
+    files = notice.querySelector("ul")
+    listed = [item.textContent for item in files.querySelectorAll("li")]
+    if css_url not in listed:
+        item = document.createElement("li")
+        item.textContent = css_url
+        files.appendChild(item)
+    return notice
 
 
 def add_style_to_shadow(

@@ -23,6 +23,7 @@ from drafter.bridge.dom import (
     remove_page_content,
     replace_html,
     reuse_theme_link_prefix,
+    show_stylesheet_notice,
 )
 from drafter.bridge.error_handling import (
     raise_bridge_system_error,
@@ -179,7 +180,10 @@ class SiteRenderer:
                 root = shadow_root
 
                 for css_url, classes in wanted_css[reused_links:]:
-                    add_link_to_shadow(shadow_root, css_url, with_class=classes)
+                    self._watch_stylesheet(
+                        add_link_to_shadow(shadow_root, css_url, with_class=classes),
+                        css_url,
+                    )
                 for style in initial_site_data.additional_style:
                     add_style_to_shadow(
                         shadow_root, style, with_class=DRAFTER_TAG_CLASSES["THEME"]
@@ -201,7 +205,9 @@ class SiteRenderer:
                 root = true_root
 
                 for css_url, classes in wanted_css[reused_links:]:
-                    add_link(root, css_url, with_class=classes)
+                    self._watch_stylesheet(
+                        add_link(root, css_url, with_class=classes), css_url
+                    )
                 for style in initial_site_data.additional_style:
                     add_style(root, style, with_class=DRAFTER_TAG_CLASSES["THEME"])
 
@@ -273,12 +279,57 @@ class SiteRenderer:
             existing_links = list(self.scope.querySelectorAll(f"link.{theme_class}"))
             reused_links = reuse_theme_link_prefix(existing_links, wanted_css)
             for css_url, classes in wanted_css[reused_links:]:
-                add_link_to_shadow(self.scope, css_url, with_class=classes)
+                self._watch_stylesheet(
+                    add_link_to_shadow(self.scope, css_url, with_class=classes),
+                    css_url,
+                )
         else:
             existing_links = list(self.document.querySelectorAll(f"link.{theme_class}"))
             reused_links = reuse_theme_link_prefix(existing_links, wanted_css)
             for css_url, classes in wanted_css[reused_links:]:
-                add_link(self.scope, css_url, with_class=classes)
+                self._watch_stylesheet(
+                    add_link(self.scope, css_url, with_class=classes), css_url
+                )
+
+    def _watch_stylesheet(self, link, css_url: str) -> None:
+        """Report a stylesheet link if the browser fails to load its file.
+
+        A `<link>` fires an `error` event when its file cannot be fetched
+        (missing from the site, blocked, or offline). Without this the page
+        just renders unstyled and nothing says why. Links reused from an
+        earlier run are not watched again: they either loaded then or were
+        already reported.
+
+        Args:
+            link: The newly created `<link>` element.
+            css_url: The stylesheet address it points at.
+        """
+
+        def on_error(_event) -> None:
+            self._report_stylesheet_failure(css_url)
+
+        link.addEventListener("error", self.runtime.wrap_event_handler(on_error))
+
+    def _report_stylesheet_failure(self, css_url: str) -> None:
+        """Tell the visitor and the debug panel that a stylesheet is missing.
+
+        Raises a site-level warning (no request id, so it stays in the
+        debug panel across pages) and shows a dismissible notice at the top
+        of the site, which is the only signal when the debug panel is
+        hidden.
+
+        Args:
+            css_url: The stylesheet address that could not be loaded.
+        """
+        report_bridge_warning(
+            "client.stylesheet_load_failed",
+            f"The stylesheet {css_url!r} could not be loaded.",
+            "bridge.site_renderer.watch_stylesheet",
+            f"The browser reported an error loading <link href={css_url!r}>.",
+            phase="setup",
+        )
+        if self.scope is not None:
+            show_stylesheet_notice(self.scope, css_url)
 
     def _find_existing_shadow_root(self, true_root):
         """The shadow root left behind by a previous run of this instance.

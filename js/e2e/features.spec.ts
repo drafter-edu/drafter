@@ -210,6 +210,43 @@ test("Download component produces a real browser download", async ({
 	expect(Buffer.concat(chunks).toString("utf-8")).toBe("downloaded content");
 });
 
+// drafter-edu/drafter#232: a stylesheet that cannot be fetched used to leave
+// the site unstyled with no explanation. jsdom never fetches stylesheets, so
+// only a real browser can show the <link> error event reaching the notice.
+const MISSING_STYLESHEET_URL = "https://drafter-test.invalid/missing-style.css";
+const MISSING_STYLESHEET_APP = `
+from drafter import *
+hide_debug_information()
+add_website_css_file("${MISSING_STYLESHEET_URL}")
+
+@route
+def index() -> Page:
+    return Page(["The page still works"])
+
+start_server()
+`;
+
+test("a stylesheet that fails to load shows a dismissible notice", async ({
+	page,
+}) => {
+	await page.route(MISSING_STYLESHEET_URL, (route) => route.abort());
+	await page.goto("/harness.html");
+	await page.evaluate(async (code) => {
+		await window.runExample(code);
+	}, MISSING_STYLESHEET_APP);
+
+	const notice = page.locator("#drafter-stylesheet-notice--");
+	await expect(notice).toContainText("styling did not load");
+	await expect(notice.locator("li")).toHaveText([MISSING_STYLESHEET_URL]);
+	// The app itself is unaffected.
+	await expect(page.locator("#drafter-root--")).toContainText(
+		"The page still works",
+	);
+
+	await notice.getByRole("button", { name: "Dismiss" }).click();
+	await expect(notice).toHaveCount(0);
+});
+
 // Mirrors examples/piano.py: each key returns a Fragment holding a hidden,
 // auto-playing Tone. The tone used to wait forever for a page-loaded event
 // that only full page loads dispatched, so the piano made no sound.

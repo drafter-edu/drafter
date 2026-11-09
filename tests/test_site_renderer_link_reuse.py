@@ -67,6 +67,10 @@ class FakeNodeContainer:
     def children(self):
         return list(self._children)
 
+    @property
+    def firstChild(self):
+        return self._children[0] if self._children else None
+
     def appendChild(self, node):
         return self.insertBefore(node, None)
 
@@ -130,9 +134,18 @@ class FakeElement(FakeNodeContainer):
         self.detach_count = 0
         self.textContent = ""
         self._attributes = {}
+        self._listeners = {}
         self.classList = FakeClassList(self)
         if self.tagName == "TEMPLATE":
             self.content = FakeFragment(document)
+
+    def addEventListener(self, event_type, handler):
+        self._listeners.setdefault(event_type, []).append(handler)
+
+    def dispatch(self, event_type):
+        """Fire an event the way the browser would, for tests."""
+        for handler in self._listeners.get(event_type, []):
+            handler(SimpleNamespace(type=event_type, target=self))
 
     def getAttribute(self, name):
         return self._attributes.get(name)
@@ -217,7 +230,10 @@ def make_document_with_root():
 
 
 def make_renderer(document):
-    runtime = SimpleNamespace(context=SimpleNamespace(document=document))
+    runtime = SimpleNamespace(
+        context=SimpleNamespace(document=document),
+        wrap_event_handler=lambda handler: handler,
+    )
     return SiteRenderer(runtime, ROOT_ID, ROOT_ID)
 
 
