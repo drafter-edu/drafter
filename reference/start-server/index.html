@@ -8025,7 +8025,7 @@ it <a href="../../help/errors/nothing-after-start-server/">never runs</a>.</p>
 <tr>
 <td><code>port</code></td>
 <td><code>int</code></td>
-<td>Which port the local development server listens on, when running from the command line.</td>
+<td>Which port the local development server listens on, when running from the command line. The default port moves to the next free one when it is busy; a port you choose is never moved.</td>
 </tr>
 <tr>
 <td><code>host</code></td>
@@ -8036,6 +8036,11 @@ it <a href="../../help/errors/nothing-after-start-server/">never runs</a>.</p>
 <td><code>open_browser</code></td>
 <td><code>bool</code></td>
 <td>Whether running locally opens a browser tab automatically.</td>
+</tr>
+<tr>
+<td><code>browser</code></td>
+<td><code>str</code></td>
+<td>Which browser opens the tab: <code>"chrome"</code>, <code>"firefox"</code>, <code>"safari"</code>, <code>"edge"</code>, or <code>"default"</code> for your computer's usual browser. Unset, Drafter uses Chrome if installed, then Firefox, then the default.</td>
 </tr>
 <tr>
 <td><code>engine</code></td>

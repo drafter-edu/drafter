@@ -7667,6 +7667,11 @@ the app whenever you save the file.</p>
 <td>Do not open a browser tab automatically.</td>
 </tr>
 <tr>
+<td><code>--browser NAME</code></td>
+<td>Chrome, then Firefox, then the system default</td>
+<td>Open the site in a particular browser: <code>chrome</code>, <code>firefox</code>, <code>safari</code>, <code>edge</code>, or <code>default</code> for whatever your computer normally uses.</td>
+</tr>
+<tr>
 <td><code>--no-reloader</code></td>
 <td>on</td>
 <td>Stop watching your files for changes.</td>
@@ -7688,6 +7693,17 @@ that behavior and its flags, such as <code>--watch-path</code>,
 as <code>--skip</code>, which is handy when the command being run is not
 <code>drafter</code> itself; for example, a unit test runner such as <code>pytest</code>
 importing your file.</p>
+<p>To stop the server, press Ctrl+C in the terminal, or use the
+<strong>Stop Server…</strong> item in the debug panel's Navigate menu (also
+reachable at your site's address plus <code>--stop-server</code>). Both end
+the program the same way.</p>
+<p>If you run your program again while an earlier run of the same file
+is still going, Drafter stops that earlier run first and keeps port
+8000. If something else holds port 8000 (another Drafter program, or
+a run that is stuck), Drafter uses the next free port instead and
+prints the new address. When you chose a port yourself with
+<code>--port</code>, Drafter never moves off it; it explains what is using the
+port and how to stop it.</p>
 <h2 id="appearance-and-production">Appearance and production</h2>
 <table>
 <thead>

@@ -7809,6 +7809,14 @@ option to hide the frame, and the live site-theme switcher for
 <a href="../../add/change-appearance/themes/">trying themes</a>. It also holds
 the Help menu, whose <strong>Download Bug Report</strong> item packages up
 <a href="../bug-reports/">everything a bug report needs</a>.</p>
+<p>While your app runs from your own computer, the Navigate menu ends
+with <strong>Stop Server…</strong>. After you confirm, it shuts down the Drafter
+program running in your terminal or editor, the same as pressing
+Ctrl+C there. The tab stays open but stops working until you run
+your program again. The same control lives at your site's address
+plus <code>--stop-server</code>, which is handy when the debug panel is
+hidden behind a small frame. Deployed sites have no server to stop,
+so the item does not appear there.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
 <li><strong>The panel is gone</strong>: debug mode is off. Remove or comment out
