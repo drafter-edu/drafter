@@ -10,6 +10,7 @@ import {
 import {
 	addMockPackages,
 	enqueueRuntimeWork,
+	installMissingImports,
 	setupEnvironment,
 	toVirtualStudentPath,
 } from "../pyodide.index";
@@ -273,6 +274,151 @@ describe("setupEnvironment package handling", () => {
 		await setupEnvironment({ code: "print('hi')" });
 		expect(install).not.toHaveBeenCalled();
 		expect(loadPackagesFromImports).not.toHaveBeenCalled();
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Automatic installs for imports Pyodide's own loading does not cover
+// ---------------------------------------------------------------------------
+
+describe("automatic installs for missing imports", () => {
+	let install: jest.Mock<(pkg: string) => Promise<void>>;
+	let runPythonAsync: jest.Mock<(code: string, options?: unknown) => Promise<string>>;
+	let destroyed: number;
+
+	/** Make Python report these names as the program's missing imports. */
+	function pythonReportsMissing(names: string[]) {
+		runPythonAsync.mockImplementation(async () => JSON.stringify(names));
+	}
+
+	beforeEach(() => {
+		destroyed = 0;
+		install = jest.fn(async (_pkg: string) => {});
+		runPythonAsync = jest.fn(async () => "[]");
+		(window as AnyWindow).pyodide = {
+			loadPackagesFromImports: jest.fn(async () => []),
+			loadPackage: jest.fn(async () => {}),
+			runPythonAsync,
+			toPy: (value: unknown) => ({
+				value,
+				destroy: () => {
+					destroyed += 1;
+				},
+			}),
+		};
+		(window as AnyWindow).micropip = { install };
+	});
+
+	afterEach(() => {
+		delete (window as AnyWindow).pyodide;
+		delete (window as AnyWindow).micropip;
+	});
+
+	test("installs each import that nothing else provides", async () => {
+		pythonReportsMissing(["auto-seaborn", "auto-wordfreq"]);
+
+		await setupEnvironment({
+			code: "import seaborn\nimport wordfreq",
+			loadPackagesAutomatically: true,
+		});
+
+		expect(install.mock.calls.map((call) => call[0])).toEqual([
+			"auto-seaborn",
+			"auto-wordfreq",
+		]);
+	});
+
+	test("hands the program's source to Python and cleans up afterwards", async () => {
+		await setupEnvironment({
+			code: "import seaborn",
+			loadPackagesAutomatically: true,
+		});
+
+		const [snippet, options] = runPythonAsync.mock.calls[0] as [
+			string,
+			{ globals: { value: Record<string, string> } },
+		];
+		expect(snippet).toContain("drafter.helpers.imports");
+		expect(options.globals.value.__drafter_import_source).toBe(
+			"import seaborn",
+		);
+		expect(destroyed).toBe(1);
+	});
+
+	test("a library that cannot be installed does not stop the program", async () => {
+		pythonReportsMissing(["auto-typo-pkg", "auto-fine-pkg"]);
+		install.mockImplementation(async (pkg: string) => {
+			if (pkg === "auto-typo-pkg") {
+				throw new Error("Can't find a pure Python 3 wheel");
+			}
+		});
+
+		await expect(
+			setupEnvironment({ code: "", loadPackagesAutomatically: true }),
+		).resolves.toBeUndefined();
+
+		expect(install).toHaveBeenCalledWith("auto-fine-pkg");
+	});
+
+	test("a failed install is not retried on the next run", async () => {
+		pythonReportsMissing(["auto-never-installs"]);
+		install.mockRejectedValue(new Error("no such package"));
+
+		await setupEnvironment({ code: "", loadPackagesAutomatically: true });
+		await setupEnvironment({ code: "", loadPackagesAutomatically: true });
+
+		expect(install).toHaveBeenCalledTimes(1);
+	});
+
+	test("an installed library is not requested again", async () => {
+		pythonReportsMissing(["auto-installed-once"]);
+
+		await setupEnvironment({ code: "", loadPackagesAutomatically: true });
+		await setupEnvironment({ code: "", loadPackagesAutomatically: true });
+
+		expect(install).toHaveBeenCalledTimes(1);
+	});
+
+	test("an explicitly listed library is not installed twice", async () => {
+		pythonReportsMissing(["auto-and-explicit"]);
+
+		await setupEnvironment({
+			code: "",
+			loadPackagesAutomatically: true,
+			explicitPackageList: ["auto-and-explicit"],
+		});
+
+		expect(install).toHaveBeenCalledTimes(1);
+	});
+
+	test("nothing is installed when the check itself cannot run", async () => {
+		// For example: the page's Drafter is older than this bundle and has
+		// no drafter.helpers.imports module.
+		runPythonAsync.mockRejectedValue(new Error("ModuleNotFoundError"));
+
+		await expect(
+			setupEnvironment({ code: "import x", loadPackagesAutomatically: true }),
+		).resolves.toBeUndefined();
+
+		expect(install).not.toHaveBeenCalled();
+		expect(destroyed).toBe(1);
+	});
+
+	test("turning automatic loading off turns this off too", async () => {
+		pythonReportsMissing(["auto-should-not-install"]);
+
+		await setupEnvironment({ code: "import x" });
+
+		expect(runPythonAsync).not.toHaveBeenCalled();
+		expect(install).not.toHaveBeenCalled();
+	});
+
+	test("installMissingImports reports what it installed", async () => {
+		pythonReportsMissing(["auto-reported"]);
+
+		expect(await installMissingImports("import reported")).toEqual([
+			"auto-reported",
+		]);
 	});
 });
 

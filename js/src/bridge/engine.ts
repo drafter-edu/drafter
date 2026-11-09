@@ -231,17 +231,18 @@ function buildStudentSteps(
 	}
 
 	if (combined.includes("ModuleNotFoundError")) {
-		// Automatic package loading only knows the libraries bundled with
-		// the browser's Python. Anything else (seaborn, for example) has to
-		// be listed explicitly, which is the step students cannot guess.
+		// By this point Drafter has already tried to install the library
+		// (see installMissingImports), so what is left is a misspelling, a
+		// library whose install name differs from its import name, or one
+		// that cannot run in a browser at all.
 		const match = /No module named '([^'.]+)/.exec(combined);
 		const name = match ? match[1] : null;
 		const library = name ? `\`${name}\`` : "the library";
 		return [
 			`Check the spelling of ${library} on the \`import\` line. If it is one of your own files, check that the file is next to your program.`,
 			name
-				? `If \`${name}\` is a library that works on your computer, the browser has to be told to install it too. Start your site with \`--project-packages ${name}\`.`
-				: "If it is a library that works on your computer, the browser has to be told to install it too. Start your site with `--project-packages` followed by the library's name.",
+				? `Drafter looked for a library named \`${name}\` to install and could not use one. If the library installs under a different name (the way \`sklearn\` is installed as \`scikit-learn\`), start your site with \`--project-packages\` followed by that name.`
+				: "If the library installs under a different name than you import it by (the way `sklearn` is installed as `scikit-learn`), start your site with `--project-packages` followed by that name.",
 			"Some libraries cannot run in a browser at all. The \"Third-party libraries\" page of the Drafter documentation explains which ones work.",
 		];
 	}

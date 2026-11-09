@@ -1,21 +1,18 @@
 """
-Seaborn works in the browser, but it is not one of the libraries bundled
-with the browser's Python, so automatic package detection does not install
-it. To use it, uncomment the two seaborn lines below and declare the
-package when starting the site:
+A seaborn chart. Seaborn is not one of the libraries bundled with the
+browser's Python, so Drafter installs it from PyPI when it sees the import.
 
-    drafter plotting_seaborn.py --project-packages seaborn
+To run this on your own computer, install the libraries there first:
 
-The seaborn lines stay commented out so this example runs without the flag.
+    pip install seaborn pandas
 """
 
 import random
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
-
-# import seaborn as sns
 import pandas as pd
+import seaborn as sns
 
 from drafter import *
 
@@ -32,8 +29,7 @@ class State:
 @route
 def index(state: State):
     df = pd.DataFrame({"data": state.data})
-    # sns.histplot(df["data"], kde=True)
-    df.plot.hist(y="data", bins=20)
+    sns.histplot(df["data"], kde=True)
     plt.title("Random data with Seaborn")
 
     return Page(

@@ -858,6 +858,83 @@ export async function mountDrafterRemote(url: string) {
 // its own built-in tracking of loaded packages.)
 const requestedPackageSpecs = new Set<string>();
 
+// Imports that could not be installed automatically. They are not retried
+// on every re-run (live editing re-runs setup on each save); reloading the
+// page tries again.
+const failedAutomaticInstalls = new Set<string>();
+
+const MISSING_IMPORTS_SNIPPET = `
+import json as _json
+from drafter.helpers.imports import find_missing_imports as _find_missing
+_json.dumps(_find_missing(__drafter_import_source))
+`;
+
+/**
+ * The imports in student code that nothing can provide yet: not the standard
+ * library, not an installed package, and not one of the student's own files
+ * (which the remote-module finder supplies). The decision is made in Python
+ * (drafter.helpers.imports) by the real import machinery. Fails open: if the
+ * check cannot run (for example, an older Drafter without that module), no
+ * imports are reported and the program runs as it would have before.
+ */
+async function findMissingImports(pyodide: any, code: string): Promise<string[]> {
+	if (typeof pyodide?.runPythonAsync !== "function" || !pyodide.toPy) {
+		return [];
+	}
+	const checkGlobals = pyodide.toPy({ __drafter_import_source: code });
+	try {
+		const result = await pyodide.runPythonAsync(MISSING_IMPORTS_SNIPPET, {
+			globals: checkGlobals,
+		});
+		const names = JSON.parse(result);
+		return Array.isArray(names) ? names.map(String) : [];
+	} catch (error) {
+		console.warn(
+			"[Drafter] Could not check for libraries to install automatically:",
+			error,
+		);
+		return [];
+	} finally {
+		checkGlobals.destroy?.();
+	}
+}
+
+/**
+ * Try to install, from PyPI, each library the student imports that Pyodide's
+ * own package loading did not provide (seaborn is the usual example). A
+ * library that cannot be installed is skipped quietly: its import then fails
+ * in the student's program with the ordinary ModuleNotFoundError, whose
+ * error page explains what to do.
+ */
+export async function installMissingImports(code: string): Promise<string[]> {
+	const pyodide = (window as any).pyodide;
+	const micropip = (window as any).micropip;
+	if (!micropip) {
+		return [];
+	}
+	const installed: string[] = [];
+	for (const name of await findMissingImports(pyodide, code)) {
+		if (requestedPackageSpecs.has(name) || failedAutomaticInstalls.has(name)) {
+			continue;
+		}
+		try {
+			await micropip.install(name);
+			requestedPackageSpecs.add(name);
+			installed.push(name);
+		} catch (error) {
+			failedAutomaticInstalls.add(name);
+			console.warn(
+				`[Drafter] Could not install "${name}" automatically:`,
+				error,
+			);
+		}
+	}
+	if (installed.length > 0) {
+		console.log("Installed missing libraries:", installed);
+	}
+	return installed;
+}
+
 export async function setupEnvironment(options: DrafterInitOptions) {
 	const pyodide = (window as any).pyodide;
 	if (options.loadPackagesAutomatically) {
@@ -875,6 +952,9 @@ export async function setupEnvironment(options: DrafterInitOptions) {
 			if (/\bMatPlotLibPlot\b/.test(options.code ?? "")) {
 				await pyodide.loadPackage("matplotlib");
 			}
+			// Libraries outside Pyodide's own distribution (seaborn, for
+			// example) are not covered by loadPackagesFromImports.
+			await installMissingImports(options.code ?? "");
 		} catch (error) {
 			throw reportSystemError({
 				id: "runtime.package_load_failed",

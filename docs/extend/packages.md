@@ -27,9 +27,12 @@ machine works.
 
 ## Importing is usually all it takes
 
-When your program runs in the browser, Drafter scans your code
-for imports and installs what it finds before running it. For
-most libraries there is nothing to configure:
+When your program runs in the browser, Drafter reads its `import`
+lines and installs what they name before running it. Libraries built
+for the browser, such as `matplotlib` and `pandas`, come from the
+browser's own Python distribution. Anything else, such as `seaborn`,
+is fetched from PyPI, the same place `pip` gets it. For most
+libraries there is nothing to configure:
 
 ```python drafter height=420
 from drafter import *
@@ -121,17 +124,19 @@ uses a dictionary, which your course may not have covered.)
 
 ## Declaring packages explicitly
 
-Automatic detection covers imports it can see in your file, and
-only for libraries that come bundled with the browser's Python,
-such as `matplotlib`, `pandas`, and `numpy`. A library outside that
-set is not installed by itself even when your `import` line is in
-plain view. `seaborn` is a common example: it works in the browser,
-but the page stops with `ModuleNotFoundError: No module named
-'seaborn'` until you declare it.
+Automatic installation works from the `import` lines in your main
+file, and it looks each library up by the name you import. Three
+situations fall outside that:
 
-When detection misses (a library outside the bundled set, a dynamic
-import, or a dependency of your own module), declare packages on the
-command line:
+- **The install name differs from the import name.** You write
+  `import sklearn`, but the library is installed as `scikit-learn`.
+  The common ones built for the browser are handled, but a less
+  common library needs its install name declared.
+- **The import is not in your main file.** One of your own modules
+  imports the library, or the name is built at run time.
+- **You want a particular version.**
+
+In those cases, declare packages on the command line:
 
 ```console
 drafter my_app.py --project-packages wordfreq --project-packages emoji
@@ -148,10 +153,19 @@ control.
 - **Works locally, fails deployed**: the library is probably in
   the cannot-work tier, or you imported it somewhere detection
   cannot see; try declaring it with `--project-packages`.
-- **`ModuleNotFoundError` for a library you did import**: it is not
-  one of the bundled libraries. Declare it, for example
-  `--project-packages seaborn`. The error page suggests the exact
-  flag.
+- **`ModuleNotFoundError` in the browser for a library you did
+  import**: Drafter looked for a library with that exact name and
+  could not install one. Check the spelling first. If the library
+  installs under a different name, declare that name with
+  `--project-packages`.
+- **Your own file has the same name as a library**: your file wins.
+  Drafter only goes to PyPI for names that nothing next to your
+  program can provide, so a `utils.py` of your own is never replaced
+  by a stranger's package.
+- **`ModuleNotFoundError` when building or deploying**: that is the
+  computer doing the build, not the browser. The library has to be
+  installed there too; see
+  [Building for deployment](../reference/cli.md#building-for-deployment).
 - **A long first load**: normal for heavy libraries. Warn your
   users on the page, or trim the dependency.
 - **`requests` raises about the connection**: check the browser
