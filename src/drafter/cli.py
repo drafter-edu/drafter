@@ -1,12 +1,16 @@
 """Drafter CLI entry point.
 
 Unified command-line interface for running Drafter in either:
+
 - App server mode (default): Starts local development server
-- Compile mode (--compile): Builds static site
+- Compile mode (`--compile`): Builds static site
 
 Usage:
-    drafter [main_file.py] [options]
-    drafter [main_file.py] --compile [options]
+
+```text
+drafter [main_file.py] [options]
+drafter [main_file.py] --compile [options]
+```
 
 Because we set up our pyproject.toml file to point to this module's `main`,
 when you run `drafter` from the command line, it will execute the `main` function

@@ -50,8 +50,10 @@ jobs:
       - name: Run docs fences
         run: uv run pytest tests/test_docs_fences.py -q
 
+      # --api renders the full per-module reference at /dev/api/; without it
+      # the deployed site would carry only the placeholder page.
       - name: Build docs
-        run: uv run drafter-docs build --strict
+        run: uv run drafter-docs build --api --strict
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4

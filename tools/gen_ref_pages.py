@@ -5,10 +5,11 @@ mkdocs.yml). Creates one virtual page per module under dev/api/,
 each containing a mkdocstrings identifier block, plus the SUMMARY.md
 navigation file consumed by mkdocs-literate-nav.
 
-Rendering every module through mkdocstrings dominates build time, so the
-full reference is only generated when DRAFTER_MKDOCS_API is set (the
-`drafter-docs --api` flag). Otherwise a single placeholder page is
-emitted so the nav entry in mkdocs.yml still resolves.
+Rendering every module through mkdocstrings adds a few seconds to each
+build, so the full reference is only generated when DRAFTER_MKDOCS_API is
+set (the `drafter-docs --api` flag, which the CI docs build passes).
+Otherwise a single placeholder page is emitted so the nav entry in
+mkdocs.yml still resolves.
 """
 
 import os

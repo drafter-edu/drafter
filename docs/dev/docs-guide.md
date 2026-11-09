@@ -22,10 +22,10 @@ the documentation CI gates on the first try.
 You can build the site locally:
 
 - `uv run drafter-docs serve --dev` — live-reloading local build.
-- `uv run drafter-docs build --strict` — the CI build; must pass with no
-  warnings.
-- `uv run drafter-docs build --api` — also renders the full `/dev/api/`
-  reference (slow; skipped by default).
+- `uv run drafter-docs build --api --strict` — the CI build; must pass
+  with no warnings.
+- `--api` renders the full `/dev/api/` reference. It adds a few seconds
+  to every build, so local builds and `serve` skip it unless you pass it.
 
 The site follows the plan in `STUDENT_DOCS_PLAN.md` at the repository
 root; nearly all planned pages are written, with new pages scaffolded as

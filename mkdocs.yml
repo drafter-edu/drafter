@@ -312,6 +312,18 @@ plugins:
         paths: [src]
         options:
           docstring_style: google
+          docstring_options:
+            # Our Returns:/Yields: sections describe one value in wrapped
+            # prose. griffe's default treats every line at the base indent
+            # as a separate returned item, splitting a sentence into one
+            # table row per line.
+            returns_multiple_items: false
+            # griffe warns for each documented parameter/return whose
+            # signature has no annotation (several hundred today, mostly
+            # `context`, `**kwargs`, and `**extra_settings`). The rendered
+            # page just leaves the type cell empty, but the warnings bury
+            # real ones and fail `--strict` builds.
+            warn_missing_types: false
           show_source: false
           merge_init_into_class: true
 # Old-site URLs → new sitemap (STUDENT_DOCS_PLAN.md §8 migration map).
