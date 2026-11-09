@@ -185,6 +185,16 @@ export function renderRepresentation(rep: SpecificRepresentation) {
 					</div>
 				</div>
 			);
+		case "hidden":
+			return (
+				<div class="drafter-debug-rep-hidden drafter-debug-rep-row">
+					<div class="drafter-debug-rep-hidden-message drafter-debug-rep-cell">
+						The state display is turned off, so this {rep.type}{" "}
+						is not shown. Turn it back on with{" "}
+						<code>set_state_display(True)</code>.
+					</div>
+				</div>
+			);
 		case "unknown":
 			return (
 				<div class="drafter-debug-rep-unknown drafter-debug-rep-row">

@@ -13,6 +13,7 @@ symbols:
   - set_page_transition
   - set_error_page
   - set_button_spinners
+  - set_state_display
   - add_website_header
   - add_website_css
   - add_website_css_file
@@ -117,6 +118,22 @@ When spinners are turned on, a pressed button shows a small spinner
 and is temporarily disabled while its request is being processed.
 This is helpful when a route does slow work and a visitor might
 otherwise click twice.
+
+### set_state_display
+
+```python
+set_state_display(False)
+```
+
+The debug panel normally shows your whole state after every change.
+When the state is very large, such as a long list, a big grid, or
+many pictures, that can slow each page down and push everything else
+in the panel out of view. Turning the display off replaces it with a
+one-line note.
+
+Only the display changes. Your state still works the same way, and so
+do the back and forward buttons and the panel's Save and Load. Call
+`set_state_display(True)` to bring the display back.
 
 ## Adding raw content
 

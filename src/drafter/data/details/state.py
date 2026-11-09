@@ -37,16 +37,42 @@ class UpdatedStateEvent(TelemetryRecord):
         }
 
     @classmethod
-    def from_state(cls, state: Any) -> "UpdatedStateEvent":
+    def from_state(cls, state: Any, display: bool = True) -> "UpdatedStateEvent":
         """
         Builds an UpdatedStateEvent describing the given state value.
 
         Args:
             state: The state value to describe; it is recursively analyzed
                 (to a maximum depth of 4) into a representation dict.
+            display: Whether to describe the state at all (the
+                `state_display` configuration setting). When False the
+                state is not walked; the event carries a `hidden`
+                representation naming only the state's type, which the
+                debug panel shows as a one-line note.
 
         Returns:
             A new UpdatedStateEvent carrying the state's representation.
         """
+        if not display:
+            return cls(representation=hidden_representation(state))
         representation = analyze_type(state, max_depth=4)
         return cls(representation=representation)
+
+
+def hidden_representation(state: Any) -> dict[str, Any]:
+    """Describe a state whose display is turned off, without walking it.
+
+    Args:
+        state: The state value that is not being displayed.
+
+    Returns:
+        A representation dict of kind `hidden` with the fields every
+        representation carries (`type`, `id`, `complexity`), so consumers
+        can treat it like any other node.
+    """
+    return {
+        "kind": "hidden",
+        "type": type(state).__name__,
+        "id": id(state),
+        "complexity": 0,
+    }

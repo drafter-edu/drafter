@@ -17,6 +17,15 @@ export interface MaxDepthReached extends Representation {
 	type: string;
 }
 
+/**
+ * Stands in for a whole state when the `state_display` setting is off:
+ * Python does not walk the state at all, and reports only its type.
+ */
+export interface HiddenRepresentation extends Representation {
+	kind: "hidden";
+	type: string;
+}
+
 export interface UnknownRepresentation extends Representation {
 	kind: "unknown";
 	type: string;
@@ -156,6 +165,7 @@ export interface BytesRepresentation extends Representation {
 export type SpecificRepresentation =
 	| CycleReference
 	| MaxDepthReached
+	| HiddenRepresentation
 	| UnknownRepresentation
 	| ErrorRepresentation
 	| CompleteFailureRepresentation

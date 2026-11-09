@@ -64,6 +64,11 @@ class ClientServerConfiguration(BaseConfiguration):
         button_spinners: Whether pressed buttons show a loading spinner
             (and stop accepting clicks) until their request's response is
             committed.
+        state_display: Whether the debug panel shows the application state.
+            When False, the state is no longer described after each change
+            (which can be slow for large states) and the Current State
+            panel shows a one-line note instead. The state itself, time
+            travel, and Save/Load are unaffected.
         browser_history: Whether Drafter navigation is mirrored into the
             browser's history stack (making the back/forward buttons time
             travel through the app). Disable for embedded instances — a
@@ -124,6 +129,9 @@ class ClientServerConfiguration(BaseConfiguration):
     page_transition_duration: float = 0.5
     # Show a loading spinner on buttons while their request is processed
     button_spinners: bool = False
+    # Describe the state for the debug panel after every change; turn off
+    # when a large state makes that slow or takes up too much room
+    state_display: bool = True
     # Mirror navigation into the browser's history stack (back/forward
     # buttons time travel); disabled for embedded instances
     browser_history: bool = True
@@ -213,6 +221,7 @@ class ClientServerConfiguration(BaseConfiguration):
             "DRAFTER_PAGE_TRANSITION_DURATION", "page_transition_duration"
         )
         result.get_bool_if_exists("DRAFTER_BUTTON_SPINNERS", "button_spinners")
+        result.get_bool_if_exists("DRAFTER_STATE_DISPLAY", "state_display")
         result.get_bool_if_exists("DRAFTER_BROWSER_HISTORY", "browser_history")
         result.get_string_if_exists("DRAFTER_ERROR_PAGE_TITLE", "error_page_title")
         result.get_string_if_exists("DRAFTER_ERROR_PAGE_MESSAGE", "error_page_message")
@@ -227,7 +236,8 @@ class ClientServerConfiguration(BaseConfiguration):
 
         Adds the "Client Server Configuration" group. Several flags are named
         for the opposite of their field: --production disables
-        `in_debug_mode`, --no-frame disables `framed`, and
+        `in_debug_mode`, --no-frame disables `framed`,
+        --no-state-display disables `state_display`, and
         --no-browser-history disables `browser_history`. Other options
         include --theme, --subtle-debug-entry, --audit-logging,
         --external-pages, the --additional-*-content options,
@@ -386,6 +396,14 @@ class ClientServerConfiguration(BaseConfiguration):
             ),
         )
         group.add_argument(
+            "--no-state-display",
+            action="store_true",
+            help=(
+                "Do not show the application state in the debug panel "
+                "(useful when a large state is slow to display)"
+            ),
+        )
+        group.add_argument(
             "--no-browser-history",
             action="store_true",
             help=(
@@ -416,7 +434,8 @@ class ClientServerConfiguration(BaseConfiguration):
         """Extract client server settings from parsed command line arguments.
 
         Note the inversions: --production sets `in_debug_mode` to False,
-        --no-frame sets `framed` to False, and --no-browser-history sets
+        --no-frame sets `framed` to False, --no-state-display sets
+        `state_display` to False, and --no-browser-history sets
         `browser_history` to False. Repeatable options (external pages
         and the additional content lists) arrive as lists, with each entry
         stripped of surrounding whitespace.
@@ -496,6 +515,8 @@ class ClientServerConfiguration(BaseConfiguration):
             result["page_transition_duration"] = parsed_args["page_transition_duration"]
         if parsed_args.get("button_spinners"):
             result["button_spinners"] = True
+        if parsed_args.get("no_state_display"):
+            result["state_display"] = False
         if parsed_args.get("no_browser_history"):
             result["browser_history"] = False
         if parsed_args.get("error_page_title"):
@@ -546,6 +567,7 @@ class ClientServerConfiguration(BaseConfiguration):
             "page_transition": self.page_transition,
             "page_transition_duration": self.page_transition_duration,
             "button_spinners": self.button_spinners,
+            "state_display": self.state_display,
             "browser_history": self.browser_history,
             "error_page_title": self.error_page_title,
             "error_page_message": self.error_page_message,
@@ -588,6 +610,7 @@ class ClientServerConfiguration(BaseConfiguration):
             page_transition=self.page_transition,
             page_transition_duration=self.page_transition_duration,
             button_spinners=self.button_spinners,
+            state_display=self.state_display,
             browser_history=self.browser_history,
             error_page_title=self.error_page_title,
             error_page_message=self.error_page_message,

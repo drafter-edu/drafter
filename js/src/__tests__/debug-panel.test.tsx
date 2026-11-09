@@ -1323,6 +1323,19 @@ describe("state panel representation rendering", () => {
 		).toContain("max depth reached for dict");
 	});
 
+	test("hidden renders a note saying how to turn the display back on", () => {
+		const content = renderRep({
+			kind: "hidden",
+			type: "State",
+			id: 10,
+			complexity: 0,
+		});
+		const note = content.querySelector(".drafter-debug-rep-hidden");
+		expect(note?.textContent).toContain("state display is turned off");
+		expect(note?.textContent).toContain("this State is not shown");
+		expect(note?.textContent).toContain("set_state_display(True)");
+	});
+
 	test("error representation renders message, type, and value", () => {
 		const content = renderRep({
 			kind: "error",

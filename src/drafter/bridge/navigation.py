@@ -43,6 +43,10 @@ class NavigationController:
             button to the host page. The request log and replay features
             are unaffected.
 
+        state_display: Whether a state restored by the back/forward buttons
+            is described for the debug panel (the `state_display`
+            configuration setting).
+
         navigation_func: The callback that performs a visit for a Request
             and returns its Response; None until set_navigation_func is
             called.
@@ -80,6 +84,9 @@ class NavigationController:
     request_log: dict[int, Request]
     get_app_state: Callable[[], Any] | None
     set_app_state: Callable[[Any], None] | None
+    #: Whether restored states are described for the debug panel (the
+    #: `state_display` configuration setting).
+    state_display: bool = True
     #: True once the owning bridge has been torn down; navigation is then
     #: dropped instead of dispatched (see teardown).
     torn_down: bool = False
@@ -87,6 +94,7 @@ class NavigationController:
     def __init__(self, runtime):
         self.history = BrowserHistory(runtime)
         self.browser_history_enabled = True
+        self.state_display = True
         self.redirect_loop_stack = []
         self.navigation_func = None
         self.last_request = None
@@ -339,7 +347,7 @@ class NavigationController:
         # current state when invoking the route handler.
         self.set_app_state(restored)
         log_record(
-            UpdatedStateEvent.from_state(restored),
+            UpdatedStateEvent.from_state(restored, display=self.state_display),
             "bridge.navigation.handle_popstate",
             route=route,
             request_id=request_id,
