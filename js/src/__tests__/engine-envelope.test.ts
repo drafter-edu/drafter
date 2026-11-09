@@ -577,6 +577,56 @@ describe("student-facing root rendering", () => {
 		]);
 	});
 
+	test("ModuleNotFoundError advice names the library and how to declare it", () => {
+		const container = renderToRoot({
+			message: "Error running student code",
+			error: new Error(
+				"PythonError: Traceback (most recent call last):\n" +
+					'  File "main.py", line 3, in <module>\n' +
+					"    import seaborn as sns\n" +
+					"ModuleNotFoundError: No module named 'seaborn'",
+			),
+		});
+
+		const steps = Array.from(container.querySelectorAll("li")).map(
+			(li) => li.textContent,
+		);
+		expect(steps).toHaveLength(3);
+		expect(steps[0]).toContain("Check the spelling of seaborn");
+		expect(steps[1]).toContain("--project-packages seaborn");
+		expect(steps[2]).toContain("cannot run in a browser");
+		// The command is marked up as code so it can be copied exactly.
+		const codes = Array.from(container.querySelectorAll("li code")).map(
+			(code) => code.textContent,
+		);
+		expect(codes).toContain("--project-packages seaborn");
+	});
+
+	test("ModuleNotFoundError advice uses the top-level package of a submodule", () => {
+		const container = renderToRoot({
+			error: new Error(
+				"ModuleNotFoundError: No module named 'seaborn.objects'",
+			),
+		});
+
+		const steps = Array.from(container.querySelectorAll("li")).map(
+			(li) => li.textContent,
+		);
+		expect(steps[1]).toContain("--project-packages seaborn.");
+	});
+
+	test("ModuleNotFoundError advice still helps when no name can be read", () => {
+		const container = renderToRoot({
+			error: new Error("ModuleNotFoundError"),
+		});
+
+		const steps = Array.from(container.querySelectorAll("li")).map(
+			(li) => li.textContent,
+		);
+		expect(steps[0]).toContain("Check the spelling of the library");
+		expect(steps[1]).toContain("--project-packages followed by");
+	});
+
 	test("SyntaxError advice wins when both SyntaxError and NameError appear", () => {
 		const container = renderToRoot({
 			error: new Error("SyntaxError before a NameError mention"),

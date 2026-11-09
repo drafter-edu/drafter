@@ -121,9 +121,17 @@ uses a dictionary, which your course may not have covered.)
 
 ## Declaring packages explicitly
 
-Automatic detection covers imports it can see in your file. When
-it misses (a dynamic import, or a dependency of your own module),
-declare packages on the command line:
+Automatic detection covers imports it can see in your file, and
+only for libraries that come bundled with the browser's Python,
+such as `matplotlib`, `pandas`, and `numpy`. A library outside that
+set is not installed by itself even when your `import` line is in
+plain view. `seaborn` is a common example: it works in the browser,
+but the page stops with `ModuleNotFoundError: No module named
+'seaborn'` until you declare it.
+
+When detection misses (a library outside the bundled set, a dynamic
+import, or a dependency of your own module), declare packages on the
+command line:
 
 ```console
 drafter my_app.py --project-packages wordfreq --project-packages emoji
@@ -140,6 +148,10 @@ control.
 - **Works locally, fails deployed**: the library is probably in
   the cannot-work tier, or you imported it somewhere detection
   cannot see; try declaring it with `--project-packages`.
+- **`ModuleNotFoundError` for a library you did import**: it is not
+  one of the bundled libraries. Declare it, for example
+  `--project-packages seaborn`. The error page suggests the exact
+  flag.
 - **A long first load**: normal for heavy libraries. Warn your
   users on the page, or trim the dependency.
 - **`requests` raises about the connection**: check the browser

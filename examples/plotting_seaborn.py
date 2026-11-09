@@ -1,6 +1,12 @@
 """
-TODO: Currently, it doesn't seem like the seaborn dependency is getting picked up
-by the automatic system?
+Seaborn works in the browser, but it is not one of the libraries bundled
+with the browser's Python, so automatic package detection does not install
+it. To use it, uncomment the two seaborn lines below and declare the
+package when starting the site:
+
+    drafter plotting_seaborn.py --project-packages seaborn
+
+The seaborn lines stay commented out so this example runs without the flag.
 """
 
 import random
