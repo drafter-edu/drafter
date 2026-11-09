@@ -316,6 +316,8 @@ class DrafterCodeBlockPlugin(BasePlugin):
             "--verbose",
             "--console_mode",
             "hover",
+            # Demos are documentation snippets, not sites someone deploys.
+            "--no-warn-missing-info",
         ]
         if self.config["shared_runtime"]:
             command.append("--shared-runtime")

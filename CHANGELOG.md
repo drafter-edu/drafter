@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - Fixed charts drawn in unit tests showing up in the first page with a `MatPlotLibPlot` (#149). A test calls the route and compares the page without displaying it, so the chart it drew stayed open and the next chart was drawn on top of it. `MatPlotLibPlot()` now takes hold of the current figure when it is created, and (unless `close_automatically=False`) closes it right then, so the next chart always starts blank. This also fixes charts piling up between page visits in the browser, where the figure was never closed. Write your `plt.` commands before `MatPlotLibPlot()`; commands that run after it belong to the next chart.
+- Building a site (`--compile`) that never calls `set_site_information` now prints a notice explaining that its about page will be empty, with the call to add (#183). The site is still built. On GitHub Actions the notice also appears as a warning on the workflow run's summary page. The `warn_missing_info` builder setting, which existed but did nothing, now controls this; turn the notice off with the new `--no-warn-missing-info` flag or `DRAFTER_WARN_MISSING_INFO=false`.
 - Fixed `MatPlotLibPlot` writing its image into the `style` attribute instead of `src` when a page was rendered outside the browser.
 
 ## [2.1.4] - 2026-11-09

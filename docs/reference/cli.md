@@ -90,6 +90,7 @@ journey.
 | `--additional-js-files PATH_OR_URL` | none | Load a script (a `.js` file next to your program, or a URL) on every page; the flag version of `add_website_js_file(...)`. Repeat once per entry. |
 | `--create-404 MODE` | `if_missing` | Whether to write a `404.html` next to `index.html`. That page is what lets a visitor open your deployed site directly on a route, such as your address plus `--about`. `if_missing` leaves a `404.html` you made yourself alone; `always` overwrites it; `never` skips it. |
 | `--zip-output` | off | Zip the built site, convenient for uploading. |
+| `--no-warn-missing-info` | notice on | Building a site that never calls [`set_site_information`](site-config.md#set_site_information) prints a notice, because its about page will be empty. The site is still built. This flag turns the notice off. |
 
 ## Libraries
 

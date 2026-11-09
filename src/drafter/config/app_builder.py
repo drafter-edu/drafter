@@ -25,7 +25,8 @@ class AppBuilderConfiguration(BaseConfiguration):
         output_filename: Name of the main HTML file to generate.
         create_404: Whether to create a 404.html file (options: "always", "never", "if_missing").
         zip_output: Whether to zip the output directory after building.
-        warn_missing_info: Whether to echo a warning if set_site_information is missing.
+        warn_missing_info: Whether to print a notice when the site is built without
+            `set_site_information`. The build always continues either way.
         pyodide_package_style: Optional custom style for the Pyodide package ("build", "cdn", or "pypi"). The "build" option means that the local version of Drafter will be built for pyodide.
         additional_paths: List of additional file paths to make available in the built site (e.g., for `open`). These will be copied to the assets folder.
         shared_runtime: When True, the compiled page attaches to a Drafter host
@@ -96,7 +97,8 @@ class AppBuilderConfiguration(BaseConfiguration):
 
         Adds the "App Builder Configuration" group with options such as
         --output-directory, --output-filename, --create-404, --zip-output,
-        --additional-paths, --pyodide-package-style, and --shared-runtime.
+        --warn-missing-info/--no-warn-missing-info, --additional-paths,
+        --pyodide-package-style, and --shared-runtime.
 
         Args:
             parser: An argparse.ArgumentParser instance to extend.
@@ -126,10 +128,21 @@ class AppBuilderConfiguration(BaseConfiguration):
             action="store_true",
             help="Whether to zip the output directory after building",
         )
+        # Both flags share the warn_missing_info dest; the None default lets
+        # parse_args report the setting only when a flag was explicitly
+        # given, so lower-precedence sources are not overridden.
         group.add_argument(
             "--warn-missing-info",
             action="store_true",
-            help="Whether to echo a warning if set_site_information is missing",
+            default=None,
+            help="Print a notice when the site is built without set_site_information (the default)",
+        )
+        group.add_argument(
+            "--no-warn-missing-info",
+            action="store_false",
+            dest="warn_missing_info",
+            default=None,
+            help="Do not print a notice when the site is built without set_site_information",
         )
         group.add_argument(
             "--additional-paths",
@@ -172,8 +185,8 @@ class AppBuilderConfiguration(BaseConfiguration):
             result["create_404"] = parsed_args["create_404"]
         if parsed_args.get("zip_output"):
             result["zip_output"] = True
-        if parsed_args.get("warn_missing_info"):
-            result["warn_missing_info"] = True
+        if parsed_args.get("warn_missing_info") is not None:
+            result["warn_missing_info"] = parsed_args["warn_missing_info"]
         if parsed_args.get("additional_paths"):
             result["additional_paths"] = list(parsed_args["additional_paths"])
         if parsed_args.get("pyodide_package_style"):

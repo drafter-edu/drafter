@@ -126,7 +126,10 @@ Run the app locally one more time and confirm:
   run before `start_server(...)`, and must not be commented out.
 - **The about page is empty**: `set_site_information(...)` was not
   called, or runs after `start_server(...)`. Configuration goes near the
-  top of the file.
+  top of the file. When this happens, building the
+  site prints a notice that starts "this site has no site information";
+  on GitHub it also appears as a warning on the workflow run's summary
+  page.
 - **The app is still in a small box**: add `set_website_framed(False)`.
 - **You cannot debug anymore**: that is the expected effect of hiding
   the debug information. Comment the line out while you are still
