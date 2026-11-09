@@ -24,6 +24,10 @@ const GLOBALS_TO_COPY = [
 	"structuredClone",
 ];
 
+// Globals that jsdom does define, but that must come from the same realm as
+// Node's `fetch`/`Request` whenever those are the ones in use.
+const FETCH_REALM_GLOBALS = ["AbortController", "AbortSignal"];
+
 class DrafterJSDOMEnvironment extends JSDOMEnvironment {
 	constructor(config, context) {
 		super(config, context);
@@ -42,6 +46,18 @@ class DrafterJSDOMEnvironment extends JSDOMEnvironment {
 				typeof this.global[name] === "undefined" &&
 				typeof globalThis[name] !== "undefined"
 			) {
+				this.global[name] = globalThis[name];
+			}
+		}
+
+		// jsdom ships its own AbortController/AbortSignal, but the Fetch
+		// classes copied above are Node's. Node 24 rejects a `signal` that
+		// is not its own AbortSignal ("Expected signal to be an instance of
+		// AbortSignal"), which breaks every Pyodide `pyfetch` (and so every
+		// `micropip.install`), because pyfetch always passes a signal. Keep
+		// the abort classes in the same realm as the fetch that consumes them.
+		if (this.global.fetch === globalThis.fetch) {
+			for (const name of FETCH_REALM_GLOBALS) {
 				this.global[name] = globalThis[name];
 			}
 		}

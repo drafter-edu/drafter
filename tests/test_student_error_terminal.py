@@ -11,7 +11,12 @@ import pytest
 
 from drafter import launch
 from drafter.app import app_server
-from drafter.configuration import get_system_configuration
+from drafter.config.app_builder import AppBuilderConfiguration
+from drafter.config.app_common import AppCommonConfiguration
+from drafter.config.app_server import AppServerConfiguration
+from drafter.config.bootstrap import BootstrapConfiguration
+from drafter.config.client_server import ClientServerConfiguration
+from drafter.config.system import SystemConfiguration
 from drafter.data.errors import (
     DEFAULT_TERMINAL_ERROR_TITLE,
     TERMINAL_WIDTH,
@@ -79,7 +84,16 @@ class TestStartServerPresentsHostErrors:
 
         monkeypatch.setattr(launch, "is_web", lambda: False)
         monkeypatch.setattr(app_server, "serve_app_once", fail)
-        system = get_system_configuration()
+        # Build the configuration by hand rather than from the process: the
+        # real one reads sys.argv, so running `pytest --verbose` would turn on
+        # Drafter's own verbose setting and change the behavior under test.
+        system = SystemConfiguration(
+            bootstrap=BootstrapConfiguration(path="main.py"),
+            client_server=ClientServerConfiguration(),
+            app_server=AppServerConfiguration(),
+            app_builder=AppBuilderConfiguration(),
+            app_common=AppCommonConfiguration(),
+        )
         monkeypatch.setattr(launch, "get_system_configuration", lambda: system)
         return system
 

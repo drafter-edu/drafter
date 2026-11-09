@@ -83,10 +83,13 @@ def _windows_application_path(executable: str) -> str | None:
         The full path to the executable, or None when it is not registered or
         the recorded file no longer exists.
     """
-    try:
-        import winreg
-    except ImportError:
+    # `winreg` exists only on Windows. Checking `sys.platform` (rather than
+    # catching ImportError) also tells type checkers on other platforms that
+    # the registry calls below are not reachable there.
+    if sys.platform != "win32":
         return None
+    import winreg
+
     subkey = rf"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\{executable}"
     for root in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
         try:

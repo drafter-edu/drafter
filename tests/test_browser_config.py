@@ -226,3 +226,8 @@ class TestPlatformLookups:
         controller = find_browser("chrome")
         assert isinstance(controller, webbrowser.BackgroundBrowser)
         assert controller.name == r"C:\Browsers\chrome.exe"
+
+    def test_registry_lookup_is_none_off_windows(self, monkeypatch):
+        # The registry (and the `winreg` module) only exists on Windows.
+        monkeypatch.setattr(browser_launch.sys, "platform", "linux")
+        assert browser_launch._windows_application_path("chrome.exe") is None
