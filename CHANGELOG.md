@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Fixed charts drawn in unit tests showing up in the first page with a `MatPlotLibPlot` (#149). A test calls the route and compares the page without displaying it, so the chart it drew stayed open and the next chart was drawn on top of it. `MatPlotLibPlot()` now takes hold of the current figure when it is created, and (unless `close_automatically=False`) closes it right then, so the next chart always starts blank. This also fixes charts piling up between page visits in the browser, where the figure was never closed. Write your `plt.` commands before `MatPlotLibPlot()`; commands that run after it belong to the next chart.
+- Fixed `MatPlotLibPlot` writing its image into the `style` attribute instead of `src` when a page was rendered outside the browser.
+
 ## [2.1.4] - 2026-11-09
 
 - Fixed sites failing to start after upgrading Drafter, with `TypeError: Failed to fetch dynamically imported module: .../pyodide.asm.js`. The browser could keep using the copy of Drafter's JavaScript it had saved from the older version, which then asked for a Pyodide file that newer Pyodide versions no longer have. Pages now load Drafter's scripts from addresses that include the Drafter version (such as `drafter.pyodide.js?v=2.1.4`), so each release gets fresh copies, and the local development server tells the browser to check Drafter's own files for changes before reusing saved ones. On an older version, a hard refresh (Ctrl+Shift+R, or Cmd+Shift+R on a Mac) clears the error.
