@@ -186,7 +186,9 @@ pattern to copy.
 ## Look it up
 
 [Testing functions](../reference/testing-functions.md) lists every
-assertion with its flags and failure output.
+assertion with its flags and failure output. To run your tests with
+the tools other Python projects use, see
+[Use pytest or unittest](use-pytest-or-unittest.md).
 
 ## Fix a problem
 

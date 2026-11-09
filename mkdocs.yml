@@ -42,6 +42,7 @@ nav:
   - Make things happen over time: add/timers.md
   - Embed HTML: add/html.md
   - Test a feature: add/test-a-feature.md
+  - Use pytest or unittest: add/use-pytest-or-unittest.md
   - Freeze finished pages: add/freeze-pages.md
 - Your Project:
   - your-project/index.md

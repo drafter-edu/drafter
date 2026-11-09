@@ -70,6 +70,11 @@ Work through the classic save-and-reload steps, in order:
   `start_server(port=8081)`.
 - If `import drafter` itself fails, the installation is the problem;
   see [Get Drafter running](../start/install.md).
+- If the program ends right away with no message and no site, the
+  `DRAFTER_SKIP` environment variable may be set in your terminal. It
+  tells `start_server` to do nothing, which is meant for
+  [test runners](../add/use-pytest-or-unittest.md). Open a new
+  terminal, or unset the variable.
 
 ## The page looks plain or unstyled
 

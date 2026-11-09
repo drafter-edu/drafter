@@ -241,6 +241,13 @@ pages:
     audience: S
     priority: P0
     outcome: Write focused tests for routes.
+  - path: add/use-pytest-or-unittest.md
+    title: Use pytest or unittest
+    template: how-to
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Run route tests with pytest or unittest.
   - path: add/freeze-pages.md
     title: Freeze finished pages
     template: how-to
