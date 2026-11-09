@@ -166,6 +166,10 @@ what is live.
 - **The site is up but a picture or file is missing**: the file was
   never uploaded to the repository. Upload it next to `main.py` and
   redeploy.
+- **The run fails with `ModuleNotFoundError`**: your program imports a
+  library that GitHub's build computer does not have. List it in a
+  `requirements.txt` file next to `main.py`, one name per line, and
+  run the workflow again.
 - **The site shows an old version**: you committed changes but did not
   run the workflow again, or the browser cached the old page. Redeploy,
   then hard-refresh.

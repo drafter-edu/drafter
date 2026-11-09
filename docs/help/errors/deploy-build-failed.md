@@ -52,6 +52,10 @@ Compare the last lines of the log against these common causes:
 - **A missing file** → see
   [works locally, 404s deployed](missing-asset-on-deploy.md);
   a file the build needs was never uploaded.
+- **`ModuleNotFoundError` for a library that works on your computer**
+  → the build runs on one of GitHub's computers, which does not have
+  the library installed; list it in a `requirements.txt` file next to
+  `main.py`.
 - **Nothing found to build** → the workflow expects your program to
   be in a file named `main.py`, with exactly that name.
 

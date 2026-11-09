@@ -81,6 +81,21 @@ for GitHub Pages; the
 [deploy guide](../your-project/deploy/index.md) walks the whole
 journey.
 
+Building runs your program once, on the computer doing the build,
+to prepare the first page. Every library your program imports
+therefore has to be **installed on that computer**, even though each
+visitor's browser later installs its own copy. If a library is
+missing, the build stops with `ModuleNotFoundError`.
+
+- On your own computer, install the library the way you installed
+  Drafter, for example `pip install seaborn`.
+- With the course deployment template on GitHub, list the library in
+  a file named `requirements.txt` next to `main.py`, one name per
+  line. The deploy workflow installs everything in that file before
+  it builds.
+- In a workflow you wrote yourself, add the library to the build
+  command, as in `uvx --with seaborn drafter main.py --compile`.
+
 | Flag | Default | What it does |
 | ---- | ------- | ------------ |
 | `--output-directory DIR` | `dist` | Build somewhere else. |
