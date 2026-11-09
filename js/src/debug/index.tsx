@@ -30,6 +30,7 @@ import {
 } from "./menubar";
 import { getCurrentSourceCode, openCodeEditor } from "./editor";
 import { openSourceViewer } from "./viewsource";
+import { openHtmlConverter } from "./htmlconvert";
 import { openStateEditor } from "./state_edit";
 import { openThemeSwitcher } from "./theme_switch";
 import { downloadBugReport, SaveLoadManager } from "./saveload";
@@ -514,6 +515,13 @@ export class DebugPanel {
 						tooltipKey: "button.edit.tooltip",
 						className: "drafter-menu-item-edit-source",
 						action: () => openCodeEditor(),
+					},
+					{
+						labelKey: "menu.convert_html",
+						iconKey: "icon.convert_html",
+						tooltipKey: "menu.convert_html.tooltip",
+						className: "drafter-menu-item-convert-html",
+						action: () => openHtmlConverter(),
 					},
 				],
 			},

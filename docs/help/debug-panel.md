@@ -98,6 +98,13 @@ option to hide the frame, and the live site-theme switcher for
 the Help menu, whose **Download Bug Report** item packages up
 [everything a bug report needs](bug-reports.md).
 
+The Edit menu's **Convert HTML to Drafter…** item turns HTML you
+already have into Drafter code. Paste the HTML (or choose an `.html`
+file), press Convert, and copy the Python it writes. The result is a
+starting point: read it before using it, because some HTML has no
+exact Drafter match. The converter downloads the first time you use
+it, so the first conversion takes a moment longer than the rest.
+
 While your app runs from your own computer, the Navigate menu ends
 with **Stop Server…**. After you confirm, it shuts down the Drafter
 program running in your terminal or editor, the same as pressing

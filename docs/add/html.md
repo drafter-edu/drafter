@@ -94,6 +94,20 @@ def index(state: State) -> Page:
 start_server(State())
 ```
 
+## Recipe: turn existing HTML into components
+
+When you have a whole page of HTML, from an earlier project or a
+design tool, you do not have to retype it. In the debug panel, open
+**Edit** and choose **Convert HTML to Drafter…**. Paste the HTML or
+choose the file, press Convert, and Drafter writes the matching
+components: headings become `Header`, inputs become `TextBox`,
+`CheckBox`, `Slider` and the rest, and CSS inside `<style>` tags
+becomes `add_website_css` calls. Copy the result into your program.
+
+Treat the result as a first draft. A tag with no Drafter component
+is kept as an `HtmlTag`, and the buttons will need routes to point
+at.
+
 ## The safety rule
 
 `RawHTML` turns off the text-stays-text protection, so it comes

@@ -1908,3 +1908,33 @@ div.btlw-container img {
 	gap: 6px;
 	margin-bottom: 6px;
 }
+
+/* Edit > Convert HTML to Drafter dialog */
+.drafter-html-converter {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.drafter-html-converter-intro {
+	margin: 0;
+}
+
+.drafter-html-converter-input {
+	width: 100%;
+	box-sizing: border-box;
+	font-family: monospace;
+	font-size: 13px;
+	resize: vertical;
+}
+
+.drafter-html-converter-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+.drafter-html-converter-status {
+	font-size: 13px;
+}

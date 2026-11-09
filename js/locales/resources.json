@@ -195,7 +195,26 @@
 			"console.clear.tooltip": "Clear the console output",
 			"console.hide": "Hide",
 			"console.hide.tooltip": "Hide the console until new output is printed or it is toggled back on",
-			"console.input.placeholder": "Type Python code and press Enter"
+			"console.input.placeholder": "Type Python code and press Enter",
+			"icon.convert_html": "🔁",
+			"menu.convert_html": "Convert HTML to Drafter…",
+			"menu.convert_html.tooltip": "Turn HTML you paste or upload into Drafter components",
+			"htmlconvert.title": "Convert HTML to Drafter",
+			"htmlconvert.intro": "Paste HTML below (CSS inside style tags is converted too), or choose an HTML file. Drafter writes the matching Python for you to copy into your program.",
+			"htmlconvert.input_label": "HTML to convert",
+			"htmlconvert.upload_label": "Or choose an HTML file:",
+			"htmlconvert.convert": "Convert",
+			"htmlconvert.copy": "Copy Python",
+			"htmlconvert.copied": "Copied!",
+			"htmlconvert.copy_failed": "Could not copy. Select the code and copy it by hand.",
+			"htmlconvert.loading": "Loading the converter…",
+			"htmlconvert.load_failed": "Could not load the converter. Check your connection and try again.",
+			"htmlconvert.empty": "Paste some HTML first.",
+			"htmlconvert.done": "Converted. Read the result before using it: some HTML has no exact Drafter match.",
+			"htmlconvert.failed": "Could not convert that HTML: {{message}}",
+			"htmlconvert.output_label": "Drafter code",
+			"htmlconvert.output_placeholder": "The converted Python will appear here.",
+			"htmlconvert.close": "Close"
 		}
 	},
 	"es": {
@@ -368,7 +387,26 @@
 			"console.clear.tooltip": "Borrar la salida de la consola",
 			"console.hide": "Ocultar",
 			"console.hide.tooltip": "Ocultar la consola hasta que se imprima nueva salida o se vuelva a activar",
-			"console.input.placeholder": "Escribe código Python y presiona Enter"
+			"console.input.placeholder": "Escribe código Python y presiona Enter",
+			"icon.convert_html": "🔁",
+			"menu.convert_html": "Convertir HTML a Drafter…",
+			"menu.convert_html.tooltip": "Convierte el HTML que pegues o subas en componentes de Drafter",
+			"htmlconvert.title": "Convertir HTML a Drafter",
+			"htmlconvert.intro": "Pega HTML abajo (el CSS dentro de etiquetas style también se convierte) o elige un archivo HTML. Drafter escribe el Python equivalente para que lo copies en tu programa.",
+			"htmlconvert.input_label": "HTML para convertir",
+			"htmlconvert.upload_label": "O elige un archivo HTML:",
+			"htmlconvert.convert": "Convertir",
+			"htmlconvert.copy": "Copiar Python",
+			"htmlconvert.copied": "¡Copiado!",
+			"htmlconvert.copy_failed": "No se pudo copiar. Selecciona el código y cópialo a mano.",
+			"htmlconvert.loading": "Cargando el convertidor…",
+			"htmlconvert.load_failed": "No se pudo cargar el convertidor. Revisa tu conexión e inténtalo de nuevo.",
+			"htmlconvert.empty": "Primero pega algo de HTML.",
+			"htmlconvert.done": "Convertido. Lee el resultado antes de usarlo: algunas partes de HTML no tienen un equivalente exacto en Drafter.",
+			"htmlconvert.failed": "No se pudo convertir ese HTML: {{message}}",
+			"htmlconvert.output_label": "Código de Drafter",
+			"htmlconvert.output_placeholder": "El Python convertido aparecerá aquí.",
+			"htmlconvert.close": "Cerrar"
 		}
 	}
 }

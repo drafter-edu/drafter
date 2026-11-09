@@ -65,6 +65,28 @@ export default defineConfig([
 		minify: true,
 	},
 	{
+		// Loaded on demand (see src/lazy.ts): the HTML and CSS parsers it
+		// needs are too large to ship to every page in the main bundles.
+		entry: {
+			"drafter.transpiler": "src/transpiler.index.ts",
+		},
+		format: ["iife"],
+		globalName: "DrafterTranspiler",
+		// css-tree's Node build reads its data files with createRequire,
+		// which does not exist in a browser. Building for the browser
+		// platform makes esbuild follow the package's "browser" field to
+		// the prebuilt data files instead.
+		platform: "browser",
+		outDir: "dist/js",
+		clean: false,
+		target: browserslistToEsbuild(),
+		outExtension() {
+			return { js: ".js" };
+		},
+		sourcemap: true,
+		minify: true,
+	},
+	{
 		entry: cssEntries,
 		bundle: true,
 		sourcemap: true,

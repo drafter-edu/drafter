@@ -30,6 +30,7 @@ const PARITY_PREFIXES = [
 	"test_wizard.",
 	"internals.",
 	"viewsource.",
+	"htmlconvert.",
 	"state_edit.",
 	"footer.status",
 	"theme.",

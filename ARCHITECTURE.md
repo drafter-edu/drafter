@@ -881,6 +881,13 @@ Here are the parts of Drafter that have to be hosted:
   - `drafter.skulpt.js` - the bundle integrating Drafter with the Skulpt environment.
   - `drafter.pyodide.js` - the bundle integrating Drafter with the Pyodide environment.
   - (There is no unified `drafter.js`; the two engine bundles are the entry points.)
+  - `drafter.transpiler.js` - the HTML-to-Drafter converter (global `DrafterTranspiler`). This is a
+    **lazy bundle**: it is not referenced by any page template. `loadLazyBundle()` in
+    `js/src/lazy.ts` adds its `<script>` on first use, resolving the address from the main bundle's
+    own URL (same folder, same `?v=` version stamp). Anything large that most pages never use
+    should be built this way (its own tsup entry with `platform: "browser"`, one global, loaded
+    through `loadLazyBundle`) instead of being imported into an engine bundle, since every Drafter
+    page downloads those in full.
   - `drafter_base.css` - core styling.
   - `drafter_debug.css` - debug menu styles.
   - `drafter_deploy.css` - styles for deployed (non-debug) mode.

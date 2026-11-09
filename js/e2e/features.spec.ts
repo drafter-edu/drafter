@@ -310,6 +310,63 @@ test("Slider and ColorPicker deliver their values in the annotated forms", async
 	);
 });
 
+// The converter is a separate bundle fetched on first use (js/src/lazy.ts).
+// Only a real browser can show the whole path: the menu item, the script
+// request for drafter.transpiler.js beside the main bundle, and the result.
+const CONVERTER_HOST_APP = `
+from drafter import *
+
+@route
+def index() -> Page:
+    return Page(["A page with the debug panel open"])
+
+start_server()
+`;
+
+test("Convert HTML to Drafter loads its bundle on demand and converts", async ({
+	page,
+}) => {
+	const transpilerRequests: string[] = [];
+	page.on("request", (request) => {
+		if (request.url().includes("drafter.transpiler.js")) {
+			transpilerRequests.push(request.url());
+		}
+	});
+	await page.goto("/harness.html");
+	await page.evaluate(async (code) => {
+		await window.runExample(code);
+	}, CONVERTER_HOST_APP);
+	await expect(page.locator("#drafter-root--")).toContainText(
+		"A page with the debug panel open",
+	);
+	// Nothing is downloaded until the converter is actually used.
+	expect(transpilerRequests).toHaveLength(0);
+
+	await page.locator(".drafter-menu-button-edit").click();
+	await page.locator(".drafter-menu-item-convert-html").click();
+	const dialog = page.locator(".drafter-html-converter");
+	await expect(dialog).toBeVisible();
+	expect(transpilerRequests).toHaveLength(0);
+
+	await dialog
+		.locator(".drafter-html-converter-input")
+		.fill('<h1>Corgi Cafe</h1><input type="color" name="ink" value="#ff8800">');
+	await dialog.locator(".drafter-html-converter-convert").click();
+
+	const output = dialog.locator(".drafter-html-converter-output");
+	await expect(output).toContainText("Corgi Cafe");
+	await expect(output).toContainText('ColorPicker("ink", default_value="#ff8800")');
+	await expect(dialog.locator(".drafter-html-converter-copy")).toBeEnabled();
+	expect(transpilerRequests).toHaveLength(1);
+	expect(transpilerRequests[0]).toContain("/js/drafter.transpiler.js");
+
+	// A second conversion reuses the loaded converter.
+	await dialog.locator(".drafter-html-converter-input").fill("<p>Again</p>");
+	await dialog.locator(".drafter-html-converter-convert").click();
+	await expect(output).toContainText("Again");
+	expect(transpilerRequests).toHaveLength(1);
+});
+
 // Mirrors examples/piano.py: each key returns a Fragment holding a hidden,
 // auto-playing Tone. The tone used to wait forever for a page-loaded event
 // that only full page loads dispatched, so the piano made no sound.

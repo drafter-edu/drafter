@@ -405,6 +405,7 @@ describe("construction and mounting", () => {
 			"drafter-menu-item-switch-theme",
 			"drafter-menu-item-edit-state",
 			"drafter-menu-item-edit-source",
+			"drafter-menu-item-convert-html",
 		]) {
 			const item = headerBar.querySelector(
 				`.${cls}`,
