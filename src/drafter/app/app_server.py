@@ -21,6 +21,7 @@ from starlette.responses import (
 )
 from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
+from starlette.types import Scope
 
 from drafter.app.browser_launch import open_in_browser
 from drafter.app.error_log import append_error_log_entry, build_log_entry
@@ -232,6 +233,24 @@ MAX_ERROR_REPORT_BYTES = 256 * 1024
 """Reject browser error reports larger than this many bytes."""
 
 
+class RevalidatingStaticFiles(StaticFiles):
+    """StaticFiles whose responses the browser must revalidate before reuse.
+
+    Used for Drafter's own assets. Without a `Cache-Control` header a
+    browser guesses how long a file stays fresh from its age, so a bundle
+    installed weeks ago can be reused for days without asking the server,
+    even after Drafter was upgraded and the file behind the URL changed.
+    `no-cache` still lets the browser keep its copy, but makes it check
+    with the server first (an inexpensive 304 when nothing changed).
+    """
+
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        """Serve a file, marking the response as needing revalidation."""
+        response = await super().get_response(path, scope)
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+
+
 class TrackingStaticFiles(StaticFiles):
     """StaticFiles that reports each file it successfully serves.
 
@@ -420,7 +439,7 @@ def make_app(
         routes.append(
             Mount(
                 "/" + INTERNAL_ROUTES["ASSETS"],
-                app=StaticFiles(directory=str(assets_dir)),
+                app=RevalidatingStaticFiles(directory=str(assets_dir)),
                 name="assets",
             )
         )

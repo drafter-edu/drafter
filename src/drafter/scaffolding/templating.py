@@ -12,6 +12,7 @@ from jinja2 import Environment, FileSystemLoader, Template
 from drafter.config.system import SystemConfiguration
 from drafter.scaffolding.utils import pkg_scaffold_dir
 from drafter.site.site import DRAFTER_TAG_IDS
+from drafter.version import CURRENT_DRAFTER_VERSION
 
 _env = Environment(loader=FileSystemLoader(str(pkg_scaffold_dir())), autoescape=False)
 
@@ -60,6 +61,9 @@ def render_index_html(
 
     Loads the appropriate template for the engine and renders it with the
     provided values. The assets_url parameter controls how assets are served.
+    Asset URLs written by the template end in a `?v=<Drafter version>` query,
+    so upgrading Drafter changes them and a browser cannot reuse a script it
+    cached from an older release.
 
     Args:
         system: System configuration; selects the engine template and is
@@ -86,7 +90,11 @@ def render_index_html(
     template = _load_template_text(system.app_common.engine)
 
     def static(asset_name: str) -> str:
-        return f"{assets_url}/{asset_name}"
+        # The version query gives every Drafter release its own asset URLs,
+        # so a browser never pairs this page with a bundle it cached from an
+        # older release (whose Pyodide loader would not match the Pyodide
+        # version this page points at).
+        return f"{assets_url}/{asset_name}?v={CURRENT_DRAFTER_VERSION}"
 
     return template.render(
         # General variables

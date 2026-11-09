@@ -657,6 +657,58 @@ function yieldToBrowser(loadSlowly = false): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+/**
+ * How browsers, Pyodide, and micropip word a download that did not arrive:
+ * Chrome ("Failed to fetch", also for dynamic imports), Firefox ("error
+ * loading dynamically imported module", "NetworkError"), Safari ("Importing
+ * a module script failed", "Load failed"), Pyodide ("Failed to load '...':
+ * request failed."), and micropip ("Can't fetch ...").
+ */
+const DOWNLOAD_FAILURE_PATTERN =
+	/failed to fetch|error loading dynamically imported module|importing a module script failed|networkerror|load failed|request failed|can't fetch/i;
+
+/** The host a URL points at, or null when it names no other server. */
+function externalHostOf(url: string | undefined): string | null {
+	if (!url || !/^https?:\/\//i.test(url)) {
+		return null;
+	}
+	try {
+		return new URL(url).host || null;
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Student-facing explanation for a Pyodide setup failure caused by a
+ * download that did not arrive (offline, a blocked CDN, or a stale cached
+ * copy of Drafter asking for a file that no longer exists). Returns an
+ * empty object for any other failure, leaving the generic setup text.
+ */
+function explainPyodideDownloadFailure(
+	error: unknown,
+	pyodideUrl: string,
+): { friendlyMessage?: string; friendlySteps?: string[] } {
+	const text = error instanceof Error ? error.message : String(error);
+	if (!DOWNLOAD_FAILURE_PATTERN.test(text)) {
+		return {};
+	}
+	// Prefer the server named in the error itself (the file that failed)
+	// over the configured Pyodide location.
+	const failedUrl = /https?:\/\/[^\s'"`)]+/i.exec(text)?.[0];
+	const host = externalHostOf(failedUrl) ?? externalHostOf(pyodideUrl);
+	const blocked = host ? `\`${host}\`` : "the download";
+	return {
+		friendlyMessage:
+			"Drafter could not download the files it needs to run Python in your browser. This is a connection or browser problem, not a mistake in your code.",
+		friendlySteps: [
+			"Check that this computer is connected to the internet.",
+			"Reload this page with a hard refresh (Ctrl+Shift+R on Windows or Linux, Cmd+Shift+R on a Mac), so the browser downloads fresh copies instead of reusing saved ones.",
+			`If it still fails, your network may be blocking ${blocked} (some school and work networks do). Try a different network, or show the technical details to your instructor.`,
+		],
+	};
+}
+
 export async function setupPyodide(options: PyodideSettings, verbose = false) {
 	const verboseLog = (...args: any[]) => {
 		if (verbose) {
@@ -734,6 +786,7 @@ export async function setupPyodide(options: PyodideSettings, verbose = false) {
 				category: "runtime",
 				message: "Error setting up Pyodide",
 				error,
+				...explainPyodideDownloadFailure(error, options.pyodideUrl),
 				context: { phase: "setup" },
 			});
 		}
