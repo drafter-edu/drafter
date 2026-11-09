@@ -139,6 +139,39 @@ tests.datetimeinput_with_default = """
 """
 
 
+# Slider tests
+tests.slider_simple = Slider("volume", 0, 100)
+tests.slider_simple = """
+<input aria-label="volume" id="volume" max="100" min="0" name="volume" type="range">
+"""
+
+tests.slider_with_default = Slider("volume", 0, 100, 25)
+tests.slider_with_default = """
+<input aria-label="volume" id="volume" max="100" min="0" name="volume" type="range" value="25">
+"""
+
+tests.slider_with_step = Slider("rating", 1, 5, default_value=2.5, step=0.5)
+tests.slider_with_step = """
+<input aria-label="rating" id="rating" max="5" min="1" name="rating" step="0.5" type="range" value="2.5">
+"""
+
+tests.slider_negative_range = Slider("temperature", -40, 40, 0)
+tests.slider_negative_range = """
+<input aria-label="temperature" id="temperature" max="40" min="-40" name="temperature" type="range" value="0">
+"""
+
+# ColorPicker tests
+tests.colorpicker_simple = ColorPicker("favorite")
+tests.colorpicker_simple = """
+<input aria-label="favorite" id="favorite" name="favorite" type="color">
+"""
+
+tests.colorpicker_with_default = ColorPicker("favorite", "#3366FF")
+tests.colorpicker_with_default = """
+<input aria-label="favorite" id="favorite" name="favorite" type="color" value="#3366ff">
+"""
+
+
 tests.arguments_outside = Argument("secret_message", "It's a secret to everybody!")
 tests.arguments_outside = """
 <input data-transform='json-decode' id="secret_message" name="secret_message" type="hidden" value="&quot;It's a secret to everybody!&quot;">

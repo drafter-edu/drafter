@@ -3,11 +3,13 @@
 Defines `FormComponent` (the shared base class for named form fields) and
 the concrete inputs students place on pages: `TextBox`, `TextArea`,
 `SelectBox`, `CheckBox`, `RelatedCheckBox`, `RadioButtonGroup`, `Label`,
-and the date/time inputs (`DateTimeInput`, `DateInput`, `TimeInput`).
+the date/time inputs (`DateTimeInput`, `DateInput`, `TimeInput`), and the
+`Slider` and `ColorPicker` pickers.
 Each field's `name` becomes a parameter of the route that the enclosing
 page submits to.
 """
 
+import re
 from dataclasses import dataclass
 from datetime import date, datetime, time
 from typing import Any
@@ -677,4 +679,225 @@ class TimeInput(FormComponent):
             if default_value is not None
             else None
         )
+        self.extra_settings = kwargs
+
+
+def _require_number(value: Any, parameter: str) -> None:
+    """Check that a Slider argument is a number.
+
+    Args:
+        value: The argument the student passed.
+        parameter: The Slider parameter name it was passed as.
+
+    Raises:
+        StudentFacingError: If the value is not an int or float (booleans
+            are rejected too, since `True` is almost always a mistake here).
+    """
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise StudentFacingError(
+            f"Slider {parameter} must be a number, but got {value!r} "
+            f"({type(value).__name__}).",
+            friendly=(
+                f"The {parameter} you gave Slider was {value!r}, which is a "
+                f"{type(value).__name__}. A slider moves along numbers, so "
+                f"its {parameter} has to be a number."
+            ),
+            steps=(
+                f"Pass a number for {parameter}, like Slider('volume', 0, 100).",
+                "If the value is text such as '10', convert it first with "
+                "int(...) or float(...).",
+            ),
+        )
+
+
+@dataclass(repr=False)
+class Slider(FormComponent):
+    """A slider for choosing a number between a lowest and highest value.
+
+    The visitor drags a handle along a track. The chosen number arrives at
+    the route as a parameter with the field's name; annotate that parameter
+    as `int` (or `float` when `step` is fractional) to receive a number.
+
+    Attributes:
+        min: The lowest value, at the left end of the track.
+        max: The highest value, at the right end of the track.
+        default_value: Where the handle starts, or None to start in the
+            middle.
+        step: The distance between the values the handle can stop on.
+        tag: The HTML tag name, always 'input'.
+
+    Example:
+        ```python
+        Slider("volume", 0, 100, 25)
+        ```
+    """
+
+    min: float
+    max: float
+    default_value: float | None
+    step: float
+
+    tag = "input"
+    SELF_CLOSING_TAG = True
+    KNOWN_ATTRS = ["type", "name", "min", "max", "value", "step"]
+    DEFAULT_ATTRS = {"type": "range"}
+    RENAME_ATTRS = {"default_value": "value"}
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("min"),
+        ComponentArgument("max"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+        ComponentArgument("step", kind="keyword", default_value=1),
+    ]
+
+    def __init__(
+        self,
+        name: str,
+        min: float,
+        max: float,
+        default_value: float | None = None,
+        step: float = 1,
+        **kwargs,
+    ):
+        """Initialize slider component.
+
+        Args:
+            name: The form field name, matching a parameter of the route
+                that receives the form.
+            min: The lowest value the visitor can choose.
+            max: The highest value the visitor can choose.
+            default_value: Where the handle starts. Defaults to None, which
+                lets the browser start it in the middle.
+            step: The distance between allowed values. Defaults to 1; use
+                a fraction such as 0.5 for finer control.
+            **kwargs: Additional HTML attributes and styles.
+
+        Raises:
+            StudentFacingError: If `min`, `max`, `step`, or `default_value`
+                is not a number, if `min` is not below `max`, if `step` is
+                not positive, or if `default_value` lies outside the range.
+        """
+        validate_parameter_name(name, "Slider")
+        _require_number(min, "min")
+        _require_number(max, "max")
+        _require_number(step, "step")
+        if min >= max:
+            raise StudentFacingError(
+                f"Slider min ({min!r}) must be less than max ({max!r}).",
+                friendly=(
+                    f"You gave Slider a min of {min!r} and a max of {max!r}, "
+                    "but the lowest value has to be smaller than the "
+                    "highest, or the slider has nowhere to move."
+                ),
+                steps=("Put the smaller number first: Slider(name, lowest, highest).",),
+            )
+        if step <= 0:
+            raise StudentFacingError(
+                f"Slider step must be greater than zero, but got {step!r}.",
+                friendly=(
+                    f"The step you gave Slider was {step!r}. The step is how "
+                    "far the handle moves each time, so it has to be more "
+                    "than zero."
+                ),
+                steps=("Use a positive step, like step=1 or step=0.5.",),
+            )
+        if default_value is not None:
+            _require_number(default_value, "default_value")
+            if not min <= default_value <= max:
+                raise StudentFacingError(
+                    f"Slider default_value ({default_value!r}) must be between "
+                    f"min ({min!r}) and max ({max!r}).",
+                    friendly=(
+                        f"The slider's starting value is {default_value!r}, "
+                        f"which is outside its range of {min!r} to {max!r}."
+                    ),
+                    steps=(
+                        f"Choose a default_value from {min!r} to {max!r}.",
+                        "Or widen the range by changing min or max.",
+                    ),
+                )
+        self.name = name
+        self.min = min
+        self.max = max
+        self.default_value = default_value
+        self.step = step
+        self.extra_settings = kwargs
+
+
+HEX_COLOR_PATTERN = re.compile(r"#[0-9a-fA-F]{6}")
+"""The only color format a browser's color picker accepts as its starting
+value: a hash sign and six hexadecimal digits, such as `#ff8800`."""
+
+
+@dataclass(repr=False)
+class ColorPicker(FormComponent):
+    """A swatch that opens the browser's color chooser.
+
+    The chosen color arrives at the route as a string parameter with the
+    field's name, written as a hex code such as `"#ff8800"`. That string
+    can be used anywhere Drafter takes a color, like `style_color` or
+    `change_background_color`.
+
+    Attributes:
+        default_value: The color the picker starts on, as a `#rrggbb` hex
+            code.
+        tag: The HTML tag name, always 'input'.
+
+    Example:
+        ```python
+        ColorPicker("favorite_color", "#3366ff")
+        ```
+    """
+
+    default_value: str
+
+    tag = "input"
+    SELF_CLOSING_TAG = True
+    KNOWN_ATTRS = ["type", "name", "value"]
+    DEFAULT_ATTRS = {"type": "color"}
+    RENAME_ATTRS = {"default_value": "value"}
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("default_value", kind="keyword", default_value="#000000"),
+    ]
+
+    def __init__(self, name: str, default_value: str = "#000000", **kwargs):
+        """Initialize color picker component.
+
+        Args:
+            name: The form field name, matching a parameter of the route
+                that receives the form.
+            default_value: The starting color as a `#rrggbb` hex code.
+                Defaults to black (`"#000000"`).
+            **kwargs: Additional HTML attributes and styles.
+
+        Raises:
+            StudentFacingError: If `default_value` is not a `#rrggbb` hex
+                code. Browsers silently replace anything else with black,
+                which would hide the mistake.
+        """
+        validate_parameter_name(name, "ColorPicker")
+        if not isinstance(default_value, str) or not HEX_COLOR_PATTERN.fullmatch(
+            default_value
+        ):
+            raise StudentFacingError(
+                f"ColorPicker default_value must be a hex color like '#ff8800', "
+                f"but got {default_value!r}.",
+                friendly=(
+                    f"The starting color you gave ColorPicker was "
+                    f"{default_value!r}. A color picker only understands "
+                    "colors written as a hash sign followed by six digits "
+                    "or letters a-f, like '#ff8800'. Color names such as "
+                    "'red' do not work here."
+                ),
+                steps=(
+                    "Write the color as a hex code, for example '#ff0000' for red.",
+                    "Search the web for 'color picker' to find the hex code "
+                    "of any color.",
+                ),
+            )
+        self.name = name
+        self.default_value = default_value.lower()
         self.extra_settings = kwargs

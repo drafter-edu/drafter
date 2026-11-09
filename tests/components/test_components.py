@@ -147,6 +147,20 @@ snippets = {
         "with_style": """DateTimeInput('scheduled', style_width='250px')""",
         "with_attributes": """DateTimeInput('launch_time', required=True, id='launch')""",
     },
+    "slider": {
+        "simple": """Slider('volume', 0, 100)""",
+        "with_default": """Slider('volume', 0, 100, 25)""",
+        "with_step": """Slider('rating', 1, 5, step=0.5)""",
+        "with_default_and_step": """Slider('rating', 1, 5, 2.5, step=0.5)""",
+        "with_style": """Slider('size', 10, 200, style_width='300px')""",
+        "with_handler": """Slider('zoom', 1, 10, on_change='rezoom')""",
+    },
+    "colorpicker": {
+        "simple": """ColorPicker('favorite')""",
+        "with_default": """ColorPicker('favorite', '#3366ff')""",
+        "with_style": """ColorPicker('ink', style_width='80px')""",
+        "with_handler": """ColorPicker('ink', '#ff8800', on_change='recolor')""",
+    },
     "link": {
         "simple": """Link('Click here', 'next_page')""",
         "external": """Link('Google', 'https://www.google.com')""",

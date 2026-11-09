@@ -98,6 +98,8 @@ nav:
       - DateInput: reference/components/input/dateinput.md
       - TimeInput: reference/components/input/timeinput.md
       - DateTimeInput: reference/components/input/datetimeinput.md
+      - Slider: reference/components/input/slider.md
+      - ColorPicker: reference/components/input/colorpicker.md
       - Label: reference/components/input/label.md
       - Output: reference/components/input/output.md
       - FileUpload: reference/components/input/fileupload.md

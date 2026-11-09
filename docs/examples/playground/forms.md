@@ -302,6 +302,49 @@ def plan(state: State, day: str, moment: str) -> Page:
 start_server(State("not planned yet"))
 ```
 
+## Slider and ColorPicker: drag and pick
+
+A [Slider](../../reference/components/input/slider.md) collects a
+number from a range, and a
+[ColorPicker](../../reference/components/input/colorpicker.md)
+collects a color as a hex code like `#ff8800`. Neither one can be
+left empty, so the route always receives a value.
+
+```python drafter height=300
+from drafter import *
+from dataclasses import dataclass
+
+
+@dataclass
+class State:
+    size: int
+    color: str
+
+
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        Span("Domino", style_font_size=str(state.size) + "px",
+             style_color=state.color),
+        "\nSize:",
+        Slider("size", 12, 60, state.size),
+        "\nColor:",
+        ColorPicker("color", state.color),
+        "\n",
+        Button("Restyle", "restyle")
+    ])
+
+
+@route
+def restyle(state: State, size: int, color: str) -> Page:
+    state.size = size
+    state.color = color
+    return index(state)
+
+
+start_server(State(24, "#3366ff"))
+```
+
 ## Where next
 
 - [Big form](../forms.md) shows several inputs working together on

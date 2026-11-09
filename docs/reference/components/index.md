@@ -59,6 +59,8 @@ button submits to; see
 | [DateInput](input/dateinput.md) | Collect a date. |
 | [TimeInput](input/timeinput.md) | Collect a time. |
 | [DateTimeInput](input/datetimeinput.md) | Collect a date and time. |
+| [Slider](input/slider.md) | Collect a number from a range. |
+| [ColorPicker](input/colorpicker.md) | Collect a color. |
 | [Label](input/label.md) | Caption an input accessibly. |
 | [Output](input/output.md) | Show a computed result region. |
 | [FileUpload](input/fileupload.md) | Receive a file from the user. |

@@ -855,6 +855,22 @@ pages:
     priority: P1
     outcome: Collect a date and time.
     symbols: [DateTimeInput]
+  - path: reference/components/input/slider.md
+    title: Slider
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Collect a number from a range.
+    symbols: [Slider]
+  - path: reference/components/input/colorpicker.md
+    title: ColorPicker
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Collect a color.
+    symbols: [ColorPicker]
   - path: reference/components/input/label.md
     title: Label
     template: component
