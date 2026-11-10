@@ -68,10 +68,12 @@ test: test-js test-js-integration test-py test-e2e
 build-js:
     cd js && npm run build
 
-# Build the Python sdist and wheel (bundles js/dist into drafter/assets)
+# Build the Python sdist and wheel (bundles js/dist into drafter/assets).
+# --clear empties dist/ first, so `publish` only uploads the current version.
 build: build-js
-    uv build
+    uv build --clear
 
+# Build and upload the current version to PyPI
 publish: build
     uv publish
 
