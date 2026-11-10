@@ -338,7 +338,14 @@ describe("automatic installs for missing imports", () => {
 			string,
 			{ globals: { value: Record<string, string> } },
 		];
-		expect(snippet).toContain("drafter.helpers.imports");
+		// The helper's Python travels with the bundle: the browser's own
+		// drafter may be a published version without it (the development
+		// server and the docs demos install drafter from PyPI).
+		expect(snippet).not.toContain("from drafter");
+		expect(snippet).toContain("exec(__drafter_import_helpers");
+		expect(options.globals.value.__drafter_import_helpers).toContain(
+			"def find_missing_imports(",
+		);
 		expect(options.globals.value.__drafter_import_source).toBe(
 			"import seaborn",
 		);
@@ -392,9 +399,8 @@ describe("automatic installs for missing imports", () => {
 	});
 
 	test("nothing is installed when the check itself cannot run", async () => {
-		// For example: the page's Drafter is older than this bundle and has
-		// no drafter.helpers.imports module.
-		runPythonAsync.mockRejectedValue(new Error("ModuleNotFoundError"));
+		// For example: a Pyodide whose interpreter rejects the check.
+		runPythonAsync.mockRejectedValue(new Error("PythonError"));
 
 		await expect(
 			setupEnvironment({ code: "import x", loadPackagesAutomatically: true }),

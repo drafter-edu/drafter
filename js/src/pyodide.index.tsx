@@ -31,6 +31,13 @@ import {
 	syncWindowConfigurationOverrides,
 } from "./config_overrides";
 import { getPrinterConsole } from "./console/printer";
+// The Python that decides which imports and requirements are missing. It
+// is carried inside this bundle (as text, run with exec) rather than
+// imported from the drafter package in the browser, because the two can be
+// different versions: the development server and the documentation demos
+// install the published drafter wheel from PyPI, while this bundle comes
+// from the local checkout.
+import IMPORT_HELPERS_SOURCE from "../../src/drafter/helpers/imports.py";
 export { attachPrinterConsole, getPrinterConsole } from "./console/printer";
 export { clearDrafterSiteRoot, reportSystemError } from "./bridge/engine";
 export * from "./common.index";
@@ -876,25 +883,40 @@ const requestedPackageSpecs = new Set<string>();
 // page tries again.
 const failedAutomaticInstalls = new Set<string>();
 
-const MISSING_IMPORTS_SNIPPET = `
+/**
+ * Python that defines the import helpers (drafter/helpers/imports.py, carried
+ * in this bundle) in the snippet's own namespace, then runs `body`, whose
+ * value is the snippet's result.
+ */
+function importHelperSnippet(body: string): string {
+	return `
 import json as _json
-from drafter.helpers.imports import find_missing_imports as _find_missing
-_json.dumps(_find_missing(__drafter_import_source))
+_helpers = {}
+exec(__drafter_import_helpers, _helpers)
+${body}
 `;
+}
+
+const MISSING_IMPORTS_SNIPPET = importHelperSnippet(
+	`_json.dumps(_helpers["find_missing_imports"](__drafter_import_source))`,
+);
 
 /**
  * The imports in student code that nothing can provide yet: not the standard
  * library, not an installed package, and not one of the student's own files
  * (which the remote-module finder supplies). The decision is made in Python
- * (drafter.helpers.imports) by the real import machinery. Fails open: if the
- * check cannot run (for example, an older Drafter without that module), no
- * imports are reported and the program runs as it would have before.
+ * (drafter.helpers.imports, bundled here) by the real import machinery.
+ * Fails open: if the check cannot run, no imports are reported and the
+ * program runs as it would have before.
  */
 async function findMissingImports(pyodide: any, code: string): Promise<string[]> {
 	if (typeof pyodide?.runPythonAsync !== "function" || !pyodide.toPy) {
 		return [];
 	}
-	const checkGlobals = pyodide.toPy({ __drafter_import_source: code });
+	const checkGlobals = pyodide.toPy({
+		__drafter_import_helpers: IMPORT_HELPERS_SOURCE,
+		__drafter_import_source: code,
+	});
 	try {
 		const result = await pyodide.runPythonAsync(MISSING_IMPORTS_SNIPPET, {
 			globals: checkGlobals,
@@ -912,11 +934,9 @@ async function findMissingImports(pyodide: any, code: string): Promise<string[]>
 	}
 }
 
-const MISSING_REQUIREMENTS_SNIPPET = `
-import json as _json
-from drafter.helpers.imports import find_missing_requirements as _find_requirements
-_json.dumps(_find_requirements(list(__drafter_distributions)))
-`;
+const MISSING_REQUIREMENTS_SNIPPET = importHelperSnippet(
+	`_json.dumps(_helpers["find_missing_requirements"](list(__drafter_distributions)))`,
+);
 
 const INSTALLED_DISTRIBUTIONS_SNIPPET = `
 import json as _json
@@ -942,7 +962,10 @@ function packageRuntime(pyodide: any, micropip: any): PackageRuntime {
 			if (typeof pyodide?.runPythonAsync !== "function" || !pyodide.toPy) {
 				return [];
 			}
-			const globals = pyodide.toPy({ __drafter_distributions: distributions });
+			const globals = pyodide.toPy({
+				__drafter_import_helpers: IMPORT_HELPERS_SOURCE,
+				__drafter_distributions: distributions,
+			});
 			try {
 				const result = await pyodide.runPythonAsync(
 					MISSING_REQUIREMENTS_SNIPPET,

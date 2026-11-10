@@ -56,7 +56,10 @@ export default defineConfig([
 		outExtension({ format }) {
 			return { js: ".js" }; // for iife this yields dist/drafter.js
 		},
-		loader: { ".css": "text" },
+		// The Python import helpers (src/drafter/helpers/imports.py) ride
+		// along as text so the bundle never depends on which drafter the
+		// browser installed.
+		loader: { ".css": "text", ".py": "text" },
 		esbuildOptions(options) {
 			options.jsx = "automatic";
 			options.jsxImportSource = "jsx-dom";
