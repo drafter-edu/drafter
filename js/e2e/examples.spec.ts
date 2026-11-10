@@ -51,6 +51,10 @@ const SKIP_EXAMPLES = [
 	// Registers files/site_style.css etc. from a sibling directory; the
 	// harness writes a single main.py per run, so the files do not exist.
 	"website_files.py",
+	// Imports chempy. The harness runs code without Drafter's automatic
+	// package installs and only pre-installs pillow and bakery, and ChemPy
+	// comes from Drafter's online wheel index.
+	"chempy_example.py",
 ];
 const INTENTIONAL_ERROR_EXAMPLES = [
 	"error_non_string_page.py",
