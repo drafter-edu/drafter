@@ -57,3 +57,24 @@ main navigation; students reach them through "Understand it"
 links after they have already seen the behavior. Knowing this
 shape helps you assign pages: point students at tasks
 ("add a form"), not at concepts ("read about state").
+
+## Presenting a page in class
+
+Every page of these docs can be shown as slides. The screen icon in
+the header (its tooltip reads "Present this page as slides") opens
+the page as a deck, starting at the section you are reading:
+
+- Each `##` section becomes a slide, and a section too long for the
+  screen continues on the next one. Demos stay live, so you can
+  click and edit them in front of the room.
+- ++arrow-right++, ++space++, or ++page-down++ moves forward, and
+  ++arrow-left++ or ++page-up++ moves back. ++o++ lists the slides,
+  ++f++ toggles full screen, and ++esc++ returns you to the page at
+  the slide you stopped on.
+- A program too long for the screen scrolls inside its own box; the
+  forward key pages through it before moving to the next slide.
+- The deck follows the window. Zoom the browser in for a large
+  room, or go full screen, and the slides are laid out again to
+  fit.
+- The last slide of a page links to the next page and keeps slide
+  mode on.

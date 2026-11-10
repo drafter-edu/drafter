@@ -27,7 +27,7 @@ styled.
 Wrap a piece of content in a styling function to style it, and wrap the
 result in another styling function to combine effects:
 
-```python drafter height=260
+```python drafter hl_lines="13-16" height=260
 from drafter import *
 from dataclasses import dataclass
 
@@ -78,7 +78,7 @@ Helpers accept any component, not only text. A button can be large and
 green, and a whole group of content can get a border when you wrap it
 in a `Div`:
 
-```python drafter height=300
+```python drafter hl_lines="17 19" height=300
 from drafter import *
 from dataclasses import dataclass
 
@@ -119,7 +119,7 @@ per CSS property. The part after `style_` is the CSS property name with
 underscores instead of hyphens, so `style_background_color` sets
 `background-color`:
 
-```python drafter height=240
+```python drafter hl_lines="13 15-17" height=240
 from drafter import *
 from dataclasses import dataclass
 

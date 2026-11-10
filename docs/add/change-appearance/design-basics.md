@@ -55,7 +55,7 @@ This demo shows the same content twice: first crowded, then spaced
 and ranked. The only differences are space, one accent color, and
 heading levels:
 
-```python drafter height=420
+```python drafter hl_lines="16-26" height=420
 from drafter import *
 
 

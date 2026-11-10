@@ -29,7 +29,7 @@ you no longer have to style one component at a time.
 `add_website_css` takes a selector and a rule body; `classes` tags
 components so selectors can find them:
 
-```python drafter height=300
+```python drafter hl_lines="3-9 16-17" height=300
 from drafter import *
 
 add_website_css(".notice", """
@@ -73,7 +73,7 @@ To find which tag a component renders as, check the "External
 links" section of its reference page: a `Header(...)` at level 1 is
 an `h1`, and every `Button` is a `button`.
 
-```python drafter height=260
+```python drafter hl_lines="3-4" height=260
 from drafter import *
 
 add_website_css("h1", "color: darkslateblue; letter-spacing: 2px;")

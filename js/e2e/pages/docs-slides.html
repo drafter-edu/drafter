@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Drafter docs slide-mode fixture</title>
+		<!--
+			A stand-in for one page of the documentation site: the same element
+			structure and class names mkdocs-material produces, with just enough
+			of its CSS for layout to behave the same way. The slide-mode assets
+			are the real ones, served from docs/assets/ as /docs-assets/.
+		-->
+		<style>
+			html {
+				font-size: 125%;
+			}
+			body {
+				margin: 0;
+				font-family: sans-serif;
+				--md-default-bg-color: #ffffff;
+				--md-default-fg-color: #1d2a38;
+				--md-default-fg-color--light: #44536a;
+				--md-default-fg-color--lighter: #9aa7b8;
+				--md-default-fg-color--lightest: #e3ebf5;
+				--md-primary-fg-color: #1d5dbf;
+				--md-accent-fg-color: #c4610c;
+				background: var(--md-default-bg-color);
+				color: var(--md-default-fg-color);
+			}
+			.md-header {
+				position: sticky;
+				top: 0;
+				height: 2.4rem;
+				background: var(--md-primary-fg-color);
+			}
+			.md-header__inner {
+				display: flex;
+				justify-content: flex-end;
+			}
+			.md-header__button {
+				width: 2rem;
+				height: 2rem;
+				color: #ffffff;
+				background: none;
+				border: 0;
+			}
+			.md-content__inner {
+				margin: 0 0.8rem 1.2rem;
+				padding-top: 0.6rem;
+			}
+			.md-content__inner::before {
+				content: "";
+				display: block;
+				height: 0.4rem;
+			}
+			.md-typeset {
+				font-size: 0.8rem;
+				line-height: 1.6;
+			}
+			.md-typeset h1 {
+				font-size: 2em;
+				margin: 0 0 1.25em;
+			}
+			.md-typeset h2 {
+				font-size: 1.5625em;
+				margin: 1.6em 0 0.64em;
+			}
+			.md-typeset p,
+			.md-typeset ul,
+			.md-typeset ol {
+				margin: 1em 0;
+			}
+			.md-typeset code {
+				font-family: monospace;
+				font-size: 0.85em;
+			}
+			.md-typeset pre {
+				position: relative;
+				margin: 1em 0;
+				line-height: 1.4;
+			}
+			.md-typeset pre > code {
+				display: block;
+				margin: 0;
+				padding: 0.77em 1.18em;
+				overflow: auto;
+				background: #eff3f9;
+			}
+			.md-typeset table {
+				border-collapse: collapse;
+				font-size: 0.64rem;
+			}
+			.md-typeset td,
+			.md-typeset th {
+				padding: 0.94em 1.25em;
+				border-bottom: 1px solid var(--md-default-fg-color--lightest);
+				text-align: left;
+			}
+			.md-typeset__scrollwrap {
+				margin: 1em -0.8rem;
+				overflow-x: auto;
+			}
+			.drafter-demo {
+				margin: 1rem 0;
+				border: 1px solid var(--md-default-fg-color--lightest);
+			}
+			.drafter-demo iframe {
+				display: block;
+				box-sizing: border-box;
+			}
+		</style>
+		<link rel="stylesheet" href="/docs-assets/drafter-slides.css" />
+	</head>
+	<body data-md-color-scheme="default">
+		<header class="md-header">
+			<nav class="md-header__inner">
+				<form class="md-header__option"></form>
+			</nav>
+		</header>
+		<div class="md-container">
+			<main class="md-main">
+				<div class="md-content">
+					<article class="md-content__inner md-typeset">
+						<div class="drafter-page-meta"><span>How-to</span> <span>Restyle the whole site in one line.</span></div>
+						<script>
+							/* A script inside the article, as the demo plugin emits. */
+						</script>
+						<h1 id="fixture">Fixture page</h1>
+
+						<h2 id="goal">Goal</h2>
+						<p>A short section that fits on any screen.</p>
+
+						<h2 id="the-smallest-version">The smallest version</h2>
+						<p>A program sits beside its running demo:</p>
+						<div class="highlight"><pre><code id="short-program"></code></pre></div>
+						<div class="drafter-demo" id="demo">
+							<iframe
+								srcdoc="<p>Running site</p>"
+								title="Drafter Demo"
+								style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;"
+							></iframe>
+						</div>
+						<p>A sentence that follows the demo.</p>
+
+						<h2 id="the-theme-names">The theme names</h2>
+						<p>This table lists every valid name:</p>
+						<div class="md-typeset__scrollwrap">
+							<div class="md-typeset__table">
+								<table>
+									<thead>
+										<tr>
+											<th>Name</th>
+											<th>Based on</th>
+										</tr>
+									</thead>
+									<tbody id="rows"></tbody>
+								</table>
+							</div>
+						</div>
+
+						<h2 id="steps">Steps</h2>
+						<ol id="items"></ol>
+
+						<h2 id="a-long-program">A long program</h2>
+						<div class="highlight"><pre><code id="long-program"></code></pre></div>
+
+						<h2 id="try-it">Try it</h2>
+						<p>Typing here must not turn the slide:</p>
+						<p><textarea id="field" rows="2" cols="30"></textarea></p>
+
+						<h2 id="next-steps">Next steps</h2>
+						<p>A section that points the audience onward stays in the deck.</p>
+
+						<h2 id="related-components">Related components</h2>
+						<p>CLOSING-SECTION cross-references.</p>
+						<h2 id="external-links">External links</h2>
+						<p>CLOSING-SECTION cross-references.</p>
+						<h2 id="understand-it">Understand it</h2>
+						<p>CLOSING-SECTION one.</p>
+						<h2 id="see-another-example">See another example</h2>
+						<p>CLOSING-SECTION two.</p>
+						<h2 id="look-it-up">Look it up</h2>
+						<p>CLOSING-SECTION three.</p>
+						<h2 id="fix-a-problem">Fix a problem</h2>
+						<p>CLOSING-SECTION four.</p>
+					</article>
+				</div>
+			</main>
+		</div>
+		<footer class="md-footer">
+			<a class="md-footer__link md-footer__link--prev" href="docs-slides.html?page=previous" aria-label="Previous: Earlier page">Previous</a>
+			<a class="md-footer__link md-footer__link--next" href="docs-slides.html?page=next" aria-label="Next: Later page">Next</a>
+		</footer>
+		<script>
+			// Generated bulk content, so the fixture stays readable.
+			const lines = (count) =>
+				Array.from({ length: count }, (_, i) => `line_${i + 1} = ${i + 1}`).join("\n");
+			document.getElementById("short-program").textContent = lines(24);
+			document.getElementById("long-program").textContent = lines(160);
+			const rows = document.getElementById("rows");
+			for (let i = 1; i <= 20; i++) {
+				const row = rows.insertRow();
+				row.insertCell().textContent = `theme-${i}`;
+				row.insertCell().textContent = `Stylesheet number ${i}`;
+			}
+			const items = document.getElementById("items");
+			for (let i = 1; i <= 12; i++) {
+				const item = document.createElement("li");
+				item.textContent =
+					`Step ${i}: a list item long enough to wrap onto a second line ` +
+					"when it is shown at slide size on an ordinary laptop screen.";
+				items.appendChild(item);
+			}
+		</script>
+		<script src="/docs-assets/drafter-slides.js"></script>
+	</body>
+</html>

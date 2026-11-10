@@ -294,9 +294,12 @@ theme:
 
 extra_css:
   - assets/drafter-theme.css
+  # Slide mode: the header's Present button turns any page into a deck.
+  - assets/drafter-slides.css
 
 extra_javascript:
   - assets/drafter-theme.js
+  - assets/drafter-slides.js
 
 plugins:
 - search

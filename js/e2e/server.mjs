@@ -4,6 +4,7 @@
 //   /                     -> e2e/pages/            (test harness pages)
 //   /assets/              -> dist/                 (built drafter bundles + css)
 //   /pyodide/             -> node_modules/pyodide/ (local Pyodide distribution)
+//   /docs-assets/         -> ../docs/assets/       (documentation site scripts + css)
 //   /drafter-pyodide.zip  -> playground/__drafter_assets/drafter-pyodide.zip
 //
 // Every response carries COOP/COEP headers so pages are cross-origin isolated
@@ -30,6 +31,8 @@ const MOUNTS = [
 	// (same layout the playground and deployed sites use).
 	{ prefix: "/__drafter_assets/", root: path.join(jsRoot, "dist") },
 	{ prefix: "/pyodide/", root: path.join(jsRoot, "node_modules", "pyodide") },
+	// The documentation site's own assets, for docs-slides.spec.ts.
+	{ prefix: "/docs-assets/", root: path.resolve(jsRoot, "..", "docs", "assets") },
 	{ prefix: "/", root: path.join(__dirname, "pages") },
 ];
 

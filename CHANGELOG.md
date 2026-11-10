@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Every page of the documentation can now be shown as slides. A new Present button in the header (the screen icon beside the dark-mode toggle) opens the page as a slide deck, starting at the section you are reading. Each `##` section is a slide, a section too long for the screen continues on the next one, demos stay live, and the last slide links to the next page. The deck follows the window: zooming the browser in or going full screen lays the slides out again, and a program too long for the screen scrolls inside its own box instead of running off the bottom. Sections that are only cross-reference links, such as "Look it up" and "External links", are left out. See "Presenting a page in class" on the Teaching with Drafter page.
+- The demos on the "Change the appearance" pages (themes, styling functions, design basics, and custom CSS) now highlight the lines each example is about.
+
 ## [2.2.0] - 2026-11-09
 
 - Fixed charts drawn in unit tests showing up in the first page with a `MatPlotLibPlot` (#149). A test calls the route and compares the page without displaying it, so the chart it drew stayed open and the next chart was drawn on top of it. `MatPlotLibPlot()` now takes hold of the current figure when it is created, and (unless `close_automatically=False`) closes it right then, so the next chart always starts blank. This also fixes charts piling up between page visits in the browser, where the figure was never closed. Write your `plt.` commands before `MatPlotLibPlot()`; commands that run after it belong to the next chart.

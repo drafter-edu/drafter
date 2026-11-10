@@ -60,6 +60,11 @@ phase status live in [`../JS_TESTING_PLAN.md`](../JS_TESTING_PLAN.md).
   (same-page shadow-DOM instances), `embed-iframe.spec.ts` (DrafterHost
   iframe embeds — the docs editable-demo shape: shared runtime, per-iframe
   documents, restart/detach), `smoke.spec.ts`.
+- `docs-slides.spec.ts` is the one suite that boots no Python. It checks the
+  documentation site's slide mode (`docs/assets/drafter-slides.js`, served
+  from `/docs-assets/`) against `e2e/pages/docs-slides.html`, a fixture
+  shaped like a mkdocs-material page. Window sizes stand in for browser zoom
+  levels and full screen.
 
 ## Coverage
 

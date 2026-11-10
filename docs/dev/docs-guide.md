@@ -113,6 +113,42 @@ start_server()
   The fence harness (`tests/test_docs_fences.py`) still recognizes them,
   so error-entry repros are blocked on that plugin change.
 
+## Slide mode
+
+Every page has a Present button in the header that shows the page as a
+slide deck (`docs/assets/drafter-slides.js` and `drafter-slides.css`).
+Nothing in a page's Markdown opts in or out, but how a page is written
+decides how it presents:
+
+- The badges and title make the first slide, and every `##` heading
+  starts a new one. A section too long for one screen continues on further
+  slides, splitting between blocks, between table rows, and between list
+  items.
+- A paragraph that ends in a colon stays on the same slide as the block
+  after it, a `###` heading stays with what follows it, and a demo sits
+  beside its source. End a lead-in sentence with a colon.
+- Sections that are cross-reference lists are left out of the deck: the
+  four-link block (Understand it, See another example, Look it up, Fix a
+  problem), Understand on error pages, and Related, Related components,
+  and External links on reference pages. Sections that tell an audience
+  what to do next, such as Next steps and Go deeper, stay in. The list
+  lives in `CLOSING_SECTIONS` in the script; `tests/test_docs_slides.py`
+  checks it against `FOUR_LINKS` in `tools/docs_lint.py` and against the
+  headings the pages use.
+- `hl_lines` marks show on slides, where they point a room at the lines
+  under discussion. Mark the lines a how-to page is about, the way
+  tutorials mark changed lines.
+- A slide is scaled down to fit, but never below 65% of slide size. Past
+  that, programs and demos scroll inside their own boxes. On a laptop
+  screen that happens to programs longer than about 30 lines, so shorter
+  listings present better.
+- Each page is its own deck. Its last slide links to the next page in the
+  navigation.
+
+The layout rules are covered by `js/e2e/docs-slides.spec.ts`, which runs
+the real script against a fixture page (`js/e2e/pages/docs-slides.html`).
+Run it with `npm run test:e2e -- docs-slides` from `js/`.
+
 ## The CI gates
 
 Run all of these locally before pushing:

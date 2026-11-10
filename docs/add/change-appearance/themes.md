@@ -27,7 +27,7 @@ every page at once.
 Applying a theme takes one line, placed after the imports and before
 `start_server(...)`:
 
-```python drafter height=300
+```python drafter hl_lines="4" height=300
 from drafter import *
 from dataclasses import dataclass
 

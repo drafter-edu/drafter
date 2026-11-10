@@ -1,0 +1,369 @@
+/* Drafter docs slide mode (see drafter-slides.js).
+ *
+ * While a page is presented, <html> carries .drafter-slides and the page's
+ * <article> becomes a fixed, full-window stage. Its blocks stay where they
+ * are in the DOM: the script tags them and these rules decide which ones
+ * show, so running demo iframes are never reloaded.
+ *
+ * Text size comes from CSS zoom on each block (--drafter-slides-zoom, set by
+ * the script as base x fit). The stage itself is never zoomed, so its own
+ * geometry stays in real viewport pixels and browser zoom keeps working:
+ * zooming in makes the slides bigger and the deck repaginates to match.
+ */
+
+:root {
+  --drafter-slides-bar: 2.4rem;
+}
+
+/* ---- While presenting: page chrome steps aside ---- */
+
+html.drafter-slides,
+html.drafter-slides body {
+  overflow: hidden;
+}
+
+/* Hidden rather than removed, so the page keeps its layout (and scroll
+ * position) for when the reader leaves slide mode. */
+html.drafter-slides .md-header,
+html.drafter-slides .md-tabs,
+html.drafter-slides .md-sidebar,
+html.drafter-slides .md-footer,
+html.drafter-slides .md-top,
+html.drafter-slides .md-skip {
+  visibility: hidden;
+}
+
+/* ---- The stage ---- */
+
+.md-content__inner.drafter-slides__stage {
+  /* Base enlargement over normal page text; steps down on small windows.
+   * The breakpoints are in em, so they respond to browser zoom. */
+  --drafter-slides-base: 1;
+  position: fixed;
+  inset: 0 0 calc(var(--drafter-slides-bar) + env(safe-area-inset-bottom, 0px)) 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  /* max-content rows: a block is never squeezed below its own height, so
+   * the stage's scroll height is an honest measure of whether it fits. */
+  grid-auto-rows: max-content;
+  align-content: safe center;
+  /* The theme sets side margins with a longer selector when a sidebar is
+   * present; the stage must reach every edge of the window. */
+  margin: 0 !important;
+  padding: 3vh max(1rem, calc((100vw - 68rem) / 2));
+  overflow: hidden auto;
+  background: var(--md-default-bg-color);
+  outline: none;
+}
+
+/* Material's spacer pseudo-element would become a grid row. */
+.md-content__inner.drafter-slides__stage::before {
+  display: none;
+}
+
+@media screen and (min-width: 45em) {
+  .md-content__inner.drafter-slides__stage {
+    --drafter-slides-base: 1.3;
+  }
+}
+
+@media screen and (min-width: 60em) {
+  .md-content__inner.drafter-slides__stage {
+    --drafter-slides-base: 1.6;
+    /* Two columns so a program and its running demo can share a row;
+     * every other block spans both. */
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    column-gap: 1.2rem;
+  }
+}
+
+/* ---- Blocks ---- */
+
+/* Wrappers that hold headings (the home page layout, API reference
+ * objects) become transparent so their children are the slide blocks. */
+.drafter-slides__flat {
+  display: contents;
+}
+
+/* Anything the script did not tag is not slide content: scripts, the zone
+ * banner, and the closing link sections. */
+.drafter-slides__stage > :not(.drafter-slides__block):not(.drafter-slides__flat),
+.drafter-slides__flat > :not(.drafter-slides__block):not(.drafter-slides__flat) {
+  display: none !important;
+}
+
+.drafter-slides__block {
+  grid-column: 1 / -1;
+  min-width: 0;
+  zoom: var(--drafter-slides-zoom, 1);
+}
+
+.drafter-slides__block:not(.drafter-slides__block--on) {
+  display: none !important;
+}
+
+/* Grid items do not collapse margins, so adjacent blocks would get double
+ * gaps. One bottom margin per block restores the normal rhythm. */
+.drafter-slides__stage .drafter-slides__block {
+  margin-block: 0 0.8em;
+  margin-inline: 0;
+}
+
+.drafter-slides__stage h3.drafter-slides__block,
+.drafter-slides__stage h4.drafter-slides__block {
+  margin-top: 0.3em;
+}
+
+/* Tables: line up with the text and use tighter rows, so more of a long
+ * table fits on each slide. */
+.drafter-slides__stage .md-typeset__table {
+  padding: 0;
+}
+
+.drafter-slides__stage table:not([class]) th,
+.drafter-slides__stage table:not([class]) td {
+  padding-block: 0.5em;
+}
+
+/* Rows of a table or items of a list that belong to another slide. */
+.drafter-slides__item--off {
+  display: none !important;
+}
+
+/* ---- Slide headings ---- */
+
+.drafter-slides__stage h1.drafter-slides__head {
+  color: var(--md-default-fg-color);
+  font-weight: 600;
+  margin-bottom: 0.4em;
+}
+
+.drafter-slides__stage h2.drafter-slides__head {
+  color: var(--md-primary-fg-color);
+  font-weight: 600;
+}
+
+/* "(2/3)" on a section that continues across several slides. */
+.drafter-slides__head[data-drafter-slides-part]::after {
+  content: " (" attr(data-drafter-slides-part) ")";
+  color: var(--md-default-fg-color--light);
+  font-size: 0.7em;
+  font-weight: 400;
+}
+
+/* ---- Code, demos, images ---- */
+
+.drafter-slides__stage .highlight code {
+  font-size: 0.8em;
+}
+
+/* The block already carries the gap, and a program must start level with
+ * the demo beside it. */
+.drafter-slides__stage .drafter-slides__block.highlight pre {
+  margin-block: 0;
+}
+
+.drafter-slides__stage .drafter-slides__block.drafter-demo iframe {
+  display: block;
+}
+
+@media screen and (min-width: 60em) {
+  .drafter-slides__block.drafter-slides__src {
+    grid-column: 1;
+  }
+
+  .drafter-slides__block.drafter-slides__demo {
+    grid-column: 2;
+    align-self: start;
+  }
+}
+
+/* A picture never needs more than most of the stage. The zoom is divided
+ * back out because lengths inside a zoomed block are scaled with it. */
+.drafter-slides__block img {
+  max-height: calc(70vh / var(--drafter-slides-zoom, 1));
+  object-fit: contain;
+  object-position: left center;
+}
+
+/* ---- End card (added by the script, removed on exit) ---- */
+
+.drafter-slides__end-label {
+  margin: 0;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.7em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.drafter-slides__end-title {
+  margin: 0.2em 0 0.8em;
+  font-size: 1.6em;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.drafter-slides__end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.drafter-slides__end-actions .md-button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ---- Control bar ---- */
+
+.drafter-slides__bar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 101;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: calc(var(--drafter-slides-bar) + env(safe-area-inset-bottom, 0px));
+  padding: 0 0.6rem env(safe-area-inset-bottom, 0px);
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+  background: var(--md-default-bg-color);
+  color: var(--md-default-fg-color);
+  font-size: 0.7rem;
+}
+
+.drafter-slides__bar[hidden],
+.drafter-slides__bar [hidden] {
+  display: none;
+}
+
+.drafter-slides__progress {
+  position: absolute;
+  inset: -2px 0 auto 0;
+  height: 3px;
+  background: var(--drafter-grid, var(--md-default-fg-color--lightest));
+}
+
+.drafter-slides__progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--md-accent-fg-color);
+}
+
+.drafter-slides__button {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--md-default-fg-color--lighter);
+  border-radius: 0.2rem;
+  background: var(--md-default-bg-color);
+  color: inherit;
+  font: inherit;
+  line-height: 1.3;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.drafter-slides__button:hover {
+  border-color: var(--md-accent-fg-color);
+  color: var(--md-accent-fg-color);
+}
+
+.drafter-slides__button:focus-visible,
+.drafter-slides__outline a:focus-visible,
+.drafter-slides__outline button:focus-visible {
+  outline: 2px solid var(--md-accent-fg-color);
+  outline-offset: 2px;
+}
+
+.drafter-slides__page {
+  overflow: hidden;
+  max-width: 30%;
+  color: var(--md-default-fg-color--light);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drafter-slides__nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.drafter-slides__count {
+  overflow: hidden;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+}
+
+.drafter-slides__more {
+  color: var(--md-accent-fg-color);
+  white-space: nowrap;
+}
+
+.drafter-slides__outline {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 50%;
+  display: grid;
+  gap: 1px;
+  width: min(20rem, calc(100vw - 1.2rem));
+  max-height: 70vh;
+  padding: 0.3rem;
+  overflow-y: auto;
+  transform: translateX(-50%);
+  border: 1px solid var(--md-default-fg-color--lighter);
+  border-radius: 0.2rem;
+  background: var(--md-default-bg-color);
+  box-shadow: var(--md-shadow-z2);
+}
+
+.drafter-slides__outline a,
+.drafter-slides__outline button {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  border: 0;
+  border-radius: 0.15rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.drafter-slides__outline a:hover,
+.drafter-slides__outline button:hover,
+.drafter-slides__outline [aria-current="true"] {
+  background: var(--md-default-fg-color--lightest);
+}
+
+.drafter-slides__outline [aria-current="true"] {
+  font-weight: 700;
+}
+
+.drafter-slides__outline-number {
+  min-width: 1.4em;
+  color: var(--md-default-fg-color--light);
+  font-variant-numeric: tabular-nums;
+}
+
+.drafter-slides__outline hr {
+  width: 100%;
+  margin: 0.3rem 0;
+  border: 0;
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+}
+
+@media screen and (max-width: 44.99em) {
+  .drafter-slides__page,
+  .drafter-slides__more,
+  .drafter-slides__bar [data-act="fullscreen"] {
+    display: none;
+  }
+}
