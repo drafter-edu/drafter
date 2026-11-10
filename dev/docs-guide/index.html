@@ -47,6 +47,8 @@
     
       <link rel="stylesheet" href="../../assets/drafter-theme.css">
     
+      <link rel="stylesheet" href="../../assets/drafter-slides.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -13573,6 +13575,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#slide-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slide mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-ci-gates" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13759,6 +13772,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#slide-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slide mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-ci-gates" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13899,6 +13923,40 @@ STUDENT_DOCS_PLAN.md §7).</p>
   The fence harness (<code>tests/test_docs_fences.py</code>) still recognizes them,
   so error-entry repros are blocked on that plugin change.</li>
 </ul>
+<h2 id="slide-mode">Slide mode</h2>
+<p>Every page has a Present button in the header that shows the page as a
+slide deck (<code>docs/assets/drafter-slides.js</code> and <code>drafter-slides.css</code>).
+Nothing in a page's Markdown opts in or out, but how a page is written
+decides how it presents:</p>
+<ul>
+<li>The badges and title make the first slide, and every <code>##</code> heading
+  starts a new one. A section too long for one screen continues on further
+  slides, splitting between blocks, between table rows, and between list
+  items.</li>
+<li>A paragraph that ends in a colon stays on the same slide as the block
+  after it, a <code>###</code> heading stays with what follows it, and a demo sits
+  beside its source. End a lead-in sentence with a colon.</li>
+<li>Sections that are cross-reference lists are left out of the deck: the
+  four-link block (Understand it, See another example, Look it up, Fix a
+  problem), Understand on error pages, and Related, Related components,
+  and External links on reference pages. Sections that tell an audience
+  what to do next, such as Next steps and Go deeper, stay in. The list
+  lives in <code>CLOSING_SECTIONS</code> in the script; <code>tests/test_docs_slides.py</code>
+  checks it against <code>FOUR_LINKS</code> in <code>tools/docs_lint.py</code> and against the
+  headings the pages use.</li>
+<li><code>hl_lines</code> marks show on slides, where they point a room at the lines
+  under discussion. Mark the lines a how-to page is about, the way
+  tutorials mark changed lines.</li>
+<li>A slide is scaled down to fit, but never below 65% of slide size. Past
+  that, programs and demos scroll inside their own boxes. On a laptop
+  screen that happens to programs longer than about 30 lines, so shorter
+  listings present better.</li>
+<li>Each page is its own deck. Its last slide links to the next page in the
+  navigation.</li>
+</ul>
+<p>The layout rules are covered by <code>js/e2e/docs-slides.spec.ts</code>, which runs
+the real script against a fixture page (<code>js/e2e/pages/docs-slides.html</code>).
+Run it with <code>npm run test:e2e -- docs-slides</code> from <code>js/</code>.</p>
 <h2 id="the-ci-gates">The CI gates</h2>
 <p>Run all of these locally before pushing:</p>
 <table>
@@ -14072,6 +14130,8 @@ Phase E); after that it becomes blocking.</p>
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="../../assets/drafter-theme.js"></script>
+      
+        <script src="../../assets/drafter-slides.js"></script>
       
     
   </body>

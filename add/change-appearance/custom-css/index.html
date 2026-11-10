@@ -47,6 +47,8 @@
     
       <link rel="stylesheet" href="../../../assets/drafter-theme.css">
     
+      <link rel="stylesheet" href="../../../assets/drafter-slides.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -14242,22 +14244,22 @@ you no longer have to style one component at a time.</p>
 components so selectors can find them:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
-<span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;.notice&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    border: 2px solid darkslateblue;</span>
-<span class="s2">    border-radius: 8px;</span>
-<span class="s2">    padding: 12px;</span>
-<span class="s2">    margin: 8px 0;</span>
-<span class="s2">    background-color: ghostwhite;</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
-
+<span class="hll"><span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;.notice&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;</span>
+</span><span class="hll"><span class="s2">    border: 2px solid darkslateblue;</span>
+</span><span class="hll"><span class="s2">    border-radius: 8px;</span>
+</span><span class="hll"><span class="s2">    padding: 12px;</span>
+</span><span class="hll"><span class="s2">    margin: 8px 0;</span>
+</span><span class="hll"><span class="s2">    background-color: ghostwhite;</span>
+</span><span class="hll"><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+</span>
 
 <span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">([</span>
         <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Announcements&quot;</span><span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="s2">&quot;The bake sale moved to Saturday.&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;notice&quot;</span><span class="p">),</span>
-        <span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Captain the cat has opinions about this.&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;notice&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;Plain text stays plain.&quot;</span>
+<span class="hll">        <span class="n">Div</span><span class="p">(</span><span class="s2">&quot;The bake sale moved to Saturday.&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;notice&quot;</span><span class="p">),</span>
+</span><span class="hll">        <span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Captain the cat has opinions about this.&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;notice&quot;</span><span class="p">),</span>
+</span>        <span class="s2">&quot;Plain text stays plain.&quot;</span>
     <span class="p">])</span>
 
 
@@ -14308,9 +14310,9 @@ links" section of its reference page: a <code>Header(...)</code> at level 1 is
 an <code>h1</code>, and every <code>Button</code> is a <code>button</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
-<span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;h1&quot;</span><span class="p">,</span> <span class="s2">&quot;color: darkslateblue; letter-spacing: 2px;&quot;</span><span class="p">)</span>
-<span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;button&quot;</span><span class="p">,</span> <span class="s2">&quot;border-radius: 999px; padding: 8px 16px;&quot;</span><span class="p">)</span>
-
+<span class="hll"><span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;h1&quot;</span><span class="p">,</span> <span class="s2">&quot;color: darkslateblue; letter-spacing: 2px;&quot;</span><span class="p">)</span>
+</span><span class="hll"><span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;button&quot;</span><span class="p">,</span> <span class="s2">&quot;border-radius: 999px; padding: 8px 16px;&quot;</span><span class="p">)</span>
+</span>
 
 <span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
@@ -14506,6 +14508,8 @@ styling in one place.</p>
       <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="../../../assets/drafter-theme.js"></script>
+      
+        <script src="../../../assets/drafter-slides.js"></script>
       
     
   </body>

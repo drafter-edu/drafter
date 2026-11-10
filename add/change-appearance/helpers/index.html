@@ -47,6 +47,8 @@
     
       <link rel="stylesheet" href="../../../assets/drafter-theme.css">
     
+      <link rel="stylesheet" href="../../../assets/drafter-slides.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -14206,11 +14208,11 @@ result in another styling function to combine effects:</p>
 <span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="n">bold</span><span class="p">(</span><span class="s2">&quot;This line is bold.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
-        <span class="n">italic</span><span class="p">(</span><span class="s2">&quot;This one is italic.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
-        <span class="n">change_color</span><span class="p">(</span><span class="s2">&quot;This one is crimson.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;crimson&quot;</span><span class="p">),</span>
-        <span class="n">bold</span><span class="p">(</span><span class="n">change_color</span><span class="p">(</span><span class="s2">&quot;Warnings: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">warnings</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;darkorange&quot;</span><span class="p">)),</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Add a warning&quot;</span><span class="p">,</span> <span class="s2">&quot;warn&quot;</span><span class="p">)</span>
+<span class="hll">        <span class="n">bold</span><span class="p">(</span><span class="s2">&quot;This line is bold.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
+</span><span class="hll">        <span class="n">italic</span><span class="p">(</span><span class="s2">&quot;This one is italic.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
+</span><span class="hll">        <span class="n">change_color</span><span class="p">(</span><span class="s2">&quot;This one is crimson.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;crimson&quot;</span><span class="p">),</span>
+</span><span class="hll">        <span class="n">bold</span><span class="p">(</span><span class="n">change_color</span><span class="p">(</span><span class="s2">&quot;Warnings: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">warnings</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;darkorange&quot;</span><span class="p">)),</span>
+</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Add a warning&quot;</span><span class="p">,</span> <span class="s2">&quot;warn&quot;</span><span class="p">)</span>
     <span class="p">])</span>
 
 
@@ -14284,10 +14286,10 @@ in a <code>Div</code>:</p>
         <span class="s2">&quot;Bring a raincoat and a snack.</span><span class="se">\n</span><span class="s2">&quot;</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="n">change_padding</span><span class="p">(</span><span class="n">change_border</span><span class="p">(</span><span class="n">notice</span><span class="p">,</span> <span class="s2">&quot;2px solid steelblue&quot;</span><span class="p">),</span> <span class="s2">&quot;12px&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">large_font</span><span class="p">(</span><span class="n">change_background_color</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Sounds fun!&quot;</span><span class="p">,</span> <span class="s2">&quot;accept&quot;</span><span class="p">),</span> <span class="s2">&quot;lightgreen&quot;</span><span class="p">))</span>
-    <span class="p">])</span>
+<span class="hll">        <span class="n">change_padding</span><span class="p">(</span><span class="n">change_border</span><span class="p">(</span><span class="n">notice</span><span class="p">,</span> <span class="s2">&quot;2px solid steelblue&quot;</span><span class="p">),</span> <span class="s2">&quot;12px&quot;</span><span class="p">),</span>
+</span>        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+<span class="hll">        <span class="n">large_font</span><span class="p">(</span><span class="n">change_background_color</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Sounds fun!&quot;</span><span class="p">,</span> <span class="s2">&quot;accept&quot;</span><span class="p">),</span> <span class="s2">&quot;lightgreen&quot;</span><span class="p">))</span>
+</span>    <span class="p">])</span>
 
 
 <span class="nd">@route</span>
@@ -14321,12 +14323,12 @@ underscores instead of hyphens, so <code>style_background_color</code> sets
 <span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;Big red button protocol.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">style_font_size</span><span class="o">=</span><span class="s2">&quot;20px&quot;</span><span class="p">),</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Do not press&quot;</span><span class="p">,</span> <span class="s2">&quot;press&quot;</span><span class="p">,</span>
-               <span class="n">style_background_color</span><span class="o">=</span><span class="s2">&quot;crimson&quot;</span><span class="p">,</span>
-               <span class="n">style_color</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
-               <span class="n">style_padding</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
+<span class="hll">        <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;Big red button protocol.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">style_font_size</span><span class="o">=</span><span class="s2">&quot;20px&quot;</span><span class="p">),</span>
+</span>        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Do not press&quot;</span><span class="p">,</span> <span class="s2">&quot;press&quot;</span><span class="p">,</span>
+<span class="hll">               <span class="n">style_background_color</span><span class="o">=</span><span class="s2">&quot;crimson&quot;</span><span class="p">,</span>
+</span><span class="hll">               <span class="n">style_color</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+</span><span class="hll">               <span class="n">style_padding</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">)</span>
+</span>    <span class="p">])</span>
 
 
 <span class="nd">@route</span>
@@ -14483,6 +14485,8 @@ start at <a href="../../../help/troubleshooting/">Troubleshooting</a>.</p>
       <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="../../../assets/drafter-theme.js"></script>
+      
+        <script src="../../../assets/drafter-slides.js"></script>
       
     
   </body>
