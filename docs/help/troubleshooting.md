@@ -70,6 +70,29 @@ Work through the classic save-and-reload steps, in order:
   `start_server(port=8081)`.
 - If `import drafter` itself fails, the installation is the problem;
   see [Get Drafter running](../start/install.md).
+- If the program ends right away with no message and no site, the
+  `DRAFTER_SKIP` environment variable may be set in your terminal. It
+  tells `start_server` to do nothing, which is meant for
+  [test runners](../add/use-pytest-or-unittest.md). Open a new
+  terminal, or unset the variable.
+
+## The page looks plain or unstyled
+
+When a stylesheet cannot be loaded, a notice appears at the top of
+your site that starts "Some of this page's styling did not load" and
+names the file. The debug panel lists the same problem as a warning.
+Your Python code is not the cause, and the rest of the app keeps
+working.
+
+- Reload the page first. A brief network hiccup is the usual reason.
+- If the file is one you added with
+  [`add_website_css_file`](../reference/site-config.md#add_website_css_file),
+  check its spelling and that it sits next to your program.
+- On a deployed site, check that the file was uploaded with the rest
+  of the site.
+- If the file belongs to Drafter (its address contains `assets/`) and
+  reloading does not help, that is worth a
+  [bug report](bug-reports.md).
 
 ## My code after start_server never runs
 

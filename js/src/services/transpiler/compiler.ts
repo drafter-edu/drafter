@@ -522,6 +522,43 @@ class DrafterCompiler {
 			);
 		}
 
+		if (inputType === "color") {
+			return this.renderNamedInputWithDefault(
+				"ColorPicker",
+				name,
+				value,
+				parsed,
+			);
+		}
+
+		if (inputType === "range") {
+			// HTML lets min and max be left out (0 and 100); Slider requires
+			// both, so the browser's defaults are written out explicitly.
+			const asNumber = (raw: string | undefined, fallback: string) =>
+				raw !== undefined && raw.trim() !== "" && !isNaN(Number(raw))
+					? raw.trim()
+					: fallback;
+			const min = asNumber(this.popAttr(parsed.attributes, "min"), "0");
+			const max = asNumber(this.popAttr(parsed.attributes, "max"), "100");
+			const step = this.popAttr(parsed.attributes, "step");
+			const args = [stringify(name), min, max];
+			if (value !== undefined && !isNaN(Number(value))) {
+				args.push(`default_value=${value.trim()}`);
+			}
+			if (step !== undefined && !isNaN(Number(step)) && Number(step) > 0) {
+				args.push(`step=${step.trim()}`);
+			}
+			return [
+				callComponent(
+					"Slider",
+					args,
+					parsed.attributes,
+					parsed.styles,
+					parsed.classes,
+				),
+			];
+		}
+
 		if (inputType === "file") {
 			const args = [stringify(name)];
 			const accept = this.popAttr(parsed.attributes, "accept");

@@ -111,6 +111,7 @@ class ClientBridge:
         self.navigator.browser_history_enabled = getattr(
             configuration, "browser_history", True
         )
+        self.navigator.state_display = getattr(configuration, "state_display", True)
         self.events = EventManager(self.runtime)
         self.events.button_spinners = getattr(configuration, "button_spinners", False)
         self.debug_panel = None
@@ -387,7 +388,9 @@ class ClientBridge:
         # reads state.current when invoking the route handler.
         hooks.set_state(restored)
         log_record(
-            UpdatedStateEvent.from_state(restored),
+            UpdatedStateEvent.from_state(
+                restored, display=self.configuration.state_display
+            ),
             "bridge.client_bridge.load_state_snapshot",
             route=route,
         )
@@ -725,6 +728,11 @@ class ClientBridge:
             elif event.get("key") == "button_spinners":
                 self.configuration.button_spinners = bool(event.get("value"))
                 self.events.button_spinners = self.configuration.button_spinners
+            elif event.get("key") == "state_display":
+                # Read whenever a state update is logged; the display
+                # catches up at the next state change.
+                self.configuration.state_display = bool(event.get("value"))
+                self.navigator.state_display = self.configuration.state_display
             elif event.get("key") in (
                 "error_page_title",
                 "error_page_message",

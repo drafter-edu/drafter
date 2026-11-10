@@ -61,6 +61,13 @@ counts, so a history of red is fine once the top one is green.
 - **A wrong filename.** The deploy workflow expects your program to be
   named `main.py`, exactly. Renaming the file breaks the build, so keep
   your code in `main.py`.
+- **A library that is not installed where the site is built.** The
+  log ends with `ModuleNotFoundError: No module named ...` for a
+  library that works on your own computer. The deploy workflow builds
+  your site on one of GitHub's computers, which starts with only
+  Drafter and a few common libraries. Add a file named
+  `requirements.txt` next to `main.py` with the library's name on its
+  own line, commit it, and run the workflow again.
 - **An import the browser cannot satisfy.** Not every third-party
   library works in the deployed runtime. See
   [a library import fails in the browser](../../help/errors/package-import-error.md).

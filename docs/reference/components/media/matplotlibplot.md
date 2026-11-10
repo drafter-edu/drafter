@@ -34,7 +34,7 @@ MatPlotLibPlot(extra_matplotlib_settings)
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
 | `extra_matplotlib_settings` | `dict` | `{}` | Settings passed to matplotlib when saving the figure, like `{"format": "svg"}`. The format must be `"png"` (the default) or `"svg"`. |
-| `close_automatically` | `bool` | `True` | Close the figure after rendering, so the next chart starts fresh. |
+| `close_automatically` | `bool` | `True` | Close the figure as soon as the component is created, so the next chart starts fresh. |
 
 ## Examples
 
@@ -99,14 +99,18 @@ start_server(State([3, 4, 2]))
 
 ## Notes
 
-- The component shows the figure that is open at the moment the
-  page renders, so run your `plt.` commands inside the route,
-  before returning the `Page`.
+- The component takes the figure that is open at the moment you
+  create it, so run your `plt.` commands first and write
+  `MatPlotLibPlot()` after them. Commands that run after the
+  component is created belong to the next chart.
+- Charts drawn in unit tests never leak into your pages: each
+  `MatPlotLibPlot()` keeps its own figure, even when the page
+  is only compared and never shown.
 - The first page that uses matplotlib in the browser takes a while
   to appear: the library is downloaded and installed on demand.
   Later pages reuse it.
-- By default the figure closes after rendering. If you draw one
-  figure and show it twice on the same page, pass
+- By default the figure closes when the component is created. If
+  you draw one figure and show it twice on the same page, pass
   `close_automatically=False` to the first `MatPlotLibPlot`.
 - The chart is a picture: visitors cannot hover or zoom it.
 - To store a chart in state or offer it as a download, call the

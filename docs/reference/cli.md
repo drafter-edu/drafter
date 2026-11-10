@@ -81,6 +81,21 @@ for GitHub Pages; the
 [deploy guide](../your-project/deploy/index.md) walks the whole
 journey.
 
+Building runs your program once, on the computer doing the build,
+to prepare the first page. Every library your program imports
+therefore has to be **installed on that computer**, even though each
+visitor's browser later installs its own copy. If a library is
+missing, the build stops with `ModuleNotFoundError`.
+
+- On your own computer, install the library the way you installed
+  Drafter, for example `pip install seaborn`.
+- With the course deployment template on GitHub, list the library in
+  a file named `requirements.txt` next to `main.py`, one name per
+  line. The deploy workflow installs everything in that file before
+  it builds.
+- In a workflow you wrote yourself, add the library to the build
+  command, as in `uvx --with seaborn drafter main.py --compile`.
+
 | Flag | Default | What it does |
 | ---- | ------- | ------------ |
 | `--output-directory DIR` | `dist` | Build somewhere else. |
@@ -90,12 +105,15 @@ journey.
 | `--additional-js-files PATH_OR_URL` | none | Load a script (a `.js` file next to your program, or a URL) on every page; the flag version of `add_website_js_file(...)`. Repeat once per entry. |
 | `--create-404 MODE` | `if_missing` | Whether to write a `404.html` next to `index.html`. That page is what lets a visitor open your deployed site directly on a route, such as your address plus `--about`. `if_missing` leaves a `404.html` you made yourself alone; `always` overwrites it; `never` skips it. |
 | `--zip-output` | off | Zip the built site, convenient for uploading. |
+| `--no-warn-missing-info` | notice on | Building a site that never calls [`set_site_information`](site-config.md#set_site_information) prints a notice, because its about page will be empty. The site is still built. This flag turns the notice off. |
 
 ## Libraries
 
 | Flag | Default | What it does |
 | ---- | ------- | ------------ |
 | `--project-packages PKG` | none | Name a third-party package your app needs when automatic detection misses it; repeat the flag for each package. [Third-party libraries](../extend/packages.md) explains when. |
+| `--package-index URL` | none | An extra wheel index to search when a package has no wheel on PyPI: the address of a `wheels.json` file, with the wheel files in a `wheels/` folder beside it. Repeat the flag for several; they are searched in order, before Drafter's own index. See [Wheels Drafter hosts](../extend/packages.md#wheels-drafter-hosts). |
+| `--no-default-package-index` | off | Do not search Drafter's own wheel index (`https://drafter-edu.github.io/packages/wheels.json`). |
 
 ## Related
 

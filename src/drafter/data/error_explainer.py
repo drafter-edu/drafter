@@ -105,6 +105,19 @@ ID_EXPLANATIONS: dict[str, tuple[str, str, tuple[str, ...]]] = {
             "are not text, numbers, booleans, images, or Drafter components.",
         ),
     ),
+    "client.stylesheet_load_failed": (
+        "Styling Did Not Load",
+        "The browser could not load one of this site's stylesheets, so the "
+        "page may look plain or out of place. Your Python code still ran.",
+        (
+            "Reload the page; a brief network hiccup is the most common cause.",
+            "If you added the stylesheet yourself (for example with "
+            "`add_website_css_file`), check that the file name or address "
+            "is spelled correctly and that the file is next to your program.",
+            "If the site is deployed, check that the file was uploaded "
+            "along with the rest of the site.",
+        ),
+    ),
     "system.error_page_failed": (
         "Something Went Very Wrong",
         "Drafter hit a second problem while trying to show you the error page itself.",

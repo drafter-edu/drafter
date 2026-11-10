@@ -6,12 +6,13 @@ and embeds it in the page as an image or inline SVG.
 
 import io
 from dataclasses import dataclass
+from typing import Any
 
 from drafter.components.page_content import Component, ComponentArgument
 from drafter.components.planning.render_plan import RenderPlan
 from drafter.data.errors import StudentFacingError
 from drafter.data.images import Picture, bytes_to_data_url
-from drafter.helpers.utils import is_pyodide
+from drafter.helpers.utils import is_pyodide, is_skulpt
 
 _plt = None
 
@@ -46,13 +47,24 @@ def has_matplotlib() -> bool:
 class MatPlotLibPlot(Component):
     """Renders a Matplotlib figure as an image or SVG element.
 
-    Captures the current Matplotlib figure and embeds it as a base64-encoded
-    PNG or inline SVG. Can be used to display plots directly in Drafter pages.
+    Captures the current Matplotlib figure at the moment the component is
+    created and embeds it as a base64-encoded PNG or inline SVG. Draw the
+    chart first, then create the component.
+
+    Because the figure is captured (and, by default, closed) on creation,
+    the next chart always starts from a blank figure. That holds even when
+    the page is never shown, such as when a unit test calls the route.
 
     Attributes:
         extra_matplotlib_settings: Dict of Matplotlib savefig keyword arguments.
-        close_automatically: Whether to close the figure after rendering.
+        close_automatically: Whether creating the component closes the
+            figure, so that later plotting starts a new one.
         tag: The HTML tag name, always 'img'.
+
+    Example:
+        plt.plot([12, 15, 11, 18])
+        plt.title("Treats eaten this week")
+        Page(state, [MatPlotLibPlot()])
     """
 
     extra_matplotlib_settings: dict
@@ -60,6 +72,7 @@ class MatPlotLibPlot(Component):
 
     tag = "img"
     SELF_CLOSING_TAG = True
+    KNOWN_ATTRS = ["src", "alt"]
 
     ARGUMENTS = [
         ComponentArgument(
@@ -76,7 +89,9 @@ class MatPlotLibPlot(Component):
         Args:
             extra_matplotlib_settings: Optional dict of Matplotlib savefig kwargs.
                 Defaults to PNG format with tight bounding box.
-            close_automatically: Whether to close figure after rendering.
+            close_automatically: Whether to close the captured figure so
+                the next chart starts fresh. Pass False to keep drawing on
+                the same figure, or to show it in a second MatPlotLibPlot.
                 Defaults to True.
             **kwargs: Additional HTML attributes and styles.
 
@@ -96,13 +111,48 @@ class MatPlotLibPlot(Component):
         if "bbox_inches" not in extra_matplotlib_settings:
             extra_matplotlib_settings["bbox_inches"] = "tight"
         self.close_automatically = close_automatically
+        self._figure = self._capture_figure()
+
+    def _capture_figure(self) -> Any:
+        """Take hold of pyplot's current figure for this component.
+
+        Capturing at creation time, instead of when the page renders, ties
+        the chart to the plotting commands that came just before it. With
+        `close_automatically`, the figure is also released from pyplot, so
+        nothing drawn for this chart can appear in a later one. A released
+        figure can still be saved.
+
+        Returns:
+            The captured figure, or None under Skulpt, whose matplotlib
+            only supports saving the current figure.
+        """
+        if is_skulpt():
+            return None
+        plt = _get_pyplot()
+        figure = plt.gcf()
+        if self.close_automatically:
+            plt.close(figure)
+        return figure
+
+    def _save_figure(self, target: io.BytesIO, settings: dict) -> None:
+        """Write the captured figure into `target` using savefig settings.
+
+        Args:
+            target: Buffer that receives the image data.
+            settings: Keyword arguments for Matplotlib's `savefig`.
+        """
+        if self._figure is None:
+            # Skulpt: no figure objects, so save whatever is current.
+            _get_pyplot().savefig(target, **settings)
+        else:
+            self._figure.savefig(target, **settings)
 
     def to_picture(self) -> Picture:
-        """Capture the current Matplotlib figure as a `Picture`.
+        """Render this component's Matplotlib figure as a `Picture`.
 
-        Renders the current figure to PNG with this component's settings
-        (without closing it), so the chart can be stored in state,
-        manipulated, or offered as a download.
+        Renders the figure captured when the component was created to PNG
+        with this component's settings, so the chart can be stored in
+        state, manipulated, or offered as a download.
 
         Returns:
             The rendered chart as a Picture.
@@ -110,8 +160,7 @@ class MatPlotLibPlot(Component):
         image_data = io.BytesIO()
         settings = self.extra_matplotlib_settings.copy()
         settings["format"] = "png"
-        plt = _get_pyplot()
-        plt.savefig(image_data, **settings)  # type: ignore
+        self._save_figure(image_data, settings)
         return Picture.from_bytes(image_data.getvalue(), mime_type="image/png")
 
     def _plan_pyodide(self, context) -> RenderPlan:
@@ -127,12 +176,11 @@ class MatPlotLibPlot(Component):
             RenderPlan with raw HTML for the figure.
         """
         # In Pyodide, save the figure to a PNG buffer and embed it as a base64 data URL
-        plt = _get_pyplot()
         image_data = io.BytesIO()
         settings = self.extra_matplotlib_settings.copy()
         if "format" not in settings:
             settings["format"] = "png"
-        plt.savefig(image_data, **settings)  # type: ignore
+        self._save_figure(image_data, settings)
         data_url = bytes_to_data_url(image_data.getvalue(), "image/png")
         return RenderPlan(
             kind="raw",
@@ -155,11 +203,8 @@ class MatPlotLibPlot(Component):
             return self._plan_pyodide(context)
         else:
             # Handle image processing
-            plt = _get_pyplot()
             image_data = io.BytesIO()
-            plt.savefig(image_data, **self.extra_matplotlib_settings)  # type: ignore
-            if self.close_automatically:
-                plt.close()  # type: ignore
+            self._save_figure(image_data, self.extra_matplotlib_settings)
             image_data.seek(0)
 
             attrs = {}

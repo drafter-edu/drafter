@@ -254,16 +254,18 @@ class TestDeserializeSnapshot:
         assert deserialize_state_snapshot('{"score": 1}', None) == {"score": 1}
 
 
-def make_bridge_stand_in(server):
+def make_bridge_stand_in(server, state_display: bool = True):
     """ClientBridge.save/load_state_snapshot only touch the navigator, the
-    site title, and the injected server hooks (built here the same way
-    bridger builds them), so a minimal stand-in works."""
+    site title, the `state_display` setting, and the injected server hooks
+    (built here the same way bridger builds them), so a minimal stand-in
+    works."""
     navigator = MagicMock()
     navigator.last_request = None
     hooks = build_server_hooks(server, MagicMock(), MagicMock(), MagicMock())
     return SimpleNamespace(
         navigator=navigator,
         site_title="Test Site",
+        configuration=SimpleNamespace(state_display=state_display),
         hooks=hooks,
         _require_hooks=lambda: hooks,
     )
@@ -331,6 +333,20 @@ class TestLoadStateSnapshot:
         bridge.navigator.goto.assert_called_once_with(
             "guess", {"answer": 4}, action="system"
         )
+
+    def test_restored_state_stays_hidden_when_the_display_is_off(
+        self, captured_events, fresh_server
+    ):
+        fresh_server.state.update(GameState(score=0, name="start"))
+        bridge = make_bridge_stand_in(fresh_server, state_display=False)
+        event = self.make_load_event(GameState(score=99, name="saved"), "guess")
+
+        ClientBridge.load_state_snapshot(bridge, event)
+
+        assert fresh_server.state.current == GameState(score=99, name="saved")
+        (state_event,) = events_of_type(captured_events, "UpdatedState")
+        assert state_event.representation["kind"] == "hidden"
+        assert state_event.representation["type"] == "GameState"
 
     def test_corrupt_payload_reports_friendly_error(
         self, captured_events, fresh_server

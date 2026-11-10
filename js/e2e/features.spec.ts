@@ -210,6 +210,219 @@ test("Download component produces a real browser download", async ({
 	expect(Buffer.concat(chunks).toString("utf-8")).toBe("downloaded content");
 });
 
+// drafter-edu/drafter#232: a stylesheet that cannot be fetched used to leave
+// the site unstyled with no explanation. jsdom never fetches stylesheets, so
+// only a real browser can show the <link> error event reaching the notice.
+const MISSING_STYLESHEET_URL = "https://drafter-test.invalid/missing-style.css";
+const MISSING_STYLESHEET_APP = `
+from drafter import *
+hide_debug_information()
+add_website_css_file("${MISSING_STYLESHEET_URL}")
+
+@route
+def index() -> Page:
+    return Page(["The page still works"])
+
+start_server()
+`;
+
+test("a stylesheet that fails to load shows a dismissible notice", async ({
+	page,
+}) => {
+	await page.route(MISSING_STYLESHEET_URL, (route) => route.abort());
+	await page.goto("/harness.html");
+	await page.evaluate(async (code) => {
+		await window.runExample(code);
+	}, MISSING_STYLESHEET_APP);
+
+	const notice = page.locator("#drafter-stylesheet-notice--");
+	await expect(notice).toContainText("styling did not load");
+	await expect(notice.locator("li")).toHaveText([MISSING_STYLESHEET_URL]);
+	// The app itself is unaffected.
+	await expect(page.locator("#drafter-root--")).toContainText(
+		"The page still works",
+	);
+
+	await notice.getByRole("button", { name: "Dismiss" }).click();
+	await expect(notice).toHaveCount(0);
+});
+
+// Slider and ColorPicker submit through real browser controls, which jsdom
+// only imitates: the range input's stepping, the color input's value
+// normalization, and (with alpha on) the inline handlers that keep the
+// hidden field in step with the swatch and the opacity slider.
+const PICKERS_APP = `
+from drafter import *
+hide_debug_information()
+
+@dataclass
+class State:
+    report: str
+
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        Output("report", [state.report]),
+        Slider("size", 0, 100, 25, step=5),
+        ColorPicker("plain", "tomato"),
+        ColorPicker("glass", [51, 102, 255, 255], alpha=True),
+        Button("Send", save),
+    ])
+
+@route
+def save(state: State, size: int, plain: list[int], glass: Color) -> Page:
+    state.report = (
+        "size=" + str(size)
+        + " plain=" + str(plain)
+        + " glass=" + str(glass.to_list(alpha=True))
+        + " hex=" + glass.to_hex()
+    )
+    return index(state)
+
+start_server(State("nothing sent yet"))
+`;
+
+test("Slider and ColorPicker deliver their values in the annotated forms", async ({
+	page,
+}) => {
+	await page.goto("/harness.html");
+	await page.evaluate(async (code) => {
+		await window.runExample(code);
+	}, PICKERS_APP);
+	const root = page.locator("#drafter-root--");
+	await expect(root).toContainText("nothing sent yet");
+
+	// Untouched controls submit their starting values: the named color and
+	// the list were both turned into hex codes for the browser.
+	await page.getByRole("button", { name: "Send" }).click();
+	await expect(root).toContainText(
+		"size=25 plain=[255, 99, 71] glass=[51, 102, 255, 255] hex=#3366ff",
+	);
+
+	// Change all three the way a visitor would.
+	await page.locator('input[name="size"]').fill("60");
+	await page.locator('input[name="plain"]').fill("#00ff00");
+	await page.locator("#glass").fill("#ff8800");
+	await page.getByLabel("glass opacity").fill("128");
+	await page.getByRole("button", { name: "Send" }).click();
+	await expect(root).toContainText(
+		"size=60 plain=[0, 255, 0] glass=[255, 136, 0, 128] hex=#ff880080",
+	);
+});
+
+// The converter is a separate bundle fetched on first use (js/src/lazy.ts).
+// Only a real browser can show the whole path: the menu item, the script
+// request for drafter.transpiler.js beside the main bundle, and the result.
+const CONVERTER_HOST_APP = `
+from drafter import *
+
+@route
+def index() -> Page:
+    return Page(["A page with the debug panel open"])
+
+start_server()
+`;
+
+test("Convert HTML to Drafter loads its bundle on demand and converts", async ({
+	page,
+}) => {
+	const transpilerRequests: string[] = [];
+	page.on("request", (request) => {
+		if (request.url().includes("drafter.transpiler.js")) {
+			transpilerRequests.push(request.url());
+		}
+	});
+	await page.goto("/harness.html");
+	await page.evaluate(async (code) => {
+		await window.runExample(code);
+	}, CONVERTER_HOST_APP);
+	await expect(page.locator("#drafter-root--")).toContainText(
+		"A page with the debug panel open",
+	);
+	// Nothing is downloaded until the converter is actually used.
+	expect(transpilerRequests).toHaveLength(0);
+
+	await page.locator(".drafter-menu-button-edit").click();
+	await page.locator(".drafter-menu-item-convert-html").click();
+	const dialog = page.locator(".drafter-html-converter");
+	await expect(dialog).toBeVisible();
+	expect(transpilerRequests).toHaveLength(0);
+
+	await dialog
+		.locator(".drafter-html-converter-input")
+		.fill('<h1>Corgi Cafe</h1><input type="color" name="ink" value="#ff8800">');
+	await dialog.locator(".drafter-html-converter-convert").click();
+
+	const output = dialog.locator(".drafter-html-converter-output");
+	await expect(output).toContainText("Corgi Cafe");
+	await expect(output).toContainText('ColorPicker("ink", default_value="#ff8800")');
+	await expect(dialog.locator(".drafter-html-converter-copy")).toBeEnabled();
+	expect(transpilerRequests).toHaveLength(1);
+	expect(transpilerRequests[0]).toContain("/js/drafter.transpiler.js");
+
+	// A second conversion reuses the loaded converter.
+	await dialog.locator(".drafter-html-converter-input").fill("<p>Again</p>");
+	await dialog.locator(".drafter-html-converter-convert").click();
+	await expect(output).toContainText("Again");
+	expect(transpilerRequests).toHaveLength(1);
+});
+
+// The History tab's visit rows are built from three events that arrive in
+// order (request, parse, response); only a real run shows the composed row.
+const HISTORY_APP = `
+from drafter import *
+
+@dataclass
+class State:
+    count: int
+
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        "Count: " + str(state.count),
+        TextBox("amount", "5"),
+        Button("Add", add),
+    ])
+
+@route
+def add(state: State, amount: int) -> Page:
+    state.count += amount
+    return index(state)
+
+start_server(State(0))
+`;
+
+test("the History tab shows each visit as a status, the call made, and its arguments", async ({
+	page,
+}) => {
+	await page.goto("/harness.html");
+	await page.evaluate(async (code) => {
+		await window.runExample(code);
+	}, HISTORY_APP);
+	await page.getByRole("button", { name: "Add" }).click();
+	await expect(page.locator("#drafter-root--")).toContainText("Count: 5");
+
+	const newest = page.locator(".history-event").first();
+	await expect(newest.locator(".drafter-history-status")).toHaveText("Success");
+	await expect(newest.locator(".drafter-history-call")).toHaveText(
+		"add(amount=5)",
+	);
+	await expect(newest.locator(".drafter-history-request-meta")).toHaveText(
+		/^\d+ ms$/,
+	);
+	// The form sent text; the int parameter received a number.
+	const argument = newest.locator(".drafter-history-arg").filter({
+		hasText: "amount",
+	});
+	await expect(argument).toContainText("form field");
+	await expect(argument.locator(".drafter-history-arg-converted")).toHaveText(
+		"→ 5",
+	);
+	await expect(
+		page.locator("[class*='drafter-debug-page-history-count']"),
+	).toHaveText("2 visits, newest first");
+});
+
 // Mirrors examples/piano.py: each key returns a Fragment holding a hidden,
 // auto-playing Tone. The tone used to wait forever for a page-loaded event
 // that only full page loads dispatched, so the piano made no sound.

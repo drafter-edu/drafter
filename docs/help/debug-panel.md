@@ -38,17 +38,34 @@ look like at score 10?" without clicking ten times.
 
 ## History: everything that happened
 
-The History tab lists every visit: the route call that ran (with
-its actual arguments), the response it produced, and the state
-snapshot taken afterward. Expanding a visit's Response shows the returned `Page(...)`
-written as Python, which is what
-[freezing a page](../add/freeze-pages.md) copies.
+The History tab lists every visit, newest first, one line each.
+The line starts with how the visit went (**Success**, **1 warning**,
+**Error**, or **Page not found**), then the time, then the call that
+ran written the way you would write it, such as
+`save(size=60, name='Ada')`. Pictures and files show as a short
+summary like `<Picture ada.png 640×480>` instead of their raw data,
+and a warning or error puts its first line on the right of the row.
 
-Colored markers flag the visits that raised errors or warnings, so
-you can scroll back and find the moment something went wrong. The
-history can also replay a visit, which re-dispatches the same
-request against your current code. Replaying is exactly the check
-you want after fixing a bug: does that click work now?
+Expanding **Where these values came from** lists each argument: the
+form field, button argument or default it came from, what arrived,
+and what Drafter converted it to (a form sends `'60'`; your `int`
+parameter receives `60`). Uploaded pictures get a thumbnail and
+colors a swatch. Expanding **Page shown** gives the returned
+`Page(...)` written as Python, which is what
+[freezing a page](../add/freeze-pages.md) copies, and the state
+after the visit.
+
+Ten visits show at first; **Show older visits** adds the next ten
+without losing your place. The history can also replay a visit,
+which re-dispatches the same request against your current code.
+Replaying is exactly the check you want after fixing a bug: does
+that click work now?
+
+When the same problem happens again, the Current tab's list does
+not grow a second line; the problem gets a counter such as ×3. The
+browser tab's title also carries the number of errors and warnings
+on the current page, so a problem shows even when you have switched
+to another tab.
 
 ## Overview: the app from above
 
@@ -97,6 +114,13 @@ option to hide the frame, and the live site-theme switcher for
 [trying themes](../add/change-appearance/themes.md). It also holds
 the Help menu, whose **Download Bug Report** item packages up
 [everything a bug report needs](bug-reports.md).
+
+The Edit menu's **Convert HTML to Drafter…** item turns HTML you
+already have into Drafter code. Paste the HTML (or choose an `.html`
+file), press Convert, and copy the Python it writes. The result is a
+starting point: read it before using it, because some HTML has no
+exact Drafter match. The converter downloads the first time you use
+it, so the first conversion takes a moment longer than the rest.
 
 While your app runs from your own computer, the Navigate menu ends
 with **Stop Server…**. After you confirm, it shuts down the Drafter

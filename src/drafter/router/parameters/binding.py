@@ -17,6 +17,7 @@ from drafter.data.converter import (
     ConverterRegistry,
     preview_value,
 )
+from drafter.data.details.recursive_type_describer import analyze_type
 from drafter.data.payload import PayloadValue, describe_source
 from drafter.history.conversion import ConversionRecord, UnchangedRecord
 from drafter.router.parameters.diagnostics import RouteDiagnostic
@@ -30,6 +31,32 @@ def _capitalize(text: str) -> str:
 def _suggest(name: str, candidates: list[str]) -> str | None:
     matches = difflib.get_close_matches(name, candidates, n=1, cutoff=0.6)
     return matches[0] if matches else None
+
+
+ARGUMENT_DESCRIPTION_DEPTH = 2
+"""How deep the debug panel's description of a bound argument goes. Two
+levels show a list's items or a dataclass's fields without describing an
+entire nested state."""
+
+
+def describe_argument(value: Any) -> dict[str, Any] | None:
+    """Describe a bound argument for the debug panel's history tab.
+
+    Uses the same describer as the state display, so an uploaded picture
+    gets a thumbnail and a file its name and size. Describing is
+    best-effort: a value the describer cannot handle is simply not
+    described, and the text preview still shows.
+
+    Args:
+        value: The converted argument value.
+
+    Returns:
+        A representation dict (see `recursive_type_describer`), or None.
+    """
+    try:
+        return analyze_type(value, max_depth=ARGUMENT_DESCRIPTION_DEPTH)
+    except Exception:
+        return None
 
 
 @dataclass
@@ -392,6 +419,10 @@ class RouteBinder:
                     "expected_type": param.describe_annotation() or "",
                     "converted": preview_value(result.value) if changed else None,
                     "changed": changed,
+                    # The structured description the debug panel draws
+                    # (thumbnails for pictures, sizes for files, fields for
+                    # dataclasses), the same way it draws the state.
+                    "representation": describe_argument(result.value),
                 }
             )
 
@@ -408,6 +439,7 @@ class RouteBinder:
                     "expected_type": param.describe_annotation() or "",
                     "converted": None,
                     "changed": False,
+                    "representation": describe_argument(param.default),
                 }
             )
 

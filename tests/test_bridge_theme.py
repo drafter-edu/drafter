@@ -159,7 +159,9 @@ class TestRefreshThemeCss:
         added = []
         monkeypatch.setattr(
             "drafter.bridge.site_renderer.add_link",
-            lambda root, url, with_class="": added.append((url, with_class)),
+            lambda root, url, with_class="": (
+                added.append((url, with_class)) or MagicMock()
+            ),
         )
 
         renderer.refresh_theme_css(

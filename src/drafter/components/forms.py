@@ -3,7 +3,8 @@
 Defines `FormComponent` (the shared base class for named form fields) and
 the concrete inputs students place on pages: `TextBox`, `TextArea`,
 `SelectBox`, `CheckBox`, `RelatedCheckBox`, `RadioButtonGroup`, `Label`,
-and the date/time inputs (`DateTimeInput`, `DateInput`, `TimeInput`).
+the date/time inputs (`DateTimeInput`, `DateInput`, `TimeInput`), and the
+`Slider` and `ColorPicker` pickers.
 Each field's `name` becomes a parameter of the route that the enclosing
 page submits to.
 """
@@ -15,6 +16,7 @@ from typing import Any
 from drafter.components.page_content import Component, ComponentArgument, PageContent
 from drafter.components.planning.render_plan import NewlineMode, RenderPlan
 from drafter.components.utilities.validation import validate_parameter_name
+from drafter.data.colors import Color, to_color
 from drafter.data.errors import StudentFacingError
 
 
@@ -678,3 +680,324 @@ class TimeInput(FormComponent):
             else None
         )
         self.extra_settings = kwargs
+
+
+def _require_number(value: Any, parameter: str) -> None:
+    """Check that a Slider argument is a number.
+
+    Args:
+        value: The argument the student passed.
+        parameter: The Slider parameter name it was passed as.
+
+    Raises:
+        StudentFacingError: If the value is not an int or float (booleans
+            are rejected too, since `True` is almost always a mistake here).
+    """
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise StudentFacingError(
+            f"Slider {parameter} must be a number, but got {value!r} "
+            f"({type(value).__name__}).",
+            friendly=(
+                f"The {parameter} you gave Slider was {value!r}, which is a "
+                f"{type(value).__name__}. A slider moves along numbers, so "
+                f"its {parameter} has to be a number."
+            ),
+            steps=(
+                f"Pass a number for {parameter}, like Slider('volume', 0, 100).",
+                "If the value is text such as '10', convert it first with "
+                "int(...) or float(...).",
+            ),
+        )
+
+
+@dataclass(repr=False)
+class Slider(FormComponent):
+    """A slider for choosing a number between a lowest and highest value.
+
+    The visitor drags a handle along a track. The chosen number arrives at
+    the route as a parameter with the field's name; annotate that parameter
+    as `int` (or `float` when `step` is fractional) to receive a number.
+
+    Attributes:
+        min: The lowest value, at the left end of the track.
+        max: The highest value, at the right end of the track.
+        default_value: Where the handle starts, or None to start in the
+            middle.
+        step: The distance between the values the handle can stop on.
+        tag: The HTML tag name, always 'input'.
+
+    Example:
+        ```python
+        Slider("volume", 0, 100, 25)
+        ```
+    """
+
+    min: float
+    max: float
+    default_value: float | None
+    step: float
+
+    tag = "input"
+    SELF_CLOSING_TAG = True
+    KNOWN_ATTRS = ["type", "name", "min", "max", "value", "step"]
+    DEFAULT_ATTRS = {"type": "range"}
+    RENAME_ATTRS = {"default_value": "value"}
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("min"),
+        ComponentArgument("max"),
+        ComponentArgument("default_value", kind="keyword", default_value=None),
+        ComponentArgument("step", kind="keyword", default_value=1),
+    ]
+
+    def __init__(
+        self,
+        name: str,
+        min: float,
+        max: float,
+        default_value: float | None = None,
+        step: float = 1,
+        **kwargs,
+    ):
+        """Initialize slider component.
+
+        Args:
+            name: The form field name, matching a parameter of the route
+                that receives the form.
+            min: The lowest value the visitor can choose.
+            max: The highest value the visitor can choose.
+            default_value: Where the handle starts. Defaults to None, which
+                lets the browser start it in the middle.
+            step: The distance between allowed values. Defaults to 1; use
+                a fraction such as 0.5 for finer control.
+            **kwargs: Additional HTML attributes and styles.
+
+        Raises:
+            StudentFacingError: If `min`, `max`, `step`, or `default_value`
+                is not a number, if `min` is not below `max`, if `step` is
+                not positive, or if `default_value` lies outside the range.
+        """
+        validate_parameter_name(name, "Slider")
+        _require_number(min, "min")
+        _require_number(max, "max")
+        _require_number(step, "step")
+        if min >= max:
+            raise StudentFacingError(
+                f"Slider min ({min!r}) must be less than max ({max!r}).",
+                friendly=(
+                    f"You gave Slider a min of {min!r} and a max of {max!r}, "
+                    "but the lowest value has to be smaller than the "
+                    "highest, or the slider has nowhere to move."
+                ),
+                steps=("Put the smaller number first: Slider(name, lowest, highest).",),
+            )
+        if step <= 0:
+            raise StudentFacingError(
+                f"Slider step must be greater than zero, but got {step!r}.",
+                friendly=(
+                    f"The step you gave Slider was {step!r}. The step is how "
+                    "far the handle moves each time, so it has to be more "
+                    "than zero."
+                ),
+                steps=("Use a positive step, like step=1 or step=0.5.",),
+            )
+        if default_value is not None:
+            _require_number(default_value, "default_value")
+            if not min <= default_value <= max:
+                raise StudentFacingError(
+                    f"Slider default_value ({default_value!r}) must be between "
+                    f"min ({min!r}) and max ({max!r}).",
+                    friendly=(
+                        f"The slider's starting value is {default_value!r}, "
+                        f"which is outside its range of {min!r} to {max!r}."
+                    ),
+                    steps=(
+                        f"Choose a default_value from {min!r} to {max!r}.",
+                        "Or widen the range by changing min or max.",
+                    ),
+                )
+        self.name = name
+        self.min = min
+        self.max = max
+        self.default_value = default_value
+        self.step = step
+        self.extra_settings = kwargs
+
+
+ALPHA_SLIDER_SCRIPT = (
+    "var h=this.parentNode.querySelector('input[type=hidden]');"
+    "h.value=h.value.slice(0,7)+('0'+Number(this.value).toString(16)).slice(-2);"
+)
+"""Inline handler for a ColorPicker's opacity slider: rewrites the last two
+hex digits of the hidden field that is actually submitted."""
+
+ALPHA_SWATCH_SCRIPT = (
+    "var h=this.parentNode.querySelector('input[type=hidden]');"
+    "h.value=this.value+h.value.slice(7);"
+)
+"""Inline handler for a ColorPicker's swatch when alpha is on: rewrites the
+first six hex digits of the hidden field, keeping its alpha digits."""
+
+
+@dataclass(repr=False)
+class ColorPicker(FormComponent):
+    """A swatch that opens the browser's color chooser.
+
+    The chosen color arrives at the route as a parameter with the field's
+    name. Annotate that parameter as `str` to receive a hex code such as
+    `"#ff8800"`, as `Color` to receive a `Color` value with `red`,
+    `green`, `blue`, and `alpha` fields, or as `list[int]` to receive the
+    amounts as numbers.
+
+    With `alpha=True` a second control appears next to the swatch for how
+    see-through the color is, and the submitted color carries that amount
+    as well (`"#ff880080"`, a fourth list item, or `Color.alpha`).
+
+    Attributes:
+        default_value: The color the picker starts on, as a lowercase hex
+            code: `#rrggbb`, or `#rrggbbaa` when `alpha` is on.
+        alpha: Whether the picker also collects how see-through the color
+            is.
+        tag: The HTML tag name, always 'input'.
+
+    Example:
+        ```python
+        ColorPicker("favorite_color", "tomato")
+        ```
+    """
+
+    default_value: str
+    alpha: bool
+
+    tag = "input"
+    SELF_CLOSING_TAG = True
+    KNOWN_ATTRS = ["type", "name", "value"]
+    DEFAULT_ATTRS = {"type": "color"}
+    RENAME_ATTRS = {"default_value": "value", "alpha": ""}
+
+    ARGUMENTS = [
+        ComponentArgument("name"),
+        ComponentArgument("default_value", kind="keyword", default_value="#000000"),
+        ComponentArgument("alpha", kind="keyword", default_value=False),
+    ]
+
+    def __init__(
+        self,
+        name: str,
+        default_value: str | list[int] | tuple[int, ...] | Color = "#000000",
+        alpha: bool = False,
+        **kwargs,
+    ):
+        """Initialize color picker component.
+
+        Args:
+            name: The form field name, matching a parameter of the route
+                that receives the form.
+            default_value: The starting color, written any of these ways:
+                a hex code (`"#ff8800"` or the short `"#f80"`), a browser
+                color name (`"tomato"`), a list or tuple of red, green,
+                and blue amounts from 0 to 255 (`[255, 136, 0]`), or a
+                `Color`. Defaults to black.
+            alpha: Whether to also collect how see-through the color is.
+                When True, the starting color keeps its alpha amount (a
+                fourth list item, or the last two digits of an 8-digit
+                hex code) and the submitted color includes one. When
+                False (the default), any alpha amount in the starting
+                color is dropped and the submitted color is always solid.
+            **kwargs: Additional HTML attributes and styles.
+
+        Raises:
+            StudentFacingError: If `default_value` cannot be read as a
+                color. A browser would silently replace it with black,
+                which would hide the mistake.
+        """
+        validate_parameter_name(name, "ColorPicker")
+        self.name = name
+        self.alpha = bool(alpha)
+        self.default_value = to_color(default_value).to_hex(alpha=self.alpha)
+        self.extra_settings = kwargs
+
+    def plan(self, context) -> RenderPlan:
+        """Plan the picker: one color input, or a group when alpha is on.
+
+        Browsers' color inputs only hold solid `#rrggbb` colors. With
+        alpha on, the value that is submitted therefore lives in a hidden
+        input holding the full `#rrggbbaa` code, and two visible controls
+        (the swatch and an opacity slider) each rewrite their part of it
+        as the visitor adjusts them.
+
+        Args:
+            context: Rendering context.
+
+        Returns:
+            A tag RenderPlan for the single input, or for a span wrapping
+            the hidden input, the swatch, and the opacity slider.
+        """
+        if not self.alpha:
+            return self._plan_tag(context)
+
+        solid_part = self.default_value[:7]
+        alpha_amount = int(self.default_value[7:9], 16)
+        hidden_plan = RenderPlan(
+            kind="tag",
+            tag_name="input",
+            attributes={
+                "type": "hidden",
+                "name": self.name,
+                "value": self.default_value,
+            },
+            self_closing=True,
+            known_attributes=["type", "name", "value"],
+        )
+        swatch_plan = RenderPlan(
+            kind="tag",
+            tag_name="input",
+            attributes={
+                "type": "color",
+                "id": self.get_id(),
+                "value": solid_part,
+                "aria-label": self.name,
+                "oninput": ALPHA_SWATCH_SCRIPT,
+            },
+            self_closing=True,
+            known_attributes=["type", "id", "value", "aria-label", "oninput"],
+        )
+        slider_plan = RenderPlan(
+            kind="tag",
+            tag_name="input",
+            attributes={
+                "type": "range",
+                "min": 0,
+                "max": 255,
+                "value": alpha_amount,
+                "aria-label": f"{self.name} opacity",
+                "title": "Opacity",
+                "oninput": ALPHA_SLIDER_SCRIPT,
+            },
+            self_closing=True,
+            known_attributes=[
+                "type",
+                "min",
+                "max",
+                "value",
+                "aria-label",
+                "title",
+                "oninput",
+            ],
+        )
+        # The wrapper carries the styles and event handlers the student
+        # asked for; input and change events from the two visible controls
+        # bubble up to it. The id stays on the swatch, so a Label written
+        # for the picker still points at something a visitor can click.
+        attributes = self._handle_extra_settings({}, context, {})
+        attributes.pop("id", None)
+        return RenderPlan(
+            kind="tag",
+            tag_name="span",
+            attributes=attributes,
+            children=[hidden_plan, swatch_plan, slider_plan],
+            known_attributes=[],
+            newline_mode=NewlineMode.RETAIN,
+            children_are_content=False,
+        )

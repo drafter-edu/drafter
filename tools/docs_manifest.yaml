@@ -206,6 +206,13 @@ pages:
     audience: S
     priority: P1
     outcome: Use real CSS with classes.
+  - path: add/change-appearance/css-frameworks.md
+    title: Use a CSS framework
+    template: how-to
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Style a site with Bootstrap or Tailwind classes.
   - path: add/change-appearance/gotchas.md
     title: Styling gotchas
     template: troubleshooting
@@ -241,6 +248,13 @@ pages:
     audience: S
     priority: P0
     outcome: Write focused tests for routes.
+  - path: add/use-pytest-or-unittest.md
+    title: Use pytest or unittest
+    template: how-to
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Run route tests with pytest or unittest.
   - path: add/freeze-pages.md
     title: Freeze finished pages
     template: how-to
@@ -698,6 +712,14 @@ pages:
     priority: P2
     outcome: Use the camera result type.
     symbols: [Photo]
+  - path: reference/data-types/color.md
+    title: Color
+    template: reference
+    level: L3
+    audience: S
+    priority: P2
+    outcome: Work with a color as red, green, blue, and alpha amounts.
+    symbols: [Color]
   - path: reference/data-types/location-types.md
     title: Location and map types
     template: reference
@@ -855,6 +877,22 @@ pages:
     priority: P1
     outcome: Collect a date and time.
     symbols: [DateTimeInput]
+  - path: reference/components/input/slider.md
+    title: Slider
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Collect a number from a range.
+    symbols: [Slider]
+  - path: reference/components/input/colorpicker.md
+    title: ColorPicker
+    template: component
+    level: L3
+    audience: S
+    priority: P1
+    outcome: Collect a color.
+    symbols: [ColorPicker]
   - path: reference/components/input/label.md
     title: Label
     template: component

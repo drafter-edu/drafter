@@ -45,12 +45,14 @@ from drafter.components.data.photo import Photo
 from drafter.components.files import Download, FileUpload
 from drafter.components.forms import (
     CheckBox,
+    ColorPicker,
     DateInput,
     DateTimeInput,
     Label,
     RadioButtonGroup,
     RelatedCheckBox,
     SelectBox,
+    Slider,
     TextArea,
     TextBox,
     TimeInput,
@@ -179,6 +181,8 @@ __all__ = [
     "DateTimeInput",
     "DateInput",
     "TimeInput",
+    "Slider",
+    "ColorPicker",
     "CurrentLocation",
     "Location",
     "Map",

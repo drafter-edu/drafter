@@ -2,6 +2,7 @@ import * as Diff2Html from "diff2html";
 import { createTwoFilesPatch } from "diff";
 import { Panel } from "./panel";
 import { t } from "../../i18n";
+import { errorFingerprint } from "../utils/errors";
 import type { ErrorDetailsJson } from "../telemetry/errors";
 
 /**
@@ -15,6 +16,12 @@ export class CurrentPanel extends Panel {
 	// errors). They are re-rendered after every navigation instead of being
 	// wiped with the per-page problems.
 	private persistentProblems: ErrorDetailsJson[] = [];
+	/** Rendered problems on the current slate, by fingerprint, with their
+	 * repeat counters, so a repeat raises a count instead of a new line. */
+	private shownProblems = new Map<
+		string,
+		{ element: HTMLElement; count: number }
+	>();
 
 	constructor(
 		containerId: string,
@@ -102,8 +109,12 @@ export class CurrentPanel extends Panel {
 		this.getRouteElement().textContent = route;
 		const problems = this.getProblemsElement();
 		problems.replaceChildren();
+		this.shownProblems.clear();
 		for (const envelope of this.persistentProblems) {
-			this.renderProblem(problems, envelope);
+			this.shownProblems.set(errorFingerprint(envelope), {
+				element: this.renderProblem(problems, envelope),
+				count: 1,
+			});
 		}
 		if (this.persistentProblems.length === 0) {
 			problems.appendChild(
@@ -135,7 +146,14 @@ export class CurrentPanel extends Panel {
 	public addProblem(
 		envelope: ErrorDetailsJson,
 		persistent: boolean = false,
-	): void {
+	): boolean {
+		const fingerprint = errorFingerprint(envelope);
+		const shown = this.shownProblems.get(fingerprint);
+		if (shown) {
+			shown.count += 1;
+			this.renderRepeatCount(shown.element, shown.count);
+			return false;
+		}
 		if (persistent) {
 			this.persistentProblems.push(envelope);
 		}
@@ -143,13 +161,35 @@ export class CurrentPanel extends Panel {
 		problems
 			.querySelector(".drafter-debug-current-no-problems")
 			?.remove();
-		this.renderProblem(problems, envelope);
+		const element = this.renderProblem(problems, envelope);
+		this.shownProblems.set(fingerprint, { element, count: 1 });
+		return true;
+	}
+
+	/** Show (or update) the "×N" badge on a problem that has repeated. */
+	private renderRepeatCount(element: HTMLElement, count: number): void {
+		let badge = element.querySelector(
+			".drafter-debug-problem-count",
+		) as HTMLElement | null;
+		if (!badge) {
+			badge = (
+				<span
+					class="drafter-debug-problem-count"
+					title={t("current.problem_repeats", { n: count })}
+				></span>
+			) as HTMLElement;
+			element
+				.querySelector(".drafter-debug-current-problem-message")
+				?.after(badge);
+		}
+		badge.textContent = `×${count}`;
+		badge.title = t("current.problem_repeats", { n: count });
 	}
 
 	private renderProblem(
 		problems: HTMLElement,
 		envelope: ErrorDetailsJson,
-	): void {
+	): HTMLElement {
 		const isError =
 			envelope.severity === "error" || envelope.severity === "critical";
 		// Lead with the student-friendly explanation when the envelope
@@ -173,8 +213,7 @@ export class CurrentPanel extends Panel {
 		const technical = technicalParts
 			.filter((part) => part && part !== primary)
 			.join("\n");
-		problems.appendChild(
-			(
+		const element = (
 				<div
 					class={`drafter-debug-current-problem ${
 						isError ? "is-error" : "is-warning"
@@ -193,8 +232,9 @@ export class CurrentPanel extends Panel {
 						</details>
 					) : null}
 				</div>
-			) as HTMLElement,
-		);
+			) as HTMLElement;
+		problems.appendChild(element);
+		return element;
 	}
 
 	/** Render the previous-vs-current state diff below the button. */

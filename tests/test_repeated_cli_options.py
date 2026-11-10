@@ -119,6 +119,39 @@ class TestAppCommonRepeatedOptions:
         )
         assert result["project_packages"] == ["wordfreq", "emoji"]
 
+    def test_package_index_repeated(self):
+        result = parse(
+            AppCommonConfiguration,
+            [
+                "--package-index",
+                "https://a.example/wheels.json",
+                "--package-index",
+                "https://b.example/wheels.json",
+            ],
+        )
+        assert result["package_indexes"] == [
+            "https://a.example/wheels.json",
+            "https://b.example/wheels.json",
+        ]
+        assert "use_default_package_index" not in result
+
+    def test_no_default_package_index_flag(self):
+        result = parse(AppCommonConfiguration, ["--no-default-package-index"])
+        assert result["use_default_package_index"] is False
+
+    def test_package_index_env_vars(self):
+        result = AppCommonConfiguration.parse_env_variables(
+            {
+                "DRAFTER_PACKAGE_INDEXES": "https://a.example/wheels.json;https://b.example/wheels.json",
+                "DRAFTER_USE_DEFAULT_PACKAGE_INDEX": "false",
+            }
+        )
+        assert result["package_indexes"] == [
+            "https://a.example/wheels.json",
+            "https://b.example/wheels.json",
+        ]
+        assert result["use_default_package_index"] is False
+
 
 class TestAppBuilderRepeatedOptions:
     def test_additional_paths_repeated(self):

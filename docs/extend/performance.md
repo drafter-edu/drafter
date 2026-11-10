@@ -53,6 +53,11 @@ The debug panel's Current tab doubles as a scale: when the state
 display itself scrolls for pages, routes are paying to copy all
 of it.
 
+Showing a big state costs time too, because the debug panel
+describes all of it after every change. If the state has to stay
+that large, [`set_state_display(False)`](../reference/site-config.md#set_state_display)
+replaces the display with a one-line note.
+
 ## Enormous pages render slowly
 
 A page with thousands of components (one per row of a big

@@ -45,6 +45,7 @@ from drafter.components import (
     Canvas,
     CheckBox,
     Clock,
+    ColorPicker,
     Component,
     Content,
     CurrentLocation,
@@ -109,6 +110,7 @@ from drafter.components import (
     Section,
     SelectBox,
     Sharpen,
+    Slider,
     SmallText,
     Sound,
     Span,
@@ -128,6 +130,7 @@ from drafter.components import (
 
 # Handle configuration if needed
 from drafter.configuration import get_system_configuration
+from drafter.data.colors import Color
 from drafter.data.files import DrafterBinaryFile, DrafterTextFile
 from drafter.data.images import Picture
 from drafter.deploy import (
@@ -145,6 +148,7 @@ from drafter.deploy import (
     set_error_page,
     set_page_transition,
     set_site_information,
+    set_state_display,
     set_website_favicon,
     set_website_framed,
     set_website_style,
@@ -273,6 +277,9 @@ __all__ = [
     "DateTimeInput",
     "DateInput",
     "TimeInput",
+    "Slider",
+    "ColorPicker",
+    "Color",
     "CurrentLocation",
     "Map",
     "MapLocation",
@@ -325,6 +332,7 @@ __all__ = [
     "set_error_page",
     "set_button_spinners",
     "set_browser_history",
+    "set_state_display",
     "add_website_header",
     "add_website_css",
     "add_website_css_file",

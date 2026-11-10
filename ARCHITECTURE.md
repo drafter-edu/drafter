@@ -747,10 +747,19 @@ every field so the two can be copied back and forth safely.
 Do not mutate configuration objects directly - simply modifying fields will NOT trigger changes in
 the deployed site. Call `ClientServer.reconfigure(...)`, which emits an `UpdatedConfigurationEvent`
 on the event bus. The `ClientBridge` subscribes and currently reacts to changes of `framed`,
-`in_debug_mode`, `enable_subtle_debug_entry`, `favicon`, `page_transition`, and
-`page_transition_duration`; other keys are logged as unhandled. The page title and favicon are also
+`in_debug_mode`, `enable_subtle_debug_entry`, `favicon`, `page_transition`,
+`page_transition_duration`, and `state_display`; other keys are logged as unhandled. The page title and favicon are also
 applied imperatively during site setup. **[PLANNED]**: reacting to more configuration keys
 (e.g., live title updates).
+
+Error reporting happens once per error object. `reportSystemError()` in `js/src/bridge/engine.ts`
+remembers every error it reports (a `WeakMap` keyed by the object) and skips the console and
+telemetry when the same object comes back through a higher layer or through the window `error` /
+`unhandledrejection` listeners that `installUncaughtErrorListeners()` adds to each window running
+an instance; a report that would show the error to the student still does so if no earlier report
+did. Downstream, `errorFingerprint()` in `js/src/debug/utils/errors.ts` (id, severity, first
+message line, raise site, route) lets the Current tab, the Log tab and the dev-server log sender
+fold repeats of one problem into a counter instead of listing them again.
 
 The favicon pipeline: the index template always renders a `<link rel="icon" id="drafter-favicon--">`
 whose href is `app_common.favicon` when set (CLI `--favicon` / `DRAFTER_FAVICON`), otherwise the
@@ -881,6 +890,13 @@ Here are the parts of Drafter that have to be hosted:
   - `drafter.skulpt.js` - the bundle integrating Drafter with the Skulpt environment.
   - `drafter.pyodide.js` - the bundle integrating Drafter with the Pyodide environment.
   - (There is no unified `drafter.js`; the two engine bundles are the entry points.)
+  - `drafter.transpiler.js` - the HTML-to-Drafter converter (global `DrafterTranspiler`). This is a
+    **lazy bundle**: it is not referenced by any page template. `loadLazyBundle()` in
+    `js/src/lazy.ts` adds its `<script>` on first use, resolving the address from the main bundle's
+    own URL (same folder, same `?v=` version stamp). Anything large that most pages never use
+    should be built this way (its own tsup entry with `platform: "browser"`, one global, loaded
+    through `loadLazyBundle`) instead of being imported into an engine bundle, since every Drafter
+    page downloads those in full.
   - `drafter_base.css` - core styling.
   - `drafter_debug.css` - debug menu styles.
   - `drafter_deploy.css` - styles for deployed (non-debug) mode.

@@ -13,6 +13,8 @@ symbols:
   - set_page_transition
   - set_error_page
   - set_button_spinners
+  - set_state_display
+  - set_browser_history
   - add_website_header
   - add_website_css
   - add_website_css_file
@@ -117,6 +119,46 @@ When spinners are turned on, a pressed button shows a small spinner
 and is temporarily disabled while its request is being processed.
 This is helpful when a route does slow work and a visitor might
 otherwise click twice.
+
+### set_state_display
+
+```python
+set_state_display(False)
+```
+
+The debug panel normally shows your whole state after every change.
+When the state is very large, such as a long list, a big grid, or
+many pictures, that can slow each page down and push everything else
+in the panel out of view. Turning the display off replaces it with a
+one-line note.
+
+Only the display changes. Your state still works the same way, and so
+do the back and forward buttons and the panel's Save and Load. Call
+`set_state_display(True)` to bring the display back.
+
+### set_browser_history
+
+```python
+set_browser_history(False)
+```
+
+Normally the browser's back and forward buttons move through your
+app: each page a visitor opens becomes an entry in the browser's
+history, and going back restores that page along with the state it
+had at the time.
+
+Turn this off when your app is placed inside another web page, such
+as a course page that shows several small apps. There the back
+button belongs to the outer page, and a visitor who presses it
+expects to leave that page, not to rewind your app. With history
+off, Drafter never adds entries to the browser's history and never
+changes the address bar.
+
+Call it before `start_server(...)`; the setting is read once, when
+the site starts. The debug panel's own history and replay tools keep
+working either way. The live demos in this documentation turn
+history off automatically. The same setting is available as the
+`--no-browser-history` command line flag.
 
 ## Adding raw content
 

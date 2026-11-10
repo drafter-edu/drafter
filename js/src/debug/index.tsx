@@ -30,6 +30,7 @@ import {
 } from "./menubar";
 import { getCurrentSourceCode, openCodeEditor } from "./editor";
 import { openSourceViewer } from "./viewsource";
+import { openHtmlConverter } from "./htmlconvert";
 import { openStateEditor } from "./state_edit";
 import { openThemeSwitcher } from "./theme_switch";
 import { downloadBugReport, SaveLoadManager } from "./saveload";
@@ -515,6 +516,13 @@ export class DebugPanel {
 						className: "drafter-menu-item-edit-source",
 						action: () => openCodeEditor(),
 					},
+					{
+						labelKey: "menu.convert_html",
+						iconKey: "icon.convert_html",
+						tooltipKey: "menu.convert_html.tooltip",
+						className: "drafter-menu-item-convert-html",
+						action: () => openHtmlConverter(),
+					},
 				],
 			},
 			{
@@ -758,19 +766,28 @@ export class DebugPanel {
 		// before the first navigation): keep them visible across navigations
 		// instead of wiping them on the next RequestEvent.
 		const isGlobal = envelope.context?.request_id == null;
+		this.historyPanel?.noteProblem(envelope);
+		// A repeat of a problem already on the slate raises that problem's
+		// counter (in the Current tab) rather than the number of problems.
+		const isNew = this.currentPanel?.addProblem(envelope, isGlobal) ?? true;
+		if (isError) {
+			// The log sender does its own counting of repeats.
+			this.errorReporter.report(envelope);
+		}
+		if (!isNew) {
+			return;
+		}
 		if (isError) {
 			if (isGlobal) {
 				this.globalErrorCount++;
 			} else {
 				this.currentErrorCount++;
 			}
-			this.errorReporter.report(envelope);
 		} else if (isGlobal) {
 			this.globalWarningCount++;
 		} else {
 			this.currentWarningCount++;
 		}
-		this.currentPanel?.addProblem(envelope, isGlobal);
 		this.updateProblemIndicators();
 	}
 
@@ -783,5 +800,37 @@ export class DebugPanel {
 			errors > 0 ? "error" : "warn",
 		);
 		this.footerBar?.setProblemCounts(errors, warnings);
+		this.updateDocumentTitle(errors, warnings);
+	}
+
+	/** The site title the browser tab showed before any problem prefix. */
+	private plainDocumentTitle: string | null = null;
+
+	/**
+	 * Put the problem counts in front of the browser tab's title, so a
+	 * student who switched tabs (or scrolled the panel away) can see that
+	 * something went wrong. Only this instance's own document is touched.
+	 */
+	private updateDocumentTitle(errors: number, warnings: number): void {
+		const doc = ownerDocumentOf(this.root);
+		if (!doc) {
+			return;
+		}
+		const current = doc.title;
+		if (this.plainDocumentTitle === null) {
+			this.plainDocumentTitle = current;
+		} else if (!current.startsWith("(")) {
+			// Something else (set_website_title) changed the title.
+			this.plainDocumentTitle = current;
+		}
+		const parts: string[] = [];
+		if (errors > 0) {
+			parts.push(`${errors} ${errors === 1 ? "error" : "errors"}`);
+		}
+		if (warnings > 0) {
+			parts.push(`${warnings} ${warnings === 1 ? "warning" : "warnings"}`);
+		}
+		const plain = this.plainDocumentTitle;
+		doc.title = parts.length > 0 ? `(${parts.join(", ")}) ${plain}` : plain;
 	}
 }

@@ -577,6 +577,59 @@ describe("student-facing root rendering", () => {
 		]);
 	});
 
+	test("ModuleNotFoundError advice names the library Drafter could not install", () => {
+		const container = renderToRoot({
+			message: "Error running student code",
+			error: new Error(
+				"PythonError: Traceback (most recent call last):\n" +
+					'  File "main.py", line 3, in <module>\n' +
+					"    import seabornn as sns\n" +
+					"ModuleNotFoundError: No module named 'seabornn'",
+			),
+		});
+
+		const steps = Array.from(container.querySelectorAll("li")).map(
+			(li) => li.textContent,
+		);
+		expect(steps).toHaveLength(3);
+		expect(steps[0]).toContain("Check the spelling of seabornn");
+		expect(steps[1]).toContain("looked for a library named seabornn");
+		expect(steps[1]).toContain("--project-packages");
+		expect(steps[2]).toContain("cannot run in a browser");
+		// Names and flags are marked up as code so they can be copied exactly.
+		const codes = Array.from(container.querySelectorAll("li code")).map(
+			(code) => code.textContent,
+		);
+		expect(codes).toContain("seabornn");
+		expect(codes).toContain("--project-packages");
+	});
+
+	test("ModuleNotFoundError advice uses the top-level package of a submodule", () => {
+		const container = renderToRoot({
+			error: new Error(
+				"ModuleNotFoundError: No module named 'seaborn.objects'",
+			),
+		});
+
+		const steps = Array.from(container.querySelectorAll("li")).map(
+			(li) => li.textContent,
+		);
+		expect(steps[0]).toContain("Check the spelling of seaborn on");
+		expect(steps[1]).toContain("a library named seaborn to install");
+	});
+
+	test("ModuleNotFoundError advice still helps when no name can be read", () => {
+		const container = renderToRoot({
+			error: new Error("ModuleNotFoundError"),
+		});
+
+		const steps = Array.from(container.querySelectorAll("li")).map(
+			(li) => li.textContent,
+		);
+		expect(steps[0]).toContain("Check the spelling of the library");
+		expect(steps[1]).toContain("installs under a different name");
+	});
+
 	test("SyntaxError advice wins when both SyntaxError and NameError appear", () => {
 		const container = renderToRoot({
 			error: new Error("SyntaxError before a NameError mention"),

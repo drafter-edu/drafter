@@ -56,10 +56,35 @@ export default defineConfig([
 		outExtension({ format }) {
 			return { js: ".js" }; // for iife this yields dist/drafter.js
 		},
-		loader: { ".css": "text" },
+		// The Python import helpers (src/drafter/helpers/imports.py) ride
+		// along as text so the bundle never depends on which drafter the
+		// browser installed.
+		loader: { ".css": "text", ".py": "text" },
 		esbuildOptions(options) {
 			options.jsx = "automatic";
 			options.jsxImportSource = "jsx-dom";
+		},
+		sourcemap: true,
+		minify: true,
+	},
+	{
+		// Loaded on demand (see src/lazy.ts): the HTML and CSS parsers it
+		// needs are too large to ship to every page in the main bundles.
+		entry: {
+			"drafter.transpiler": "src/transpiler.index.ts",
+		},
+		format: ["iife"],
+		globalName: "DrafterTranspiler",
+		// css-tree's Node build reads its data files with createRequire,
+		// which does not exist in a browser. Building for the browser
+		// platform makes esbuild follow the package's "browser" field to
+		// the prebuilt data files instead.
+		platform: "browser",
+		outDir: "dist/js",
+		clean: false,
+		target: browserslistToEsbuild(),
+		outExtension() {
+			return { js: ".js" };
 		},
 		sourcemap: true,
 		minify: true,

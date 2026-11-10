@@ -237,6 +237,29 @@ def set_button_spinners(enabled: bool = True, server: ClientServer | None = None
     server.reconfigure(button_spinners=bool(enabled))
 
 
+def set_state_display(enabled: bool = True, server: ClientServer | None = None):
+    """
+    Shows or hides the application state in the debug panel.
+
+    The debug panel normally shows the whole state after every change. For
+    a very large state (a long list, a big grid, many pictures) that can be
+    slow and can crowd out everything else in the panel. Turning the
+    display off replaces it with a one-line note. Only the display changes:
+    your state, the back and forward buttons, and Save/Load keep working.
+
+    Args:
+        enabled: Whether the debug panel should show the state.
+        server: The server to configure. If None, uses the main server.
+
+    Example:
+        set_state_display(False)
+        start_server(State(grid=make_huge_grid()))
+    """
+    if server is None:
+        server = get_main_server()
+    server.reconfigure(state_display=bool(enabled))
+
+
 def set_browser_history(enabled: bool = True, server: ClientServer | None = None):
     """
     Enables or disables mirroring navigation into the browser's history

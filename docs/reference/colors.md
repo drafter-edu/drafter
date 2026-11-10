@@ -105,7 +105,7 @@ This table lists common HTML color names and their hex values.
     <tr><td><code>mediumaquamarine</code></td><td style="background-color: mediumaquamarine;">&nbsp;</td><td><code>#66cdaa</code></td></tr>
     <tr><td><code>mediumblue</code></td><td style="background-color: mediumblue;">&nbsp;</td><td><code>#0000cd</code></td></tr>
     <tr><td><code>mediumorchid</code></td><td style="background-color: mediumorchid;">&nbsp;</td><td><code>#ba55d3</code></td></tr>
-    <tr><td><code>mediumpurple</code></td><td style="background-color: mediumpurple;">&nbsp;</td><td><code>#9370d8</code></td></tr>
+    <tr><td><code>mediumpurple</code></td><td style="background-color: mediumpurple;">&nbsp;</td><td><code>#9370db</code></td></tr>
     <tr><td><code>mediumseagreen</code></td><td style="background-color: mediumseagreen;">&nbsp;</td><td><code>#3cb371</code></td></tr>
     <tr><td><code>mediumslateblue</code></td><td style="background-color: mediumslateblue;">&nbsp;</td><td><code>#7b68ee</code></td></tr>
     <tr><td><code>mediumspringgreen</code></td><td style="background-color: mediumspringgreen;">&nbsp;</td><td><code>#00fa9a</code></td></tr>
@@ -126,7 +126,7 @@ This table lists common HTML color names and their hex values.
     <tr><td><code>palegoldenrod</code></td><td style="background-color: palegoldenrod;">&nbsp;</td><td><code>#eee8aa</code></td></tr>
     <tr><td><code>palegreen</code></td><td style="background-color: palegreen;">&nbsp;</td><td><code>#98fb98</code></td></tr>
     <tr><td><code>paleturquoise</code></td><td style="background-color: paleturquoise;">&nbsp;</td><td><code>#afeeee</code></td></tr>
-    <tr><td><code>palevioletred</code></td><td style="background-color: palevioletred;">&nbsp;</td><td><code>#d87093</code></td></tr>
+    <tr><td><code>palevioletred</code></td><td style="background-color: palevioletred;">&nbsp;</td><td><code>#db7093</code></td></tr>
     <tr><td><code>papayawhip</code></td><td style="background-color: papayawhip;">&nbsp;</td><td><code>#ffefd5</code></td></tr>
     <tr><td><code>peachpuff</code></td><td style="background-color: peachpuff;">&nbsp;</td><td><code>#ffdab9</code></td></tr>
     <tr><td><code>peru</code></td><td style="background-color: peru;">&nbsp;</td><td><code>#cd853f</code></td></tr>

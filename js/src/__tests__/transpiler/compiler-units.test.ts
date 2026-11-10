@@ -285,6 +285,41 @@ describe("date and time inputs", () => {
 	});
 });
 
+describe("range and color inputs", () => {
+	test("range input writes out the browser's default bounds", () => {
+		expect(compile('<input type="range" name="volume">')).toContain(
+			'Slider("volume", 0, 100)',
+		);
+	});
+
+	test("range input keeps min, max, value, and step", () => {
+		const code = compile(
+			'<input type="range" name="rating" min="1" max="5" value="2.5" step="0.5">',
+		);
+		expect(code).toContain(
+			'Slider("rating", 1, 5, default_value=2.5, step=0.5)',
+		);
+	});
+
+	test("range input ignores bounds that are not numbers", () => {
+		const code = compile(
+			'<input type="range" name="volume" min="low" max="high">',
+		);
+		expect(code).toContain('Slider("volume", 0, 100)');
+	});
+
+	test("color input maps to ColorPicker", () => {
+		expect(compile('<input type="color" name="ink">')).toContain(
+			'ColorPicker("ink")',
+		);
+	});
+
+	test("color input with a value gets default_value", () => {
+		const code = compile('<input type="color" name="ink" value="#ff8800">');
+		expect(code).toContain('ColorPicker("ink", default_value="#ff8800")');
+	});
+});
+
 describe("file inputs", () => {
 	test("file input maps to FileUpload", () => {
 		expect(compile('<input type="file" name="upload">')).toContain(

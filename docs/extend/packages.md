@@ -27,9 +27,12 @@ machine works.
 
 ## Importing is usually all it takes
 
-When your program runs in the browser, Drafter scans your code
-for imports and installs what it finds before running it. For
-most libraries there is nothing to configure:
+When your program runs in the browser, Drafter reads its `import`
+lines and installs what they name before running it. Libraries built
+for the browser, such as `matplotlib` and `pandas`, come from the
+browser's own Python distribution. Anything else, such as `seaborn`,
+is fetched from PyPI, the same place `pip` gets it. For most
+libraries there is nothing to configure:
 
 ```python drafter height=420
 from drafter import *
@@ -119,11 +122,56 @@ start_server(State(""))
 external service; copy it into your own editor to try it. It also
 uses a dictionary, which your course may not have covered.)
 
+## Wheels Drafter hosts
+
+A few libraries students ask for exist on PyPI only as source code,
+which a browser cannot build. ChemPy is one. For these, Drafter keeps
+a **wheel index** at
+`https://drafter-edu.github.io/packages/wheels.json`: pure-Python
+wheels built for the browser, listed in a small JSON file. When a
+package has no wheel on PyPI, Drafter checks the index. Nothing to
+configure: `import chempy` works.
+
+An index is installed as a set. Its wheels are built to go together,
+so when one of them is needed all of them are installed, and then
+whatever they declare they still need (such as `sympy`, which the
+browser's Python already provides) is fetched. A declared requirement
+that nothing can supply is skipped, since not every dependency a
+package lists is needed in the browser.
+
+Courses can host their own index the same way: a `wheels.json`
+listing wheel file names next to a `wheels/` folder, on any server
+that allows cross-origin requests (GitHub Pages does). Add it with
+`--package-index`:
+
+```console
+drafter my_app.py --package-index https://my-course.github.io/wheels/wheels.json
+```
+
+Extra indexes are searched first, in the order given, and Drafter's
+own index last; `--no-default-package-index` leaves Drafter's out.
+The same settings exist as `DRAFTER_PACKAGE_INDEXES` (several URLs
+separated by `;`) and `DRAFTER_USE_DEFAULT_PACKAGE_INDEX`, and as
+`package_indexes` and `use_default_package_index` in a config file.
+The index format is the one produced by the
+[drafter-edu/packages](https://github.com/drafter-edu/packages)
+repository, which you can copy to build your own.
+
 ## Declaring packages explicitly
 
-Automatic detection covers imports it can see in your file. When
-it misses (a dynamic import, or a dependency of your own module),
-declare packages on the command line:
+Automatic installation works from the `import` lines in your main
+file, and it looks each library up by the name you import. Three
+situations fall outside that:
+
+- **The install name differs from the import name.** You write
+  `import sklearn`, but the library is installed as `scikit-learn`.
+  The common ones built for the browser are handled, but a less
+  common library needs its install name declared.
+- **The import is not in your main file.** One of your own modules
+  imports the library, or the name is built at run time.
+- **You want a particular version.**
+
+In those cases, declare packages on the command line:
 
 ```console
 drafter my_app.py --project-packages wordfreq --project-packages emoji
@@ -140,6 +188,22 @@ control.
 - **Works locally, fails deployed**: the library is probably in
   the cannot-work tier, or you imported it somewhere detection
   cannot see; try declaring it with `--project-packages`.
+- **`ModuleNotFoundError` in the browser for a library you did
+  import**: Drafter looked for a library with that exact name and
+  could not install one. Check the spelling first. If the library
+  installs under a different name, declare that name with
+  `--project-packages`.
+- **`ModuleNotFoundError` for a library that is only on PyPI as source**:
+  if Drafter's wheel index does not have it, you can build a wheel and
+  host your own index; see [Wheels Drafter hosts](#wheels-drafter-hosts).
+- **Your own file has the same name as a library**: your file wins.
+  Drafter only goes to PyPI for names that nothing next to your
+  program can provide, so a `utils.py` of your own is never replaced
+  by a stranger's package.
+- **`ModuleNotFoundError` when building or deploying**: that is the
+  computer doing the build, not the browser. The library has to be
+  installed there too; see
+  [Building for deployment](../reference/cli.md#building-for-deployment).
 - **A long first load**: normal for heavy libraries. Warn your
   users on the page, or trim the dependency.
 - **`requests` raises about the connection**: check the browser

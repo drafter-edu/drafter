@@ -694,7 +694,10 @@ class ClientServer:
             try:
                 self.state.update(updated_state)
                 log_record(
-                    UpdatedStateEvent.from_state(updated_state),
+                    UpdatedStateEvent.from_state(
+                        updated_state,
+                        display=self.get_config_setting("state_display"),
+                    ),
                     "client_server.handle_state_updates",
                     request_id=request.id,
                     route=request.url,

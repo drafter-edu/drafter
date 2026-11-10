@@ -1,15 +1,18 @@
 """
-TODO: Currently, it doesn't seem like the seaborn dependency is getting picked up
-by the automatic system?
+A seaborn chart. Seaborn is not one of the libraries bundled with the
+browser's Python, so Drafter installs it from PyPI when it sees the import.
+
+To run this on your own computer, install the libraries there first:
+
+    pip install seaborn pandas
 """
 
 import random
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
-
-# import seaborn as sns
 import pandas as pd
+import seaborn as sns
 
 from drafter import *
 
@@ -26,8 +29,7 @@ class State:
 @route
 def index(state: State):
     df = pd.DataFrame({"data": state.data})
-    # sns.histplot(df["data"], kde=True)
-    df.plot.hist(y="data", bins=20)
+    sns.histplot(df["data"], kde=True)
     plt.title("Random data with Seaborn")
 
     return Page(

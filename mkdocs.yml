@@ -37,11 +37,13 @@ nav:
     - Styling functions and keywords: add/change-appearance/helpers.md
     - Design basics: add/change-appearance/design-basics.md
     - Custom CSS: add/change-appearance/custom-css.md
+    - Use a CSS framework: add/change-appearance/css-frameworks.md
     - Styling gotchas: add/change-appearance/gotchas.md
   - Add live behavior: add/live-behavior.md
   - Make things happen over time: add/timers.md
   - Embed HTML: add/html.md
   - Test a feature: add/test-a-feature.md
+  - Use pytest or unittest: add/use-pytest-or-unittest.md
   - Freeze finished pages: add/freeze-pages.md
 - Your Project:
   - your-project/index.md
@@ -98,6 +100,8 @@ nav:
       - DateInput: reference/components/input/dateinput.md
       - TimeInput: reference/components/input/timeinput.md
       - DateTimeInput: reference/components/input/datetimeinput.md
+      - Slider: reference/components/input/slider.md
+      - ColorPicker: reference/components/input/colorpicker.md
       - Label: reference/components/input/label.md
       - Output: reference/components/input/output.md
       - FileUpload: reference/components/input/fileupload.md
@@ -165,6 +169,7 @@ nav:
     - reference/data-types/index.md
     - Picture: reference/data-types/picture.md
     - Photo: reference/data-types/photo.md
+    - Color: reference/data-types/color.md
     - Location and map types: reference/data-types/location-types.md
     - File types: reference/data-types/file-types.md
     - Audio types: reference/data-types/audio-types.md

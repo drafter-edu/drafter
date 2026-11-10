@@ -180,8 +180,11 @@ minute or two to become reachable; later ones are faster.
     uvx drafter main.py --compile --output-directory _site --production --additional-paths pets.csv --additional-paths words.txt
     ```
 
-- **Your app imports third-party packages.** The throwaway
-  environment needs them at compile time too:
+- **Your app imports third-party packages.** Compiling runs your
+  program once on the build machine, so every library it imports must
+  be installed there, or the build stops with `ModuleNotFoundError`.
+  The throwaway environment starts with only Drafter, so name each
+  library with `--with`:
 
     ```console
     uvx --with matplotlib drafter main.py --compile --output-directory _site --production

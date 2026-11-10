@@ -1908,3 +1908,172 @@ div.btlw-container img {
 	gap: 6px;
 	margin-bottom: 6px;
 }
+
+/* Edit > Convert HTML to Drafter dialog */
+.drafter-html-converter {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.drafter-html-converter-intro {
+	margin: 0;
+}
+
+.drafter-html-converter-input {
+	width: 100%;
+	box-sizing: border-box;
+	font-family: monospace;
+	font-size: 13px;
+	resize: vertical;
+}
+
+.drafter-html-converter-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+.drafter-html-converter-status {
+	font-size: 13px;
+}
+
+/* History tab: one row per visit, with its outcome on the left. */
+.drafter-debug-- .drafter-debug-history-actions {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.drafter-debug-- .drafter-debug-page-history-count {
+	color: #506784;
+	font-size: 0.9em;
+}
+
+.drafter-debug-- .drafter-debug-page-history-older {
+	display: flex;
+	justify-content: center;
+	margin: 8px 0;
+}
+
+.drafter-debug-- .history-event .request-event {
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.drafter-debug-- .history-event .drafter-history-call {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-family: monospace;
+	background-color: #e8f0fe;
+	border: 1px solid #a3c0fa;
+	padding: 1px 4px;
+	border-radius: 3px;
+	overflow-wrap: anywhere;
+}
+
+.drafter-debug-- .history-event .drafter-history-status {
+	font-size: 0.8em;
+	font-weight: 700;
+	padding: 1px 8px;
+	border-radius: 999px;
+	border: 1px solid currentColor;
+	white-space: nowrap;
+}
+
+.drafter-debug-- .history-event .drafter-history-status.is-pending {
+	color: #506784;
+	background-color: #eef3f9;
+}
+
+.drafter-debug-- .history-event .drafter-history-status.is-ok {
+	color: #1c7448;
+	background-color: #e6ffed;
+}
+
+.drafter-debug-- .history-event .drafter-history-status.is-warning {
+	color: #8a5a00;
+	background-color: #fff4d6;
+}
+
+.drafter-debug-- .history-event .drafter-history-status.is-error {
+	color: #a4262c;
+	background-color: #fde7e9;
+}
+
+.drafter-debug-- .history-event .drafter-history-request-line {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: baseline;
+}
+
+.drafter-debug-- .history-event .drafter-history-request-via,
+.drafter-debug-- .history-event .drafter-history-response-ids {
+	color: #506784;
+	font-size: 0.9em;
+	font-weight: normal;
+}
+
+.drafter-debug-- .history-event .drafter-debug-provenance {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-top: 4px;
+}
+
+.drafter-debug-- .history-event .drafter-history-arg {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.95em;
+}
+
+.drafter-debug-- .history-event .drafter-history-arg-name {
+	font-weight: 700;
+}
+
+.drafter-debug-- .history-event .drafter-history-arg-type,
+.drafter-debug-- .history-event .drafter-history-arg-source {
+	color: #506784;
+	font-size: 0.9em;
+	font-weight: normal;
+}
+
+.drafter-debug-- .history-event .drafter-history-arg-value code {
+	background-color: #e8f0fe;
+	border: 1px solid #a3c0fa;
+	padding: 1px 4px;
+	border-radius: 3px;
+}
+
+.drafter-debug-- .history-event .drafter-history-arg-swatch {
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	border-radius: 3px;
+	border: 1px solid #a3c0fa;
+	vertical-align: middle;
+	margin-right: 4px;
+}
+
+.drafter-debug-- .history-event .drafter-history-arg-preview {
+	flex-basis: 100%;
+	margin-left: 1em;
+}
+
+/* "×N" on a problem or log line that repeated. */
+.drafter-debug-- .drafter-debug-problem-count {
+	font-family: monospace;
+	font-size: 0.85em;
+	font-weight: 700;
+	background-color: #0f2a45;
+	color: #ffffff;
+	padding: 0 6px;
+	border-radius: 999px;
+	margin-left: 4px;
+}

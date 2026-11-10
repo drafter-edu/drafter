@@ -7,6 +7,7 @@ user-specified paths into the output directory.
 
 import os
 import shutil
+import textwrap
 import zipfile
 from glob import glob
 from pathlib import Path
@@ -70,6 +71,84 @@ def write_404_page(
     if verbose:
         print(f"Not-found page written to {not_found_path}")
     return not_found_path
+
+
+MISSING_SITE_INFORMATION_SUMMARY = (
+    "This site has no site information, so its About page will not say "
+    "who made it or what it does."
+)
+"""One-line form of the missing-site-information notice, also used as the
+GitHub Actions annotation so it shows in a deployment's summary."""
+
+MISSING_SITE_INFORMATION_NOTICE = textwrap.dedent(
+    """    Notice: this site has no site information.
+    Visitors who open its About page will not see who made it or what it
+    does. Add a call like this near the top of your file, before
+    start_server():
+
+        set_site_information(
+            author="Your Name",
+            description="What your site does.",
+            sources="Who or what helped you build it.",
+            planning="",
+            links=[]
+        )
+
+    The site was still built. To turn this notice off, use the
+    --no-warn-missing-info flag.
+    """
+)
+"""Terminal notice printed when a site is compiled without
+`set_site_information`."""
+
+
+def has_site_information(server: ClientServer) -> bool:
+    """Whether the site declared any information for its About page.
+
+    Args:
+        server: The server whose configuration holds the site information.
+
+    Returns:
+        True when `set_site_information` supplied at least one non-empty
+        field, False when it was never called or every field is empty.
+    """
+    information = server.get_config_setting("information")
+    if not information:
+        return False
+    return any(value for _label, value in information.get_parts())
+
+
+def warn_if_site_information_missing(
+    system: SystemConfiguration, server: ClientServer
+) -> bool:
+    """Print a notice when a site is being built without site information.
+
+    Controlled by the builder's `warn_missing_info` setting. The build is
+    never stopped: site information is recommended, not required. Under
+    GitHub Actions (the usual way students deploy), a warning annotation is
+    printed as well, so the notice shows up on the workflow run's summary
+    page instead of only deep in its log.
+
+    Args:
+        system: The system configuration, for the builder's settings.
+        server: The server whose configuration holds the site information.
+
+    Returns:
+        True if the notice was printed, False otherwise.
+    """
+    if not system.app_builder.warn_missing_info:
+        return False
+    if has_site_information(server):
+        return False
+    print()
+    print(MISSING_SITE_INFORMATION_NOTICE)
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        print(
+            "::warning title=Drafter site information missing::"
+            + MISSING_SITE_INFORMATION_SUMMARY
+            + " Add a set_site_information(...) call before start_server()."
+        )
+    return True
 
 
 def build_zip(
@@ -329,3 +408,7 @@ def compile_site(
 
     if system.bootstrap.verbose:
         print(f"Site compiled successfully to {output_directory}")
+
+    # Last, so the notice is the final thing on screen instead of being
+    # scrolled away by the copy log above.
+    warn_if_site_information_missing(system, server)

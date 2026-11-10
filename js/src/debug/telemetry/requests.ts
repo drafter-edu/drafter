@@ -2,6 +2,7 @@
  * Request/Response event types for tracking page visits.
  */
 import type { TelemetryRecord } from "./base";
+import type { SpecificRepresentation } from "./state";
 
 export interface RequestEvent extends TelemetryRecord {
 	kind: "RequestEvent";
@@ -29,6 +30,9 @@ export interface ArgumentProvenance {
 	/** Short repr of the converted value, or null when unchanged. */
 	converted: string | null;
 	changed: boolean;
+	/** Structured description of the converted value (the same shape the
+	 * state panel renders), or null/absent when it could not be described. */
+	representation?: SpecificRepresentation | null;
 }
 
 export interface RequestParseEvent extends TelemetryRecord {
