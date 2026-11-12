@@ -12745,6 +12745,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.router.routes.SYSTEM_URL_PREFIX" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SYSTEM_URL_PREFIX
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.router.routes.Router" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -12866,6 +12877,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#drafter.router.routes.Router.resolve_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resolve_url
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -12876,6 +12898,17 @@
     <span class="md-ellipsis">
       
         clean_url
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.router.routes.is_system_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_system_url
       
     </span>
   </a>
@@ -13789,6 +13822,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.router.routes.SYSTEM_URL_PREFIX" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SYSTEM_URL_PREFIX
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.router.routes.Router" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13910,6 +13954,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#drafter.router.routes.Router.resolve_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resolve_url
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -13920,6 +13975,17 @@
     <span class="md-ellipsis">
       
         clean_url
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.router.routes.is_system_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_system_url
       
     </span>
   </a>
@@ -13986,6 +14052,28 @@ signatures and prepares handler arguments by running the parameter pipeline
 
 
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="drafter.router.routes.SYSTEM_URL_PREFIX" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">SYSTEM_URL_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Prefix reserved for the URLs of Drafter's own system routes, such as <code>--about</code>.</p>
+
+    </div>
+
+</div>
+
 
 
 <div class="doc doc-object doc-class">
@@ -14031,14 +14119,15 @@ signatures and prepares handler arguments by running the parameter pipeline
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="drafter.router.routes.Router.route_functions">route_functions</span></code></td>
+            <td><code><span title="drafter.router.routes.Router.route_names">route_names</span></code></td>
             <td>
-                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="collections.abc.Callable">Callable</span>]</code>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="str">str</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
                 <p>Dictionary mapping cleaned function-style names to the
-same handlers, used for name-based lookup in <code>get_route</code>.</p>
+normalized URL they were registered under, used as the name-based
+fallback in <code>resolve_url</code>. System URLs are never listed here.</p>
               </div>
             </td>
           </tr>
@@ -14158,8 +14247,8 @@ RouteSignatureSpec data.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A dict with the registered "url" and the handler's "signature"
-rendered as a string.</p>
+                <p>A dict with the registered "url", the handler's "signature"
+rendered as a string, and its request "parameters".</p>
               </div>
             </td>
           </tr>
@@ -14381,6 +14470,8 @@ rendered as a string.</p>
     <div class="doc doc-contents ">
 
         <p>Retrieve function signature metadata for a request URL.</p>
+<p>The URL is resolved exactly as <code>get_route</code> resolves it, so the
+signature always belongs to the handler that will be called.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -14926,6 +15017,84 @@ because those are meant to survive server resets.</p>
 
 </div>
 
+<div class="doc doc-object doc-function">
+
+
+<h3 id="drafter.router.routes.Router.resolve_url" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">resolve_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Find the registered URL that a requested URL refers to.</p>
+<p>An exact match on the normalized URL always wins. Otherwise the URL
+is matched by its cleaned, function-style name (so <code>mypage</code> finds a
+route registered as <code>/my-page</code>). System URLs (see <code>is_system_url</code>)
+only ever match exactly: cleaning would strip the <code>--</code> prefix and
+confuse <code>--about</code> with a student route named <code>about</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>url</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Route URL path to look up.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The normalized URL the route was registered under (a key of
+<code>routes</code> and <code>signatures</code>), or None if no route matches.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
 
 
   </div>
@@ -14956,6 +15125,87 @@ function names, instead of explicit URLs.</p>
 - Double dots delete the previous path segment, if any.
 - Non-valid characters are removed (only alphanumeric characters and underscores are kept).</p>
 
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="drafter.router.routes.is_system_url" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">is_system_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Checks whether a URL is in the namespace reserved for system routes.</p>
+<p>System URLs start with <code>--</code> (ignoring surrounding whitespace and slashes),
+which keeps them apart from student routes: <code>--about</code> is Drafter's About
+page, while <code>about</code> is an ordinary route a student may define.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>url</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The URL to check.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True if the URL's first path segment starts with <code>--</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <p>is_system_url("--about")  # True
+is_system_url("about")  # False</p>
+</details>
 
     </div>
 

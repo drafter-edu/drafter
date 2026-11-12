@@ -14179,6 +14179,9 @@ that cannot be converted to the annotated type stops it with a
   matching: extra slashes are trimmed, and in the most heavily cleaned
   form, only letters, numbers, and underscores are kept. Buttons and
   links can target the custom address string.</li>
+<li><strong>Names that start with <code>--</code> belong to Drafter.</strong> Built-in pages such
+  as <code>--about</code> and <code>--reset</code> are separate from your routes, so you can
+  name your own routes <code>about</code> or <code>reset</code> without replacing them.</li>
 <li><strong>Advanced injection (L4):</strong> parameters named <code>_server</code>,
   <code>_configuration</code>, or <code>_request</code> receive framework objects instead of
   form values. You will not need these outside of the advanced
