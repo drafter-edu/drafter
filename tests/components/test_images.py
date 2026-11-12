@@ -50,9 +50,30 @@ class TestImageComponent:
         html = render(Image(data)).flatten()
         assert 'src="data:image/jpeg;base64,' in html
 
-    def test_plain_strings_still_render_as_urls(self):
-        html = render(Image("photo.jpg")).flatten()
-        assert 'src="/photo.jpg"' in html
+    @pytest.mark.parametrize(
+        "path",
+        ["photo.jpg", "images/photo.jpg", "./photo.jpg", "../shared/photo.jpg"],
+    )
+    def test_local_paths_stay_relative_to_the_page(self, path):
+        # Regression: a forced leading slash sent the browser to the domain
+        # root, so a site deployed under a path (as GitHub Pages serves
+        # https://user.github.io/project/) asked for /photo.jpg and got a
+        # 404 instead of /project/photo.jpg.
+        html = render(Image(path)).flatten()
+        assert f'src="{path}"' in html
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://example.com/photo.jpg",
+            "//cdn.example.com/photo.jpg",
+            "/photo.jpg",
+            "blob:https://example.com/0a1b2c3d",
+        ],
+    )
+    def test_addresses_that_say_where_they_live_are_unchanged(self, url):
+        html = render(Image(url)).flatten()
+        assert f'src="{url}"' in html
 
     def test_open_and_new_are_deprecated(self, tmp_path):
         with pytest.warns(DeprecationWarning):

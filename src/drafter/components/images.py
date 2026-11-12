@@ -14,6 +14,7 @@ from PIL import Image as PILImage
 
 from drafter.components.data.photo import Photo
 from drafter.components.page_content import Component, ComponentArgument, UrlOrFunction
+from drafter.config.urls import is_absolute_url
 from drafter.data.images import Picture, bytes_to_data_url, sniff_image_mime
 from drafter.helpers.urls import check_invalid_external_url, friendly_urls, is_data_url
 
@@ -26,6 +27,11 @@ class Image(Component):
     URL, raw image bytes, or a PIL Image object. Values (Pictures, bytes,
     PIL images) are converted to base64-encoded data URLs at render time;
     URL-backed Pictures and plain URL/path strings render as URLs.
+
+    A local file path such as `"ada.png"` or `"images/ada.png"` is looked
+    up relative to the page, next to the program, so the same path works
+    on the development server and on a site deployed inside a folder
+    (such as `https://user.github.io/project/`).
 
     Attributes:
         url: The image source: URL, local path, Picture, bytes, or PIL Image.
@@ -167,10 +173,15 @@ class Image(Component):
 
         if not isinstance(source, Photo):
             url_processed, external = self._handle_url(source)
-            if not external:
-                # Ensure we have a leading slash
-                if not url_processed.startswith("/"):
-                    url_processed = "/" + url_processed
+            if not external and is_absolute_url(source):
+                # Root-relative (`/logo.png`), protocol-relative
+                # (`//cdn.example.com/logo.png`), and `blob:` addresses
+                # already say where they live, so they are used as written.
+                url_processed = source
+            # Anything else names a file next to the program. It stays
+            # relative so the browser resolves it against the page's own
+            # folder, which is not the domain root when the site is deployed
+            # under a path (https://user.github.io/project/).
             attributes["src"] = url_processed
 
         return attributes

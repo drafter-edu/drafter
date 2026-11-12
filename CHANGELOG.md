@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-11-12
+
+- Fixed images from local files, such as `Image("ada.png")`, showing as broken on deployed sites even though the file was published with the site. `Image` put a slash in front of the file name, so the browser looked for it at the top of the domain (`https://user.github.io/ada.png`) instead of inside the site's own folder (`https://user.github.io/project/ada.png`), which is where GitHub Pages serves a project. Local file names are now looked up relative to the page, the same way `Audio` and `Video` already worked, so one name works both on your computer and deployed. Addresses that already say where they live are used exactly as written: full URLs, addresses starting with `/` or `//`, and `blob:` addresses (the last two used to be mangled). Until a site is rebuilt with this version, `Image(Picture("ada.png"))` or the image's full URL work around the problem.
 - Every page of the documentation can now be shown as slides. A new Present button in the header (the screen icon beside the dark-mode toggle) opens the page as a slide deck, starting at the section you are reading. Each `##` section is a slide, a section too long for the screen continues on the next one, demos stay live, and the last slide links to the next page. The deck follows the window: zooming the browser in or going full screen lays the slides out again, and a program too long for the screen scrolls inside its own box instead of running off the bottom. Sections that are only cross-reference links, such as "Look it up" and "External links", are left out. See "Presenting a page in class" on the Teaching with Drafter page.
 - The demos on the "Change the appearance" pages (themes, styling functions, design basics, and custom CSS) now highlight the lines each example is about.
 
