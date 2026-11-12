@@ -1998,6 +1998,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#step-0-prepare-your-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 0: Prepare your program
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#step-1-create-the-repository-from-the-template" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2057,6 +2068,17 @@
     <span class="md-ellipsis">
       
         Updating a deployed site
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-third-party-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using third-party libraries
       
     </span>
   </a>
@@ -13769,6 +13791,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#step-0-prepare-your-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 0: Prepare your program
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#step-1-create-the-repository-from-the-template" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13828,6 +13861,17 @@
     <span class="md-ellipsis">
       
         Updating a deployed site
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-third-party-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using third-party libraries
       
     </span>
   </a>
@@ -13922,12 +13966,8 @@
 <p>By the end of this page, your prepared app will be live on the web with
 a shareable URL, hosted for free by GitHub Pages.</p>
 <h2 id="before-you-start">Before you start</h2>
-<p>You need two things:</p>
-<ul>
-<li>A <strong>GitHub account</strong>: <a href="https://github.com/signup">create one here</a> if
-  you do not have one.</li>
-<li>Your <a href="../prepare/">prepared</a> program.</li>
-</ul>
+<p>You need a <strong>GitHub account</strong>: <a href="https://github.com/signup">create one here</a> if
+  you do not have one.</p>
 <div class="admonition note">
 <p class="admonition-title">Choosing a GitHub username</p>
 <p>Your username will be part of your site's URL and visible to anyone
@@ -13940,6 +13980,22 @@ recognize you.</p>
 </div>
 <p>The overall flow has five parts: create the repository, put your code
 in it, turn on Pages, run the workflow, and collect your URL.</p>
+<h2 id="step-0-prepare-your-program">Step 0: Prepare your program</h2>
+<p>You will need to make sure you <a href="../prepare/">prepared</a> your program.
+This ensures that your app has the correct title, about page, and other necessary configuration before publishing.</p>
+<p>If your program already has something like this, then you're good to continue:</p>
+<div class="highlight"><pre><span></span><code><span class="n">set_website_title</span><span class="p">(</span><span class="s2">&quot;Corgi Cafe&quot;</span><span class="p">)</span>
+<span class="n">set_site_information</span><span class="p">(</span>
+    <span class="n">author</span><span class="o">=</span><span class="s2">&quot;Your Name&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Order snacks for very good dogs.&quot;</span><span class="p">,</span>
+    <span class="n">sources</span><span class="o">=</span><span class="s2">&quot;Thanks to the Drafter docs and my study group.&quot;</span><span class="p">,</span>
+    <span class="n">planning</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plan.pdf&quot;</span><span class="p">,</span> <span class="s2">&quot;design.pdf&quot;</span><span class="p">],</span>
+    <span class="n">links</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;https://github.com/your-username/your-repository&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">hide_debug_information</span><span class="p">()</span>
+<span class="n">set_website_framed</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p>Otherwise, go through the <a href="../prepare/">prepared</a> guide first.</p>
 <h2 id="step-1-create-the-repository-from-the-template">Step 1: Create the repository from the template</h2>
 <ol>
 <li>Open
@@ -14048,6 +14104,56 @@ instructions now and finish those while everything is fresh.</p>
 To publish a change, edit or upload the files (Step 2), then run the
 workflow again (Step 4). The newest run in the Actions list determines
 what is live.</p>
+<h2 id="using-third-party-libraries">Using third-party libraries</h2>
+<p>A third-party library is one you had to install on your own computer
+before you could import it, such as <code>seaborn</code> or <code>pandas</code>. The deploy
+workflow builds your site on one of GitHub's computers, and that
+computer does not have the libraries you installed. If your program
+imports one, the workflow run stops with <code>ModuleNotFoundError</code> until
+you list the library in a file named <code>requirements.txt</code>.</p>
+<p>You can skip this section if your program imports only Drafter, Bakery,
+Pillow (<code>PIL</code>), Matplotlib, and the modules that come with Python, such
+as <code>random</code>, <code>math</code>, and <code>dataclasses</code>. The build computer already has
+those.</p>
+<ol>
+<li>Open your repository on GitHub and go to the <strong>Code</strong> tab.</li>
+<li>Click <strong>Add file</strong>, then <strong>Create new file</strong>.</li>
+<li>Name the file <code>requirements.txt</code>. The name must match exactly, all
+   lowercase, and the file must be in the same folder as <code>main.py</code>.</li>
+<li>
+<p>Type the name of each library on its own line. For a program that
+   imports <code>seaborn</code> and <code>pandas</code>, the whole file is:</p>
+<div class="highlight"><pre><span></span><code>seaborn
+pandas
+</code></pre></div>
+</li>
+<li>
+<p>Click <strong>Commit changes</strong> and confirm.</p>
+</li>
+<li>Run the deploy workflow again (Step 4). Committing the file does not
+   redeploy the site.</li>
+<li>When the run turns green, open your site and visit a page that uses
+   the library to confirm it works.</li>
+</ol>
+<p>Three details about what goes in the file:</p>
+<ul>
+<li><strong>Use the name you install, not the name you import.</strong> They are
+  usually the same, but not always: you write <code>import sklearn</code>, and the
+  library installs as <code>scikit-learn</code>. The install name is the one in
+  the <code>pip install</code> command on the library's
+  <a href="https://pypi.org/">PyPI</a> page.</li>
+<li><strong>Leave Drafter out.</strong> The workflow chooses the Drafter version
+  itself and ignores a <code>drafter</code> line.</li>
+<li><strong>Add a line whenever you import a new library.</strong> Then commit and run
+  the workflow again.</li>
+</ul>
+<p><code>requirements.txt</code> covers the build computer only. Each visitor's
+browser installs libraries separately, by reading the <code>import</code> lines in
+<code>main.py</code>, and some libraries cannot run in a browser at all. If the
+run is green but the site shows an error about a library, see
+<a href="../../../help/errors/package-import-error/">A library import fails in the browser</a>.
+<a href="../../../extend/packages/">Third-party libraries</a> explains which
+libraries work in the browser and which cannot.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
 <li><strong>The first run fails immediately</strong>: Pages is probably not enabled.
@@ -14056,9 +14162,9 @@ what is live.</p>
   never uploaded to the repository. Upload it next to <code>main.py</code> and
   redeploy.</li>
 <li><strong>The run fails with <code>ModuleNotFoundError</code></strong>: your program imports a
-  library that GitHub's build computer does not have. List it in a
-  <code>requirements.txt</code> file next to <code>main.py</code>, one name per line, and
-  run the workflow again.</li>
+  library that GitHub's build computer does not have. Follow
+  <a href="#using-third-party-libraries">Using third-party libraries</a> to list
+  it in <code>requirements.txt</code>, then run the workflow again.</li>
 <li><strong>The site shows an old version</strong>: you committed changes but did not
   run the workflow again, or the browser cached the old page. Redeploy,
   then hard-refresh.</li>

@@ -6,7 +6,7 @@ set_site_information(
     author="A. Student",
     description="Order snacks for very good dogs.",
     sources="",
-    planning="",
+    planning=["plan.pdf", "design.pdf"],
     links=[]
 )
 hide_debug_information()

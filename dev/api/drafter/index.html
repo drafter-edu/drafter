@@ -25996,6 +25996,10 @@ This is not meant to be called by the user; it will be called by the server.</p>
 URL, raw image bytes, or a PIL Image object. Values (Pictures, bytes,
 PIL images) are converted to base64-encoded data URLs at render time;
 URL-backed Pictures and plain URL/path strings render as URLs.</p>
+<p>A local file path such as <code>"ada.png"</code> or <code>"images/ada.png"</code> is looked
+up relative to the page, next to the program, so the same path works
+on the development server and on a site deployed inside a folder
+(such as <code>https://user.github.io/project/</code>).</p>
 
 
 <p><span class="doc-section-title">Attributes:</span></p>
