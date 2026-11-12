@@ -32,7 +32,7 @@ set_site_information(
     author="Your Name",
     description="Order snacks for very good dogs.",
     sources="Thanks to the Drafter docs and my study group.",
-    planning="plan.pdf",
+    planning=["plan.pdf", "design.pdf"],
     links=["https://github.com/your-username/your-repository"]
 )
 hide_debug_information()
@@ -67,7 +67,7 @@ set_site_information(
     author="A. Student",
     description="Order snacks for very good dogs.",
     sources="",
-    planning="",
+    planning=["plan.pdf", "design.pdf"],
     links=[]
 )
 hide_debug_information()

@@ -18,11 +18,8 @@ a shareable URL, hosted for free by GitHub Pages.
 
 ## Before you start
 
-You need two things:
-
-- A **GitHub account**: [create one here](https://github.com/signup) if
+You need a **GitHub account**: [create one here](https://github.com/signup) if
   you do not have one.
-- Your [prepared](prepare.md) program.
 
 !!! note "Choosing a GitHub username"
     Your username will be part of your site's URL and visible to anyone
@@ -35,6 +32,29 @@ You need two things:
 
 The overall flow has five parts: create the repository, put your code
 in it, turn on Pages, run the workflow, and collect your URL.
+
+## Step 0: Prepare your program
+
+You will need to make sure you [prepared](prepare.md) your program.
+This ensures that your app has the correct title, about page, and other necessary configuration before publishing.
+
+If your program already has something like this, then you're good to continue:
+
+```python
+set_website_title("Corgi Cafe")
+set_site_information(
+    author="Your Name",
+    description="Order snacks for very good dogs.",
+    sources="Thanks to the Drafter docs and my study group.",
+    planning=["plan.pdf", "design.pdf"],
+    links=["https://github.com/your-username/your-repository"]
+)
+hide_debug_information()
+set_website_framed(False)
+```
+
+Otherwise, go through the [prepared](prepare.md) guide first.
+
 
 ## Step 1: Create the repository from the template
 
@@ -159,6 +179,58 @@ To publish a change, edit or upload the files (Step 2), then run the
 workflow again (Step 4). The newest run in the Actions list determines
 what is live.
 
+## Using third-party libraries
+
+A third-party library is one you had to install on your own computer
+before you could import it, such as `seaborn` or `pandas`. The deploy
+workflow builds your site on one of GitHub's computers, and that
+computer does not have the libraries you installed. If your program
+imports one, the workflow run stops with `ModuleNotFoundError` until
+you list the library in a file named `requirements.txt`.
+
+You can skip this section if your program imports only Drafter, Bakery,
+Pillow (`PIL`), Matplotlib, and the modules that come with Python, such
+as `random`, `math`, and `dataclasses`. The build computer already has
+those.
+
+1. Open your repository on GitHub and go to the **Code** tab.
+2. Click **Add file**, then **Create new file**.
+3. Name the file `requirements.txt`. The name must match exactly, all
+   lowercase, and the file must be in the same folder as `main.py`.
+4. Type the name of each library on its own line. For a program that
+   imports `seaborn` and `pandas`, the whole file is:
+
+    ```text
+    seaborn
+    pandas
+    ```
+
+5. Click **Commit changes** and confirm.
+6. Run the deploy workflow again (Step 4). Committing the file does not
+   redeploy the site.
+7. When the run turns green, open your site and visit a page that uses
+   the library to confirm it works.
+
+Three details about what goes in the file:
+
+- **Use the name you install, not the name you import.** They are
+  usually the same, but not always: you write `import sklearn`, and the
+  library installs as `scikit-learn`. The install name is the one in
+  the `pip install` command on the library's
+  [PyPI](https://pypi.org/) page.
+- **Leave Drafter out.** The workflow chooses the Drafter version
+  itself and ignores a `drafter` line.
+- **Add a line whenever you import a new library.** Then commit and run
+  the workflow again.
+
+`requirements.txt` covers the build computer only. Each visitor's
+browser installs libraries separately, by reading the `import` lines in
+`main.py`, and some libraries cannot run in a browser at all. If the
+run is green but the site shows an error about a library, see
+[A library import fails in the browser](../../help/errors/package-import-error.md).
+[Third-party libraries](../../extend/packages.md) explains which
+libraries work in the browser and which cannot.
+
 ## Common problems
 
 - **The first run fails immediately**: Pages is probably not enabled.
@@ -167,9 +239,9 @@ what is live.
   never uploaded to the repository. Upload it next to `main.py` and
   redeploy.
 - **The run fails with `ModuleNotFoundError`**: your program imports a
-  library that GitHub's build computer does not have. List it in a
-  `requirements.txt` file next to `main.py`, one name per line, and
-  run the workflow again.
+  library that GitHub's build computer does not have. Follow
+  [Using third-party libraries](#using-third-party-libraries) to list
+  it in `requirements.txt`, then run the workflow again.
 - **The site shows an old version**: you committed changes but did not
   run the workflow again, or the browser cached the old page. Redeploy,
   then hard-refresh.
