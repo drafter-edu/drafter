@@ -100,22 +100,71 @@ def clean_url(url: str) -> str:
     return cleaned_url
 
 
+SYSTEM_URL_PREFIX = "--"
+"""Prefix reserved for the URLs of Drafter's own system routes, such as `--about`."""
+
+
+def is_system_url(url: str) -> bool:
+    """
+    Checks whether a URL is in the namespace reserved for system routes.
+
+    System URLs start with `--` (ignoring surrounding whitespace and slashes),
+    which keeps them apart from student routes: `--about` is Drafter's About
+    page, while `about` is an ordinary route a student may define.
+
+    Args:
+        url: The URL to check.
+
+    Returns:
+        True if the URL's first path segment starts with `--`.
+
+    Example:
+        is_system_url("--about")  # True
+        is_system_url("about")  # False
+    """
+    return normalize_url(url).startswith("/" + SYSTEM_URL_PREFIX)
+
+
 @dataclass
 class Router:
     """Map URL paths to route handler functions and prepare request arguments.
 
     Attributes:
         routes: Dictionary mapping normalized URL strings to callable handlers.
-        route_functions: Dictionary mapping cleaned function-style names to the
-            same handlers, used for name-based lookup in `get_route`.
+        route_names: Dictionary mapping cleaned function-style names to the
+            normalized URL they were registered under, used as the name-based
+            fallback in `resolve_url`. System URLs are never listed here.
         signatures: Dictionary mapping normalized URL strings to
             RouteSignatureSpec data.
     """
 
     def __init__(self) -> None:
         self.routes: dict[str, Callable] = {}
-        self.route_functions: dict[str, Callable] = {}
+        self.route_names: dict[str, str] = {}
         self.signatures: dict[str, RouteSignatureSpec] = {}
+
+    def resolve_url(self, url: str) -> str | None:
+        """Find the registered URL that a requested URL refers to.
+
+        An exact match on the normalized URL always wins. Otherwise the URL
+        is matched by its cleaned, function-style name (so `mypage` finds a
+        route registered as `/my-page`). System URLs (see `is_system_url`)
+        only ever match exactly: cleaning would strip the `--` prefix and
+        confuse `--about` with a student route named `about`.
+
+        Args:
+            url: Route URL path to look up.
+
+        Returns:
+            The normalized URL the route was registered under (a key of
+            `routes` and `signatures`), or None if no route matches.
+        """
+        normalized_url = normalize_url(url)
+        if normalized_url in self.routes:
+            return normalized_url
+        if is_system_url(normalized_url):
+            return None
+        return self.route_names.get(clean_url(url))
 
     def get_route(self, url: str) -> Callable | None:
         """Retrieve the handler function for a given URL.
@@ -126,12 +175,10 @@ class Router:
         Returns:
             Optional[Callable]: Handler function or None if not found.
         """
-        if clean_url(url) in self.route_functions:
-            return self.route_functions[clean_url(url)]
-        route = self.routes.get(normalize_url(url))
-        if route:
-            return route
-        return None
+        registered_url = self.resolve_url(url)
+        if registered_url is None:
+            return None
+        return self.routes[registered_url]
 
     def has_route(self, url: str) -> bool:
         """Check whether a route exists for the given URL.
@@ -142,9 +189,7 @@ class Router:
         Returns:
             bool: True if route exists, False otherwise.
         """
-        return (
-            clean_url(url) in self.route_functions or normalize_url(url) in self.routes
-        )
+        return self.resolve_url(url) is not None
 
     def add_route(self, url: str, func: Callable) -> dict[str, Any]:
         """Register a route handler for the given URL.
@@ -154,14 +199,16 @@ class Router:
             func: Handler function to call for requests to this URL.
 
         Returns:
-            A dict with the registered "url" and the handler's "signature"
-            rendered as a string.
+            A dict with the registered "url", the handler's "signature"
+            rendered as a string, and its request "parameters".
         """
         # TODO: Handle ignored parameters.
-        self.routes[normalize_url(url)] = func
-        self.route_functions[clean_url(url)] = func
+        normalized_url = normalize_url(url)
+        self.routes[normalized_url] = func
+        if not is_system_url(normalized_url):
+            self.route_names[clean_url(url)] = normalized_url
         signature = get_signature(func)
-        self.signatures[normalize_url(url)] = signature
+        self.signatures[normalized_url] = signature
         return {
             "url": url,
             "signature": signature.to_string(),
@@ -178,7 +225,7 @@ class Router:
     def clear(self) -> None:
         """Remove all registered routes and signatures."""
         self.routes.clear()
-        self.route_functions.clear()
+        self.route_names.clear()
         self.signatures.clear()
 
     def prepare_arguments(
@@ -322,6 +369,9 @@ class Router:
     def get_signature(self, request: Request) -> RouteSignatureSpec:
         """Retrieve function signature metadata for a request URL.
 
+        The URL is resolved exactly as `get_route` resolves it, so the
+        signature always belongs to the handler that will be called.
+
         Args:
             request: Request with URL to look up.
 
@@ -331,11 +381,14 @@ class Router:
         Raises:
             ValueError: If no signature is registered for the URL.
         """
-        normalized_url = normalize_url(request.url)
-        signature = self.signatures.get(normalized_url)
+        registered_url = self.resolve_url(request.url)
+        signature = (
+            self.signatures.get(registered_url) if registered_url is not None else None
+        )
         if not signature:
             raise ValueError(
-                f"No signature found for route '{request.url}' ('{normalized_url}')"
+                f"No signature found for route '{request.url}' "
+                f"('{normalize_url(request.url)}')"
             )
         return signature
 

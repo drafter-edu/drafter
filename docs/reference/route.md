@@ -128,6 +128,9 @@ start_server(State("none yet"))
   matching: extra slashes are trimmed, and in the most heavily cleaned
   form, only letters, numbers, and underscores are kept. Buttons and
   links can target the custom address string.
+- **Names that start with `--` belong to Drafter.** Built-in pages such
+  as `--about` and `--reset` are separate from your routes, so you can
+  name your own routes `about` or `reset` without replacing them.
 - **Advanced injection (L4):** parameters named `_server`,
   `_configuration`, or `_request` receive framework objects instead of
   form values. You will not need these outside of the advanced

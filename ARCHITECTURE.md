@@ -158,7 +158,11 @@ The `Request` dataclass (`src/drafter/data/request.py`) carries:
 
 The `ClientServer` processes the request in `do_visit` (there is no method named just `visit`):
 route lookup is `get_route` (delegating to `Router.get_route`), then `execute_route` calls the route
-function safely, converting exceptions into error responses. The route function is expected to
+function safely, converting exceptions into error responses. Both the handler and its signature are
+found through `Router.resolve_url`: an exact match on the normalized URL wins, then the cleaned
+function-style name is tried (`mypage` finds `/my-page`). URLs starting with `--` are reserved for
+system routes and only match exactly, so a student route named `about` never stands in for (or
+blocks the registration of) the system `--about` route. The route function is expected to
 return a `ResponsePayload`. The payload gets post-processed and wrapped in a `Response`
 (`src/drafter/data/response.py`) along with metadata - a symbolic `status_code` string (one of the
 `STATUSES` in `drafter/data/errors.py`, not a numeric HTTP code), `errors`, `warnings`, `channels`,
