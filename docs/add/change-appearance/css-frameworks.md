@@ -23,7 +23,7 @@ not write rules; you put the framework's class names on your
 components with the [`classes` keyword](../../reference/keyword-attributes.md),
 and its rules do the rest.
 
-Two things to set up first:
+## Two things to set up first
 
 - **Turn off Drafter's theme.** A theme and a framework both try to
   style buttons, headings, and tables, and the result is a mix of
@@ -36,7 +36,9 @@ Two things to set up first:
 
 ## Bootstrap
 
-Bootstrap is one stylesheet. Link it with `add_website_css_file`:
+Bootstrap is one stylesheet. Link it with `add_website_css_file`, then
+use its class names. `display-4`, `text-primary`, `alert`, and `btn`
+are all Bootstrap class names, and its documentation lists the rest:
 
 ```python
 # bootstrap_site.py
@@ -54,29 +56,22 @@ def index() -> Page:
         Header("Corgi Cafe", classes="display-4 text-primary"),
         Div("Ada recommends the peanut butter biscuits.",
             classes="alert alert-success"),
-        Button("Order", "order", classes="btn btn-primary")
-    ])
-
-
-@route
-def order() -> Page:
-    return Page([
-        Div("Thanks for your order!", classes="alert alert-info"),
-        Button("Back", "index", classes="btn btn-secondary")
+        Button("See the menu", "index", classes="btn btn-primary")
     ])
 
 
 start_server()
 ```
 
-`display-4`, `text-primary`, `alert`, and `btn` are all Bootstrap
-class names; its documentation lists the rest.
-
 ## Tailwind
 
 Tailwind works differently: a script reads the class names on your
-page and writes the matching rules as it goes. Load that script with
-`add_website_js_file`:
+page and writes the matching rules as it goes. Tailwind describes this
+script as a tool for trying things out, and recommends a build step
+for finished sites. For a class project it is fine; for a site with
+real visitors, Bootstrap's plain stylesheet is the sturdier choice.
+Load the script with `add_website_js_file`, using the version 4
+address shown here:
 
 ```python
 # tailwind_site.py
@@ -94,31 +89,13 @@ def index() -> Page:
         Header("Corgi Cafe", classes="text-3xl font-bold text-blue-600 p-4"),
         Div("Ada recommends the peanut butter biscuits.",
             classes="m-4 rounded bg-emerald-100 p-4"),
-        Button("Order", "order",
+        Button("See the menu", "index",
                classes="m-4 rounded bg-blue-600 px-4 py-2 text-white")
-    ])
-
-
-@route
-def order() -> Page:
-    return Page([
-        Div("Thanks for your order!", classes="m-4 rounded bg-sky-100 p-4"),
-        Button("Back", "index",
-               classes="m-4 rounded bg-gray-600 px-4 py-2 text-white")
     ])
 
 
 start_server()
 ```
-
-Use the version 4 browser script shown here. The older address,
-`cdn.tailwindcss.com`, leaves the first page unstyled until the
-visitor clicks something.
-
-Tailwind describes this script as a tool for trying things out, and
-recommends a build step for finished sites. For a class project it
-is fine; for a site with real visitors, Bootstrap's plain stylesheet
-is the sturdier choice.
 
 ## Common problems
 
@@ -128,8 +105,9 @@ is the sturdier choice.
   browser could not reach the framework's server. Check the
   connection and the spelling of the address, then reload.
 - **Tailwind styles appear only after the first click**: the site is
-  loading the older `cdn.tailwindcss.com` script. Switch to the
-  version 4 address above.
+  loading the older `cdn.tailwindcss.com` script, which leaves the
+  first page unstyled until the visitor clicks something. Switch to
+  the version 4 address above.
 - **A class does nothing**: check its spelling against the
   framework's documentation, and check that it is inside the
   `classes="..."` string with spaces between names.

@@ -4,7 +4,7 @@ title: Custom CSS
 level: L3
 audience: S
 priority: P1
-prereqs: [add/change-appearance/design-basics]
+prereqs: [add/change-appearance/helpers]
 symbols: []
 outcome: Use real CSS with classes.
 ---
@@ -13,40 +13,115 @@ outcome: Use real CSS with classes.
 
 ## Goal
 
-The theme is close but not quite, and styling components one at a
-time is getting repetitive. You want to write a rule once and have
-it apply everywhere.
+Styling components one at a time is getting repetitive. You want to
+write a rule once and have it apply everywhere.
 
 ## Before you start
 
-You have used [styling helpers](helpers.md) and know the
-[box model](design-basics.md). CSS adds one idea to what you
-already do: a *selector* says which elements a rule applies to, so
-you no longer have to style one component at a time.
+You know the [box and its properties](design-basics.md), and you have
+set them with [styling functions and keywords](helpers.md).
 
-## The smallest version
+## You already write properties and values
 
-`add_website_css` takes a selector and a rule body; `classes` tags
-components so selectors can find them:
+Here are three notices, with the same two keywords typed three times:
 
-```python drafter hl_lines="3-9 16-17" height=300
+```python
+Div("The bake sale moved to Saturday.",
+    style_border="2px solid slateblue",
+    style_padding="12px")
+Div("Captain the cat has opinions.",
+    style_border="2px solid slateblue",
+    style_padding="12px")
+Div("Bring a raincoat.",
+    style_border="2px solid slateblue",
+    style_padding="12px")
+```
+
+A CSS rule says it once. The properties and values are the ones you
+know, and the new part is the first line, which says who gets them:
+
+```css
+.notice {
+    border: 2px solid slateblue;
+    padding: 12px;
+}
+```
+
+## The parts of a rule
+
+Every rule answers three questions:
+
+<div class="drafter-rule">
+<pre class="drafter-rule__code" role="img" aria-label="A CSS rule. The selector is .notice. Inside curly braces are two lines: the property border with the value 2px solid slateblue, and the property padding with the value 12px. Each line has a colon between the property and the value, and ends with a semicolon."><span class="drafter-rule__selector">.notice</span> {
+    <span class="drafter-rule__property">border</span>: <span class="drafter-rule__value">2px solid slateblue</span>;
+    <span class="drafter-rule__property">padding</span>: <span class="drafter-rule__value">12px</span>;
+}</pre>
+<div class="drafter-rule__parts">
+<div class="drafter-rule__part drafter-rule__part--selector"><b>Selector</b>Who gets styled?</div>
+<div class="drafter-rule__part drafter-rule__part--property"><b>Property</b>What are you changing?</div>
+<div class="drafter-rule__part drafter-rule__part--value"><b>Value</b>How should it look?</div>
+</div>
+</div>
+
+Four symbols hold a rule together. Curly braces `{` `}` wrap the
+rule's lines, a colon separates each property from its value, and a
+semicolon ends every line.
+
+## A tag selector styles every component of one kind
+
+`add_website_css` adds a rule to the whole site. Each component
+becomes a tag in the page: a `Button` is a `button`, a `Link` is an
+`a`, and a `Header` is an `h1`. When the selector is a tag name, every
+component of that kind gets the rule:
+
+```python drafter hl_lines="3-9" height=260
 from drafter import *
 
-add_website_css(".notice", """
-    border: 2px solid darkslateblue;
-    border-radius: 8px;
-    padding: 12px;
-    margin: 8px 0;
-    background-color: ghostwhite;
+add_website_css("""
+button {
+    background-color: lavender;
+    border: 2px solid slateblue;
+    padding: 8px 16px;
+}
 """)
 
 
 @route
 def index() -> Page:
     return Page([
-        Header("Announcements"),
+        Header("Lavender World"),
+        Button("Every button", "index"),
+        Button("Gets the rule", "index")
+    ])
+
+
+start_server()
+```
+
+## A class selector styles the components you choose
+
+A class is a name you make up and hand out. The `classes` keyword
+puts the name on a component, and a selector that starts with a dot
+finds every component carrying it. The dot goes in the CSS and never
+in the Python:
+
+```python drafter hl_lines="4 15-16" height=260
+from drafter import *
+
+add_website_css("""
+.notice {
+    border: 2px solid slateblue;
+    padding: 12px;
+    margin: 8px 0;
+}
+""")
+
+
+@route
+def index() -> Page:
+    return Page([
         Div("The bake sale moved to Saturday.", classes="notice"),
-        Div("Captain the cat has opinions about this.", classes="notice"),
+        Div("Captain the cat has opinions.", classes="notice"),
         "Plain text stays plain."
     ])
 
@@ -54,60 +129,60 @@ def index() -> Page:
 start_server()
 ```
 
-Change the rule once, and every `notice` changes with it. That is
-the trade CSS offers: a little setup in exchange for consistency.
+## Tag or class?
 
-## Selectors 101
+A tag rule is a decision about the whole site: every button, every
+header. A class is a name you hand out, so you decide who is in. One
+class can go on many components, and one component can carry several
+classes, separated by spaces.
 
-You need only four kinds of selector, listed here in order of
-usefulness:
+| Selector | Looks like | Who gets styled |
+| -------- | ---------- | --------------- |
+| Tag | `button` | Every `Button` on the site |
+| Class | `.notice` | Each component with `classes="notice"` |
 
-| Selector | Applies to | Example |
-| -------- | ---------- | ------- |
-| `.name` | Components tagged `classes="name"` | `.notice` |
-| `tag` | Every element of that HTML kind | `h1`, `button`, `a` |
-| `.a .b` | Things tagged `b` inside things tagged `a` | `.card .title` |
-| `#name` | The one component with `id="name"` | `#scoreboard` |
+Prefer a class for anything less than a sitewide decision.
 
-To find which tag a component renders as, check the "External
-links" section of its reference page: a `Header(...)` at level 1 is
-an `h1`, and every `Button` is a `button`.
+## Common problems
 
-```python drafter hl_lines="3-4" height=260
-from drafter import *
+- **`add_website_css("style.css")` complains**: that function takes
+  CSS, not a file name. Use `add_website_css_file("style.css")` to
+  link a file.
+- **The rule does nothing**: check the selector against what is
+  actually rendered. `classes="notice"` pairs with `.notice` (the
+  dot belongs in the selector, not in the keyword). Then check the
+  four symbols: a misspelled selector, a missing brace, or a missing
+  semicolon fails silently.
+- **The rule styles too much**: `button` styles every button,
+  including ones you forgot about. Switch to a class.
 
-add_website_css("h1", "color: darkslateblue; letter-spacing: 2px;")
-add_website_css("button", "border-radius: 999px; padding: 8px 16px;")
+For a rule that a theme overrides, or a selector that reaches
+Drafter's own interface, see [Styling gotchas](gotchas.md).
 
+## In more depth
 
-@route
-def index() -> Page:
-    return Page([
-        Header("Rounded World"),
-        Button("Every button", "index"),
-        Button("Gets the treatment", "index")
-    ])
+### A shorthand for one rule
 
-
-start_server()
-```
-
-## Both forms of add_website_css
+`add_website_css` also takes the selector and the lines that go inside
+the braces as two separate arguments, and adds the braces for you.
+These two calls do the same thing:
 
 ```python
-add_website_css(".notice", "border: 2px solid navy;")
 add_website_css(".notice { border: 2px solid navy; }")
+add_website_css(".notice", "border: 2px solid navy;")
 ```
 
-With two arguments, the first is the selector and the second is the
-declarations that belong inside the braces. With one argument, you
-are handing over raw CSS, which can contain several rules at once.
+With one argument, you are handing over raw CSS, which can contain
+several rules at once. With two, the first is the selector and the
+second is the lines that belong inside the braces.
 
-## Keep the CSS in its own file
+### Keep the CSS in its own file
 
 Once you have more than a few rules, a separate `style.css` file next
 to your program is easier to edit, and your editor will highlight it
-properly. `add_website_css_file` links it into every page:
+properly. The rules are written exactly as they are inside
+`add_website_css`, and `add_website_css_file` links the file into
+every page:
 
 ```python
 from drafter import *
@@ -134,14 +209,27 @@ copied into the built site.
 The same pair exists for JavaScript: `add_website_js` for code written
 in your program, `add_website_js_file` for a `.js` file or URL.
 
-## Style tags inside a page
+### Two more selectors
+
+Tags and classes cover most rules. Two other kinds of selector are
+worth knowing:
+
+| Selector | Applies to | Example |
+| -------- | ---------- | ------- |
+| `.a .b` | Things with the class `b` inside things with the class `a` | `.card .title` |
+| `#name` | The one component with `id="name"` | `#scoreboard` |
+
+To find which tag a component renders as, check the "External links"
+section of its reference page.
+
+### Style tags inside a page
 
 CSS from `add_website_css` applies to the whole site. When only one
 page needs a rule, the `Page`'s `css` parameter attaches the rule
 to that page alone. This is an advanced feature documented on
 [Page](../../reference/page.md).
 
-## Where this sits with themes
+### Where this sits with themes
 
 Themes are CSS too, and they load before yours, so your rules
 usually win when they target the same element precisely. A strongly
@@ -150,34 +238,19 @@ be ignored, see the [specificity gotcha](gotchas.md). To build a
 look entirely your own, start from `set_website_style("none")`, the
 blank slate.
 
-## Common problems
-
-- **`add_website_css("style.css")` complains**: that function takes
-  CSS, not a file name. Use `add_website_css_file("style.css")` to
-  link a file.
-- **The rule does nothing**: check the selector against what is
-  actually rendered. `classes="notice"` pairs with `.notice` (the
-  dot belongs in the selector, not in the keyword), and a
-  misspelled selector fails silently.
-- **The rule styles too much**: `button` styles every button,
-  including ones you forgot about. Prefer classes for anything less
-  than a sitewide decision.
-- **The theme overrides your rule**: see
-  [Styling gotchas](gotchas.md) for specificity and the ways around
-  it.
-- **It styles the debug panel too**: broad selectors like `body`
-  also reach Drafter's own interface. Target your content instead;
-  the [gotchas page](gotchas.md) names the right container.
+Broad selectors like `body` also reach Drafter's own interface,
+including the debug panel. Target your content instead; the
+[gotchas page](gotchas.md) names the right container.
 
 ## Understand it
 
-[Design basics](design-basics.md) explains the reasoning behind the
-rules. Selectors are the only new machinery on this page.
+[Design basics](design-basics.md) explains the box and the properties
+a rule sets. Selectors are the only new machinery on this page.
 
 ## See another example
 
 The [styling playground](../../examples/playground/styling.md) has
-the three tiers side by side, cards included.
+the three ways to style a site side by side, cards included.
 
 ## Look it up
 

@@ -10,17 +10,19 @@ import { test, expect, type Page } from "playwright/test";
 
 const FIXTURE = "/docs-slides.html";
 
-// Slides the fixture should produce, in order. The cross-reference sections
-// at the bottom of the fixture (Related components, External links, and the
-// four-link block) must not appear; Next steps must.
+// Slides the fixture should produce, in order. The opening sections (Goal,
+// Before you start) join the title slide, so only the Goal heading used later
+// in the page is a slide. The sections at the bottom of the fixture (In more
+// depth, Related components, External links, and the four-link block) must
+// not appear; Next steps must.
 const SLIDE_TITLES = [
 	"Fixture page",
-	"Goal",
 	"The smallest version",
 	"The theme names",
 	"Steps",
 	"A long program",
 	"Try it",
+	"Goal",
 	"Next steps",
 ];
 
@@ -159,6 +161,35 @@ for (const size of WINDOWS) {
 	});
 }
 
+test("the opening sections join the title slide", async ({ page }) => {
+	await page.setViewportSize({ width: 1440, height: 810 });
+	await present(page);
+
+	const first = await snapshot(page);
+	expect(first.label).toBe("Slide 1 of 8");
+	expect(first.text).toContain("Fixture page");
+	expect(first.text).toContain("OPENING-SECTION one");
+	expect(first.text).toContain("OPENING-SECTION two");
+	// Their text shows without their headings, which are not slides.
+	await expect(page.locator("#goal")).toBeHidden();
+	await expect(page.locator("#before-you-start")).toBeHidden();
+	await page.keyboard.press("ArrowRight");
+	expect((await snapshot(page)).text).toMatch(/^The smallest version/);
+
+	// A link to a folded heading still lands on the slide that shows its text.
+	await page.evaluate(() => {
+		window.location.hash = "#before-you-start";
+	});
+	await expect.poll(async () => (await snapshot(page)).label).toBe("Slide 1 of 8");
+
+	// The same heading later in the page starts a slide like any other.
+	await openSlide(page, "Goal");
+	const late = await snapshot(page);
+	expect(late.label).toBe("Slide 7 of 8");
+	expect(late.text).toContain("An opening heading used later");
+	await expect(page.locator("#late-goal")).toBeVisible();
+});
+
 test("a program sits beside its running demo on a wide screen", async ({ page }) => {
 	await page.setViewportSize({ width: 1440, height: 810 });
 	await present(page);
@@ -180,7 +211,7 @@ test("a program too long for the screen scrolls in its own box, and Next pages t
 	await openSlide(page, "A long program");
 
 	let stop = await snapshot(page);
-	expect(stop.label).toBe("Slide 6 of 8");
+	expect(stop.label).toBe("Slide 5 of 8");
 	expect(stop.overflowing).toBe(false);
 	expect(stop.code).not.toBeNull();
 	expect(stop.code!.hiddenBelow).toBeGreaterThan(2);
@@ -188,19 +219,19 @@ test("a program too long for the screen scrolls in its own box, and Next pages t
 
 	await page.keyboard.press("ArrowRight");
 	stop = await snapshot(page);
-	expect(stop.label).toBe("Slide 6 of 8");
+	expect(stop.label).toBe("Slide 5 of 8");
 	expect(stop.code!.top).toBeGreaterThan(0);
 
 	// Keep going: the slide only changes once the last line has been shown.
-	for (let presses = 0; presses < 40 && stop.label === "Slide 6 of 8"; presses++) {
+	for (let presses = 0; presses < 40 && stop.label === "Slide 5 of 8"; presses++) {
 		const hiddenBefore = stop.code!.hiddenBelow;
 		await page.keyboard.press("ArrowRight");
 		stop = await snapshot(page);
-		if (stop.label !== "Slide 6 of 8") {
+		if (stop.label !== "Slide 5 of 8") {
 			expect(hiddenBefore).toBeLessThanOrEqual(2);
 		}
 	}
-	expect(stop.label).toBe("Slide 7 of 8");
+	expect(stop.label).toBe("Slide 6 of 8");
 });
 
 test("resizing the window lays the deck out again on the same content", async ({ page }) => {
@@ -220,7 +251,7 @@ test("resizing the window lays the deck out again on the same content", async ({
 		.toBe(true);
 
 	const after = await snapshot(page);
-	expect(after.label).toMatch(/^Slide 4 of 8/);
+	expect(after.label).toMatch(/^Slide 3 of 8/);
 	expect(after.rows[0]).toBe("theme-1");
 	expect(after.overflowing).toBe(false);
 	expect(after.lowestBlock).toBeLessThanOrEqual(after.stageBottom + 1);
@@ -233,12 +264,12 @@ test("the deck opens at the section being read and Exit returns there", async ({
 	await page.goto(FIXTURE);
 	await page.evaluate(() => document.getElementById("steps")!.scrollIntoView());
 	await page.locator(".drafter-slides-open").click();
-	expect((await snapshot(page)).label).toMatch(/^Slide 5 of 8/);
+	expect((await snapshot(page)).label).toMatch(/^Slide 4 of 8/);
 
 	await openSlide(page, "Goal");
 	await page.keyboard.press("Escape");
 	await expect(page.locator("html")).not.toHaveClass(/drafter-slides/);
-	const goal = await page.locator("#goal").boundingBox();
+	const goal = await page.locator("#late-goal").boundingBox();
 	expect(goal!.y).toBeGreaterThanOrEqual(-1);
 	expect(goal!.y).toBeLessThan(200);
 });
@@ -277,5 +308,5 @@ test("typing in a field on a slide does not turn the slide", async ({ page }) =>
 	await page.keyboard.press("ArrowRight");
 	await page.keyboard.press("PageDown");
 	await expect(page.locator("#field")).toHaveValue("a b");
-	expect((await snapshot(page)).label).toBe("Slide 7 of 8");
+	expect((await snapshot(page)).label).toBe("Slide 6 of 8");
 });

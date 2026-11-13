@@ -124,24 +124,44 @@ decides how it presents:
   starts a new one. A section too long for one screen continues on further
   slides, splitting between blocks, between table rows, and between list
   items.
+- The opening sections (Goal, In one sentence, Before you start) do not
+  get slides of their own. Their text shows on the title slide, under the
+  title and without their headings, so write them to read well that way
+  and keep them to a sentence or two. The list lives in
+  `OPENING_SECTIONS` in the script.
 - A paragraph that ends in a colon stays on the same slide as the block
   after it, a `###` heading stays with what follows it, and a demo sits
-  beside its source. End a lead-in sentence with a colon.
-- Sections that are cross-reference lists are left out of the deck: the
-  four-link block (Understand it, See another example, Look it up, Fix a
-  problem), Understand on error pages, and Related, Related components,
-  and External links on reference pages. Sections that tell an audience
-  what to do next, such as Next steps and Go deeper, stay in. The list
-  lives in `CLOSING_SECTIONS` in the script; `tests/test_docs_slides.py`
-  checks it against `FOUR_LINKS` in `tools/docs_lint.py` and against the
-  headings the pages use.
+  beside its source. Say the point before a demo and end that sentence
+  with a colon; a sentence placed after a demo usually lands alone on a
+  slide of its own.
+- Name each `##` heading for the point its slide makes. The heading is
+  the slide's title and its entry in the slide list.
+- Detail that is worth reading but not worth presenting goes under one
+  `## In more depth` heading near the end of the page, as `###`
+  subsections. The whole section is left out of the deck.
+- Sections that are cross-reference lists are left out of the deck too:
+  the four-link block (Understand it, See another example, Look it up,
+  Fix a problem), Understand on error pages, and Related, Related
+  components, and External links on reference pages. Sections that tell
+  an audience what to do next, such as Next steps and Go deeper, stay
+  in. The list lives in `CLOSING_SECTIONS` in the script;
+  `tests/test_docs_slides.py` checks both lists against `FOUR_LINKS` in
+  `tools/docs_lint.py` and against the headings the pages use.
 - `hl_lines` marks show on slides, where they point a room at the lines
   under discussion. Mark the lines a how-to page is about, the way
   tutorials mark changed lines.
 - A slide is scaled down to fit, but never below 65% of slide size. Past
   that, programs and demos scroll inside their own boxes. On a laptop
   screen that happens to programs longer than about 30 lines, so shorter
-  listings present better.
+  listings present better. A program of about 20 lines shows at or near
+  full size beside its demo, which is the size to aim for on a page meant
+  to be presented.
+- The pictures on the Change the appearance pages (the box model, the
+  rendered samples, the marked-up CSS rule) are blocks of HTML styled by
+  the `drafter-` classes under "Teaching pictures" in
+  `docs/assets/drafter-theme.css`. They scale with the slide and follow
+  the color scheme. Give each picture `role="img"` and an `aria-label`
+  unless its text already says everything the picture shows.
 - Each page is its own deck. Its last slide links to the next page in the
   navigation.
 

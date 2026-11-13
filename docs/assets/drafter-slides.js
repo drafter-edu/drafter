@@ -18,22 +18,35 @@
  *   nothing is out of reach.
  * - The deck is laid out again whenever the window changes size, which
  *   covers browser zoom and full screen.
- * - Sections that are only cross-reference links (CLOSING_SECTIONS) are
- *   left out.
+ * - The short sections that open a page (OPENING_SECTIONS) join the title
+ *   slide instead of making slides of their own.
+ * - Sections that are for reading rather than presenting (CLOSING_SECTIONS)
+ *   are left out.
  * - Each page is its own deck. An end card links to the next page, and
  *   following it reopens slide mode there.
  */
 (function () {
   "use strict";
 
-  /* Sections that are cross-reference lists: links to follow while reading,
-   * which do nothing on a projector. Sections that tell an audience what to
-   * do next ("Next steps", "Go deeper") are deliberately not here.
+  /* Sections that say in a sentence or two what a page is for and what the
+   * reader needs first. Each would be a nearly empty slide, so while nothing
+   * else has started a slide their text joins the title slide and their
+   * headings are left out. tests/test_docs_slides.py checks this list
+   * against the headings the pages use. */
+  var OPENING_SECTIONS = ["Goal", "In one sentence", "Before you start"];
+
+  /* Sections that are for reading, not for presenting. Sections that tell an
+   * audience what to do next ("Next steps", "Go deeper") are deliberately
+   * not here.
    *
+   * Most are cross-reference lists, links that do nothing on a projector.
    * The first four are the four-link block, FOUR_LINKS in
    * tools/docs_lint.py. "Understand" is its counterpart on error pages, and
-   * the last three close the reference pages. tests/test_docs_slides.py
-   * checks this list against the linter and the pages. */
+   * the next three close the reference pages. "In more depth" is where a
+   * page keeps the detail a presenter would skip; everything under it, down
+   * to the next "##" heading, stays out of the deck.
+   * tests/test_docs_slides.py checks this list against the linter and the
+   * pages. */
   var CLOSING_SECTIONS = [
     "Understand it",
     "See another example",
@@ -43,6 +56,7 @@
     "Related",
     "Related components",
     "External links",
+    "In more depth",
   ];
 
   /* Top-level children of the article that are never slide content. */
@@ -186,6 +200,7 @@
 
     var slides = [{ head: [], blocks: [], title: "" }];
     var blocks = [];
+    var folded = [];
     var skipping = false;
     all.forEach(function (el) {
       if (el === deck.endCard) {
@@ -194,6 +209,12 @@
         var title = headingText(el);
         skipping = CLOSING_SECTIONS.indexOf(title) !== -1;
         if (skipping) {
+          return;
+        }
+        if (slides.length === 1 && OPENING_SECTIONS.indexOf(title) !== -1) {
+          // The heading is left untagged, which hides it; the blocks under
+          // it land on the title slide like any others.
+          folded.push(el);
           return;
         }
         slides.push({ head: [el], blocks: [], title: title });
@@ -249,6 +270,7 @@
       el.classList.add(BLOCK);
     });
     deck.blocks = blocks;
+    deck.folded = folded;
     deck.slides = slides;
   }
 
@@ -495,6 +517,14 @@
   /* The view that shows a given element of the page. */
   function viewOf(element) {
     var block = element.closest ? element.closest("." + BLOCK) : null;
+    if (!block && deck.folded.indexOf(element) !== -1) {
+      // A folded opening heading stands for the text that follows it.
+      block = element.nextElementSibling;
+      while (block && !block.classList.contains(BLOCK)) {
+        block = block.nextElementSibling;
+      }
+      element = block;
+    }
     if (!block) {
       return -1;
     }
@@ -828,6 +858,7 @@
       starts: new Map(),
       items: new Map(),
       blocks: [],
+      folded: [],
       slides: [],
       views: [],
       index: 0,

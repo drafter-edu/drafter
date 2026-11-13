@@ -23,6 +23,13 @@
   --drafter-surface: #ffffff;
   --drafter-grid: #e3ebf5;
   --drafter-accent: #c4610c;
+  --drafter-box-margin: #f8cf9f;
+  --drafter-box-border: #fbe6a2;
+  --drafter-box-padding: #c5e0a6;
+  --drafter-box-content: #a8c8ec;
+  --drafter-box-ink: #1d2a38;
+  --drafter-rule-property: #a34a05;
+  --drafter-rule-value: #1b7348;
 }
 
 [data-md-color-scheme="slate"] {
@@ -35,6 +42,13 @@
   --drafter-surface: #1a2332;
   --drafter-grid: #233047;
   --drafter-accent: #e8a04c;
+  --drafter-box-margin: #7d4c1b;
+  --drafter-box-border: #75601a;
+  --drafter-box-padding: #3f6628;
+  --drafter-box-content: #2b568c;
+  --drafter-box-ink: #f2f5f9;
+  --drafter-rule-property: #e8a04c;
+  --drafter-rule-value: #6fcf97;
 }
 
 /* ---- Tokens: Teach and Developer zones (override either scheme) ---- */
@@ -391,6 +405,364 @@ body,
   color: var(--md-default-fg-color--light);
   border-top: 1px solid var(--drafter-grid);
   padding-top: 0.8rem;
+}
+
+/* ---- Teaching pictures (Change the appearance pages) ----
+ * Drawn with real boxes instead of image files, so they scale with slide
+ * mode, follow the color scheme, and stay sharp on a projector. Each one is
+ * a single block of HTML in the page's Markdown.
+ */
+
+/* Rendered samples: a row of small "pages", each above the CSS that made
+ * it. The page is always light, like the embedded demos, so a named color
+ * looks the way it will in a student's app. */
+
+.drafter-samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1em 0;
+}
+
+.drafter-sample {
+  display: flex;
+  flex: 1 1 8rem;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--drafter-grid);
+  border-radius: 0.2rem;
+  background: var(--drafter-surface);
+}
+
+.drafter-sample__view {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.2rem 0.2rem 0 0;
+  background: #ffffff;
+  color: #1d2a38;
+}
+
+.drafter-sample__caption {
+  padding: 0.3rem 0.6rem;
+  border-top: 1px solid var(--drafter-grid);
+  color: var(--md-default-fg-color--light);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.drafter-sample__caption b {
+  display: block;
+  color: var(--md-default-fg-color);
+}
+
+.md-typeset .drafter-sample__caption code {
+  padding: 0;
+  background: none;
+  font-size: 1em;
+}
+
+/* "What is CSS?": the same page without and with its styling. */
+
+.drafter-pagepair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin: 1em 0;
+}
+
+.drafter-pagepair__page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--drafter-grid);
+  border-radius: 0.2rem;
+  background: #ffffff;
+  color: #1d2a38;
+}
+
+.drafter-pagepair__label {
+  color: #44536a;
+  font-family: "Inter", "Source Sans 3", -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.drafter-pagepair__header {
+  font-size: 1.6em;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.drafter-pagepair__page--plain {
+  font-family: "Times New Roman", Times, serif;
+}
+
+.drafter-pagepair__page--plain .drafter-pagepair__button {
+  padding: 0.05em 0.4em;
+  border: 1px solid #767676;
+  border-radius: 0.15em;
+  background: #efefef;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.8em;
+}
+
+.drafter-pagepair__page--styled {
+  gap: 0.5em;
+  padding: 1rem 1.4rem;
+}
+
+.drafter-pagepair__page--styled .drafter-pagepair__header {
+  padding-bottom: 0.1em;
+  border-bottom: 0.15em solid #e6e6fa;
+  color: #483d8b;
+  font-weight: 600;
+}
+
+.drafter-pagepair__page--styled .drafter-pagepair__button {
+  margin-top: 0.2em;
+  padding: 0.35em 1em;
+  border-radius: 0.3em;
+  background: #483d8b;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* The box model. The colors match the overlay in a browser's inspector. */
+
+.drafter-boxmodel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.6rem;
+  align-items: center;
+  margin: 1em 0;
+}
+
+.drafter-boxmodel__picture {
+  color: var(--drafter-box-ink);
+}
+
+.drafter-boxmodel__layer {
+  position: relative;
+  padding: 1.5em 1.3em 1.3em;
+}
+
+.drafter-boxmodel__layer > span {
+  position: absolute;
+  top: 0.25em;
+  left: 0.6em;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.drafter-boxmodel__layer--margin {
+  background: var(--drafter-box-margin);
+  outline: 2px dashed var(--md-default-fg-color--light);
+  outline-offset: -1px;
+}
+
+.drafter-boxmodel__layer--border {
+  background: var(--drafter-box-border);
+}
+
+.drafter-boxmodel__layer--padding {
+  background: var(--drafter-box-padding);
+}
+
+.drafter-boxmodel__content {
+  padding: 0.5em 1.6em;
+  background: var(--drafter-box-content);
+  font-weight: 600;
+  text-align: center;
+}
+
+.drafter-boxmodel__key {
+  display: flex;
+  flex: 1 1 14rem;
+  flex-direction: column;
+  gap: 0.35em;
+}
+
+/* Each entry hangs from its swatch when it wraps. */
+.drafter-boxmodel__key span {
+  padding-left: 1.4em;
+  text-indent: -1.4em;
+}
+
+.drafter-boxmodel__key span::before {
+  content: "";
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  margin-right: 0.55em;
+  border: 1px solid var(--md-default-fg-color--light);
+  background: var(--drafter-key);
+  vertical-align: -0.08em;
+}
+
+/* Four boxes side by side, each layer as thick as its own numbers say.
+ * --m, --b and --p are set on each box, in em. */
+
+.drafter-boxlineup {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  align-items: end;
+  margin: 1em 0;
+}
+
+.drafter-boxlineup__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  align-items: center;
+  min-width: 0;
+  text-align: center;
+}
+
+.drafter-boxlineup__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 6em;
+}
+
+.drafter-boxlineup__box {
+  display: inline-block;
+  padding: calc(var(--m) * 1em);
+  background: var(--drafter-box-margin);
+  color: var(--drafter-box-ink);
+  outline: 1px dashed var(--md-default-fg-color--light);
+}
+
+.drafter-boxlineup__box span {
+  display: block;
+}
+
+.drafter-boxlineup__box > span {
+  padding: calc(var(--b) * 1em);
+  background: var(--drafter-box-border);
+}
+
+.drafter-boxlineup__box > span > span {
+  padding: calc(var(--p) * 1em);
+  background: var(--drafter-box-padding);
+}
+
+.drafter-boxlineup__box > span > span > span {
+  padding: 0.1em 0.35em;
+  background: var(--drafter-box-content);
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+/* Stands in for a photograph. */
+.drafter-boxlineup__box .drafter-boxlineup__photo {
+  width: 4.2em;
+  height: 2.8em;
+  padding: 0;
+  background: linear-gradient(
+    160deg,
+    var(--drafter-box-content) 55%,
+    var(--drafter-box-padding) 56%
+  );
+}
+
+.drafter-boxlineup__name {
+  font-weight: 600;
+}
+
+.drafter-boxlineup__values {
+  color: var(--md-default-fg-color--light);
+  font-family: "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono",
+    monospace;
+  font-size: 0.6rem;
+  line-height: 1.5;
+}
+
+/* A CSS rule with its three parts marked. The parts differ by line style
+ * as well as color, so the picture reads without color. */
+
+.drafter-rule {
+  margin: 1em 0;
+}
+
+.md-typeset .drafter-rule__code {
+  margin: 0 0 0.7em;
+  padding: 0.6em 1em;
+  overflow-x: auto;
+  border: 1px solid var(--drafter-grid);
+  border-radius: 0.2rem;
+  background: var(--md-code-bg-color);
+  font-size: 1.1em;
+  line-height: 1.8;
+}
+
+.drafter-rule__selector,
+.drafter-rule__property,
+.drafter-rule__value {
+  border-bottom: 0.18em solid currentcolor;
+  font-weight: 700;
+}
+
+.drafter-rule__selector,
+.drafter-rule__part--selector b {
+  color: var(--md-primary-fg-color);
+}
+
+.drafter-rule__property,
+.drafter-rule__part--property b {
+  border-bottom-style: dashed;
+  color: var(--drafter-rule-property);
+}
+
+.drafter-rule__value,
+.drafter-rule__part--value b {
+  border-bottom-style: dotted;
+  color: var(--drafter-rule-value);
+}
+
+.drafter-rule__parts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.drafter-rule__part b {
+  display: block;
+  width: fit-content;
+  border-bottom: 0.18em solid currentcolor;
+}
+
+.drafter-rule__part--property b {
+  border-bottom-style: dashed;
+}
+
+.drafter-rule__part--value b {
+  border-bottom-style: dotted;
+}
+
+@media screen and (max-width: 44.99em) {
+  .drafter-pagepair,
+  .drafter-rule__parts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .drafter-boxlineup {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* ---- Accessibility engineering (§9.5) ---- */

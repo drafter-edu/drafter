@@ -33,10 +33,10 @@ nav:
   - Upload and download files: add/files.md
   - Change the appearance:
     - add/change-appearance/index.md
-    - Use a theme: add/change-appearance/themes.md
-    - Styling functions and keywords: add/change-appearance/helpers.md
     - Design basics: add/change-appearance/design-basics.md
+    - Styling functions and keywords: add/change-appearance/helpers.md
     - Custom CSS: add/change-appearance/custom-css.md
+    - Use a theme: add/change-appearance/themes.md
     - Use a CSS framework: add/change-appearance/css-frameworks.md
     - Styling gotchas: add/change-appearance/gotchas.md
   - Add live behavior: add/live-behavior.md
