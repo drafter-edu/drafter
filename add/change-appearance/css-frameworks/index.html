@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="../custom-css/">
+        <link rel="prev" href="../themes/">
       
       
         <link rel="next" href="../gotchas/">
@@ -1199,14 +1199,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../themes/" class="md-nav__link">
+      <a href="../design-basics/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Use a theme
+    Design basics
   
 
     
@@ -1255,14 +1255,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../design-basics/" class="md-nav__link">
+      <a href="../custom-css/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Design basics
+    Custom CSS
   
 
     
@@ -1283,14 +1283,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../custom-css/" class="md-nav__link">
+      <a href="../themes/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Custom CSS
+    Use a theme
   
 
     
@@ -1386,6 +1386,17 @@
     <span class="md-ellipsis">
       
         Before you start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#two-things-to-set-up-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two things to set up first
       
     </span>
   </a>
@@ -13714,6 +13725,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#two-things-to-set-up-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two things to set up first
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#bootstrap" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13816,7 +13838,7 @@ and you want to use their class names on a Drafter site.</p>
 not write rules; you put the framework's class names on your
 components with the <a href="../../../reference/keyword-attributes/"><code>classes</code> keyword</a>,
 and its rules do the rest.</p>
-<p>Two things to set up first:</p>
+<h2 id="two-things-to-set-up-first">Two things to set up first</h2>
 <ul>
 <li><strong>Turn off Drafter's theme.</strong> A theme and a framework both try to
   style buttons, headings, and tables, and the result is a mix of
@@ -13828,7 +13850,9 @@ and its rules do the rest.</p>
   notice saying the styling did not load.</li>
 </ul>
 <h2 id="bootstrap">Bootstrap</h2>
-<p>Bootstrap is one stylesheet. Link it with <code>add_website_css_file</code>:</p>
+<p>Bootstrap is one stylesheet. Link it with <code>add_website_css_file</code>, then
+use its class names. <code>display-4</code>, <code>text-primary</code>, <code>alert</code>, and <code>btn</code>
+are all Bootstrap class names, and its documentation lists the rest:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># bootstrap_site.py</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
@@ -13844,26 +13868,20 @@ and its rules do the rest.</p>
         <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Corgi Cafe&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;display-4 text-primary&quot;</span><span class="p">),</span>
         <span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Ada recommends the peanut butter biscuits.&quot;</span><span class="p">,</span>
             <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;alert alert-success&quot;</span><span class="p">),</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Order&quot;</span><span class="p">,</span> <span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
-
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">order</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">([</span>
-        <span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Thanks for your order!&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;alert alert-info&quot;</span><span class="p">),</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;btn btn-secondary&quot;</span><span class="p">)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;See the menu&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span><span class="p">)</span>
     <span class="p">])</span>
 
 
 <span class="n">start_server</span><span class="p">()</span>
 </code></pre></div>
-<p><code>display-4</code>, <code>text-primary</code>, <code>alert</code>, and <code>btn</code> are all Bootstrap
-class names; its documentation lists the rest.</p>
 <h2 id="tailwind">Tailwind</h2>
 <p>Tailwind works differently: a script reads the class names on your
-page and writes the matching rules as it goes. Load that script with
-<code>add_website_js_file</code>:</p>
+page and writes the matching rules as it goes. Tailwind describes this
+script as a tool for trying things out, and recommends a build step
+for finished sites. For a class project it is fine; for a site with
+real visitors, Bootstrap's plain stylesheet is the sturdier choice.
+Load the script with <code>add_website_js_file</code>, using the version 4
+address shown here:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># tailwind_site.py</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
@@ -13879,29 +13897,13 @@ page and writes the matching rules as it goes. Load that script with
         <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Corgi Cafe&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;text-3xl font-bold text-blue-600 p-4&quot;</span><span class="p">),</span>
         <span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Ada recommends the peanut butter biscuits.&quot;</span><span class="p">,</span>
             <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;m-4 rounded bg-emerald-100 p-4&quot;</span><span class="p">),</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Order&quot;</span><span class="p">,</span> <span class="s2">&quot;order&quot;</span><span class="p">,</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;See the menu&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">,</span>
                <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;m-4 rounded bg-blue-600 px-4 py-2 text-white&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
-
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">order</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">([</span>
-        <span class="n">Div</span><span class="p">(</span><span class="s2">&quot;Thanks for your order!&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;m-4 rounded bg-sky-100 p-4&quot;</span><span class="p">),</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">,</span>
-               <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;m-4 rounded bg-gray-600 px-4 py-2 text-white&quot;</span><span class="p">)</span>
     <span class="p">])</span>
 
 
 <span class="n">start_server</span><span class="p">()</span>
 </code></pre></div>
-<p>Use the version 4 browser script shown here. The older address,
-<code>cdn.tailwindcss.com</code>, leaves the first page unstyled until the
-visitor clicks something.</p>
-<p>Tailwind describes this script as a tool for trying things out, and
-recommends a build step for finished sites. For a class project it
-is fine; for a site with real visitors, Bootstrap's plain stylesheet
-is the sturdier choice.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
 <li><strong>The page is half styled, or buttons have the wrong colors</strong>: a
@@ -13910,8 +13912,9 @@ is the sturdier choice.</p>
   browser could not reach the framework's server. Check the
   connection and the spelling of the address, then reload.</li>
 <li><strong>Tailwind styles appear only after the first click</strong>: the site is
-  loading the older <code>cdn.tailwindcss.com</code> script. Switch to the
-  version 4 address above.</li>
+  loading the older <code>cdn.tailwindcss.com</code> script, which leaves the
+  first page unstyled until the visitor clicks something. Switch to
+  the version 4 address above.</li>
 <li><strong>A class does nothing</strong>: check its spelling against the
   framework's documentation, and check that it is inside the
   <code>classes="..."</code> string with spaces between names.</li>
@@ -13977,7 +13980,7 @@ covers a page that looks plain.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../custom-css/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Custom CSS">
+          <a href="../themes/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Use a theme">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -13987,7 +13990,7 @@ covers a page that looks plain.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Custom CSS
+                Use a theme
               </div>
             </div>
           </a>

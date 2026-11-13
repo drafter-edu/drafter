@@ -12,7 +12,7 @@
         <link rel="prev" href="../files/">
       
       
-        <link rel="next" href="themes/">
+        <link rel="next" href="design-basics/">
       
       
         
@@ -1199,14 +1199,14 @@
   
   
     <li class="md-nav__item">
-      <a href="themes/" class="md-nav__link">
+      <a href="design-basics/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Use a theme
+    Design basics
   
 
     
@@ -1255,14 +1255,14 @@
   
   
     <li class="md-nav__item">
-      <a href="design-basics/" class="md-nav__link">
+      <a href="custom-css/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Design basics
+    Custom CSS
   
 
     
@@ -1283,14 +1283,14 @@
   
   
     <li class="md-nav__item">
-      <a href="custom-css/" class="md-nav__link">
+      <a href="themes/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Custom CSS
+    Use a theme
   
 
     
@@ -13568,10 +13568,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#pick-a-theme-any-theme" class="md-nav__link">
+  <a href="#what-is-css" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pick a Theme, Any Theme
+        What is CSS?
       
     </span>
   </a>
@@ -13579,10 +13579,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#then-adjust-individual-pieces" class="md-nav__link">
+  <a href="#what-css-is-used-for" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Then adjust individual pieces
+        What CSS is used for
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#same-page-different-css" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Same page, different CSS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#three-ways-to-style-a-drafter-site" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three ways to style a Drafter site
       
     </span>
   </a>
@@ -13997,104 +14019,94 @@
 </script>
 <h1 id="change-the-appearance">Change the appearance</h1>
 <h2 id="goal">Goal</h2>
-<p>Your app works, and now you want it to look better, with the least
-effort that gets the look you want.</p>
+<p>Your app works, and now you want it to look the way you imagine.</p>
 <h2 id="before-you-start">Before you start</h2>
-<p>You should already understand how to build pages; if not, start with
+<p>You should already know how to build pages. If not, start with
 <a href="../../start/first-app/">Build your first app</a>.</p>
-<p>Drafter offers three tiers of styling, in order of
-effort. Start at the top and only go deeper when the tier above cannot
-do what you want:</p>
-<ol>
-<li><strong><a href="themes/">Use a theme</a></strong>: a single line of code restyles the
-   whole site, and there are twenty ready-made looks to choose from.
-   Start here.</li>
-<li><strong><a href="helpers/">Styling functions and keywords</a></strong>: make one component
-   bold, colored, bigger, or centered. Use these for emphasis and small
-   adjustments.</li>
-<li><strong><a href="custom-css/">Custom CSS</a></strong>: write real CSS classes and rules
-   when you want a look of your own. Learn
-   <a href="design-basics/">design basics</a> first.</li>
-</ol>
-<h2 id="pick-a-theme-any-theme">Pick a Theme, Any Theme</h2>
-<p>Picking a theme is the fastest visible improvement. Here is a plain
-page with a theme applied. Change <code>"sakura"</code> to <code>"retro"</code>, <code>"98"</code>, or
-<code>"terminal"</code> in the demo and run it again to see the difference:</p>
+<h2 id="what-is-css">What is CSS?</h2>
+<p>CSS, short for Cascading Style Sheets, is the language that describes
+how a web page looks. The same Python built both of these pages:</p>
+<div class="drafter-pagepair" role="img" aria-label="The same page shown twice. Without CSS it is plain black text with a small gray button. With CSS the header is purple with a line under it, the text has room around it, and the button is a solid purple block.">
+<div class="drafter-pagepair__page drafter-pagepair__page--plain"><span class="drafter-pagepair__label">Without CSS</span><span class="drafter-pagepair__header">Corgi Fan Club</span><span>Members so far: 12</span><span>Ada approves of this club.</span><span class="drafter-pagepair__button">Reload</span></div>
+<div class="drafter-pagepair__page drafter-pagepair__page--styled"><span class="drafter-pagepair__label">With CSS</span><span class="drafter-pagepair__header">Corgi Fan Club</span><span>Members so far: 12</span><span>Ada approves of this club.</span><span class="drafter-pagepair__button">Reload</span></div>
+</div>
+
+<p>Your Python decides what is on the page: a header, two lines of text,
+and a button. CSS decides how each of those looks. Every Drafter page
+you have made was already styled with CSS that Drafter wrote for you,
+and now you get to change it.</p>
+<h2 id="what-css-is-used-for">What CSS is used for</h2>
+<p>CSS can change almost anything about how a page looks, but four jobs
+cover most of what you will want:</p>
+<div class="drafter-samples">
+<div class="drafter-sample"><div class="drafter-sample__view"><div style="color: crimson">Lives remaining: 3</div></div><div class="drafter-sample__caption"><b>Color</b><code>color</code>, <code>background-color</code></div></div>
+<div class="drafter-sample"><div class="drafter-sample__view"><div style="border: 2px solid slateblue; padding: 2px 8px">Lives remaining: 3</div></div><div class="drafter-sample__caption"><b>Borders</b><code>border</code></div></div>
+<div class="drafter-sample"><div class="drafter-sample__view"><div style="background-color: lavender; padding: 12px">Lives remaining: 3</div></div><div class="drafter-sample__caption"><b>Spacing</b><code>padding</code>, <code>margin</code></div></div>
+<div class="drafter-sample"><div class="drafter-sample__view"><div style="font-family: Georgia; font-size: 1.15em">Lives remaining: 3</div></div><div class="drafter-sample__caption"><b>Text</b><code>font-family</code>, <code>font-size</code></div></div>
+</div>
+
+<p>Each job comes down to one or two CSS properties, named under each
+sample. <a href="design-basics/">Design basics</a> takes them one at a time.</p>
+<h2 id="same-page-different-css">Same page, different CSS</h2>
+<p>A theme is a complete set of CSS that somebody else wrote. In this
+program, the highlighted line is the only one about appearance.
+Change <code>"sakura"</code> to <code>"retro"</code>, <code>"98"</code>, or <code>"terminal"</code> and run it
+again:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
-<span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;sakura&quot;</span><span class="p">)</span>
-
-
-<span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
-    <span class="n">signups</span><span class="p">:</span> <span class="nb">int</span>
-
+<span class="hll"><span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;sakura&quot;</span><span class="p">)</span>
+</span>
 
 <span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">([</span>
         <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Corgi Fan Club&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;Members so far: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">signups</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Members so far: 12</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Ada approves of this club.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Join the club&quot;</span><span class="p">,</span> <span class="s2">&quot;join&quot;</span><span class="p">)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Reload&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
     <span class="p">])</span>
 
 
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">join</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">signups</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">signups</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-
-
-<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">start_server</span><span class="p">()</span>
 </code></pre></div>
-<div class="drafter-demo" data-drafter-demo="index-1-d0e2d7c796a7">
-  <iframe src="../../drafter-demos/index-1-d0e2d7c796a7/index.html" title="Drafter Demo index-1-d0e2d7c796a7" name="index-1-d0e2d7c796a7" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
+<div class="drafter-demo" data-drafter-demo="index-1-ea9db19eab26">
+  <iframe src="../../drafter-demos/index-1-ea9db19eab26/index.html" title="Drafter Demo index-1-ea9db19eab26" name="index-1-ea9db19eab26" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
 </div>
 
-<p>One line, <code>set_website_style("sakura")</code>, placed right after the imports,
-restyles everything: text, buttons, headers, spacing.</p>
-<h2 id="then-adjust-individual-pieces">Then adjust individual pieces</h2>
-<p>After a theme sets the overall look, use styling helpers for the details
-you want to stand out:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-
-<span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;simple&quot;</span><span class="p">)</span>
-
-
-<span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
-    <span class="n">lives</span><span class="p">:</span> <span class="nb">int</span>
-
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
-        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Danger Zone&quot;</span><span class="p">),</span>
-        <span class="n">bold</span><span class="p">(</span><span class="n">change_color</span><span class="p">(</span><span class="s2">&quot;Lives remaining: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">lives</span><span class="p">),</span> <span class="s2">&quot;crimson&quot;</span><span class="p">)),</span>
-        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Lose a life&quot;</span><span class="p">,</span> <span class="s2">&quot;lose_life&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
-
-
-<span class="nd">@route</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">lose_life</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">lives</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">state</span><span class="o">.</span><span class="n">lives</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">lives</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-
-
-<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
-</code></pre></div>
-<div class="drafter-demo" data-drafter-demo="index-2-b98f6b8fe1f3">
-  <iframe src="../../drafter-demos/index-2-b98f6b8fe1f3/index.html" title="Drafter Demo index-2-b98f6b8fe1f3" name="index-2-b98f6b8fe1f3" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
-</div>
-
-<p>The rule of thumb is to use <strong>themes for the whole site and helpers for
-moments of emphasis</strong>. If you find yourself styling every single
-component by hand, step back and pick a different theme instead.</p>
+<h2 id="three-ways-to-style-a-drafter-site">Three ways to style a Drafter site</h2>
+<p>Drafter gives you three ways to change the CSS, listed here from
+least effort to most control:</p>
+<table>
+<thead>
+<tr>
+<th>Way</th>
+<th>What it changes</th>
+<th>Where to learn it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A theme</td>
+<td>The whole site, in one line</td>
+<td><a href="themes/">Use a theme</a></td>
+</tr>
+<tr>
+<td>Styling functions and keywords</td>
+<td>One component at a time</td>
+<td><a href="helpers/">Styling functions and keywords</a></td>
+</tr>
+<tr>
+<td>Custom CSS</td>
+<td>Everything a rule matches</td>
+<td><a href="custom-css/">Custom CSS</a></td>
+</tr>
+</tbody>
+</table>
+<p>Start at the top and move down only when the row above cannot do what
+you want. A good rule of thumb is a theme for the whole site, then
+functions and keywords for moments of emphasis. If you find yourself
+styling every single component by hand, step back and pick a
+different theme instead.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
 <li><strong>Nothing changed</strong>: <code>set_website_style(...)</code> must run before
@@ -14179,13 +14191,13 @@ usually show as a friendly error naming the bad value.</p>
         
         
           
-          <a href="themes/" class="md-footer__link md-footer__link--next" aria-label="Next: Use a theme">
+          <a href="design-basics/" class="md-footer__link md-footer__link--next" aria-label="Next: Design basics">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Use a theme
+                Design basics
               </div>
             </div>
             <div class="md-footer__button md-icon">
