@@ -635,9 +635,10 @@ lists the same limits from the other side of the desk.
 
 ## Working with an AI assistant
 
-Your course allows you to use an AI assistant while you program.
-Used well, it makes the features on this page reachable in an
-afternoon. A few habits make the difference:
+Check your course's instructions first. If your course allows you
+to use an AI assistant while you program, then used well, it makes
+the features on this page reachable in an afternoon. A few habits
+make the difference:
 
 - **Give it the real documentation.** Paste the link to the
   reference page for the component you want. Assistants sometimes

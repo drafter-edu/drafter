@@ -14,22 +14,25 @@ Each example here is a complete, runnable program that you can read,
 run, and take apart. Every worked example follows the same structure:
 try it, read the code, see how it works, then make it yours.
 
-If you want a full application to study or remix, the
-[project gallery](../your-project/gallery/index.md) has those. The
-examples on this page are deliberately small; each one is built to
-show a handful of ideas clearly.
+The examples on this page are deliberately small, and each one is
+built to show a handful of ideas clearly. The Shop and the Photo
+editor come closest to a full application. The
+[project gallery](../your-project/gallery/index.md) points to the
+larger apps and to project ideas.
 
 ## Worked examples
 
+The table runs from the smallest example to the largest.
+
 | Example | Shows | Good after |
 | ------- | ----- | ---------- |
-| [Calculator](calculator.md) | Forms and state working together | [Ask the user for information](../add/ask-for-information.md) |
 | [Three linked pages](ring.md) | Multi-page navigation with no state | [Build your first app](../start/first-app.md) |
+| [Calculator](calculator.md) | Forms and state working together | [Ask the user for information](../add/ask-for-information.md) |
 | [Big form](forms.md) | Every core input in one form | [Ask the user for information](../add/ask-for-information.md) |
-| [To-do list](todo-list.md) | Adding and removing items from list state | [Show a collection](../add/show-a-collection.md) |
-| [Pet registry](pet-registry.md) | Nested data: a list of dataclasses | [Show a collection](../add/show-a-collection.md) |
-| [Shop](shop.md) | Arguments and inventory across routes | [Show different content](../add/show-different-content.md) |
 | [Login flow](login.md) | Conditional pages from state (and why it is not security) | [Show different content](../add/show-different-content.md) |
+| [Pet registry](pet-registry.md) | Nested data: a list of dataclasses | [Show a collection](../add/show-a-collection.md) |
+| [To-do list](todo-list.md) | Adding and removing items from list state | [Show a collection](../add/show-a-collection.md) |
+| [Shop](shop.md) | Arguments and inventory across routes | [Show different content](../add/show-different-content.md) |
 | [Photo editor](photo-editor.md) | Uploading and transforming images | [Use pictures](../add/pictures.md) |
 
 ## Playground

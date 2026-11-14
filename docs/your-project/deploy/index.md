@@ -57,6 +57,32 @@ your URL. Those live in your course's own instructions, not here.
 Follow this guide for the deployment itself, then your course's
 checklist for the rest.
 
+## Other ways to publish
+
+GitHub Pages is the route these pages walk through, but it is not
+the only one. Deploying means compiling, and you can compile on your
+own computer from a terminal:
+
+```text
+drafter main.py --compile --output-directory _site --production
+```
+
+That command writes a folder named `_site` that holds `index.html`
+and the files it needs. Any service that hosts static websites can
+serve that folder. Two details differ from the template:
+
+- The `--production` flag hides the debug panel, the same way
+  `hide_debug_information()` does.
+- A compile on your own computer copies only your main program. Name
+  every other file the app needs, such as pictures, data files, and
+  helper modules, with
+  [`add_website_file`](../../reference/site-config.md#add_website_file)
+  in your code.
+
+[Command line](../../reference/cli.md) lists the other build flags,
+and [Deploy with GitHub Actions](../../extend/github-actions.md)
+explains how to write a deploy workflow of your own.
+
 ## Common problems
 
 - **You submitted or shared a `localhost` link**: that link only works
@@ -77,8 +103,9 @@ there is no server to rent and nothing to install.
 
 ## See another example
 
-Every app in the [project gallery](../gallery/index.md) was deployed
-exactly this way.
+Every live demo in these docs is a Drafter app compiled to a static
+site, the same way your deployed app will be. The
+[project gallery](../gallery/index.md) lists the larger ones.
 
 ## Look it up
 

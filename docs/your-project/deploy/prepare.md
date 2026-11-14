@@ -116,8 +116,9 @@ Run the app locally one more time and confirm:
 - The tab shows your title.
 - The debug panel is gone.
 - Your tests still print `SUCCESS` in the console.
-- Every image or data file your app opens sits next to your program
-  file, because it must be uploaded along with it
+- Every image or data file your app opens, and every other `.py`
+  file it imports, sits next to your program file, because it must
+  be uploaded along with it
   ([missing files 404 after deploy](../../help/errors/missing-asset-on-deploy.md)).
 
 ## Common problems

@@ -39,6 +39,6 @@ Not sure what to build? [What Drafter can do](what-drafter-can-do.md)
 tours the features the guided projects skipped: sound, cameras, maps,
 timers, charts, and more, each with project ideas.
 
-The [project gallery](gallery/index.md) collects finished projects that
+The [project gallery](gallery/index.md) points to complete apps that
 you can try in your browser. You can also read their code and remix
 them into something of your own.

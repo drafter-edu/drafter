@@ -129,7 +129,8 @@ their own answer, and the app decides which card to show next.
 - **Stretch**: multiple decks, add-a-card form, shuffle.
 - **Watch out for**: "shuffle" tempts you toward `import random`,
   which works but makes tests trickier. Test the deck logic with a
-  fixed order.
+  fixed order, as in the recipe
+  [A random result you can still test](../add/show-different-content.md#recipe-a-random-result-you-can-still-test).
 
 ### Picture showcase
 
@@ -138,8 +139,10 @@ captions, and browsing the collection. This shape builds on
 [Use pictures](../add/pictures.md).
 
 - **Pages**: gallery grid, single-picture view, upload form.
-- **State**: `photos: list[Photo]` where `Photo` pairs a `Picture`
-  with a caption.
+- **State**: `exhibits: list[Exhibit]` where `Exhibit` is your own
+  dataclass that pairs a `Picture` with a caption. Do not name the
+  dataclass `Photo`, because Drafter already uses that name for
+  pictures taken with the camera.
 - **Milestones**: one hard-coded picture shows; upload works;
   captions; the single-picture page.
 - **Stretch**: transformations (rotate, grayscale), a
@@ -159,7 +162,7 @@ or a cookie-clicker with decay. It builds on
 - **Milestones**: the game works untimed; the countdown; game over
   at zero; a high score.
 - **Stretch**: difficulty levels, pause.
-- **Watch out for**: this is the only shape that needs an L4
+- **Watch out for**: this is the only shape that needs an advanced
   feature (timers). Build the untimed version completely first, so
   that the timer is a garnish rather than a foundation.
 

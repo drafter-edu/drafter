@@ -41,7 +41,9 @@ page, asking five questions:
   yet. Add your first one below." reads as working software.
 - **Error paths**: type something wrong in every field. Your app
   should respond with a polite page that says what to fix, not
-  with silence and not with a raw error.
+  with silence and not with a raw error. The recipe
+  [Check the answer and ask again](../add/ask-for-information.md#recipe-check-the-answer-and-ask-again)
+  shows how.
 - **Dead ends**: from every page, can the visitor get back to the
   main page without the browser's back button? Add the missing
   links.
@@ -92,9 +94,12 @@ moves demonstrated.
   styles that still matter;
   [styling gotchas](../add/change-appearance/gotchas.md) explains
   the interaction.
-- **Restyling changed a test result**: loose `assert_has` tests
-  ignore styling, but frozen whole-page tests include it.
-  Re-freeze the pages you deliberately restyled.
+- **Restyling changed a test result**: assertions ignore styling
+  by default, so a new color or theme does not change any test.
+  If a test did change, the restyle also changed the page's words,
+  their order, or the kind of component, for example by turning
+  plain text into a `Header`. Re-freeze the pages you changed on
+  purpose.
 - **It looks fine on my laptop and cramped on a phone**: avoid
   fixed pixel widths on content; let text wrap. Test once in a
   narrow browser window.

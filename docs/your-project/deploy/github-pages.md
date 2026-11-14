@@ -99,11 +99,13 @@ yourself.
 
     ![The commit dialog with a text field for the commit message and a Commit changes button](images/deployment_github_commit.png)
 
-Your whole program lives in `main.py`. If your app uses other files,
-such as images or data files, add them too: click **Add file**, then
+The workflow looks for your program under the name `main.py`. If your
+app uses other files, such as images, data files, or other `.py`
+files that `main.py` imports, add them too: click **Add file**, then
 **Upload files**, drag the files in next to `main.py`, and commit.
-Every file your program opens must be here, or it will
-[404 on the live site](../../help/errors/missing-asset-on-deploy.md).
+The workflow includes every file in the repository in your site.
+Every file your program opens or imports must be here, or it will
+[be missing from the live site](../../help/errors/missing-asset-on-deploy.md).
 
 ??? example "Show the upload screen"
     ![The GitHub upload page, with a drag-and-drop area for adding files to the repository](images/deployment_github_upload2.png)
@@ -255,8 +257,10 @@ means.
 
 ## See another example
 
-The [project gallery](../gallery/index.md) apps are all published this
-way.
+Drafter's own
+[deployment template](https://github.com/drafter-edu/drafter-deployment-template-v1)
+is a complete repository set up this way, with a starter `main.py`
+and the deploy workflow.
 
 ## Look it up
 

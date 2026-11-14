@@ -112,8 +112,9 @@ findings into a usability and styling pass.
 
 ## See another example
 
-The [project gallery](gallery/index.md) entries each note what makes
-them pleasant to use. Compare their choices against your findings.
+The [project gallery](gallery/index.md) lists complete apps. Use one
+as a first-time visitor would, notice where you hesitate, and compare
+that experience with what your testers did in your app.
 
 ## Look it up
 

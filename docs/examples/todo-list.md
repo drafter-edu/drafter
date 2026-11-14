@@ -118,11 +118,16 @@ wrong task every time, off by one.
 **Bad input becomes a page, not a crash.** The number arrives as a
 string, and the route checks two things before acting: whether the
 text is all digits, and whether the number is in range. Any other
-input leads to an error page with a way back. Notice that the
+input leads to a page of the app's own that explains the problem and
+offers a way back. Notice that the
 parameter is annotated `str`, not `int`, so the route receives
 exactly what was typed and can respond politely. The
 [calculator](calculator.md) makes the same choice for the same
 reason.
+
+Typing a number is one way to choose an item. Another is to give
+every task its own button, as in the recipe
+[A button for each item](../add/show-a-collection.md#recipe-a-button-for-each-item).
 
 ## Make it yours
 
@@ -144,7 +149,8 @@ reason.
 There are three assertions, one for each behavior worth protecting:
 adding a task appends it to the list, removing translates the
 visitor's one-based number correctly (`"2"` removes `"b"`), and a
-bad number produces the error page rather than an exception. The
+bad number produces the app's explanation page rather than an
+exception. The
 off-by-one test is the most important of the three; it fails
 immediately if the `- 1` ever disappears.
 

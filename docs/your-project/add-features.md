@@ -21,8 +21,8 @@ have.
 ## Before you start
 
 You have [one working path](build-one-path.md) and the
-[test habit](test-as-you-go.md) started. You also have your
-archetype's milestone list from
+[test habit](test-as-you-go.md) started. You also have the
+milestone list for your project shape from
 [choosing an idea](choose-an-idea.md); that list is your feature
 queue.
 
@@ -70,8 +70,8 @@ habits if you want to see them in a finished app.
 
 Mid-project, a new idea will feel more interesting than the next
 required milestone. Write the idea down in your planning notes,
-then finish the milestone. The stretch features from your
-archetype page are the sanctioned place for extra ambition, and
+then finish the milestone. The stretch features listed for your
+project shape are the sanctioned place for extra ambition, and
 they are best started only after every required milestone works.
 Scope grows by trades, not additions: if the new idea truly
 matters, decide what it replaces.
@@ -88,9 +88,10 @@ matters, decide what it replaces.
   accumulating duplicated furniture. Pause for one extraction
   pass; growth gets cheaper immediately.
 - **The feature needs something no recipe covers**: check the
-  [component reference](../reference/components/index.md) before
-  inventing machinery, and consider whether a nearby archetype's
-  stretch feature is the same thing under a different name.
+  [component reference](../reference/components/index.md) and
+  [What Drafter can do](what-drafter-can-do.md) before inventing
+  machinery, and consider whether a stretch feature from a nearby
+  project shape is the same thing under a different name.
 
 ## You are ready for the next step when
 
