@@ -201,6 +201,101 @@ start_server(State(""))
 Handing `state.review` back to the `TextArea` as its starting value gives
 the visitor an edit loop instead of a blank box.
 
+## Recipe: check the answer and ask again
+
+Visitors type things your code cannot use: words where a number
+belongs, or a number that is too large. Checking an answer before
+using it is called validating it. When the answer fails the check,
+show the form again with a message that says what to fix, and keep
+what the visitor typed so they can correct it.
+
+```python drafter height=320
+from drafter import *
+from dataclasses import dataclass
+
+
+@dataclass
+class State:
+    tickets: str
+    problem: str
+
+
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        Header("Ticket booth"),
+        state.problem,
+        "How many tickets would you like (1 to 10)?",
+        TextBox("tickets", state.tickets),
+        "\n",
+        Button("Buy", "buy")
+    ])
+
+
+@route
+def buy(state: State, tickets: str) -> Page:
+    state.tickets = tickets
+    if not tickets.isdigit():
+        state.problem = "Please type a whole number.\n"
+        return index(state)
+    if int(tickets) < 1 or int(tickets) > 10:
+        state.problem = "You can buy between 1 and 10 tickets.\n"
+        return index(state)
+    state.problem = ""
+    cost = int(tickets) * 5
+    return Page(state, [
+        "You bought " + tickets + " tickets for " + str(cost) + " gold.\n",
+        Button("Buy more", "index")
+    ])
+
+
+assert_has(buy(State("", ""), "lots"), "Please type a whole number.")
+assert_has(buy(State("", ""), "40"), "between 1 and 10")
+assert_has(buy(State("", ""), "3"), "You bought 3 tickets for 15 gold.")
+
+start_server(State("2", ""))
+```
+
+Three decisions make this work:
+
+- The `tickets` parameter is annotated `str`, not `int`. Drafter then
+  hands over exactly what was typed, and the route decides whether it
+  is a number. With an `int` annotation, Drafter would stop at its own
+  error page before the route ever ran.
+- The state has a `problem` field. The form page always displays it,
+  and it is an empty string when there is nothing to report.
+- When a check fails, the route sets the message and returns
+  `index(state)`, so the visitor sees the same form again with their
+  answer still in the box.
+
+Each check gets its own test. Tests for input checks are worth
+writing, because the mistakes are the cases you are least likely to
+try by hand.
+
+## More kinds of input
+
+The recipes above use four input components. Drafter has more, and
+every one follows the same rule: the component's name becomes a
+parameter, and the parameter's annotation says what kind of value
+arrives.
+
+| The visitor... | Component | Annotate the parameter as |
+| -------------- | --------- | ------------------------- |
+| picks one option from a short visible list | [RadioButtonGroup](../reference/components/input/radiobuttongroup.md) | `str` |
+| checks any number of boxes in a group | [RelatedCheckBox](../reference/components/input/relatedcheckbox.md) | `list[str]` |
+| picks several options from one list | [SelectBox](../reference/components/input/selectbox.md) with `multiple=True` | `list[str]` |
+| drags a slider to a number | [Slider](../reference/components/input/slider.md) | `int` or `float` |
+| picks a color | [ColorPicker](../reference/components/input/colorpicker.md) | `str` |
+| picks a date | [DateInput](../reference/components/input/dateinput.md) | `date` |
+| picks a time of day | [TimeInput](../reference/components/input/timeinput.md) | `time` |
+| picks a date and a time together | [DateTimeInput](../reference/components/input/datetimeinput.md) | `datetime` |
+| chooses a file | [FileUpload](../reference/components/input/fileupload.md) | see [Upload and download files](files.md) |
+
+The two `list[str]` rows deliver an empty list when nothing is
+checked or selected. The `date`, `time`, and `datetime` types come
+from Python's `datetime` module, so a route that uses them needs
+`from datetime import date, time, datetime` at the top of the file.
+
 ## Common problems
 
 - **A missing-parameter error**: an input name and a parameter name do
@@ -211,8 +306,12 @@ the visitor an edit loop instead of a blank box.
 - **The value vanishes after the next click**: a parameter's value only
   lasts for that one route call. Save it into a `state` field, as every
   recipe above does.
-- **Two buttons, one form**: both target routes receive the same inputs,
-  so both need the matching parameters.
+- **Two buttons, one form**: every button on the page sends all of the
+  page's inputs to its route. A route that needs a value must have the
+  matching parameter. A route that does not need it, such as the target
+  of a Cancel button, can leave the parameter out. The page still
+  works, and the debug panel lists a warning about a form field with no
+  matching parameter.
 
 ## Understand it
 

@@ -23,40 +23,66 @@ You can write an `assert_state` or `assert_has` test by hand
 ([Test a feature](test-a-feature.md)). Freezing is different in
 spirit: instead of asserting a rule you chose, you record a whole
 page you approved. Drafter does the recording for you while you use
-your own app.
+your own app, and a button in the debug panel writes the tests.
 
 ## The workflow
 
-1. **Run your app and visit the page** you want to freeze, in the
-   exact situation you care about (the right state, the right
-   values).
-2. **Open the debug panel's History tab.** Every visit is listed
-   with the route call that produced it.
-3. **Expand the visit's Response.** It shows the complete
-   `Page(...)` your route returned, written out as Python you can
-   copy.
-4. **Assemble the test** above `start_server(...)`, with the route
-   call as the first argument and the copied page as the second.
+1. **Run your app and click through it.** Visit each page you want
+   to freeze, in the exact situation you care about (the right
+   state, the right values). Drafter records every visit.
+2. **Open the debug panel's Tests tab** and press **Copy Regression
+   Tests**. Drafter writes one test for each page you visited and
+   puts them all on your clipboard. The **Download Tests (.py)**
+   button next to it saves the same tests as a file instead.
+3. **Paste the tests** into your program, above
+   `start_server(...)`.
+4. **Delete the tests you do not want.** You get a test for every
+   visit, so a page you passed through three times appears three
+   times. Keep the visits that show a finished page and remove the
+   rest.
+5. **Save.** The Tests tab now lists the frozen tests as passing.
 
-The result looks like this (from the compliment machine in
-[Finish and test an app](../tutorials/finishing.md)):
+The pasted text begins with two comment lines and its own
+`from drafter import *` line. All three are harmless, and you can
+delete them if your file already has the import.
+
+Each test has the same shape. This one is from the chore list in
+[Show a collection](show-a-collection.md), after pressing "Done" on
+the second chore:
 
 ```python
-assert_equal(index(State(COMPLIMENTS, 0)),
-             Page(State(COMPLIMENTS, 0), [
-                 Header("The Compliment Machine"),
-                 "Your code is looking sharp today.\n",
-                 Button("Another, please", "another")
-             ]))
+assert_equal(finish_chore(State(chores=['Feed the cats', 'Walk the dogs', 'Water the plants']), 1),
+    Page(State(chores=['Feed the cats', 'Water the plants']), [
+        Header("Today's chores"),
+        'Feed the cats ',
+        Button('Rename', 'edit_chore', arguments=Argument('position', 0)),
+        Button('Done', 'finish_chore', arguments=Argument('position', 0)),
+        '\n',
+        'Water the plants ',
+        Button('Rename', 'edit_chore', arguments=Argument('position', 1)),
+        Button('Done', 'finish_chore', arguments=Argument('position', 1)),
+        '\n',
+    ]))
 ```
 
-`assert_equal` compares any two values and reports every difference
-it finds; for frozen pages, that means a failure shows exactly which
-piece of the page changed.
+The first argument is the route call that built the page, with the
+state and the parameters as they were at that moment. The second
+argument is the complete page the route returned. `assert_equal`
+compares any two values and reports every difference it finds, so a
+failing frozen test shows exactly which piece of the page changed.
 
-The Tests tab can also **copy or download every test** the app has
-run as a ready-to-save Python file, which is a quick way to collect
-your frozen tests once you have a few.
+## Freeze one page
+
+To freeze a single visit, use the History tab instead of the Tests
+tab. Find the visit in the list and expand **Page shown** underneath
+it. Drafter displays that one visit as a complete `assert_equal`
+test, which you can select, copy, and paste above
+`start_server(...)`.
+
+A generated test spells out every value in full. You may shorten it
+by hand when your program already has a name for a long value, as
+[Finish and test an app](../tutorials/finishing.md) does with its
+list of compliments.
 
 ## When to freeze, and when not to
 
@@ -75,9 +101,9 @@ better.
 
 When you *deliberately* redesign a frozen page, its test fails, and
 it should: the test is asking whether you meant to change the page.
-Answer by re-freezing: visit the redesigned page, copy the
-new `Page(...)` from the History tab, and replace the old expected
-value. Delete frozen tests for pages that no longer exist.
+Answer by re-freezing: visit the redesigned page, copy its new test
+from the History tab, and replace the old test with it. Delete
+frozen tests for pages that no longer exist.
 
 ## Common problems
 
@@ -91,15 +117,21 @@ value. Delete frozen tests for pages that no longer exist.
   [Circular Reference in generated tests](../help/errors/circular-reference-tests.md).
 - **The frozen page is huge and the test is unreadable**: freeze
   smaller pages, or switch that page to a few `assert_has` checks.
-- **Every tiny styling tweak breaks a frozen test**: that is the
-  trade-off freezing makes. Freeze after the styling pass, not
-  before; the [finishing tutorial](../tutorials/finishing.md) orders
-  the steps that way on purpose.
+- **You changed a color or a theme and expected a frozen test to
+  fail**: it will not. `assert_equal` ignores styling unless you ask
+  for `strict_styles=True`, so colors, fonts, sizes, and themes can
+  change freely. A frozen test fails when the words, the order, or
+  the kind of component on the page changes, for example when plain
+  text becomes a `Header`.
+- **A frozen test passes on some runs and fails on others**: the page
+  came from a route that uses `random`. Do not freeze that page. Test
+  the part that does not depend on chance, as in
+  [a random result you can still test](show-different-content.md#recipe-a-random-result-you-can-still-test).
 
 ## Understand it
 
-Frozen tests are regression tests: the concept is introduced at the
-end of [Test a feature](test-a-feature.md), and
+Frozen tests are a kind of regression test, which is a test that
+checks finished work has not changed.
 [Finish and test an app](../tutorials/finishing.md) walks through
 the whole cycle of freezing a page, breaking it, and fixing it.
 

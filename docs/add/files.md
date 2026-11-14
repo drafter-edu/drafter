@@ -74,9 +74,12 @@ Each annotation produces a different kind of value:
 | `Picture` | An image, decoded; see [Use pictures](pictures.md). |
 | `DrafterTextFile` / `DrafterBinaryFile` | Contents plus the filename and metadata; see [File types](../reference/data-types/file-types.md). |
 
-Add `| None` to any of them to make "no file chosen" arrive as
-`None` instead of an error. A `FileUpload` with the `multiple`
-attribute delivers a list.
+When the visitor presses the button without choosing a file, a `str`
+parameter receives an empty string and a `bytes` parameter receives
+empty bytes, so check for an empty value before using it. A `Picture`
+parameter has no empty form and shows an error instead, unless you
+annotate it as `Picture | None`, in which case it receives `None`. A
+`FileUpload` with the `multiple` attribute delivers a list.
 
 ## Recipe: offer a download
 
@@ -134,9 +137,16 @@ with open("questions.txt") as data_file:
 ```
 
 Keep the file next to your program. When you deploy, the file must
-be deployed too: upload it to the repository, and tell the build
-about it with `add_website_file`, which also checks right away that
-the file really exists (and suggests similarly named files if not):
+be deployed too. If you publish with the template from
+[Publish on GitHub Pages](../your-project/deploy/github-pages.md),
+upload the file to the repository next to `main.py`, and the
+template includes it in the site along with every other file in the
+repository.
+
+If you build the site another way, tell the build about the file
+with `add_website_file`. That function also checks right away that
+the file really exists, and stops the program with a "file not
+found" message if it does not:
 
 ```python
 add_website_file("questions.txt")
@@ -148,6 +158,170 @@ outside the code, repeated once per file (see
 The helper `get_drafter_path("questions.txt")` resolves a name to
 wherever the app's files actually live, which helps in the rare
 case where plain `open` cannot find a file you bundled.
+
+## Recipe: save and load your data
+
+State lasts only as long as the browser tab stays open, and Drafter
+has no built-in way to store it between visits. A visitor can still
+keep their data by saving it as a file and loading that file the
+next time. This recipe combines the two components above: a
+`Download` writes the state out as text, and a `FileUpload` reads it
+back in.
+
+```python drafter height=360
+from drafter import *
+from dataclasses import dataclass
+
+
+@dataclass
+class State:
+    entries: list[str]
+
+
+def entries_to_text(entries: list[str]) -> str:
+    text = ""
+    for entry in entries:
+        text = text + entry + "\n"
+    return text
+
+
+def text_to_entries(text: str) -> list[str]:
+    entries = []
+    for line in text.split("\n"):
+        if line.strip() != "":
+            entries.append(line.strip())
+    return entries
+
+
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        Header("Field Journal"),
+        BulletedList(state.entries),
+        "New entry:",
+        TextBox("entry"),
+        Button("Record", "record"),
+        "\n",
+        Download("Save my journal", "journal.txt",
+                 entries_to_text(state.entries).encode("utf-8")),
+        " or ",
+        Link("load a saved journal", "ask_for_file")
+    ])
+
+
+@route
+def record(state: State, entry: str) -> Page:
+    state.entries.append(entry)
+    return index(state)
+
+
+@route
+def ask_for_file(state: State) -> Page:
+    return Page(state, [
+        "Choose the journal.txt file you saved earlier:",
+        FileUpload("saved_file", accept=".txt"),
+        "\n",
+        Button("Load", "load_journal"),
+        Link("Cancel", "index")
+    ])
+
+
+@route
+def load_journal(state: State, saved_file: str) -> Page:
+    if saved_file != "":
+        state.entries = text_to_entries(saved_file)
+    return index(state)
+
+
+assert_equal(entries_to_text(["Day 1", "Day 2"]), "Day 1\nDay 2\n")
+assert_equal(text_to_entries("Day 1\nDay 2\n"), ["Day 1", "Day 2"])
+assert_state(load_journal(State(["Old entry"]), "Day 1\nDay 2\n"),
+             State(["Day 1", "Day 2"]))
+assert_state(load_journal(State(["Old entry"]), ""), State(["Old entry"]))
+
+start_server(State(["Day 1: Captain ignored me."]))
+```
+
+Two helper functions do the converting. The `entries_to_text`
+function turns the list in state into one string with an entry on
+each line, and `text_to_entries` turns that string back into a list.
+The first two tests check each direction.
+
+The `Download` receives the text converted to bytes with
+`.encode("utf-8")`. A download built from bytes saves every character
+exactly as written. A download built from a plain string can lose
+part of the text when it contains a `#` character, which matters when
+the file holds whatever a visitor typed.
+
+The `load_journal` route checks for an empty string before it
+replaces anything. When the visitor presses Load without choosing a
+file, `saved_file` arrives as `""`, and the check keeps the journal
+they already have.
+
+A journal is a list of strings, so one line per entry is enough. For
+a state with several fields, decide on a fixed layout, such as one
+field per line or one item per line with its parts separated by
+commas, and write the two converting functions to match each other.
+Test them the way this recipe does, because a saved file is only
+useful if loading it gives back the same state.
+
+## Recipe: split your program across files
+
+When one file grows hard to find your way around, move helper
+functions into a second file and import them. Put the second file in
+the same folder as your main program. Here it is named
+`pet_helpers.py`:
+
+```python
+def describe_mood(hunger: int) -> str:
+    if hunger > 5:
+        return "hungry"
+    return "content"
+```
+
+The main program imports the function by the file's name, without
+the `.py` ending:
+
+```python
+from drafter import *
+from dataclasses import dataclass
+from pet_helpers import describe_mood
+
+
+@dataclass
+class State:
+    hunger: int
+
+
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        "Ada is " + describe_mood(state.hunger) + ".\n"
+    ])
+
+
+start_server(State(7))
+```
+
+While the program runs, Drafter watches both files, so saving either
+one reloads the site. Three guidelines keep a project with several
+files manageable:
+
+- Keep `start_server(...)`, your `State` dataclass, and your routes
+  in the main file. Move out the functions that do not use Drafter
+  at all, such as calculations, text formatting, and lists of data.
+  A helper file should not import from the main file, because two
+  files that import each other usually fail to load.
+- Give the helper file a specific name of your own. A name such as
+  `helpers.py` is also the name of a public library. If your file
+  is ever missing from the deployed site, the browser installs that
+  library in its place, and the import error that follows is
+  confusing to read.
+- When you deploy, upload every `.py` file to the repository, next
+  to `main.py`. The template from
+  [Publish on GitHub Pages](../your-project/deploy/github-pages.md)
+  includes them in the site. If you build the site another way,
+  declare each one, as in `add_website_file("pet_helpers.py")`.
 
 ## Variations
 
@@ -170,6 +344,10 @@ case where plain `open` cannot find a file you bundled.
 - **A bundled file 404s after deploy**: it never made it into the
   repository, or the name differs in case. See
   [works locally, 404s deployed](../help/errors/missing-asset-on-deploy.md).
+- **The deployed site reports an import error for your own file**:
+  the helper file is not in the repository next to `main.py`, or its
+  name is spelled differently from the `import` line. Upload it and
+  run the deploy workflow again.
 - **Nothing survives reload**: files a visitor uploads live in
   state, and state resets on reload as it always does. The download
   button is how visitors keep a permanent copy.

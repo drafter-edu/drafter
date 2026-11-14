@@ -123,7 +123,10 @@ you reach every page and return without touching the browser controls?
   name, and make sure the function has `@route`.
 - **You wrote a route but cannot see it**: nothing links to it yet. A
   route becomes reachable when some page names it, or when you visit its
-  address directly.
+  address directly by ending the site's address with `?route=` and the
+  route's name.
+  [Opening a site on a route](../reference/route.md#opening-a-site-on-a-route)
+  explains what such an address can and cannot do.
 - **Two functions with the same name**: Python silently keeps only the
   second definition. Every route needs its own name.
 - **Your pages have state but the new one errors**: if your app has a

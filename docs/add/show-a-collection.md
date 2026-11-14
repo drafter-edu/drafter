@@ -168,6 +168,154 @@ def all_score(state: State) -> Page:
 start_server(State([Player("Red team", 3), Player("Blue team", 5)]))
 ```
 
+## Recipe: a button for each item
+
+To let the visitor remove or edit one particular item, give every row
+its own buttons. Each button carries an `Argument` that holds the
+item's position in the list, and the route receives that position as a
+parameter with the same name.
+
+```python drafter height=360
+from drafter import *
+from dataclasses import dataclass
+
+
+@dataclass
+class State:
+    chores: list[str]
+
+
+def chore_rows(chores: list[str]) -> list:
+    rows = []
+    position = 0
+    for chore in chores:
+        rows.append(chore + " ")
+        rows.append(Button("Rename", "edit_chore", Argument("position", position)))
+        rows.append(Button("Done", "finish_chore", Argument("position", position)))
+        rows.append("\n")
+        position = position + 1
+    return rows
+
+
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        Header("Today's chores")
+    ] + chore_rows(state.chores))
+
+
+@route
+def finish_chore(state: State, position: int) -> Page:
+    state.chores.pop(position)
+    return index(state)
+
+
+@route
+def edit_chore(state: State, position: int) -> Page:
+    return Page(state, [
+        "Rename this chore:",
+        TextBox("new_name", state.chores[position]),
+        "\n",
+        Button("Save", "save_chore", Argument("position", position)),
+        Button("Cancel", "index")
+    ])
+
+
+@route
+def save_chore(state: State, position: int, new_name: str) -> Page:
+    state.chores[position] = new_name
+    return index(state)
+
+
+assert_state(finish_chore(State(["Feed the cats", "Walk the dogs"]), 0),
+             State(["Walk the dogs"]))
+assert_state(save_chore(State(["Feed the cats", "Walk the dogs"]), 1, "Walk Ada"),
+             State(["Feed the cats", "Walk Ada"]))
+
+start_server(State(["Feed the cats", "Walk the dogs", "Water the plants"]))
+```
+
+The loop in `chore_rows` counts positions as it goes. The first
+chore's buttons carry `Argument("position", 0)`, the second chore's
+buttons carry `Argument("position", 1)`, and so on. Every "Done" button
+goes to the same `finish_chore` route, and the argument is how that
+route learns which button was pressed.
+
+Renaming takes two routes. The `edit_chore` route shows a text box
+that starts with the chore's current name. Its Save button passes the
+same position along to `save_chore`, which replaces that one item. The
+position has to travel through the edit page because a parameter lasts
+for one route call only.
+
+The Cancel button returns to the list without saving. The text box's
+value is still sent with that click, and `index` has no parameter for
+it, so the debug panel lists a warning about
+[a form field with no matching parameter](../help/errors/missing-parameter.md#a-related-warning-a-form-field-with-no-matching-parameter).
+That warning is expected here and does not affect the page.
+
+## Recipe: show only the items that match
+
+A search box is a filter. The page shows the items that contain what
+the visitor typed and leaves the rest out. Keep the full list in state,
+keep the search text in state as well, and build the shorter list each
+time the page is displayed.
+
+```python drafter height=340
+from drafter import *
+from dataclasses import dataclass
+
+
+@dataclass
+class State:
+    pets: list[str]
+    search_text: str
+
+
+def matching_pets(pets: list[str], search_text: str) -> list[str]:
+    matches = []
+    for pet in pets:
+        if search_text.lower() in pet.lower():
+            matches.append(pet)
+    return matches
+
+
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        Header("Pet finder"),
+        "Show pets whose description contains:",
+        TextBox("search_text", state.search_text),
+        Button("Search", "search"),
+        "\n",
+        BulletedList(matching_pets(state.pets, state.search_text))
+    ])
+
+
+@route
+def search(state: State, search_text: str) -> Page:
+    state.search_text = search_text
+    return index(state)
+
+
+assert_equal(matching_pets(["Ada the corgi", "Captain the grey cat"], "CAT"),
+             ["Captain the grey cat"])
+assert_equal(matching_pets(["Ada the corgi", "Captain the grey cat"], ""),
+             ["Ada the corgi", "Captain the grey cat"])
+
+start_server(State([
+    "Ada the corgi",
+    "Babbage the small black mutt",
+    "Captain the grey cat",
+    "Domino the black cat"
+], ""))
+```
+
+The `matching_pets` function never changes `state.pets`. It builds a
+new list for display, so clearing the search box and pressing Search
+brings every pet back. Comparing lowercase copies with `.lower()` makes
+the search ignore capital letters. An empty search box matches every
+pet, because every string contains the empty string.
+
 ## Recipe: handle the empty case
 
 A collection page should still make sense with nothing in it. Check for
@@ -222,6 +370,10 @@ list.
   `BulletedList(state.chores)`, not `state.chores`.
 - **An error when removing an item**: the list was empty. Guard with
   `if state.chores:` before `pop`, as the first recipe does.
+- **Every row's button changes the same item**: the buttons do not
+  carry different arguments. Check that the `Argument` value changes
+  inside the loop, as `position` does in the button-for-each-item
+  recipe.
 - **The table's columns look wrong**: `Table` reads column names from
   the dataclass fields. If a row is not that dataclass, or the list
   mixes types, rows will not line up.
@@ -242,8 +394,9 @@ adding and removing items.
 ## Look it up
 
 [BulletedList](../reference/components/lists/bulletedlist.md),
-[NumberedList](../reference/components/lists/numberedlist.md), and
-[Table](../reference/components/data/table.md).
+[NumberedList](../reference/components/lists/numberedlist.md),
+[Table](../reference/components/data/table.md), and
+[Argument](../reference/components/actions/argument.md).
 
 ## Fix a problem
 

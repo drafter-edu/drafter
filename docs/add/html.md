@@ -127,10 +127,12 @@ strings, those same values are harmless.
   tags inside `RawHTML` will run, but embeds that load outside
   resources may be blocked or behave differently once deployed;
   test the deployed site early.
-- **Tests cannot find the content**: assertions see `RawHTML` as
-  one blob. `assert_has(page, RawHTML(...))` with the identical
-  string works; matching text inside it does not. One more
-  reason to prefer components.
+- **Tests see the markup as one piece of text**: an assertion such
+  as `assert_has(page, "Ada wins")` finds those words inside a
+  `RawHTML`, but it searches the whole markup, tag names and
+  attribute values included, and it cannot check one element
+  separately from the rest. Components give your tests more to
+  work with.
 - **Styling helpers do not reach inside**: `HtmlTag` accepts
   `style_` keywords and `classes` like any component, but the
   interior of a `RawHTML` blob is beyond the helpers; style it

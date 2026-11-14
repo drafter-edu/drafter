@@ -175,6 +175,14 @@ assert_state(reset(State(70, 8)), State(0, 1))
 start_server(new_game())
 ```
 
+Drafter also has a built-in route for the most common case. A button
+written as `Button("Start over", "--reset")` puts the whole state back
+to the value passed to `start_server` and shows the `index` page, with
+no reset route of your own.
+[Built-in routes](../reference/route.md#built-in-routes) describes it.
+Write your own reset route, as above, when only some fields should
+start over or when the visitor should land on a different page.
+
 ## What survives a reload
 
 Nothing does. State lives in the browser's memory, and reloading the
@@ -182,6 +190,11 @@ tab starts the app again from the values in `start_server(...)`. For
 course projects, that behavior is normal and expected. If your users
 might be surprised by it, say so on the page. The full story is in
 [How Drafter works](../start/how-drafter-works.md).
+
+When visitors need to keep their data between visits, let them save
+it as a file and load it again later.
+[Save and load your data](files.md#recipe-save-and-load-your-data)
+is a complete recipe.
 
 ## Common problems
 

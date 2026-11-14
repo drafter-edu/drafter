@@ -180,6 +180,68 @@ Adding a pet to the list adds a button and a working detail page,
 with no new code. This is the pattern the
 [quiz game](../tutorials/quiz-game.md) is built on.
 
+## Recipe: a random result you can still test
+
+Dice, shuffled decks, and surprise questions all use Python's `random`
+module. Randomness makes a route hard to test, because a test cannot
+know which number will come up. The way around that is to split the
+work in two. The route picks the random value and does nothing else. A
+plain helper function receives that value as a parameter and does
+everything that follows.
+
+```python drafter height=300
+from drafter import *
+from dataclasses import dataclass
+import random
+
+
+@dataclass
+class State:
+    last_roll: int
+    total: int
+
+
+@route
+def index(state: State) -> Page:
+    return Page(state, [
+        Header("Dice game"),
+        "You rolled: " + str(state.last_roll) + "\n",
+        "Total so far: " + str(state.total) + "\n",
+        Button("Roll", "roll")
+    ])
+
+
+def record_roll(state: State, value: int) -> Page:
+    state.last_roll = value
+    state.total = state.total + value
+    return index(state)
+
+
+@route
+def roll(state: State) -> Page:
+    return record_roll(state, random.randint(1, 6))
+
+
+assert_state(record_roll(State(0, 0), 4), State(4, 4))
+assert_state(record_roll(State(4, 4), 6), State(6, 10))
+assert_has(record_roll(State(0, 0), 2), "You rolled: 2")
+
+start_server(State(0, 0))
+```
+
+The `record_roll` function has no `@route` above it, so it is an
+ordinary function that returns a page. The tests call it with a roll
+they choose, which makes the result predictable. The `roll` route is
+one line long, and that line is the only part of the program the tests
+do not reach.
+
+A route that picks a random value picks a new one every time it runs.
+That includes the browser's Back button, which runs the earlier route
+again, so a visitor who goes back may see a different roll from the
+one they saw the first time. For the same reason, do not
+[freeze](freeze-pages.md) a page that came from a random route. The
+frozen test would fail on most runs.
+
 ## Variations
 
 - To branch on an argument instead of state, put

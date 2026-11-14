@@ -135,6 +135,13 @@ button works as expected. A worked example is on the
 - You can target any component by giving it an `id` and giving the
   fragment `target="#that_id"`; `Output` is a convenient pre-named
   region.
+- When several components share one event route, the route needs to
+  know which of them fired. Add `arguments` next to the event
+  keyword, as in
+  `TextBox("note", on_change="save_note", arguments={"row": 3})`.
+  The route then receives `row` as a parameter, along with the box's
+  own value. The forms that `arguments` accepts are listed under
+  [Passing arguments](../reference/components/actions/button.md#passing-arguments).
 - For behavior that happens on a schedule instead of in response to
   an action, see [Timers](timers.md).
 
