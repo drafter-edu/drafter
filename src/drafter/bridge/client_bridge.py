@@ -663,7 +663,10 @@ class ClientBridge:
         Configuration-update events are applied directly: "framed" toggles
         the site frame, while "in_debug_mode" and "enable_subtle_debug_entry"
         update the configuration and refresh the debug CSS and subtle
-        debug-entry button. Every event (including configuration updates) is
+        debug-entry button. Settings that change nothing in the page (such
+        as the site information fields) are accepted as they are; only a key
+        that is not a setting at all is reported as a bridge error.
+        Every event (including configuration updates) is
         then forwarded to the debug panel; events the panel does not handle
         are logged to the console.
 
@@ -741,6 +744,14 @@ class ClientBridge:
                 # Consumed by the server-side error route; nothing for the
                 # bridge to do beyond keeping its configuration copy fresh.
                 setattr(self.configuration, str(event.get("key")), event.get("value"))
+            elif self.configuration.has_setting(str(event.get("key"))):
+                # Every other real setting is read where it is used instead
+                # of being mirrored into the page: the site information
+                # (author, description, sources, planning, links) by the
+                # --about route, browser_history when the site boots. The
+                # server has already recorded the new value, so the bridge
+                # has nothing to change.
+                pass
             else:
                 report_bridge_error(
                     "client.unhandled_config_update",

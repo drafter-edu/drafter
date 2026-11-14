@@ -649,6 +649,18 @@ class ClientServerConfiguration(BaseConfiguration):
         "additional_files",
     )
 
+    def has_setting(self, key: str) -> bool:
+        """Check whether a key names a setting `update_configuration` accepts.
+
+        Args:
+            key: The configuration key to check (e.g., 'theme', 'author').
+
+        Returns:
+            True for a configuration attribute or a site-information key
+            (which lives on the `information` object), False otherwise.
+        """
+        return hasattr(self, key) or key in self.SITE_INFORMATION_KEYS
+
     def update_configuration(self, key: str, value):
         """
         Updates a specific configuration key with a new value.
@@ -667,7 +679,7 @@ class ClientServerConfiguration(BaseConfiguration):
                 site-information key, or if a content key's current value is
                 not a list.
         """
-        if not hasattr(self, key) and key not in self.SITE_INFORMATION_KEYS:
+        if not self.has_setting(key):
             # TODO: InvalidConfigurationKeyError
             raise ValueError(f"Invalid configuration key: {key}")
         # TODO: Add validation for specific keys if necessary (e.g., theme should be a valid theme name)

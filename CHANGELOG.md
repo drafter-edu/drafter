@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Fixed an error appearing in the debug panel of every site that calls `set_site_information`: "Drafter had trouble syncing your Python code with the browser", with the detail `Unhandled configuration update event`. Nothing was wrong with the site. Drafter's browser side reported any setting it had no page change to make for, and the author, description, sources, planning, and links are only read by the About page. `set_browser_history` caused the same error. These settings are now accepted quietly.
+
 ## [2.2.1] - 2026-11-12
 
 - Fixed a route named `about` breaking the built-in About page. With `@route def about(state)` in a site, opening `--about` (the About link in the debug panel's header, or your site's address plus `--about`) stopped with "Problem With the Route's Arguments" and `No signature found for route '--about'`. Drafter matched addresses to routes by a simplified name that dropped the dashes, so it mistook the built-in `--about` page for your `about` route and never set up its own. The same mix-up affected every built-in page: a route named `reset` blocked `--reset`, and a route named `error` was used to draw error pages. Addresses that start with `--` now belong only to Drafter's built-in pages, and an address always goes to the route registered under exactly that address before any simplified name is tried, so `about` and `--about` are two separate pages. A custom address written a different way, such as `mypage` for `@route("/my-page")`, now also reaches its route instead of failing with the same error.
