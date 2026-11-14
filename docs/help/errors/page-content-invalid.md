@@ -14,50 +14,97 @@ error_text: "must be a list of strings, numbers, booleans, or components"
 
 ## The error
 
+The error page has this title:
+
 ```text
-The content of a Page must be a list of strings, numbers, booleans, or components.
-Found Pet instead.
+Unusable Value
 ```
 
-The friendly version: "The content you returned in this Page was a
-Pet, but it needs to be text, a number, a boolean, a component, or a
-list of those." A related message appears when the list itself is
-fine but one item inside it is not; that message names the route and
-the offending item.
+Drafter uses the title "Unusable Value" for several different
+problems, so the sentence under the title is what identifies this
+one:
+
+```text
+Item number 0 in this Page's content list is a Pet, but every item needs
+to be text, a number, a boolean, or a component.
+```
+
+The technical message below it reads:
+
+```text
+request.route_execution_failed: Error while processing request for URL 'index':
+The content of a Page must be a list of strings, numbers, booleans, or
+components. Found Pet at index 0 instead.
+```
+
+The position counts from zero, so "index 0" is the first item of the
+content list and "index 1" is the second.
+
+Two other forms of this error exist. When the value sits where the
+whole list belongs, the messages leave out the position ("The content
+you returned in this Page was a Pet", and "Found Pet instead."). When
+the value is inside another component, such as a `Div` or a
+`BulletedList`, the error page is titled "Page Content Problem" and
+the sentence under the title says where the value is:
+
+```text
+Your page content includes a value that Drafter does not know how to
+display: a Pet value (Pet(name='Ada', age=3)). It is located at: the Div
+at index 0, the item at index 0.
+```
 
 ## What it means
 
 A `Page` displays a list of strings, numbers, booleans, and
 components. Something you put into that list, or in place of the
-list itself, was none of those: perhaps a dataclass, a dictionary,
-or a nested list. Drafter stopped rather than guess how to display
-it.
+list itself, was none of those. It may have been a dataclass, a
+dictionary, or a nested list. Drafter stopped rather than guess how
+to display it.
 
 ## Where to look
 
-Start with the route named in the message. Look at the `Page(...)`
-call it returns and read the content list item by item.
+Start with the route named in the technical message. Look at the
+`Page(...)` call it returns and count through the content list to the
+position the message gives.
 
 ## Check
 
-- **A dataclass in the list**: `Page(state, [state.pet])`; show its
-  fields (`state.pet.name`) or use a component like
+Each cause below is followed by the end of the technical message it
+produces:
+
+- **A dataclass in the list**: `Page(state, [state.pet])` produces
+  "Found Pet at index 0 instead." Show its fields
+  (`state.pet.name`) or use a component like
   [Table](../../reference/components/data/table.md) built for
   structured data.
 - **A nested list**: `Page(state, ["Pets:", state.names])` puts a
-  whole list inside the content list. Join it into one string
+  whole list inside the content list and produces "Found list at
+  index 1 instead." Join it into one string
   (`", ".join(state.names)`) or use
   [BulletedList](../../reference/components/lists/bulletedlist.md).
-- **A dictionary in the list**: pull out the values you want to
-  show, or hand the whole thing to a component built for it.
-- **A missing comma**: two adjacent strings without a comma merge
-  into one string, which Python allows, but a component next to a
-  string without its comma is a syntax error that would appear
-  before this one.
+- **A dictionary in the list**: `Page(state, ["Ages:", {"Ada": 3}])`
+  produces "Found dict at index 1 instead." Pull out the values you
+  want to show, or give the dictionary to a component built for it.
+- **`None` in the list**: the message says "Found NoneType at index
+  1 instead." This usually comes from a helper function that has no
+  `return` statement, so calling it inside the list puts `None`
+  there.
+- **A value where the list belongs**: `Page(state, state.pet)`
+  produces "Found Pet instead." The same message with your state
+  class's name ("Found State instead.") means the two arguments are
+  in the wrong order, as in `Page(["Hello"], state)`. The state comes
+  first.
+- **Missing square brackets around several items**:
+  `Page(state, "Hello", Button("Go", "index"))` gives an error page
+  titled "Page Content Problem" whose technical message ends
+  `'Button' object has no attribute 'extend'`. Put the items inside
+  one list.
 
-Plain numbers and booleans are fine on their own: `Page(state,
-["Score:", state.score])` displays the score directly, no `str()`
-needed.
+A single string, number, or component in place of the list is not an
+error. `Page(state, "Hello")` shows the same page as
+`Page(state, ["Hello"])`. Plain numbers and booleans are also
+accepted as items: `Page(state, ["Score:", state.score])` displays
+the score directly, with no `str()` needed.
 
 ## Fix
 

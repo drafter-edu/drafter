@@ -14,11 +14,21 @@ error_text: "Circular Reference"
 
 ## The error
 
-This one does not arrive as an error page. Instead, the text
-`Circular Reference` appears inside a recorded page or state in the
-debug panel's History tab, right where a real value should be, and any
-[frozen test](../../add/freeze-pages.md) copied from it fails or
-looks wrong.
+This problem has no error page and no title. The words
+`Circular Reference` appear inside a recorded route call or a
+generated test, in the place where a value should be. In the text of
+a [frozen test](../../add/freeze-pages.md) the marker looks like
+this:
+
+```text
+Pet(name='Ada', owner=<strong>Circular Reference</strong>)
+```
+
+Python's own marker for the same situation, three dots, can appear
+in the same test, as in `Pet(name='Ada', owner=...)`. A test that
+contains the first marker is not valid Python, and a test that
+contains the three dots compares against the wrong value, so neither
+one passes.
 
 ## What it means
 

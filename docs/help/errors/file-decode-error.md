@@ -14,6 +14,18 @@ error_text: "does not look like unicode (utf-8) text"
 
 ## The error
 
+The error page has this title:
+
+```text
+Problem With the Route's Arguments
+```
+
+Under the title, one sentence names the route function ("Drafter
+could not match the information sent by the page to the parameters
+of your 'receive' function."). The technical message then begins
+"Parameter 'upload' expects str but got" and ends with the sentences
+that identify this error:
+
 ```text
 The file 'photo.jpg' does not look like unicode (utf-8) text.
 Perhaps the file is not the type you expected, or the parameter

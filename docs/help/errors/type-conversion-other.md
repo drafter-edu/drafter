@@ -14,16 +14,27 @@ error_text: "expects float but got"
 
 ## The error
 
+The error page has this title:
+
+```text
+Problem With the Route's Arguments
+```
+
+Under the title, one sentence names the route function ("Drafter
+could not match the information sent by the page to the parameters
+of your 'set_price' function."). The technical message and the "What
+To Try Next" list then give the detail that identifies this error:
+
 ```text
 Parameter 'price' expects float but got 'free' from the form field
 'price'. Try entering a number, or change the parameter type to str.
 ```
 
-The same form of message appears for other target types; it always
+The same form of message appears for other target types. It always
 names the parameter, the expected type, the value that arrived, and
-where it came from, plus a hint. (Because it is the most common
-case, the `int` version has
-[its own entry](type-conversion-int.md).)
+where the value came from, and it ends with a hint. Because it is the
+most common case, the `int` version has
+[its own entry](type-conversion-int.md).
 
 ## What it means
 

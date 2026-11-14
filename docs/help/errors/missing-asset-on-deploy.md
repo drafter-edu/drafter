@@ -7,58 +7,106 @@ priority: P0
 prereqs: []
 symbols: []
 outcome: Fix assets that work locally but 404 when deployed.
-error_text: "404 (Not Found)"
+error_text: "the server responded with a status of 404"
 ---
 
 # Image or file works locally but 404s when deployed
 
 ## The error
 
-On the deployed site, an image shows as a broken icon, or a file the
-app opens fails to load. The browser's developer console (open it
-with ++f12++, Console or Network tab) shows a request ending in:
+On your own computer the app works. On the deployed site, an image
+or a file is missing, and what you see depends on how your program
+uses the file.
+
+A missing image does not produce a Drafter error page. The page
+appears with a broken-image icon where the picture belongs. The
+browser's developer console (open it with ++f12++, Console or Network
+tab) shows a line that begins:
 
 ```text
-404 (Not Found)
+Failed to load resource: the server responded with a status of 404
 ```
 
-On your own computer, the same app works perfectly.
+A missing file that your code reads with `open(...)` produces an
+error page with this title:
+
+```text
+File Not Found
+```
+
+The sentence under the title reads "Your code tried to open a file
+that Python could not find." The technical message names the file:
+
+```text
+request.route_execution_failed: Error while processing request for URL 'index':
+File not found: pets.txt
+```
 
 ## What it means
 
 Your program refers to a file by name, such as `Image("ada.png")` or
-`open("pets.txt")`. Locally, that file sits next to your program, so
-everything works. The deployed site only contains what you uploaded
-to the repository; the file is not there, so the browser gets a "no
-such file" answer.
+`open("pets.txt")`. On your computer, that file sits next to your
+program, so the name leads to it. The deployed site contains only the
+files that the build placed there. The file is either absent from the
+site, or present under a different name or in a different folder, so
+the browser's request for it is answered with 404, the web's code for
+"no such file".
 
 ## Where to look
 
 Look at the repository on GitHub. Compare the files listed there
-against every filename your program mentions.
+against every filename your program mentions, including the folder
+and the capital letters.
 
 ## Check
 
 - **The file was never uploaded**: it exists on your computer but not
   in the repository listing.
-- **The name differs**: `Ada.PNG` uploaded, `ada.png` in the code.
-  Deployed sites treat filenames as case-sensitive even if your own
-  computer does not.
-- **The path differs**: the code says `images/ada.png`, but the file
-  was uploaded to the repository root (or the reverse).
+- **The folder differs**: the code says `images/ada.png`, but the
+  file was uploaded to the top of the repository, or the reverse.
+  The build keeps every file in the folder where it found it.
+- **The capital letters differ**: `Ada.PNG` was uploaded and the
+  code says `ada.png`. Deployed sites treat `Ada.PNG` and `ada.png`
+  as two different names, even if your own computer does not.
+- **The site was not rebuilt after the upload**: the Actions tab
+  shows no run newer than the upload, or the newest run failed.
+- **The build was never told about the file**: this cause applies
+  when you build the site yourself with `--compile`, or when your
+  repository does not use Drafter's deployment template. The Fix
+  section explains the difference.
 
 ## Fix
 
-Upload the file to the repository, next to `main.py` (or in the
-folder your code names), with exactly the spelling the code uses.
-Then run the deploy workflow again; the dashboard and Actions tab
-show it finishing.
+What is needed depends on how the site is built.
+
+If you deploy with
+[Drafter's deployment template](../../your-project/deploy/github-pages.md),
+the build copies the files and folders at the top of your repository
+into the site. Upload the file to the repository, next to `main.py`
+or in the folder your code names, with exactly the spelling and
+capital letters the code uses. Then run the deploy workflow again
+and wait for the Actions tab to show it finishing.
+
+If you build the site yourself with `--compile`, or with a workflow
+of your own, the build copies only your program. An image or a data
+file that your code names is not picked up automatically. Declare
+each file in your program, above the routes:
+
+```python
+add_website_file("ada.png")
+add_website_file("images/cat.png")
+```
+
+The build then copies each declared file into the site, in the same
+folder it has next to your program. The `--additional-paths` command
+line flag does the same job from outside the code, and it also
+accepts the name of a whole folder.
 
 ## Confirm
 
 Reload the deployed site with a hard refresh (++ctrl+shift+r++), and
-check from a second device if you can; the image or file should
-appear.
+check from a second device if you can. The image appears, or the
+page that reads the file is displayed.
 
 ## Prevent
 
@@ -66,14 +114,15 @@ Keep every asset in the same folder as your program from the start,
 use lowercase filenames with no spaces, and after any deploy, click
 through the pages that show images or open files.
 
-Declare the files your site needs with
+Declaring files with
 [`add_website_file`](../../reference/site-config.md#add_website_file)
-(stylesheets and scripts added with `add_website_css_file` and
-`add_website_js_file` are declared automatically). Drafter then
-checks each name while you develop, so a misspelled or missing file
-is an error you see immediately, with a suggestion when a similarly
-named file exists, and the build copies the files into the deployed
-site.
+also helps while you develop, whichever way you deploy. Drafter
+checks that each declared file exists as soon as the program starts.
+A misspelled or missing name stops the program with a message such
+as `add_website_file: file not found: 'adda.png'`, long before
+anyone visits the deployed site. Stylesheets and scripts added with
+`add_website_css_file` and `add_website_js_file` are declared
+automatically.
 
 ## Understand
 

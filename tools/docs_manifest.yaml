@@ -1316,6 +1316,13 @@ pages:
     audience: S
     priority: P1
     outcome: Fix a failed parameter type conversion.
+  - path: help/errors/route-did-not-return-a-page.md
+    title: Route did not return a Page
+    template: error
+    level: L1
+    audience: S
+    priority: P0
+    outcome: Fix a route that does not return a Page.
   - path: help/errors/state-mismatch.md
     title: State doesn't match the State class
     template: error

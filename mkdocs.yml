@@ -196,6 +196,7 @@ nav:
     - Missing parameter: help/errors/missing-parameter.md
     - Text to int conversion: help/errors/type-conversion-int.md
     - Other type conversion: help/errors/type-conversion-other.md
+    - Route did not return a page: help/errors/route-did-not-return-a-page.md
     - State mismatch: help/errors/state-mismatch.md
     - Nothing after start_server: help/errors/nothing-after-start-server.md
     - Invalid page content: help/errors/page-content-invalid.md

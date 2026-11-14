@@ -14,15 +14,17 @@ error_text: "Process completed with exit code 1"
 
 ## The error
 
-A red X appears next to your deployment in the repository's
-**Actions** tab, and GitHub sends you an email about a failed
-workflow run. The log of the failed step typically ends with:
+This failure happens on GitHub and not inside your app, so there is
+no Drafter error page and no title to look for. A red X appears next
+to your deployment in the repository's **Actions** tab, and GitHub
+sends you an email about a failed workflow run. The log of the failed
+step typically ends with:
 
 ```text
 Error: Process completed with exit code 1.
 ```
 
-The useful message is the lines just above that one.
+The useful message is in the lines directly above that one.
 
 ## What it means
 

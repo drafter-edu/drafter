@@ -14,6 +14,17 @@ error_text: "expects int but got"
 
 ## The error
 
+The error page has this title:
+
+```text
+Problem With the Route's Arguments
+```
+
+Under the title, one sentence names the route function ("Drafter
+could not match the information sent by the page to the parameters
+of your 'set_age' function."). The technical message and the "What
+To Try Next" list then give the detail that identifies this error:
+
 ```text
 Parameter 'age' expects int but got 'twenty' from the form field
 'age'. Try entering a number, or change the parameter type to str.

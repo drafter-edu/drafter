@@ -14,13 +14,16 @@ error_text: "access denied"
 
 ## The error
 
+This problem has no error page and no title. The component shows
+one of these messages where its preview or button was:
+
 ```text
 Camera access denied
+Microphone access denied
 Location access denied
 ```
 
-Not a crash: the component shows a denied message where its
-preview or button was, and the value your route receives has
+The app keeps running, and the value your route receives has
 `status` set to `"denied"`.
 
 ## What it means

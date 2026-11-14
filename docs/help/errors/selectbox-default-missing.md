@@ -14,12 +14,27 @@ error_text: "is not in options"
 
 ## The error
 
+The error page has this title:
+
 ```text
-default_value 'Chocolate' is not in options ['vanilla', 'chocolate', 'strawberry']
+Unusable Value
 ```
 
-The friendly version: "The starting choice for this SelectBox has
-to be one of the options in its list."
+Drafter uses the title "Unusable Value" for several different
+problems, so the sentence under the title is what identifies this
+one:
+
+```text
+The starting choice for this SelectBox has to be one of the options in its
+list, and 'Chocolate' is not.
+```
+
+The technical message below it shows the default and the options:
+
+```text
+request.route_execution_failed: Error while processing request for URL 'index':
+default_value 'Chocolate' is not in options ['vanilla', 'chocolate', 'strawberry']
+```
 
 ## What it means
 

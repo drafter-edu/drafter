@@ -14,15 +14,31 @@ error_text: "has multiple components with the same name"
 
 ## The error
 
+The error page has this title:
+
 ```text
-The page returned from save has multiple components with the same
-name:
-  'answer' is used by: TextBox, SelectBox
-Each component must have a unique name, because the name is how
-values are matched to route parameters. Rename the duplicates.
+Components Share a Name
 ```
 
-The friendly title is "Components Share a Name".
+The sentence under the title names the route and the shared name:
+
+```text
+Two or more components on the page returned from `index` use the same
+name (`answer`). Drafter uses each component's name to match its value to
+a parameter of the next route function, so every component needs its own
+name.
+```
+
+The technical message below it lists the components that use the
+name:
+
+```text
+payload.verification_failed: Payload verification failed for the page 'index':
+The page returned from index has multiple components with the same name:
+  'answer' is used by: TextBox, SelectBox
+Each component must have a unique name, because the name is how values
+are matched to route parameters. Rename the duplicates.
+```
 
 ## What it means
 

@@ -14,9 +14,9 @@ error_text: "code after start_server() never runs"
 
 ## The error
 
-There is no error message; that is the confusing part. Code placed
-after the `start_server(...)` call, like the last line here, silently
-never happens:
+There is no error page, no title, and no message, which is the
+confusing part. Code placed after the `start_server(...)` call, like
+the last line here, does not run where you expect it to:
 
 ```python
 from drafter import *
@@ -28,15 +28,23 @@ def index() -> Page:
 
 
 start_server()
-print("Welcome to my site!")  # never printed
+print("Welcome to my site!")  # never printed in the terminal
 ```
+
+The terminal (the Thonny shell) never shows "Welcome to my site!",
+no matter how long the site runs.
 
 ## What it means
 
-`start_server(...)` does not finish and move on; it hands your whole
-program over to Drafter, which runs your routes from then on. The
-lines after it would only run if the call returned, and it never
-does. This is by design, not a bug.
+Your program runs twice, once on your computer and once in the
+browser. On your computer, `start_server(...)` starts the site and
+keeps running for as long as the site is up, so Python does not reach
+the lines after it. In the browser, the call finishes once the first
+page is ready, and the lines after it run one time as the site loads.
+The `print` in this example therefore appears in the Console box in
+the footer of the browser page and never in the terminal. Code that
+runs in one place and not the other is hard to reason about, which is
+why nothing should follow the call.
 
 ## Where to look
 
@@ -90,6 +98,6 @@ call, or inside a route.
 ## Understand
 
 [How Drafter works](../../start/how-drafter-works.md) explains the
-program's two runs and why the call never returns;
+program's two runs, and
 [start_server](../../reference/start-server.md) has the full option
 list.
