@@ -15,9 +15,10 @@ Running your file with Python (`python my_app.py`, or the Run
 button in your editor) is the normal way to work, and most
 projects never need more. The `drafter` command exists for the
 occasions you want to change how the app is served or built.
-`python -m drafter` is the same command spelled differently, and
-`drafter --help` prints the complete live list; this page keeps
-to the flags students actually reach for.
+`python -m drafter` is the same command spelled differently. This
+page keeps to the flags students actually reach for. For the complete
+list, `drafter --help` prints every flag for running a site, and
+`drafter --compile --help` prints every flag for building one.
 
 ## Running
 
@@ -69,6 +70,12 @@ port and how to stop it.
 | `--theme NAME` | `default` | Start with a theme, same as `set_website_style(...)` in code. The code version wins if both are used; the [theme catalog](themes.md) shows the choices. |
 | `--no-frame` | framed | Remove the browser-window frame around the app, same as `set_website_framed(False)`. |
 | `--production` | off | Run without the debug panel, the way visitors will see the deployed site. Worth one look before deploying. |
+| `--site-title TITLE` | none | Set the title shown in the browser tab, same as `set_website_title(...)` in code. The code version wins if both are used. |
+| `--console-mode MODE` | `auto` | Choose where `print()` output appears in the browser. `auto` shows a console in the page footer while the debug panel is on. `hover` shows a floating console box, which also appears with `--production`. `toast` shows each line briefly in a corner, and `devtools` sends output only to the browser's developer console. |
+
+These flags also apply to a build, so
+`drafter my_app.py --compile --production` builds the site without the
+debug panel.
 
 ## Building for deployment
 
@@ -99,12 +106,11 @@ missing, the build stops with `ModuleNotFoundError`.
 | Flag | Default | What it does |
 | ---- | ------- | ------------ |
 | `--output-directory DIR` | `dist` | Build somewhere else. |
-| `--additional-paths PATH` | none | Bundle an extra file your code `open()`s; repeat the flag for each file: `--additional-paths pets.csv --additional-paths words.txt`. Forgetting this is the classic works-locally, [404s-deployed](../help/errors/missing-asset-on-deploy.md) mistake. The in-code form is [`add_website_file`](site-config.md#add_website_file). |
-| `--additional-files PATH` | none | Same idea as `--additional-paths`, but through the site configuration: the flag version of `add_website_file(...)`. Repeat once per file. |
+| `--additional-paths PATH` | none | Copy an extra file, folder, or pattern such as `data/*.csv` into the built site. Repeat the flag for each one: `--additional-paths pets.csv --additional-paths words.txt`. A pattern that matches nothing prints a warning, and the build continues. Forgetting a file your code `open()`s is the classic works-locally, [404s-deployed](../help/errors/missing-asset-on-deploy.md) mistake. |
+| `--additional-files PATH` | none | The flag version of [`add_website_file(...)`](site-config.md#add_website_file). It names one file next to your program that the site needs, and the file is copied into the built site. Repeat once per file. A name that matches no file prints a warning, and the build continues. |
 | `--additional-css-files PATH_OR_URL` | none | Link a stylesheet (a `.css` file next to your program, or a URL) into every page; the flag version of `add_website_css_file(...)`. Repeat once per entry. |
 | `--additional-js-files PATH_OR_URL` | none | Load a script (a `.js` file next to your program, or a URL) on every page; the flag version of `add_website_js_file(...)`. Repeat once per entry. |
-| `--create-404 MODE` | `if_missing` | Whether to write a `404.html` next to `index.html`. That page is what lets a visitor open your deployed site directly on a route, such as your address plus `--about`. `if_missing` leaves a `404.html` you made yourself alone; `always` overwrites it; `never` skips it. |
-| `--zip-output` | off | Zip the built site, convenient for uploading. |
+| `--create-404 MODE` | `if_missing` | Whether to write a `404.html` next to `index.html`. That page is what lets a visitor open your deployed site directly on a route, such as your address plus `--about`. `if_missing` leaves a `404.html` you made yourself alone, `always` overwrites it, and `never` skips it. [Opening a site on a route](route.md#opening-a-site-on-a-route) explains what such an address can and cannot do. |
 | `--no-warn-missing-info` | notice on | Building a site that never calls [`set_site_information`](site-config.md#set_site_information) prints a notice, because its about page will be empty. The site is still built. This flag turns the notice off. |
 
 ## Libraries
@@ -117,9 +123,11 @@ missing, the build stops with `ModuleNotFoundError`.
 
 ## Related
 
-- The full flag reference, including development and internal
-  options, lives in the repository README; contributors should
-  start at the [developer docs](../dev/index.md).
+- The full flag list, including development and internal options,
+  comes from the command itself. Run `drafter --help` for the flags
+  that apply when running a site and `drafter --compile --help` for
+  the flags that apply when building one. Contributors should start
+  at the [developer docs](../dev/index.md).
 - Most of what these flags do is also available in code through
   [site configuration](site-config.md), which travels with your
   file and is usually the better home.

@@ -61,12 +61,15 @@ page.
 
 ## Data types
 
-- [Data types](data-types/index.md): `Picture`, `Photo`, location
-  types, file types, and audio types.
+- [Data types](data-types/index.md): `Picture`, `Photo`,
+  [`Color`](data-types/color.md), location types, file types, and
+  audio types.
 
 ## Everything else
 
 - [Glossary](glossary.md): the words Drafter uses, in plain language.
 - [Command line](cli.md): flags for running `drafter` from a terminal.
+- [Live reload](live-reload.md): which files Drafter watches while
+  your program runs, and the settings that control the reload on save.
 - [Concepts](../concepts/index.md): the explanations behind these
   details, written to be read rather than looked up.

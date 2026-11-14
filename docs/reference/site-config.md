@@ -54,9 +54,17 @@ def index() -> Page:
 start_server()
 ```
 
+Under each heading below, the first line gives the function's
+parameters and any default values. The code block after it shows a
+typical call. Every function also accepts a final `server` keyword,
+which chooses the app to configure in a program that runs more than
+one. Ordinary programs leave it out.
+
 ## Appearance
 
 ### set_website_title
+
+`set_website_title(title)`
 
 ```python
 set_website_title("My Amazing App")
@@ -65,6 +73,8 @@ set_website_title("My Amazing App")
 Sets the title shown in the browser tab.
 
 ### set_website_favicon
+
+`set_website_favicon(favicon)`
 
 ```python
 set_website_favicon("icon.png")
@@ -77,6 +87,8 @@ When deploying, remember the file must travel with your site; see
 
 ### set_website_style
 
+`set_website_style(style)`
+
 ```python
 set_website_style("terminal")
 ```
@@ -88,6 +100,8 @@ error listing every valid theme. The how-to is
 
 ### set_website_framed
 
+`set_website_framed(framed)`
+
 ```python
 set_website_framed(False)
 ```
@@ -98,6 +112,8 @@ off so the app fills the page.
 
 ### set_page_transition
 
+`set_page_transition(transition="fade", duration=None)`
+
 ```python
 set_page_transition("fade")
 set_page_transition("black", 0.3)
@@ -107,9 +123,12 @@ Plays a visual transition whenever the visitor moves between pages.
 `"fade"` fades the new page in from transparent; a CSS color such as
 `"black"` or `"#004488"` fades in from a solid veil of that color;
 `"none"` turns transitions off again. The second argument is the
-duration in seconds (0.5 by default).
+duration in seconds. When it is left out, the duration keeps its
+current value, which starts at 0.5 seconds.
 
 ### set_button_spinners
+
+`set_button_spinners(enabled=True)`
 
 ```python
 set_button_spinners(True)
@@ -121,6 +140,8 @@ This is helpful when a route does slow work and a visitor might
 otherwise click twice.
 
 ### set_state_display
+
+`set_state_display(enabled=True)`
 
 ```python
 set_state_display(False)
@@ -137,6 +158,8 @@ do the back and forward buttons and the panel's Save and Load. Call
 `set_state_display(True)` to bring the display back.
 
 ### set_browser_history
+
+`set_browser_history(enabled=True)`
 
 ```python
 set_browser_history(False)
@@ -164,6 +187,8 @@ history off automatically. The same setting is available as the
 
 ### add_website_header
 
+`add_website_header(header)`
+
 ```python
 add_website_header("<meta name='author' content='Ada'>")
 ```
@@ -172,6 +197,8 @@ Adds raw content to the site's HTML head: meta tags, script tags, or
 anything else that belongs there. The text is not wrapped or escaped.
 
 ### add_website_css
+
+`add_website_css(selector, css=None)`
 
 ```python
 add_website_css("h1 { color: darkslateblue; }")
@@ -186,6 +213,8 @@ Passing a file name such as `"style.css"` is a mistake this function
 catches and reports; use `add_website_css_file` for files.
 
 ### add_website_css_file
+
+`add_website_css_file(path)`
 
 ```python
 add_website_css_file("style.css")
@@ -205,6 +234,8 @@ ties.
 
 ### add_website_js
 
+`add_website_js(js)`
+
 ```python
 add_website_js("console.log('Site loaded');")
 ```
@@ -213,6 +244,8 @@ Runs JavaScript code once, when the site first loads. Like
 `add_website_css`, it takes code, not a file name.
 
 ### add_website_js_file
+
+`add_website_js_file(path)`
 
 ```python
 add_website_js_file("app.js")
@@ -226,6 +259,8 @@ files for deployment.
 
 ### add_website_file
 
+`add_website_file(*filenames)`
+
 ```python
 add_website_file("words.txt", "images/logo.png")
 ```
@@ -234,16 +269,24 @@ Declares files next to your program that the site needs at runtime:
 data files you `open()`, images, fonts, and so on. Each name is
 checked immediately (with suggestions when a similarly named file
 exists), and the files are copied into the built site when you
-deploy. This is the in-code equivalent of the
-[`--additional-paths`](cli.md#building-for-deployment) flag, and the
-way to prevent the
+deploy. This is the way to prevent the
 [works locally, 404s deployed](../help/errors/missing-asset-on-deploy.md)
 problem. Only files inside your program's folder can be added:
 absolute paths, `..` paths, and URLs are rejected with an explanation.
 
+Two command line flags also copy files into the built site.
+[`--additional-files`](cli.md#building-for-deployment) is the flag form
+of this function and takes one file name at a time.
+[`--additional-paths`](cli.md#building-for-deployment) is a separate
+build flag that also accepts folders and patterns such as
+`data/*.csv`. Calling `add_website_file` in your program has the
+advantage that the list of files travels with the code.
+
 ## Site information
 
 ### set_site_information
+
+`set_site_information(author, description, sources, planning, links)`
 
 ```python
 set_site_information(
@@ -265,6 +308,8 @@ expects this to be filled in; see
 
 ### get_site_information
 
+`get_site_information()`
+
 ```python
 get_site_information()
 ```
@@ -276,6 +321,8 @@ in tests.
 
 ### hide_debug_information
 
+`hide_debug_information()`
+
 ```python
 hide_debug_information()
 ```
@@ -286,6 +333,8 @@ app rather than your debugger.
 
 ### show_debug_information
 
+`show_debug_information()`
+
 ```python
 show_debug_information()
 ```
@@ -295,16 +344,21 @@ development.
 
 ### set_error_page
 
+`set_error_page(title=None, message=None, show_details=None)`
+
 ```python
 set_error_page("Oh no!", "Something broke. Try the home page.", False)
 ```
 
 Customizes the built-in error page. The three arguments set the
 heading, the friendly message shown to visitors, and whether technical
-details (the error message and traceback) are shown. Deployed sites
-often pass `False` so visitors never see a traceback.
+details (the error message and traceback) are shown. Each argument is
+optional, and one that is left out keeps its current setting. Deployed
+sites often pass `False` so visitors never see a traceback.
 
 ### deploy_site
+
+`deploy_site(image_folder="images")`
 
 ```python
 deploy_site()

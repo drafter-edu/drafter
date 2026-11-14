@@ -27,7 +27,7 @@ outcome: Look up every assertion.
 # Testing functions
 
 This page lists every assertion Drafter ships. They all behave the
-same way: each prints SUCCESS or FAILURE (with every difference
+same way: each prints SUCCESS or FAILURE (with the differences it
 found), returns `True` or `False`, and never crashes your program.
 Assertions run where they are written, before `start_server(...)`,
 and report into the debug panel's Tests tab. The how-to is
@@ -35,18 +35,24 @@ and report into the debug panel's Tests tab. The how-to is
 
 ## Shared flags
 
-Every assertion accepts these keyword flags:
+Most assertions accept the same four keyword flags.
 
 | Flag | Default | Meaning |
 | ---- | ------- | ------- |
-| `precision` | `None` | Decimal places for float comparisons. |
-| `exact_strings` | loose | Make text matching exact (case and whitespace count). |
-| `strict_styles` | off | Make style differences count as failures. |
-| `quiet` | `False` | Suppress the SUCCESS line on passing tests. |
+| `precision` | 4 decimal places | How many decimal places are compared when two floats are compared. With the default, `1.00001` and `1.00002` count as equal. |
+| `exact_strings` | `False` | When `True`, text must match exactly, including capital letters and spaces at either end. |
+| `strict_styles` | `False` | When `True`, a difference in styling counts as a failure. |
+| `quiet` | `False` | When `True`, this one call does not print its SUCCESS line. A FAILURE is always printed. |
 
-By default, matching is deliberately forgiving: text comparisons
-ignore case, and styles are left out of comparisons entirely. Change
-the defaults for a whole file with `set_assertion_defaults`, below.
+Four assertions accept only `exact_strings` and `quiet`. They are
+`assert_has_regex`, `assert_in_regex`, `assert_style`, and
+`assert_text`. Passing `precision` or `strict_styles` to one of them
+raises a `TypeError`.
+
+With the default flags, matching is forgiving. Text comparisons ignore
+capital letters and spaces at either end, and styles are left out of
+comparisons entirely. Change the defaults for a whole file with
+`set_assertion_defaults`, described below.
 
 ## Comparing whole things
 
@@ -146,11 +152,13 @@ styles by default; this one exists to test them.
 ### assert_children
 
 ```python
-assert_children(BulletedList(["a", "b"]), ["a", "b"])
+assert_children(Div("a", "b"), ["a", "b"])
 ```
 
-Check what is nested inside a component, such as the items of a
-list or the contents of a Div.
+Check what is nested inside a component, such as the contents of a
+`Div` or a `Span`. For the items of a `BulletedList`, check the
+`items` attribute:
+`assert_attribute(BulletedList(["a", "b"]), "items", ["a", "b"])`.
 
 ### assert_text
 
@@ -171,15 +179,25 @@ set_assertion_defaults(strict_styles=True)
 
 Change the default flags for every assertion after this call: any
 of `precision`, `exact_strings`, `strict_styles`, and
-`report_success`. Only the flags you pass change. The flags are
-keyword arguments, so spell them out (`strict_styles=True`).
+`report_success`. Only the flags you pass change. Pass each flag by
+name, as in `strict_styles=True`.
+
+`report_success` is the whole-file form of `quiet`.
+`set_assertion_defaults(report_success=False)` stops every passing
+assertion from printing its SUCCESS line, and `quiet=True` does the
+same for one call. A SUCCESS line is printed only when `quiet` is
+`False` and `report_success` is `True`. Neither setting hides a
+FAILURE.
 
 ## Notes
 
 - Assertions return booleans and print failures rather than raising,
   so one failing test never hides the ones after it.
-- Failing tests do not stop the site from starting; they report in
-  the terminal and in the debug panel's Tests tab.
+- A failing test does not stop the site from starting. The failure
+  is reported in the terminal and in the debug panel's Tests tab, and
+  the site runs as usual. Python's own `assert` statement behaves
+  differently: when it fails, it raises `AssertionError`, and the
+  program stops before it reaches `start_server`.
 - Routes are ordinary functions you can call directly: build a
   state, call the route, and assert on the result. You never need to
   click through the app to test its logic.

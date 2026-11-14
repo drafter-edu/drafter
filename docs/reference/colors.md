@@ -11,7 +11,10 @@ outcome: Look up color names.
 
 # HTML Colors
 
-This table lists common HTML color names and their hex values.
+This table lists the 148 HTML color names that Drafter accepts, with
+the hex value of each. Capital letters make no difference, so `Gray`
+and `gray` name the same color. Every color with "gray" in its name
+can also be spelled with "grey".
 
 <table>
   <thead>
@@ -48,6 +51,7 @@ This table lists common HTML color names and their hex values.
     <tr><td><code>darkgoldenrod</code></td><td style="background-color: darkgoldenrod;">&nbsp;</td><td><code>#b8860b</code></td></tr>
     <tr><td><code>darkgray</code></td><td style="background-color: darkgray;">&nbsp;</td><td><code>#a9a9a9</code></td></tr>
     <tr><td><code>darkgreen</code></td><td style="background-color: darkgreen;">&nbsp;</td><td><code>#006400</code></td></tr>
+    <tr><td><code>darkgrey</code></td><td style="background-color: darkgrey;">&nbsp;</td><td><code>#a9a9a9</code></td></tr>
     <tr><td><code>darkkhaki</code></td><td style="background-color: darkkhaki;">&nbsp;</td><td><code>#bdb76b</code></td></tr>
     <tr><td><code>darkmagenta</code></td><td style="background-color: darkmagenta;">&nbsp;</td><td><code>#8b008b</code></td></tr>
     <tr><td><code>darkolivegreen</code></td><td style="background-color: darkolivegreen;">&nbsp;</td><td><code>#556b2f</code></td></tr>
@@ -58,11 +62,13 @@ This table lists common HTML color names and their hex values.
     <tr><td><code>darkseagreen</code></td><td style="background-color: darkseagreen;">&nbsp;</td><td><code>#8fbc8f</code></td></tr>
     <tr><td><code>darkslateblue</code></td><td style="background-color: darkslateblue;">&nbsp;</td><td><code>#483d8b</code></td></tr>
     <tr><td><code>darkslategray</code></td><td style="background-color: darkslategray;">&nbsp;</td><td><code>#2f4f4f</code></td></tr>
+    <tr><td><code>darkslategrey</code></td><td style="background-color: darkslategrey;">&nbsp;</td><td><code>#2f4f4f</code></td></tr>
     <tr><td><code>darkturquoise</code></td><td style="background-color: darkturquoise;">&nbsp;</td><td><code>#00ced1</code></td></tr>
     <tr><td><code>darkviolet</code></td><td style="background-color: darkviolet;">&nbsp;</td><td><code>#9400d3</code></td></tr>
     <tr><td><code>deeppink</code></td><td style="background-color: deeppink;">&nbsp;</td><td><code>#ff1493</code></td></tr>
     <tr><td><code>deepskyblue</code></td><td style="background-color: deepskyblue;">&nbsp;</td><td><code>#00bfff</code></td></tr>
     <tr><td><code>dimgray</code></td><td style="background-color: dimgray;">&nbsp;</td><td><code>#696969</code></td></tr>
+    <tr><td><code>dimgrey</code></td><td style="background-color: dimgrey;">&nbsp;</td><td><code>#696969</code></td></tr>
     <tr><td><code>dodgerblue</code></td><td style="background-color: dodgerblue;">&nbsp;</td><td><code>#1e90ff</code></td></tr>
     <tr><td><code>firebrick</code></td><td style="background-color: firebrick;">&nbsp;</td><td><code>#b22222</code></td></tr>
     <tr><td><code>floralwhite</code></td><td style="background-color: floralwhite;">&nbsp;</td><td><code>#fffaf0</code></td></tr>
@@ -75,8 +81,10 @@ This table lists common HTML color names and their hex values.
     <tr><td><code>gray</code></td><td style="background-color: gray;">&nbsp;</td><td><code>#808080</code></td></tr>
     <tr><td><code>green</code></td><td style="background-color: green;">&nbsp;</td><td><code>#008000</code></td></tr>
     <tr><td><code>greenyellow</code></td><td style="background-color: greenyellow;">&nbsp;</td><td><code>#adff2f</code></td></tr>
+    <tr><td><code>grey</code></td><td style="background-color: grey;">&nbsp;</td><td><code>#808080</code></td></tr>
     <tr><td><code>honeydew</code></td><td style="background-color: honeydew;">&nbsp;</td><td><code>#f0fff0</code></td></tr>
     <tr><td><code>hotpink</code></td><td style="background-color: hotpink;">&nbsp;</td><td><code>#ff69b4</code></td></tr>
+    <tr><td><code>indianred</code></td><td style="background-color: indianred;">&nbsp;</td><td><code>#cd5c5c</code></td></tr>
     <tr><td><code>indigo</code></td><td style="background-color: indigo;">&nbsp;</td><td><code>#4b0082</code></td></tr>
     <tr><td><code>ivory</code></td><td style="background-color: ivory;">&nbsp;</td><td><code>#fffff0</code></td></tr>
     <tr><td><code>khaki</code></td><td style="background-color: khaki;">&nbsp;</td><td><code>#f0e68c</code></td></tr>
@@ -88,13 +96,15 @@ This table lists common HTML color names and their hex values.
     <tr><td><code>lightcoral</code></td><td style="background-color: lightcoral;">&nbsp;</td><td><code>#f08080</code></td></tr>
     <tr><td><code>lightcyan</code></td><td style="background-color: lightcyan;">&nbsp;</td><td><code>#e0ffff</code></td></tr>
     <tr><td><code>lightgoldenrodyellow</code></td><td style="background-color: lightgoldenrodyellow;">&nbsp;</td><td><code>#fafad2</code></td></tr>
-    <tr><td><code>lightgrey</code></td><td style="background-color: lightgrey;">&nbsp;</td><td><code>#d3d3d3</code></td></tr>
+    <tr><td><code>lightgray</code></td><td style="background-color: lightgray;">&nbsp;</td><td><code>#d3d3d3</code></td></tr>
     <tr><td><code>lightgreen</code></td><td style="background-color: lightgreen;">&nbsp;</td><td><code>#90ee90</code></td></tr>
+    <tr><td><code>lightgrey</code></td><td style="background-color: lightgrey;">&nbsp;</td><td><code>#d3d3d3</code></td></tr>
     <tr><td><code>lightpink</code></td><td style="background-color: lightpink;">&nbsp;</td><td><code>#ffb6c1</code></td></tr>
     <tr><td><code>lightsalmon</code></td><td style="background-color: lightsalmon;">&nbsp;</td><td><code>#ffa07a</code></td></tr>
     <tr><td><code>lightseagreen</code></td><td style="background-color: lightseagreen;">&nbsp;</td><td><code>#20b2aa</code></td></tr>
     <tr><td><code>lightskyblue</code></td><td style="background-color: lightskyblue;">&nbsp;</td><td><code>#87cefa</code></td></tr>
     <tr><td><code>lightslategray</code></td><td style="background-color: lightslategray;">&nbsp;</td><td><code>#778899</code></td></tr>
+    <tr><td><code>lightslategrey</code></td><td style="background-color: lightslategrey;">&nbsp;</td><td><code>#778899</code></td></tr>
     <tr><td><code>lightsteelblue</code></td><td style="background-color: lightsteelblue;">&nbsp;</td><td><code>#b0c4de</code></td></tr>
     <tr><td><code>lightyellow</code></td><td style="background-color: lightyellow;">&nbsp;</td><td><code>#ffffe0</code></td></tr>
     <tr><td><code>lime</code></td><td style="background-color: lime;">&nbsp;</td><td><code>#00ff00</code></td></tr>
@@ -148,6 +158,7 @@ This table lists common HTML color names and their hex values.
     <tr><td><code>skyblue</code></td><td style="background-color: skyblue;">&nbsp;</td><td><code>#87ceeb</code></td></tr>
     <tr><td><code>slateblue</code></td><td style="background-color: slateblue;">&nbsp;</td><td><code>#6a5acd</code></td></tr>
     <tr><td><code>slategray</code></td><td style="background-color: slategray;">&nbsp;</td><td><code>#708090</code></td></tr>
+    <tr><td><code>slategrey</code></td><td style="background-color: slategrey;">&nbsp;</td><td><code>#708090</code></td></tr>
     <tr><td><code>snow</code></td><td style="background-color: snow;">&nbsp;</td><td><code>#fffafa</code></td></tr>
     <tr><td><code>springgreen</code></td><td style="background-color: springgreen;">&nbsp;</td><td><code>#00ff7f</code></td></tr>
     <tr><td><code>steelblue</code></td><td style="background-color: steelblue;">&nbsp;</td><td><code>#4682b4</code></td></tr>

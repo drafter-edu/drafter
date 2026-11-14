@@ -66,11 +66,15 @@ never trigger a reload in any mode.
 
 ## Settings
 
-Each setting below can be passed as a keyword to `start_server(...)`,
-set in a JSON configuration file (passed with `--config-file`) under
-the `app_server` section, or set through an environment variable with
-the `DRAFTER_` prefix (for example `DRAFTER_WATCH_MAX_FILES=500`).
-The boolean switches also have `--no-...` command-line flags.
+Each setting below can be passed as a keyword to `start_server(...)`
+or given as a command line flag, such as `--no-reloader` or
+`--watch-max-files 500`. Running `drafter --help` lists the flags.
+The `watch_...` settings can also be set through an environment
+variable with the `DRAFTER_` prefix, for example
+`DRAFTER_WATCH_MAX_FILES=500`. The `use_reloader` setting is the
+exception: its environment variable currently has no effect.
+[Where settings come from](start-server.md#where-settings-come-from)
+describes the three forms.
 
 | Setting | Default | What it does |
 | ------- | ------- | ------------ |
@@ -131,9 +135,9 @@ path relative to your program's folder.
 ## Turning it off
 
 Pass `use_reloader=False` to `start_server`, or run with
-`drafter my_app.py --no-reloader`. The server still runs; it simply
-never restarts the site on its own, and you refresh manually after
-stopping and rerunning the program.
+`drafter my_app.py --no-reloader`. The server still runs, but it
+never restarts the site on its own. To see a change, stop the program,
+run it again, and refresh the browser tab.
 
 ## Related
 

@@ -5,18 +5,16 @@ level: L3
 audience: S
 priority: P1
 prereqs: []
-symbols:
-  - PageContent
-  - Content
-  - Component
+symbols: []
 outcome: Understand the extra keyword attributes components accept.
 ---
 
 # Keywords every component accepts
 
 Beyond its own parameters, every component accepts extra keyword
-arguments. They fall into five families, and all five work on any
-component, from `Button` to `Table`.
+arguments. They fall into six families. Five of them work on any
+component, from `Button` to `Table`. The sixth, `arguments`, has an
+effect only on a component that calls a route.
 
 ```python drafter height=260
 from drafter import *
@@ -78,6 +76,22 @@ happens. The supported events are `blur`, `change`, `focus`, `input`,
 `keydown`, `keyup`, `keypress`, `mouseenter`, `mouseleave`,
 `mouseover`, `mouseout`, `click`, and `dblclick`. The concept, with
 a worked demo, is [Live updates](../concepts/live-updates.md).
+
+## `arguments`: extra values for the route
+
+The `arguments` keyword sends fixed values to the route along with
+whatever the visitor entered. It works on a `Button` or `Link`, and on
+any component that has an `on_*` handler. The value can be a
+dictionary of parameter names and values:
+
+```python
+TextBox("amount", "1", on_change="update", arguments={"row": 3})
+```
+
+When the visitor changes this box, Drafter calls `update` with the
+box's value as `amount` and with `row` set to `3`.
+[Passing arguments](components/actions/button.md#passing-arguments)
+lists the other forms that `arguments` accepts.
 
 ## Plain HTML attributes
 
