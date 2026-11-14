@@ -28,13 +28,17 @@ debug mode is on, which is the default during development;
 ## Current: what the app is, right now
 
 The Current tab shows the route that produced the page you are
-looking at and the full current state. The state view is live: after
-every click it reflects what your routes did.
+looking at, a list titled "Errors & Warnings" for that page, and the
+full current state. Each field of the state appears with its value
+and its type. The state view is live, so after every click it shows
+what your routes did. Expanding **Page Content** shows the page
+written as an `assert_equal` test.
 
-It is also editable. Changing a value in the state editor and
-applying it re-renders the page from the edited state, which is the
-fastest way to answer questions like "what does the results page
-look like at score 10?" without clicking ten times.
+The state view is read-only. To see a page at a particular state,
+such as the results page at score 10, either change the starting
+value in `start_server(...)` and save, or click your way to that
+state once and keep it with the
+[Save/Load menu](#saveload).
 
 ## History: everything that happened
 
@@ -50,16 +54,17 @@ Expanding **Where these values came from** lists each argument: the
 form field, button argument or default it came from, what arrived,
 and what Drafter converted it to (a form sends `'60'`; your `int`
 parameter receives `60`). Uploaded pictures get a thumbnail and
-colors a swatch. Expanding **Page shown** gives the returned
-`Page(...)` written as Python, which is what
-[freezing a page](../add/freeze-pages.md) copies, and the state
-after the visit.
+colors a swatch. Expanding **Page shown** gives an `assert_equal`
+test for the visit, with the returned `Page(...)` written as Python,
+which is what [freezing a page](../add/freeze-pages.md) copies. The
+state after the visit appears below the test.
 
-Ten visits show at first; **Show older visits** adds the next ten
-without losing your place. The history can also replay a visit,
-which re-dispatches the same request against your current code.
-Replaying is exactly the check you want after fixing a bug: does
-that click work now?
+Ten visits show at first, and the **Show older visits** button adds
+the next ten without losing your place. Each line also has a
+**Revisit** button, which runs the same route again with the same
+arguments and the state as it is now. Revisiting is a quick check
+after you fix a bug, because it repeats the click that failed.
+**Clear History** asks you to confirm and then empties the list.
 
 When the same problem happens again, the Current tab's list does
 not grow a second line; the problem gets a counter such as ×3. The
@@ -69,82 +74,168 @@ to another tab.
 
 ## Overview: the app from above
 
-The routes list shows every registered route with its parameters.
-Think of it as a table of contents for your app. Check it when
-clicking a button reports that a route does not exist, or when you
-suspect a route function is missing its `@route` decorator.
-(A visual route graph is planned for this tab but not finished.)
+The **Registered Routes** list shows every route in your program
+with its parameters, such as `index(state: State)`. Think of the
+list as a table of contents for your app. Check it when clicking a
+button reports that a route does not exist, or when you suspect a
+route function is missing its `@route` decorator.
+
+Below the list, the **Route Graph** section is not finished. It
+shows a note that the graph is coming soon and a sample drawing with
+the routes `index`, `guess`, `give_up`, and `result`. The drawing is
+the same for every app and does not describe yours.
 
 ## Tests: your assertions, live
 
-Every assertion that ran at startup is here with its result, line
-number, and, for failures, the full difference report. Two buttons
-here are more useful than they may first appear: **copy** and
-**download**, which export every test the app has run as a
-ready-to-save Python file. They become valuable once
-[frozen tests](../add/freeze-pages.md) start accumulating.
+Every assertion in your file is listed here with its result and its
+line number, and each failure has the full difference report. A
+failing test also puts a count next to the tab's name.
 
-Tests re-run when your program restarts, not while you click around
-the app. If the test list is all green but clicking still breaks
-something, the broken behavior does not have a test yet.
+Tests run again every time the site reloads, which includes every
+time you save your file. They do not run while you click around the
+app. If every test passes and clicking still breaks something, the
+broken behavior does not have a test yet.
+
+The **Regression Tests** section has two buttons, **Copy Regression
+Tests** and **Download Tests (.py)**. Both produce one
+`assert_equal` test for each page you have visited, in the order you
+visited them. [Freeze finished pages](../add/freeze-pages.md)
+explains what to do with those tests.
 
 ## Environment: the machinery
 
 This tab collects several kinds of information about the
-environment your app runs in:
+environment your app runs in.
 
-- **Files**: what the app's file system holds, for checking that a
-  data file or image is actually where `open(...)` expects it.
-- **Packages**: which Python packages are loaded.
-- **Configuration**: every active setting (title, theme, debug mode,
-  and the rest) with its current value, for "did my
-  `set_website_...` call actually take?"
-- **Runtime info** and **Internals**: versions and wiring, mostly
-  useful when [filing a bug report](bug-reports.md).
-- **Log**: the cumulative record of errors and warnings, including
-  ones that older pages showed and you clicked past.
-- **Storage**: saved state slots. Save a situation you want to
-  return to (a half-finished quiz, a full shopping cart) and load it
-  back later instead of re-clicking your way there.
+- **File Systems** lists the files that Python can see in the
+  browser, under "Client File System". Press Refresh to update the
+  list. Use it to check that a data file is where `open(...)`
+  expects it.
+- **Installed Packages** lists the Python packages that are loaded.
+- **Configuration** lists every setting, such as the title, the
+  theme, and debug mode, with its current value. Look here to check
+  that a `set_website_...` call took effect. Each setting also has
+  an Edit button that overrides the value in this browser only.
+- **Runtime Info** gives the browser and Python versions, which are
+  mostly useful when [filing a bug report](bug-reports.md).
+- **Event Log** is a running list of what Drafter has done since the
+  site loaded. Errors stay in this list after you leave the page
+  that showed them.
+- **Browser Storage** lists what Drafter has saved in this browser,
+  including the snapshots from the Save/Load menu. Press Refresh to
+  update the list, and use the button at the end of a row to delete
+  that entry.
+- **Advanced** is not finished. Its "Show Drafter internals" section
+  shows sample values, not information about your app.
 
 ## The menus
 
-The header menubar above the tabs holds the view controls: an
-option to hide the frame, and the live site-theme switcher for
-[trying themes](../add/change-appearance/themes.md). It also holds
-the Help menu, whose **Download Bug Report** item packages up
-[everything a bug report needs](bug-reports.md).
+The menu bar at the top of the frame around your page has five
+menus. The names of the items below are the names on the screen.
 
-The Edit menu's **Convert HTML to Drafter…** item turns HTML you
-already have into Drafter code. Paste the HTML (or choose an `.html`
-file), press Convert, and copy the Python it writes. The result is a
-starting point: read it before using it, because some HTML has no
-exact Drafter match. The converter downloads the first time you use
-it, so the first conversion takes a moment longer than the rest.
+### Navigate
 
-While your app runs from your own computer, the Navigate menu ends
-with **Stop Server…**. After you confirm, it shuts down the Drafter
-program running in your terminal or editor, the same as pressing
-Ctrl+C there. The tab stays open but stops working until you run
-your program again. The same control lives at your site's address
-plus `--stop-server`, which is handy when the debug panel is
-hidden behind a small frame. Deployed sites have no server to stop,
-so the item does not appear there.
+- **Home** goes to your `index` page.
+- **Reset** puts the state back to its starting value and returns to
+  the `index` page.
+- **Reload Site** reloads the whole site in the browser.
+- **Replay Route** runs the current route again with the same
+  arguments. If that route changes the state, the change happens
+  again.
+- **About** shows a page with the information you gave to
+  `set_site_information`.
+- **Stop Server…** appears while your app runs from your own
+  computer. After you confirm, it shuts down the Drafter program
+  running in your terminal or editor, the same as pressing Ctrl+C
+  there. The tab stays open, and a page that is already loaded may
+  still respond to clicks, because your Python runs in the browser.
+  Saving your file no longer reloads the site, and reloading the tab
+  fails, until you run your program again. The same control is
+  available at your site's address plus `--stop-server`, which helps
+  when the debug panel is hidden. Deployed sites have no server to
+  stop, so the item does not appear there.
+
+### View
+
+- **Toggle Frame** hides the frame around your page, which includes
+  the menu bar and the Console box, so that you can see the page as
+  a visitor would. The debug panel keeps its own small **View** menu
+  at its top right, and choosing Toggle Frame there brings the frame
+  back.
+- **Production** hides the debug panel as well as the frame. Reload
+  the browser tab to get them back.
+- **Switch Theme…** opens the theme switcher for
+  [trying themes](../add/change-appearance/themes.md).
+- **View Page HTML** opens a read-only window with the HTML that
+  Drafter generated for the current page.
+
+### Edit
+
+- **Edit State…** is not finished. It opens a window that shows the
+  current state and a note that editing is coming soon. You cannot
+  change a value there.
+- **Edit Source** opens your program in an editor inside the
+  browser. Pressing **Run** restarts the site with the edited code.
+  The edit exists only in that browser tab. The file on your
+  computer does not change, so copy anything you want to keep back
+  into your own editor.
+- **Convert HTML to Drafter…** turns HTML you already have into
+  Drafter code. Paste the HTML or choose an `.html` file, press
+  Convert, and copy the Python it writes. Read the result before
+  you use it, because some HTML has no exact Drafter match. The
+  converter is downloaded the first time you use it, so the first
+  conversion takes a moment longer than the rest.
+
+### Save/Load
+
+A snapshot records the current state and the route that produced the
+current page. Use one to return to a situation that takes many
+clicks to reach, such as a half-finished quiz or a full shopping
+cart.
+
+- **Quick Save** stores a snapshot in the browser.
+- **Save to Slot…** stores a snapshot in one of ten numbered slots.
+- **Load Most Recent** restores the newest snapshot. The item shows
+  how long ago that snapshot was saved, and it is gray until you
+  have saved one.
+- **Load from Slot…** lets you pick among the saved snapshots.
+- **Download Snapshot…** saves a snapshot as a `.json` file on your
+  computer, and **Upload Snapshot…** restores from such a file.
+
+Loading a snapshot puts the saved state back and then runs the saved
+route again. If that route changes the state, the change is applied
+again on top of the saved state. For example, a counter saved at 4
+on a page produced by an `add_one` route loads as 5. To get back
+exactly what you saved, save while you are on a page whose route
+only displays the state, such as `index`.
+
+Snapshots are kept by the browser, so they survive a reload of the
+tab. If you change the fields of your `State` class after you save,
+for example by renaming one, loading the snapshot can fail. The
+state then stays as it was, and the Current tab lists an error.
+
+### Help
+
+- **Documentation** opens the Drafter documentation in a new tab.
+- **Download Bug Report** packages up
+  [everything a bug report needs](bug-reports.md).
 
 ## Common problems
 
-- **The panel is gone**: debug mode is off. Remove or comment out
-  `hide_debug_information()` (and any `in_debug_mode=False`), then
-  restart.
-- **The state view disagrees with the page**: the page was rendered
-  before your latest state edit or click; interact once more, or
-  check History to see which state each page was built from.
-- **Tests show stale results**: tests run at startup. Restart the
-  program to re-run them against current code.
-- **Editing state broke the page**: you gave a field a value of the
-  wrong type, which is a preview of the
-  [state type problem](errors/state-mismatch.md). Reset by
-  restarting; state edits are never saved to your code.
+- **The panel is gone.** Debug mode is off. Remove or comment out
+  `hide_debug_information()` and any `in_debug_mode=False`, then
+  save. If you chose Production from the View menu, reload the tab.
+- **The menus are gone but the panel is still there.** The frame is
+  hidden. Open the **View** menu at the top right of the debug panel
+  and choose Toggle Frame.
+- **The state view disagrees with the page.** A page shows the state
+  as it was when its route ran. Check the History tab to see which
+  state each page was built from.
+- **Tests show old results.** Tests run when the site loads. Save
+  your file, or reload the tab, to run them against the current
+  code.
+- **A loaded snapshot is off by one step.** Loading runs the saved
+  route again. See the note under [Save/Load](#saveload).
 
 ## Next steps
 

@@ -57,6 +57,30 @@ session. It contains your code and your clicks, and that level of
 detail is exactly what makes it useful to the people fixing the
 bug.
 
+## The drafter-debug.log file
+
+While you develop, a file named `drafter-debug.log` may appear in
+the folder that holds your program. Drafter creates the file the
+first time an error happens on your site while the program runs on
+your computer with the debug panel showing. Later errors add lines
+to the file. Warnings are not recorded, and a deployed site never
+writes the file.
+
+Each line is one report in JSON format. A report holds the time,
+the name of your file, the versions of Drafter, Python, and your
+browser, and the error itself with the route call that failed. That
+call includes the values in your state and anything that was typed
+into a form. The file does not contain your program's code.
+
+You can delete the file at any time. Drafter creates it again when
+the next error happens, and trims it once it grows past 10
+megabytes. Changes to the file never reload your site. The file is
+not part of your site, so leave it out when you upload your project
+to a repository, and share it only when you are comfortable sharing
+the values it records. If the person fixing a bug asks for more
+detail about an error, this file is a second source next to the bug
+report bundle.
+
 ## What a useful report says
 
 Once the bundle is attached, a useful report needs only three more
@@ -86,8 +110,8 @@ reports they receive and forward the genuine bugs.
 
 - **The download button did nothing**: the browser may have blocked
   the download, so check its download bar. If the download truly
-  fails, screenshots of the debug panel's Log and Internals
-  sections are a serviceable substitute.
+  fails, screenshots of the Runtime Info and Event Log sections on
+  the debug panel's Environment tab are a workable substitute.
 - **The bug will not reproduce**: report it anyway with the bundle
   from the session where it happened; the telemetry often contains
   the sequence even when you cannot repeat it.
