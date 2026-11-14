@@ -93,7 +93,8 @@ start_server(State())
 
 - Code before `start_server(...)` runs in both places; write it
   so it is happy in both. Printing and tests are fine (in the
-  browser, `print` goes to the debug console).
+  browser, `print` goes to the Console box below the page; see
+  [Printing and the console](../help/printing-and-console.md)).
 - Anything the browser forbids, Python cannot do either: no
   reading the visitor's files, no opening network sockets, no
   running other programs.
@@ -101,8 +102,8 @@ start_server(State())
   are the way to ship data with your app; they appear in the
   virtual filesystem where `open()` finds them.
 - A `js` module exists inside Pyodide for calling browser
-  JavaScript from Python. It is powerful and sharp-edged; the
-  planned JavaScript interop page will cover it properly.
+  JavaScript from Python. It is powerful and sharp-edged, and
+  [JavaScript interop](javascript.md) covers it.
 
 ## Where people get confused
 
