@@ -33,11 +33,11 @@ Clock(interval, "route_name")
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
 | `interval` | `int` | required | Milliseconds between ticks (one second is `1000`). |
-| `route` | `str` | required | The name of the route to call on each tick. |
+| `route` | route name or route function | required | The route to call on each tick, given as its name in a string or as the function itself. [Route targets](../actions/button.md#route-targets) compares the two forms. |
 | `show` | `bool` | `True` | Display the elapsed time on the page. |
 | `controls` | `bool` | `False` | Show pause and restart buttons. |
 | `persistent` | `bool` | `False` | Keep counting through page re-renders and page changes. |
-| `on_tick` | `str` | none | Alternative keyword spelling of `route`. |
+| `on_tick` | route name or route function | none | Alternative keyword spelling of `route`. |
 
 ## Examples
 

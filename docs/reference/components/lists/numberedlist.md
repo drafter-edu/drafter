@@ -82,6 +82,8 @@ start_server(State(["Ada", "Babbage", "Captain", "Domino"]))
 - [BulletedList](bulletedlist.md): shows the items with bullets,
   for when order does not matter.
 - [Table](../data/table.md): displays rows with multiple columns.
+- [Show a collection of items](../../../add/show-a-collection.md) is
+  the how-to guide for displaying lists and tables from your data.
 
 ## External links
 

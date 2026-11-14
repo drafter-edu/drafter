@@ -36,8 +36,17 @@ TextArea(name, default_value)
 | `default_value` | `str` | `""` | The text shown before the visitor types. |
 
 Like every component, `TextArea` also accepts
-[styling and attribute keywords](../../keyword-attributes.md); `rows`
-and `cols` control its size, and `placeholder` shows a hint.
+[styling and attribute keywords](../../keyword-attributes.md). The
+HTML attributes it recognizes as keywords are `rows` and `cols`,
+which control its size, `placeholder`, which shows a hint, and
+`disabled`, `readonly`, and `required`.
+
+`maxlength` is not on that list. Drafter turns a keyword it does not
+recognize into a CSS style, which the browser ignores, and it reports
+no error. `required=True` adds the attribute, but a button still runs
+its route when the area is empty, so check for empty text inside the
+route. [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains the keyword rule.
 
 ## Examples
 
@@ -92,6 +101,8 @@ enough that writing is comfortable.
 - [TextBox](textbox.md): single-line input.
 - [PreformattedText](../text/pre.md): showing multi-line text back
   with its line breaks intact.
+- [Ask the user for information](../../../add/ask-for-information.md)
+  is the how-to guide, with a recipe for collecting longer text.
 
 ## External links
 

@@ -37,6 +37,16 @@ DateTimeInput(name, default_value)
 | `name` | `str` | required | The field's name, matching a parameter of the receiving route. |
 | `default_value` | `str` or `datetime.datetime` | empty | The pre-filled moment, written as `"YYYY-MM-DDTHH:MM"` (like `"2026-07-27T14:30"`, with a capital T between the date and the time) or given as a `datetime` object. |
 
+Like every component, `DateTimeInput` also accepts
+[styling and attribute keywords](../../keyword-attributes.md). It
+recognizes no HTML attributes beyond the ones every component shares,
+so `min`, `max`, `step`, `required`, and `disabled` do not work here,
+and the picker cannot be limited to a range of moments. Drafter turns
+a keyword it does not recognize into a CSS style, which the browser
+ignores, and it reports no error. Check the value inside the route
+instead. [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains the keyword rule.
+
 ## Examples
 
 The route's parameter is annotated as `datetime.datetime`, so

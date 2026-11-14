@@ -43,6 +43,16 @@ Slider(name, min, max, default_value, step)
 | `default_value` | `int` or `float` | the middle | Where the handle starts. It must lie from `min` to `max`. |
 | `step` | `int` or `float` | `1` | How far apart the allowed values are. With `step=5` the handle stops on 0, 5, 10, and so on. |
 
+Like every component, `Slider` also accepts
+[styling and attribute keywords](../../keyword-attributes.md). Its
+`min`, `max`, and `step` are parameters, and it recognizes no further
+HTML attributes beyond the ones every component shares, so
+`disabled=True` does not work here. Drafter turns a keyword it does
+not recognize into a CSS style, which the browser ignores, and it
+reports no error.
+[Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains the keyword rule.
+
 ## Examples
 
 The route's parameter is annotated as `int`, so Drafter converts the

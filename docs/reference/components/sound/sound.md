@@ -43,7 +43,7 @@ Sound(src, volume=0.5, speed=1.5, effects=[Echo()])
 | `auto_play` | `bool` | `False` | Start when the page loads. |
 | `controls` | `bool` | `True` | Show playback controls. |
 | `visualize` | `str` | none | Draw the sound live: `"waveform"` or `"bars"`. |
-| `on_play` / `on_finish` / `on_error` | `str` | none | Routes to call as playback starts, ends, or fails. |
+| `on_play` / `on_finish` / `on_error` | route name or route function | none | Routes to call as playback starts, ends, or fails. |
 
 ## Examples
 
@@ -103,6 +103,16 @@ start_server(State(""))
   nice touch for music apps.
 - The browser's require-an-interaction rule applies to
   `auto_play` here as everywhere in this group.
+- The play and finish routes can receive `src` (the audio's
+  address, a string) by name. The finish route can also receive
+  `duration` (the length in seconds, a float). The component sends
+  `duration` only when the browser knows the length, so give that
+  parameter a default value. The error route can receive `status`
+  and `message`, both strings.
+- Each `on_` parameter takes the route's name as a string or the
+  route function itself.
+  [Route targets](../actions/button.md#route-targets) on the Button
+  page compares the two.
 - File sources need bundling at deploy time with
   `--additional-paths`, like [Audio](../media/audio.md); data
   URLs from recordings need nothing extra.

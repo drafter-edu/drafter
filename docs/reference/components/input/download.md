@@ -26,7 +26,7 @@ outlast the visit.
 ## Syntax
 
 ```python
-Download(text, filename, contents)
+Download(text, filename, content)
 ```
 
 ## Parameters
@@ -35,8 +35,8 @@ Download(text, filename, contents)
 | --------- | ---- | ------- | ------- |
 | `text` | `str` | required | The visible link text. |
 | `filename` | `str` | required | The name the saved file gets, extension included. |
-| `contents` | `str`, `bytes`, or `Picture` | required | What goes in the file. |
-| `content_type` | `str` | `"text/plain"` | The file's MIME type, when it matters. |
+| `content` | `str`, `bytes`, or `Picture` | required | What goes in the file: text, raw bytes, or a [Picture](../../data-types/picture.md), which is saved as an image file. |
+| `content_type` | `str` | `"text/plain"` | The file's MIME type, used for text and bytes. A `Picture` supplies its own type. |
 
 ## Examples
 
@@ -82,6 +82,12 @@ start_server(State(["Meeting began late."]))
   the download always matches the current state.
 - The extension should match the contents: `.txt` for text, `.png`
   for a `Picture`, `.csv` for comma-separated rows.
+- Text is written into the download link exactly as given, and a
+  browser treats some characters in a link specially. A `#` in the
+  text ends the saved file at that character, and a line break at
+  the very end of the text is dropped. When the text might contain
+  a `#`, pass it as bytes with `transcript.encode("utf-8")`, and
+  the file arrives unchanged.
 - The visitor's browser decides where downloads are saved (usually
   the downloads folder); your app is not told whether the visitor
   kept the file.
@@ -98,6 +104,8 @@ the text should make clear that clicking saves a file.
   instead.
 - [Picture](../../data-types/picture.md): images as downloadable
   values.
+- [Upload and download files](../../../add/files.md) is the how-to
+  guide, with a recipe for offering a download.
 
 ## External links
 

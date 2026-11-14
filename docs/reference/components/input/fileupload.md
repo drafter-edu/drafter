@@ -40,6 +40,14 @@ Adding the `multiple` attribute (`FileUpload("photos",
 multiple=True)`) lets the visitor pick several files; the parameter
 then receives a list.
 
+Besides `multiple`, the HTML attributes `FileUpload` recognizes as
+keywords are `capture` and `required`. `required=True` adds the
+attribute, but a button still runs its route when no file is chosen.
+`disabled` is not on that list. Drafter turns a keyword it does not
+recognize into a CSS style, which the browser ignores, and it reports
+no error. [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains the keyword rule.
+
 ## Examples
 
 ```python drafter height=260
@@ -78,8 +86,15 @@ start_server(State(0))
   annotate `str` to receive text, `bytes` to receive any file's raw
   data, `Picture` to receive an image, or one of the
   [file types](../../data-types/file-types.md) when the filename
-  matters too. Add `| None` so that an empty picker delivers
-  `None`.
+  matters too.
+- When the visitor chooses no file, the result also depends on the
+  annotation. A `str` parameter receives `""`, and a `bytes`
+  parameter receives `b""`. A file type such as `DrafterTextFile`
+  receives a file whose `filename` is empty and whose `size` is 0.
+  A `Picture` parameter stops with an error page that says no file
+  was chosen. Annotate it `Picture | None` to receive `None`
+  instead. Adding `| None` to `str` does not change the result,
+  which is still `""`.
 - `accept` is guidance for the picker, not enforcement; a visitor
   can still choose any file. A file of the wrong type produces a
   [friendly error](../../../help/errors/file-decode-error.md).
@@ -97,6 +112,8 @@ nothing about what the file is for.
 - [Download](download.md): sending files to the visitor instead.
 - [Camera](../capture/camera.md): another way to bring pictures
   into the app.
+- [Upload and download files](../../../add/files.md) is the how-to
+  guide, with a recipe for receiving a file.
 
 ## External links
 

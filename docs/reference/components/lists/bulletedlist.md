@@ -90,6 +90,8 @@ start_server(State(["rope", "lantern"]))
 - [Table](../data/table.md): displays rows with multiple columns.
 - [DefinitionList](definitionlist.md): displays term and definition
   pairs.
+- [Show a collection of items](../../../add/show-a-collection.md) is
+  the how-to guide, and its first recipe uses a `BulletedList`.
 
 ## External links
 

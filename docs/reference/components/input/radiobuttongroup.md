@@ -38,6 +38,16 @@ RadioButtonGroup(name, options, default_value)
 | `options` | `list[str]` | required | The choices, each rendered with its own radio button. |
 | `default_value` | `str` | none chosen | The option pre-selected when the page loads. |
 
+Like every component, `RadioButtonGroup` also accepts
+[styling and attribute keywords](../../keyword-attributes.md). Drafter
+applies them to the box that wraps the whole group, not to the
+individual radio buttons. The group recognizes no HTML attributes of
+its own, so `disabled=True` and `required=True` do not work here.
+Drafter turns a keyword it does not recognize into a CSS style, which
+the browser ignores, and it reports no error.
+[Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains the keyword rule.
+
 ## Examples
 
 ```python drafter height=280

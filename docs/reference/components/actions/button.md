@@ -34,15 +34,49 @@ Button(text, url, arguments)
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
 | `text` | `str` | required | The label shown on the button. |
-| `url` | `str` | required | The name of the target route, as a string, such as `"feed"` for the route defined by `def feed(...)`. |
-| `arguments` | see below | `None` | Extra values delivered to the target route's parameters. |
-
-`arguments` accepts a single [Argument](argument.md), a list of
-`Argument` objects, or a list of `(name, value)` pairs. Each one fills
-the target route's parameter of the same name.
+| `url` | route name or route function | required | The route to run. Give its name as a string, such as `"feed"` for the route defined by `def feed(...)`, or give the function itself. See [Route targets](#route-targets). |
+| `arguments` | see [Passing arguments](#passing-arguments) | `None` | Extra values delivered to the target route's parameters. |
 
 Like every component, `Button` also accepts
 [styling and attribute keywords](../../keyword-attributes.md).
+
+### Route targets
+
+The `url` parameter accepts the route's name as a string, as in
+`Button("Feed", "feed")`, or the route function itself, as in
+`Button("Feed", feed)`. Both forms run the same route, and a page
+built with one form is equal in tests to the same page built with the
+other.
+
+The tutorials use strings. A string works wherever in the file the
+target route is defined, because Drafter looks the name up only when
+the page is shown. The function form lets an editor that checks names
+point out a misspelled route before the program runs. Python looks the
+function up at the moment the page is built, so the function form
+stops with a `NameError` when a page is built before its target route
+has been defined. This happens when a test calls a route from a line
+above the definition of a route that it links to.
+
+### Passing arguments
+
+The `arguments` parameter accepts four forms. These four buttons all
+deliver the same value, `10`, to a parameter named `amount`:
+
+```python
+Button("Add ten", "add_points", Argument("amount", 10))
+Button("Add ten", "add_points", [Argument("amount", 10)])
+Button("Add ten", "add_points", [("amount", 10)])
+Button("Add ten", "add_points", {"amount": 10})
+```
+
+The first form is a single [Argument](argument.md). The second is a
+list of `Argument` objects, the third is a list of `(name, value)`
+pairs, and the fourth is a dictionary. The list and dictionary forms
+can hold several entries, such as `{"amount": 10, "bonus": True}`, and
+each entry fills the target route's parameter of the same name. The
+values must be text, numbers, booleans, or lists of those. The
+[Argument](argument.md) page describes what happens when a name
+matches no parameter.
 
 ## Examples
 
@@ -140,6 +174,43 @@ def act(state: State, choice: str) -> Page:
 start_server(State("sitting"))
 ```
 
+A frequent use of `arguments` is a button on every row of a list,
+where each button tells the route which row it belongs to. This
+example gives each Delete button its row's position, written in the
+dictionary form, and the `delete` route receives that position as an
+`int`:
+
+```python drafter height=260
+from drafter import *
+from dataclasses import dataclass
+
+
+@dataclass
+class State:
+    chores: list[str]
+
+
+@route
+def index(state: State) -> Page:
+    content = [Header("Chores")]
+    position = 0
+    for chore in state.chores:
+        content.append(chore + " ")
+        content.append(Button("Delete", "delete", {"position": position}))
+        content.append("\n")
+        position = position + 1
+    return Page(state, content)
+
+
+@route
+def delete(state: State, position: int) -> Page:
+    state.chores.pop(position)
+    return index(state)
+
+
+start_server(State(["Walk Ada", "Brush Captain", "Feed Domino"]))
+```
+
 ## Notes
 
 - A button whose `url` names no existing route stops the page with a
@@ -167,6 +238,11 @@ keyboard-operable by default; do not replace them with styled text.
   route.
 - Inputs like [TextBox](../input/textbox.md) supply the form values a
   button submits.
+- [Add and connect pages](../../../add/pages.md) is the how-to guide
+  for joining several pages with buttons and links.
+- [Show different content](../../../add/show-different-content.md) is
+  the how-to guide with a recipe for one route that serves many
+  buttons.
 
 ## External links
 

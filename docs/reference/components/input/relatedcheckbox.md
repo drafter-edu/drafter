@@ -37,6 +37,15 @@ RelatedCheckBox(name, value, default_value)
 | `value` | `str` | required | What this box contributes to the list when checked. |
 | `default_value` | `bool` | `False` | Whether this box starts checked. |
 
+Like every component, `RelatedCheckBox` also accepts
+[styling and attribute keywords](../../keyword-attributes.md). It
+recognizes no HTML attributes beyond the ones every component shares,
+so `disabled=True` and `required=True` do not work here. Drafter turns
+a keyword it does not recognize into a CSS style, which the browser
+ignores, and it reports no error.
+[Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains the keyword rule.
+
 ## Examples
 
 ```python drafter height=300

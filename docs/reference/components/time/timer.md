@@ -32,12 +32,12 @@ Timer(duration, "route_name")
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
 | `duration` | `int` | required | How long the countdown lasts, in milliseconds (5 seconds is `5000`). |
-| `on_finish` | `str` | required | The name of the route to call when the countdown reaches zero. |
+| `on_finish` | route name or route function | required | The route to call when the countdown reaches zero. |
 | `show` | `bool` | `True` | Display the remaining time on the page. |
 | `controls` | `bool` | `False` | Show pause and restart buttons next to the timer. |
 | `persistent` | `bool` | `False` | Keep the countdown running when the page re-renders. Without this, every re-render starts a fresh timer. |
 | `rate` | `int` | `1000` | Milliseconds between ticks. |
-| `on_tick` | `str` | none | The name of a route to call on every tick. |
+| `on_tick` | route name or route function | none | A route to call on every tick. |
 
 ## Examples
 
@@ -125,8 +125,13 @@ start_server(State(10))
 ## Notes
 
 - All times are in milliseconds: `1000` is one second.
-- `on_finish` and `on_tick` take route names as strings, the same
-  way a [Button](../actions/button.md) does.
+- `on_finish` and `on_tick` each take a route's name as a string or
+  the route function itself, the same way a
+  [Button](../actions/button.md#route-targets) does. A string works
+  wherever in the file the route is defined, and it is the form the
+  tutorials use. The function form lets an editor that checks names
+  point out a misspelled route, but the function must already be
+  defined when the page is built.
 - The finish and tick routes can receive two extra parameters by
   name: `remaining` (milliseconds left) and `duration` (the total),
   both whole numbers.
@@ -142,6 +147,9 @@ start_server(State(10))
 - [Clock](clock.md): counts up forever instead of down.
 - [RemovePersistent](removepersistent.md): stop a persistent timer
   from a later page.
+- [Make things happen over time](../../../add/timers.md) is the
+  how-to guide, with recipes for a question that expires and a game
+  that ticks.
 
 ## External links
 

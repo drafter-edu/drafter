@@ -69,21 +69,46 @@ start_server(State("nothing yet"))
 
 ## Notes
 
-- A button accepts a single `Argument`, a list of them, or a list
-  of `(name, value)` pairs; several arguments fill several
-  parameters.
-- Arguments render as hidden inputs, so their values are submitted
-  with the form like any other field and follow the same rules: an
-  argument whose name collides with a real input's name causes a
-  [duplicate-name error](../../../help/errors/duplicate-component-name.md),
-  and an argument whose name matches no parameter of the route is
-  the reverse of the
-  [missing-parameter](../../../help/errors/missing-parameter.md)
-  problem.
+- A button or link accepts a single `Argument`, a list of them, a
+  list of `(name, value)` pairs, or a dictionary such as
+  `{"wish_for": "gold"}`. Each entry fills the route parameter with
+  the same name, so several entries fill several parameters.
+  [Passing arguments](button.md#passing-arguments) on the Button
+  page shows all four forms.
+- An argument given to a `Button` or `Link` is stored on that one
+  button or link, and only a click on that component delivers it.
+  This is why the three buttons in the example can each carry a
+  different `wish_for` value.
+- An `Argument` placed directly in a page's content list behaves
+  differently. Drafter renders it as a hidden input, so every button
+  and link on the page delivers its value, the same way they deliver
+  the contents of a `TextBox`. A hidden-input argument also follows
+  the rule for inputs that its name must be unique on the page, and
+  a second component with the same name causes a
+  [duplicate-name error](../../../help/errors/duplicate-component-name.md).
+- When a button's argument and an input on the page have the same
+  name, the route receives the argument's value, and the debug panel
+  warns that the name was provided more than once.
+- The `arguments` keyword also works on any component that has an
+  `on_*` event handler.
+  `TextBox("amount", on_change="update", arguments={"row": 3})`
+  calls `update` with `row` set to `3` each time the box changes.
 - Values must be JSON-safe (text, numbers, booleans, or lists of
   those). Passing a whole dataclass is not supported; instead, pass
   a name or index and look the object up inside the route, as the
   [shop example](../../../examples/shop.md) does.
+- An argument whose name matches no parameter of the target route
+  does not stop the page. The route runs without that value. The
+  opposite mistake is an error, because a route parameter that no
+  argument or input fills produces a
+  [missing-parameter](../../../help/errors/missing-parameter.md)
+  error page. A misspelled argument name therefore usually causes
+  both problems at once. For the unmatched name, the debug panel
+  shows a warning like this one:
+
+    ```text
+    The component argument 'wish_fr' was sent to 'wish', but the function has no matching parameter.
+    ```
 
 ## Related components
 

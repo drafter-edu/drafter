@@ -42,7 +42,7 @@ Tone(pitch, duration=1000, waveform="square")
 | `auto_play` | `bool` | `False` | Play when the page loads instead of showing a button. |
 | `show` | `bool` | `True` | Display the component. |
 | `effects` | list of effects | none | [Audio effects](effects.md) applied in order. |
-| `on_start` / `on_finish` / `on_error` | `str` | none | Routes to call as playback starts, ends, or fails. |
+| `on_start` / `on_finish` / `on_error` | route name or route function | none | Routes to call as playback starts, ends, or fails. |
 
 ## Examples
 
@@ -89,6 +89,17 @@ start_server(State())
   so the tone never fails silently.
 - A wrong waveform or an unpronounceable pitch stops the page
   with a friendly error listing the valid choices.
+- The start and finish routes can receive four parameters by name:
+  `frequency` (the pitch in Hz, a float), `duration` (milliseconds,
+  a whole number), `waveform` (a string), and `note` (the note name,
+  a string). The tone sends `note` only when the pitch was written
+  as a note name, so give that parameter a default value.
+- The error route can receive `status` (`"unavailable"` or
+  `"error"`) and `message`, both strings.
+- Each `on_` parameter takes the route's name as a string or the
+  route function itself.
+  [Route targets](../actions/button.md#route-targets) on the Button
+  page compares the two.
 
 ## Related components
 

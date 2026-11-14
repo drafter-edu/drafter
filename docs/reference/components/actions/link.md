@@ -35,11 +35,18 @@ Link(text, url, arguments)
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
 | `text` | `str` | required | The visible link text. |
-| `url` | `str` | required | The name of a target route (`"rules"`), or a full external address (`"https://example.com"`). External addresses are detected automatically. |
-| `arguments` | see [Button](button.md) | `None` | Extra values delivered to the target route's parameters. |
+| `url` | route name, route function, or web address | required | The name of a target route (`"rules"`), the route function itself (`rules`), or a full external address (`"https://example.com"`). External addresses are detected automatically. |
+| `arguments` | see [Passing arguments](button.md#passing-arguments) | `None` | Extra values delivered to the target route's parameters. |
 
 Like every component, `Link` also accepts
 [styling and attribute keywords](../../keyword-attributes.md).
+
+A route's name as a string works wherever in the file the route is
+defined, and it is the form the tutorials use. The function form lets
+an editor that checks names point out a misspelled route, but the
+function must already be defined when the page is built.
+[Route targets](button.md#route-targets) on the Button page explains
+the difference.
 
 ## Examples
 
@@ -111,6 +118,8 @@ links out of context.
   actions.
 - [Argument](argument.md): extra values a link can deliver to its
   route.
+- [Add and connect pages](../../../add/pages.md) is the how-to guide
+  for joining several pages with buttons and links.
 
 ## External links
 

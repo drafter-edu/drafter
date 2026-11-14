@@ -42,9 +42,9 @@ Camera(name)
 | `facing` | `str` | `"user"` | Which camera to prefer on phones: `"user"` (front, selfie) or `"environment"` (rear). |
 | `mirror` | `bool` | `True` | Mirror the live preview like a selfie mirror. The captured photo is never mirrored. |
 | `show` | `bool` | `True` | Display the camera UI. |
-| `on_capture` | `str` | none | Route to call when a photo is taken. |
-| `on_denied` | `str` | none | Route to call when the visitor refuses permission. |
-| `on_error` | `str` | none | Route to call when the camera fails. |
+| `on_capture` | route name or route function | none | Route to call when a photo is taken. |
+| `on_denied` | route name or route function | none | Route to call when the visitor refuses permission. |
+| `on_error` | route name or route function | none | Route to call when the camera fails, including when permission is refused. |
 
 ## Examples
 
@@ -143,6 +143,22 @@ start_server(State())
   case yourself, as the first example does.
 - After a photo is taken, the camera stream stops (and the
   camera light turns off); "Retake" starts it again.
+- The `on_capture` route can receive two parameters by name:
+  `width` and `height`, the size of the photo in pixels, both whole
+  numbers. The route also receives the photo itself through a
+  parameter with the camera's name, the same way a button's route
+  does.
+- The `on_denied` and `on_error` routes can receive `status`
+  (`"denied"`, `"unavailable"`, or `"error"`) and `message`, both
+  strings.
+- Each `on_` parameter takes the route's name as a string or the
+  route function itself. A string works wherever in the file the
+  route is defined, and it is the form the tutorials use. The
+  function form lets an editor that checks names point out a
+  misspelled route, but the function must already be defined when
+  the page is built.
+  [Route targets](../actions/button.md#route-targets) on the Button
+  page explains the difference.
 - Store a captured `Picture` in state to keep it across pages, and
   hand it to [Download](../input/download.md) to let
   the visitor save it.

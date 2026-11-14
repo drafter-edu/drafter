@@ -41,7 +41,7 @@ Melody([("C4", 2), "D4", "rest", ("E4", 0.5)], tempo=90)
 | `controls` | `bool` | `False` | Show play/pause and restart buttons. |
 | `show` | `bool` | `True` | Display the component. |
 | `effects` | list of effects | none | [Audio effects](effects.md) applied in order. |
-| `on_note` / `on_finish` | `str` | none | Routes to call as each note starts and when the melody ends. |
+| `on_note` / `on_finish` | route name or route function | none | Routes to call as each note starts and when the melody ends. |
 
 ## Examples
 
@@ -74,6 +74,15 @@ start_server(State())
 - Beats can be fractions: `("C4", 0.5)` is half a beat,
   `("C4", 2)` a held note. `None` in the list also counts as a
   rest.
+- The `on_note` route can receive four parameters by name: `note`
+  (the note name, or `"rest"`), `frequency` (the pitch in Hz, or 0
+  for a rest), `index` (the note's position in the list, counting
+  from 0), and `count` (how many notes and rests the melody has).
+  The `on_finish` route can receive `count`.
+- Each `on_` parameter takes the route's name as a string or the
+  route function itself.
+  [Route targets](../actions/button.md#route-targets) on the Button
+  page compares the two.
 - An `on_note` route that returns a whole `Page` re-renders the
   page and resets the melody after its first note; return an
   `Update` or a `Fragment` to react while the music continues,

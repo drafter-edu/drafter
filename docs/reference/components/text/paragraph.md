@@ -20,8 +20,7 @@ A `Paragraph` is a real paragraph: a block of text with breathing
 room above and below it, the way themes expect prose to arrive.
 Plain strings with `"\n"` work fine for short labels and lines,
 but multi-sentence prose reads better as paragraphs, and themes
-style them deliberately. `P` is a shorter name for the same
-component.
+style them deliberately.
 
 ## Syntax
 

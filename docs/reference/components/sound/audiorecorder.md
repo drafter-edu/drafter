@@ -37,8 +37,8 @@ AudioRecorder(name, max_duration=10000)
 | `name` | `str` | required | The field's name, matching a parameter of the receiving route. |
 | `max_duration` | `int` | `30000` | The longest allowed recording, in milliseconds. |
 | `show` | `bool` | `True` | Display the recorder UI. |
-| `on_record` | `str` | none | Route to call when a recording completes. |
-| `on_denied` / `on_error` | `str` | none | Routes for refusal and failure. |
+| `on_record` | route name or route function | none | Route to call when a recording completes. |
+| `on_denied` / `on_error` | route name or route function | none | Routes for refusal and failure. |
 
 ## Examples
 
@@ -93,6 +93,10 @@ start_server(State(""))
   keeps clips (and state) small.
 - The `on_record` route can receive `duration` and `size` as
   parameters by name.
+- Each `on_` parameter takes the route's name as a string or the
+  route function itself.
+  [Route targets](../actions/button.md#route-targets) on the Button
+  page compares the two.
 
 ## Related components
 

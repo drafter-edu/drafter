@@ -39,8 +39,20 @@ TextBox(name, default_value, kind)
 | `kind` | `str` | `"text"` | The HTML input type: `"text"`, `"password"`, `"email"`, `"number"`, or another valid type. |
 
 Like every component, `TextBox` also accepts
-[styling and attribute keywords](../../keyword-attributes.md); useful
-ones here include `placeholder` and `maxlength`.
+[styling and attribute keywords](../../keyword-attributes.md). The
+HTML attributes it recognizes as keywords are `placeholder`,
+`maxlength`, `minlength`, `size`, `pattern`, and `alt`.
+
+Several attributes that work on a plain HTML input are not on that
+list, including `required`, `min`, `max`, `step`, `disabled`, and
+`readonly`. Drafter turns a keyword it does not recognize into a CSS
+style, which the browser ignores, and it reports no error. As a
+result, `TextBox("age", kind="number", min=0, max=10)` shows a number
+box that accepts any number. Drafter also does not ask the browser to
+check the form when a button is clicked, so `minlength` and `pattern`
+do not stop a route from running. Check the value inside the route
+instead. [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains the keyword rule.
 
 ## Examples
 
@@ -136,6 +148,8 @@ visitors and screen readers know what to type.
 - [SelectBox](selectbox.md), [CheckBox](checkbox.md): choices instead
   of typing.
 - [Label](label.md): captions for inputs.
+- [Ask the user for information](../../../add/ask-for-information.md)
+  is the how-to guide for building a form from inputs like this one.
 
 ## External links
 

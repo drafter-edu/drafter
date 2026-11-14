@@ -99,6 +99,9 @@ a single large table that mixes several kinds.
   one-column collections.
 - [DefinitionList](../lists/definitionlist.md): displays one
   record's fields as term/value pairs.
+- [Show a collection of items](../../../add/show-a-collection.md) is
+  the how-to guide, with a recipe for a table built from a list of
+  dataclasses.
 
 ## External links
 

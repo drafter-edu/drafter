@@ -48,9 +48,9 @@ Map(name, center=(latitude, longitude), zoom=13)
 | `markers` | `list[MapMarker]` | none | Pins to display, each with an optional hover label. |
 | `height` | `int` | `300` | Height of the map in pixels. |
 | `persistent` | `bool` | `False` | Keep the live map (including where the visitor panned) across page re-renders. |
-| `on_click` | `str` | none | Route to call when the map is clicked; it can receive `latitude` and `longitude`. |
-| `on_marker_click` | `str` | none | Route to call when a marker is clicked; it can receive `latitude`, `longitude`, and `label`. |
-| `on_move` | `str` | none | Route to call after panning or zooming; it can receive `latitude`, `longitude`, and `zoom`. |
+| `on_click` | route name or route function | none | Route to call when the map is clicked; it can receive `latitude` and `longitude`. |
+| `on_marker_click` | route name or route function | none | Route to call when a marker is clicked; it can receive `latitude`, `longitude`, and `label`. |
+| `on_move` | route name or route function | none | Route to call after panning or zooming; it can receive `latitude`, `longitude`, and `zoom`. |
 
 ## Examples
 
@@ -124,10 +124,16 @@ start_server(State([]))
 
 - Map imagery downloads from OpenStreetMap, so demos and deployed
   apps need an internet connection to show the actual map.
-- The event routes take route names as strings, like a
-  [Button](../actions/button.md), and receive the click's
-  coordinates through parameters named `latitude` and `longitude`
-  (plus `label` for marker clicks and `zoom` for view changes).
+- The event parameters each take a route's name as a string or the
+  route function itself, like a
+  [Button](../actions/button.md#route-targets). A string works
+  wherever in the file the route is defined, and it is the form the
+  tutorials use. The function form lets an editor that checks names
+  point out a misspelled route, but the function must already be
+  defined when the page is built.
+- The event routes receive the click's coordinates through
+  parameters named `latitude` and `longitude` (plus `label` for
+  marker clicks and `zoom` for view changes).
 - The map also works as a form field: the last clicked spot is
   submitted under `name` when a Button submits the page, and a
   route parameter with that name annotated as `MapLocation`

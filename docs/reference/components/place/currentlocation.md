@@ -41,10 +41,10 @@ CurrentLocation(name)
 | `enable_high_accuracy` | `bool` | `True` | Prefer the most precise position the device can give. |
 | `timeout` | `int` | `10000` | How long to wait for a position, in milliseconds. |
 | `maximum_age` | `int` | `0` | Accept a cached position up to this many milliseconds old. |
-| `on_locate` | `str` | none | Route to call when a position (or a failure) is resolved. |
-| `on_error` | `str` | none | Route to call when finding the location fails for any reason. |
-| `on_denied` | `str` | none | Route to call when the visitor refuses permission. |
-| `on_timeout` | `str` | none | Route to call when the request runs out of time. |
+| `on_locate` | route name or route function | none | Route to call when a position (or a failure) is resolved. |
+| `on_error` | route name or route function | none | Route to call when finding the location fails for any reason. |
+| `on_denied` | route name or route function | none | Route to call when the visitor refuses permission. |
+| `on_timeout` | route name or route function | none | Route to call when the request runs out of time. |
 
 ## Examples
 
@@ -97,6 +97,22 @@ start_server(State(""))
   `longitude` are `None` and `message` may explain why.
 - A granted `Location` also carries `accuracy` (in meters) and,
   when the device knows them, `altitude`, `heading`, and `speed`.
+- The `on_locate` route can receive the parts of the result as
+  parameters by name: `status` and `message` (strings), and
+  `latitude`, `longitude`, `accuracy`, `altitude`, `heading`,
+  `speed`, and `timestamp` (floats). Only `status` is always sent.
+  The coordinates arrive only when the status is `"granted"`, and
+  `altitude`, `heading`, and `speed` only when the device knows
+  them, so give each of those parameters a default value. A route
+  that needs the whole result can instead take one parameter with
+  the component's name, annotated `Location`, as `report` does
+  above.
+- The `on_error`, `on_denied`, and `on_timeout` routes can receive
+  `status` and `message`, both strings.
+- Each `on_` parameter takes the route's name as a string or the
+  route function itself.
+  [Route targets](../actions/button.md#route-targets) on the Button
+  page compares the two.
 - Browsers only allow location requests on secure pages. This is
   fine for deployed Drafter sites and local testing, but the
   request can fail as `"unavailable"` in unusual setups.

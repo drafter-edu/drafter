@@ -41,9 +41,9 @@ Microphone(name, threshold=0.6, on_loud="route_name")
 | `rate` | `int` | `0` | Milliseconds between `on_level` calls, or 0 for never. |
 | `show` | `bool` | `True` | Display the permission UI and live meter. |
 | `visualize` | `str` | `"meter"` | The live display once granted: `"meter"`, `"waveform"`, or `"bars"`. |
-| `on_loud` / `on_quiet` | `str` | none | Routes called when the volume rises past, and falls back below, the threshold. |
-| `on_level` | `str` | none | Route called every `rate` milliseconds with the current volume. |
-| `on_denied` / `on_error` | `str` | none | Routes for refusal and failure. |
+| `on_loud` / `on_quiet` | route name or route function | none | Routes called when the volume rises past, and falls back below, the threshold. |
+| `on_level` | route name or route function | none | Route called every `rate` milliseconds with the current volume. |
+| `on_denied` / `on_error` | route name or route function | none | Routes for refusal and failure. |
 
 ## Examples
 
@@ -85,9 +85,19 @@ start_server(State(0))
 
 ## Notes
 
-- The loud and quiet routes can receive `volume` (and the level
-  route `volume` plus `peak_volume`) as float parameters by
-  name.
+- The loud and quiet routes can receive two parameters by name:
+  `volume` (the loudness that was heard, from 0.0 to 1.0) and
+  `threshold` (the component's own setting), both floats.
+- The level route can receive `volume` and `pitch`, both floats.
+  The `pitch` is the strongest frequency in Hz, and the microphone
+  sends it only when it detects one, so give that parameter a
+  default value such as `pitch: float = 0.0`.
+- The denied and error routes can receive `status` (`"denied"`,
+  `"unavailable"`, or `"error"`) and `message`, both strings.
+- Each `on_` parameter takes the route's name as a string or the
+  route function itself.
+  [Route targets](../actions/button.md#route-targets) on the Button
+  page compares the two.
 - An event route that returns a whole `Page` re-renders the
   component, briefly resetting the meter and `peak_volume`;
   return an `Update` or a `Fragment` for frequent events.

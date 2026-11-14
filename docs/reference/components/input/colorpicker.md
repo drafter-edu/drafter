@@ -48,6 +48,15 @@ The starting color can be written any of these ways:
 | A list or tuple of red, green, and blue amounts from 0 to 255 | `[255, 136, 0]` |
 | A `Color` | `Color(255, 136, 0)` |
 
+Like every component, `ColorPicker` also accepts
+[styling and attribute keywords](../../keyword-attributes.md). It
+recognizes no HTML attributes beyond the ones every component shares,
+so `disabled=True` does not work here. Drafter turns a keyword it
+does not recognize into a CSS style, which the browser ignores, and
+it reports no error.
+[Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains the keyword rule.
+
 ## Examples
 
 The chosen color is stored in state and used to style a piece of

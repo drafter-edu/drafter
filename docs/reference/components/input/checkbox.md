@@ -36,7 +36,13 @@ CheckBox(name, default_value)
 | `default_value` | `bool` | `False` | Whether the box starts checked. |
 
 Like every component, `CheckBox` also accepts
-[styling and attribute keywords](../../keyword-attributes.md).
+[styling and attribute keywords](../../keyword-attributes.md). It
+recognizes no HTML attributes beyond the ones every component shares,
+so `disabled=True` and `required=True` do not work here. Drafter turns
+a keyword it does not recognize into a CSS style, which the browser
+ignores, and it reports no error.
+[Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains the keyword rule.
 
 ## Examples
 
@@ -99,6 +105,8 @@ words toggles it.
   received as one list.
 - [RadioButtonGroup](radiobuttongroup.md): choose exactly one option
   instead.
+- [Ask the user for information](../../../add/ask-for-information.md)
+  is the how-to guide, with a recipe that puts a checkbox in a form.
 
 ## External links
 

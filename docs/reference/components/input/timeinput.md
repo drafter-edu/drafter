@@ -36,6 +36,16 @@ TimeInput(name, default_value)
 | `name` | `str` | required | The field's name, matching a parameter of the receiving route. |
 | `default_value` | `str` or `datetime.time` | empty | The pre-filled time, written as `"HH:MM"` in 24-hour form (like `"14:30"`) or given as a `time` object. |
 
+Like every component, `TimeInput` also accepts
+[styling and attribute keywords](../../keyword-attributes.md). It
+recognizes no HTML attributes beyond the ones every component shares,
+so `min`, `max`, `step`, `required`, and `disabled` do not work here,
+and the picker cannot be limited to a range of times. Drafter turns a
+keyword it does not recognize into a CSS style, which the browser
+ignores, and it reports no error. Check the time inside the route
+instead. [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains the keyword rule.
+
 ## Examples
 
 The route's parameter is annotated as `datetime.time`, so Drafter
