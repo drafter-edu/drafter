@@ -196,7 +196,7 @@ page shows whatever question the position points at.
 `start_server(State(QUESTIONS, 2))`. What will the page show? Run it
 and check. Then predict what `State(QUESTIONS, 3)` will do before you
 try it. (It breaks: there is no question 3. Read the error, then put
-the 0 back. Step 3 will make running out of questions mean something.)
+the 0 back. Step 2 will make running out of questions mean something.)
 
 ## Step 2: One route, every question
 
@@ -421,8 +421,66 @@ answer was right or wrong.)
 
 Add a `score` field, count correct answers in `check`, and replace the
 plain ending with a `results` route whose verdict depends on the
-score. The finished app at the top of the page is exactly this step;
-its last lines before `start_server` are three tests:
+score. Change `State`, `check`, `restart`, and the last line of your
+copy to match the highlighted lines, and add the new `results` route:
+
+```python hl_lines="5 13 24 28-42 48 52"
+@dataclass
+class State:
+    questions: list[Question]
+    position: int
+    score: int
+
+
+@route
+def check(state: State, chosen: str) -> Page:
+    question = state.questions[state.position]
+    state.position = state.position + 1
+    if chosen == question.answer:
+        state.score = state.score + 1
+        message = "Correct!"
+    else:
+        message = "Not quite. It was " + question.answer + "."
+    if state.position < len(state.questions):
+        return Page(state, [
+            message + "\n",
+            Button("Next question", "ask")
+        ])
+    return Page(state, [
+        message + "\n",
+        Button("See your results", "results")
+    ])
+
+
+@route
+def results(state: State) -> Page:
+    total = len(state.questions)
+    if state.score == total:
+        verdict = "Perfect. The pets are impressed."
+    elif state.score >= total / 2:
+        verdict = "Solid work."
+    else:
+        verdict = "The pets forgive you. Try again!"
+    return Page(state, [
+        Header("Results"),
+        "You scored " + str(state.score) + " out of " + str(total) + ".\n",
+        verdict + "\n",
+        Button("Play again", "restart")
+    ])
+
+
+@route
+def restart(state: State) -> Page:
+    state.position = 0
+    state.score = 0
+    return index(state)
+
+
+start_server(State(QUESTIONS, 0, 0))
+```
+
+The finished app at the top of the page is exactly this step. Its
+last lines before `start_server` are three tests:
 
 ```python
 assert_state(check(State(QUESTIONS, 0, 0), "a cat"),

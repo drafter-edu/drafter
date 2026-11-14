@@ -29,12 +29,24 @@ TextBox("new_name")
 When the visitor clicks a `Button`, Drafter gathers every input on the
 page and delivers each one to the button's target route **as the
 parameter with the same name**. A page with `#!python TextBox("new_name")`
-means the target route must have a parameter called `new_name`:
+means the target route receives the value through a parameter called
+`new_name`:
 
 ```python
 @route
 def greet(state: State, new_name: str) -> Page:
     ...
+```
+
+A page can have several inputs. Each one travels to the parameter
+that shares its name, and the button's target names the function:
+
+```text
+On the page                           In the program
+
+TextBox("new_name")  ──────────────▶  new_name: str
+CheckBox("shout")    ──────────────▶  shout: bool
+Button("Greet", "greet")  ─────────▶  def greet(state, new_name, shout)
 ```
 
 The names must match exactly. The value arrives as text unless the
@@ -46,6 +58,13 @@ parameter's annotation says otherwise:
 | `int`      | `42`              | `#!python 42`      |
 | `float`    | `3.5`             | `#!python 3.5`     |
 | `bool`     | (a checked box)   | `#!python True`    |
+| `list[str]` | (two boxes checked in a group) | `#!python ["cheese", "olives"]` |
+| `date`     | (a day picked in a `DateInput`) | `#!python date(2026, 11, 14)` |
+
+These are the conversions most forms need. Drafter also converts
+times, pictures, uploaded files, and several other types. The complete
+list is the
+[parameter conversion table](../reference/route.md#parameter-conversion).
 
 If the text cannot be converted, for example `abc` for an `int`
 parameter, Drafter stops with a friendly error naming the parameter and
@@ -140,8 +159,10 @@ number is expected.
 
 - Choose input names as carefully as variable names; they *become*
   parameter names. `new_name` and `first` read well; `textbox1` does not.
-- The button's target route must accept one parameter per input on the
-  page, matching each name exactly.
+- The button's target route needs a parameter for each input whose
+  value it uses, matching the input's name exactly. An input that the
+  route has no parameter for is not an error. The page still works, and
+  the debug panel lists a warning about the unused form field.
 - Annotate every input parameter. With `#!python age: int`, the route
   receives a number or a clear error; without an annotation, it
   receives text that you must convert yourself.
@@ -162,9 +183,9 @@ number is expected.
 - **"Where did my typed value go after the next click?"** Parameters are
   delivered once, to one route. If the value should live longer, assign
   it to a `state` field.
-- **"Can one page have two buttons to different routes?"** Yes, and both
-  routes receive the same page's inputs, so both need the matching
-  parameters.
+- **"Can one page have two buttons to different routes?"** Yes. Both
+  routes receive the same page's inputs. Each route declares parameters
+  for the inputs it uses and may leave out the rest.
 
 ## Go deeper
 

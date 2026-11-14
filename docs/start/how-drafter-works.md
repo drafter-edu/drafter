@@ -84,7 +84,8 @@ lives only in memory.
 
 ## What this means for your code
 
-- Put `start_server(...)` last; nothing after it runs.
+- Put `start_server(...)` last. On your computer, nothing after it
+  runs.
 - Put tests before `start_server(...)`; they run at startup, every time.
 - Design your `State` to hold everything the app needs to remember, and
   expect it to reset on reload.
@@ -95,9 +96,11 @@ lives only in memory.
 ## Where people get confused
 
 - **"My app saves things, right?"** No. State is held in memory, not
-  saved to storage, so closing or reloading the tab resets it. You will
-  eventually learn how to save values to *local storage* in the browser,
-  but that comes much later.
+  saved to storage, so closing or reloading the tab resets it. When
+  visitors need to keep their data, an app can offer it as a file to
+  download and read that file back in later.
+  [Save and load your data](../add/files.md#recipe-save-and-load-your-data)
+  shows how.
 - **"The server crashed"**: there is no server. If the app breaks, the
   cause is in your program, and the error message on the page plus the
   debug panel will point to it.

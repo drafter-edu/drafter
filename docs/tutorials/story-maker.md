@@ -94,7 +94,7 @@ words be stored for that to work?
 
 ## Step 1: Ask, then answer
 
-Start with the smallest version of the contract you met in
+Start with the smallest version of the contract described in
 [Forms and input](../concepts/forms-and-input.md): one page asks for a
 value, and one route receives it. Watch the name `hero` travel from the
 `TextBox`, through the button click, into the parameter:

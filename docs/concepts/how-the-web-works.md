@@ -37,16 +37,18 @@ display.
 ### Reading a URL
 
 ```text
-https://ada.github.io/snack-tracker/?page=history
-\___/  \____________/\_____________/\___________/
-scheme     host           path         query
+https://ada.github.io/snack-tracker/?route=history
+\___/  \____________/\_____________/\____________/
+scheme     host           path          query
 ```
 
 - The **scheme** (`https://`) is the protocol, with the `s` meaning
   the connection is encrypted.
 - The **host** (`ada.github.io`) names which server to ask.
 - The **path** (`/snack-tracker/`) names what to ask it for.
-- The **query** (`?page=history`) carries extra values.
+- The **query** (`?route=history`) carries extra values. A Drafter
+  app uses it to record which route built the page you are looking
+  at, here a route named `history`.
 
 ### Where Drafter fits
 
@@ -89,7 +91,7 @@ network again: the package comes from the server.)
 ## What this means for your code
 
 - **`localhost` addresses are private and temporary.** While you
-  develop, your app's address looks like `http://localhost:8080`.
+  develop, your app's address looks like `http://localhost:8000`.
   `localhost` always means "this same device", so the address is
   meaningless to anyone else, and it stops working when your program
   stops. To share your app, [deploy it](../your-project/deploy/index.md),
@@ -113,7 +115,9 @@ network again: the package comes from the server.)
   reaches your device only, and only while the program runs. To share
   the app, deploy it.
 - **"The server saves my data."** There is no server after loading;
-  nothing is saved anywhere unless you build saving into the app.
+  nothing is saved anywhere unless you build saving into the app,
+  for example by letting the visitor
+  [save their data as a file](../add/files.md#recipe-save-and-load-your-data).
 - **"HTTPS means my login page is secure."** HTTPS encrypts the
   connection. It says nothing about your app's logic; a simulated
   login is still a simulation, delivered securely.

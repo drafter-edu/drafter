@@ -91,6 +91,7 @@ change the code and run it again.
 
 ## Working on your project?
 
+- [See what Drafter can do](your-project/what-drafter-can-do.md)
 - [Choose a manageable idea](your-project/choose-an-idea.md)
 - [Plan your pages and data](your-project/sketch-the-pages.md)
 - [Build and test one path](your-project/build-one-path.md)

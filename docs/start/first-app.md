@@ -293,8 +293,15 @@ SUCCESS at line 33 (assert_has)
 
 ## Common problems
 
-- **The page shows an error about `#!python Page` content**: the content must be a
-  list, even for one item. Write `#!python Page(["Hello"])`, not `#!python Page("Hello")`.
+- **The page shows an error titled "Type Mismatch"**: this usually means
+  the code joined text to a number, as in `#!python "Current count: " + state.count`.
+  Python cannot add a number to a string, so convert the number first with
+  `#!python str(state.count)`.
+- **The page shows an error titled "Route Did Not Return a Page"**: the route
+  function built a `#!python Page` but did not hand it back. Check that the line
+  starts with `#!python return`.
+  [Route did not return a Page](../help/errors/route-did-not-return-a-page.md)
+  lists the other causes.
 - **The page shows a "points to non-existent page" error**: the name in
   `Button("+1", "increment")` must exactly match a route function you
   defined with `@route`. Check the spelling.
@@ -336,7 +343,7 @@ difficulty:
 
     ---
 
-    Practice the edit, save, reload loop, break the app on purpose, and
+    Practice the edit, save, look loop, break the app on purpose, and
     read your first friendly error.
 
     [Make one visible change](make-a-change.md)

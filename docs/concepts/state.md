@@ -42,6 +42,20 @@ From then on, the state moves in a cycle:
 4. When the user clicks, the next route receives that same state, changes
    included.
 
+The same cycle as a picture:
+
+```text
+start_server(State("Ada", 0, 3))
+        │
+        ▼
+┌───────────────────┐    return Page(state, [...])    ┌────────────────┐
+│ A route runs.     │ ──────────────────────────────▶ │ The page shows │
+│ It reads fields   │                                 │ in the browser.│
+│ and assigns them. │ ◀────────────────────────────── │                │
+└───────────────────┘   a click hands the state to    └────────────────┘
+                        the next route
+```
+
 Two important boundaries:
 
 - **State resets on reload.** It lives in the browser's memory. Closing or
@@ -147,14 +161,17 @@ start_server(State([Pet("Ada", "woof"), Pet("Captain", "meow")]))
   the field is not running or not assigning; check the debug panel's
   History tab.
 - **"The back button broke my app"**: Drafter keeps a history of your
-  pages and their states, and going back rewinds to the state that page
-  had. That is usually what users expect, but it can surprise you while
-  testing: your latest click is not "lost", you are looking at an earlier
-  moment. The History tab shows exactly this timeline. Note that going
-  backward means *replaying the route* that built that page, not *undoing
-  the last route*. If you want to "undo" a click, you need to write a
-  route that reverses it, such as one that subtracts a point or removes
-  the last pet.
+  pages and their states. Going back restores the state from just before
+  that page's route ran, and then runs the route again to rebuild the
+  page. A counter that shows 3 shows 2 after one press of Back. That is
+  usually what visitors expect, but it can surprise you while testing,
+  because the effect of your latest click is gone and you are looking at
+  an earlier moment. The route really does run a second time, so a route
+  that picks a random number can show a different result from the first
+  time. Back belongs to the browser, and not every visitor will think to
+  use it. If your app needs an "undo", offer your own button with a
+  route that reverses the change, such as one that subtracts a point or
+  removes the last pet.
 - **"Why not a global variable?"** Global variables are invisible to
   Drafter: they are not shown in the debugger, not carried in history, and
   not checked by `assert_state`. Everything the app remembers belongs in

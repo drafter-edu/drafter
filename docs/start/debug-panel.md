@@ -79,7 +79,7 @@ will use most often are:
 
 You will need the other three tabs less often:
 
-- **Overview** lists all your routes and how they connect.
+- **Overview** lists every route in your app, with its parameters.
 - **Tests** shows the results of your `assert_` lines. The two tests in
   this app appear there, marked as passing. Break one on your computer
   (change `State(1)` to `State(2)`) and watch it fail with an explanation
@@ -89,14 +89,8 @@ You will need the other three tabs less often:
 ## Step 2: See where print() goes
 
 You can `print(...)` from inside a route to see what is happening while it
-runs.
-
-???+ note
-    If nothing seems to print, remember that printed output does not appear in the browser version of this demo. Run the program in Thonny to see it.
-
-
-Run this, click the button, and watch:
-
+runs. Copy this program to your computer, run it, click the button, and
+look at the area between your page and the debug panel:
 
 
 ```python drafter height=430
@@ -128,9 +122,19 @@ def double_count(state: State) -> Page:
 start_server(State(1))
 ```
 
-The printed lines appear in the app's console area instead of
-disappearing. Printing the state before and after a change is the most
-basic debugging tool you have, and it works everywhere.
+The printed lines appear in a box labeled **Console**, on the web page
+itself. They do not appear in Thonny's shell. A route runs inside the
+browser when you click a button, so the browser is where its output
+goes. Thonny's shell shows only what was printed while the program was
+starting, such as your test results.
+
+???+ note
+    In the demo on this page, the Console box is part of the debug
+    view. Click the "debug" button in the corner of the demo, then click
+    **Double it**, and the printed lines appear below the page.
+
+Printing the state before and after a change is the most basic
+debugging tool you have.
 [Print and the console](../help/printing-and-console.md) covers the
 details.
 
@@ -156,8 +160,8 @@ mode; nothing is wrong.
 
 - The area under your app is the **debug panel** (or debugger).
 - The record of visited pages is the **page history**. Later, you will
-  [turn history into regression tests](../add/freeze-pages.md)
-  automatically.
+  [turn that history into regression tests](../add/freeze-pages.md)
+  with a button in the Tests tab.
 
 ## Make it yours
 

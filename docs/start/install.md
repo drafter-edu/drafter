@@ -83,7 +83,7 @@ Still stuck? See [Troubleshooting](../help/troubleshooting.md).
 
     ---
 
-    Build a working counter site, one idea at a time, in about twenty
+    Build a working counter site, one idea at a time, in about ten
     minutes.
 
     [Build your first app](first-app.md)

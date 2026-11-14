@@ -144,10 +144,14 @@ around:
 
 1. Run your app and visit the page you want to freeze.
 2. Open the debug panel's **History** tab. Each visit shows the
-   route call that produced it, and expanding its **Response** shows
-   the full `Page(...)` your route returned, written as Python.
-3. Copy the call and the page into an `assert_equal`, above
-   `start_server(...)`:
+   route call that produced it. Expand **Page shown** under the
+   visit, and Drafter displays the visit as a complete
+   `assert_equal` test: the route call first, then the full
+   `Page(...)` the route returned.
+3. Copy that test into your program, above `start_server(...)`. The
+   copied test spells out the whole list of compliments twice. Here
+   the list has been replaced with its name, `COMPLIMENTS`, and the
+   field names have been removed to keep the test short:
 
 ```python
 assert_equal(index(State(COMPLIMENTS, 0)),
@@ -165,6 +169,12 @@ rule:
 ```python
 assert_state(another(State(COMPLIMENTS, 2)), State(COMPLIMENTS, 0))
 ```
+
+Freezing pages one at a time shows you what a frozen test is. When
+you have several pages to freeze, the Tests tab has a
+**Copy Regression Tests** button that writes a test for every page
+you visited. [Freeze finished pages](../add/freeze-pages.md) explains
+how to use it.
 
 **Predict first**: which pages of the quiz game are worth freezing?
 (The results page for a known score is a strong pick: it has the most
@@ -214,7 +224,7 @@ hide_debug_information()
 The debug panel is a tool for you, not for your visitors, and hiding
 it is the clearest sign that an app is finished. The full production
 checklist, including site information for the about page and
-unframing, is in
+removing the development frame around the app, is in
 [Prepare for release](../your-project/deploy/prepare.md); apply it
 when you deploy for real.
 

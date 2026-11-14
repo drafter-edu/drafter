@@ -14,8 +14,8 @@ outcome: Edit a running app, see the result, and recover from a first error.
 ## What you'll build
 
 This step adds nothing new to the app. Instead, you will practice the
-loop you will use hundreds of times: **edit the code, save, reload, see
-the change**. Then you will break the app on purpose, read the error, and
+loop you will use hundreds of times: **edit the code, save, and see the
+change**. Then you will break the app on purpose, read the error, and
 fix it. Knowing what breakage looks like when you cause it deliberately
 makes it far less alarming when it happens by accident.
 
@@ -25,7 +25,7 @@ makes it far less alarming when it happens by accident.
   your computer.
 - About ten minutes.
 
-## Step 1: The edit, save, reload loop
+## Step 1: The edit, save, look loop
 
 Here is the counter again as a starting point:
 
@@ -56,15 +56,26 @@ def increment(state: State) -> Page:
 start_server(State(0))
 ```
 
-On your computer, the loop is:
+Run the program once, and leave it running. On your computer, the loop
+is:
 
 1. **Edit**: change something in the code.
-2. **Save and run** the file again.
-3. **Look**: the site reloads with your change.
+2. **Save** the file.
+3. **Look**: the site in your browser reloads with your change.
 
-Try it now: change `"Current count: "` to a message of your own, save, and
-run. The page shows your text. That round trip is the rhythm you will
-follow whenever you build with Drafter.
+While your program is running, Drafter watches the file. Each time you
+save, Drafter restarts the site in the browser tab with the new code, so
+you do not need to stop the program and run it again. The restart also
+sets the state back to its starting value, which is why the count
+returns to 0 after every save.
+
+Try it now: change `"Current count: "` to a message of your own and
+save. Switch to the browser tab, and the page shows your text. That
+round trip is the rhythm you will follow whenever you build with
+Drafter.
+
+If you stopped the program or closed the editor, the site has nothing
+to reload it. Run the file again to start it.
 
 ## Step 2: Add a second button
 
@@ -117,45 +128,59 @@ In your copy, misspell the function name inside the button, like this:
 Button("+10", "ad_ten")
 ```
 
-Save and run. When the page tries to display, Drafter stops it and shows
-an error like:
+Save. When the page tries to display, Drafter stops it and shows an
+error page that begins like this:
 
 ```text
-Problem Displaying This Page
-Drafter could not turn your page result into something it can display.
+Unusable Value
 
-payload.verification_failed: Payload verification failed for URL index: While verifying the Page() object returned from index, an error was encountered:
-Link `+10` points to non-existent page `ad_ten`.  
+The link labeled '+10' tries to go to a page named `ad_ten`, but your site has no route with that name.
+
+payload.verification_failed: Payload verification failed for the page 'index': While verifying the Page() object returned from index, an error was encountered:
+Link `+10` points to non-existent page `ad_ten`.
 ```
 
-Read it slowly. The last line names the exact problem: the `+10` button
-points to a page called `ad_ten`, and no route with that name exists.
+Read it slowly. The large title at the top is a general category, and
+the sentence under it says what happened in plain words: the `+10`
+button points to a page called `ad_ten`, and no route with that name
+exists. The error calls the button a link because buttons and links are
+checked the same way. Below that sentence is the technical message, and
+below that is a list titled "What To Try Next".
+
 Drafter checks every link and button on a page before showing it, so a
 broken app tells you what went wrong instead of showing a blank screen or
 a dead button.
 
 ## Step 4: Undo it
 
-Fix the spelling back to `add_ten`, save, and run. The app works again.
+Fix the spelling back to `add_ten` and save. The app works again.
 
 That is the full recovery loop: **read the error, find the line, fix it,
-run again**. If an error ever stumps you, the
+save again**. If an error ever stumps you, the
 [error index](../help/errors/index.md) explains the common ones in plain
-language; you can search it with the exact text of your error message.
+language. You can look an error up there by the title at the top of the
+error page, or search the docs for the exact text of the message.
 
 ## Common problems
 
-- **You saved but nothing changed**: make sure you ran the file again
-  after saving, and that you edited the same file you are running.
-- **The site shows an old version**: stop the program and run it again; a
-  fresh run always reflects the current code.
+- **You saved but nothing changed**: check that the program is still
+  running, and that you edited the same file you are running. If the
+  program has stopped, run it again.
+- **A box says your code has a syntax error**: Drafter could not read
+  the file you saved, so it kept showing the last version that worked.
+  Fix the line the box names and save again.
+- **The site still shows an old version**: stop the program and run it
+  again, and use the browser tab that the new run opens. A fresh run
+  always reflects the current code, but a tab left open from an
+  earlier run keeps showing the old code.
 - **You cannot find the broken spot**: the last line of the error message
   names what is wrong (here, the button label and the missing page name).
   Search your file for that name; do not start reading from the top.
 
 ## Name it
 
-- The rhythm you practiced is the **edit, save, reload loop**.
+- The rhythm you practiced is the **edit, save, look loop**. Drafter
+  reloading the site each time you save is called **live reload**.
 - The error you caused is a **link verification error**: before showing a
   page, Drafter checks that every button and link points to a route that
   actually exists.
@@ -165,7 +190,7 @@ language; you can search it with the exact text of your error message.
 1. Add a `-10` button, first predicting what will happen if you click it
    enough times.
 2. Break the app a different way: remove the closing bracket of the
-   content list, run it, and read that error too. Then fix it.
+   content list, save, and read the message that appears. Then fix it.
 
 ## Next steps
 
