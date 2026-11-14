@@ -54,7 +54,9 @@ class ClientServerConfiguration(BaseConfiguration):
         use_shadow_dom: Wrap app in Shadow DOM to prevent CSS conflicts.
         root_element_id: ID prefix for root element.
         system_routes: Dict mapping route names to handler callables.
-        external_pages: List of external page links (URL or (URL, Text) tuples).
+        external_pages: List of extra links shown on the About page. Each
+            entry is a "URL" string, a "URL Text" string (the address, a
+            space, then the link's text), or a (URL, Text) tuple.
         newlines_to_br: Whether to convert newlines to <br> tags in text content.
         page_transition: Visual transition applied to the page body on
             navigation: "none" disables transitions, "fade" fades the new
