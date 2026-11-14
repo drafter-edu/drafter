@@ -2166,13 +2166,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6282,6 +6275,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14206,7 +14227,7 @@ will use most often are:</p>
 </ul>
 <p>You will need the other three tabs less often:</p>
 <ul>
-<li><strong>Overview</strong> lists all your routes and how they connect.</li>
+<li><strong>Overview</strong> lists every route in your app, with its parameters.</li>
 <li><strong>Tests</strong> shows the results of your <code>assert_</code> lines. The two tests in
   this app appear there, marked as passing. Break one on your computer
   (change <code>State(1)</code> to <code>State(2)</code>) and watch it fail with an explanation
@@ -14215,12 +14236,8 @@ will use most often are:</p>
 </ul>
 <h2 id="step-2-see-where-print-goes">Step 2: See where print() goes</h2>
 <p>You can <code>print(...)</code> from inside a route to see what is happening while it
-runs.</p>
-<details class="note" open="open">
-<summary>Note</summary>
-<p>If nothing seems to print, remember that printed output does not appear in the browser version of this demo. Run the program in Thonny to see it.</p>
-</details>
-<p>Run this, click the button, and watch:</p>
+runs. Copy this program to your computer, run it, click the button, and
+look at the area between your page and the debug panel:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
@@ -14252,9 +14269,19 @@ runs.</p>
   <iframe src="../../drafter-demos/debug-panel-2-0d49078cac7f/index.html" title="Drafter Demo debug-panel-2-0d49078cac7f" name="debug-panel-2-0d49078cac7f" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 430px;" ></iframe>
 </div>
 
-<p>The printed lines appear in the app's console area instead of
-disappearing. Printing the state before and after a change is the most
-basic debugging tool you have, and it works everywhere.
+<p>The printed lines appear in a box labeled <strong>Console</strong>, on the web page
+itself. They do not appear in Thonny's shell. A route runs inside the
+browser when you click a button, so the browser is where its output
+goes. Thonny's shell shows only what was printed while the program was
+starting, such as your test results.</p>
+<details class="note" open="open">
+<summary>Note</summary>
+<p>In the demo on this page, the Console box is part of the debug
+view. Click the "debug" button in the corner of the demo, then click
+<strong>Double it</strong>, and the printed lines appear below the page.</p>
+</details>
+<p>Printing the state before and after a change is the most basic
+debugging tool you have.
 <a href="../../help/printing-and-console/">Print and the console</a> covers the
 details.</p>
 <h2 id="when-the-panel-is-missing">When the panel is missing</h2>
@@ -14277,8 +14304,8 @@ mode; nothing is wrong.</p>
 <ul>
 <li>The area under your app is the <strong>debug panel</strong> (or debugger).</li>
 <li>The record of visited pages is the <strong>page history</strong>. Later, you will
-  <a href="../../add/freeze-pages/">turn history into regression tests</a>
-  automatically.</li>
+  <a href="../../add/freeze-pages/">turn that history into regression tests</a>
+  with a button in the Tests tab.</li>
 </ul>
 <h2 id="make-it-yours">Make it yours</h2>
 <ol>

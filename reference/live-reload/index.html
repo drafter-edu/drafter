@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6249,6 +6242,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13786,11 +13807,15 @@ example <code>lab3/</code>, and run it from there.</p>
 <p>Files that Drafter generates itself, such as <code>drafter-debug.log</code>,
 never trigger a reload in any mode.</p>
 <h2 id="settings">Settings</h2>
-<p>Each setting below can be passed as a keyword to <code>start_server(...)</code>,
-set in a JSON configuration file (passed with <code>--config-file</code>) under
-the <code>app_server</code> section, or set through an environment variable with
-the <code>DRAFTER_</code> prefix (for example <code>DRAFTER_WATCH_MAX_FILES=500</code>).
-The boolean switches also have <code>--no-...</code> command-line flags.</p>
+<p>Each setting below can be passed as a keyword to <code>start_server(...)</code>
+or given as a command line flag, such as <code>--no-reloader</code> or
+<code>--watch-max-files 500</code>. Running <code>drafter --help</code> lists the flags.
+The <code>watch_...</code> settings can also be set through an environment
+variable with the <code>DRAFTER_</code> prefix, for example
+<code>DRAFTER_WATCH_MAX_FILES=500</code>. The <code>use_reloader</code> setting is the
+exception: its environment variable currently has no effect.
+<a href="../start-server/#where-settings-come-from">Where settings come from</a>
+describes the three forms.</p>
 <table>
 <thead>
 <tr>
@@ -13898,9 +13923,9 @@ whole folder, and other entries match either the file name or the
 path relative to your program's folder.</p>
 <h2 id="turning-it-off">Turning it off</h2>
 <p>Pass <code>use_reloader=False</code> to <code>start_server</code>, or run with
-<code>drafter my_app.py --no-reloader</code>. The server still runs; it simply
-never restarts the site on its own, and you refresh manually after
-stopping and rerunning the program.</p>
+<code>drafter my_app.py --no-reloader</code>. The server still runs, but it
+never restarts the site on its own. To see a change, stop the program,
+run it again, and refresh the browser tab.</p>
 <h2 id="related">Related</h2>
 <ul>
 <li><a href="../cli/">Command line</a>: the flags for these settings.</li>

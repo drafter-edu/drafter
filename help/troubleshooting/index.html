@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6052,10 +6045,76 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#reloading-the-tab-does-not-go-back-to-the-first-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reloading the tab does not go back to the first page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-browser-shows-an-old-or-different-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The browser shows an old or different app
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-site-will-not-start" class="md-nav__link">
     <span class="md-ellipsis">
       
         The site will not start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-loading-screen-never-finishes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The loading screen never finishes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#everything-appears-on-one-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Everything appears on one line
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-picture-shows-as-a-broken-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A picture shows as a broken image
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#it-works-on-my-computer-but-not-on-the-deployed-site" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        It works on my computer but not on the deployed site
       
     </span>
   </a>
@@ -6282,6 +6341,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13723,10 +13810,76 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#reloading-the-tab-does-not-go-back-to-the-first-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reloading the tab does not go back to the first page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-browser-shows-an-old-or-different-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The browser shows an old or different app
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-site-will-not-start" class="md-nav__link">
     <span class="md-ellipsis">
       
         The site will not start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-loading-screen-never-finishes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The loading screen never finishes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#everything-appears-on-one-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Everything appears on one line
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-picture-shows-as-a-broken-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A picture shows as a broken image
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#it-works-on-my-computer-but-not-on-the-deployed-site" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        It works on my computer but not on the deployed site
       
     </span>
   </a>
@@ -13807,67 +13960,224 @@
 
 <h1 id="troubleshooting">Troubleshooting</h1>
 <p>This page is organized by what you can see on the screen. If you
-have an actual error message, the <a href="../errors/">error index</a>
+are looking at an error page, the <a href="../errors/">error index</a>
 is a faster place to look.</p>
 <h2 id="the-page-is-blank">The page is blank</h2>
-<p>Usually the route ran but returned something empty, or never ran at
-all.</p>
+<p>A page that is completely blank usually came from a route that
+returned a page with nothing in it.</p>
 <ul>
-<li>Check the terminal and the debug panel for an error that happened
-  while the page was being built; an error can leave the old or empty
-  page behind.</li>
-<li>Check that your <code>index</code> route returns a <code>Page</code> on every path. A
-  route that ends without <code>return</code> returns <code>None</code>, and there is
-  nothing to show.</li>
-<li>If the whole site is blank on first load, give it a moment: see
-  "The first load is slow" below.</li>
+<li>Check the content list of the page that the route returns. A route
+  that ends with <code>return Page(state, [])</code> shows an empty page.
+  Drafter does not treat an empty page as a mistake, so no warning
+  appears.</li>
+<li>Check which route ran. The debug panel's Current tab names the
+  route that produced the page you are looking at, and that route
+  may not be the one you expected.</li>
+<li>A route that forgets its <code>return</code> statement does not give a blank
+  page. Drafter shows an error page titled "Route Did Not Return a
+  Page" instead, and
+  <a href="../errors/route-did-not-return-a-page/">the entry for that error</a>
+  explains the fix.</li>
 </ul>
 <h2 id="a-button-does-nothing">A button does nothing</h2>
 <ul>
-<li>Open the debug panel and click the button again: did a request
-  happen? If yes, the route ran; check what it returned and whether
-  it actually changed state.</li>
-<li>If the click produced an error page instead, read it; the two most
+<li>Open the debug panel's History tab and click the button again. A
+  new line at the top of the list means that the route ran. Check
+  what the route returned and whether it changed the state.</li>
+<li>If the site has only now opened, wait for the "Loading, please
+  wait..." message to disappear. Buttons do not respond until the
+  browser has finished starting Python.</li>
+<li>If the click produced an error page instead, read it. The two most
   common are a
   <a href="../errors/missing-parameter/">missing parameter</a> and a
-  <a href="../errors/type-conversion-int/">conversion failure</a>.</li>
-<li>Make sure the route mutates the state it was given rather than a
-  fresh copy: <code>state.score = state.score + 1</code>, not
-  <code>state = State(...)</code>.</li>
-<li>If the page never re-renders, the button appears to do nothing
-  even when the route ran. The route should end by returning a page
-  that shows the change, usually <code>return index(state)</code>.</li>
+  <a href="../errors/type-conversion-int/">conversion failure</a>. A route that
+  ends without a <code>return</code> statement produces
+  <a href="../errors/route-did-not-return-a-page/">Route Did Not Return a Page</a>.</li>
+<li>Make sure the route stores its result in the state. The line
+  <code>state.score + 1</code> computes a new number and never saves it. The
+  line <code>state.score = state.score + 1</code> saves it.</li>
+<li>Make sure the page that the route returns shows the value that
+  changed. If the route updates <code>state.score</code> and the page never
+  displays the score, the page looks the same after every click.
+  Most routes end with <code>return index(state)</code> so that the visitor
+  sees the updated page.</li>
 </ul>
 <h2 id="my-changes-are-not-appearing">My changes are not appearing</h2>
-<p>Work through the classic save-and-reload steps, in order:</p>
+<p>While your program is running, Drafter watches your file. Each time
+you save, the site in the browser reloads by itself within about a
+second, and the state goes back to its starting value. You do not
+need to run the program again. If a change does not show up, work
+through these checks in order.</p>
 <ol>
-<li>Save the file. Changes you have not saved never run.</li>
-<li>If you ran the program yourself, stop it and run it again;
-   the site is built from the code as it was when you started it.
-   (The <code>drafter</code> command watches your file and restarts for you.)</li>
-<li>Refresh the browser tab.</li>
-<li>If a syntax error crept in, the old site keeps running while the
-   terminal shows the error; fix it and save again.</li>
-<li>If you edited a helper file (not your main program) and the
-   terminal printed "Drafter noticed that ... is in a large or broad
-   folder" at startup, only files your site has already used reload
-   automatically. Move the project into its own small folder, or see
+<li>Check that the program is still running. If it has ended, or you
+   stopped it, nothing is watching your file. Run the program again.</li>
+<li>Save the file. A change that you have not saved never runs.</li>
+<li>Check that you are editing the file that is running, and that you
+   are looking at the browser tab that belongs to this run. When a
+   program starts, the terminal prints the address of its site in a
+   line such as <code>Drafter ready at http://localhost:8000</code>. A tab left
+   open from an earlier run, or from another program, does not
+   reload when you save. Reload that tab, and see
+   <a href="#the-browser-shows-an-old-or-different-app">The browser shows an old or different app</a>.</li>
+<li>Look for a box titled "Syntax Error" on top of your site. When
+   the saved file is not valid Python, Drafter keeps showing the
+   last working version of the site, and the box names the line to
+   fix. Fix that line and save again.</li>
+<li>If the file you changed is not your main program, check whether
+   the terminal printed "Drafter noticed that ... is in a large or
+   broad folder" when the program started. That message means live
+   reload is in safe mode. In safe mode, Drafter reloads for your
+   main program and for files the site has already used, and it
+   ignores the other files in the folder. Move the project into its
+   own small folder, or see
    <a href="../../reference/live-reload/">live reload</a>.</li>
+<li>As a last resort, stop the program, run it again, and open the
+   address that the terminal prints.</li>
 </ol>
+<h2 id="reloading-the-tab-does-not-go-back-to-the-first-page">Reloading the tab does not go back to the first page</h2>
+<p>After each click, the address bar ends with the name of the route
+that produced the current page, such as <code>?route=add_one</code>. When you
+reload the tab, Drafter starts the site again with the state at its
+starting value and then runs that same route, with no form values.
+Two results of this behavior can be surprising.</p>
+<ul>
+<li>If the route changes the state, the change is applied once to the
+  starting state. A counter that starts at 0 and was showing 4 shows
+  1 after a reload when the address ends in <code>?route=add_one</code>.</li>
+<li>If the route needs a value from a form, the reload has no value to
+  give it. Drafter shows an error page titled "Problem With the
+  Route's Arguments", which the
+  <a href="../errors/missing-parameter/">missing parameter</a> entry describes.</li>
+</ul>
+<p>To return to the first page, click <strong>Return to Index Page</strong> on the
+error page, or open the site's address without the <code>?route=...</code>
+part.</p>
+<h2 id="the-browser-shows-an-old-or-different-app">The browser shows an old or different app</h2>
+<p>Every running Drafter program serves its site at an address that
+ends in a port number, normally <code>http://localhost:8000</code>. Only one
+program can use a port at a time. Each time a program starts,
+Drafter checks whether the port is free, and the terminal reports
+what Drafter did.</p>
+<p><strong>You ran the same file again while its earlier run was still
+going.</strong> Drafter stops the earlier run and reuses its address. The
+terminal prints these two lines.</p>
+<div class="highlight"><pre><span></span><code>An earlier run of main.py is still using port 8000. Stopping it so this run can take over...
+Stopped the earlier run.
+</code></pre></div>
+<p>A browser tab that the earlier run opened does not follow the new
+run. That tab keeps showing the old version of your site, and it no
+longer reloads when you save. Reload that tab, or use the tab that
+the new run opened.</p>
+<p><strong>A different program is using the port.</strong> Drafter moves your
+program to the next free port and prints the new address. When the
+other program is also a Drafter site, a second line says how to stop
+it.</p>
+<div class="highlight"><pre><span></span><code>Port 8000 is in use by another Drafter program (quiz.py), so this run will use port 8001 instead: http://localhost:8001/
+To stop the other program, open http://localhost:8000/--stop-server in your browser or press Ctrl+C in its terminal.
+</code></pre></div>
+<p>A tab that is still open at <code>localhost:8000</code> keeps showing the
+other program, which is how an old app ends up on the screen. Open
+the address that the terminal printed for the program you want.</p>
+<p><strong>You chose the port yourself, and a different program is using
+it.</strong> A port is your own choice when you pass <code>--port</code> on the
+command line or <code>port=</code> to <code>start_server</code>. Drafter does not move to
+another port in this case. The program stops with a message titled
+"Port already in use", which says what is using the port and lists
+three ways forward. You can stop the other program, choose a
+different port, or remove the port setting so that Drafter can pick
+a free port for you.</p>
 <h2 id="the-site-will-not-start">The site will not start</h2>
 <ul>
-<li>Read the terminal message. A syntax error names the file and line;
-  fix it and rerun.</li>
-<li>If the message says the port is in use, another copy of your app is
-  probably still running; stop it, or pass a different port with
-  <code>start_server(port=8081)</code>.</li>
-<li>If <code>import drafter</code> itself fails, the installation is the problem;
-  see <a href="../../start/install/">Get Drafter running</a>.</li>
-<li>If the program ends right away with no message and no site, the
+<li>Read the message in the terminal. A syntax error names the file
+  and the line. Fix that line and run the program again.</li>
+<li>If the terminal shows a message titled "Port already in use", see
+  <a href="#the-browser-shows-an-old-or-different-app">The browser shows an old or different app</a>.</li>
+<li>If <code>import drafter</code> itself fails, the installation is the problem.
+  See <a href="../../start/install/">Get Drafter running</a>.</li>
+<li>If the program ends right away without starting a site, the
   <code>DRAFTER_SKIP</code> environment variable may be set in your terminal. It
   tells <code>start_server</code> to do nothing, which is meant for
   <a href="../../add/use-pytest-or-unittest/">test runners</a>. Open a new
   terminal, or unset the variable.</li>
+</ul>
+<h2 id="the-loading-screen-never-finishes">The loading screen never finishes</h2>
+<p>When a site opens, the browser first downloads and starts Python.
+Until that work is done, the first page appears faded behind a
+spinner and the words "Loading, please wait...", and buttons do not
+respond. The message disappears when the site is ready.</p>
+<ul>
+<li>Check the internet connection. The browser downloads Python from
+  <code>cdn.jsdelivr.net</code> and Python libraries from <code>pypi.org</code>, even when
+  the site itself runs from your own computer.</li>
+<li>If the download fails, the loading screen is replaced by a box
+  titled "Something Went Wrong" that begins "Drafter could not
+  download the files it needs to run Python in your browser." Follow
+  the steps in the box. Reload with a hard refresh
+  (<span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-r">R</kbd></span>, or <span class="keys"><kbd class="key-command">Cmd</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-r">R</kbd></span> on a Mac), and if that does
+  not help, try a different network, because some school and work
+  networks block these downloads.</li>
+<li>A program that imports large libraries takes longer to load,
+  because the browser downloads each library before your code runs.
+  If a library cannot be loaded at all, see
+  <a href="../errors/package-import-error/">A library import fails in the browser</a>.</li>
+<li>If the screen still does not change, open the browser's developer
+  tools with <span class="keys"><kbd class="key-f12">F12</kbd></span> and read the Console tab. Copy any red message
+  there when you ask for help.</li>
+</ul>
+<h2 id="everything-appears-on-one-line">Everything appears on one line</h2>
+<p>Drafter puts the items of a page's content list one after another
+on the same line. It does not start a new line between items. To
+end a line, put <code>"\n"</code> at the end of a string.</p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+    <span class="s2">&quot;Name: Ada</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Species: corgi</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Feed&quot;</span><span class="p">,</span> <span class="s2">&quot;feed&quot;</span><span class="p">)</span>
+<span class="p">])</span>
+</code></pre></div>
+<p>Each <code>"\n"</code> becomes a line break on the page, and two of them in a
+row leave an empty line. A <code>Header</code> already starts on a line of its
+own.</p>
+<h2 id="a-picture-shows-as-a-broken-image">A picture shows as a broken image</h2>
+<p>A small broken-picture icon in place of your image means that the
+browser asked for the file and did not get it. Drafter does not show
+an error page or a warning for a missing picture, so the icon is the
+only sign on the page.</p>
+<ul>
+<li>Compare the filename in your code, such as <code>Image("ada.png")</code>,
+  with the name of the real file, including the ending.</li>
+<li>Check that the file sits next to your program.</li>
+<li>While the program runs on your computer, the terminal prints a
+  line ending in <code>404 Not Found</code> for each file that the browser
+  asked for and did not get. That line shows the exact name that was
+  requested.</li>
+<li>If the picture works on your computer and is broken only on the
+  deployed site, see
+  <a href="../errors/missing-asset-on-deploy/">Image or file works locally but 404s when deployed</a>.</li>
+</ul>
+<p><a href="../../add/pictures/">Use pictures</a> has more on images that come from
+a web address and on uploaded pictures.</p>
+<h2 id="it-works-on-my-computer-but-not-on-the-deployed-site">It works on my computer but not on the deployed site</h2>
+<p>The deployed site is built from the files in your repository, and
+it usually has no debug panel, so problems look different there.</p>
+<ul>
+<li>A red X next to the deployment means that the build failed and the
+  site was not updated. See
+  <a href="../errors/deploy-build-failed/">GitHub Actions build failed</a>.</li>
+<li>A picture or data file that is missing only on the deployed site
+  was not uploaded or not declared. See
+  <a href="../errors/missing-asset-on-deploy/">Image or file works locally but 404s when deployed</a>.</li>
+<li>A library that works on your computer may not work in the browser.
+  See
+  <a href="../errors/package-import-error/">A library import fails in the browser</a>.</li>
+<li>A site that still shows an old version was not deployed again
+  after your last change, or the browser kept an old copy.
+  <a href="../../your-project/deploy/troubleshooting/">Fix a failed deployment</a>
+  explains how to run the deployment again and how to read its log.</li>
+<li>Error pages look the same on a deployed site as on your computer,
+  so read them the same way. If your program calls
+  <code>hide_debug_information()</code>, the debug panel and the Console box
+  are hidden, and <code>print()</code> output appears only in the browser's
+  developer tools (<span class="keys"><kbd class="key-f12">F12</kbd></span>, then the Console tab).</li>
 </ul>
 <h2 id="the-page-looks-plain-or-unstyled">The page looks plain or unstyled</h2>
 <p>When a stylesheet cannot be loaded, a notice appears at the top of
@@ -13887,15 +14197,20 @@ working.</p>
   <a href="../bug-reports/">bug report</a>.</li>
 </ul>
 <h2 id="my-code-after-start_server-never-runs">My code after start_server never runs</h2>
-<p>That is <a href="../errors/nothing-after-start-server/">by design</a>:
+<p>This behavior is
+<a href="../errors/nothing-after-start-server/">by design</a>. The call to
 <code>start_server(...)</code> takes over the program. Configuration and tests
 go before it, and behavior goes in routes.</p>
 <h2 id="the-first-load-is-slow">The first load is slow</h2>
-<p>Behind the scenes, the browser downloads and starts a complete copy
-of Python before your first page appears, so expect a delay of a
-few seconds on the first visit. If the page never loads at all,
-check the browser's network connection, and check whether the
-terminal shows that the site actually started.</p>
+<p>The browser downloads and starts a complete copy of Python before
+your site can respond, so expect a delay of several seconds on the
+first visit. During that time the first page is visible but faded,
+behind the words "Loading, please wait...". If the message stays,
+see
+<a href="#the-loading-screen-never-finishes">The loading screen never finishes</a>.
+If the browser reports that it cannot reach the site at all, check
+that the terminal printed a line starting with <code>Drafter ready at</code>
+and that the program is still running.</p>
 <h2 id="tests-pass-but-the-app-misbehaves">Tests pass but the app misbehaves</h2>
 <p>Tests only exercise the routes you wrote them for, so the
 misbehavior is probably on a path that has no test yet. Reproduce

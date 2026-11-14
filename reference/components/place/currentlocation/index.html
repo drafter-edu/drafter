@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6264,6 +6257,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14161,25 +14182,25 @@ whether coordinates are actually there.</p>
 </tr>
 <tr>
 <td><code>on_locate</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Route to call when a position (or a failure) is resolved.</td>
 </tr>
 <tr>
 <td><code>on_error</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Route to call when finding the location fails for any reason.</td>
 </tr>
 <tr>
 <td><code>on_denied</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Route to call when the visitor refuses permission.</td>
 </tr>
 <tr>
 <td><code>on_timeout</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Route to call when the request runs out of time.</td>
 </tr>
@@ -14236,6 +14257,22 @@ needed:</p>
   <code>longitude</code> are <code>None</code> and <code>message</code> may explain why.</li>
 <li>A granted <code>Location</code> also carries <code>accuracy</code> (in meters) and,
   when the device knows them, <code>altitude</code>, <code>heading</code>, and <code>speed</code>.</li>
+<li>The <code>on_locate</code> route can receive the parts of the result as
+  parameters by name: <code>status</code> and <code>message</code> (strings), and
+  <code>latitude</code>, <code>longitude</code>, <code>accuracy</code>, <code>altitude</code>, <code>heading</code>,
+  <code>speed</code>, and <code>timestamp</code> (floats). Only <code>status</code> is always sent.
+  The coordinates arrive only when the status is <code>"granted"</code>, and
+  <code>altitude</code>, <code>heading</code>, and <code>speed</code> only when the device knows
+  them, so give each of those parameters a default value. A route
+  that needs the whole result can instead take one parameter with
+  the component's name, annotated <code>Location</code>, as <code>report</code> does
+  above.</li>
+<li>The <code>on_error</code>, <code>on_denied</code>, and <code>on_timeout</code> routes can receive
+  <code>status</code> and <code>message</code>, both strings.</li>
+<li>Each <code>on_</code> parameter takes the route's name as a string or the
+  route function itself.
+  <a href="../../actions/button/#route-targets">Route targets</a> on the Button
+  page compares the two.</li>
 <li>Browsers only allow location requests on secure pages. This is
   fine for deployed Drafter sites and local testing, but the
   request can fail as <code>"unavailable"</code> in unusual setups.</li>

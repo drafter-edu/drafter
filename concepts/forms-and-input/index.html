@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6251,6 +6244,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14088,10 +14109,19 @@ visitor. Each one is created with a name:</p>
 <p>When the visitor clicks a <code>Button</code>, Drafter gathers every input on the
 page and delivers each one to the button's target route <strong>as the
 parameter with the same name</strong>. A page with <code class="highlight"><span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;new_name&quot;</span><span class="p">)</span></code>
-means the target route must have a parameter called <code>new_name</code>:</p>
+means the target route receives the value through a parameter called
+<code>new_name</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
     <span class="o">...</span>
+</code></pre></div>
+<p>A page can have several inputs. Each one travels to the parameter
+that shares its name, and the button's target names the function:</p>
+<div class="highlight"><pre><span></span><code>On the page                           In the program
+
+TextBox(&quot;new_name&quot;)  ──────────────▶  new_name: str
+CheckBox(&quot;shout&quot;)    ──────────────▶  shout: bool
+Button(&quot;Greet&quot;, &quot;greet&quot;)  ─────────▶  def greet(state, new_name, shout)
 </code></pre></div>
 <p>The names must match exactly. The value arrives as text unless the
 parameter's annotation says otherwise:</p>
@@ -14124,8 +14154,22 @@ parameter's annotation says otherwise:</p>
 <td>(a checked box)</td>
 <td><code class="highlight"><span class="kc">True</span></code></td>
 </tr>
+<tr>
+<td><code>list[str]</code></td>
+<td>(two boxes checked in a group)</td>
+<td><code class="highlight"><span class="p">[</span><span class="s2">&quot;cheese&quot;</span><span class="p">,</span> <span class="s2">&quot;olives&quot;</span><span class="p">]</span></code></td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>(a day picked in a <code>DateInput</code>)</td>
+<td><code class="highlight"><span class="n">date</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span></code></td>
+</tr>
 </tbody>
 </table>
+<p>These are the conversions most forms need. Drafter also converts
+times, pictures, uploaded files, and several other types. The complete
+list is the
+<a href="../../reference/route/#parameter-conversion">parameter conversion table</a>.</p>
 <p>If the text cannot be converted, for example <code>abc</code> for an <code>int</code>
 parameter, Drafter stops with a friendly error naming the parameter and
 the value, and the visitor can go back and correct it.</p>
@@ -14217,8 +14261,10 @@ number is expected.</p>
 <ul>
 <li>Choose input names as carefully as variable names; they <em>become</em>
   parameter names. <code>new_name</code> and <code>first</code> read well; <code>textbox1</code> does not.</li>
-<li>The button's target route must accept one parameter per input on the
-  page, matching each name exactly.</li>
+<li>The button's target route needs a parameter for each input whose
+  value it uses, matching the input's name exactly. An input that the
+  route has no parameter for is not an error. The page still works, and
+  the debug panel lists a warning about the unused form field.</li>
 <li>Annotate every input parameter. With <code class="highlight"><span class="n">age</span><span class="p">:</span> <span class="nb">int</span></code>, the route
   receives a number or a clear error; without an annotation, it
   receives text that you must convert yourself.</li>
@@ -14239,9 +14285,9 @@ number is expected.</p>
 <li><strong>"Where did my typed value go after the next click?"</strong> Parameters are
   delivered once, to one route. If the value should live longer, assign
   it to a <code>state</code> field.</li>
-<li><strong>"Can one page have two buttons to different routes?"</strong> Yes, and both
-  routes receive the same page's inputs, so both need the matching
-  parameters.</li>
+<li><strong>"Can one page have two buttons to different routes?"</strong> Yes. Both
+  routes receive the same page's inputs. Each route declares parameters
+  for the inputs it uses and may leave out the rest.</li>
 </ul>
 <h2 id="go-deeper">Go deeper</h2>
 <ul>

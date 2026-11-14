@@ -2188,13 +2188,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6304,6 +6297,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14290,10 +14311,12 @@ strings, those same values are harmless.</p>
   tags inside <code>RawHTML</code> will run, but embeds that load outside
   resources may be blocked or behave differently once deployed;
   test the deployed site early.</li>
-<li><strong>Tests cannot find the content</strong>: assertions see <code>RawHTML</code> as
-  one blob. <code>assert_has(page, RawHTML(...))</code> with the identical
-  string works; matching text inside it does not. One more
-  reason to prefer components.</li>
+<li><strong>Tests see the markup as one piece of text</strong>: an assertion such
+  as <code>assert_has(page, "Ada wins")</code> finds those words inside a
+  <code>RawHTML</code>, but it searches the whole markup, tag names and
+  attribute values included, and it cannot check one element
+  separately from the rest. Components give your tests more to
+  work with.</li>
 <li><strong>Styling helpers do not reach inside</strong>: <code>HtmlTag</code> accepts
   <code>style_</code> keywords and <code>classes</code> like any component, but the
   interior of a <code>RawHTML</code> blob is beyond the helpers; style it

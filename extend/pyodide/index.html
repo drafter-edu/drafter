@@ -2042,13 +2042,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6158,6 +6151,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14177,7 +14198,8 @@ reports <code>emscripten</code>, the name of the WebAssembly platform:</p>
 <ul>
 <li>Code before <code>start_server(...)</code> runs in both places; write it
   so it is happy in both. Printing and tests are fine (in the
-  browser, <code>print</code> goes to the debug console).</li>
+  browser, <code>print</code> goes to the Console box below the page; see
+  <a href="../../help/printing-and-console/">Printing and the console</a>).</li>
 <li>Anything the browser forbids, Python cannot do either: no
   reading the visitor's files, no opening network sockets, no
   running other programs.</li>
@@ -14185,8 +14207,8 @@ reports <code>emscripten</code>, the name of the WebAssembly platform:</p>
   are the way to ship data with your app; they appear in the
   virtual filesystem where <code>open()</code> finds them.</li>
 <li>A <code>js</code> module exists inside Pyodide for calling browser
-  JavaScript from Python. It is powerful and sharp-edged; the
-  planned JavaScript interop page will cover it properly.</li>
+  JavaScript from Python. It is powerful and sharp-edged, and
+  <a href="../javascript/">JavaScript interop</a> covers it.</li>
 </ul>
 <h2 id="where-people-get-confused">Where people get confused</h2>
 <ul>

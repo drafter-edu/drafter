@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6138,6 +6131,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13787,13 +13808,23 @@
 
 <h1 id="two-components-share-a-name">Two components share a name</h1>
 <h2 id="the-error">The error</h2>
-<div class="highlight"><pre><span></span><code>The page returned from save has multiple components with the same
-name:
-  &#39;answer&#39; is used by: TextBox, SelectBox
-Each component must have a unique name, because the name is how
-values are matched to route parameters. Rename the duplicates.
+<p>The error page has this title:</p>
+<div class="highlight"><pre><span></span><code>Components Share a Name
 </code></pre></div>
-<p>The friendly title is "Components Share a Name".</p>
+<p>The sentence under the title names the route and the shared name:</p>
+<div class="highlight"><pre><span></span><code>Two or more components on the page returned from `index` use the same
+name (`answer`). Drafter uses each component&#39;s name to match its value to
+a parameter of the next route function, so every component needs its own
+name.
+</code></pre></div>
+<p>The technical message below it lists the components that use the
+name:</p>
+<div class="highlight"><pre><span></span><code>payload.verification_failed: Payload verification failed for the page &#39;index&#39;:
+The page returned from index has multiple components with the same name:
+  &#39;answer&#39; is used by: TextBox, SelectBox
+Each component must have a unique name, because the name is how values
+are matched to route parameters. Rename the duplicates.
+</code></pre></div>
 <h2 id="what-it-means">What it means</h2>
 <p>Two or more inputs on one page use the same <code>name</code>. Names are how
 submitted values are matched to route parameters. If two components

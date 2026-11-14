@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6238,6 +6231,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13722,9 +13743,10 @@
 button in your editor) is the normal way to work, and most
 projects never need more. The <code>drafter</code> command exists for the
 occasions you want to change how the app is served or built.
-<code>python -m drafter</code> is the same command spelled differently, and
-<code>drafter --help</code> prints the complete live list; this page keeps
-to the flags students actually reach for.</p>
+<code>python -m drafter</code> is the same command spelled differently. This
+page keeps to the flags students actually reach for. For the complete
+list, <code>drafter --help</code> prints every flag for running a site, and
+<code>drafter --compile --help</code> prints every flag for building one.</p>
 <h2 id="running">Running</h2>
 <div class="highlight"><pre><span></span><code><span class="go">drafter my_app.py</span>
 </code></pre></div>
@@ -13817,8 +13839,21 @@ port and how to stop it.</p>
 <td>off</td>
 <td>Run without the debug panel, the way visitors will see the deployed site. Worth one look before deploying.</td>
 </tr>
+<tr>
+<td><code>--site-title TITLE</code></td>
+<td>none</td>
+<td>Set the title shown in the browser tab, same as <code>set_website_title(...)</code> in code. The code version wins if both are used.</td>
+</tr>
+<tr>
+<td><code>--console-mode MODE</code></td>
+<td><code>auto</code></td>
+<td>Choose where <code>print()</code> output appears in the browser. <code>auto</code> shows a console in the page footer while the debug panel is on. <code>hover</code> shows a floating console box, which also appears with <code>--production</code>. <code>toast</code> shows each line briefly in a corner, and <code>devtools</code> sends output only to the browser's developer console.</td>
+</tr>
 </tbody>
 </table>
+<p>These flags also apply to a build, so
+<code>drafter my_app.py --compile --production</code> builds the site without the
+debug panel.</p>
 <h2 id="building-for-deployment">Building for deployment</h2>
 <div class="highlight"><pre><span></span><code><span class="go">drafter my_app.py --compile</span>
 </code></pre></div>
@@ -13858,12 +13893,12 @@ missing, the build stops with <code>ModuleNotFoundError</code>.</p>
 <tr>
 <td><code>--additional-paths PATH</code></td>
 <td>none</td>
-<td>Bundle an extra file your code <code>open()</code>s; repeat the flag for each file: <code>--additional-paths pets.csv --additional-paths words.txt</code>. Forgetting this is the classic works-locally, <a href="../../help/errors/missing-asset-on-deploy/">404s-deployed</a> mistake. The in-code form is <a href="../site-config/#add_website_file"><code>add_website_file</code></a>.</td>
+<td>Copy an extra file, folder, or pattern such as <code>data/*.csv</code> into the built site. Repeat the flag for each one: <code>--additional-paths pets.csv --additional-paths words.txt</code>. A pattern that matches nothing prints a warning, and the build continues. Forgetting a file your code <code>open()</code>s is the classic works-locally, <a href="../../help/errors/missing-asset-on-deploy/">404s-deployed</a> mistake.</td>
 </tr>
 <tr>
 <td><code>--additional-files PATH</code></td>
 <td>none</td>
-<td>Same idea as <code>--additional-paths</code>, but through the site configuration: the flag version of <code>add_website_file(...)</code>. Repeat once per file.</td>
+<td>The flag version of <a href="../site-config/#add_website_file"><code>add_website_file(...)</code></a>. It names one file next to your program that the site needs, and the file is copied into the built site. Repeat once per file. A name that matches no file prints a warning, and the build continues.</td>
 </tr>
 <tr>
 <td><code>--additional-css-files PATH_OR_URL</code></td>
@@ -13878,12 +13913,7 @@ missing, the build stops with <code>ModuleNotFoundError</code>.</p>
 <tr>
 <td><code>--create-404 MODE</code></td>
 <td><code>if_missing</code></td>
-<td>Whether to write a <code>404.html</code> next to <code>index.html</code>. That page is what lets a visitor open your deployed site directly on a route, such as your address plus <code>--about</code>. <code>if_missing</code> leaves a <code>404.html</code> you made yourself alone; <code>always</code> overwrites it; <code>never</code> skips it.</td>
-</tr>
-<tr>
-<td><code>--zip-output</code></td>
-<td>off</td>
-<td>Zip the built site, convenient for uploading.</td>
+<td>Whether to write a <code>404.html</code> next to <code>index.html</code>. That page is what lets a visitor open your deployed site directly on a route, such as your address plus <code>--about</code>. <code>if_missing</code> leaves a <code>404.html</code> you made yourself alone, <code>always</code> overwrites it, and <code>never</code> skips it. <a href="../route/#opening-a-site-on-a-route">Opening a site on a route</a> explains what such an address can and cannot do.</td>
 </tr>
 <tr>
 <td><code>--no-warn-missing-info</code></td>
@@ -13921,9 +13951,11 @@ missing, the build stops with <code>ModuleNotFoundError</code>.</p>
 </table>
 <h2 id="related">Related</h2>
 <ul>
-<li>The full flag reference, including development and internal
-  options, lives in the repository README; contributors should
-  start at the <a href="../../dev/">developer docs</a>.</li>
+<li>The full flag list, including development and internal options,
+  comes from the command itself. Run <code>drafter --help</code> for the flags
+  that apply when running a site and <code>drafter --compile --help</code> for
+  the flags that apply when building one. Contributors should start
+  at the <a href="../../dev/">developer docs</a>.</li>
 <li>Most of what these flags do is also available in code through
   <a href="../site-config/">site configuration</a>, which travels with your
   file and is usually the better home.</li>

@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6138,6 +6131,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13787,10 +13808,19 @@
 
 <h1 id="selectbox-default-not-in-options">SelectBox default not in options</h1>
 <h2 id="the-error">The error</h2>
-<div class="highlight"><pre><span></span><code>default_value &#39;Chocolate&#39; is not in options [&#39;vanilla&#39;, &#39;chocolate&#39;, &#39;strawberry&#39;]
+<p>The error page has this title:</p>
+<div class="highlight"><pre><span></span><code>Unusable Value
 </code></pre></div>
-<p>The friendly version: "The starting choice for this SelectBox has
-to be one of the options in its list."</p>
+<p>Drafter uses the title "Unusable Value" for several different
+problems, so the sentence under the title is what identifies this
+one:</p>
+<div class="highlight"><pre><span></span><code>The starting choice for this SelectBox has to be one of the options in its
+list, and &#39;Chocolate&#39; is not.
+</code></pre></div>
+<p>The technical message below it shows the default and the options:</p>
+<div class="highlight"><pre><span></span><code>request.route_execution_failed: Error while processing request for URL &#39;index&#39;:
+default_value &#39;Chocolate&#39; is not in options [&#39;vanilla&#39;, &#39;chocolate&#39;, &#39;strawberry&#39;]
+</code></pre></div>
 <h2 id="what-it-means">What it means</h2>
 <p>A <code>SelectBox</code> shows a dropdown of options with one of them
 pre-chosen. The pre-chosen value must appear in the options list

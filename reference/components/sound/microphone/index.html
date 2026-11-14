@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6253,6 +6246,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14140,19 +14161,19 @@ visitor can refuse.</p>
 </tr>
 <tr>
 <td><code>on_loud</code> / <code>on_quiet</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Routes called when the volume rises past, and falls back below, the threshold.</td>
 </tr>
 <tr>
 <td><code>on_level</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Route called every <code>rate</code> milliseconds with the current volume.</td>
 </tr>
 <tr>
 <td><code>on_denied</code> / <code>on_error</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Routes for refusal and failure.</td>
 </tr>
@@ -14198,9 +14219,19 @@ visitor can refuse.</p>
 
 <h2 id="notes">Notes</h2>
 <ul>
-<li>The loud and quiet routes can receive <code>volume</code> (and the level
-  route <code>volume</code> plus <code>peak_volume</code>) as float parameters by
-  name.</li>
+<li>The loud and quiet routes can receive two parameters by name:
+  <code>volume</code> (the loudness that was heard, from 0.0 to 1.0) and
+  <code>threshold</code> (the component's own setting), both floats.</li>
+<li>The level route can receive <code>volume</code> and <code>pitch</code>, both floats.
+  The <code>pitch</code> is the strongest frequency in Hz, and the microphone
+  sends it only when it detects one, so give that parameter a
+  default value such as <code>pitch: float = 0.0</code>.</li>
+<li>The denied and error routes can receive <code>status</code> (<code>"denied"</code>,
+  <code>"unavailable"</code>, or <code>"error"</code>) and <code>message</code>, both strings.</li>
+<li>Each <code>on_</code> parameter takes the route's name as a string or the
+  route function itself.
+  <a href="../../actions/button/#route-targets">Route targets</a> on the Button
+  page compares the two.</li>
 <li>An event route that returns a whole <code>Page</code> re-renders the
   component, briefly resetting the meter and <code>peak_volume</code>;
   return an <code>Update</code> or a <code>Fragment</code> for frequent events.</li>

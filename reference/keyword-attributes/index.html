@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -5337,6 +5330,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#arguments-extra-values-for-the-route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        arguments: extra values for the route
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#plain-html-attributes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6260,6 +6264,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13712,6 +13744,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#arguments-extra-values-for-the-route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        arguments: extra values for the route
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#plain-html-attributes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14097,8 +14140,9 @@
 </script>
 <h1 id="keywords-every-component-accepts">Keywords every component accepts</h1>
 <p>Beyond its own parameters, every component accepts extra keyword
-arguments. They fall into five families, and all five work on any
-component, from <code>Button</code> to <code>Table</code>.</p>
+arguments. They fall into six families. Five of them work on any
+component, from <code>Button</code> to <code>Table</code>. The sixth, <code>arguments</code>, has an
+effect only on a component that calls a route.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 
@@ -14153,6 +14197,17 @@ happens. The supported events are <code>blur</code>, <code>change</code>, <code>
 <code>keydown</code>, <code>keyup</code>, <code>keypress</code>, <code>mouseenter</code>, <code>mouseleave</code>,
 <code>mouseover</code>, <code>mouseout</code>, <code>click</code>, and <code>dblclick</code>. The concept, with
 a worked demo, is <a href="../../concepts/live-updates/">Live updates</a>.</p>
+<h2 id="arguments-extra-values-for-the-route"><code>arguments</code>: extra values for the route</h2>
+<p>The <code>arguments</code> keyword sends fixed values to the route along with
+whatever the visitor entered. It works on a <code>Button</code> or <code>Link</code>, and on
+any component that has an <code>on_*</code> handler. The value can be a
+dictionary of parameter names and values:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">on_change</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="n">arguments</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;row&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">})</span>
+</code></pre></div>
+<p>When the visitor changes this box, Drafter calls <code>update</code> with the
+box's value as <code>amount</code> and with <code>row</code> set to <code>3</code>.
+<a href="../components/actions/button/#passing-arguments">Passing arguments</a>
+lists the other forms that <code>arguments</code> accepts.</p>
 <h2 id="plain-html-attributes">Plain HTML attributes</h2>
 <p>Each component also understands the HTML attributes that make sense
 for its element: <code>placeholder="Type here"</code> or <code>maxlength=20</code> on a

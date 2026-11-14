@@ -1227,6 +1227,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#recipe-save-and-load-your-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe: save and load your data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recipe-split-your-program-across-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe: split your program across files
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#variations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2187,13 +2209,6 @@
     
   </span>
   
-  
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
   
 
       </a>
@@ -6304,6 +6319,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13767,6 +13810,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#recipe-save-and-load-your-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe: save and load your data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recipe-split-your-program-across-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe: split your program across files
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#variations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14259,9 +14324,12 @@ parameter; the parameter's type annotation decides what arrives.</p>
 </tr>
 </tbody>
 </table>
-<p>Add <code>| None</code> to any of them to make "no file chosen" arrive as
-<code>None</code> instead of an error. A <code>FileUpload</code> with the <code>multiple</code>
-attribute delivers a list.</p>
+<p>When the visitor presses the button without choosing a file, a <code>str</code>
+parameter receives an empty string and a <code>bytes</code> parameter receives
+empty bytes, so check for an empty value before using it. A <code>Picture</code>
+parameter has no empty form and shows an error instead, unless you
+annotate it as <code>Picture | None</code>, in which case it receives <code>None</code>. A
+<code>FileUpload</code> with the <code>multiple</code> attribute delivers a list.</p>
 <h2 id="recipe-offer-a-download">Recipe: offer a download</h2>
 <p><code>Download</code> works in the opposite direction: it offers text (or
 bytes) your app built as a file the visitor can save.</p>
@@ -14313,9 +14381,15 @@ state.</p>
     <span class="n">lines</span> <span class="o">=</span> <span class="n">data_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
 </code></pre></div>
 <p>Keep the file next to your program. When you deploy, the file must
-be deployed too: upload it to the repository, and tell the build
-about it with <code>add_website_file</code>, which also checks right away that
-the file really exists (and suggests similarly named files if not):</p>
+be deployed too. If you publish with the template from
+<a href="../../your-project/deploy/github-pages/">Publish on GitHub Pages</a>,
+upload the file to the repository next to <code>main.py</code>, and the
+template includes it in the site along with every other file in the
+repository.</p>
+<p>If you build the site another way, tell the build about the file
+with <code>add_website_file</code>. That function also checks right away that
+the file really exists, and stops the program with a "file not
+found" message if it does not:</p>
 <div class="highlight"><pre><span></span><code><span class="n">add_website_file</span><span class="p">(</span><span class="s2">&quot;questions.txt&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>The <code>--additional-paths</code> command line flag does the same job from
@@ -14324,6 +14398,159 @@ outside the code, repeated once per file (see
 The helper <code>get_drafter_path("questions.txt")</code> resolves a name to
 wherever the app's files actually live, which helps in the rare
 case where plain <code>open</code> cannot find a file you bundled.</p>
+<h2 id="recipe-save-and-load-your-data">Recipe: save and load your data</h2>
+<p>State lasts only as long as the browser tab stays open, and Drafter
+has no built-in way to store it between visits. A visitor can still
+keep their data by saving it as a file and loading that file the
+next time. This recipe combines the two components above: a
+<code>Download</code> writes the state out as text, and a <code>FileUpload</code> reads it
+back in.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
+    <span class="n">entries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">entries_to_text</span><span class="p">(</span><span class="n">entries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span> <span class="o">+</span> <span class="n">entry</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="n">text</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">text_to_entries</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">entries</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Field Journal&quot;</span><span class="p">),</span>
+        <span class="n">BulletedList</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">entries</span><span class="p">),</span>
+        <span class="s2">&quot;New entry:&quot;</span><span class="p">,</span>
+        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;entry&quot;</span><span class="p">),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Record&quot;</span><span class="p">,</span> <span class="s2">&quot;record&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">Download</span><span class="p">(</span><span class="s2">&quot;Save my journal&quot;</span><span class="p">,</span> <span class="s2">&quot;journal.txt&quot;</span><span class="p">,</span>
+                 <span class="n">entries_to_text</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">entries</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)),</span>
+        <span class="s2">&quot; or &quot;</span><span class="p">,</span>
+        <span class="n">Link</span><span class="p">(</span><span class="s2">&quot;load a saved journal&quot;</span><span class="p">,</span> <span class="s2">&quot;ask_for_file&quot;</span><span class="p">)</span>
+    <span class="p">])</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">record</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">entry</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ask_for_file</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s2">&quot;Choose the journal.txt file you saved earlier:&quot;</span><span class="p">,</span>
+        <span class="n">FileUpload</span><span class="p">(</span><span class="s2">&quot;saved_file&quot;</span><span class="p">,</span> <span class="n">accept</span><span class="o">=</span><span class="s2">&quot;.txt&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Load&quot;</span><span class="p">,</span> <span class="s2">&quot;load_journal&quot;</span><span class="p">),</span>
+        <span class="n">Link</span><span class="p">(</span><span class="s2">&quot;Cancel&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
+    <span class="p">])</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_journal</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">saved_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">saved_file</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="n">text_to_entries</span><span class="p">(</span><span class="n">saved_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="n">assert_equal</span><span class="p">(</span><span class="n">entries_to_text</span><span class="p">([</span><span class="s2">&quot;Day 1&quot;</span><span class="p">,</span> <span class="s2">&quot;Day 2&quot;</span><span class="p">]),</span> <span class="s2">&quot;Day 1</span><span class="se">\n</span><span class="s2">Day 2</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">assert_equal</span><span class="p">(</span><span class="n">text_to_entries</span><span class="p">(</span><span class="s2">&quot;Day 1</span><span class="se">\n</span><span class="s2">Day 2</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span> <span class="p">[</span><span class="s2">&quot;Day 1&quot;</span><span class="p">,</span> <span class="s2">&quot;Day 2&quot;</span><span class="p">])</span>
+<span class="n">assert_state</span><span class="p">(</span><span class="n">load_journal</span><span class="p">(</span><span class="n">State</span><span class="p">([</span><span class="s2">&quot;Old entry&quot;</span><span class="p">]),</span> <span class="s2">&quot;Day 1</span><span class="se">\n</span><span class="s2">Day 2</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
+             <span class="n">State</span><span class="p">([</span><span class="s2">&quot;Day 1&quot;</span><span class="p">,</span> <span class="s2">&quot;Day 2&quot;</span><span class="p">]))</span>
+<span class="n">assert_state</span><span class="p">(</span><span class="n">load_journal</span><span class="p">(</span><span class="n">State</span><span class="p">([</span><span class="s2">&quot;Old entry&quot;</span><span class="p">]),</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="n">State</span><span class="p">([</span><span class="s2">&quot;Old entry&quot;</span><span class="p">]))</span>
+
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">([</span><span class="s2">&quot;Day 1: Captain ignored me.&quot;</span><span class="p">]))</span>
+</code></pre></div>
+<div class="drafter-demo" data-drafter-demo="files-3-6817edb11faf">
+  <iframe src="../../drafter-demos/files-3-6817edb11faf/index.html" title="Drafter Demo files-3-6817edb11faf" name="files-3-6817edb11faf" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 360px;" ></iframe>
+</div>
+
+<p>Two helper functions do the converting. The <code>entries_to_text</code>
+function turns the list in state into one string with an entry on
+each line, and <code>text_to_entries</code> turns that string back into a list.
+The first two tests check each direction.</p>
+<p>The <code>Download</code> receives the text converted to bytes with
+<code>.encode("utf-8")</code>. A download built from bytes saves every character
+exactly as written. A download built from a plain string can lose
+part of the text when it contains a <code>#</code> character, which matters when
+the file holds whatever a visitor typed.</p>
+<p>The <code>load_journal</code> route checks for an empty string before it
+replaces anything. When the visitor presses Load without choosing a
+file, <code>saved_file</code> arrives as <code>""</code>, and the check keeps the journal
+they already have.</p>
+<p>A journal is a list of strings, so one line per entry is enough. For
+a state with several fields, decide on a fixed layout, such as one
+field per line or one item per line with its parts separated by
+commas, and write the two converting functions to match each other.
+Test them the way this recipe does, because a saved file is only
+useful if loading it gives back the same state.</p>
+<h2 id="recipe-split-your-program-across-files">Recipe: split your program across files</h2>
+<p>When one file grows hard to find your way around, move helper
+functions into a second file and import them. Put the second file in
+the same folder as your main program. Here it is named
+<code>pet_helpers.py</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">describe_mood</span><span class="p">(</span><span class="n">hunger</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">hunger</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;hungry&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;content&quot;</span>
+</code></pre></div>
+<p>The main program imports the function by the file's name, without
+the <code>.py</code> ending:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pet_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">describe_mood</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
+    <span class="n">hunger</span><span class="p">:</span> <span class="nb">int</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s2">&quot;Ada is &quot;</span> <span class="o">+</span> <span class="n">describe_mood</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">hunger</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">])</span>
+
+
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
+</code></pre></div>
+<p>While the program runs, Drafter watches both files, so saving either
+one reloads the site. Three guidelines keep a project with several
+files manageable:</p>
+<ul>
+<li>Keep <code>start_server(...)</code>, your <code>State</code> dataclass, and your routes
+  in the main file. Move out the functions that do not use Drafter
+  at all, such as calculations, text formatting, and lists of data.
+  A helper file should not import from the main file, because two
+  files that import each other usually fail to load.</li>
+<li>Give the helper file a specific name of your own. A name such as
+  <code>helpers.py</code> is also the name of a public library. If your file
+  is ever missing from the deployed site, the browser installs that
+  library in its place, and the import error that follows is
+  confusing to read.</li>
+<li>When you deploy, upload every <code>.py</code> file to the repository, next
+  to <code>main.py</code>. The template from
+  <a href="../../your-project/deploy/github-pages/">Publish on GitHub Pages</a>
+  includes them in the site. If you build the site another way,
+  declare each one, as in <code>add_website_file("pet_helpers.py")</code>.</li>
+</ul>
 <h2 id="variations">Variations</h2>
 <ul>
 <li>If uploaded text may contain unusual characters, annotate the
@@ -14345,6 +14572,10 @@ case where plain <code>open</code> cannot find a file you bundled.</p>
 <li><strong>A bundled file 404s after deploy</strong>: it never made it into the
   repository, or the name differs in case. See
   <a href="../../help/errors/missing-asset-on-deploy/">works locally, 404s deployed</a>.</li>
+<li><strong>The deployed site reports an import error for your own file</strong>:
+  the helper file is not in the repository next to <code>main.py</code>, or its
+  name is spelled differently from the <code>import</code> line. Upload it and
+  run the deploy workflow again.</li>
 <li><strong>Nothing survives reload</strong>: files a visitor uploads live in
   state, and state resets on reload as it always does. The download
   button is how visitors keep a permanent copy.</li>

@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6416,6 +6409,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14075,13 +14096,13 @@
 
 <h1 id="testing-functions">Testing functions</h1>
 <p>This page lists every assertion Drafter ships. They all behave the
-same way: each prints SUCCESS or FAILURE (with every difference
+same way: each prints SUCCESS or FAILURE (with the differences it
 found), returns <code>True</code> or <code>False</code>, and never crashes your program.
 Assertions run where they are written, before <code>start_server(...)</code>,
 and report into the debug panel's Tests tab. The how-to is
 <a href="../../add/test-a-feature/">Test a feature</a>.</p>
 <h2 id="shared-flags">Shared flags</h2>
-<p>Every assertion accepts these keyword flags:</p>
+<p>Most assertions accept the same four keyword flags.</p>
 <table>
 <thead>
 <tr>
@@ -14093,29 +14114,34 @@ and report into the debug panel's Tests tab. The how-to is
 <tbody>
 <tr>
 <td><code>precision</code></td>
-<td><code>None</code></td>
-<td>Decimal places for float comparisons.</td>
+<td>4 decimal places</td>
+<td>How many decimal places are compared when two floats are compared. With the default, <code>1.00001</code> and <code>1.00002</code> count as equal.</td>
 </tr>
 <tr>
 <td><code>exact_strings</code></td>
-<td>loose</td>
-<td>Make text matching exact (case and whitespace count).</td>
+<td><code>False</code></td>
+<td>When <code>True</code>, text must match exactly, including capital letters and spaces at either end.</td>
 </tr>
 <tr>
 <td><code>strict_styles</code></td>
-<td>off</td>
-<td>Make style differences count as failures.</td>
+<td><code>False</code></td>
+<td>When <code>True</code>, a difference in styling counts as a failure.</td>
 </tr>
 <tr>
 <td><code>quiet</code></td>
 <td><code>False</code></td>
-<td>Suppress the SUCCESS line on passing tests.</td>
+<td>When <code>True</code>, this one call does not print its SUCCESS line. A FAILURE is always printed.</td>
 </tr>
 </tbody>
 </table>
-<p>By default, matching is deliberately forgiving: text comparisons
-ignore case, and styles are left out of comparisons entirely. Change
-the defaults for a whole file with <code>set_assertion_defaults</code>, below.</p>
+<p>Four assertions accept only <code>exact_strings</code> and <code>quiet</code>. They are
+<code>assert_has_regex</code>, <code>assert_in_regex</code>, <code>assert_style</code>, and
+<code>assert_text</code>. Passing <code>precision</code> or <code>strict_styles</code> to one of them
+raises a <code>TypeError</code>.</p>
+<p>With the default flags, matching is forgiving. Text comparisons ignore
+capital letters and spaces at either end, and styles are left out of
+comparisons entirely. Change the defaults for a whole file with
+<code>set_assertion_defaults</code>, described below.</p>
 <h2 id="comparing-whole-things">Comparing whole things</h2>
 <h3 id="assert_equal">assert_equal</h3>
 <div class="highlight"><pre><span></span><code><span class="n">assert_equal</span><span class="p">(</span><span class="n">save_task</span><span class="p">(</span><span class="n">State</span><span class="p">([]),</span> <span class="s2">&quot;nap&quot;</span><span class="p">),</span> <span class="n">Page</span><span class="p">(</span><span class="n">State</span><span class="p">([</span><span class="s2">&quot;nap&quot;</span><span class="p">]),</span> <span class="p">[</span><span class="o">...</span><span class="p">]))</span>
@@ -14173,10 +14199,12 @@ or <code>url</code>.</p>
 <code>style_*</code> keywords, or <code>update_style</code>. The other assertions ignore
 styles by default; this one exists to test them.</p>
 <h3 id="assert_children">assert_children</h3>
-<div class="highlight"><pre><span></span><code><span class="n">assert_children</span><span class="p">(</span><span class="n">BulletedList</span><span class="p">([</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">]),</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">])</span>
+<div class="highlight"><pre><span></span><code><span class="n">assert_children</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">),</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">])</span>
 </code></pre></div>
-<p>Check what is nested inside a component, such as the items of a
-list or the contents of a Div.</p>
+<p>Check what is nested inside a component, such as the contents of a
+<code>Div</code> or a <code>Span</code>. For the items of a <code>BulletedList</code>, check the
+<code>items</code> attribute:
+<code>assert_attribute(BulletedList(["a", "b"]), "items", ["a", "b"])</code>.</p>
 <h3 id="assert_text">assert_text</h3>
 <div class="highlight"><pre><span></span><code><span class="n">assert_text</span><span class="p">(</span><span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="s2">&quot;The Pet Quiz</span><span class="se">\n</span><span class="s2">Three questions. No pressure.&quot;</span><span class="p">)</span>
 </code></pre></div>
@@ -14188,14 +14216,23 @@ newlines, and compare it, ignoring structure and styling entirely.</p>
 </code></pre></div>
 <p>Change the default flags for every assertion after this call: any
 of <code>precision</code>, <code>exact_strings</code>, <code>strict_styles</code>, and
-<code>report_success</code>. Only the flags you pass change. The flags are
-keyword arguments, so spell them out (<code>strict_styles=True</code>).</p>
+<code>report_success</code>. Only the flags you pass change. Pass each flag by
+name, as in <code>strict_styles=True</code>.</p>
+<p><code>report_success</code> is the whole-file form of <code>quiet</code>.
+<code>set_assertion_defaults(report_success=False)</code> stops every passing
+assertion from printing its SUCCESS line, and <code>quiet=True</code> does the
+same for one call. A SUCCESS line is printed only when <code>quiet</code> is
+<code>False</code> and <code>report_success</code> is <code>True</code>. Neither setting hides a
+FAILURE.</p>
 <h2 id="notes">Notes</h2>
 <ul>
 <li>Assertions return booleans and print failures rather than raising,
   so one failing test never hides the ones after it.</li>
-<li>Failing tests do not stop the site from starting; they report in
-  the terminal and in the debug panel's Tests tab.</li>
+<li>A failing test does not stop the site from starting. The failure
+  is reported in the terminal and in the debug panel's Tests tab, and
+  the site runs as usual. Python's own <code>assert</code> statement behaves
+  differently: when it fails, it raises <code>AssertionError</code>, and the
+  program stops before it reaches <code>start_server</code>.</li>
 <li>Routes are ordinary functions you can call directly: build a
   state, call the route, and assert on the result. You never need to
   click through the app to test its logic.</li>

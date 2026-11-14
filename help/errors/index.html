@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6138,6 +6131,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13546,6 +13567,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#by-the-title-on-the-error-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        By the title on the error page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#by-message-text" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13607,9 +13639,118 @@
 
 
 <h1 id="error-index">Error index</h1>
-<p>Find your error by the words in the message. Use your browser's
-find-in-page (<span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-f">F</kbd></span>) or the site search with a distinctive phrase
-from the error, in quotes.</p>
+<p>A Drafter error page starts with a title in large letters, followed
+by a sentence that describes the problem and then a technical
+message. Look at the title first and find it in the first table
+below. Some titles cover several different problems, and for those
+the table also gives a phrase to look for in the message. If your
+problem has no title, or the title is not listed, use the second
+table, which is organized by the words in the message.</p>
+<p>You can also search for either one. Use your browser's find-in-page
+(<span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-f">F</kbd></span>) or the site search with the title, or with a distinctive
+phrase from the message, in quotes.</p>
+<h2 id="by-the-title-on-the-error-page">By the title on the error page</h2>
+<table>
+<thead>
+<tr>
+<th>The title</th>
+<th>The message contains</th>
+<th>Go to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Route Did Not Return a Page</code></td>
+<td>Any message</td>
+<td><a href="route-did-not-return-a-page/">Route did not return a Page</a></td>
+</tr>
+<tr>
+<td><code>State Changed Type</code></td>
+<td>Any message</td>
+<td><a href="state-mismatch/">State doesn't match the State class</a></td>
+</tr>
+<tr>
+<td><code>Components Share a Name</code></td>
+<td>Any message</td>
+<td><a href="duplicate-component-name/">Two components share a name</a></td>
+</tr>
+<tr>
+<td><code>Problem With the Route's Arguments</code></td>
+<td><code>expects a value for parameter ... but none was provided</code></td>
+<td><a href="missing-parameter/">Route is missing a parameter a form expected</a></td>
+</tr>
+<tr>
+<td><code>Problem With the Route's Arguments</code></td>
+<td><code>expects int but got</code></td>
+<td><a href="type-conversion-int/">Could not convert text to an int</a></td>
+</tr>
+<tr>
+<td><code>Problem With the Route's Arguments</code></td>
+<td><code>expects float but got</code>, or another type</td>
+<td><a href="type-conversion-other/">Could not convert a value to the parameter's type</a></td>
+</tr>
+<tr>
+<td><code>Problem With the Route's Arguments</code></td>
+<td><code>does not look like unicode (utf-8) text</code></td>
+<td><a href="file-decode-error/">Uploaded file couldn't be read as text</a></td>
+</tr>
+<tr>
+<td><code>Unusable Value</code></td>
+<td><code>points to non-existent page</code></td>
+<td><a href="route-not-found/">Link or button points to an unknown route</a></td>
+</tr>
+<tr>
+<td><code>Unusable Value</code></td>
+<td><code>must be a list of strings, numbers, booleans, or components</code></td>
+<td><a href="page-content-invalid/">Page content must be a list of strings, numbers, booleans, or components</a></td>
+</tr>
+<tr>
+<td><code>Unusable Value</code></td>
+<td><code>is not in options</code></td>
+<td><a href="selectbox-default-missing/">SelectBox default not in options</a></td>
+</tr>
+<tr>
+<td><code>Unusable Value</code></td>
+<td><code>Header level must be between 1 and 6</code></td>
+<td><a href="header-level-invalid/">Header level must be 1-6</a></td>
+</tr>
+<tr>
+<td><code>Unusable Value</code></td>
+<td>Anything else</td>
+<td><a href="#pythons-own-errors">Python's own errors</a></td>
+</tr>
+<tr>
+<td><code>Page Content Problem</code></td>
+<td><code>Unsupported page content type</code>, or <code>has no attribute 'extend'</code></td>
+<td><a href="page-content-invalid/">Page content must be a list of strings, numbers, booleans, or components</a></td>
+</tr>
+<tr>
+<td><code>Page Not Found</code></td>
+<td><code>No route found for URL</code></td>
+<td><a href="route-not-found/">Link or button points to an unknown route</a></td>
+</tr>
+<tr>
+<td><code>Module Not Found</code></td>
+<td><code>No module named</code></td>
+<td><a href="package-import-error/">A library import fails in the browser</a></td>
+</tr>
+<tr>
+<td><code>File Not Found</code></td>
+<td><code>File not found</code>, on the deployed site only</td>
+<td><a href="missing-asset-on-deploy/">Image or file works locally but 404s when deployed</a></td>
+</tr>
+<tr>
+<td><code>Unknown Name</code>, <code>Type Mismatch</code>, <code>Missing Attribute</code>, <code>List Position Out of Range</code>, <code>Missing Dictionary Key</code>, <code>Division by Zero</code>, <code>Endless Recursion</code>, or <code>Problem Loading This Page</code></td>
+<td>A message from Python</td>
+<td><a href="#pythons-own-errors">Python's own errors</a></td>
+</tr>
+<tr>
+<td><code>Error</code>, on a dialog that says "Error running student code"</td>
+<td><code>ModuleNotFoundError</code></td>
+<td><a href="package-import-error/">A library import fails in the browser</a></td>
+</tr>
+</tbody>
+</table>
 <h2 id="by-message-text">By message text</h2>
 <table>
 <thead>
@@ -13620,12 +13761,20 @@ from the error, in quotes.</p>
 </thead>
 <tbody>
 <tr>
+<td><code>finished without returning a Page</code>, or <code>did not return a Page() object</code></td>
+<td><a href="route-did-not-return-a-page/">Route did not return a Page</a></td>
+</tr>
+<tr>
 <td><code>points to non-existent page</code></td>
 <td><a href="route-not-found/">Link or button points to an unknown route</a></td>
 </tr>
 <tr>
 <td><code>expects a value for parameter ... but none was provided</code></td>
 <td><a href="missing-parameter/">Route is missing a parameter a form expected</a></td>
+</tr>
+<tr>
+<td><code>was sent to ..., but the function has no matching parameter</code> (a warning in the debug panel)</td>
+<td><a href="missing-parameter/#a-related-warning-a-form-field-with-no-matching-parameter">A form field with no matching parameter</a></td>
 </tr>
 <tr>
 <td><code>expects int but got</code></td>
@@ -13636,19 +13785,23 @@ from the error, in quotes.</p>
 <td><a href="type-conversion-other/">Could not convert a value to the parameter's type</a></td>
 </tr>
 <tr>
-<td><code>type changed from ... to ...</code></td>
+<td><code>has a state that is a ..., but the previous state was a ...</code></td>
 <td><a href="state-mismatch/">State doesn't match the State class</a></td>
+</tr>
+<tr>
+<td><code>changed the site state from ... to ...</code> (a warning in the debug panel)</td>
+<td><a href="state-mismatch/#a-warning-in-place-of-the-error-page">A warning in place of the error page</a></td>
 </tr>
 <tr>
 <td><code>must be a list of strings, numbers, booleans, or components</code></td>
 <td><a href="page-content-invalid/">Page content must be a list of strings, numbers, booleans, or components</a></td>
 </tr>
 <tr>
-<td>Two components share a <code>name</code></td>
+<td><code>has multiple components with the same name</code></td>
 <td><a href="duplicate-component-name/">Two components share a name</a></td>
 </tr>
 <tr>
-<td>SelectBox default not among the options</td>
+<td><code>default_value ... is not in options</code></td>
 <td><a href="selectbox-default-missing/">SelectBox default not in options</a></td>
 </tr>
 <tr>
@@ -13672,28 +13825,33 @@ from the error, in quotes.</p>
 <td><a href="deploy-build-failed/">GitHub Actions build failed</a></td>
 </tr>
 <tr>
-<td>An <code>import</code> fails in the browser</td>
+<td><code>ModuleNotFoundError</code>, or <code>No module named</code></td>
 <td><a href="package-import-error/">A library import fails in the browser</a></td>
 </tr>
 <tr>
-<td>Camera, microphone, or location <code>permission denied</code></td>
+<td><code>Camera access denied</code>, <code>Microphone access denied</code>, or <code>Location access denied</code></td>
 <td><a href="permission-denied-device/">Device permission denied</a></td>
 </tr>
 </tbody>
 </table>
 <h2 id="not-an-error-but-broken-anyway">Not an error, but broken anyway</h2>
 <ul>
-<li>If code placed after <code>start_server()</code> never runs, nothing is wrong:
-  <a href="nothing-after-start-server/">that is how start_server works</a>.</li>
+<li>If code placed after <code>start_server()</code> does not seem to run, see
+  <a href="nothing-after-start-server/">Code after start_server() never runs</a>.</li>
 <li>If there is no error message but the app behaves incorrectly, see
   <a href="../troubleshooting/">Troubleshooting</a>, which is organized by symptom.</li>
 </ul>
 <h2 id="pythons-own-errors">Python's own errors</h2>
-<p><code>SyntaxError</code>, <code>NameError</code>, <code>TypeError</code>, <code>IndexError</code>, and similar
-messages come from Python itself, not from Drafter. Drafter's error
-page explains the common ones in plain language above the traceback.
-Read that friendly explanation first, then go to the line it names.
-The habits in
+<p><code>NameError</code>, <code>TypeError</code>, <code>IndexError</code>, and similar messages come
+from Python itself, not from Drafter. When one of them happens while
+a route runs, Drafter shows an error page with a plain-language title
+such as "Unknown Name", "Type Mismatch", or "List Position Out of
+Range", and a sentence that explains the problem above the traceback.
+A <code>ValueError</code> appears as "Unusable Value", and an error that has no
+title of its own appears as "Problem Loading This Page". Read the
+explanation first, then go to the line the traceback names. A <code>SyntaxError</code> in your file does not produce an error page.
+The site keeps showing the last working version, and a dialog titled
+"Syntax Error" names the line to fix. The habits in
 <a href="../#reading-an-error-page">Reading an error page</a> apply
 here as well.</p>
 <h2 id="how-these-pages-work">How these pages work</h2>

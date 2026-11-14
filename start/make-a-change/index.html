@@ -702,10 +702,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-1-the-edit-save-reload-loop" class="md-nav__link">
+  <a href="#step-1-the-edit-save-look-loop" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: The edit, save, reload loop
+        Step 1: The edit, save, look loop
       
     </span>
   </a>
@@ -2176,13 +2176,6 @@
     
   </span>
   
-  
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
   
 
       </a>
@@ -6293,6 +6286,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13723,10 +13744,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-1-the-edit-save-reload-loop" class="md-nav__link">
+  <a href="#step-1-the-edit-save-look-loop" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: The edit, save, reload loop
+        Step 1: The edit, save, look loop
       
     </span>
   </a>
@@ -14164,8 +14185,8 @@
 <h1 id="make-one-visible-change">Make one visible change</h1>
 <h2 id="what-youll-build">What you'll build</h2>
 <p>This step adds nothing new to the app. Instead, you will practice the
-loop you will use hundreds of times: <strong>edit the code, save, reload, see
-the change</strong>. Then you will break the app on purpose, read the error, and
+loop you will use hundreds of times: <strong>edit the code, save, and see the
+change</strong>. Then you will break the app on purpose, read the error, and
 fix it. Knowing what breakage looks like when you cause it deliberately
 makes it far less alarming when it happens by accident.</p>
 <h2 id="what-you-need">What you need</h2>
@@ -14174,7 +14195,7 @@ makes it far less alarming when it happens by accident.</p>
   your computer.</li>
 <li>About ten minutes.</li>
 </ul>
-<h2 id="step-1-the-edit-save-reload-loop">Step 1: The edit, save, reload loop</h2>
+<h2 id="step-1-the-edit-save-look-loop">Step 1: The edit, save, look loop</h2>
 <p>Here is the counter again as a starting point:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
@@ -14205,15 +14226,24 @@ makes it far less alarming when it happens by accident.</p>
   <iframe src="../../drafter-demos/make-a-change-1-d3ccb9fbca99/index.html" title="Drafter Demo make-a-change-1-d3ccb9fbca99" name="make-a-change-1-d3ccb9fbca99" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
 </div>
 
-<p>On your computer, the loop is:</p>
+<p>Run the program once, and leave it running. On your computer, the loop
+is:</p>
 <ol>
 <li><strong>Edit</strong>: change something in the code.</li>
-<li><strong>Save and run</strong> the file again.</li>
-<li><strong>Look</strong>: the site reloads with your change.</li>
+<li><strong>Save</strong> the file.</li>
+<li><strong>Look</strong>: the site in your browser reloads with your change.</li>
 </ol>
-<p>Try it now: change <code>"Current count: "</code> to a message of your own, save, and
-run. The page shows your text. That round trip is the rhythm you will
-follow whenever you build with Drafter.</p>
+<p>While your program is running, Drafter watches the file. Each time you
+save, Drafter restarts the site in the browser tab with the new code, so
+you do not need to stop the program and run it again. The restart also
+sets the state back to its starting value, which is why the count
+returns to 0 after every save.</p>
+<p>Try it now: change <code>"Current count: "</code> to a message of your own and
+save. Switch to the browser tab, and the page shows your text. That
+round trip is the rhythm you will follow whenever you build with
+Drafter.</p>
+<p>If you stopped the program or closed the editor, the site has nothing
+to reload it. Run the file again to start it.</p>
 <h2 id="step-2-add-a-second-button">Step 2: Add a second button</h2>
 <p>Make a slightly bigger change: add a <code>+10</code> button. That takes two edits, a
 new route and a new <code>Button</code> pointing at it:</p>
@@ -14260,38 +14290,51 @@ about to find out.</p>
 <p>In your copy, misspell the function name inside the button, like this:</p>
 <div class="highlight"><pre><span></span><code><span class="n">Button</span><span class="p">(</span><span class="s2">&quot;+10&quot;</span><span class="p">,</span> <span class="s2">&quot;ad_ten&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>Save and run. When the page tries to display, Drafter stops it and shows
-an error like:</p>
-<div class="highlight"><pre><span></span><code>Problem Displaying This Page
-Drafter could not turn your page result into something it can display.
+<p>Save. When the page tries to display, Drafter stops it and shows an
+error page that begins like this:</p>
+<div class="highlight"><pre><span></span><code>Unusable Value
 
-payload.verification_failed: Payload verification failed for URL index: While verifying the Page() object returned from index, an error was encountered:
-Link `+10` points to non-existent page `ad_ten`.  
+The link labeled &#39;+10&#39; tries to go to a page named `ad_ten`, but your site has no route with that name.
+
+payload.verification_failed: Payload verification failed for the page &#39;index&#39;: While verifying the Page() object returned from index, an error was encountered:
+Link `+10` points to non-existent page `ad_ten`.
 </code></pre></div>
-<p>Read it slowly. The last line names the exact problem: the <code>+10</code> button
-points to a page called <code>ad_ten</code>, and no route with that name exists.
-Drafter checks every link and button on a page before showing it, so a
+<p>Read it slowly. The large title at the top is a general category, and
+the sentence under it says what happened in plain words: the <code>+10</code>
+button points to a page called <code>ad_ten</code>, and no route with that name
+exists. The error calls the button a link because buttons and links are
+checked the same way. Below that sentence is the technical message, and
+below that is a list titled "What To Try Next".</p>
+<p>Drafter checks every link and button on a page before showing it, so a
 broken app tells you what went wrong instead of showing a blank screen or
 a dead button.</p>
 <h2 id="step-4-undo-it">Step 4: Undo it</h2>
-<p>Fix the spelling back to <code>add_ten</code>, save, and run. The app works again.</p>
+<p>Fix the spelling back to <code>add_ten</code> and save. The app works again.</p>
 <p>That is the full recovery loop: <strong>read the error, find the line, fix it,
-run again</strong>. If an error ever stumps you, the
+save again</strong>. If an error ever stumps you, the
 <a href="../../help/errors/">error index</a> explains the common ones in plain
-language; you can search it with the exact text of your error message.</p>
+language. You can look an error up there by the title at the top of the
+error page, or search the docs for the exact text of the message.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
-<li><strong>You saved but nothing changed</strong>: make sure you ran the file again
-  after saving, and that you edited the same file you are running.</li>
-<li><strong>The site shows an old version</strong>: stop the program and run it again; a
-  fresh run always reflects the current code.</li>
+<li><strong>You saved but nothing changed</strong>: check that the program is still
+  running, and that you edited the same file you are running. If the
+  program has stopped, run it again.</li>
+<li><strong>A box says your code has a syntax error</strong>: Drafter could not read
+  the file you saved, so it kept showing the last version that worked.
+  Fix the line the box names and save again.</li>
+<li><strong>The site still shows an old version</strong>: stop the program and run it
+  again, and use the browser tab that the new run opens. A fresh run
+  always reflects the current code, but a tab left open from an
+  earlier run keeps showing the old code.</li>
 <li><strong>You cannot find the broken spot</strong>: the last line of the error message
   names what is wrong (here, the button label and the missing page name).
   Search your file for that name; do not start reading from the top.</li>
 </ul>
 <h2 id="name-it">Name it</h2>
 <ul>
-<li>The rhythm you practiced is the <strong>edit, save, reload loop</strong>.</li>
+<li>The rhythm you practiced is the <strong>edit, save, look loop</strong>. Drafter
+  reloading the site each time you save is called <strong>live reload</strong>.</li>
 <li>The error you caused is a <strong>link verification error</strong>: before showing a
   page, Drafter checks that every button and link points to a route that
   actually exists.</li>
@@ -14301,7 +14344,7 @@ language; you can search it with the exact text of your error message.</p>
 <li>Add a <code>-10</code> button, first predicting what will happen if you click it
    enough times.</li>
 <li>Break the app a different way: remove the closing bracket of the
-   content list, run it, and read that error too. Then fix it.</li>
+   content list, save, and read the message that appears. Then fix it.</li>
 </ol>
 <h2 id="next-steps">Next steps</h2>
 <div class="grid cards">

@@ -2245,13 +2245,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6361,6 +6354,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14032,11 +14053,13 @@ editing:</p>
 <p>A box asks for a commit message describing your change:</p>
 <p><img alt="The commit dialog with a text field for the commit message and a Commit changes button" src="../images/deployment_github_commit.png" /></p>
 </details>
-<p>Your whole program lives in <code>main.py</code>. If your app uses other files,
-such as images or data files, add them too: click <strong>Add file</strong>, then
+<p>The workflow looks for your program under the name <code>main.py</code>. If your
+app uses other files, such as images, data files, or other <code>.py</code>
+files that <code>main.py</code> imports, add them too: click <strong>Add file</strong>, then
 <strong>Upload files</strong>, drag the files in next to <code>main.py</code>, and commit.
-Every file your program opens must be here, or it will
-<a href="../../../help/errors/missing-asset-on-deploy/">404 on the live site</a>.</p>
+The workflow includes every file in the repository in your site.
+Every file your program opens or imports must be here, or it will
+<a href="../../../help/errors/missing-asset-on-deploy/">be missing from the live site</a>.</p>
 <details class="example">
 <summary>Show the upload screen</summary>
 <p><img alt="The GitHub upload page, with a drag-and-drop area for adding files to the repository" src="../images/deployment_github_upload2.png" /></p>
@@ -14175,8 +14198,10 @@ libraries work in the browser and which cannot.</p>
 <p><a href="../">Deploy and submit</a> explains what compiling to a static site
 means.</p>
 <h2 id="see-another-example">See another example</h2>
-<p>The <a href="../../gallery/">project gallery</a> apps are all published this
-way.</p>
+<p>Drafter's own
+<a href="https://github.com/drafter-edu/drafter-deployment-template-v1">deployment template</a>
+is a complete repository set up this way, with a starter <code>main.py</code>
+and the deploy workflow.</p>
 <h2 id="look-it-up">Look it up</h2>
 <p>The deployment dashboard and logs are described in
 <a href="../troubleshooting/">Fix a failed deployment</a>.</p>

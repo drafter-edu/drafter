@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6264,6 +6257,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14129,9 +14150,9 @@ happen, that is a <a href="../timer/">Timer</a>; a clock never finishes.</p>
 </tr>
 <tr>
 <td><code>route</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>required</td>
-<td>The name of the route to call on each tick.</td>
+<td>The route to call on each tick, given as its name in a string or as the function itself. <a href="../../actions/button/#route-targets">Route targets</a> compares the two forms.</td>
 </tr>
 <tr>
 <td><code>show</code></td>
@@ -14153,7 +14174,7 @@ happen, that is a <a href="../timer/">Timer</a>; a clock never finishes.</p>
 </tr>
 <tr>
 <td><code>on_tick</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Alternative keyword spelling of <code>route</code>.</td>
 </tr>

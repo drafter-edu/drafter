@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -5186,6 +5179,50 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#parameter-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameter conversion
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#built-in-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in routes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opening-a-site-on-a-route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opening a site on a route
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters-that-drafter-supplies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters that Drafter supplies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#notes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6238,6 +6275,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13679,6 +13744,50 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#parameter-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameter conversion
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#built-in-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in routes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opening-a-site-on-a-route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opening a site on a route
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters-that-drafter-supplies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters that Drafter supplies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#notes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14130,9 +14239,11 @@ front page shown when your app starts, and every app must have one.</p>
    attached to a button fills a parameter called <code>prize</code>.</li>
 </ol>
 <p>A required parameter that nothing fills stops the request with a
-<a href="../../help/errors/missing-parameter/">missing parameter</a> error; a value
+<a href="../../help/errors/missing-parameter/">missing parameter</a> error. A value
 that cannot be converted to the annotated type stops it with a
-<a href="../../help/errors/type-conversion-int/">conversion error</a>.</p>
+<a href="../../help/errors/type-conversion-int/">conversion error</a>. The table
+under <a href="#parameter-conversion">Parameter conversion</a> lists every
+annotation that Drafter converts.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
@@ -14167,6 +14278,240 @@ that cannot be converted to the annotated type stops it with a
   <iframe src="../../drafter-demos/route-2-5e24649e9ca2/index.html" title="Drafter Demo route-2-5e24649e9ca2" name="route-2-5e24649e9ca2" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 240px;" ></iframe>
 </div>
 
+<h2 id="parameter-conversion">Parameter conversion</h2>
+<p>Values from the browser arrive as text. The type annotation on a
+parameter tells Drafter what to turn that text into before the route
+runs. When a value cannot be converted, the request stops with an
+error page titled <code>Problem With the Route's Arguments</code>, and the
+message names the parameter and the value that was sent.</p>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>The route receives</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>none</td>
+<td>The value as it was sent.</td>
+<td>Nothing is converted. A text input sends a <code>str</code>.</td>
+</tr>
+<tr>
+<td><code>str</code></td>
+<td>The text exactly as typed.</td>
+<td>Spaces at either end are kept. An empty box gives <code>""</code>.</td>
+</tr>
+<tr>
+<td><code>int</code></td>
+<td>A whole number.</td>
+<td>Spaces around the number are ignored, and <code>5.0</code> is accepted as <code>5</code>. Text such as <code>2.5</code>, <code>twenty</code>, or <code>1,000</code> is an error, and so is an empty box.</td>
+</tr>
+<tr>
+<td><code>float</code></td>
+<td>A decimal number.</td>
+<td><code>3</code> becomes <code>3.0</code>. Text that is not a number is an error, and so is an empty box.</td>
+</tr>
+<tr>
+<td><code>bool</code></td>
+<td><code>True</code> or <code>False</code>.</td>
+<td><code>true</code>, <code>on</code>, <code>1</code>, <code>yes</code>, and <code>checked</code> give <code>True</code>. <code>false</code>, <code>off</code>, <code>0</code>, <code>no</code>, and empty text give <code>False</code>. Capital letters make no difference. A <code>CheckBox</code> gives <code>True</code> when it is checked and <code>False</code> when it is not. Any other text is an error.</td>
+</tr>
+<tr>
+<td><code>list</code>, <code>list[str]</code>, <code>list[int]</code></td>
+<td>A list.</td>
+<td>Each item is converted to the type in the brackets. One value alone becomes a one-item list. A <code>SelectBox</code> with <code>multiple=True</code> sends one item for each selected option.</td>
+</tr>
+<tr>
+<td><code>tuple[int, int]</code>, <code>tuple[int, ...]</code>, <code>set[str]</code></td>
+<td>A tuple or a set.</td>
+<td>The items are converted as they are for a list. A tuple that names a type for each position must receive exactly that many values.</td>
+</tr>
+<tr>
+<td><code>Literal["red", "blue"]</code></td>
+<td>The value, when it is one of the listed choices.</td>
+<td><code>Literal[1, 2, 3]</code> turns the text <code>2</code> into the number <code>2</code>. Any other value is an error that lists the choices.</td>
+</tr>
+<tr>
+<td><code>int | float</code> and other unions</td>
+<td>The result from the first type that accepts the value.</td>
+<td>The types are tried from left to right. With <code>int | float</code>, the text <code>2</code> gives <code>2</code> and the text <code>2.5</code> gives <code>2.5</code>. When <code>str</code> is one of the types, text is passed through unchanged.</td>
+</tr>
+<tr>
+<td><code>int | None</code>, <code>Optional[int]</code></td>
+<td>The same result as <code>int</code>.</td>
+<td>Adding <code>None</code> does not make the parameter optional, and an empty box is still an error. The one exception is listed with <code>Picture</code> below.</td>
+</tr>
+<tr>
+<td>a default, as in <code>times: int = 1</code></td>
+<td>The default, when no value with that name was sent.</td>
+<td>A value that was sent is still converted by the annotation.</td>
+</tr>
+<tr>
+<td><code>**kwargs</code></td>
+<td>A dictionary of every value that matched no named parameter.</td>
+<td>These values are not converted.</td>
+</tr>
+<tr>
+<td><code>date</code>, <code>time</code>, <code>datetime</code></td>
+<td>A value from Python's <code>datetime</code> module.</td>
+<td>The text must be in ISO form, such as <code>2026-11-14</code>, <code>13:30</code>, or <code>2026-11-14T13:30</code>, which is the form that date and time inputs send. Empty text gives the current date or time. Other forms, such as <code>11/14/2026</code>, are an error.</td>
+</tr>
+<tr>
+<td>a dataclass</td>
+<td>An instance of the dataclass.</td>
+<td>The value must be a dictionary, or JSON text, with a key for each field. Each field is converted by its own annotation, and fields that have defaults may be left out.</td>
+</tr>
+<tr>
+<td><code>dict</code></td>
+<td>The dictionary that was sent.</td>
+<td>JSON text is not turned into a dictionary. An uploaded file gives a dictionary with the keys <code>filename</code>, <code>content</code>, <code>type</code>, and <code>size</code>.</td>
+</tr>
+<tr>
+<td><code>Color</code></td>
+<td>A <a href="../data-types/color/">Color</a>.</td>
+<td>The text can be a hex code such as <code>#ff8800</code> or a color name such as <code>red</code>. A <code>ColorPicker</code> sends a hex code. With <code>list[int]</code>, a hex code becomes <code>[255, 136, 0]</code>.</td>
+</tr>
+<tr>
+<td><code>Picture</code></td>
+<td>A <a href="../data-types/picture/">Picture</a> made from an uploaded image.</td>
+<td>A file that is not an image is an error. With <code>Picture | None</code>, the route receives <code>None</code> when no file was chosen.</td>
+</tr>
+<tr>
+<td><code>str</code>, <code>bytes</code>, <code>DrafterTextFile</code>, <code>DrafterBinaryFile</code> on a <code>FileUpload</code></td>
+<td>The file's text, its raw bytes, or its contents together with the filename.</td>
+<td><a href="../data-types/file-types/">File types</a> describes each one. For <code>str</code>, a file that is not UTF-8 text is an error.</td>
+</tr>
+<tr>
+<td><code>Photo</code>, <code>Location</code>, <code>Recording</code>, <code>AudioLevel</code></td>
+<td>A value built from the data that a camera, location, or sound component sends.</td>
+<td><a href="../data-types/">Data types</a> describes each one.</td>
+</tr>
+</tbody>
+</table>
+<p>Two rules explain most surprises:</p>
+<ul>
+<li><strong>An empty text box still sends a value.</strong> The value is empty text,
+  so the parameter is not missing, and its default is not used. For a
+  number field that may be left empty, annotate the parameter as <code>str</code>
+  and convert the text yourself after checking for <code>""</code>.</li>
+<li><strong>A value that matches no parameter is not an error.</strong> The route
+  still runs, and the debug panel shows a warning that names the unused
+  value. A route with <code>**kwargs</code> receives those values without a
+  warning.</li>
+</ul>
+<h2 id="built-in-routes">Built-in routes</h2>
+<p>Drafter adds a few routes of its own to every app. Their names start
+with <code>--</code>, so they are separate from your routes, and you can still
+name your own routes <code>about</code> or <code>reset</code>. A <code>Button</code> or <code>Link</code> can
+target a built-in route by its name.</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--about</code></td>
+<td>Shows the About page, which lists the site title and the details given to <a href="../site-config/#set_site_information"><code>set_site_information</code></a>. When no details were given, the page says so.</td>
+</tr>
+<tr>
+<td><code>--reset</code></td>
+<td>Puts the state back to the value that was passed to <code>start_server</code>, and then shows the <code>index</code> page.</td>
+</tr>
+<tr>
+<td><code>--bug-report</code></td>
+<td>Shows a page that explains when to report a problem with Drafter and offers a <strong>Download Bug Report</strong> button.</td>
+</tr>
+<tr>
+<td><code>--stop-server</code></td>
+<td>Shows a page that asks for confirmation. Its button ends the program that is running on your computer, the same as pressing Ctrl+C in the terminal.</td>
+</tr>
+</tbody>
+</table>
+<p>Two more names, <code>--error</code> and <code>--reload</code>, are used by Drafter's own
+error pages. They are not meant to be targets for your buttons.</p>
+<p>The most common use is a button that starts the app over:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s2">&quot;Count: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">count</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Add one&quot;</span><span class="p">,</span> <span class="s2">&quot;add&quot;</span><span class="p">),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Start over&quot;</span><span class="p">,</span> <span class="s2">&quot;--reset&quot;</span><span class="p">)</span>
+    <span class="p">])</span>
+</code></pre></div>
+<p>Clicking <strong>Start over</strong> returns the state to its starting value and
+shows the front page. The address bar then ends with <code>?route=--reset</code>.
+The browser's Back button still returns to the page the visitor was on,
+with the state that page had.</p>
+<h2 id="opening-a-site-on-a-route">Opening a site on a route</h2>
+<p>After each navigation, the address bar ends with <code>?route=</code> and the
+name of the route that built the page, as in
+<code>http://localhost:8000/?route=second</code>. Opening an address of that form
+starts the site and runs that route in place of <code>index</code>.</p>
+<p>Three limits apply to an address like this:</p>
+<ul>
+<li><strong>The state starts fresh.</strong> The route receives the state that was
+  passed to <code>start_server</code>, not the state from an earlier visit.
+  Reloading the browser tab has the same effect, because the address
+  still names the last route.</li>
+<li><strong>Only the route name is used.</strong> Other values in the address are not
+  passed to the route, so <code>?route=greet&amp;who=Ada</code> runs <code>greet</code> without a
+  value for <code>who</code>. An address like this is dependable only for a route
+  that needs nothing but the state. A route with a required form
+  parameter shows the <code>Problem With the Route's Arguments</code> error page.</li>
+<li><strong>The name must match a route.</strong> Any other name shows the
+  <code>Page Not Found</code> error page.</li>
+</ul>
+<p>On the development server, a shorter form also works. The address
+<code>http://localhost:8000/second</code> is redirected to
+<code>http://localhost:8000/?route=second</code>.</p>
+<p>A site built with <code>drafter --compile</code> includes a file named <code>404.html</code>
+that performs the same redirect on GitHub Pages. With that file in
+place, <code>https://your-username.github.io/your-repository/--about</code> opens
+the About page of the deployed site. The redirect expects the usual
+GitHub Pages project address, in which the site sits one folder below
+the domain. The <a href="../cli/#building-for-deployment"><code>--create-404</code></a> flag
+controls whether the file is written.</p>
+<h2 id="parameters-that-drafter-supplies">Parameters that Drafter supplies</h2>
+<p>A parameter with one of three reserved names is filled by Drafter
+itself, not by a form value.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>What it receives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_request</code></td>
+<td>The request being handled. <code>_request.url</code> is the name of the route that was asked for, and <code>_request.kwargs</code> is a dictionary of the values that were sent, before any conversion.</td>
+</tr>
+<tr>
+<td><code>_configuration</code></td>
+<td>The site's settings. For example, <code>_configuration.site_title</code> is the site title and <code>_configuration.theme</code> is the name of the theme.</td>
+</tr>
+<tr>
+<td><code>_server</code></td>
+<td>The object that runs the app. Drafter's own pages use it, and most apps never need it.</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">where</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">_request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s2">&quot;The route named &quot;</span> <span class="o">+</span> <span class="n">_request</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="s2">&quot; built this page.&quot;</span>
+    <span class="p">])</span>
+</code></pre></div>
+<p>Avoid other parameter names that begin with an underscore. Drafter
+treats every such name as one of its own, so it does not check that a
+value was sent for the parameter. When nothing fills the parameter,
+the route fails with Python's own <code>missing 1 required positional
+argument</code> error in place of the usual missing parameter message.</p>
 <h2 id="notes">Notes</h2>
 <ul>
 <li><strong>Route names must be unique.</strong> If you define two functions with the
@@ -14179,13 +14524,9 @@ that cannot be converted to the annotated type stops it with a
   matching: extra slashes are trimmed, and in the most heavily cleaned
   form, only letters, numbers, and underscores are kept. Buttons and
   links can target the custom address string.</li>
-<li><strong>Names that start with <code>--</code> belong to Drafter.</strong> Built-in pages such
-  as <code>--about</code> and <code>--reset</code> are separate from your routes, so you can
-  name your own routes <code>about</code> or <code>reset</code> without replacing them.</li>
-<li><strong>Advanced injection (L4):</strong> parameters named <code>_server</code>,
-  <code>_configuration</code>, or <code>_request</code> receive framework objects instead of
-  form values. You will not need these outside of the advanced
-  material in <a href="../../extend/">Extend</a>.</li>
+<li><strong>Names that start with <code>--</code> belong to Drafter.</strong> The
+  <a href="#built-in-routes">built-in routes</a> use that prefix, so you can name
+  your own routes <code>about</code> or <code>reset</code> without replacing them.</li>
 </ul>
 <h2 id="related">Related</h2>
 <ul>

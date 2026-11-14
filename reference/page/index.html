@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -5071,6 +5064,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="What content can hold">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-single-value-without-a-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A single value without a list
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#type-names-for-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type names for content
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -6249,6 +6270,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13687,6 +13736,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="What content can hold">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-single-value-without-a-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A single value without a list
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#type-names-for-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type names for content
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -14098,7 +14175,7 @@ whatever page was on screen before.</p>
 <tr>
 <td><code>content</code></td>
 <td><code>list</code></td>
-<td>A list of strings, numbers, booleans, and components, rendered in order. Must be a list, even for a single item.</td>
+<td>A list of strings, numbers, booleans, and components, rendered in order. A single string, number, boolean, or component is also accepted, and Drafter wraps it in a list.</td>
 </tr>
 </tbody>
 </table>
@@ -14170,10 +14247,96 @@ component:</p>
 <li><strong>Components</strong> (<code>Button</code>, <code>TextBox</code>, <code>Header</code>, <code>Image</code>, and the rest
   of the <a href="../components/">component list</a>) render as their HTML.</li>
 </ul>
-<p>A single string, value, or component is quietly wrapped in a list for
-you, but anything else (a dataclass, a dictionary, a list of lists)
-produces a friendly error that names the route that returned it. See
+<p>A <a href="../data-types/picture/">Picture</a> value is also allowed as an item.
+Drafter shows it as an <code>Image</code>.</p>
+<h3 id="a-single-value-without-a-list">A single value without a list</h3>
+<p>When the content is one string, number, boolean, component, or
+<code>Picture</code>, the list is optional. <code>Page("Hello")</code> builds the same page
+as <code>Page(["Hello"])</code>, and <code>Page(state, 5)</code> builds the same page as
+<code>Page(state, [5])</code>.</p>
+<p>Every other kind of value is an error, whether it is passed alone or
+placed inside the list.</p>
+<table>
+<thead>
+<tr>
+<th>Content</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"Hello"</code>, <code>5</code>, <code>2.5</code>, <code>True</code></td>
+<td>Accepted, and wrapped in a list.</td>
+</tr>
+<tr>
+<td><code>Button("Go", "index")</code></td>
+<td>Accepted, and wrapped in a list.</td>
+</tr>
+<tr>
+<td>A dataclass instance</td>
+<td>Error.</td>
+</tr>
+<tr>
+<td>A dictionary</td>
+<td>Error.</td>
+</tr>
+<tr>
+<td>A tuple</td>
+<td>Error.</td>
+</tr>
+<tr>
+<td><code>None</code></td>
+<td>Error.</td>
+</tr>
+<tr>
+<td><code>["Pets:", ["Ada", "Babbage"]]</code> (a list inside the list)</td>
+<td>Error.</td>
+</tr>
+</tbody>
+</table>
+<p>The error appears when the <code>Page</code> is created. In the browser, the
+error page is titled <code>Unusable Value</code>, and its message names the type
+that Drafter found:</p>
+<div class="highlight"><pre><span></span><code>The content you returned in this Page was a dict, but it needs to be text, a number, a boolean, a component, or a list of those.
+</code></pre></div>
+<p>For an item inside the list, the message gives the item's position,
+counting from zero:</p>
+<div class="highlight"><pre><span></span><code>Item number 1 in this Page&#39;s content list is a list, but every item needs to be text, a number, a boolean, or a component.
+</code></pre></div>
+<p>To show a value of another type, convert it to text with <code>str()</code>
+first. To show the items of a list, add them to the content list one
+at a time. See
 <a href="../../help/errors/page-content-invalid/">Page content must be a list</a>.</p>
+<h3 id="type-names-for-content">Type names for content</h3>
+<p>Three names describe content in type annotations. They are useful when
+you write a helper function that builds part of a page.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Component</code></td>
+<td>The class that every component, such as <code>Button</code> or <code>Header</code>, is built from. <code>isinstance(item, Component)</code> is <code>True</code> for a component and <code>False</code> for plain text.</td>
+</tr>
+<tr>
+<td><code>Content</code></td>
+<td>One content item: a component, a string, an <code>int</code>, a <code>float</code>, or a <code>bool</code>.</td>
+</tr>
+<tr>
+<td><code>PageContent</code></td>
+<td>One content item, or a list of content items.</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">pet_card</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PageContent</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Div</span><span class="p">(</span><span class="n">bold</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="s2">&quot; the &quot;</span> <span class="o">+</span> <span class="n">species</span><span class="p">)</span>
+</code></pre></div>
+<p>The result of <code>pet_card("Ada", "corgi")</code> is one component, so it can
+be placed in a content list like any other item.</p>
 <h2 id="what-drafter-verifies">What Drafter verifies</h2>
 <p>Before showing a page, Drafter checks it:</p>
 <ul>

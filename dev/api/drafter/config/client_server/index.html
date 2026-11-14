@@ -2042,13 +2042,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6178,6 +6171,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../../help/errors/state-mismatch/" class="md-nav__link">
         
   
@@ -9791,6 +9812,17 @@
     <span class="md-ellipsis">
       
         get_key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drafter.config.client_server.ClientServerConfiguration.has_setting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        has_setting
       
     </span>
   </a>
@@ -13790,6 +13822,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#drafter.config.client_server.ClientServerConfiguration.has_setting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        has_setting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#drafter.config.client_server.ClientServerConfiguration.parse_args" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14212,7 +14255,9 @@ Filled by <code>add_website_file()</code>.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List of external page links (URL or (URL, Text) tuples).</p>
+                <p>List of extra links shown on the About page. Each
+entry is a "URL" string, a "URL Text" string (the address, a
+space, then the link's text), or a (URL, Text) tuple.</p>
               </div>
             </td>
           </tr>
@@ -14519,6 +14564,79 @@ include --theme, --subtle-debug-entry, --audit-logging,
             <td>
               <div class="doc-md-description">
                 <p>The string "client_server".</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="drafter.config.client_server.ClientServerConfiguration.has_setting" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">has_setting</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check whether a key names a setting <code>update_configuration</code> accepts.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>key</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The configuration key to check (e.g., 'theme', 'author').</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True for a configuration attribute or a site-information key
+(which lives on the <code>information</code> object), False otherwise.</p>
               </div>
             </td>
           </tr>

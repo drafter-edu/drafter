@@ -2188,13 +2188,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6304,6 +6297,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14310,10 +14331,14 @@ around:</p>
 <ol>
 <li>Run your app and visit the page you want to freeze.</li>
 <li>Open the debug panel's <strong>History</strong> tab. Each visit shows the
-   route call that produced it, and expanding its <strong>Response</strong> shows
-   the full <code>Page(...)</code> your route returned, written as Python.</li>
-<li>Copy the call and the page into an <code>assert_equal</code>, above
-   <code>start_server(...)</code>:</li>
+   route call that produced it. Expand <strong>Page shown</strong> under the
+   visit, and Drafter displays the visit as a complete
+   <code>assert_equal</code> test: the route call first, then the full
+   <code>Page(...)</code> the route returned.</li>
+<li>Copy that test into your program, above <code>start_server(...)</code>. The
+   copied test spells out the whole list of compliments twice. Here
+   the list has been replaced with its name, <code>COMPLIMENTS</code>, and the
+   field names have been removed to keep the test short:</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="n">assert_equal</span><span class="p">(</span><span class="n">index</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
              <span class="n">Page</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">[</span>
@@ -14327,6 +14352,11 @@ one behavior test alongside it while you are there, for the wraparound
 rule:</p>
 <div class="highlight"><pre><span></span><code><span class="n">assert_state</span><span class="p">(</span><span class="n">another</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
+<p>Freezing pages one at a time shows you what a frozen test is. When
+you have several pages to freeze, the Tests tab has a
+<strong>Copy Regression Tests</strong> button that writes a test for every page
+you visited. <a href="../../add/freeze-pages/">Freeze finished pages</a> explains
+how to use it.</p>
 <p><strong>Predict first</strong>: which pages of the quiz game are worth freezing?
 (The results page for a known score is a strong pick: it has the most
 ways to quietly break.)</p>
@@ -14362,7 +14392,7 @@ restyling everything by hand.</p>
 <p>The debug panel is a tool for you, not for your visitors, and hiding
 it is the clearest sign that an app is finished. The full production
 checklist, including site information for the about page and
-unframing, is in
+removing the development frame around the app, is in
 <a href="../../your-project/deploy/prepare/">Prepare for release</a>; apply it
 when you deploy for real.</p>
 <p>Compare your result against the finished version at the top. It is

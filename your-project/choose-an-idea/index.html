@@ -2227,13 +2227,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6343,6 +6336,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14034,7 +14055,8 @@ their own answer, and the app decides which card to show next.</p>
 <li><strong>Stretch</strong>: multiple decks, add-a-card form, shuffle.</li>
 <li><strong>Watch out for</strong>: "shuffle" tempts you toward <code>import random</code>,
   which works but makes tests trickier. Test the deck logic with a
-  fixed order.</li>
+  fixed order, as in the recipe
+  <a href="../../add/show-different-content/#recipe-a-random-result-you-can-still-test">A random result you can still test</a>.</li>
 </ul>
 <h3 id="picture-showcase">Picture showcase</h3>
 <p>A gallery that the user curates by uploading pictures, giving them
@@ -14042,8 +14064,10 @@ captions, and browsing the collection. This shape builds on
 <a href="../../add/pictures/">Use pictures</a>.</p>
 <ul>
 <li><strong>Pages</strong>: gallery grid, single-picture view, upload form.</li>
-<li><strong>State</strong>: <code>photos: list[Photo]</code> where <code>Photo</code> pairs a <code>Picture</code>
-  with a caption.</li>
+<li><strong>State</strong>: <code>exhibits: list[Exhibit]</code> where <code>Exhibit</code> is your own
+  dataclass that pairs a <code>Picture</code> with a caption. Do not name the
+  dataclass <code>Photo</code>, because Drafter already uses that name for
+  pictures taken with the camera.</li>
 <li><strong>Milestones</strong>: one hard-coded picture shows; upload works;
   captions; the single-picture page.</li>
 <li><strong>Stretch</strong>: transformations (rotate, grayscale), a
@@ -14062,7 +14086,7 @@ or a cookie-clicker with decay. It builds on
 <li><strong>Milestones</strong>: the game works untimed; the countdown; game over
   at zero; a high score.</li>
 <li><strong>Stretch</strong>: difficulty levels, pause.</li>
-<li><strong>Watch out for</strong>: this is the only shape that needs an L4
+<li><strong>Watch out for</strong>: this is the only shape that needs an advanced
   feature (timers). Build the untimed version completely first, so
   that the timer is a garnish rather than a foundation.</li>
 </ul>

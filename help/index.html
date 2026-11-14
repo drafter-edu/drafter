@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6136,6 +6129,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13596,27 +13617,50 @@
 <h1 id="help">Help</h1>
 <p>When something goes wrong, start from what you can see:</p>
 <ul>
-<li><strong>You have an error message.</strong> Look it up in the
-  <a href="errors/">error index</a>, which is organized by the words in
-  the message.</li>
+<li><strong>You have an error page or an error message.</strong> Look it up in the
+  <a href="errors/">error index</a>, which lists errors by the title on
+  the error page and by the words in the message.</li>
 <li><strong>No error, but the app behaves wrongly.</strong> Go to
   <a href="troubleshooting/">Troubleshooting</a>, which is organized by
-  symptom: blank page, button does nothing, changes not appearing.</li>
+  symptom, such as a blank page, a button that does nothing, or
+  changes that do not appear.</li>
 <li><strong>You want to see what your app is doing.</strong> The
   <a href="debug-panel/">debug panel guide</a> covers the state viewer,
-  history, and tests;
+  history, and tests.
   <a href="printing-and-console/">Print and the console</a> covers <code>print()</code>
-  and the REPL.</li>
+  and the Python prompt on the page.</li>
+<li><strong>You have a general question.</strong> The <a href="faq/">FAQ</a> gives short
+  answers to the questions students ask most often, each with a link
+  to the page that explains the answer in full.</li>
 <li><strong>You think Drafter itself is broken.</strong> See
-  <a href="bug-reports/">Report a Drafter bug</a>, including the Download Bug
-  Report button and what makes a report useful.</li>
+  <a href="bug-reports/">Report a Drafter bug</a>, which covers the Download
+  Bug Report button and what makes a report useful.</li>
 </ul>
 <h2 id="reading-an-error-page">Reading an error page</h2>
-<p>Drafter's error pages have two layers: a plain-language explanation
-of what went wrong and what to try, and, below it, the technical
-message and traceback. Read the friendly part first; it usually names
-the route and the fix. The technical part matters when you ask for
-help, so copy it whole rather than paraphrasing.</p>
+<p>Every Drafter error page has the same parts, in the same order from
+top to bottom.</p>
+<ol>
+<li>The <strong>title</strong>, in large letters, names the kind of problem.
+   One example is "Route Did Not Return a Page".</li>
+<li>A <strong>sentence or two in plain language</strong> says what went wrong and
+   usually names the route.</li>
+<li>The <strong>technical message</strong>, in smaller type, starts with an error
+   id such as <code>payload.verification_failed</code>, then a colon, then the
+   exact message.</li>
+<li><strong>What To Try Next</strong> is a short list of fixes.</li>
+<li><strong>Navigation Options</strong> has four links, named Return to Index
+   Page, Reset State and Return to Index, Reload Entire Application,
+   and Submit a Bug Report.</li>
+<li><strong>Technical Details</strong> is a table that holds the error id, the
+   route call that failed, the request, and the traceback when there
+   is one.</li>
+</ol>
+<p>Read the title and the sentence under it first. Next read "What To
+Try Next", and after that the technical message. To find the help
+page for an error, search the <a href="errors/">error index</a> for the
+title. The technical message and the Technical Details table matter
+when you ask someone for help, so copy them whole and do not
+paraphrase them.</p>
 <h2 id="asking-a-good-question">Asking a good question</h2>
 <p>When you ask a person for help (an instructor, a TA, a forum), bring
 three things:</p>
@@ -13630,14 +13674,18 @@ automatically. Even when your problem is a homework question rather
 than a Drafter bug, the bundle gives a helper most of what they
 need.</p>
 <h2 id="the-five-minute-checklist">The five-minute checklist</h2>
-<p>Before you settle in for any deep debugging, run through the
-classic checks:</p>
+<p>Before you settle in for any deep debugging, run through these five
+checks.</p>
 <ul>
-<li>Did you save the file? Is the running app actually the saved
-  version?</li>
-<li>Is there an error message in the terminal you started from, or in
-  the debug panel?</li>
-<li>Does the app still break after a restart?</li>
+<li>Did you save the file, and is the program still running? Saving
+  reloads the site only while the program runs.</li>
+<li>Are you looking at the right browser tab? A tab left open from an
+  earlier run keeps showing the old version of your site until you
+  reload it.</li>
+<li>Is there an error message in the terminal you started from, or
+  under "Errors &amp; Warnings" in the debug panel's Current tab?</li>
+<li>Does the app still break after you stop the program and run it
+  again?</li>
 <li>Did it ever work? What changed since?</li>
 </ul>
 

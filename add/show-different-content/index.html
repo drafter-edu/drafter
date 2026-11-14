@@ -1171,6 +1171,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#recipe-a-random-result-you-can-still-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe: a random result you can still test
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#variations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2187,13 +2198,6 @@
     
   </span>
   
-  
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
   
 
       </a>
@@ -6304,6 +6308,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13767,6 +13799,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#recipe-a-random-result-you-can-still-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe: a random result you can still test
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#variations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14346,6 +14389,66 @@ The route receives the name and finds the item itself:</p>
 <p>Adding a pet to the list adds a button and a working detail page,
 with no new code. This is the pattern the
 <a href="../../tutorials/quiz-game/">quiz game</a> is built on.</p>
+<h2 id="recipe-a-random-result-you-can-still-test">Recipe: a random result you can still test</h2>
+<p>Dice, shuffled decks, and surprise questions all use Python's <code>random</code>
+module. Randomness makes a route hard to test, because a test cannot
+know which number will come up. The way around that is to split the
+work in two. The route picks the random value and does nothing else. A
+plain helper function receives that value as a parameter and does
+everything that follows.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
+    <span class="n">last_roll</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">total</span><span class="p">:</span> <span class="nb">int</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Dice game&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;You rolled: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">last_roll</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Total so far: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">total</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Roll&quot;</span><span class="p">,</span> <span class="s2">&quot;roll&quot;</span><span class="p">)</span>
+    <span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">record_roll</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">last_roll</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">total</span> <span class="o">+</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">roll</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">record_roll</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+
+<span class="n">assert_state</span><span class="p">(</span><span class="n">record_roll</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span> <span class="n">State</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">assert_state</span><span class="p">(</span><span class="n">record_roll</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="mi">6</span><span class="p">),</span> <span class="n">State</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">assert_has</span><span class="p">(</span><span class="n">record_roll</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;You rolled: 2&quot;</span><span class="p">)</span>
+
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+</code></pre></div>
+<div class="drafter-demo" data-drafter-demo="show-different-content-4-b41e727718c2">
+  <iframe src="../../drafter-demos/show-different-content-4-b41e727718c2/index.html" title="Drafter Demo show-different-content-4-b41e727718c2" name="show-different-content-4-b41e727718c2" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
+</div>
+
+<p>The <code>record_roll</code> function has no <code>@route</code> above it, so it is an
+ordinary function that returns a page. The tests call it with a roll
+they choose, which makes the result predictable. The <code>roll</code> route is
+one line long, and that line is the only part of the program the tests
+do not reach.</p>
+<p>A route that picks a random value picks a new one every time it runs.
+That includes the browser's Back button, which runs the earlier route
+again, so a visitor who goes back may see a different roll from the
+one they saw the first time. For the same reason, do not
+<a href="../freeze-pages/">freeze</a> a page that came from a random route. The
+frozen test would fail on most runs.</p>
 <h2 id="variations">Variations</h2>
 <ul>
 <li>To branch on an argument instead of state, put

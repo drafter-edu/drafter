@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6482,6 +6475,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14564,12 +14585,19 @@ them belong inside a route.</p>
   <iframe src="../../drafter-demos/site-config-1-d1d99cbd938f/index.html" title="Drafter Demo site-config-1-d1d99cbd938f" name="site-config-1-d1d99cbd938f" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 220px;" ></iframe>
 </div>
 
+<p>Under each heading below, the first line gives the function's
+parameters and any default values. The code block after it shows a
+typical call. Every function also accepts a final <code>server</code> keyword,
+which chooses the app to configure in a program that runs more than
+one. Ordinary programs leave it out.</p>
 <h2 id="appearance">Appearance</h2>
 <h3 id="set_website_title">set_website_title</h3>
+<p><code>set_website_title(title)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">set_website_title</span><span class="p">(</span><span class="s2">&quot;My Amazing App&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Sets the title shown in the browser tab.</p>
 <h3 id="set_website_favicon">set_website_favicon</h3>
+<p><code>set_website_favicon(favicon)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">set_website_favicon</span><span class="p">(</span><span class="s2">&quot;icon.png&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Sets the small browser-tab icon. Give the name of an image file (svg,
@@ -14577,6 +14605,7 @@ png, ico, ...) next to your Python file, or a full URL to an image.
 When deploying, remember the file must travel with your site; see
 <a href="../../help/errors/missing-asset-on-deploy/">Image works locally but not deployed</a>.</p>
 <h3 id="set_website_style">set_website_style</h3>
+<p><code>set_website_style(style)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">set_website_style</span><span class="p">(</span><span class="s2">&quot;terminal&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Applies a <a href="../themes/">theme</a> by name. <code>set_website_style("none")</code>
@@ -14584,12 +14613,14 @@ removes all styling for a blank slate. A misspelled name produces an
 error listing every valid theme. The how-to is
 <a href="../../add/change-appearance/themes/">Use a theme</a>.</p>
 <h3 id="set_website_framed">set_website_framed</h3>
+<p><code>set_website_framed(framed)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">set_website_framed</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p>Controls whether your app sits inside Drafter's window frame. The
 frame is helpful during development; deployed sites usually turn it
 off so the app fills the page.</p>
 <h3 id="set_page_transition">set_page_transition</h3>
+<p><code>set_page_transition(transition="fade", duration=None)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">set_page_transition</span><span class="p">(</span><span class="s2">&quot;fade&quot;</span><span class="p">)</span>
 <span class="n">set_page_transition</span><span class="p">(</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
 </code></pre></div>
@@ -14597,8 +14628,10 @@ off so the app fills the page.</p>
 <code>"fade"</code> fades the new page in from transparent; a CSS color such as
 <code>"black"</code> or <code>"#004488"</code> fades in from a solid veil of that color;
 <code>"none"</code> turns transitions off again. The second argument is the
-duration in seconds (0.5 by default).</p>
+duration in seconds. When it is left out, the duration keeps its
+current value, which starts at 0.5 seconds.</p>
 <h3 id="set_button_spinners">set_button_spinners</h3>
+<p><code>set_button_spinners(enabled=True)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">set_button_spinners</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
 <p>When spinners are turned on, a pressed button shows a small spinner
@@ -14606,6 +14639,7 @@ and is temporarily disabled while its request is being processed.
 This is helpful when a route does slow work and a visitor might
 otherwise click twice.</p>
 <h3 id="set_state_display">set_state_display</h3>
+<p><code>set_state_display(enabled=True)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">set_state_display</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p>The debug panel normally shows your whole state after every change.
@@ -14617,6 +14651,7 @@ one-line note.</p>
 do the back and forward buttons and the panel's Save and Load. Call
 <code>set_state_display(True)</code> to bring the display back.</p>
 <h3 id="set_browser_history">set_browser_history</h3>
+<p><code>set_browser_history(enabled=True)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">set_browser_history</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p>Normally the browser's back and forward buttons move through your
@@ -14636,11 +14671,13 @@ history off automatically. The same setting is available as the
 <code>--no-browser-history</code> command line flag.</p>
 <h2 id="adding-raw-content">Adding raw content</h2>
 <h3 id="add_website_header">add_website_header</h3>
+<p><code>add_website_header(header)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">add_website_header</span><span class="p">(</span><span class="s2">&quot;&lt;meta name=&#39;author&#39; content=&#39;Ada&#39;&gt;&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Adds raw content to the site's HTML head: meta tags, script tags, or
 anything else that belongs there. The text is not wrapped or escaped.</p>
 <h3 id="add_website_css">add_website_css</h3>
+<p><code>add_website_css(selector, css=None)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;h1 { color: darkslateblue; }&quot;</span><span class="p">)</span>
 <span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;h1&quot;</span><span class="p">,</span> <span class="s2">&quot;color: darkslateblue;&quot;</span><span class="p">)</span>
 </code></pre></div>
@@ -14651,6 +14688,7 @@ in braces. The how-to, including the selectors you need, is
 Passing a file name such as <code>"style.css"</code> is a mistake this function
 catches and reports; use <code>add_website_css_file</code> for files.</p>
 <h3 id="add_website_css_file">add_website_css_file</h3>
+<p><code>add_website_css_file(path)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">add_website_css_file</span><span class="p">(</span><span class="s2">&quot;style.css&quot;</span><span class="p">)</span>
 <span class="n">add_website_css_file</span><span class="p">(</span><span class="s2">&quot;https://fonts.googleapis.com/css2?family=Lora&quot;</span><span class="p">)</span>
 </code></pre></div>
@@ -14665,11 +14703,13 @@ rather than silently ignored. The file is registered as a website file
 deploy. Your stylesheet is linked after the theme's, so its rules win
 ties.</p>
 <h3 id="add_website_js">add_website_js</h3>
+<p><code>add_website_js(js)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">add_website_js</span><span class="p">(</span><span class="s2">&quot;console.log(&#39;Site loaded&#39;);&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Runs JavaScript code once, when the site first loads. Like
 <code>add_website_css</code>, it takes code, not a file name.</p>
 <h3 id="add_website_js_file">add_website_js_file</h3>
+<p><code>add_website_js_file(path)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">add_website_js_file</span><span class="p">(</span><span class="s2">&quot;app.js&quot;</span><span class="p">)</span>
 <span class="n">add_website_js_file</span><span class="p">(</span><span class="s2">&quot;https://cdn.example.com/library.js&quot;</span><span class="p">)</span>
 </code></pre></div>
@@ -14678,20 +14718,27 @@ program or from a full URL. Local files get the same checks and
 suggestions as <code>add_website_css_file</code>, and are registered as website
 files for deployment.</p>
 <h3 id="add_website_file">add_website_file</h3>
+<p><code>add_website_file(*filenames)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">add_website_file</span><span class="p">(</span><span class="s2">&quot;words.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;images/logo.png&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Declares files next to your program that the site needs at runtime:
 data files you <code>open()</code>, images, fonts, and so on. Each name is
 checked immediately (with suggestions when a similarly named file
 exists), and the files are copied into the built site when you
-deploy. This is the in-code equivalent of the
-<a href="../cli/#building-for-deployment"><code>--additional-paths</code></a> flag, and the
-way to prevent the
+deploy. This is the way to prevent the
 <a href="../../help/errors/missing-asset-on-deploy/">works locally, 404s deployed</a>
 problem. Only files inside your program's folder can be added:
 absolute paths, <code>..</code> paths, and URLs are rejected with an explanation.</p>
+<p>Two command line flags also copy files into the built site.
+<a href="../cli/#building-for-deployment"><code>--additional-files</code></a> is the flag form
+of this function and takes one file name at a time.
+<a href="../cli/#building-for-deployment"><code>--additional-paths</code></a> is a separate
+build flag that also accepts folders and patterns such as
+<code>data/*.csv</code>. Calling <code>add_website_file</code> in your program has the
+advantage that the list of files travels with the code.</p>
 <h2 id="site-information">Site information</h2>
 <h3 id="set_site_information">set_site_information</h3>
+<p><code>set_site_information(author, description, sources, planning, links)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">set_site_information</span><span class="p">(</span>
     <span class="s2">&quot;Ada Lovelace&quot;</span><span class="p">,</span>
     <span class="s2">&quot;An app for tracking my corgi&#39;s snacks.&quot;</span><span class="p">,</span>
@@ -14708,30 +14755,36 @@ empty list for <code>links</code>, for anything that does not apply. Deployment
 expects this to be filled in; see
 <a href="../../your-project/deploy/prepare/">Prepare for release</a>.</p>
 <h3 id="get_site_information">get_site_information</h3>
+<p><code>get_site_information()</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">get_site_information</span><span class="p">()</span>
 </code></pre></div>
 <p>Returns the information previously set, mostly useful for checking it
 in tests.</p>
 <h2 id="debugging-and-release">Debugging and release</h2>
 <h3 id="hide_debug_information">hide_debug_information</h3>
+<p><code>hide_debug_information()</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">hide_debug_information</span><span class="p">()</span>
 </code></pre></div>
 <p>Turns off the debug panel. This is the standard step before
 <a href="../../your-project/deploy/prepare/">deploying</a>, so visitors see your
 app rather than your debugger.</p>
 <h3 id="show_debug_information">show_debug_information</h3>
+<p><code>show_debug_information()</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">show_debug_information</span><span class="p">()</span>
 </code></pre></div>
 <p>Turns the debug panel back on. The panel is on by default during
 development.</p>
 <h3 id="set_error_page">set_error_page</h3>
+<p><code>set_error_page(title=None, message=None, show_details=None)</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">set_error_page</span><span class="p">(</span><span class="s2">&quot;Oh no!&quot;</span><span class="p">,</span> <span class="s2">&quot;Something broke. Try the home page.&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p>Customizes the built-in error page. The three arguments set the
 heading, the friendly message shown to visitors, and whether technical
-details (the error message and traceback) are shown. Deployed sites
-often pass <code>False</code> so visitors never see a traceback.</p>
+details (the error message and traceback) are shown. Each argument is
+optional, and one that is left out keeps its current setting. Deployed
+sites often pass <code>False</code> so visitors never see a traceback.</p>
 <h3 id="deploy_site">deploy_site</h3>
+<p><code>deploy_site(image_folder="images")</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">deploy_site</span><span class="p">()</span>
 </code></pre></div>
 <p>Prepares the site for deployment. Currently it turns off debug

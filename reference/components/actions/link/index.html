@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6275,6 +6268,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14153,13 +14174,13 @@ fields on the page.</p>
 </tr>
 <tr>
 <td><code>url</code></td>
-<td><code>str</code></td>
+<td>route name, route function, or web address</td>
 <td>required</td>
-<td>The name of a target route (<code>"rules"</code>), or a full external address (<code>"https://example.com"</code>). External addresses are detected automatically.</td>
+<td>The name of a target route (<code>"rules"</code>), the route function itself (<code>rules</code>), or a full external address (<code>"https://example.com"</code>). External addresses are detected automatically.</td>
 </tr>
 <tr>
 <td><code>arguments</code></td>
-<td>see <a href="../button/">Button</a></td>
+<td>see <a href="../button/#passing-arguments">Passing arguments</a></td>
 <td><code>None</code></td>
 <td>Extra values delivered to the target route's parameters.</td>
 </tr>
@@ -14167,6 +14188,12 @@ fields on the page.</p>
 </table>
 <p>Like every component, <code>Link</code> also accepts
 <a href="../../../keyword-attributes/">styling and attribute keywords</a>.</p>
+<p>A route's name as a string works wherever in the file the route is
+defined, and it is the form the tutorials use. The function form lets
+an editor that checks names point out a misspelled route, but the
+function must already be defined when the page is built.
+<a href="../button/#route-targets">Route targets</a> on the Button page explains
+the difference.</p>
 <h2 id="examples">Examples</h2>
 <p>Links between your own pages:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
@@ -14236,6 +14263,8 @@ links out of context.</p>
   actions.</li>
 <li><a href="../argument/">Argument</a>: extra values a link can deliver to its
   route.</li>
+<li><a href="../../../../add/pages/">Add and connect pages</a> is the how-to guide
+  for joining several pages with buttons and links.</li>
 </ul>
 <h2 id="external-links">External links</h2>
 <ul>

@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6273,6 +6266,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13787,30 +13808,53 @@
 
 <h1 id="link-or-button-points-to-an-unknown-route">Link or button points to an unknown route</h1>
 <h2 id="the-error">The error</h2>
-<div class="highlight"><pre><span></span><code>Link `Next` points to non-existent page `sumary`.
+<p>The error page has this title:</p>
+<div class="highlight"><pre><span></span><code>Unusable Value
 </code></pre></div>
-<p>or the same for a <code>Button</code>. The friendly version explains that the
-link tries to go to a page named <code>sumary</code>, but your site has no route
-with that name. A closely related message appears when you follow an
-address directly: "Drafter could not find the page route your app
-tried to open."</p>
+<p>Drafter uses the title "Unusable Value" for several different
+problems, so the sentence under the title is what identifies this
+one:</p>
+<div class="highlight"><pre><span></span><code>The link labeled &#39;Next&#39; tries to go to a page named `sumary`, but your
+site has no route with that name.
+</code></pre></div>
+<p>The technical message below it reads:</p>
+<div class="highlight"><pre><span></span><code>payload.verification_failed: Payload verification failed for the page &#39;index&#39;:
+While verifying the Page() object returned from index, an error was encountered:
+Link `Next` points to non-existent page `sumary`.
+</code></pre></div>
+<p>Both messages say "link" even when the component is a <code>Button</code>.
+Drafter checks buttons and links the same way, so
+<code>Button("Next", "sumary")</code> and <code>Link("Next", "sumary")</code> produce the
+same text.</p>
+<p>A different error page, titled "Page Not Found", appears when the
+address in the browser names a route your program does not have, for
+example an address that ends in <code>?route=sumary</code>:</p>
+<div class="highlight"><pre><span></span><code>Drafter could not find the page route your app tried to open.
+request.route_not_found: No route found for URL: sumary
+</code></pre></div>
+<p>That page can appear after you rename or delete a route and then
+reload a browser tab that was showing it. Its "Return to Index Page"
+link takes you back to a page that exists.</p>
 <h2 id="what-it-means">What it means</h2>
 <p>Before showing a page, Drafter checks that every button and link on
 it points at a real route. One of yours names a route that does not
 exist, so Drafter stopped the page rather than render it with a
 button or link that leads nowhere.</p>
 <h2 id="where-to-look">Where to look</h2>
-<p>The message names the label and the target. Search your code for that
-<code>Button(...)</code> or <code>Link(...)</code> call, then compare its target string
-against your route functions' names.</p>
+<p>The first message names the label and the target. The technical
+message also names the route whose page holds the button or link
+("returned from index"). Search that route for the <code>Button(...)</code> or
+<code>Link(...)</code> call with that label, then compare its target string
+against the names of your route functions.</p>
 <h2 id="check">Check</h2>
-<p>Three causes produce this message, and the details in it tell you
-which one you have:</p>
+<p>Three causes produce this error. The message is the same for all
+three, so check your code for each one:</p>
 <ul>
 <li><strong>A typo</strong>: the target almost matches a route name (<code>"sumary"</code> vs
-  <code>def summary</code>). Fix the spelling.</li>
+  <code>def summary</code>). Capital letters count, so <code>"Summary"</code> does not
+  match <code>def summary</code>.</li>
 <li><strong>A missing decorator</strong>: the function exists, but has no <code>@route</code>
-  above it, so Drafter never registered it.</li>
+  above it, so Drafter never registered it as a route.</li>
 <li><strong>A route you have not written yet</strong>: you wired the button before
   writing its destination.</li>
 </ul>
@@ -13823,6 +13867,11 @@ which one you have:</p>
 <span class="c1"># In the page that links there:</span>
 <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Next&quot;</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">)</span>
 </code></pre></div>
+<p>The third hint under "What To Try Next" on the error page suggests
+passing the route function itself, as in <code>Button("Next", summary)</code>
+with no quotation marks. Both forms work and lead to the same route,
+and when you use a string, as these docs do, the string must match
+the name of the function exactly.</p>
 <h2 id="confirm">Confirm</h2>
 <p>Reload and click the fixed control; the target page should render.
 If you have tests, add

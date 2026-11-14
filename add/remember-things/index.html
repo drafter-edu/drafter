@@ -2188,13 +2188,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6304,6 +6297,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14342,12 +14363,23 @@ Write the starting values once, in a helper, so the reset and
   <iframe src="../../drafter-demos/remember-things-3-084975d642da/index.html" title="Drafter Demo remember-things-3-084975d642da" name="remember-things-3-084975d642da" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
 </div>
 
+<p>Drafter also has a built-in route for the most common case. A button
+written as <code>Button("Start over", "--reset")</code> puts the whole state back
+to the value passed to <code>start_server</code> and shows the <code>index</code> page, with
+no reset route of your own.
+<a href="../../reference/route/#built-in-routes">Built-in routes</a> describes it.
+Write your own reset route, as above, when only some fields should
+start over or when the visitor should land on a different page.</p>
 <h2 id="what-survives-a-reload">What survives a reload</h2>
 <p>Nothing does. State lives in the browser's memory, and reloading the
 tab starts the app again from the values in <code>start_server(...)</code>. For
 course projects, that behavior is normal and expected. If your users
 might be surprised by it, say so on the page. The full story is in
 <a href="../../start/how-drafter-works/">How Drafter works</a>.</p>
+<p>When visitors need to keep their data between visits, let them save
+it as a file and load it again later.
+<a href="../files/#recipe-save-and-load-your-data">Save and load your data</a>
+is a complete recipe.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
 <li><strong>The value resets when you did not expect it</strong>: you reloaded the tab,

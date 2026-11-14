@@ -28,4 +28,7 @@ def index(state: State) -> Page:
     ])
 
 
+assert_has(index(State()),
+           PetCard("Ada", "corgi", "Every walk is the best walk."))
+
 start_server(State())

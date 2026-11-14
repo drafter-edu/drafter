@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6264,6 +6257,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14165,19 +14186,19 @@ is looking at).</p>
 </tr>
 <tr>
 <td><code>on_click</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Route to call when the map is clicked; it can receive <code>latitude</code> and <code>longitude</code>.</td>
 </tr>
 <tr>
 <td><code>on_marker_click</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Route to call when a marker is clicked; it can receive <code>latitude</code>, <code>longitude</code>, and <code>label</code>.</td>
 </tr>
 <tr>
 <td><code>on_move</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Route to call after panning or zooming; it can receive <code>latitude</code>, <code>longitude</code>, and <code>zoom</code>.</td>
 </tr>
@@ -14256,10 +14277,16 @@ click happened:</p>
 <ul>
 <li>Map imagery downloads from OpenStreetMap, so demos and deployed
   apps need an internet connection to show the actual map.</li>
-<li>The event routes take route names as strings, like a
-  <a href="../../actions/button/">Button</a>, and receive the click's
-  coordinates through parameters named <code>latitude</code> and <code>longitude</code>
-  (plus <code>label</code> for marker clicks and <code>zoom</code> for view changes).</li>
+<li>The event parameters each take a route's name as a string or the
+  route function itself, like a
+  <a href="../../actions/button/#route-targets">Button</a>. A string works
+  wherever in the file the route is defined, and it is the form the
+  tutorials use. The function form lets an editor that checks names
+  point out a misspelled route, but the function must already be
+  defined when the page is built.</li>
+<li>The event routes receive the click's coordinates through
+  parameters named <code>latitude</code> and <code>longitude</code> (plus <code>label</code> for
+  marker clicks and <code>zoom</code> for view changes).</li>
 <li>The map also works as a form field: the last clicked spot is
   submitted under <code>name</code> when a Button submits the page, and a
   route parameter with that name annotated as <code>MapLocation</code>

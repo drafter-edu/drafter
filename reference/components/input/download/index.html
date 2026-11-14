@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6275,6 +6268,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14131,7 +14152,7 @@ filename it is saved under. Because
 a downloaded file is the only way for information from your app to
 outlast the visit.</p>
 <h2 id="syntax">Syntax</h2>
-<div class="highlight"><pre><span></span><code><span class="n">Download</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">contents</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Download</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="parameters">Parameters</h2>
 <table>
@@ -14157,16 +14178,16 @@ outlast the visit.</p>
 <td>The name the saved file gets, extension included.</td>
 </tr>
 <tr>
-<td><code>contents</code></td>
+<td><code>content</code></td>
 <td><code>str</code>, <code>bytes</code>, or <code>Picture</code></td>
 <td>required</td>
-<td>What goes in the file.</td>
+<td>What goes in the file: text, raw bytes, or a <a href="../../../data-types/picture/">Picture</a>, which is saved as an image file.</td>
 </tr>
 <tr>
 <td><code>content_type</code></td>
 <td><code>str</code></td>
 <td><code>"text/plain"</code></td>
-<td>The file's MIME type, when it matters.</td>
+<td>The file's MIME type, used for text and bytes. A <code>Picture</code> supplies its own type.</td>
 </tr>
 </tbody>
 </table>
@@ -14215,6 +14236,12 @@ outlast the visit.</p>
   the download always matches the current state.</li>
 <li>The extension should match the contents: <code>.txt</code> for text, <code>.png</code>
   for a <code>Picture</code>, <code>.csv</code> for comma-separated rows.</li>
+<li>Text is written into the download link exactly as given, and a
+  browser treats some characters in a link specially. A <code>#</code> in the
+  text ends the saved file at that character, and a line break at
+  the very end of the text is dropped. When the text might contain
+  a <code>#</code>, pass it as bytes with <code>transcript.encode("utf-8")</code>, and
+  the file arrives unchanged.</li>
 <li>The visitor's browser decides where downloads are saved (usually
   the downloads folder); your app is not told whether the visitor
   kept the file.</li>
@@ -14229,6 +14256,8 @@ the text should make clear that clicking saves a file.</p>
   instead.</li>
 <li><a href="../../../data-types/picture/">Picture</a>: images as downloadable
   values.</li>
+<li><a href="../../../../add/files/">Upload and download files</a> is the how-to
+  guide, with a recipe for offering a download.</li>
 </ul>
 <h2 id="external-links">External links</h2>
 <ul>

@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6138,6 +6131,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13787,52 +13808,90 @@
 
 <h1 id="image-or-file-works-locally-but-404s-when-deployed">Image or file works locally but 404s when deployed</h1>
 <h2 id="the-error">The error</h2>
-<p>On the deployed site, an image shows as a broken icon, or a file the
-app opens fails to load. The browser's developer console (open it
-with <span class="keys"><kbd class="key-f12">F12</kbd></span>, Console or Network tab) shows a request ending in:</p>
-<div class="highlight"><pre><span></span><code>404 (Not Found)
+<p>On your own computer the app works. On the deployed site, an image
+or a file is missing, and what you see depends on how your program
+uses the file.</p>
+<p>A missing image does not produce a Drafter error page. The page
+appears with a broken-image icon where the picture belongs. The
+browser's developer console (open it with <span class="keys"><kbd class="key-f12">F12</kbd></span>, Console or Network
+tab) shows a line that begins:</p>
+<div class="highlight"><pre><span></span><code>Failed to load resource: the server responded with a status of 404
 </code></pre></div>
-<p>On your own computer, the same app works perfectly.</p>
+<p>A missing file that your code reads with <code>open(...)</code> produces an
+error page with this title:</p>
+<div class="highlight"><pre><span></span><code>File Not Found
+</code></pre></div>
+<p>The sentence under the title reads "Your code tried to open a file
+that Python could not find." The technical message names the file:</p>
+<div class="highlight"><pre><span></span><code>request.route_execution_failed: Error while processing request for URL &#39;index&#39;:
+File not found: pets.txt
+</code></pre></div>
 <h2 id="what-it-means">What it means</h2>
 <p>Your program refers to a file by name, such as <code>Image("ada.png")</code> or
-<code>open("pets.txt")</code>. Locally, that file sits next to your program, so
-everything works. The deployed site only contains what you uploaded
-to the repository; the file is not there, so the browser gets a "no
-such file" answer.</p>
+<code>open("pets.txt")</code>. On your computer, that file sits next to your
+program, so the name leads to it. The deployed site contains only the
+files that the build placed there. The file is either absent from the
+site, or present under a different name or in a different folder, so
+the browser's request for it is answered with 404, the web's code for
+"no such file".</p>
 <h2 id="where-to-look">Where to look</h2>
 <p>Look at the repository on GitHub. Compare the files listed there
-against every filename your program mentions.</p>
+against every filename your program mentions, including the folder
+and the capital letters.</p>
 <h2 id="check">Check</h2>
 <ul>
 <li><strong>The file was never uploaded</strong>: it exists on your computer but not
   in the repository listing.</li>
-<li><strong>The name differs</strong>: <code>Ada.PNG</code> uploaded, <code>ada.png</code> in the code.
-  Deployed sites treat filenames as case-sensitive even if your own
-  computer does not.</li>
-<li><strong>The path differs</strong>: the code says <code>images/ada.png</code>, but the file
-  was uploaded to the repository root (or the reverse).</li>
+<li><strong>The folder differs</strong>: the code says <code>images/ada.png</code>, but the
+  file was uploaded to the top of the repository, or the reverse.
+  The build keeps every file in the folder where it found it.</li>
+<li><strong>The capital letters differ</strong>: <code>Ada.PNG</code> was uploaded and the
+  code says <code>ada.png</code>. Deployed sites treat <code>Ada.PNG</code> and <code>ada.png</code>
+  as two different names, even if your own computer does not.</li>
+<li><strong>The site was not rebuilt after the upload</strong>: the Actions tab
+  shows no run newer than the upload, or the newest run failed.</li>
+<li><strong>The build was never told about the file</strong>: this cause applies
+  when you build the site yourself with <code>--compile</code>, or when your
+  repository does not use Drafter's deployment template. The Fix
+  section explains the difference.</li>
 </ul>
 <h2 id="fix">Fix</h2>
-<p>Upload the file to the repository, next to <code>main.py</code> (or in the
-folder your code names), with exactly the spelling the code uses.
-Then run the deploy workflow again; the dashboard and Actions tab
-show it finishing.</p>
+<p>What is needed depends on how the site is built.</p>
+<p>If you deploy with
+<a href="../../../your-project/deploy/github-pages/">Drafter's deployment template</a>,
+the build copies the files and folders at the top of your repository
+into the site. Upload the file to the repository, next to <code>main.py</code>
+or in the folder your code names, with exactly the spelling and
+capital letters the code uses. Then run the deploy workflow again
+and wait for the Actions tab to show it finishing.</p>
+<p>If you build the site yourself with <code>--compile</code>, or with a workflow
+of your own, the build copies only your program. An image or a data
+file that your code names is not picked up automatically. Declare
+each file in your program, above the routes:</p>
+<div class="highlight"><pre><span></span><code><span class="n">add_website_file</span><span class="p">(</span><span class="s2">&quot;ada.png&quot;</span><span class="p">)</span>
+<span class="n">add_website_file</span><span class="p">(</span><span class="s2">&quot;images/cat.png&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>The build then copies each declared file into the site, in the same
+folder it has next to your program. The <code>--additional-paths</code> command
+line flag does the same job from outside the code, and it also
+accepts the name of a whole folder.</p>
 <h2 id="confirm">Confirm</h2>
 <p>Reload the deployed site with a hard refresh (<span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-r">R</kbd></span>), and
-check from a second device if you can; the image or file should
-appear.</p>
+check from a second device if you can. The image appears, or the
+page that reads the file is displayed.</p>
 <h2 id="prevent">Prevent</h2>
 <p>Keep every asset in the same folder as your program from the start,
 use lowercase filenames with no spaces, and after any deploy, click
 through the pages that show images or open files.</p>
-<p>Declare the files your site needs with
+<p>Declaring files with
 <a href="../../../reference/site-config/#add_website_file"><code>add_website_file</code></a>
-(stylesheets and scripts added with <code>add_website_css_file</code> and
-<code>add_website_js_file</code> are declared automatically). Drafter then
-checks each name while you develop, so a misspelled or missing file
-is an error you see immediately, with a suggestion when a similarly
-named file exists, and the build copies the files into the deployed
-site.</p>
+also helps while you develop, whichever way you deploy. Drafter
+checks that each declared file exists as soon as the program starts.
+A misspelled or missing name stops the program with a message such
+as <code>add_website_file: file not found: 'adda.png'</code>, long before
+anyone visits the deployed site. Stylesheets and scripts added with
+<code>add_website_css_file</code> and <code>add_website_js_file</code> are declared
+automatically.</p>
 <h2 id="understand">Understand</h2>
 <p><a href="../../../your-project/deploy/">What deploying means</a> explains
 that the deployed site contains exactly what is in the repository

@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6253,6 +6246,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14121,13 +14142,13 @@ with <a href="../sound/">Sound</a>.</p>
 </tr>
 <tr>
 <td><code>on_record</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Route to call when a recording completes.</td>
 </tr>
 <tr>
 <td><code>on_denied</code> / <code>on_error</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Routes for refusal and failure.</td>
 </tr>
@@ -14186,6 +14207,10 @@ with <a href="../sound/">Sound</a>.</p>
   keeps clips (and state) small.</li>
 <li>The <code>on_record</code> route can receive <code>duration</code> and <code>size</code> as
   parameters by name.</li>
+<li>Each <code>on_</code> parameter takes the route's name as a string or the
+  route function itself.
+  <a href="../../actions/button/#route-targets">Route targets</a> on the Button
+  page compares the two.</li>
 </ul>
 <h2 id="related-components">Related components</h2>
 <ul>

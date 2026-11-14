@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6275,6 +6268,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14158,8 +14179,16 @@ visitor room to write.</p>
 </tbody>
 </table>
 <p>Like every component, <code>TextArea</code> also accepts
-<a href="../../../keyword-attributes/">styling and attribute keywords</a>; <code>rows</code>
-and <code>cols</code> control its size, and <code>placeholder</code> shows a hint.</p>
+<a href="../../../keyword-attributes/">styling and attribute keywords</a>. The
+HTML attributes it recognizes as keywords are <code>rows</code> and <code>cols</code>,
+which control its size, <code>placeholder</code>, which shows a hint, and
+<code>disabled</code>, <code>readonly</code>, and <code>required</code>.</p>
+<p><code>maxlength</code> is not on that list. Drafter turns a keyword it does not
+recognize into a CSS style, which the browser ignores, and it reports
+no error. <code>required=True</code> adds the attribute, but a button still runs
+its route when the area is empty, so check for empty text inside the
+route. <a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
+explains the keyword rule.</p>
 <h2 id="examples">Examples</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
@@ -14212,6 +14241,8 @@ enough that writing is comfortable.</p>
 <li><a href="../textbox/">TextBox</a>: single-line input.</li>
 <li><a href="../../text/pre/">PreformattedText</a>: showing multi-line text back
   with its line breaks intact.</li>
+<li><a href="../../../../add/ask-for-information/">Ask the user for information</a>
+  is the how-to guide, with a recipe for collecting longer text.</li>
 </ul>
 <h2 id="external-links">External links</h2>
 <ul>

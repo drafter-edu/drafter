@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6138,6 +6131,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13787,9 +13808,9 @@
 
 <h1 id="code-after-start_server-never-runs">Code after start_server() never runs</h1>
 <h2 id="the-error">The error</h2>
-<p>There is no error message; that is the confusing part. Code placed
-after the <code>start_server(...)</code> call, like the last line here, silently
-never happens:</p>
+<p>There is no error page, no title, and no message, which is the
+confusing part. Code placed after the <code>start_server(...)</code> call, like
+the last line here, does not run where you expect it to:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 
@@ -13799,13 +13820,20 @@ never happens:</p>
 
 
 <span class="n">start_server</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Welcome to my site!&quot;</span><span class="p">)</span>  <span class="c1"># never printed</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Welcome to my site!&quot;</span><span class="p">)</span>  <span class="c1"># never printed in the terminal</span>
 </code></pre></div>
+<p>The terminal (the Thonny shell) never shows "Welcome to my site!",
+no matter how long the site runs.</p>
 <h2 id="what-it-means">What it means</h2>
-<p><code>start_server(...)</code> does not finish and move on; it hands your whole
-program over to Drafter, which runs your routes from then on. The
-lines after it would only run if the call returned, and it never
-does. This is by design, not a bug.</p>
+<p>Your program runs twice, once on your computer and once in the
+browser. On your computer, <code>start_server(...)</code> starts the site and
+keeps running for as long as the site is up, so Python does not reach
+the lines after it. In the browser, the call finishes once the first
+page is ready, and the lines after it run one time as the site loads.
+The <code>print</code> in this example therefore appears in the Console box in
+the footer of the browser page and never in the terminal. Code that
+runs in one place and not the other is hard to reason about, which is
+why nothing should follow the call.</p>
 <h2 id="where-to-look">Where to look</h2>
 <p>Look at the bottom of your file, at anything after the
 <code>start_server(...)</code> call.</p>
@@ -13846,7 +13874,7 @@ treat "where does this line go?" as a two-answer question: before the
 call, or inside a route.</p>
 <h2 id="understand">Understand</h2>
 <p><a href="../../../start/how-drafter-works/">How Drafter works</a> explains the
-program's two runs and why the call never returns;
+program's two runs, and
 <a href="../../../reference/start-server/">start_server</a> has the full option
 list.</p>
 

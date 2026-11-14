@@ -2022,13 +2022,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6138,6 +6131,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13590,6 +13611,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#other-ways-to-publish" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other ways to publish
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#common-problems" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13712,6 +13744,27 @@ repository links, videos, documents to include, or a place to submit
 your URL. Those live in your course's own instructions, not here.
 Follow this guide for the deployment itself, then your course's
 checklist for the rest.</p>
+<h2 id="other-ways-to-publish">Other ways to publish</h2>
+<p>GitHub Pages is the route these pages walk through, but it is not
+the only one. Deploying means compiling, and you can compile on your
+own computer from a terminal:</p>
+<div class="highlight"><pre><span></span><code>drafter main.py --compile --output-directory _site --production
+</code></pre></div>
+<p>That command writes a folder named <code>_site</code> that holds <code>index.html</code>
+and the files it needs. Any service that hosts static websites can
+serve that folder. Two details differ from the template:</p>
+<ul>
+<li>The <code>--production</code> flag hides the debug panel, the same way
+  <code>hide_debug_information()</code> does.</li>
+<li>A compile on your own computer copies only your main program. Name
+  every other file the app needs, such as pictures, data files, and
+  helper modules, with
+  <a href="../../reference/site-config/#add_website_file"><code>add_website_file</code></a>
+  in your code.</li>
+</ul>
+<p><a href="../../reference/cli/">Command line</a> lists the other build flags,
+and <a href="../../extend/github-actions/">Deploy with GitHub Actions</a>
+explains how to write a deploy workflow of your own.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
 <li><strong>You submitted or shared a <code>localhost</code> link</strong>: that link only works
@@ -13729,8 +13782,9 @@ checklist for the rest.</p>
 <a href="../../concepts/how-the-web-works/">How the web works</a> explain why
 there is no server to rent and nothing to install.</p>
 <h2 id="see-another-example">See another example</h2>
-<p>Every app in the <a href="../gallery/">project gallery</a> was deployed
-exactly this way.</p>
+<p>Every live demo in these docs is a Drafter app compiled to a static
+site, the same way your deployed app will be. The
+<a href="../gallery/">project gallery</a> lists the larger ones.</p>
 <h2 id="look-it-up">Look it up</h2>
 <p>See <a href="../../reference/site-config/">Site configuration</a> for every
 <code>set_...</code> function used in preparation.</p>

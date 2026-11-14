@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6264,6 +6257,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14178,7 +14199,7 @@ small play button unless you make it automatic.</p>
 </tr>
 <tr>
 <td><code>on_start</code> / <code>on_finish</code> / <code>on_error</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Routes to call as playback starts, ends, or fails.</td>
 </tr>
@@ -14229,6 +14250,17 @@ small play button unless you make it automatic.</p>
   so the tone never fails silently.</li>
 <li>A wrong waveform or an unpronounceable pitch stops the page
   with a friendly error listing the valid choices.</li>
+<li>The start and finish routes can receive four parameters by name:
+  <code>frequency</code> (the pitch in Hz, a float), <code>duration</code> (milliseconds,
+  a whole number), <code>waveform</code> (a string), and <code>note</code> (the note name,
+  a string). The tone sends <code>note</code> only when the pitch was written
+  as a note name, so give that parameter a default value.</li>
+<li>The error route can receive <code>status</code> (<code>"unavailable"</code> or
+  <code>"error"</code>) and <code>message</code>, both strings.</li>
+<li>Each <code>on_</code> parameter takes the route's name as a string or the
+  route function itself.
+  <a href="../../actions/button/#route-targets">Route targets</a> on the Button
+  page compares the two.</li>
 </ul>
 <h2 id="related-components">Related components</h2>
 <ul>

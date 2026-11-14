@@ -1098,6 +1098,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#recipe-check-the-answer-and-ask-again" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe: check the answer and ask again
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#more-kinds-of-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        More kinds of input
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#common-problems" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2187,13 +2209,6 @@
     
   </span>
   
-  
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
   
 
       </a>
@@ -6304,6 +6319,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13778,6 +13821,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#recipe-check-the-answer-and-ask-again" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe: check the answer and ask again
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#more-kinds-of-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        More kinds of input
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#common-problems" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14366,6 +14431,141 @@ several lines. The name-to-parameter contract is the same:</p>
 
 <p>Handing <code>state.review</code> back to the <code>TextArea</code> as its starting value gives
 the visitor an edit loop instead of a blank box.</p>
+<h2 id="recipe-check-the-answer-and-ask-again">Recipe: check the answer and ask again</h2>
+<p>Visitors type things your code cannot use: words where a number
+belongs, or a number that is too large. Checking an answer before
+using it is called validating it. When the answer fails the check,
+show the form again with a message that says what to fix, and keep
+what the visitor typed so they can correct it.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
+    <span class="n">tickets</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">problem</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Ticket booth&quot;</span><span class="p">),</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span>
+        <span class="s2">&quot;How many tickets would you like (1 to 10)?&quot;</span><span class="p">,</span>
+        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;tickets&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">tickets</span><span class="p">),</span>
+        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Buy&quot;</span><span class="p">,</span> <span class="s2">&quot;buy&quot;</span><span class="p">)</span>
+    <span class="p">])</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">buy</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">tickets</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">tickets</span> <span class="o">=</span> <span class="n">tickets</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tickets</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">problem</span> <span class="o">=</span> <span class="s2">&quot;Please type a whole number.</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">tickets</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">tickets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">problem</span> <span class="o">=</span> <span class="s2">&quot;You can buy between 1 and 10 tickets.</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">problem</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">cost</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tickets</span><span class="p">)</span> <span class="o">*</span> <span class="mi">5</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s2">&quot;You bought &quot;</span> <span class="o">+</span> <span class="n">tickets</span> <span class="o">+</span> <span class="s2">&quot; tickets for &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; gold.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Buy more&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
+    <span class="p">])</span>
+
+
+<span class="n">assert_has</span><span class="p">(</span><span class="n">buy</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;lots&quot;</span><span class="p">),</span> <span class="s2">&quot;Please type a whole number.&quot;</span><span class="p">)</span>
+<span class="n">assert_has</span><span class="p">(</span><span class="n">buy</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;40&quot;</span><span class="p">),</span> <span class="s2">&quot;between 1 and 10&quot;</span><span class="p">)</span>
+<span class="n">assert_has</span><span class="p">(</span><span class="n">buy</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;3&quot;</span><span class="p">),</span> <span class="s2">&quot;You bought 3 tickets for 15 gold.&quot;</span><span class="p">)</span>
+
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+</code></pre></div>
+<div class="drafter-demo" data-drafter-demo="ask-for-information-5-4cdd68863a8b">
+  <iframe src="../../drafter-demos/ask-for-information-5-4cdd68863a8b/index.html" title="Drafter Demo ask-for-information-5-4cdd68863a8b" name="ask-for-information-5-4cdd68863a8b" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 320px;" ></iframe>
+</div>
+
+<p>Three decisions make this work:</p>
+<ul>
+<li>The <code>tickets</code> parameter is annotated <code>str</code>, not <code>int</code>. Drafter then
+  hands over exactly what was typed, and the route decides whether it
+  is a number. With an <code>int</code> annotation, Drafter would stop at its own
+  error page before the route ever ran.</li>
+<li>The state has a <code>problem</code> field. The form page always displays it,
+  and it is an empty string when there is nothing to report.</li>
+<li>When a check fails, the route sets the message and returns
+  <code>index(state)</code>, so the visitor sees the same form again with their
+  answer still in the box.</li>
+</ul>
+<p>Each check gets its own test. Tests for input checks are worth
+writing, because the mistakes are the cases you are least likely to
+try by hand.</p>
+<h2 id="more-kinds-of-input">More kinds of input</h2>
+<p>The recipes above use four input components. Drafter has more, and
+every one follows the same rule: the component's name becomes a
+parameter, and the parameter's annotation says what kind of value
+arrives.</p>
+<table>
+<thead>
+<tr>
+<th>The visitor...</th>
+<th>Component</th>
+<th>Annotate the parameter as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>picks one option from a short visible list</td>
+<td><a href="../../reference/components/input/radiobuttongroup/">RadioButtonGroup</a></td>
+<td><code>str</code></td>
+</tr>
+<tr>
+<td>checks any number of boxes in a group</td>
+<td><a href="../../reference/components/input/relatedcheckbox/">RelatedCheckBox</a></td>
+<td><code>list[str]</code></td>
+</tr>
+<tr>
+<td>picks several options from one list</td>
+<td><a href="../../reference/components/input/selectbox/">SelectBox</a> with <code>multiple=True</code></td>
+<td><code>list[str]</code></td>
+</tr>
+<tr>
+<td>drags a slider to a number</td>
+<td><a href="../../reference/components/input/slider/">Slider</a></td>
+<td><code>int</code> or <code>float</code></td>
+</tr>
+<tr>
+<td>picks a color</td>
+<td><a href="../../reference/components/input/colorpicker/">ColorPicker</a></td>
+<td><code>str</code></td>
+</tr>
+<tr>
+<td>picks a date</td>
+<td><a href="../../reference/components/input/dateinput/">DateInput</a></td>
+<td><code>date</code></td>
+</tr>
+<tr>
+<td>picks a time of day</td>
+<td><a href="../../reference/components/input/timeinput/">TimeInput</a></td>
+<td><code>time</code></td>
+</tr>
+<tr>
+<td>picks a date and a time together</td>
+<td><a href="../../reference/components/input/datetimeinput/">DateTimeInput</a></td>
+<td><code>datetime</code></td>
+</tr>
+<tr>
+<td>chooses a file</td>
+<td><a href="../../reference/components/input/fileupload/">FileUpload</a></td>
+<td>see <a href="../files/">Upload and download files</a></td>
+</tr>
+</tbody>
+</table>
+<p>The two <code>list[str]</code> rows deliver an empty list when nothing is
+checked or selected. The <code>date</code>, <code>time</code>, and <code>datetime</code> types come
+from Python's <code>datetime</code> module, so a route that uses them needs
+<code>from datetime import date, time, datetime</code> at the top of the file.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
 <li><strong>A missing-parameter error</strong>: an input name and a parameter name do
@@ -14376,8 +14576,12 @@ the visitor an edit loop instead of a blank box.</p>
 <li><strong>The value vanishes after the next click</strong>: a parameter's value only
   lasts for that one route call. Save it into a <code>state</code> field, as every
   recipe above does.</li>
-<li><strong>Two buttons, one form</strong>: both target routes receive the same inputs,
-  so both need the matching parameters.</li>
+<li><strong>Two buttons, one form</strong>: every button on the page sends all of the
+  page's inputs to its route. A route that needs a value must have the
+  matching parameter. A route that does not need it, such as the target
+  of a Cancel button, can leave the parameter out. The page still
+  works, and the debug panel lists a warning about a form field with no
+  matching parameter.</li>
 </ul>
 <h2 id="understand-it">Understand it</h2>
 <p><a href="../../concepts/forms-and-input/">Forms and input</a> explains the

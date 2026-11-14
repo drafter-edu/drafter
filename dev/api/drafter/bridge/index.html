@@ -2042,13 +2042,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6158,6 +6151,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14163,7 +14184,10 @@ re-registered), False otherwise.</p>
 <p>Configuration-update events are applied directly: "framed" toggles
 the site frame, while "in_debug_mode" and "enable_subtle_debug_entry"
 update the configuration and refresh the debug CSS and subtle
-debug-entry button. Every event (including configuration updates) is
+debug-entry button. Settings that change nothing in the page (such
+as the site information fields) are accepted as they are; only a key
+that is not a setting at all is reported as a bridge error.
+Every event (including configuration updates) is
 then forwarded to the debug panel; events the panel does not handle
 are logged to the console.</p>
 

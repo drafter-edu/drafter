@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -5203,6 +5196,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#where-settings-come-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where settings come from
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#notes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6227,6 +6231,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13657,6 +13689,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#where-settings-come-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where settings come from
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#notes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14076,6 +14119,7 @@ it <a href="../../help/errors/nothing-after-start-server/">never runs</a>.</p>
 <tr>
 <th>Option</th>
 <th>Type</th>
+<th>Default</th>
 <th>What it does</th>
 </tr>
 </thead>
@@ -14083,84 +14127,148 @@ it <a href="../../help/errors/nothing-after-start-server/">never runs</a>.</p>
 <tr>
 <td><code>initial_state</code></td>
 <td>any</td>
-<td>The starting state, passed to <code>index</code> on the first visit and restored on reset.</td>
+<td><code>None</code></td>
+<td>The starting state, passed to <code>index</code> on the first visit and restored by the built-in <a href="../route/#built-in-routes"><code>--reset</code></a> route.</td>
 </tr>
 <tr>
 <td><code>theme</code></td>
 <td><code>str</code></td>
+<td><code>"default"</code></td>
 <td>Apply a <a href="../themes/">theme</a> by name, same effect as <code>set_website_style(...)</code>.</td>
 </tr>
 <tr>
 <td><code>site_title</code></td>
 <td><code>str</code></td>
+<td><code>"Drafter Application"</code></td>
 <td>The title shown in the browser tab.</td>
 </tr>
 <tr>
 <td><code>favicon</code></td>
 <td><code>str</code></td>
+<td>Drafter's own icon</td>
 <td>The small browser-tab icon: a URL or the path to an image file next to your program.</td>
 </tr>
 <tr>
 <td><code>framed</code></td>
 <td><code>bool</code></td>
+<td><code>True</code></td>
 <td>Whether the app sits inside Drafter's window frame. <code>set_website_framed(False)</code> is the usual way to turn this off for <a href="../../your-project/deploy/prepare/">deployment</a>.</td>
 </tr>
 <tr>
 <td><code>in_debug_mode</code></td>
 <td><code>bool</code></td>
-<td>Whether the debug panel appears. On by default while you develop; <code>hide_debug_information()</code> is the usual way to turn it off.</td>
+<td><code>True</code></td>
+<td>Whether the debug panel appears. <code>False</code> shows the site the way visitors will see it, which is the same as the <code>--production</code> flag. <code>hide_debug_information()</code> is the usual way to turn the panel off.</td>
+</tr>
+<tr>
+<td><code>console_mode</code></td>
+<td><code>str</code></td>
+<td><code>"auto"</code></td>
+<td>Where <code>print()</code> output appears in the browser. <code>"auto"</code> shows a console in the page footer while the debug panel is on. <code>"hover"</code> shows a floating console box, which also appears when the debug panel is off. <code>"toast"</code> shows each line briefly in a corner, and <code>"devtools"</code> sends output only to the browser's developer console.</td>
 </tr>
 <tr>
 <td><code>port</code></td>
 <td><code>int</code></td>
-<td>Which port the local development server listens on, when running from the command line. The default port moves to the next free one when it is busy; a port you choose is never moved.</td>
+<td><code>8000</code></td>
+<td>Which port the local development server listens on. The default port moves to the next free one when it is busy. A port you choose is never moved.</td>
 </tr>
 <tr>
 <td><code>host</code></td>
 <td><code>str</code></td>
+<td><code>"localhost"</code></td>
 <td>Which network interface the local development server binds.</td>
 </tr>
 <tr>
 <td><code>open_browser</code></td>
 <td><code>bool</code></td>
+<td><code>True</code></td>
 <td>Whether running locally opens a browser tab automatically.</td>
 </tr>
 <tr>
 <td><code>browser</code></td>
 <td><code>str</code></td>
-<td>Which browser opens the tab: <code>"chrome"</code>, <code>"firefox"</code>, <code>"safari"</code>, <code>"edge"</code>, or <code>"default"</code> for your computer's usual browser. Unset, Drafter uses Chrome if installed, then Firefox, then the default.</td>
+<td><code>None</code></td>
+<td>Which browser opens the tab: <code>"chrome"</code>, <code>"firefox"</code>, <code>"safari"</code>, <code>"edge"</code>, or <code>"default"</code> for your computer's usual browser. When this is not set, Drafter uses Chrome if installed, then Firefox, then the default.</td>
 </tr>
 <tr>
 <td><code>engine</code></td>
 <td><code>str</code></td>
-<td>Which in-browser Python runs your code; <code>"pyodide"</code> is the default and the one these docs cover.</td>
+<td><code>"pyodide"</code></td>
+<td>Which in-browser Python runs your code. <code>"pyodide"</code> is the one these docs cover.</td>
 </tr>
 <tr>
 <td><code>use_reloader</code></td>
 <td><code>bool</code></td>
+<td><code>True</code></td>
 <td>Whether saving a file restarts the site automatically. <a href="../live-reload/">Live reload</a> covers this and the finer-grained <code>watch_...</code> options.</td>
 </tr>
 <tr>
 <td><code>skip</code></td>
 <td><code>bool</code></td>
+<td><code>False</code></td>
 <td>Do nothing at all: no server, no compilation. Meant for test runners; see the note below.</td>
 </tr>
 </tbody>
 </table>
 <p>Several options exist in two forms: a <code>start_server</code> keyword and a
 configuration function (<code>set_website_style</code>, <code>set_website_title</code>,
-<code>set_website_framed</code>, <code>hide_debug_information</code>). They do the same
-thing; the <a href="../site-config/">configuration functions</a> read more clearly
-and are what the rest of these docs use. Values passed directly to
-<code>start_server</code> are applied last, so they take precedence if you
-accidentally use both.</p>
+<code>set_website_framed</code>, <code>hide_debug_information</code>). The
+<a href="../site-config/">configuration functions</a> read more clearly and are
+what the rest of these docs use.</p>
+<p>Set each option in only one of the two forms. When a configuration
+function and a <code>start_server</code> keyword give different values for the
+same option, the result is not dependable. For example, the browser
+tab shows the title from <code>set_website_title</code>, while the theme follows
+the <code>start_server</code> keyword.</p>
+<div class="admonition warning">
+<p class="admonition-title">A misspelled option is ignored without any message</p>
+<p><code>start_server</code> accepts any keyword. A keyword that it does not
+recognize, such as <code>sight_title</code> in place of <code>site_title</code>, produces
+no error and no warning, and the real option keeps its default. If
+an option seems to have no effect, check its spelling against the
+table above.</p>
+</div>
+<h2 id="where-settings-come-from">Where settings come from</h2>
+<p>A setting can be given in three places. The examples all set the
+theme.</p>
+<ol>
+<li>
+<p><strong>A <code>start_server</code> keyword.</strong> The setting is part of your program,
+   so it is still in effect when the site is deployed.</p>
+<div class="highlight"><pre><span></span><code><span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">theme</span><span class="o">=</span><span class="s2">&quot;terminal&quot;</span><span class="p">)</span>
+</code></pre></div>
+</li>
+<li>
+<p><strong>A command line flag.</strong> The setting applies to one run.
+   <a href="../cli/">Command line</a> lists the flags.</p>
+<div class="highlight"><pre><span></span><code><span class="go">drafter my_app.py --theme terminal</span>
+</code></pre></div>
+</li>
+<li>
+<p><strong>An environment variable.</strong> The variable's name is <code>DRAFTER_</code>
+   followed by the setting's name in capital letters.</p>
+<div class="highlight"><pre><span></span><code><span class="go">DRAFTER_THEME=terminal python my_app.py</span>
+</code></pre></div>
+<p>That line is written for macOS, Linux, and Git Bash. In Windows
+PowerShell, set the variable on its own line first with
+<code>$env:DRAFTER_THEME = "terminal"</code>, and then run the program.</p>
+</li>
+</ol>
+<p>When the same setting is given in more than one place, a
+<code>start_server</code> keyword wins over a flag, and a flag wins over an
+environment variable.</p>
+<p>The environment variables for <code>port</code>, <code>host</code>, <code>open_browser</code>, and
+<code>use_reloader</code> currently have no effect. Use the keyword or the flag
+for those four settings.</p>
 <h2 id="notes">Notes</h2>
 <ul>
 <li><strong>Nothing after the call runs.</strong> <code>start_server</code> takes over the
   program, so all configuration must come before it; code placed
   after the call never executes.</li>
 <li><strong>Tests run first.</strong> Assertions written above <code>start_server</code> execute
-  before the site starts.</li>
+  before the site starts. A failing assertion prints a FAILURE message
+  and the site still starts. See
+  <a href="../testing-functions/">Testing functions</a>.</li>
 <li><strong>Skipping the server for tests.</strong> Setting the <code>DRAFTER_SKIP</code>
   environment variable (or passing <code>skip=True</code>, or running with the
   <code>--skip</code> flag) makes <code>start_server</code> return immediately without
@@ -14172,8 +14280,10 @@ accidentally use both.</p>
   the entire folder. <a href="../live-reload/">Live reload</a> has the details.</li>
 <li><strong>Old v1 options are ignored.</strong> Parameters from Drafter v1 such as
   <code>cdn_skulpt</code> print a warning and do nothing.</li>
-<li><strong>Command-line flags</strong> can override some of these when you run
-  <code>drafter yourfile.py</code>; see <a href="../cli/">Command line</a>.</li>
+<li><strong>Command-line flags</strong> set many of the same options for one run of
+  <code>drafter yourfile.py</code>. A keyword in <code>start_server</code> wins when both
+  are given. See <a href="../cli/">Command line</a> and
+  <a href="#where-settings-come-from">Where settings come from</a>.</li>
 </ul>
 <h2 id="related">Related</h2>
 <ul>

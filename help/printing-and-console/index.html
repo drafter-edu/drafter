@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6156,6 +6149,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../errors/state-mismatch/" class="md-nav__link">
         
   
@@ -6610,6 +6631,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#where-print-output-goes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where print output goes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#printing-from-routes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6636,6 +6668,17 @@
     <span class="md-ellipsis">
       
         Console modes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#printing-on-a-deployed-site" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Printing on a deployed site
       
     </span>
   </a>
@@ -13690,6 +13733,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#where-print-output-goes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where print output goes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#printing-from-routes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13716,6 +13770,17 @@
     <span class="md-ellipsis">
       
         Console modes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#printing-on-a-deployed-site" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Printing on a deployed site
       
     </span>
   </a>
@@ -14100,12 +14165,35 @@
 <p>You want to use <code>print()</code> to see what your app is doing, and you
 want a place to experiment with your running program by hand.</p>
 <h2 id="before-you-start">Before you start</h2>
-<p>You need nothing beyond a running app. <code>print()</code> in a Drafter app does not
-disappear; it goes to the <strong>Console</strong>, a small terminal-style panel
-that appears in the page footer the first time your program prints
-(while debug mode is on, which is the default during development).</p>
+<p>You need a running app with the debug panel showing, which is the
+default while you develop. In a Drafter app, the output of <code>print()</code>
+goes to the <strong>Console</strong>, a dark box on the web page itself, below
+your page and above the debug panel. The box appears the first time
+your program prints.</p>
+<h2 id="where-print-output-goes">Where print output goes</h2>
+<p>A Drafter program runs in two places, and each place has its own
+output.</p>
+<ul>
+<li><strong>The terminal, or Thonny's shell.</strong> When you start the program,
+  Python runs your file once on your computer. Your tests run during
+  that first run, and Drafter builds the first page. Anything
+  printed during that run appears in the terminal, including test
+  results such as <code>SUCCESS at line 39 (assert_has)</code>.</li>
+<li><strong>The browser.</strong> The browser then runs your file again, and from
+  that point on every route runs in the browser. The output goes to
+  the Console box on the page. The box also shows the test results
+  from the browser's run of your file.</li>
+</ul>
+<p>One consequence surprises many people. A <code>print()</code> inside a route
+runs in the browser when a button is clicked, so its output appears
+in the page's Console box and never in the terminal or Thonny's
+shell. The same is true after you save a change. The site reloads in
+the browser, the tests run again there, and the terminal prints
+nothing new.</p>
+<p>Every printed line is also copied to the console of the browser's
+developer tools, which you can open with <span class="keys"><kbd class="key-f12">F12</kbd></span>.</p>
 <h2 id="printing-from-routes">Printing from routes</h2>
-<p>Drop a <code>print()</code> into any route and watch the console as you click:</p>
+<p>Add a <code>print()</code> to any route and watch the Console box as you click.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
@@ -14137,31 +14225,44 @@ that appears in the page footer the first time your program prints
   <iframe src="../../drafter-demos/printing-and-console-1-d12022a3cf5f/index.html" title="Drafter Demo printing-and-console-1-d12022a3cf5f" name="printing-and-console-1-d12022a3cf5f" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
 </div>
 
-<p>Printed lines also mirror to the browser's developer-tools console,
-and messages Python writes to <code>stderr</code> (like warnings) appear in
-red. The 🖨️ Console button in the footer opens and closes the
-panel, with Clear and Hide buttons to tidy up.</p>
-<p>Printing is the quickest way to answer two common questions: "did
-this route even run?" and "what value actually arrived?" Print the
-parameters at the top of the route you suspect, then click the
+<p>The demos on this documentation site run with the debug panel
+hidden, so the Console box is hidden too. Click the "debug" button
+in the corner of the demo, then click <strong>Click me</strong>, and the printed
+lines appear in the Console box below the page. When you run the
+same program on your own computer, the box is visible without that
+step.</p>
+<p>Messages that Python writes to <code>stderr</code>, such as warnings, appear in
+the Console box in red. The <strong>Console</strong> button in the bar above the
+box opens and closes the box. Inside the box, <strong>Clear</strong> empties it
+and <strong>Hide</strong> closes it. After you press Hide, new output does not
+reopen the box, so press the Console button to see it again.</p>
+<p>Printing is the quickest way to answer two common questions, which
+are "did this route run at all?" and "what value arrived?" Print
+the parameters at the top of the route you suspect, then click the
 button that should trigger it.</p>
 <h2 id="the-console-is-a-real-python-prompt">The console is a real Python prompt</h2>
-<p>The console is also a REPL, a prompt where you can type Python code
-and run it immediately: type next to the <code>&gt;&gt;&gt;</code> prompt and press
+<p>The Console box is also a REPL, a prompt where you can type Python
+code and run it immediately. Type next to the <code>&gt;&gt;&gt;</code> prompt and press
 Enter. The REPL shares variables with your program, so your <code>State</code>
-class and route functions are already available:</p>
+class and route functions are already available.</p>
 <div class="highlight"><pre><span></span><code>&gt;&gt;&gt; state = State(clicks=10)
 &gt;&gt;&gt; index(state)
-Page(state=State(clicks=10), content=[&#39;Clicks: 10\n&#39;, Button(text=&#39;Click me&#39;, url=&#39;add_one&#39;)])
+Rendering index with 10 clicks
+Page(state=State(clicks=10), content=[&#39;Clicks: 10\n&#39;, Button(&#39;Click me&#39;, &#39;add_one&#39;)], target=Target(id=&#39;drafter-body--&#39;), css=None, js=None)
 </code></pre></div>
-<p>Multi-line blocks work (the prompt changes to <code>...</code>), and the Up
-and Down arrows revisit earlier commands. Calling a route by hand
-in the REPL is a fine way to prototype a test before writing the
-<code>assert_state</code> line in your file.</p>
+<p>Calling a route at the prompt runs the route and prints the <code>Page</code>
+it returns. The page on screen does not change.
+Blocks of several lines work, and the prompt changes to <code>...</code> while
+you are inside one. The Up and Down arrow keys bring back earlier
+commands. Calling a route by hand at the prompt is a good way to
+try out a test before you write the <code>assert_equal</code> line in your
+file.</p>
 <h2 id="console-modes">Console modes</h2>
-<p>Where output appears is configurable with the <code>--console-mode</code>
-command-line flag (or the <code>DRAFTER_CONSOLE_MODE</code> environment
-variable):</p>
+<p>The <code>console_mode</code> setting controls where output appears. You can
+pass it to <code>start_server</code>, as in
+<code>start_server(State(0), console_mode="hover")</code>. You can also use the
+<code>--console-mode</code> command-line flag or the <code>DRAFTER_CONSOLE_MODE</code>
+environment variable.</p>
 <table>
 <thead>
 <tr>
@@ -14172,39 +14273,51 @@ variable):</p>
 <tbody>
 <tr>
 <td><code>auto</code> (default)</td>
-<td>Console panel in the footer, debug mode only.</td>
+<td>The Console box under the page, only while the debug panel is showing.</td>
 </tr>
 <tr>
 <td><code>hover</code></td>
-<td>A floating console box pinned to the window, visible even in production.</td>
+<td>A floating Console box pinned to the bottom of the window, with or without the debug panel.</td>
 </tr>
 <tr>
 <td><code>toast</code></td>
-<td>Each printed line pops up briefly as a corner notification.</td>
+<td>Each printed line appears for a few seconds as a small notice in a corner of the window.</td>
 </tr>
 <tr>
 <td><code>devtools</code></td>
-<td>No on-page console; output goes only to the browser developer tools.</td>
+<td>No Console box on the page. Output goes only to the browser's developer tools.</td>
 </tr>
 </tbody>
 </table>
-<p>To run a production site that still shows printed output, use
-<code>drafter my_site.py --production --console-mode hover</code>.</p>
+<p>In every mode, output is also copied to the browser's developer
+tools.</p>
+<h2 id="printing-on-a-deployed-site">Printing on a deployed site</h2>
+<p>A deployed site normally calls <code>hide_debug_information()</code>, which
+hides the debug panel and the Console box with it. In the default
+<code>auto</code> mode, visitors see no printed output on the page. The
+<code>print()</code> calls still run, and their output is still in the
+browser's developer tools, where a curious visitor can read it, so
+do not print anything private.</p>
+<p>To keep printed output visible on a site without the debug panel,
+choose the <code>hover</code> or <code>toast</code> mode, for example with
+<code>start_server(State(0), console_mode="hover")</code>.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
-<li><strong>Nothing prints</strong>: either the route did not run (check that the
-  button is wired to it), or you are looking in the wrong place:
-  perhaps at the browser console while the output went to the
-  footer panel, or the other way around.</li>
-<li><strong>The console is gone in production</strong>: that is how the <code>auto</code>
-  mode is designed to behave; <code>hide_debug_information()</code> hides the
-  footer. Output still reaches the browser's developer tools, or
-  you can choose a more visible mode from the table above.</li>
-<li><strong>Prints flood the console</strong>: a <code>print</code> inside a route that runs
-  on every keystroke (<code>on_input</code>) or on every render will produce a
-  line every time. Move the <code>print</code> inside the branch you care
-  about, and remove debugging prints once they have told you what
-  you needed to know.</li>
+<li><strong>Nothing prints in the terminal or Thonny's shell.</strong> Output from
+  routes never goes there. Look at the Console box on the web page.</li>
+<li><strong>Nothing prints in the Console box.</strong> The route may not have run.
+  Open the debug panel's History tab and check that clicking the
+  button adds a line for the route you expect.</li>
+<li><strong>The Console box is missing.</strong> The box appears only after
+  something has been printed, and only while the debug panel is
+  showing. If you pressed Hide, press the Console button under your
+  page. If your program calls <code>hide_debug_information()</code>, see
+  <a href="#printing-on-a-deployed-site">Printing on a deployed site</a>.</li>
+<li><strong>Prints flood the console.</strong> A <code>print</code> inside a route that runs
+  on every keystroke (<code>on_input</code>) produces a line every time the
+  route runs. Move the <code>print</code> inside the branch you care about, and
+  remove debugging prints once they have told you what you needed
+  to know.</li>
 </ul>
 <h2 id="next-steps">Next steps</h2>
 <p>The <a href="../debug-panel/">debug panel</a> shows state and history without

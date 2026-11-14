@@ -2133,13 +2133,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6249,6 +6242,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14143,7 +14164,8 @@ computer and watch the count start over. The count resets because state
 lives only in memory.</p>
 <h2 id="what-this-means-for-your-code">What this means for your code</h2>
 <ul>
-<li>Put <code>start_server(...)</code> last; nothing after it runs.</li>
+<li>Put <code>start_server(...)</code> last. On your computer, nothing after it
+  runs.</li>
 <li>Put tests before <code>start_server(...)</code>; they run at startup, every time.</li>
 <li>Design your <code>State</code> to hold everything the app needs to remember, and
   expect it to reset on reload.</li>
@@ -14154,9 +14176,11 @@ lives only in memory.</p>
 <h2 id="where-people-get-confused">Where people get confused</h2>
 <ul>
 <li><strong>"My app saves things, right?"</strong> No. State is held in memory, not
-  saved to storage, so closing or reloading the tab resets it. You will
-  eventually learn how to save values to <em>local storage</em> in the browser,
-  but that comes much later.</li>
+  saved to storage, so closing or reloading the tab resets it. When
+  visitors need to keep their data, an app can offer it as a file to
+  download and read that file back in later.
+  <a href="../../add/files/#recipe-save-and-load-your-data">Save and load your data</a>
+  shows how.</li>
 <li><strong>"The server crashed"</strong>: there is no server. If the app breaks, the
   cause is in your program, and the error message on the page plus the
   debug panel will point to it.</li>

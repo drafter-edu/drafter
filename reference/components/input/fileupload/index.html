@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6275,6 +6268,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14161,6 +14182,13 @@ annotations is in the <a href="../../../../add/files/">files how-to</a>.</p>
 <p>Adding the <code>multiple</code> attribute (<code>FileUpload("photos",
 multiple=True)</code>) lets the visitor pick several files; the parameter
 then receives a list.</p>
+<p>Besides <code>multiple</code>, the HTML attributes <code>FileUpload</code> recognizes as
+keywords are <code>capture</code> and <code>required</code>. <code>required=True</code> adds the
+attribute, but a button still runs its route when no file is chosen.
+<code>disabled</code> is not on that list. Drafter turns a keyword it does not
+recognize into a CSS style, which the browser ignores, and it reports
+no error. <a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
+explains the keyword rule.</p>
 <h2 id="examples">Examples</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
@@ -14200,8 +14228,15 @@ then receives a list.</p>
   annotate <code>str</code> to receive text, <code>bytes</code> to receive any file's raw
   data, <code>Picture</code> to receive an image, or one of the
   <a href="../../../data-types/file-types/">file types</a> when the filename
-  matters too. Add <code>| None</code> so that an empty picker delivers
-  <code>None</code>.</li>
+  matters too.</li>
+<li>When the visitor chooses no file, the result also depends on the
+  annotation. A <code>str</code> parameter receives <code>""</code>, and a <code>bytes</code>
+  parameter receives <code>b""</code>. A file type such as <code>DrafterTextFile</code>
+  receives a file whose <code>filename</code> is empty and whose <code>size</code> is 0.
+  A <code>Picture</code> parameter stops with an error page that says no file
+  was chosen. Annotate it <code>Picture | None</code> to receive <code>None</code>
+  instead. Adding <code>| None</code> to <code>str</code> does not change the result,
+  which is still <code>""</code>.</li>
 <li><code>accept</code> is guidance for the picker, not enforcement; a visitor
   can still choose any file. A file of the wrong type produces a
   <a href="../../../../help/errors/file-decode-error/">friendly error</a>.</li>
@@ -14217,6 +14252,8 @@ nothing about what the file is for.</p>
 <li><a href="../download/">Download</a>: sending files to the visitor instead.</li>
 <li><a href="../../capture/camera/">Camera</a>: another way to bring pictures
   into the app.</li>
+<li><a href="../../../../add/files/">Upload and download files</a> is the how-to
+  guide, with a recipe for receiving a file.</li>
 </ul>
 <h2 id="external-links">External links</h2>
 <ul>

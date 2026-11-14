@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6138,6 +6131,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13787,12 +13808,14 @@
 
 <h1 id="github-actions-build-failed">GitHub Actions build failed</h1>
 <h2 id="the-error">The error</h2>
-<p>A red X appears next to your deployment in the repository's
-<strong>Actions</strong> tab, and GitHub sends you an email about a failed
-workflow run. The log of the failed step typically ends with:</p>
+<p>This failure happens on GitHub and not inside your app, so there is
+no Drafter error page and no title to look for. A red X appears next
+to your deployment in the repository's <strong>Actions</strong> tab, and GitHub
+sends you an email about a failed workflow run. The log of the failed
+step typically ends with:</p>
 <div class="highlight"><pre><span></span><code>Error: Process completed with exit code 1.
 </code></pre></div>
-<p>The useful message is the lines just above that one.</p>
+<p>The useful message is in the lines directly above that one.</p>
 <h2 id="what-it-means">What it means</h2>
 <p>The deployment is a program GitHub runs for you: it takes your
 repository, builds your Drafter app into a static site, and

@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6279,6 +6272,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13818,16 +13839,18 @@ the result, and each click starts another request. In that
 arrangement, the server is the application and the browser is its
 display.</p>
 <h3 id="reading-a-url">Reading a URL</h3>
-<div class="highlight"><pre><span></span><code>https://ada.github.io/snack-tracker/?page=history
-\___/  \____________/\_____________/\___________/
-scheme     host           path         query
+<div class="highlight"><pre><span></span><code>https://ada.github.io/snack-tracker/?route=history
+\___/  \____________/\_____________/\____________/
+scheme     host           path          query
 </code></pre></div>
 <ul>
 <li>The <strong>scheme</strong> (<code>https://</code>) is the protocol, with the <code>s</code> meaning
   the connection is encrypted.</li>
 <li>The <strong>host</strong> (<code>ada.github.io</code>) names which server to ask.</li>
 <li>The <strong>path</strong> (<code>/snack-tracker/</code>) names what to ask it for.</li>
-<li>The <strong>query</strong> (<code>?page=history</code>) carries extra values.</li>
+<li>The <strong>query</strong> (<code>?route=history</code>) carries extra values. A Drafter
+  app uses it to record which route built the page you are looking
+  at, here a route named <code>history</code>.</li>
 </ul>
 <h3 id="where-drafter-fits">Where Drafter fits</h3>
 <p>A deployed Drafter app changes this arrangement. The server (GitHub
@@ -13862,7 +13885,7 @@ network again: the package comes from the server.)</p>
 <h2 id="what-this-means-for-your-code">What this means for your code</h2>
 <ul>
 <li><strong><code>localhost</code> addresses are private and temporary.</strong> While you
-  develop, your app's address looks like <code>http://localhost:8080</code>.
+  develop, your app's address looks like <code>http://localhost:8000</code>.
   <code>localhost</code> always means "this same device", so the address is
   meaningless to anyone else, and it stops working when your program
   stops. To share your app, <a href="../../your-project/deploy/">deploy it</a>,
@@ -13886,7 +13909,9 @@ network again: the package comes from the server.)</p>
   reaches your device only, and only while the program runs. To share
   the app, deploy it.</li>
 <li><strong>"The server saves my data."</strong> There is no server after loading;
-  nothing is saved anywhere unless you build saving into the app.</li>
+  nothing is saved anywhere unless you build saving into the app,
+  for example by letting the visitor
+  <a href="../../add/files/#recipe-save-and-load-your-data">save their data as a file</a>.</li>
 <li><strong>"HTTPS means my login page is secure."</strong> HTTPS encrypts the
   connection. It says nothing about your app's logic; a simulated
   login is still a simulation, delivered securely.</li>

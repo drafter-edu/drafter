@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6156,6 +6149,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../errors/state-mismatch/" class="md-nav__link">
         
   
@@ -6644,6 +6665,67 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="The menus">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#navigate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Navigate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Edit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#saveload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Save/Load
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Help
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -13786,6 +13868,67 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The menus">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#navigate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Navigate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Edit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#saveload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Save/Load
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Help
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -13840,12 +13983,16 @@ debug mode is on, which is the default during development;
 <a href="../../your-project/deploy/prepare/">release</a>.</p>
 <h2 id="current-what-the-app-is-right-now">Current: what the app is, right now</h2>
 <p>The Current tab shows the route that produced the page you are
-looking at and the full current state. The state view is live: after
-every click it reflects what your routes did.</p>
-<p>It is also editable. Changing a value in the state editor and
-applying it re-renders the page from the edited state, which is the
-fastest way to answer questions like "what does the results page
-look like at score 10?" without clicking ten times.</p>
+looking at, a list titled "Errors &amp; Warnings" for that page, and the
+full current state. Each field of the state appears with its value
+and its type. The state view is live, so after every click it shows
+what your routes did. Expanding <strong>Page Content</strong> shows the page
+written as an <code>assert_equal</code> test.</p>
+<p>The state view is read-only. To see a page at a particular state,
+such as the results page at score 10, either change the starting
+value in <code>start_server(...)</code> and save, or click your way to that
+state once and keep it with the
+<a href="#saveload">Save/Load menu</a>.</p>
 <h2 id="history-everything-that-happened">History: everything that happened</h2>
 <p>The History tab lists every visit, newest first, one line each.
 The line starts with how the visit went (<strong>Success</strong>, <strong>1 warning</strong>,
@@ -13858,88 +14005,172 @@ and a warning or error puts its first line on the right of the row.</p>
 form field, button argument or default it came from, what arrived,
 and what Drafter converted it to (a form sends <code>'60'</code>; your <code>int</code>
 parameter receives <code>60</code>). Uploaded pictures get a thumbnail and
-colors a swatch. Expanding <strong>Page shown</strong> gives the returned
-<code>Page(...)</code> written as Python, which is what
-<a href="../../add/freeze-pages/">freezing a page</a> copies, and the state
-after the visit.</p>
-<p>Ten visits show at first; <strong>Show older visits</strong> adds the next ten
-without losing your place. The history can also replay a visit,
-which re-dispatches the same request against your current code.
-Replaying is exactly the check you want after fixing a bug: does
-that click work now?</p>
+colors a swatch. Expanding <strong>Page shown</strong> gives an <code>assert_equal</code>
+test for the visit, with the returned <code>Page(...)</code> written as Python,
+which is what <a href="../../add/freeze-pages/">freezing a page</a> copies. The
+state after the visit appears below the test.</p>
+<p>Ten visits show at first, and the <strong>Show older visits</strong> button adds
+the next ten without losing your place. Each line also has a
+<strong>Revisit</strong> button, which runs the same route again with the same
+arguments and the state as it is now. Revisiting is a quick check
+after you fix a bug, because it repeats the click that failed.
+<strong>Clear History</strong> asks you to confirm and then empties the list.</p>
 <p>When the same problem happens again, the Current tab's list does
 not grow a second line; the problem gets a counter such as ×3. The
 browser tab's title also carries the number of errors and warnings
 on the current page, so a problem shows even when you have switched
 to another tab.</p>
 <h2 id="overview-the-app-from-above">Overview: the app from above</h2>
-<p>The routes list shows every registered route with its parameters.
-Think of it as a table of contents for your app. Check it when
-clicking a button reports that a route does not exist, or when you
-suspect a route function is missing its <code>@route</code> decorator.
-(A visual route graph is planned for this tab but not finished.)</p>
+<p>The <strong>Registered Routes</strong> list shows every route in your program
+with its parameters, such as <code>index(state: State)</code>. Think of the
+list as a table of contents for your app. Check it when clicking a
+button reports that a route does not exist, or when you suspect a
+route function is missing its <code>@route</code> decorator.</p>
+<p>Below the list, the <strong>Route Graph</strong> section is not finished. It
+shows a note that the graph is coming soon and a sample drawing with
+the routes <code>index</code>, <code>guess</code>, <code>give_up</code>, and <code>result</code>. The drawing is
+the same for every app and does not describe yours.</p>
 <h2 id="tests-your-assertions-live">Tests: your assertions, live</h2>
-<p>Every assertion that ran at startup is here with its result, line
-number, and, for failures, the full difference report. Two buttons
-here are more useful than they may first appear: <strong>copy</strong> and
-<strong>download</strong>, which export every test the app has run as a
-ready-to-save Python file. They become valuable once
-<a href="../../add/freeze-pages/">frozen tests</a> start accumulating.</p>
-<p>Tests re-run when your program restarts, not while you click around
-the app. If the test list is all green but clicking still breaks
-something, the broken behavior does not have a test yet.</p>
+<p>Every assertion in your file is listed here with its result and its
+line number, and each failure has the full difference report. A
+failing test also puts a count next to the tab's name.</p>
+<p>Tests run again every time the site reloads, which includes every
+time you save your file. They do not run while you click around the
+app. If every test passes and clicking still breaks something, the
+broken behavior does not have a test yet.</p>
+<p>The <strong>Regression Tests</strong> section has two buttons, <strong>Copy Regression
+Tests</strong> and <strong>Download Tests (.py)</strong>. Both produce one
+<code>assert_equal</code> test for each page you have visited, in the order you
+visited them. <a href="../../add/freeze-pages/">Freeze finished pages</a>
+explains what to do with those tests.</p>
 <h2 id="environment-the-machinery">Environment: the machinery</h2>
 <p>This tab collects several kinds of information about the
-environment your app runs in:</p>
+environment your app runs in.</p>
 <ul>
-<li><strong>Files</strong>: what the app's file system holds, for checking that a
-  data file or image is actually where <code>open(...)</code> expects it.</li>
-<li><strong>Packages</strong>: which Python packages are loaded.</li>
-<li><strong>Configuration</strong>: every active setting (title, theme, debug mode,
-  and the rest) with its current value, for "did my
-  <code>set_website_...</code> call actually take?"</li>
-<li><strong>Runtime info</strong> and <strong>Internals</strong>: versions and wiring, mostly
-  useful when <a href="../bug-reports/">filing a bug report</a>.</li>
-<li><strong>Log</strong>: the cumulative record of errors and warnings, including
-  ones that older pages showed and you clicked past.</li>
-<li><strong>Storage</strong>: saved state slots. Save a situation you want to
-  return to (a half-finished quiz, a full shopping cart) and load it
-  back later instead of re-clicking your way there.</li>
+<li><strong>File Systems</strong> lists the files that Python can see in the
+  browser, under "Client File System". Press Refresh to update the
+  list. Use it to check that a data file is where <code>open(...)</code>
+  expects it.</li>
+<li><strong>Installed Packages</strong> lists the Python packages that are loaded.</li>
+<li><strong>Configuration</strong> lists every setting, such as the title, the
+  theme, and debug mode, with its current value. Look here to check
+  that a <code>set_website_...</code> call took effect. Each setting also has
+  an Edit button that overrides the value in this browser only.</li>
+<li><strong>Runtime Info</strong> gives the browser and Python versions, which are
+  mostly useful when <a href="../bug-reports/">filing a bug report</a>.</li>
+<li><strong>Event Log</strong> is a running list of what Drafter has done since the
+  site loaded. Errors stay in this list after you leave the page
+  that showed them.</li>
+<li><strong>Browser Storage</strong> lists what Drafter has saved in this browser,
+  including the snapshots from the Save/Load menu. Press Refresh to
+  update the list, and use the button at the end of a row to delete
+  that entry.</li>
+<li><strong>Advanced</strong> is not finished. Its "Show Drafter internals" section
+  shows sample values, not information about your app.</li>
 </ul>
 <h2 id="the-menus">The menus</h2>
-<p>The header menubar above the tabs holds the view controls: an
-option to hide the frame, and the live site-theme switcher for
-<a href="../../add/change-appearance/themes/">trying themes</a>. It also holds
-the Help menu, whose <strong>Download Bug Report</strong> item packages up
-<a href="../bug-reports/">everything a bug report needs</a>.</p>
-<p>The Edit menu's <strong>Convert HTML to Drafter…</strong> item turns HTML you
-already have into Drafter code. Paste the HTML (or choose an <code>.html</code>
-file), press Convert, and copy the Python it writes. The result is a
-starting point: read it before using it, because some HTML has no
-exact Drafter match. The converter downloads the first time you use
-it, so the first conversion takes a moment longer than the rest.</p>
-<p>While your app runs from your own computer, the Navigate menu ends
-with <strong>Stop Server…</strong>. After you confirm, it shuts down the Drafter
-program running in your terminal or editor, the same as pressing
-Ctrl+C there. The tab stays open but stops working until you run
-your program again. The same control lives at your site's address
-plus <code>--stop-server</code>, which is handy when the debug panel is
-hidden behind a small frame. Deployed sites have no server to stop,
-so the item does not appear there.</p>
+<p>The menu bar at the top of the frame around your page has five
+menus. The names of the items below are the names on the screen.</p>
+<h3 id="navigate">Navigate</h3>
+<ul>
+<li><strong>Home</strong> goes to your <code>index</code> page.</li>
+<li><strong>Reset</strong> puts the state back to its starting value and returns to
+  the <code>index</code> page.</li>
+<li><strong>Reload Site</strong> reloads the whole site in the browser.</li>
+<li><strong>Replay Route</strong> runs the current route again with the same
+  arguments. If that route changes the state, the change happens
+  again.</li>
+<li><strong>About</strong> shows a page with the information you gave to
+  <code>set_site_information</code>.</li>
+<li><strong>Stop Server…</strong> appears while your app runs from your own
+  computer. After you confirm, it shuts down the Drafter program
+  running in your terminal or editor, the same as pressing Ctrl+C
+  there. The tab stays open, and a page that is already loaded may
+  still respond to clicks, because your Python runs in the browser.
+  Saving your file no longer reloads the site, and reloading the tab
+  fails, until you run your program again. The same control is
+  available at your site's address plus <code>--stop-server</code>, which helps
+  when the debug panel is hidden. Deployed sites have no server to
+  stop, so the item does not appear there.</li>
+</ul>
+<h3 id="view">View</h3>
+<ul>
+<li><strong>Toggle Frame</strong> hides the frame around your page, which includes
+  the menu bar and the Console box, so that you can see the page as
+  a visitor would. The debug panel keeps its own small <strong>View</strong> menu
+  at its top right, and choosing Toggle Frame there brings the frame
+  back.</li>
+<li><strong>Production</strong> hides the debug panel as well as the frame. Reload
+  the browser tab to get them back.</li>
+<li><strong>Switch Theme…</strong> opens the theme switcher for
+  <a href="../../add/change-appearance/themes/">trying themes</a>.</li>
+<li><strong>View Page HTML</strong> opens a read-only window with the HTML that
+  Drafter generated for the current page.</li>
+</ul>
+<h3 id="edit">Edit</h3>
+<ul>
+<li><strong>Edit State…</strong> is not finished. It opens a window that shows the
+  current state and a note that editing is coming soon. You cannot
+  change a value there.</li>
+<li><strong>Edit Source</strong> opens your program in an editor inside the
+  browser. Pressing <strong>Run</strong> restarts the site with the edited code.
+  The edit exists only in that browser tab. The file on your
+  computer does not change, so copy anything you want to keep back
+  into your own editor.</li>
+<li><strong>Convert HTML to Drafter…</strong> turns HTML you already have into
+  Drafter code. Paste the HTML or choose an <code>.html</code> file, press
+  Convert, and copy the Python it writes. Read the result before
+  you use it, because some HTML has no exact Drafter match. The
+  converter is downloaded the first time you use it, so the first
+  conversion takes a moment longer than the rest.</li>
+</ul>
+<h3 id="saveload">Save/Load</h3>
+<p>A snapshot records the current state and the route that produced the
+current page. Use one to return to a situation that takes many
+clicks to reach, such as a half-finished quiz or a full shopping
+cart.</p>
+<ul>
+<li><strong>Quick Save</strong> stores a snapshot in the browser.</li>
+<li><strong>Save to Slot…</strong> stores a snapshot in one of ten numbered slots.</li>
+<li><strong>Load Most Recent</strong> restores the newest snapshot. The item shows
+  how long ago that snapshot was saved, and it is gray until you
+  have saved one.</li>
+<li><strong>Load from Slot…</strong> lets you pick among the saved snapshots.</li>
+<li><strong>Download Snapshot…</strong> saves a snapshot as a <code>.json</code> file on your
+  computer, and <strong>Upload Snapshot…</strong> restores from such a file.</li>
+</ul>
+<p>Loading a snapshot puts the saved state back and then runs the saved
+route again. If that route changes the state, the change is applied
+again on top of the saved state. For example, a counter saved at 4
+on a page produced by an <code>add_one</code> route loads as 5. To get back
+exactly what you saved, save while you are on a page whose route
+only displays the state, such as <code>index</code>.</p>
+<p>Snapshots are kept by the browser, so they survive a reload of the
+tab. If you change the fields of your <code>State</code> class after you save,
+for example by renaming one, loading the snapshot can fail. The
+state then stays as it was, and the Current tab lists an error.</p>
+<h3 id="help">Help</h3>
+<ul>
+<li><strong>Documentation</strong> opens the Drafter documentation in a new tab.</li>
+<li><strong>Download Bug Report</strong> packages up
+  <a href="../bug-reports/">everything a bug report needs</a>.</li>
+</ul>
 <h2 id="common-problems">Common problems</h2>
 <ul>
-<li><strong>The panel is gone</strong>: debug mode is off. Remove or comment out
-  <code>hide_debug_information()</code> (and any <code>in_debug_mode=False</code>), then
-  restart.</li>
-<li><strong>The state view disagrees with the page</strong>: the page was rendered
-  before your latest state edit or click; interact once more, or
-  check History to see which state each page was built from.</li>
-<li><strong>Tests show stale results</strong>: tests run at startup. Restart the
-  program to re-run them against current code.</li>
-<li><strong>Editing state broke the page</strong>: you gave a field a value of the
-  wrong type, which is a preview of the
-  <a href="../errors/state-mismatch/">state type problem</a>. Reset by
-  restarting; state edits are never saved to your code.</li>
+<li><strong>The panel is gone.</strong> Debug mode is off. Remove or comment out
+  <code>hide_debug_information()</code> and any <code>in_debug_mode=False</code>, then
+  save. If you chose Production from the View menu, reload the tab.</li>
+<li><strong>The menus are gone but the panel is still there.</strong> The frame is
+  hidden. Open the <strong>View</strong> menu at the top right of the debug panel
+  and choose Toggle Frame.</li>
+<li><strong>The state view disagrees with the page.</strong> A page shows the state
+  as it was when its route ran. Check the History tab to see which
+  state each page was built from.</li>
+<li><strong>Tests show old results.</strong> Tests run when the site loads. Save
+  your file, or reload the tab, to run them against the current
+  code.</li>
+<li><strong>A loaded snapshot is off by one step.</strong> Loading runs the saved
+  route again. See the note under <a href="#saveload">Save/Load</a>.</li>
 </ul>
 <h2 id="next-steps">Next steps</h2>
 <p><a href="../printing-and-console/">Print and the console</a> adds <code>print()</code> and

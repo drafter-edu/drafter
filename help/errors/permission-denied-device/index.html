@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6138,6 +6131,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13787,11 +13808,13 @@
 
 <h1 id="camera-microphone-or-location-permission-denied">Camera, microphone, or location permission denied</h1>
 <h2 id="the-error">The error</h2>
+<p>This problem has no error page and no title. The component shows
+one of these messages where its preview or button was:</p>
 <div class="highlight"><pre><span></span><code>Camera access denied
+Microphone access denied
 Location access denied
 </code></pre></div>
-<p>Not a crash: the component shows a denied message where its
-preview or button was, and the value your route receives has
+<p>The app keeps running, and the value your route receives has
 <code>status</code> set to <code>"denied"</code>.</p>
 <h2 id="what-it-means">What it means</h2>
 <p>The <a href="../../../reference/components/capture/camera/">Camera</a>,

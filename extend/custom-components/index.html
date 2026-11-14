@@ -2042,13 +2042,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6178,6 +6171,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../help/errors/state-mismatch/" class="md-nav__link">
         
   
@@ -7251,6 +7272,78 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Level 3: a real Component class">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-class-and-its-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The class and its fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments-and-the-constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ARGUMENTS and the constructor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-a-setting-becomes-an-html-attribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How a setting becomes an HTML attribute
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#children-and-the-renderplan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Children and the RenderPlan
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-the-component" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing the component
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-to-go-from-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go from here
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -13747,6 +13840,78 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Level 3: a real Component class">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-class-and-its-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The class and its fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments-and-the-constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ARGUMENTS and the constructor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-a-setting-becomes-an-html-attribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How a setting becomes an HTML attribute
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#children-and-the-renderplan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Children and the RenderPlan
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-the-component" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing the component
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-to-go-from-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go from here
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -14124,19 +14289,20 @@
 </script>
 <h1 id="build-your-own-components">Build your own components</h1>
 <h2 id="goal">Goal</h2>
-<p>Package a piece of page you keep rebuilding into something you
-can use like a built-in component. There are three levels, and
-the first one covers almost everyone.</p>
+<p>Package a piece of a page that you keep rebuilding, so that you
+can use it the way you use a built-in component. There are three
+levels, and the first one covers almost every project.</p>
 <h2 id="before-you-start">Before you start</h2>
-<p>You can build pages comfortably and have repeated yourself at
-least once; repetition is what components cure. The levels
-escalate in power and difficulty together, so start at level
-one and climb only when a level genuinely cannot express what
-you want.</p>
+<p>You can build pages comfortably, and you have written the same
+group of components at least twice. Each level is more powerful
+than the one before it and also harder to get right, so start at
+level 1 and move up only when a level cannot express what you
+need.</p>
 <h2 id="level-1-a-function-that-returns-components">Level 1: a function that returns components</h2>
-<p>A "component" can be nothing more than a function returning the
-content you keep writing. It composes, takes parameters, and
-needs no new concepts:</p>
+<p>A component of your own can be a function that returns the
+content you keep writing. The function takes parameters like any
+other, and its result can go anywhere content can go, including
+inside another component.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
@@ -14167,95 +14333,276 @@ needs no new concepts:</p>
     <span class="p">])</span>
 
 
+<span class="n">assert_has</span><span class="p">(</span><span class="n">index</span><span class="p">(</span><span class="n">State</span><span class="p">()),</span>
+           <span class="n">PetCard</span><span class="p">(</span><span class="s2">&quot;Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;corgi&quot;</span><span class="p">,</span> <span class="s2">&quot;Every walk is the best walk.&quot;</span><span class="p">))</span>
+
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">())</span>
 </code></pre></div>
-<div class="drafter-demo" data-drafter-demo="custom-components-1-5c3192777b30">
-  <iframe src="../../drafter-demos/custom-components-1-5c3192777b30/index.html" title="Drafter Demo custom-components-1-5c3192777b30" name="custom-components-1-5c3192777b30" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
+<div class="drafter-demo" data-drafter-demo="custom-components-1-dffa40568ff2">
+  <iframe src="../../drafter-demos/custom-components-1-dffa40568ff2/index.html" title="Drafter Demo custom-components-1-dffa40568ff2" name="custom-components-1-dffa40568ff2" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
 </div>
 
-<p>Name these functions like components (<code>PetCard</code>, not
-<code>make_pet_card</code>) and keep them pure: parameters in, content out,
-no state mutation. This level is enough for cards, banners,
-navigation bars, and any repeated furniture.</p>
+<p>Give these functions names that look like component names
+(<code>PetCard</code> rather than <code>make_pet_card</code>), and have each one build
+its result only from its parameters, without changing the state.
+The test above the last line shows a benefit of this level: the
+function returns ordinary components, so <code>assert_has</code> can look for
+a whole card. Level 1 is enough for cards, banners, navigation
+bars, and any other group of components that repeats.</p>
 <h2 id="level-2-rawhtml-for-markup-no-component-makes">Level 2: RawHTML for markup no component makes</h2>
-<p>When the structure you need has no component equivalent, a
-function can wrap <a href="../../reference/components/media/rawhtml/">RawHTML</a>.
-You gain arbitrary markup and lose Drafter's safety, so the
-<a href="../../add/html/">safety rule</a> applies in full: only your own
-text, never a visitor's, goes into the markup.</p>
+<p>Sometimes the HTML you need has no component. If you need one
+unusual tag around ordinary content, use <code>HtmlTag</code> and stay at
+level 1. <code>HtmlTag("u", "Babbage")</code> wraps its content in whatever
+tag you name, and the content is still escaped, which means that
+any HTML inside it is shown as plain text instead of being run.
+<a href="../../add/html/">Embed HTML</a> shows <code>HtmlTag</code> in use.</p>
+<p>If you need a block of markup written entirely by hand, a function
+can return <a href="../../reference/components/media/rawhtml/">RawHTML</a>.
+<code>RawHTML</code> sends your string to the browser exactly as you wrote it,
+so Drafter's escaping no longer protects the page. The
+<a href="../../add/html/#the-safety-rule">safety rule</a> therefore applies in
+full. Only text that you wrote yourself may go into the markup,
+and text that a visitor typed must stay out.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">Badge</span><span class="p">(</span><span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PageContent</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">RawHTML</span><span class="p">(</span>
         <span class="s1">&#39;&lt;span style=&quot;border-radius: 9px; background: gold; &#39;</span>
         <span class="s1">&#39;padding: 2px 8px;&quot;&gt;&#39;</span> <span class="o">+</span> <span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;&lt;/span&gt;&quot;</span>
     <span class="p">)</span>
 </code></pre></div>
-<p>(Calling <code>Badge(user_typed_text)</code> would break the rule; even at
-level 2, keep visitor text out.)</p>
+<p><code>Badge("Adopted")</code> is safe, because the label is your own text.
+<code>Badge(new_name)</code>, where <code>new_name</code> came from a text box, would
+break the rule, because any HTML the visitor typed would become
+part of the page.</p>
 <h2 id="level-3-a-real-component-class">Level 3: a real Component class</h2>
-<p>Real components subclass <code>Component</code> and describe their
-rendering with the <code>RenderPlan</code> API, the same machinery the
-built-ins use. This buys equality for tests, styling keywords,
-and multi-element rendering, at the cost of touching Drafter's
-internals:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span><span class="p">,</span> <span class="n">PageContent</span>
+<p>Every built-in component is a class that inherits from
+<code>Component</code>, and you can write such a class yourself. A class of
+your own gives you two things that a level 1 function cannot.
+You decide which keywords become real HTML attributes, and the
+component appears under its own name in test output. The cost is
+that you are now working with Drafter's internal machinery, which
+has more rules than the rest of the library.</p>
+<p>The example builds a <code>FieldGroup</code>. It renders a <code>&lt;fieldset&gt;</code>,
+the HTML element that draws a box around a group of form inputs
+with a caption set into the top border. A fieldset can also be
+switched off, which makes every input and button inside it stop
+responding. Drafter has no fieldset component, and
+<code>HtmlTag("fieldset", ...)</code> cannot switch one off, for a reason
+explained below. A component class uses class variables and <code>*</code>
+parameters, which your course may not have covered. The sections
+after the example explain each one.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">drafter.components.page_content</span><span class="w"> </span><span class="kn">import</span> <span class="n">ComponentArgument</span><span class="p">,</span> <span class="n">RenderPlan</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
+    <span class="n">applicant</span><span class="p">:</span> <span class="nb">str</span>
 
 
 <span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">AdBox</span><span class="p">(</span><span class="n">Component</span><span class="p">):</span>
-    <span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;div&quot;</span>
-    <span class="n">product</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FieldGroup</span><span class="p">(</span><span class="n">Component</span><span class="p">):</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;fieldset&quot;</span>
+    <span class="n">caption</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">content</span><span class="p">:</span> <span class="nb">list</span>
+    <span class="n">locked</span><span class="p">:</span> <span class="nb">bool</span>
 
     <span class="n">ARGUMENTS</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">ComponentArgument</span><span class="p">(</span><span class="s2">&quot;product&quot;</span><span class="p">,</span> <span class="n">is_content</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-        <span class="n">ComponentArgument</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">is_content</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">ComponentArgument</span><span class="p">(</span><span class="s2">&quot;caption&quot;</span><span class="p">),</span>
+        <span class="n">ComponentArgument</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;var&quot;</span><span class="p">,</span> <span class="n">is_content</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">ComponentArgument</span><span class="p">(</span><span class="s2">&quot;locked&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
     <span class="p">]</span>
+    <span class="n">KNOWN_ATTRS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;disabled&quot;</span><span class="p">]</span>
+    <span class="n">RENAME_ATTRS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;caption&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;locked&quot;</span><span class="p">:</span> <span class="s2">&quot;disabled&quot;</span><span class="p">}</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">product</span> <span class="o">=</span> <span class="n">product</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">extra_settings</span> <span class="o">=</span> <span class="n">kwargs</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">caption</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">content</span><span class="p">,</span> <span class="n">locked</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">extra_settings</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">caption</span> <span class="o">=</span> <span class="n">caption</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="n">locked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extra_settings</span> <span class="o">=</span> <span class="n">extra_settings</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span>
-            <span class="n">RenderPlan</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="n">tag_name</span><span class="o">=</span><span class="s2">&quot;hr&quot;</span><span class="p">),</span>
-            <span class="n">RenderPlan</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="n">tag_name</span><span class="o">=</span><span class="s2">&quot;section&quot;</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="p">[</span>
-                <span class="n">RenderPlan</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="n">tag_name</span><span class="o">=</span><span class="s2">&quot;h3&quot;</span><span class="p">,</span>
-                           <span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">product</span><span class="p">]),</span>
-                <span class="n">RenderPlan</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="n">tag_name</span><span class="o">=</span><span class="s2">&quot;p&quot;</span><span class="p">,</span>
-                           <span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">]),</span>
-            <span class="p">]),</span>
-        <span class="p">]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">legend</span> <span class="o">=</span> <span class="n">RenderPlan</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="n">tag_name</span><span class="o">=</span><span class="s2">&quot;legend&quot;</span><span class="p">,</span>
+                            <span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">legend</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">content</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Adopt Babbage&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;Latest applicant: &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">applicant</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">FieldGroup</span><span class="p">(</span>
+            <span class="s2">&quot;Your application&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Your name: &quot;</span><span class="p">,</span>
+            <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;visitor&quot;</span><span class="p">),</span>
+            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Apply&quot;</span><span class="p">,</span> <span class="s2">&quot;apply&quot;</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">FieldGroup</span><span class="p">(</span>
+            <span class="s2">&quot;Applications for Captain&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Captain the grey cat already has a home. &quot;</span><span class="p">,</span>
+            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Apply&quot;</span><span class="p">,</span> <span class="s2">&quot;apply&quot;</span><span class="p">),</span>
+            <span class="n">locked</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+    <span class="p">])</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">visitor</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">applicant</span> <span class="o">=</span> <span class="n">visitor</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="n">assert_has</span><span class="p">(</span><span class="n">index</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;nobody yet&quot;</span><span class="p">)),</span>
+           <span class="n">FieldGroup</span><span class="p">(</span><span class="s2">&quot;Your application&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;Your name: &quot;</span><span class="p">,</span>
+                      <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;visitor&quot;</span><span class="p">),</span>
+                      <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Apply&quot;</span><span class="p">,</span> <span class="s2">&quot;apply&quot;</span><span class="p">)))</span>
+<span class="n">assert_state</span><span class="p">(</span><span class="n">apply</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;nobody yet&quot;</span><span class="p">),</span> <span class="s2">&quot;Grace&quot;</span><span class="p">),</span> <span class="n">State</span><span class="p">(</span><span class="s2">&quot;Grace&quot;</span><span class="p">))</span>
+
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;nobody yet&quot;</span><span class="p">))</span>
 </code></pre></div>
-<p>The library's own <code>SelectBox</code>, <code>CheckBox</code>, and <code>Table</code> are the
-reference implementations to read next. Beyond this lies level
-four, interactive custom elements with a TypeScript half (how
-<code>Timer</code> and <code>Map</code> work), which is
-<a href="../../dev/architecture/">developer-docs</a> territory.</p>
+<div class="drafter-demo" data-drafter-demo="custom-components-2-c0f412e6f0b9">
+  <iframe src="../../drafter-demos/custom-components-2-c0f412e6f0b9/index.html" title="Drafter Demo custom-components-2-c0f412e6f0b9" name="custom-components-2-c0f412e6f0b9" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 540px;" ></iframe>
+</div>
+
+<p>The first group works like any other part of a form. The Apply
+button in the second group does nothing when clicked, because that
+group is locked.</p>
+<h3 id="the-class-and-its-fields">The class and its fields</h3>
+<p><code>@dataclass(repr=False)</code> is the same decorator you put on <code>State</code>,
+with one setting changed. The decorator makes two <code>FieldGroup</code>
+values equal when their caption, content, and <code>locked</code> setting are
+equal. <code>repr=False</code> tells the decorator to leave the printed form
+alone, so that <code>Component</code> can print the component the way you
+wrote it, as <code>FieldGroup('Your application', ...)</code>. That printed
+form is what a failing test shows you.</p>
+<p><code>tag = "fieldset"</code> names the HTML element. The three annotated
+lines after it declare the fields that each <code>FieldGroup</code> stores.</p>
+<h3 id="arguments-and-the-constructor">ARGUMENTS and the constructor</h3>
+<p><code>ARGUMENTS</code> lists the constructor's parameters in order, one
+<code>ComponentArgument</code> for each. Drafter reads this list whenever it
+prints, compares, or renders the component, so the list has to
+match <code>__init__</code> exactly.</p>
+<ul>
+<li><code>ComponentArgument("caption")</code> is an ordinary parameter that
+  must be given.</li>
+<li><code>kind="var"</code> marks the parameter that collects any number of
+  values. It matches <code>*content</code> in <code>__init__</code>, where the <code>*</code> means
+  "gather every remaining value into one group".</li>
+<li><code>kind="keyword"</code> with a <code>default_value</code> marks an optional
+  parameter that is given by name, as in <code>locked=True</code>.</li>
+<li><code>is_content=True</code> says that the values are content to show
+  inside the element. Arguments without it are settings.</li>
+</ul>
+<p><code>__init__</code> stores each value on <code>self</code> under the name used in
+<code>ARGUMENTS</code>. The last parameter, <code>**extra_settings</code>, gathers every
+other keyword into a dictionary, and every component must store
+that dictionary as <code>self.extra_settings</code>. Styling keywords such as
+<code>style_border</code> arrive there.</p>
+<h3 id="how-a-setting-becomes-an-html-attribute">How a setting becomes an HTML attribute</h3>
+<p>By default, Drafter turns every argument that is not content into
+an HTML attribute with the same name as the field. Two class
+variables and one list inside Drafter adjust that default, and
+<code>FieldGroup</code> depends on all three.</p>
+<p><code>RENAME_ATTRS</code> maps a field name to the attribute name that should
+be used instead. The field is called <code>locked</code> because that word
+describes what the visitor experiences, and HTML calls the
+attribute <code>disabled</code>, so the class maps <code>"locked"</code> to <code>"disabled"</code>.
+Mapping a field to the empty string <code>""</code> leaves that field out of
+the attributes altogether. The caption is shown in a <code>&lt;legend&gt;</code>
+element inside the fieldset, not as an attribute, so the class
+maps <code>"caption"</code> to <code>""</code>.</p>
+<p><code>KNOWN_ATTRS</code> lists the attributes that belong to this tag. Drafter
+already recognizes the attributes that every tag accepts, such as
+<code>id</code>, <code>title</code>, and <code>class</code>. Any other name is treated as a CSS
+property and placed in the element's <code>style</code>. Without
+<code>"disabled"</code> in <code>KNOWN_ATTRS</code>, the locked group would render as
+<code>&lt;fieldset style="disabled: True"&gt;</code>, which locks nothing. That
+fallback is also why <code>HtmlTag("fieldset", ..., disabled=True)</code>
+cannot lock a group.</p>
+<p><code>BOOLEAN_ATTRS</code> is a list inside Drafter rather than something your
+class declares. It holds HTML's on-or-off attributes, among them
+<code>disabled</code>, <code>checked</code>, <code>required</code>, <code>hidden</code>, and <code>open</code>. Drafter
+writes an attribute from that list as a bare word when its value is
+true and leaves it out when its value is false. As a result,
+<code>locked=True</code> renders as <code>&lt;fieldset disabled&gt;</code> and not as
+<code>&lt;fieldset disabled="True"&gt;</code>.</p>
+<p>The same rules apply to keywords that the caller adds. In
+<code>FieldGroup("Pets", "Ada", title="Dogs first", width="50%")</code>, the
+<code>title</code> becomes an attribute because every tag accepts one, and
+<code>width</code> becomes the inline style <code>width: 50%</code> because Drafter does
+not recognize it as an attribute of this tag.</p>
+<h3 id="children-and-the-renderplan">Children and the RenderPlan</h3>
+<p><code>get_children</code> returns what goes inside the element. A
+<code>RenderPlan</code> describes one HTML element that has no component of
+its own, which here is the <code>&lt;legend&gt;</code> that holds the caption. The
+content that the caller passed follows it. Text inside a
+<code>RenderPlan</code> is escaped like all other content, so a caption that
+contains HTML is shown as plain text.</p>
+<p>Put together, the locked group produces this HTML. Drafter also
+adds an <code>id</code> to the fieldset, and the button carries several
+attributes of its own, which are left out here.</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">fieldset</span> <span class="na">disabled</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">legend</span><span class="p">&gt;</span>Applications for Captain<span class="p">&lt;/</span><span class="nt">legend</span><span class="p">&gt;</span>
+  Captain the grey cat already has a home.
+  <span class="p">&lt;</span><span class="nt">button</span><span class="p">&gt;</span>Apply<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">fieldset</span><span class="p">&gt;</span>
+</code></pre></div>
+<h3 id="testing-the-component">Testing the component</h3>
+<p>The two lines before <code>start_server</code> test the program the way you
+would test any other. <code>assert_has</code> finds the first group in the
+page, which works because two <code>FieldGroup</code> values with the same
+arguments are equal. <code>assert_state</code> checks the <code>apply</code> route. When
+a test like the first one fails, the message names the component
+as <code>FieldGroup('Your application', ...)</code>, where a level 1 function
+would be reported as the <code>Div</code> or <code>HtmlTag</code> it returned.</p>
+<h3 id="where-to-go-from-here">Where to go from here</h3>
+<p>The built-in closest to <code>FieldGroup</code> is <code>Details</code>, in the file
+<code>components/layout.py</code> of the Drafter source. It also places one
+generated element ahead of the caller's content. <code>SelectBox</code>, in
+<code>components/forms.py</code>, builds a list of <code>&lt;option&gt;</code> children from
+its <code>options</code> field and maps that field to <code>""</code>. Beyond level 3
+are interactive custom elements such as <code>Timer</code> and <code>Map</code>, which
+pair a Python class with a part written in TypeScript. The
+<a href="../../dev/architecture/">developer architecture page</a> is the place
+to start for those.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
-<li><strong>The level-1 function mutates state</strong>: then it is secretly a
-  route helper, not a component. Pass values in; return content
-  out.</li>
-<li><strong>Tests cannot match the level-2 markup</strong>: <code>assert_has</code> sees a
-  <code>RawHTML</code> blob, matched only by its exact string. Level 1
-  components test naturally; another reason to prefer them.</li>
-<li><strong>A level-3 field leaks into the rendering</strong> (a stray
-  attribute or inline style): every dataclass field becomes an
-  attribute unless handled; declare <code>ARGUMENTS</code> fully, and use
-  <code>RENAME_ATTRS = {"field": ""}</code> to suppress a field that is
-  configuration rather than markup.</li>
-<li><strong>It feels like fighting the framework</strong>: check whether
-  composition (level 1) around existing components expresses
-  the idea; it usually can.</li>
+<li><strong>A level 1 function changes the state.</strong> A function that
+  changes state is doing a route's work. Pass the values in as
+  parameters and return content, and leave state changes to the
+  route that calls the function.</li>
+<li><strong>A test passes on text that no visitor can see.</strong> A test
+  treats a <code>RawHTML</code> value as one string that includes its tags
+  and styles. <code>assert_has</code> matches it only against a <code>RawHTML</code>
+  with the identical string, and a text search such as
+  <code>assert_in("gold", page)</code> succeeds on the <code>Badge</code> above even
+  though the word is part of a style. Level 1 components do not
+  have this problem.</li>
+<li><strong>A level 3 field shows up as an inline style.</strong> A style such
+  as <code>style="caption: Your application"</code> means that a field which
+  is not content was neither listed in <code>KNOWN_ATTRS</code> nor mapped in
+  <code>RENAME_ATTRS</code>. Map the field to the right attribute name, or to
+  <code>""</code> if it should not be an attribute at all.</li>
+<li><strong>A true-or-false keyword renders as <code>name="True"</code> or as a
+  style.</strong> The attribute needs to be in your <code>KNOWN_ATTRS</code>, and it
+  is written as a bare word only if it is one of the attributes in
+  Drafter's <code>BOOLEAN_ATTRS</code> list.</li>
+<li><strong>Level 3 takes more code than the result seems worth.</strong> Check
+  whether a level 1 function around existing components expresses
+  the idea, which it usually does.</li>
 </ul>
 <h2 id="related">Related</h2>
 <ul>
-<li><a href="../../add/html/">Embed HTML</a>: the safety rules level 2
-  inherits.</li>
-<li><a href="../../dev/">Developer documentation</a>: architecture and
-  internals for level 3 and beyond.</li>
+<li><a href="../../add/html/">Embed HTML</a> explains <code>HtmlTag</code>, <code>RawHTML</code>, and
+  the safety rule that level 2 depends on.</li>
+<li><a href="../../reference/keyword-attributes/">Keywords every component accepts</a>
+  lists the styling and attribute keywords that the caller of any
+  component can add.</li>
+<li><a href="../../dev/">Developer documentation</a> covers the
+  architecture and internals behind level 3.</li>
 </ul>
 
 

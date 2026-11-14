@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6264,6 +6257,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14172,7 +14193,7 @@ rhythm even while the page is busy.</p>
 </tr>
 <tr>
 <td><code>on_note</code> / <code>on_finish</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Routes to call as each note starts and when the melody ends.</td>
 </tr>
@@ -14210,6 +14231,15 @@ rhythm even while the page is busy.</p>
 <li>Beats can be fractions: <code>("C4", 0.5)</code> is half a beat,
   <code>("C4", 2)</code> a held note. <code>None</code> in the list also counts as a
   rest.</li>
+<li>The <code>on_note</code> route can receive four parameters by name: <code>note</code>
+  (the note name, or <code>"rest"</code>), <code>frequency</code> (the pitch in Hz, or 0
+  for a rest), <code>index</code> (the note's position in the list, counting
+  from 0), and <code>count</code> (how many notes and rests the melody has).
+  The <code>on_finish</code> route can receive <code>count</code>.</li>
+<li>Each <code>on_</code> parameter takes the route's name as a string or the
+  route function itself.
+  <a href="../../actions/button/#route-targets">Route targets</a> on the Button
+  page compares the two.</li>
 <li>An <code>on_note</code> route that returns a whole <code>Page</code> re-renders the
   page and resets the melody after its first note; return an
   <code>Update</code> or a <code>Fragment</code> to react while the music continues,

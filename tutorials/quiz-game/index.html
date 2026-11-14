@@ -2188,13 +2188,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6304,6 +6297,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14363,7 +14384,7 @@ page shows whatever question the position points at.</p>
 <code>start_server(State(QUESTIONS, 2))</code>. What will the page show? Run it
 and check. Then predict what <code>State(QUESTIONS, 3)</code> will do before you
 try it. (It breaks: there is no question 3. Read the error, then put
-the 0 back. Step 3 will make running out of questions mean something.)</p>
+the 0 back. Step 2 will make running out of questions mean something.)</p>
 <h2 id="step-2-one-route-every-question">Step 2: One route, every question</h2>
 <p>Move the question display into its own <code>ask</code> route, show the options
 with a <code>BulletedList</code>, and add a Skip button that moves the position
@@ -14578,8 +14599,63 @@ answer was right or wrong.)</p>
 <h2 id="step-4-keep-score-vary-the-ending">Step 4: Keep score, vary the ending</h2>
 <p>Add a <code>score</code> field, count correct answers in <code>check</code>, and replace the
 plain ending with a <code>results</code> route whose verdict depends on the
-score. The finished app at the top of the page is exactly this step;
-its last lines before <code>start_server</code> are three tests:</p>
+score. Change <code>State</code>, <code>check</code>, <code>restart</code>, and the last line of your
+copy to match the highlighted lines, and add the new <code>results</code> route:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
+    <span class="n">questions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Question</span><span class="p">]</span>
+    <span class="n">position</span><span class="p">:</span> <span class="nb">int</span>
+<span class="hll">    <span class="n">score</span><span class="p">:</span> <span class="nb">int</span>
+</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">chosen</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">question</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">[</span><span class="n">state</span><span class="o">.</span><span class="n">position</span><span class="p">]</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">chosen</span> <span class="o">==</span> <span class="n">question</span><span class="o">.</span><span class="n">answer</span><span class="p">:</span>
+<span class="hll">        <span class="n">state</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">score</span> <span class="o">+</span> <span class="mi">1</span>
+</span>        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Correct!&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Not quite. It was &quot;</span> <span class="o">+</span> <span class="n">question</span><span class="o">.</span><span class="n">answer</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+            <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Next question&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">)</span>
+        <span class="p">])</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+<span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;See your results&quot;</span><span class="p">,</span> <span class="s2">&quot;results&quot;</span><span class="p">)</span>
+</span>    <span class="p">])</span>
+
+
+<span class="hll"><span class="nd">@route</span>
+</span><span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">results</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+</span><span class="hll">    <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">questions</span><span class="p">)</span>
+</span><span class="hll">    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">score</span> <span class="o">==</span> <span class="n">total</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">verdict</span> <span class="o">=</span> <span class="s2">&quot;Perfect. The pets are impressed.&quot;</span>
+</span><span class="hll">    <span class="k">elif</span> <span class="n">state</span><span class="o">.</span><span class="n">score</span> <span class="o">&gt;=</span> <span class="n">total</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">verdict</span> <span class="o">=</span> <span class="s2">&quot;Solid work.&quot;</span>
+</span><span class="hll">    <span class="k">else</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">verdict</span> <span class="o">=</span> <span class="s2">&quot;The pets forgive you. Try again!&quot;</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+</span><span class="hll">        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Results&quot;</span><span class="p">),</span>
+</span><span class="hll">        <span class="s2">&quot;You scored &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">score</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; out of &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">total</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">verdict</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Play again&quot;</span><span class="p">,</span> <span class="s2">&quot;restart&quot;</span><span class="p">)</span>
+</span><span class="hll">    <span class="p">])</span>
+</span>
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">restart</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="hll">    <span class="n">state</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+</span>    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="hll"><span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">QUESTIONS</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+</span></code></pre></div>
+<p>The finished app at the top of the page is exactly this step. Its
+last lines before <code>start_server</code> are three tests:</p>
 <div class="highlight"><pre><span></span><code><span class="n">assert_state</span><span class="p">(</span><span class="n">check</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">QUESTIONS</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;a cat&quot;</span><span class="p">),</span>
              <span class="n">State</span><span class="p">(</span><span class="n">QUESTIONS</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 <span class="n">assert_state</span><span class="p">(</span><span class="n">check</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">QUESTIONS</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;a dog&quot;</span><span class="p">),</span>

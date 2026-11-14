@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -2854,6 +2847,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#route-targets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Route targets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#passing-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passing arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -6275,6 +6296,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13713,6 +13762,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#route-targets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Route targets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#passing-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passing arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -14152,23 +14229,50 @@ the visitor is performing an action ("Feed", "Submit", "Play"); use a
 </tr>
 <tr>
 <td><code>url</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>required</td>
-<td>The name of the target route, as a string, such as <code>"feed"</code> for the route defined by <code>def feed(...)</code>.</td>
+<td>The route to run. Give its name as a string, such as <code>"feed"</code> for the route defined by <code>def feed(...)</code>, or give the function itself. See <a href="#route-targets">Route targets</a>.</td>
 </tr>
 <tr>
 <td><code>arguments</code></td>
-<td>see below</td>
+<td>see <a href="#passing-arguments">Passing arguments</a></td>
 <td><code>None</code></td>
 <td>Extra values delivered to the target route's parameters.</td>
 </tr>
 </tbody>
 </table>
-<p><code>arguments</code> accepts a single <a href="../argument/">Argument</a>, a list of
-<code>Argument</code> objects, or a list of <code>(name, value)</code> pairs. Each one fills
-the target route's parameter of the same name.</p>
 <p>Like every component, <code>Button</code> also accepts
 <a href="../../../keyword-attributes/">styling and attribute keywords</a>.</p>
+<h3 id="route-targets">Route targets</h3>
+<p>The <code>url</code> parameter accepts the route's name as a string, as in
+<code>Button("Feed", "feed")</code>, or the route function itself, as in
+<code>Button("Feed", feed)</code>. Both forms run the same route, and a page
+built with one form is equal in tests to the same page built with the
+other.</p>
+<p>The tutorials use strings. A string works wherever in the file the
+target route is defined, because Drafter looks the name up only when
+the page is shown. The function form lets an editor that checks names
+point out a misspelled route before the program runs. Python looks the
+function up at the moment the page is built, so the function form
+stops with a <code>NameError</code> when a page is built before its target route
+has been defined. This happens when a test calls a route from a line
+above the definition of a route that it links to.</p>
+<h3 id="passing-arguments">Passing arguments</h3>
+<p>The <code>arguments</code> parameter accepts four forms. These four buttons all
+deliver the same value, <code>10</code>, to a parameter named <code>amount</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Add ten&quot;</span><span class="p">,</span> <span class="s2">&quot;add_points&quot;</span><span class="p">,</span> <span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Add ten&quot;</span><span class="p">,</span> <span class="s2">&quot;add_points&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)])</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Add ten&quot;</span><span class="p">,</span> <span class="s2">&quot;add_points&quot;</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)])</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Add ten&quot;</span><span class="p">,</span> <span class="s2">&quot;add_points&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">})</span>
+</code></pre></div>
+<p>The first form is a single <a href="../argument/">Argument</a>. The second is a
+list of <code>Argument</code> objects, the third is a list of <code>(name, value)</code>
+pairs, and the fourth is a dictionary. The list and dictionary forms
+can hold several entries, such as <code>{"amount": 10, "bonus": True}</code>, and
+each entry fills the target route's parameter of the same name. The
+values must be text, numbers, booleans, or lists of those. The
+<a href="../argument/">Argument</a> page describes what happens when a name
+matches no parameter.</p>
 <h2 id="examples">Examples</h2>
 <p>In its most basic form, a button runs a route that changes the state
 and shows the result:</p>
@@ -14267,6 +14371,44 @@ identifying which button was clicked:</p>
   <iframe src="../../../../drafter-demos/button-3-2cde276275e3/index.html" title="Drafter Demo button-3-2cde276275e3" name="button-3-2cde276275e3" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 220px;" ></iframe>
 </div>
 
+<p>A frequent use of <code>arguments</code> is a button on every row of a list,
+where each button tells the route which row it belongs to. This
+example gives each Delete button its row's position, written in the
+dictionary form, and the <code>delete</code> route receives that position as an
+<code>int</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
+    <span class="n">chores</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">[</span><span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Chores&quot;</span><span class="p">)]</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">chore</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">chores</span><span class="p">:</span>
+        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chore</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Delete&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="n">position</span><span class="p">}))</span>
+        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">position</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">chores</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">([</span><span class="s2">&quot;Walk Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;Brush Captain&quot;</span><span class="p">,</span> <span class="s2">&quot;Feed Domino&quot;</span><span class="p">]))</span>
+</code></pre></div>
+<div class="drafter-demo" data-drafter-demo="button-4-6719e1674a8e">
+  <iframe src="../../../../drafter-demos/button-4-6719e1674a8e/index.html" title="Drafter Demo button-4-6719e1674a8e" name="button-4-6719e1674a8e" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
+</div>
+
 <h2 id="notes">Notes</h2>
 <ul>
 <li>A button whose <code>url</code> names no existing route stops the page with a
@@ -14292,6 +14434,11 @@ keyboard-operable by default; do not replace them with styled text.</p>
   route.</li>
 <li>Inputs like <a href="../../input/textbox/">TextBox</a> supply the form values a
   button submits.</li>
+<li><a href="../../../../add/pages/">Add and connect pages</a> is the how-to guide
+  for joining several pages with buttons and links.</li>
+<li><a href="../../../../add/show-different-content/">Show different content</a> is
+  the how-to guide with a recipe for one route that serves many
+  buttons.</li>
 </ul>
 <h2 id="external-links">External links</h2>
 <ul>

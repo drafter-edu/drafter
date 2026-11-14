@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6275,6 +6268,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14166,8 +14187,19 @@ for numbers, converted for you.</p>
 </tbody>
 </table>
 <p>Like every component, <code>TextBox</code> also accepts
-<a href="../../../keyword-attributes/">styling and attribute keywords</a>; useful
-ones here include <code>placeholder</code> and <code>maxlength</code>.</p>
+<a href="../../../keyword-attributes/">styling and attribute keywords</a>. The
+HTML attributes it recognizes as keywords are <code>placeholder</code>,
+<code>maxlength</code>, <code>minlength</code>, <code>size</code>, <code>pattern</code>, and <code>alt</code>.</p>
+<p>Several attributes that work on a plain HTML input are not on that
+list, including <code>required</code>, <code>min</code>, <code>max</code>, <code>step</code>, <code>disabled</code>, and
+<code>readonly</code>. Drafter turns a keyword it does not recognize into a CSS
+style, which the browser ignores, and it reports no error. As a
+result, <code>TextBox("age", kind="number", min=0, max=10)</code> shows a number
+box that accepts any number. Drafter also does not ask the browser to
+check the form when a button is clicked, so <code>minlength</code> and <code>pattern</code>
+do not stop a route from running. Check the value inside the route
+instead. <a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
+explains the keyword rule.</p>
 <h2 id="examples">Examples</h2>
 <p>This first example collects text and shows it back:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
@@ -14261,6 +14293,8 @@ visitors and screen readers know what to type.</p>
 <li><a href="../selectbox/">SelectBox</a>, <a href="../checkbox/">CheckBox</a>: choices instead
   of typing.</li>
 <li><a href="../label/">Label</a>: captions for inputs.</li>
+<li><a href="../../../../add/ask-for-information/">Ask the user for information</a>
+  is the how-to guide for building a form from inputs like this one.</li>
 </ul>
 <h2 id="external-links">External links</h2>
 <ul>

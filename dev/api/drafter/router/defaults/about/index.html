@@ -2042,13 +2042,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6158,6 +6151,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -12338,10 +12359,54 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.router.defaults.about.FILE_LINK_SECTIONS" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FILE_LINK_SECTIONS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.router.defaults.about.default_about" class="md-nav__link">
     <span class="md-ellipsis">
       
         default_about
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.router.defaults.about.make_file_link" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        make_file_link
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.router.defaults.about.parse_external_page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parse_external_page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.router.defaults.about.render_information_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        render_information_text
       
     </span>
   </a>
@@ -13664,10 +13729,54 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.router.defaults.about.FILE_LINK_SECTIONS" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FILE_LINK_SECTIONS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.router.defaults.about.default_about" class="md-nav__link">
     <span class="md-ellipsis">
       
         default_about
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.router.defaults.about.make_file_link" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        make_file_link
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.router.defaults.about.parse_external_page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parse_external_page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.router.defaults.about.render_information_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        render_information_text
       
     </span>
   </a>
@@ -13730,6 +13839,30 @@
 
 
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="drafter.router.defaults.about.FILE_LINK_SECTIONS" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">FILE_LINK_SECTIONS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Planning&#39;</span><span class="p">,)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Site information sections whose entries name files published with the
+site (such as <code>plan.pdf</code> or <code>My Plan.pdf</code>), so every string there becomes a
+link to the file of that name, as in Drafter 1.</p>
+
+    </div>
+
+</div>
+
 
 
 
@@ -13746,8 +13879,9 @@
 
         <p>Generate the About page from site information settings.</p>
 <p>Displays the site title plus the author, description, sources,
-planning, and links sections that have been filled in. Includes
-external pages if configured, and a back button.</p>
+planning, and links sections that have been filled in. Each string in
+the planning section links to the file of that name. Includes external
+pages if configured, and a back button.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -13825,6 +13959,319 @@ information when none has been configured.</p>
     </table>
 
 
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If an <code>external_pages</code> entry is not a string or a pair
+of strings.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="drafter.router.defaults.about.make_file_link" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">make_file_link</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a link to a file or folder published alongside the site.</p>
+<p>A <code>Link</code> always means "go to this route" unless its address starts with
+<code>http://</code> or <code>https://</code>, so it cannot point at <code>plan.pdf</code> or
+<code>dashboard/</code>. This plain anchor is followed by the browser itself, which
+resolves the address against the page's own folder (the right place on
+a site deployed under a path, like <code>https://user.github.io/project/</code>).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>url</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The address of the file, usually relative to the site.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>label</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The text shown for the link.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="RawHTML(html, **extra_settings)
+
+  
+      dataclass
+   (drafter.components.RawHTML)" href="../../../components/#drafter.components.RawHTML">RawHTML</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An anchor element with the address and label escaped.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="drafter.router.defaults.about.parse_external_page" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">parse_external_page</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Split one configured external page into its address and link text.</p>
+<p>An entry is a <code>"URL"</code> string (the address doubles as the text), a
+<code>"URL Text"</code> string (everything after the first space is the text, as
+in <code>--external-pages "dashboard/ Dashboard"</code>), or a <code>(URL, Text)</code> pair.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>entry</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One item of the <code>external_pages</code> setting.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="tuple">tuple</span>[<span title="str">str</span>, <span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The <code>(url, text)</code> pair, or None for a blank entry.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the entry is not a string or a pair of strings.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="drafter.router.defaults.about.render_information_text" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">render_information_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">link_files</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Convert one string of site information into page content.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>text</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The string to convert.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>link_files</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether the string names a file published with the
+site, and so becomes a link to that file. File names may
+contain spaces.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="PageContent = Union[Content, Sequence[Content]]
+
+  
+      module-attribute
+   (drafter.components.page_content.PageContent)" href="../../../components/page_content/#drafter.components.page_content.PageContent">PageContent</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A <code>Link</code> for a web address, a file link for any other non-blank
+string when <code>link_files</code> is set, and otherwise the text unchanged.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
     </div>
 
 </div>
@@ -13833,7 +14280,7 @@ information when none has been configured.</p>
 
 
 <h2 id="drafter.router.defaults.about.render_information_value" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">render_information_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">render_information_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">link_files</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 </h2>
 
@@ -13871,6 +14318,23 @@ component).</p>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>link_files</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether every string is the name of a file published
+with the site (such as <code>plan.pdf</code>) and becomes a link to it.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
             </td>
           </tr>
       </tbody>

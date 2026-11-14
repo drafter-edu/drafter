@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6264,6 +6257,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14128,9 +14149,9 @@ messages disappear after a few seconds.</p>
 </tr>
 <tr>
 <td><code>on_finish</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>required</td>
-<td>The name of the route to call when the countdown reaches zero.</td>
+<td>The route to call when the countdown reaches zero.</td>
 </tr>
 <tr>
 <td><code>show</code></td>
@@ -14158,9 +14179,9 @@ messages disappear after a few seconds.</p>
 </tr>
 <tr>
 <td><code>on_tick</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
-<td>The name of a route to call on every tick.</td>
+<td>A route to call on every tick.</td>
 </tr>
 </tbody>
 </table>
@@ -14251,8 +14272,13 @@ display and the page text does the announcing:</p>
 <h2 id="notes">Notes</h2>
 <ul>
 <li>All times are in milliseconds: <code>1000</code> is one second.</li>
-<li><code>on_finish</code> and <code>on_tick</code> take route names as strings, the same
-  way a <a href="../../actions/button/">Button</a> does.</li>
+<li><code>on_finish</code> and <code>on_tick</code> each take a route's name as a string or
+  the route function itself, the same way a
+  <a href="../../actions/button/#route-targets">Button</a> does. A string works
+  wherever in the file the route is defined, and it is the form the
+  tutorials use. The function form lets an editor that checks names
+  point out a misspelled route, but the function must already be
+  defined when the page is built.</li>
 <li>The finish and tick routes can receive two extra parameters by
   name: <code>remaining</code> (milliseconds left) and <code>duration</code> (the total),
   both whole numbers.</li>
@@ -14268,6 +14294,9 @@ display and the page text does the announcing:</p>
 <li><a href="../clock/">Clock</a>: counts up forever instead of down.</li>
 <li><a href="../removepersistent/">RemovePersistent</a>: stop a persistent timer
   from a later page.</li>
+<li><a href="../../../../add/timers/">Make things happen over time</a> is the
+  how-to guide, with recipes for a question that expires and a game
+  that ticks.</li>
 </ul>
 <h2 id="external-links">External links</h2>
 <ul>

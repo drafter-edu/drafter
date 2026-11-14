@@ -2144,13 +2144,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6260,6 +6253,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13787,7 +13808,9 @@ page, asking five questions:</p>
   yet. Add your first one below." reads as working software.</li>
 <li><strong>Error paths</strong>: type something wrong in every field. Your app
   should respond with a polite page that says what to fix, not
-  with silence and not with a raw error.</li>
+  with silence and not with a raw error. The recipe
+  <a href="../../add/ask-for-information/#recipe-check-the-answer-and-ask-again">Check the answer and ask again</a>
+  shows how.</li>
 <li><strong>Dead ends</strong>: from every page, can the visitor get back to the
   main page without the browser's back button? Add the missing
   links.</li>
@@ -13833,9 +13856,12 @@ moves demonstrated.</p>
   styles that still matter;
   <a href="../../add/change-appearance/gotchas/">styling gotchas</a> explains
   the interaction.</li>
-<li><strong>Restyling changed a test result</strong>: loose <code>assert_has</code> tests
-  ignore styling, but frozen whole-page tests include it.
-  Re-freeze the pages you deliberately restyled.</li>
+<li><strong>Restyling changed a test result</strong>: assertions ignore styling
+  by default, so a new color or theme does not change any test.
+  If a test did change, the restyle also changed the page's words,
+  their order, or the kind of component, for example by turning
+  plain text into a <code>Header</code>. Re-freeze the pages you changed on
+  purpose.</li>
 <li><strong>It looks fine on my laptop and cramped on a phone</strong>: avoid
   fixed pixel widths on content; let text wrap. Test once in a
   narrow browser window.</li>

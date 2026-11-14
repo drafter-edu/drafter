@@ -2210,13 +2210,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6326,6 +6319,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14491,8 +14512,15 @@ SUCCESS at line 33 (assert_has)
 </code></pre></div>
 <h2 id="common-problems">Common problems</h2>
 <ul>
-<li><strong>The page shows an error about <code class="highlight"><span class="n">Page</span></code> content</strong>: the content must be a
-  list, even for one item. Write <code class="highlight"><span class="n">Page</span><span class="p">([</span><span class="s2">&quot;Hello&quot;</span><span class="p">])</span></code>, not <code class="highlight"><span class="n">Page</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span></code>.</li>
+<li><strong>The page shows an error titled "Type Mismatch"</strong>: this usually means
+  the code joined text to a number, as in <code class="highlight"><span class="s2">&quot;Current count: &quot;</span> <span class="o">+</span> <span class="n">state</span><span class="o">.</span><span class="n">count</span></code>.
+  Python cannot add a number to a string, so convert the number first with
+  <code class="highlight"><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">count</span><span class="p">)</span></code>.</li>
+<li><strong>The page shows an error titled "Route Did Not Return a Page"</strong>: the route
+  function built a <code class="highlight"><span class="n">Page</span></code> but did not hand it back. Check that the line
+  starts with <code class="highlight"><span class="k">return</span></code>.
+  <a href="../../help/errors/route-did-not-return-a-page/">Route did not return a Page</a>
+  lists the other causes.</li>
 <li><strong>The page shows a "points to non-existent page" error</strong>: the name in
   <code>Button("+1", "increment")</code> must exactly match a route function you
   defined with <code>@route</code>. Check the spelling.</li>
@@ -14530,7 +14558,7 @@ difficulty:</p>
 <li>
 <p><strong>Next: Make one visible change</strong></p>
 <hr />
-<p>Practice the edit, save, reload loop, break the app on purpose, and
+<p>Practice the edit, save, look loop, break the app on purpose, and
 read your first friendly error.</p>
 <p><a href="../make-a-change/">Make one visible change</a></p>
 </li>

@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6271,6 +6264,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14218,11 +14239,15 @@ wrong task every time, off by one.</p>
 <p><strong>Bad input becomes a page, not a crash.</strong> The number arrives as a
 string, and the route checks two things before acting: whether the
 text is all digits, and whether the number is in range. Any other
-input leads to an error page with a way back. Notice that the
+input leads to a page of the app's own that explains the problem and
+offers a way back. Notice that the
 parameter is annotated <code>str</code>, not <code>int</code>, so the route receives
 exactly what was typed and can respond politely. The
 <a href="../calculator/">calculator</a> makes the same choice for the same
 reason.</p>
+<p>Typing a number is one way to choose an item. Another is to give
+every task its own button, as in the recipe
+<a href="../../add/show-a-collection/#recipe-a-button-for-each-item">A button for each item</a>.</p>
 <h2 id="make-it-yours">Make it yours</h2>
 <ol>
 <li><strong>Modify</strong>: start the list empty, and make <code>index</code> say something
@@ -14242,7 +14267,8 @@ reason.</p>
 <p>There are three assertions, one for each behavior worth protecting:
 adding a task appends it to the list, removing translates the
 visitor's one-based number correctly (<code>"2"</code> removes <code>"b"</code>), and a
-bad number produces the error page rather than an exception. The
+bad number produces the app's explanation page rather than an
+exception. The
 off-by-one test is the most important of the three; it fails
 immediately if the <code>- 1</code> ever disappears.</p>
 <h2 id="likely-errors">Likely errors</h2>

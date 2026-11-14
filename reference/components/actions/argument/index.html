@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6264,6 +6257,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14170,21 +14191,46 @@ the <a href="../../../../add/show-different-content/">one-route-many-items patte
 
 <h2 id="notes">Notes</h2>
 <ul>
-<li>A button accepts a single <code>Argument</code>, a list of them, or a list
-  of <code>(name, value)</code> pairs; several arguments fill several
-  parameters.</li>
-<li>Arguments render as hidden inputs, so their values are submitted
-  with the form like any other field and follow the same rules: an
-  argument whose name collides with a real input's name causes a
-  <a href="../../../../help/errors/duplicate-component-name/">duplicate-name error</a>,
-  and an argument whose name matches no parameter of the route is
-  the reverse of the
-  <a href="../../../../help/errors/missing-parameter/">missing-parameter</a>
-  problem.</li>
+<li>A button or link accepts a single <code>Argument</code>, a list of them, a
+  list of <code>(name, value)</code> pairs, or a dictionary such as
+  <code>{"wish_for": "gold"}</code>. Each entry fills the route parameter with
+  the same name, so several entries fill several parameters.
+  <a href="../button/#passing-arguments">Passing arguments</a> on the Button
+  page shows all four forms.</li>
+<li>An argument given to a <code>Button</code> or <code>Link</code> is stored on that one
+  button or link, and only a click on that component delivers it.
+  This is why the three buttons in the example can each carry a
+  different <code>wish_for</code> value.</li>
+<li>An <code>Argument</code> placed directly in a page's content list behaves
+  differently. Drafter renders it as a hidden input, so every button
+  and link on the page delivers its value, the same way they deliver
+  the contents of a <code>TextBox</code>. A hidden-input argument also follows
+  the rule for inputs that its name must be unique on the page, and
+  a second component with the same name causes a
+  <a href="../../../../help/errors/duplicate-component-name/">duplicate-name error</a>.</li>
+<li>When a button's argument and an input on the page have the same
+  name, the route receives the argument's value, and the debug panel
+  warns that the name was provided more than once.</li>
+<li>The <code>arguments</code> keyword also works on any component that has an
+  <code>on_*</code> event handler.
+  <code>TextBox("amount", on_change="update", arguments={"row": 3})</code>
+  calls <code>update</code> with <code>row</code> set to <code>3</code> each time the box changes.</li>
 <li>Values must be JSON-safe (text, numbers, booleans, or lists of
   those). Passing a whole dataclass is not supported; instead, pass
   a name or index and look the object up inside the route, as the
   <a href="../../../../examples/shop/">shop example</a> does.</li>
+<li>
+<p>An argument whose name matches no parameter of the target route
+  does not stop the page. The route runs without that value. The
+  opposite mistake is an error, because a route parameter that no
+  argument or input fills produces a
+  <a href="../../../../help/errors/missing-parameter/">missing-parameter</a>
+  error page. A misspelled argument name therefore usually causes
+  both problems at once. For the unmatched name, the debug panel
+  shows a warning like this one:</p>
+<div class="highlight"><pre><span></span><code>The component argument &#39;wish_fr&#39; was sent to &#39;wish&#39;, but the function has no matching parameter.
+</code></pre></div>
+</li>
 </ul>
 <h2 id="related-components">Related components</h2>
 <ul>

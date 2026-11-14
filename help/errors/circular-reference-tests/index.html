@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6138,6 +6131,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13787,11 +13808,18 @@
 
 <h1 id="circular-reference-appears-in-generated-tests">Circular Reference appears in generated tests</h1>
 <h2 id="the-error">The error</h2>
-<p>This one does not arrive as an error page. Instead, the text
-<code>Circular Reference</code> appears inside a recorded page or state in the
-debug panel's History tab, right where a real value should be, and any
-<a href="../../../add/freeze-pages/">frozen test</a> copied from it fails or
-looks wrong.</p>
+<p>This problem has no error page and no title. The words
+<code>Circular Reference</code> appear inside a recorded route call or a
+generated test, in the place where a value should be. In the text of
+a <a href="../../../add/freeze-pages/">frozen test</a> the marker looks like
+this:</p>
+<div class="highlight"><pre><span></span><code>Pet(name=&#39;Ada&#39;, owner=&lt;strong&gt;Circular Reference&lt;/strong&gt;)
+</code></pre></div>
+<p>Python's own marker for the same situation, three dots, can appear
+in the same test, as in <code>Pet(name='Ada', owner=...)</code>. A test that
+contains the first marker is not valid Python, and a test that
+contains the three dots compares against the wrong value, so neither
+one passes.</p>
 <h2 id="what-it-means">What it means</h2>
 <p>Drafter writes out your state as Python code you can paste into
 tests. That only works for values that can be written down. A

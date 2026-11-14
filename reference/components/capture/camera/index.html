@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6264,6 +6257,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14162,21 +14183,21 @@ image, ready to display or edit).</p>
 </tr>
 <tr>
 <td><code>on_capture</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Route to call when a photo is taken.</td>
 </tr>
 <tr>
 <td><code>on_denied</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
 <td>Route to call when the visitor refuses permission.</td>
 </tr>
 <tr>
 <td><code>on_error</code></td>
-<td><code>str</code></td>
+<td>route name or route function</td>
 <td>none</td>
-<td>Route to call when the camera fails.</td>
+<td>Route to call when the camera fails, including when permission is refused.</td>
 </tr>
 </tbody>
 </table>
@@ -14278,6 +14299,22 @@ can use every <code>Picture</code> transformation:</p>
   case yourself, as the first example does.</li>
 <li>After a photo is taken, the camera stream stops (and the
   camera light turns off); "Retake" starts it again.</li>
+<li>The <code>on_capture</code> route can receive two parameters by name:
+  <code>width</code> and <code>height</code>, the size of the photo in pixels, both whole
+  numbers. The route also receives the photo itself through a
+  parameter with the camera's name, the same way a button's route
+  does.</li>
+<li>The <code>on_denied</code> and <code>on_error</code> routes can receive <code>status</code>
+  (<code>"denied"</code>, <code>"unavailable"</code>, or <code>"error"</code>) and <code>message</code>, both
+  strings.</li>
+<li>Each <code>on_</code> parameter takes the route's name as a string or the
+  route function itself. A string works wherever in the file the
+  route is defined, and it is the form the tutorials use. The
+  function form lets an editor that checks names point out a
+  misspelled route, but the function must already be defined when
+  the page is built.
+  <a href="../../actions/button/#route-targets">Route targets</a> on the Button
+  page explains the difference.</li>
 <li>Store a captured <code>Picture</code> in state to keep it across pages, and
   hand it to <a href="../../input/download/">Download</a> to let
   the visitor save it.</li>

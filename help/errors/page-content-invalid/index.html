@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6138,6 +6131,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13787,43 +13808,79 @@
 
 <h1 id="page-content-must-be-a-list-of-strings-numbers-booleans-or-components">Page content must be a list of strings, numbers, booleans, or components</h1>
 <h2 id="the-error">The error</h2>
-<div class="highlight"><pre><span></span><code>The content of a Page must be a list of strings, numbers, booleans, or components.
-Found Pet instead.
+<p>The error page has this title:</p>
+<div class="highlight"><pre><span></span><code>Unusable Value
 </code></pre></div>
-<p>The friendly version: "The content you returned in this Page was a
-Pet, but it needs to be text, a number, a boolean, a component, or a
-list of those." A related message appears when the list itself is
-fine but one item inside it is not; that message names the route and
-the offending item.</p>
+<p>Drafter uses the title "Unusable Value" for several different
+problems, so the sentence under the title is what identifies this
+one:</p>
+<div class="highlight"><pre><span></span><code>Item number 0 in this Page&#39;s content list is a Pet, but every item needs
+to be text, a number, a boolean, or a component.
+</code></pre></div>
+<p>The technical message below it reads:</p>
+<div class="highlight"><pre><span></span><code>request.route_execution_failed: Error while processing request for URL &#39;index&#39;:
+The content of a Page must be a list of strings, numbers, booleans, or
+components. Found Pet at index 0 instead.
+</code></pre></div>
+<p>The position counts from zero, so "index 0" is the first item of the
+content list and "index 1" is the second.</p>
+<p>Two other forms of this error exist. When the value sits where the
+whole list belongs, the messages leave out the position ("The content
+you returned in this Page was a Pet", and "Found Pet instead."). When
+the value is inside another component, such as a <code>Div</code> or a
+<code>BulletedList</code>, the error page is titled "Page Content Problem" and
+the sentence under the title says where the value is:</p>
+<div class="highlight"><pre><span></span><code>Your page content includes a value that Drafter does not know how to
+display: a Pet value (Pet(name=&#39;Ada&#39;, age=3)). It is located at: the Div
+at index 0, the item at index 0.
+</code></pre></div>
 <h2 id="what-it-means">What it means</h2>
 <p>A <code>Page</code> displays a list of strings, numbers, booleans, and
 components. Something you put into that list, or in place of the
-list itself, was none of those: perhaps a dataclass, a dictionary,
-or a nested list. Drafter stopped rather than guess how to display
-it.</p>
+list itself, was none of those. It may have been a dataclass, a
+dictionary, or a nested list. Drafter stopped rather than guess how
+to display it.</p>
 <h2 id="where-to-look">Where to look</h2>
-<p>Start with the route named in the message. Look at the <code>Page(...)</code>
-call it returns and read the content list item by item.</p>
+<p>Start with the route named in the technical message. Look at the
+<code>Page(...)</code> call it returns and count through the content list to the
+position the message gives.</p>
 <h2 id="check">Check</h2>
+<p>Each cause below is followed by the end of the technical message it
+produces:</p>
 <ul>
-<li><strong>A dataclass in the list</strong>: <code>Page(state, [state.pet])</code>; show its
-  fields (<code>state.pet.name</code>) or use a component like
+<li><strong>A dataclass in the list</strong>: <code>Page(state, [state.pet])</code> produces
+  "Found Pet at index 0 instead." Show its fields
+  (<code>state.pet.name</code>) or use a component like
   <a href="../../../reference/components/data/table/">Table</a> built for
   structured data.</li>
 <li><strong>A nested list</strong>: <code>Page(state, ["Pets:", state.names])</code> puts a
-  whole list inside the content list. Join it into one string
+  whole list inside the content list and produces "Found list at
+  index 1 instead." Join it into one string
   (<code>", ".join(state.names)</code>) or use
   <a href="../../../reference/components/lists/bulletedlist/">BulletedList</a>.</li>
-<li><strong>A dictionary in the list</strong>: pull out the values you want to
-  show, or hand the whole thing to a component built for it.</li>
-<li><strong>A missing comma</strong>: two adjacent strings without a comma merge
-  into one string, which Python allows, but a component next to a
-  string without its comma is a syntax error that would appear
-  before this one.</li>
+<li><strong>A dictionary in the list</strong>: <code>Page(state, ["Ages:", {"Ada": 3}])</code>
+  produces "Found dict at index 1 instead." Pull out the values you
+  want to show, or give the dictionary to a component built for it.</li>
+<li><strong><code>None</code> in the list</strong>: the message says "Found NoneType at index
+  1 instead." This usually comes from a helper function that has no
+  <code>return</code> statement, so calling it inside the list puts <code>None</code>
+  there.</li>
+<li><strong>A value where the list belongs</strong>: <code>Page(state, state.pet)</code>
+  produces "Found Pet instead." The same message with your state
+  class's name ("Found State instead.") means the two arguments are
+  in the wrong order, as in <code>Page(["Hello"], state)</code>. The state comes
+  first.</li>
+<li><strong>Missing square brackets around several items</strong>:
+  <code>Page(state, "Hello", Button("Go", "index"))</code> gives an error page
+  titled "Page Content Problem" whose technical message ends
+  <code>'Button' object has no attribute 'extend'</code>. Put the items inside
+  one list.</li>
 </ul>
-<p>Plain numbers and booleans are fine on their own: <code>Page(state,
-["Score:", state.score])</code> displays the score directly, no <code>str()</code>
-needed.</p>
+<p>A single string, number, or component in place of the list is not an
+error. <code>Page(state, "Hello")</code> shows the same page as
+<code>Page(state, ["Hello"])</code>. Plain numbers and booleans are also
+accepted as items: <code>Page(state, ["Score:", state.score])</code> displays
+the score directly, with no <code>str()</code> needed.</p>
 <h2 id="fix">Fix</h2>
 <p>Keep everything inside one flat list of strings, numbers, booleans,
 and components:</p>

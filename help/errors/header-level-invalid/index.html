@@ -2015,13 +2015,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6138,6 +6131,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13787,16 +13808,24 @@
 
 <h1 id="header-level-must-be-1-6">Header level must be 1-6</h1>
 <h2 id="the-error">The error</h2>
-<div class="highlight"><pre><span></span><code>Header level must be between 1 and 6, not 7
+<p>The error page has this title:</p>
+<div class="highlight"><pre><span></span><code>Unusable Value
 </code></pre></div>
-<p>The friendly version: "Headers only come in six sizes, so the
-level argument must be a number from 1 (biggest) to 6
-(smallest)."</p>
+<p>Drafter uses the title "Unusable Value" for several different
+problems, so the sentence under the title is what identifies this
+one:</p>
+<div class="highlight"><pre><span></span><code>Headers only come in six sizes, so the level argument must be a number
+from 1 (biggest) to 6 (smallest).
+</code></pre></div>
+<p>The technical message below it shows the level your code gave:</p>
+<div class="highlight"><pre><span></span><code>request.route_execution_failed: Error while processing request for URL &#39;index&#39;:
+Header level must be between 1 and 6, not 7
+</code></pre></div>
 <h2 id="what-it-means">What it means</h2>
 <p><code>Header("Title", level)</code> takes a size level, and the web only has
-six heading sizes. Level 1 is the biggest and 6 is the smallest;
-anything outside that range (or not a whole number) stops the
-page when the component is built.</p>
+six heading sizes. Level 1 is the biggest and 6 is the smallest. A
+level below 1 or above 6 stops the page when the component is
+built.</p>
 <h2 id="where-to-look">Where to look</h2>
 <p>The <code>Header(...)</code> call whose level the message quotes. If your
 route builds headers in a loop or computes the level, the
@@ -13806,7 +13835,10 @@ computation is the real suspect.</p>
 <li><strong>A level of 0 or 7+</strong>: often from arithmetic, like
   <code>level + 1</code> applied one time too many in nested sections.</li>
 <li><strong>The arguments swapped</strong>: <code>Header(2, "Title")</code> puts the text
-  where the level belongs. The text comes first.</li>
+  where the level belongs. This mistake produces a different error
+  page, titled "Type Mismatch", whose technical message ends
+  <code>'&lt;' not supported between instances of 'str' and 'int'</code>. The text
+  comes first and the level second.</li>
 <li><strong>Expecting bigger numbers to mean bigger text</strong>: the scale
   runs the other way; 1 is the largest.</li>
 </ul>

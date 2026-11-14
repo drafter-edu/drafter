@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="../type-conversion-other/">
+        <link rel="prev" href="../route-did-not-return-a-page/">
       
       
         <link rel="next" href="../nothing-after-start-server/">
@@ -2014,13 +2014,6 @@
     
   </span>
   
-  
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
   
 
       </a>
@@ -6155,6 +6148,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -6258,6 +6279,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Check">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-warning-in-place-of-the-error-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A warning in place of the error page
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -13722,6 +13760,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Check">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-warning-in-place-of-the-error-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A warning in place of the error page
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -13787,34 +13842,75 @@
 
 <h1 id="state-doesnt-match-the-state-class">State doesn't match the State class</h1>
 <h2 id="the-error">The error</h2>
-<div class="highlight"><pre><span></span><code>SiteState type changed from State to NoneType.
+<p>The error page has this title:</p>
+<div class="highlight"><pre><span></span><code>State Changed Type
 </code></pre></div>
-<p>The friendly version: "One of your routes changed the site state from
-State to NoneType; the state should keep the same type for the whole
-site." This arrives as a warning, and the real trouble usually
-follows one click later, as an <code>AttributeError</code> like
-<code>'NoneType' object has no attribute 'score'</code> when the next route
-tries to use the broken state.</p>
+<p>The sentence under the title names the route and the two types
+involved:</p>
+<div class="highlight"><pre><span></span><code>The page returned from `gain` has a state that is a NoneType, but the
+previous state was a State. The state must stay the same type from page
+to page.
+</code></pre></div>
+<p>The technical message below it shows the value the route supplied
+and the value the app had before:</p>
+<div class="highlight"><pre><span></span><code>payload.state_verification_failed: State verification failed for the page &#39;gain&#39;:
+The server did not return a valid Page() object from gain. The state object&#39;s
+type changed from its previous type. The new value is:
+ None
+The most recent value was:
+ State(score=0)
+The expected type was:
+ &lt;class &#39;__main__.State&#39;&gt;
+Make sure you return the same type each time.
+</code></pre></div>
+<p>The error page appears as soon as the route returns. Drafter does
+not accept the new value, and the app keeps the state object it
+already had, so the other pages of the app still work.</p>
 <h2 id="what-it-means">What it means</h2>
 <p>Every route receives the state and passes it onward through the
-<code>Page</code> it returns. One of your routes returned something of a
-different type than your <code>State</code> class, most often <code>None</code>, and from
-then on every route receives that wrong value instead of your state.</p>
+<code>Page</code> it returns. After each click, Drafter compares the type of the
+state in the returned <code>Page</code> with the type of the previous state. The
+<code>Page</code> your route returned carried a state of a different type, most
+often <code>None</code>, so Drafter stopped the page before the wrong value
+could reach your other routes.</p>
 <h2 id="where-to-look">Where to look</h2>
-<p>Look at the route that ran right before the warning appeared; the
-debug panel's history shows which one that was. Examine the
-<code>Page(...)</code> it returned.</p>
+<p>The message names the route. Look at the first argument of every
+<code>Page(...)</code> that route returns. The line after "The new value is" in
+the technical message shows the value Drafter found there.</p>
 <h2 id="check">Check</h2>
+<p>The type named in the message points to the cause:</p>
 <ul>
-<li><strong>A <code>Page</code> without state</strong>: in a stateful app, <code>Page(["..."])</code>
-  silently sets the state to <code>None</code>. Every route in a stateful app
-  must return <code>Page(state, [...])</code> with the state first.</li>
-<li><strong>Returning the wrong value</strong>: <code>Page(state.score, [...])</code> carries a
-  number onward instead of the whole state.</li>
-<li><strong>Rebuilding instead of mutating</strong>: a route that does
-  <code>state = ["oops"]</code> or otherwise reassigns to something that is not
-  your <code>State</code>.</li>
+<li><strong>A <code>Page</code> without state</strong>: the message says the state "is a
+  NoneType". <code>Page(["Score: 1"])</code> has a content list and no state, so
+  its state is <code>None</code>. In an app that has state, every route returns
+  <code>Page(state, [...])</code> with the state first.</li>
+<li><strong>One field in place of the whole state</strong>: the message names the
+  field's type, as in "is a int". <code>Page(state.score, [...])</code> passes a
+  number where the state belongs.</li>
+<li><strong>The name <code>state</code> was reassigned</strong>: a line such as
+  <code>state = state.score + 1</code> replaces the state with a different
+  value. Change the field (<code>state.score = state.score + 1</code>) and leave
+  the name <code>state</code> alone.</li>
+<li><strong>The app started without a state</strong>: the message ends "the
+  previous state was a NoneType". The program calls <code>start_server()</code>
+  with nothing in the parentheses, and a route then returns a <code>Page</code>
+  that has a state. Give the starting state to <code>start_server</code>, as in
+  <code>start_server(State(0))</code>.</li>
 </ul>
+<h3 id="a-warning-in-place-of-the-error-page">A warning in place of the error page</h3>
+<p>In one situation Drafter accepts the page and lists a warning in the
+debug panel. This happens when the new state's type is a more
+specific kind of the old type. The most likely case is an app whose
+state is a whole number, where a route returns <code>True</code> or <code>False</code> as
+the state, because Python counts <code>True</code> and <code>False</code> as kinds of whole
+number. A state built from a class that inherits from your <code>State</code>
+class has the same effect. The Current tab of the debug panel then
+shows this line under "Errors &amp; Warnings", and the line stays there
+as you move to other pages:</p>
+<div class="highlight"><pre><span></span><code>One of your routes changed the site state from int to bool; the state should
+keep the same type for the whole site.
+</code></pre></div>
+<p>The causes and the fix are the same as for the error page.</p>
 <h2 id="fix">Fix</h2>
 <p>Pass the state to the returned <code>Page</code>. You can change its fields,
 but it should remain the same object and type:</p>
@@ -13827,19 +13923,16 @@ but it should remain the same object and type:</p>
     <span class="p">])</span>
 </code></pre></div>
 <h2 id="confirm">Confirm</h2>
-<p>The warning stops appearing, and the debug panel's Current tab shows
-your <code>State</code> with its fields after every click. An
-<code>assert_state(gain(State(0)), State(1))</code> test locks the shape in.</p>
+<p>Click the same button again. The page appears where the error page
+was, and the debug panel's Current tab shows your <code>State</code> with its
+fields after every click. A test such as
+<code>assert_state(gain(State(0)), State(1))</code> checks that the route still
+passes a <code>State</code> onward.</p>
 <h2 id="prevent">Prevent</h2>
-<p>One habit prevents this error: every route takes <code>state</code> as its
+<p>One habit prevents this error. Every route takes <code>state</code> as its
 first parameter and returns <code>Page(state, [...])</code> with the state
-first. When a route has nothing to remember, it still passes the
-state through untouched.</p>
-<p>A related situation arises after you edit the <code>State</code> class itself
-(adding or removing a field): old saved or replayed state no longer
-fits the new class. Restart the app so it rebuilds state from
-<code>start_server(State(...))</code>, and update any tests that construct the
-old shape.</p>
+first. A route that has nothing to remember still passes the state
+through unchanged.</p>
 <h2 id="understand">Understand</h2>
 <p><a href="../../../concepts/state/">State</a> explains how state flows from route
 to page to the next route, and why the type must stay stable.</p>
@@ -13882,7 +13975,7 @@ to page to the next route, and why the type must stay stable.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../type-conversion-other/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Other type conversion">
+          <a href="../route-did-not-return-a-page/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Route did not return a page">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -13892,7 +13985,7 @@ to page to the next route, and why the type must stay stable.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Other type conversion
+                Route did not return a page
               </div>
             </div>
           </a>

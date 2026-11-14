@@ -2177,13 +2177,6 @@
   </span>
   
   
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
-  
 
       </a>
     </li>
@@ -6293,6 +6286,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -14266,7 +14287,10 @@ you reach every page and return without touching the browser controls?</p>
   name, and make sure the function has <code>@route</code>.</li>
 <li><strong>You wrote a route but cannot see it</strong>: nothing links to it yet. A
   route becomes reachable when some page names it, or when you visit its
-  address directly.</li>
+  address directly by ending the site's address with <code>?route=</code> and the
+  route's name.
+  <a href="../../reference/route/#opening-a-site-on-a-route">Opening a site on a route</a>
+  explains what such an address can and cannot do.</li>
 <li><strong>Two functions with the same name</strong>: Python silently keeps only the
   second definition. Every route needs its own name.</li>
 <li><strong>Your pages have state but the new one errors</strong>: if your app has a

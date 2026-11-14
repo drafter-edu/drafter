@@ -1143,6 +1143,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#recipe-a-button-for-each-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe: a button for each item
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recipe-show-only-the-items-that-match" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe: show only the items that match
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#recipe-handle-the-empty-case" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2187,13 +2209,6 @@
     
   </span>
   
-  
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
   
 
       </a>
@@ -6304,6 +6319,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13767,6 +13810,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#recipe-a-button-for-each-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe: a button for each item
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recipe-show-only-the-items-that-match" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe: show only the items that match
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#recipe-handle-the-empty-case" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14335,6 +14400,150 @@ pieces in the page's list. A helper function keeps the route readable:</p>
   <iframe src="../../drafter-demos/show-a-collection-3-47c1c4db01ab/index.html" title="Drafter Demo show-a-collection-3-47c1c4db01ab" name="show-a-collection-3-47c1c4db01ab" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
 </div>
 
+<h2 id="recipe-a-button-for-each-item">Recipe: a button for each item</h2>
+<p>To let the visitor remove or edit one particular item, give every row
+its own buttons. Each button carries an <code>Argument</code> that holds the
+item's position in the list, and the route receives that position as a
+parameter with the same name.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
+    <span class="n">chores</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">chore_rows</span><span class="p">(</span><span class="n">chores</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">chore</span> <span class="ow">in</span> <span class="n">chores</span><span class="p">:</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chore</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Rename&quot;</span><span class="p">,</span> <span class="s2">&quot;edit_chore&quot;</span><span class="p">,</span> <span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="n">position</span><span class="p">)))</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Done&quot;</span><span class="p">,</span> <span class="s2">&quot;finish_chore&quot;</span><span class="p">,</span> <span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="n">position</span><span class="p">)))</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">position</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">rows</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Today&#39;s chores&quot;</span><span class="p">)</span>
+    <span class="p">]</span> <span class="o">+</span> <span class="n">chore_rows</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">chores</span><span class="p">))</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">finish_chore</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">chores</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">edit_chore</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s2">&quot;Rename this chore:&quot;</span><span class="p">,</span>
+        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;new_name&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">chores</span><span class="p">[</span><span class="n">position</span><span class="p">]),</span>
+        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Save&quot;</span><span class="p">,</span> <span class="s2">&quot;save_chore&quot;</span><span class="p">,</span> <span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="n">position</span><span class="p">)),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Cancel&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
+    <span class="p">])</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_chore</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">chores</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_name</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="n">assert_state</span><span class="p">(</span><span class="n">finish_chore</span><span class="p">(</span><span class="n">State</span><span class="p">([</span><span class="s2">&quot;Feed the cats&quot;</span><span class="p">,</span> <span class="s2">&quot;Walk the dogs&quot;</span><span class="p">]),</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="n">State</span><span class="p">([</span><span class="s2">&quot;Walk the dogs&quot;</span><span class="p">]))</span>
+<span class="n">assert_state</span><span class="p">(</span><span class="n">save_chore</span><span class="p">(</span><span class="n">State</span><span class="p">([</span><span class="s2">&quot;Feed the cats&quot;</span><span class="p">,</span> <span class="s2">&quot;Walk the dogs&quot;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Walk Ada&quot;</span><span class="p">),</span>
+             <span class="n">State</span><span class="p">([</span><span class="s2">&quot;Feed the cats&quot;</span><span class="p">,</span> <span class="s2">&quot;Walk Ada&quot;</span><span class="p">]))</span>
+
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">([</span><span class="s2">&quot;Feed the cats&quot;</span><span class="p">,</span> <span class="s2">&quot;Walk the dogs&quot;</span><span class="p">,</span> <span class="s2">&quot;Water the plants&quot;</span><span class="p">]))</span>
+</code></pre></div>
+<div class="drafter-demo" data-drafter-demo="show-a-collection-4-903696d4c642">
+  <iframe src="../../drafter-demos/show-a-collection-4-903696d4c642/index.html" title="Drafter Demo show-a-collection-4-903696d4c642" name="show-a-collection-4-903696d4c642" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 360px;" ></iframe>
+</div>
+
+<p>The loop in <code>chore_rows</code> counts positions as it goes. The first
+chore's buttons carry <code>Argument("position", 0)</code>, the second chore's
+buttons carry <code>Argument("position", 1)</code>, and so on. Every "Done" button
+goes to the same <code>finish_chore</code> route, and the argument is how that
+route learns which button was pressed.</p>
+<p>Renaming takes two routes. The <code>edit_chore</code> route shows a text box
+that starts with the chore's current name. Its Save button passes the
+same position along to <code>save_chore</code>, which replaces that one item. The
+position has to travel through the edit page because a parameter lasts
+for one route call only.</p>
+<p>The Cancel button returns to the list without saving. The text box's
+value is still sent with that click, and <code>index</code> has no parameter for
+it, so the debug panel lists a warning about
+<a href="../../help/errors/missing-parameter/#a-related-warning-a-form-field-with-no-matching-parameter">a form field with no matching parameter</a>.
+That warning is expected here and does not affect the page.</p>
+<h2 id="recipe-show-only-the-items-that-match">Recipe: show only the items that match</h2>
+<p>A search box is a filter. The page shows the items that contain what
+the visitor typed and leaves the rest out. Keep the full list in state,
+keep the search text in state as well, and build the shorter list each
+time the page is displayed.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
+    <span class="n">pets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">search_text</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">matching_pets</span><span class="p">(</span><span class="n">pets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">search_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">pet</span> <span class="ow">in</span> <span class="n">pets</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">search_text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">pet</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pet</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">matches</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Pet finder&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;Show pets whose description contains:&quot;</span><span class="p">,</span>
+        <span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;search_text&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">search_text</span><span class="p">),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Search&quot;</span><span class="p">,</span> <span class="s2">&quot;search&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">BulletedList</span><span class="p">(</span><span class="n">matching_pets</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">pets</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">search_text</span><span class="p">))</span>
+    <span class="p">])</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">search_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">search_text</span> <span class="o">=</span> <span class="n">search_text</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="n">assert_equal</span><span class="p">(</span><span class="n">matching_pets</span><span class="p">([</span><span class="s2">&quot;Ada the corgi&quot;</span><span class="p">,</span> <span class="s2">&quot;Captain the grey cat&quot;</span><span class="p">],</span> <span class="s2">&quot;CAT&quot;</span><span class="p">),</span>
+             <span class="p">[</span><span class="s2">&quot;Captain the grey cat&quot;</span><span class="p">])</span>
+<span class="n">assert_equal</span><span class="p">(</span><span class="n">matching_pets</span><span class="p">([</span><span class="s2">&quot;Ada the corgi&quot;</span><span class="p">,</span> <span class="s2">&quot;Captain the grey cat&quot;</span><span class="p">],</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+             <span class="p">[</span><span class="s2">&quot;Ada the corgi&quot;</span><span class="p">,</span> <span class="s2">&quot;Captain the grey cat&quot;</span><span class="p">])</span>
+
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">([</span>
+    <span class="s2">&quot;Ada the corgi&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Babbage the small black mutt&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Captain the grey cat&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Domino the black cat&quot;</span>
+<span class="p">],</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+</code></pre></div>
+<div class="drafter-demo" data-drafter-demo="show-a-collection-5-ae559538de91">
+  <iframe src="../../drafter-demos/show-a-collection-5-ae559538de91/index.html" title="Drafter Demo show-a-collection-5-ae559538de91" name="show-a-collection-5-ae559538de91" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
+</div>
+
+<p>The <code>matching_pets</code> function never changes <code>state.pets</code>. It builds a
+new list for display, so clearing the search box and pressing Search
+brings every pet back. Comparing lowercase copies with <code>.lower()</code> makes
+the search ignore capital letters. An empty search box matches every
+pet, because every string contains the empty string.</p>
 <h2 id="recipe-handle-the-empty-case">Recipe: handle the empty case</h2>
 <p>A collection page should still make sense with nothing in it. Check for
 the empty list and say something helpful instead of showing a blank
@@ -14374,8 +14583,8 @@ space:</p>
 
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">([]))</span>
 </code></pre></div>
-<div class="drafter-demo" data-drafter-demo="show-a-collection-4-7bd44172e7da">
-  <iframe src="../../drafter-demos/show-a-collection-4-7bd44172e7da/index.html" title="Drafter Demo show-a-collection-4-7bd44172e7da" name="show-a-collection-4-7bd44172e7da" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
+<div class="drafter-demo" data-drafter-demo="show-a-collection-6-7bd44172e7da">
+  <iframe src="../../drafter-demos/show-a-collection-6-7bd44172e7da/index.html" title="Drafter Demo show-a-collection-6-7bd44172e7da" name="show-a-collection-6-7bd44172e7da" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
 </div>
 
 <p>This example also shows how to add items from real input: the
@@ -14388,6 +14597,10 @@ list.</p>
   <code>BulletedList(state.chores)</code>, not <code>state.chores</code>.</li>
 <li><strong>An error when removing an item</strong>: the list was empty. Guard with
   <code>if state.chores:</code> before <code>pop</code>, as the first recipe does.</li>
+<li><strong>Every row's button changes the same item</strong>: the buttons do not
+  carry different arguments. Check that the <code>Argument</code> value changes
+  inside the loop, as <code>position</code> does in the button-for-each-item
+  recipe.</li>
 <li><strong>The table's columns look wrong</strong>: <code>Table</code> reads column names from
   the dataclass fields. If a row is not that dataclass, or the list
   mixes types, rows will not line up.</li>
@@ -14403,8 +14616,9 @@ with a table, and the <a href="../../examples/todo-list/">to-do list</a> shows
 adding and removing items.</p>
 <h2 id="look-it-up">Look it up</h2>
 <p><a href="../../reference/components/lists/bulletedlist/">BulletedList</a>,
-<a href="../../reference/components/lists/numberedlist/">NumberedList</a>, and
-<a href="../../reference/components/data/table/">Table</a>.</p>
+<a href="../../reference/components/lists/numberedlist/">NumberedList</a>,
+<a href="../../reference/components/data/table/">Table</a>, and
+<a href="../../reference/components/actions/argument/">Argument</a>.</p>
 <h2 id="fix-a-problem">Fix a problem</h2>
 <p><a href="../../help/errors/state-mismatch/">State doesn't match the State class</a>,
 and <a href="../../help/errors/page-content-invalid/">Page content must be a list</a>

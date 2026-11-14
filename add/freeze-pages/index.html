@@ -1606,6 +1606,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#freeze-one-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Freeze one page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#when-to-freeze-and-when-not-to" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2176,13 +2187,6 @@
     
   </span>
   
-  
-    
-  
-  
-    <span class="md-status md-status--stub"></span>
-  
-
   
 
       </a>
@@ -6293,6 +6297,34 @@
     
   
     Other type conversion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../help/errors/route-did-not-return-a-page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route did not return a page
   
 
     
@@ -13734,6 +13766,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#freeze-one-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Freeze one page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#when-to-freeze-and-when-not-to" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13837,35 +13880,58 @@ surprise a visitor.</p>
 (<a href="../test-a-feature/">Test a feature</a>). Freezing is different in
 spirit: instead of asserting a rule you chose, you record a whole
 page you approved. Drafter does the recording for you while you use
-your own app.</p>
+your own app, and a button in the debug panel writes the tests.</p>
 <h2 id="the-workflow">The workflow</h2>
 <ol>
-<li><strong>Run your app and visit the page</strong> you want to freeze, in the
-   exact situation you care about (the right state, the right
-   values).</li>
-<li><strong>Open the debug panel's History tab.</strong> Every visit is listed
-   with the route call that produced it.</li>
-<li><strong>Expand the visit's Response.</strong> It shows the complete
-   <code>Page(...)</code> your route returned, written out as Python you can
-   copy.</li>
-<li><strong>Assemble the test</strong> above <code>start_server(...)</code>, with the route
-   call as the first argument and the copied page as the second.</li>
+<li><strong>Run your app and click through it.</strong> Visit each page you want
+   to freeze, in the exact situation you care about (the right
+   state, the right values). Drafter records every visit.</li>
+<li><strong>Open the debug panel's Tests tab</strong> and press <strong>Copy Regression
+   Tests</strong>. Drafter writes one test for each page you visited and
+   puts them all on your clipboard. The <strong>Download Tests (.py)</strong>
+   button next to it saves the same tests as a file instead.</li>
+<li><strong>Paste the tests</strong> into your program, above
+   <code>start_server(...)</code>.</li>
+<li><strong>Delete the tests you do not want.</strong> You get a test for every
+   visit, so a page you passed through three times appears three
+   times. Keep the visits that show a finished page and remove the
+   rest.</li>
+<li><strong>Save.</strong> The Tests tab now lists the frozen tests as passing.</li>
 </ol>
-<p>The result looks like this (from the compliment machine in
-<a href="../../tutorials/finishing/">Finish and test an app</a>):</p>
-<div class="highlight"><pre><span></span><code><span class="n">assert_equal</span><span class="p">(</span><span class="n">index</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
-             <span class="n">Page</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">COMPLIMENTS</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">[</span>
-                 <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;The Compliment Machine&quot;</span><span class="p">),</span>
-                 <span class="s2">&quot;Your code is looking sharp today.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-                 <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Another, please&quot;</span><span class="p">,</span> <span class="s2">&quot;another&quot;</span><span class="p">)</span>
-             <span class="p">]))</span>
+<p>The pasted text begins with two comment lines and its own
+<code>from drafter import *</code> line. All three are harmless, and you can
+delete them if your file already has the import.</p>
+<p>Each test has the same shape. This one is from the chore list in
+<a href="../show-a-collection/">Show a collection</a>, after pressing "Done" on
+the second chore:</p>
+<div class="highlight"><pre><span></span><code><span class="n">assert_equal</span><span class="p">(</span><span class="n">finish_chore</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">chores</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Feed the cats&#39;</span><span class="p">,</span> <span class="s1">&#39;Walk the dogs&#39;</span><span class="p">,</span> <span class="s1">&#39;Water the plants&#39;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">Page</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">chores</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Feed the cats&#39;</span><span class="p">,</span> <span class="s1">&#39;Water the plants&#39;</span><span class="p">]),</span> <span class="p">[</span>
+        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Today&#39;s chores&quot;</span><span class="p">),</span>
+        <span class="s1">&#39;Feed the cats &#39;</span><span class="p">,</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Rename&#39;</span><span class="p">,</span> <span class="s1">&#39;edit_chore&#39;</span><span class="p">,</span> <span class="n">arguments</span><span class="o">=</span><span class="n">Argument</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="s1">&#39;finish_chore&#39;</span><span class="p">,</span> <span class="n">arguments</span><span class="o">=</span><span class="n">Argument</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Water the plants &#39;</span><span class="p">,</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Rename&#39;</span><span class="p">,</span> <span class="s1">&#39;edit_chore&#39;</span><span class="p">,</span> <span class="n">arguments</span><span class="o">=</span><span class="n">Argument</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="s1">&#39;finish_chore&#39;</span><span class="p">,</span> <span class="n">arguments</span><span class="o">=</span><span class="n">Argument</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+    <span class="p">]))</span>
 </code></pre></div>
-<p><code>assert_equal</code> compares any two values and reports every difference
-it finds; for frozen pages, that means a failure shows exactly which
-piece of the page changed.</p>
-<p>The Tests tab can also <strong>copy or download every test</strong> the app has
-run as a ready-to-save Python file, which is a quick way to collect
-your frozen tests once you have a few.</p>
+<p>The first argument is the route call that built the page, with the
+state and the parameters as they were at that moment. The second
+argument is the complete page the route returned. <code>assert_equal</code>
+compares any two values and reports every difference it finds, so a
+failing frozen test shows exactly which piece of the page changed.</p>
+<h2 id="freeze-one-page">Freeze one page</h2>
+<p>To freeze a single visit, use the History tab instead of the Tests
+tab. Find the visit in the list and expand <strong>Page shown</strong> underneath
+it. Drafter displays that one visit as a complete <code>assert_equal</code>
+test, which you can select, copy, and paste above
+<code>start_server(...)</code>.</p>
+<p>A generated test spells out every value in full. You may shorten it
+by hand when your program already has a name for a long value, as
+<a href="../../tutorials/finishing/">Finish and test an app</a> does with its
+list of compliments.</p>
 <h2 id="when-to-freeze-and-when-not-to">When to freeze, and when not to</h2>
 <p>Freeze pages that are <strong>finished and stable</strong>: the results screen,
 the landing page, a formatted report. The freeze protects work you
@@ -13879,9 +13945,9 @@ better.</p>
 <h2 id="updating-a-stale-frozen-test">Updating a stale frozen test</h2>
 <p>When you <em>deliberately</em> redesign a frozen page, its test fails, and
 it should: the test is asking whether you meant to change the page.
-Answer by re-freezing: visit the redesigned page, copy the
-new <code>Page(...)</code> from the History tab, and replace the old expected
-value. Delete frozen tests for pages that no longer exist.</p>
+Answer by re-freezing: visit the redesigned page, copy its new test
+from the History tab, and replace the old test with it. Delete
+frozen tests for pages that no longer exist.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
 <li><strong>The frozen test fails the moment you paste it</strong>: the state in
@@ -13894,14 +13960,20 @@ value. Delete frozen tests for pages that no longer exist.</p>
   <a href="../../help/errors/circular-reference-tests/">Circular Reference in generated tests</a>.</li>
 <li><strong>The frozen page is huge and the test is unreadable</strong>: freeze
   smaller pages, or switch that page to a few <code>assert_has</code> checks.</li>
-<li><strong>Every tiny styling tweak breaks a frozen test</strong>: that is the
-  trade-off freezing makes. Freeze after the styling pass, not
-  before; the <a href="../../tutorials/finishing/">finishing tutorial</a> orders
-  the steps that way on purpose.</li>
+<li><strong>You changed a color or a theme and expected a frozen test to
+  fail</strong>: it will not. <code>assert_equal</code> ignores styling unless you ask
+  for <code>strict_styles=True</code>, so colors, fonts, sizes, and themes can
+  change freely. A frozen test fails when the words, the order, or
+  the kind of component on the page changes, for example when plain
+  text becomes a <code>Header</code>.</li>
+<li><strong>A frozen test passes on some runs and fails on others</strong>: the page
+  came from a route that uses <code>random</code>. Do not freeze that page. Test
+  the part that does not depend on chance, as in
+  <a href="../show-different-content/#recipe-a-random-result-you-can-still-test">a random result you can still test</a>.</li>
 </ul>
 <h2 id="understand-it">Understand it</h2>
-<p>Frozen tests are regression tests: the concept is introduced at the
-end of <a href="../test-a-feature/">Test a feature</a>, and
+<p>Frozen tests are a kind of regression test, which is a test that
+checks finished work has not changed.
 <a href="../../tutorials/finishing/">Finish and test an app</a> walks through
 the whole cycle of freezing a page, breaking it, and fixing it.</p>
 <h2 id="see-another-example">See another example</h2>
