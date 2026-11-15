@@ -299,6 +299,14 @@ function resolveStudentSteps(
 	return buildStudentSteps(report, error, suggestion);
 }
 
+/**
+ * Text Pyodide adds to a ModuleNotFoundError for a standard-library module
+ * it leaves out (`turtle`, `tkinter`, and others): "The module 'turtle' is
+ * removed from the Python standard library in the Pyodide distribution due
+ * to browser limitations."
+ */
+const BROWSER_PYTHON_OMITS_MODULE = "removed from the Python standard library";
+
 function buildStudentSteps(
 	report: SystemErrorReport,
 	error: Error,
@@ -322,6 +330,15 @@ function buildStudentSteps(
 		const match = /No module named '([^'.]+)/.exec(combined);
 		const name = match ? match[1] : null;
 		const library = name ? `\`${name}\`` : "the library";
+		if (combined.includes(BROWSER_PYTHON_OMITS_MODULE)) {
+			// Nothing was looked up or misspelled here: the module is a real
+			// part of Python that the browser's Python leaves out.
+			return [
+				`${name ? `\`${name}\`` : "This module"} is part of Python on your computer, but the Python that runs in the browser does not include it. No setting can add it.`,
+				"Modules such as `turtle` and `tkinter` open windows on your own computer's screen, which a web page cannot do.",
+				`Remove the \`import\` line for ${library} and the code that uses it, and build that part of your site from Drafter's own components instead.`,
+			];
+		}
 		return [
 			`Check the spelling of ${library} on the \`import\` line. If it is one of your own files, check that the file is next to your program.`,
 			name

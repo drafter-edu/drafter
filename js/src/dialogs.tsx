@@ -60,6 +60,7 @@ const openDialogElements: HTMLDivElement[] = [];
 interface TrackedDialog {
 	updateContent: (content: string | HTMLElement | ReactElement) => void;
 	promise: Promise<unknown>;
+	close: () => void;
 }
 
 const openDialogs = new Map<string, TrackedDialog>();
@@ -136,6 +137,7 @@ export function showDialog<T = unknown>(
 	let setContentRef: (
 		c: string | HTMLElement | ReactElement,
 	) => void = () => {};
+	let closeRef: () => void = () => {};
 
 	const promise = new Promise<T | undefined>((resolve) => {
 		dialogStack += 1;
@@ -221,6 +223,8 @@ export function showDialog<T = unknown>(
 			onClose?.(value, reason);
 			resolve(value);
 		};
+
+		closeRef = () => close(undefined, "programmatic");
 
 		const onKeyDown = (event: KeyboardEvent) => {
 			if (event.key === "Escape" && closeOnEscape) {
@@ -332,10 +336,26 @@ export function showDialog<T = unknown>(
 		openDialogs.set(symbolicId, {
 			updateContent: setContentRef,
 			promise,
+			close: closeRef,
 		});
 	}
 
 	return promise;
+}
+
+/**
+ * Close the open dialog that was shown with this `symbolicId`, as if the
+ * program had dismissed it. Used when the problem a dialog reported no
+ * longer exists, for example an error dialog once the corrected code has
+ * run. Returns whether a dialog was open under that id.
+ */
+export function closeDialog(symbolicId: string): boolean {
+	const tracked = openDialogs.get(symbolicId);
+	if (!tracked) {
+		return false;
+	}
+	tracked.close();
+	return true;
 }
 
 export interface AlertDialogOptions {

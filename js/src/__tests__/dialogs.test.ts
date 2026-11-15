@@ -9,6 +9,7 @@ import {
 
 import {
 	alertDialog,
+	closeDialog,
 	confirmDialog,
 	promptDialog,
 	showDialog,
@@ -486,6 +487,24 @@ describe("symbolicId registration", () => {
 		void showDialog({ symbolicId: "sym-b" });
 
 		expect(getDialogs()).toHaveLength(2);
+	});
+
+	test("closeDialog dismisses only the dialog with that symbolicId", async () => {
+		const onClose = jest.fn();
+		const stale = showDialog({ symbolicId: "sym-stale", onClose });
+		void showDialog({ symbolicId: "sym-kept" });
+
+		expect(closeDialog("sym-stale")).toBe(true);
+
+		expect(await stale).toBeUndefined();
+		expect(onClose).toHaveBeenCalledWith(undefined, "programmatic");
+		expect(getDialogs()).toHaveLength(1);
+		// The id is free again, and closing it twice is harmless.
+		expect(closeDialog("sym-stale")).toBe(false);
+	});
+
+	test("closeDialog reports when no dialog has that symbolicId", () => {
+		expect(closeDialog("sym-never-opened")).toBe(false);
 	});
 });
 

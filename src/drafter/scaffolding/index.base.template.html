@@ -9,6 +9,10 @@
     <title>{{ title or "Drafter App" }}</title>
     <link rel="icon" id="{{ favicon_id }}" href="{{ favicon }}" />
     <script>window.DRAFTER_ENGINE = "{{ system.app_common.engine }}";</script>
+    <!-- A hash of the main file's path; keeps what the page stores in the
+         browser separate for each program (see js/src/storage_keys.ts). It
+         must be set before Drafter's script loads. -->
+    <script>window.DRAFTER_MAIN_FILE_ID = {{ main_file_id | tojson }};</script>
     {% if compiled_headers %}
       <!-- Additional header content from precompilation -->
       {{ compiled_headers }}
@@ -53,7 +57,7 @@
       <div class="drafter-loading-spinner" aria-hidden="true"></div>
       <div>Loading, please wait...</div>
     </div>
-    <div id="{{ drafter_root }}">
+    <div id="{{ drafter_root }}"{% block root_attributes %}{% endblock root_attributes %}>
       {% if compiled_body %}
         <!-- Precompiled body content -->
         <div class="drafter-body--">{{ compiled_body }}</div>

@@ -604,6 +604,36 @@ describe("student-facing root rendering", () => {
 		expect(codes).toContain("--project-packages");
 	});
 
+	test("ModuleNotFoundError for a module the browser's Python omits does not blame spelling", () => {
+		// `turtle` and `tkinter` are real parts of Python that Pyodide leaves
+		// out. The advice used to say to check the spelling and that Drafter
+		// "looked for a library named turtle to install", which never happened.
+		const container = renderToRoot({
+			message: "Error running student code",
+			error: new Error(
+				"PythonError: Traceback (most recent call last):\n" +
+					'  File "main.py", line 3, in <module>\n' +
+					"    import turtle\n" +
+					"ModuleNotFoundError: No module named 'turtle'\n" +
+					"The module 'turtle' is removed from the Python standard library in the Pyodide distribution due to browser limitations.",
+			),
+		});
+
+		const steps = Array.from(container.querySelectorAll("li")).map(
+			(li) => li.textContent,
+		);
+		expect(steps).toHaveLength(3);
+		expect(steps[0]).toContain(
+			"turtle is part of Python on your computer",
+		);
+		expect(steps[0]).toContain("does not include it");
+		expect(steps[2]).toContain("Remove the import line for turtle");
+		const everything = steps.join(" ");
+		expect(everything).not.toContain("spelling");
+		expect(everything).not.toContain("looked for a library");
+		expect(everything).not.toContain("--project-packages");
+	});
+
 	test("ModuleNotFoundError advice uses the top-level package of a submodule", () => {
 		const container = renderToRoot({
 			error: new Error(

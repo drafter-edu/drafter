@@ -7,10 +7,13 @@ import {
 	test,
 } from "@jest/globals";
 
+import { setSystemErrorSink, type ErrorTelemetryRecord } from "../bridge/engine";
+import { closeDialog } from "../dialogs";
 import {
 	addMockPackages,
 	enqueueRuntimeWork,
 	installMissingImports,
+	runStudentCode,
 	setupEnvironment,
 	toVirtualStudentPath,
 } from "../pyodide.index";
@@ -425,6 +428,254 @@ describe("automatic installs for missing imports", () => {
 		expect(await installMissingImports("import reported")).toEqual([
 			"auto-reported",
 		]);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Saying so when an import was filled from PyPI
+// ---------------------------------------------------------------------------
+
+describe("imports filled from PyPI", () => {
+	// A deployed site whose `helpers.py` is missing used to install the
+	// unrelated PyPI package `helpers` without a word, and the student then
+	// saw that package's error. Each test uses its own library name because
+	// the page-long record of what was installed has no reset hook.
+
+	const WARNING_ID = "runtime.import_installed_from_pypi";
+
+	let install: jest.Mock<(spec: string | string[]) => Promise<void>>;
+	let missingImports: string[];
+	let importedModules: string[];
+	let studentCodeError: Error | null;
+	let loadedPackages: Record<string, string>;
+	let received: ErrorTelemetryRecord[];
+
+	beforeEach(() => {
+		document.body.innerHTML = '<div id="drafter-root--"></div>';
+		missingImports = [];
+		importedModules = [];
+		studentCodeError = null;
+		loadedPackages = {};
+		received = [];
+		setSystemErrorSink((event) => received.push(event));
+		jest.spyOn(console, "warn").mockImplementation(() => {});
+		jest.spyOn(console, "error").mockImplementation(() => {});
+		install = jest.fn(async (spec: string | string[]) => {
+			// Like micropip, record where each library came from.
+			if (typeof spec === "string" && !(spec in loadedPackages)) {
+				loadedPackages[spec] = "pypi";
+			}
+		});
+		(window as AnyWindow).micropip = { install };
+		(window as AnyWindow).pyodide = {
+			loadedPackages,
+			loadPackagesFromImports: jest.fn(async () => []),
+			loadPackage: jest.fn(async () => {}),
+			toPy: (value: unknown) => ({ value, destroy: () => {} }),
+			FS: { writeFile: () => {}, mkdirTree: () => {} },
+			runPythonAsync: jest.fn(async (code: string) => {
+				if (code.includes('_helpers["find_missing_imports"]')) {
+					return JSON.stringify(missingImports);
+				}
+				if (code.includes('_helpers["find_imported_modules"]')) {
+					return JSON.stringify(importedModules);
+				}
+				if (code.startsWith("import ") && studentCodeError) {
+					throw studentCodeError;
+				}
+				// Package metadata questions, and the no-op that absorbs a
+				// pending interrupt.
+				return "[]";
+			}),
+		};
+	});
+
+	afterEach(() => {
+		closeDialog("runtime.student_code_failed");
+		setSystemErrorSink(null);
+		jest.restoreAllMocks();
+		delete (window as AnyWindow).pyodide;
+		delete (window as AnyWindow).micropip;
+		document.body.innerHTML = "";
+	});
+
+	/** Set up and run a program that imports `name`, as an instance does. */
+	async function runProgramImporting(
+		name: string,
+		options: { explicitPackageList?: string[]; packageIndexes?: string[] } = {},
+	): Promise<void> {
+		const code = `import ${name}`;
+		importedModules = [name];
+		await setupEnvironment({
+			code,
+			loadPackagesAutomatically: true,
+			...options,
+		});
+		await runStudentCode({ code });
+	}
+
+	function warnings(): ErrorTelemetryRecord[] {
+		return received.filter((event) => event.error.id === WARNING_ID);
+	}
+
+	test("the debug panel is told which library was installed", async () => {
+		missingImports = ["pypi_helpers"];
+
+		await runProgramImporting("pypi_helpers");
+
+		expect(install).toHaveBeenCalledWith("pypi_helpers");
+		expect(warnings()).toHaveLength(1);
+		const envelope = warnings()[0].error;
+		expect(envelope.severity).toBe("warning");
+		expect(envelope.friendly_message).toContain(
+			"Drafter installed the library named pypi_helpers from PyPI",
+		);
+		expect(envelope.friendly_message).toContain("no pypi_helpers.py");
+		// Not tied to one page, so the panel keeps showing it.
+		expect(envelope.context.request_id).toBeNull();
+		// A warning goes to the debug panel only: the site keeps running.
+		expect(document.querySelector(".drafter-dialog")).toBeNull();
+		expect(document.querySelector(".drafter-system-error")).toBeNull();
+	});
+
+	test("the warning is given again on each run, without installing again", async () => {
+		missingImports = ["pypi_rerun"];
+		await runProgramImporting("pypi_rerun");
+		// From now on the library is installed, so nothing is missing.
+		missingImports = [];
+		received = [];
+
+		await runProgramImporting("pypi_rerun");
+
+		expect(install).toHaveBeenCalledTimes(1);
+		expect(warnings()).toHaveLength(1);
+	});
+
+	test("the warning stops once the program no longer imports the library", async () => {
+		missingImports = ["pypi_dropped"];
+		await runProgramImporting("pypi_dropped");
+		missingImports = [];
+		received = [];
+
+		importedModules = [];
+		await runStudentCode({ code: "import math" });
+
+		expect(warnings()).toHaveLength(0);
+	});
+
+	test("a library the project declared is installed without a warning", async () => {
+		missingImports = ["pypi_declared"];
+
+		await runProgramImporting("pypi_declared", {
+			explicitPackageList: ["Pypi-Declared>=1.0"],
+		});
+
+		expect(install).toHaveBeenCalledWith("pypi_declared");
+		expect(warnings()).toHaveLength(0);
+	});
+
+	test("a library that comes with Pyodide is installed without a warning", async () => {
+		missingImports = ["pypi_shipped"];
+		// micropip serves the request from Pyodide's own distribution.
+		install.mockImplementation(async () => {
+			loadedPackages["pypi-shipped"] = "default channel";
+		});
+
+		await runProgramImporting("pypi_shipped");
+
+		expect(install).toHaveBeenCalledWith("pypi_shipped");
+		expect(warnings()).toHaveLength(0);
+	});
+
+	test("a library from a wheel index is installed without a warning", async () => {
+		missingImports = ["pypi_indexed"];
+		const indexUrl = "https://wheels.example/pypi-indexed/wheels.json";
+		// PyPI cannot supply it; the course's wheel index can.
+		install.mockImplementation(async (spec: string | string[]) => {
+			if (spec === "pypi_indexed") {
+				throw new Error("Can't find a pure Python 3 wheel");
+			}
+		});
+		jest.spyOn(globalThis, "fetch").mockResolvedValue({
+			ok: true,
+			json: async () => ({
+				wheels: ["pypi_indexed-1.0-py3-none-any.whl"],
+			}),
+		} as Response);
+
+		await runProgramImporting("pypi_indexed", {
+			packageIndexes: [indexUrl],
+		});
+
+		expect(install).toHaveBeenCalledWith(
+			["https://wheels.example/pypi-indexed/wheels/pypi_indexed-1.0-py3-none-any.whl"],
+		);
+		expect(warnings()).toHaveLength(0);
+	});
+
+	test.each([
+		[
+			"a name that cannot be imported from it",
+			"ImportError: cannot import name 'make_greeting' from 'MODULE' (/lib/python3.14/site-packages/MODULE/__init__.py)",
+			"make_greeting",
+		],
+		[
+			"an attribute it does not have",
+			"AttributeError: module 'MODULE' has no attribute 'make_greeting'",
+			"make_greeting",
+		],
+		[
+			"a submodule it does not have",
+			"ModuleNotFoundError: No module named 'MODULE.greetings'",
+			"greetings",
+		],
+	])(
+		"an error about %s explains that the library came from PyPI",
+		async (label, pythonError, missing) => {
+			const module = `pypi_shadow_${label.split(" ")[1]}`;
+			missingImports = [module];
+			studentCodeError = new Error(
+				`Traceback (most recent call last):\n  File "main.py", line 1, in <module>\n${pythonError.replaceAll("MODULE", module)}\n`,
+			);
+			studentCodeError.name = "PythonError";
+
+			await expect(runProgramImporting(module)).rejects.toBe(
+				studentCodeError,
+			);
+
+			const failure = received.find(
+				(event) => event.error.id === "runtime.student_code_failed",
+			);
+			const steps = failure?.error.friendly_steps ?? [];
+			expect(steps).toHaveLength(3);
+			expect(steps[0]).toBe(
+				`There is no \`${module}.py\` next to your program, so Drafter installed the library named \`${module}\` from PyPI. If \`${module}\` is meant to be one of your own files, that library is something else.`,
+			);
+			expect(steps[1]).toContain("deployed with your site");
+			expect(steps[2]).toContain(`nothing named \`${missing}\``);
+			// The student sees the same steps in the error dialog.
+			expect(
+				document.querySelector(".drafter-dialog-content")?.textContent,
+			).toContain(`installed the library named \`${module}\` from PyPI`);
+		},
+	);
+
+	test("the same error about a library the student asked for keeps the usual advice", async () => {
+		missingImports = ["pypi_asked_for"];
+		studentCodeError = new Error(
+			"Traceback (most recent call last):\nImportError: cannot import name 'nope' from 'pypi_asked_for' (/lib/x.py)\n",
+		);
+
+		await expect(
+			runProgramImporting("pypi_asked_for", {
+				explicitPackageList: ["pypi_asked_for"],
+			}),
+		).rejects.toBe(studentCodeError);
+
+		const failure = received.find(
+			(event) => event.error.id === "runtime.student_code_failed",
+		);
+		expect(failure?.error.friendly_steps?.join(" ")).not.toContain("PyPI");
 	});
 });
 

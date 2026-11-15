@@ -1,4 +1,10 @@
 {% extends "index.base.template.html" %}
+{# The first page is drawn ahead of time and replaced once Python has
+   started. Anything typed into it before then would be thrown away with
+   it, so it cannot be used (`inert`) until the loading screen lifts. A
+   mouse is already kept out by the loading screen; this does the same for
+   the keyboard. #}
+{% block root_attributes %} inert{% endblock root_attributes %}
 {% block scripts %}
   <script src="{{ system.app_common.get_pyodide_url() }}/pyodide.js"></script>
   <script src="{{ static('js/drafter.pyodide.js') }}"></script>
@@ -54,6 +60,43 @@
         }
       }
       {% endif %}
+      // 0) Check that Drafter's own script arrived. Without it nothing on
+      // this page can run, including Drafter's error dialogs, so the problem
+      // is reported with plain HTML. Otherwise the loading screen would lift
+      // on a page that looks ready (the first page is drawn ahead of time)
+      // while every button and link on it does nothing.
+      if (!window.Drafter) {
+        const scriptUrl = {{ static('js/drafter.pyodide.js') | tojson }};
+        const notice = document.createElement('div');
+        notice.id = '--drafter-script-missing-notice';
+        notice.setAttribute('role', 'alert');
+        notice.style.cssText = 'max-width: 40rem; margin: 3rem auto; padding: 1rem 1.5rem; ' +
+          'font-family: sans-serif; line-height: 1.5; color: #222; background: #fff; ' +
+          'border: 2px solid #b00020; border-radius: 0.5rem;';
+        const addText = (tag, text) => {
+          const element = document.createElement(tag);
+          element.textContent = text;
+          notice.appendChild(element);
+          return element;
+        };
+        addText('h1', 'This site could not start');
+        addText('p', "Drafter's own code did not load, so nothing on this page can work.");
+        const steps = addText('ol', '');
+        [
+          'Reload the page. A brief network problem is the most common cause.',
+          'If the site runs on your computer, check that your program is still running, then run it again.',
+          "If the site is deployed, check that every file of the site was uploaded, including the folder that holds Drafter's own files.",
+        ].forEach((step) => {
+          const item = document.createElement('li');
+          item.textContent = step;
+          steps.appendChild(item);
+        });
+        addText('p', 'The file that did not load: ' + new URL(scriptUrl, window.location.href).href);
+        document.getElementById({{ drafter_root | tojson }}).replaceChildren(notice);
+        console.error('[Drafter AppServer Scaffolding] The Drafter script did not load:', scriptUrl);
+        return;
+      }
+
       // 1) Load Pyodide
       await window.Drafter.setupPyodide({
         pyodideUrl: {{ system.app_common.get_pyodide_url() | tojson }},
@@ -88,6 +131,8 @@
       // All done!
       console.log("[Drafter AppServer Scaffolding] Student Code Initialized with Pyodide:");
     } finally {
+      // The page is live (or has a notice to read), so it can be used.
+      document.getElementById({{ drafter_root | tojson }})?.removeAttribute('inert');
       document.getElementById('--drafter-initial-loading-white-screen').remove();
     }
   })();

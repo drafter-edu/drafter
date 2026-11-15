@@ -2,7 +2,15 @@
  * Basic unit tests for TypeScript client functionality
  */
 
-import { describe, test, expect } from "@jest/globals";
+import {
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	test,
+	expect,
+	jest,
+} from "@jest/globals";
 
 import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
@@ -102,5 +110,70 @@ describe(`Simple Drafter Application`, () => {
 			await app.findByRole("button", { name: /plus one/i }),
 		);
 		await app.findByText(/Flag is off/);
+	});
+});
+
+const INPUT_STUDENT_CODE = `
+from drafter import *
+
+hide_debug_information()
+
+@route
+def index(state: str):
+    return Page(state, [
+        "Nobody has answered yet.",
+        Button("Ask", ask),
+    ])
+
+@route
+def ask(state: str):
+    answer = input("What is your name? ")
+    return Page(state, [f"The answer was [{answer}]"])
+
+start_server("")
+`;
+
+describe("input() in a route", () => {
+	let promptSpy: ReturnType<typeof jest.spyOn>;
+
+	beforeAll(async () => {
+		await setupPyodideWithLocalDrafter();
+	});
+
+	beforeEach(async () => {
+		await resetPyodideDrafterRuntime();
+		promptSpy = jest.spyOn(window, "prompt");
+	});
+
+	afterEach(() => {
+		promptSpy.mockRestore();
+	});
+
+	async function clickAsk(): Promise<ReturnType<typeof within>> {
+		await runStudentCode({ code: INPUT_STUDENT_CODE, presentErrors: false });
+		const app = within(
+			document.querySelector("#drafter-body--") as HTMLElement,
+		);
+		await userEvent.click(await app.findByRole("button", { name: "Ask" }));
+		return app;
+	}
+
+	test("shows the question in the prompt box and returns the answer", async () => {
+		promptSpy.mockReturnValue("Ada");
+
+		const app = await clickAsk();
+
+		await app.findByText("The answer was [Ada]");
+		expect(promptSpy).toHaveBeenCalledTimes(1);
+		expect(promptSpy).toHaveBeenCalledWith("What is your name? ");
+	});
+
+	test("gives an empty string when the prompt box is cancelled", async () => {
+		promptSpy.mockReturnValue(null);
+
+		const app = await clickAsk();
+
+		await app.findByText("The answer was []");
+		expect(promptSpy).toHaveBeenCalledWith("What is your name? ");
 	});
 });

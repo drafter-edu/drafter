@@ -19,10 +19,13 @@ import { mountDirectory } from "./pyodide_bridge/directories";
 import { DebugPanel } from "./debug";
 import { markDevServerDocument } from "./debug/dev_server";
 import type { DrafterInitOptions } from "./bridge/engine";
-import { confirmDialog } from "./dialogs";
+import { closeDialog, confirmDialog } from "./dialogs";
 import { clearDrafterSiteRoot, reportSystemError, installUncaughtErrorListeners } from "./bridge/engine";
 import {
 	installWithIndexes,
+	normalizeProjectName,
+	requirementName,
+	type IndexInstallResult,
 	type PackageRuntime,
 } from "./package_index";
 import {
@@ -31,6 +34,11 @@ import {
 	syncWindowConfigurationOverrides,
 } from "./config_overrides";
 import { getPrinterConsole } from "./console/printer";
+import {
+	connectLiveReload,
+	type LiveReloadConnection,
+	type LiveReloadSchedule,
+} from "./live_reload";
 // The Python that decides which imports and requirements are missing. It
 // is carried inside this bundle (as text, run with exec) rather than
 // imported from the drafter package in the browser, because the two can be
@@ -38,6 +46,9 @@ import { getPrinterConsole } from "./console/printer";
 // install the published drafter wheel from PyPI, while this bundle comes
 // from the local checkout.
 import IMPORT_HELPERS_SOURCE from "../../src/drafter/helpers/imports.py";
+// Carried as text for the same reason: gives a program drawn in an iframe a
+// `js` that is that iframe's window.
+import SCOPED_JS_SOURCE from "../../src/drafter/helpers/scoped_js.py";
 export { attachPrinterConsole, getPrinterConsole } from "./console/printer";
 export { clearDrafterSiteRoot, reportSystemError } from "./bridge/engine";
 export * from "./common.index";
@@ -46,6 +57,15 @@ window.DebugPanel = DebugPanel;
 initializeRuntimeConfigurationOverrides();
 
 const DRAFTER_CONFIG_FILENAME = "/_drafter_config.json";
+
+/**
+ * Ids of the dialogs that report a run of the student's code that failed
+ * (see `reportStudentSyntaxError` and `runStudentCodeInner`).
+ */
+const RUN_FAILURE_DIALOG_IDS = [
+	"runtime.student_code_failed",
+	"runtime.student_code_syntax_error",
+];
 
 export function toVirtualStudentPath(studentFilename?: string): string {
 	const rawFilename = (studentFilename ?? "main.py").trim() || "main.py";
@@ -114,6 +134,11 @@ interface AppServerPyodideOptions {
 	/** How verbose the Pyodide runtime should be in terms of logging. */
 	verbose: boolean;
 	devWsUrl?: string;
+	/**
+	 * Overrides for how a lost live-reload connection is retried and when
+	 * the retries stop (see `DEFAULT_LIVE_RELOAD_SCHEDULE`).
+	 */
+	liveReloadSchedule?: Partial<LiveReloadSchedule>;
 	pythonUrl?: string;
 	inlineCode?: string;
 	studentFilename?: string;
@@ -479,7 +504,11 @@ export async function createDrafterInstance(
 	let runInProgress = false;
 	let restartRequested = false;
 	let hasCompletedRun = false;
-	let instanceWebSocket: WebSocket | null = null;
+	// Whether this instance's last run ended in an error dialog that is
+	// still open. A later run that succeeds closes it: the dialog describes
+	// code that is no longer what is running.
+	let failureDialogMayBeOpen = false;
+	let liveReload: LiveReloadConnection | null = null;
 
 	const getStudentCode = async () => {
 		if (latestStudentCode !== null) {
@@ -551,9 +580,14 @@ export async function createDrafterInstance(
 						return runStudentCodeInner(executionOptions);
 					});
 					hasCompletedRun = true;
+					if (failureDialogMayBeOpen) {
+						failureDialogMayBeOpen = false;
+						RUN_FAILURE_DIALOG_IDS.forEach((id) => closeDialog(id));
+					}
 				} catch (error) {
 					// Interrupt-driven restarts are expected while live-editing.
 					if (!restartRequested) {
+						failureDialogMayBeOpen = true;
 						throw error;
 					}
 				}
@@ -568,27 +602,32 @@ export async function createDrafterInstance(
 	};
 
 	if (options.devWsUrl) {
-		instanceWebSocket = new WebSocket(options.devWsUrl);
-		instanceWebSocket.onmessage = (e) => {
-			const msg = JSON.parse(e.data);
-			if (msg.type === "reload") {
-				location.reload();
-				return;
-			}
-			if (msg.type === "restart_student_code") {
-				if (typeof msg.code === "string") {
-					latestStudentCode = msg.code;
-				} else {
-					latestStudentCode = null;
+		// The connection looks after itself: when the program stops it
+		// retries, and it reloads this tab once the program is running
+		// again (see live_reload.ts).
+		liveReload = connectLiveReload({
+			url: options.devWsUrl,
+			schedule: options.liveReloadSchedule,
+			onMessage: (msg) => {
+				if (msg.type === "reload") {
+					location.reload();
+					return;
 				}
-				runStudentExecution().catch((error) => {
-					console.error(
-						"[Drafter AppServer Scaffolding] Failed to restart student code:",
-						error,
-					);
-				});
-			}
-		};
+				if (msg.type === "restart_student_code") {
+					if (typeof msg.code === "string") {
+						latestStudentCode = msg.code;
+					} else {
+						latestStudentCode = null;
+					}
+					runStudentExecution().catch((error) => {
+						console.error(
+							"[Drafter AppServer Scaffolding] Failed to restart student code:",
+							error,
+						);
+					});
+				}
+			},
+		});
 	}
 
 	// Allow external callers (e.g. the in-browser code editor) to trigger a
@@ -642,9 +681,10 @@ export async function createDrafterInstance(
 			await runStudentExecution();
 		},
 		stop: () => {
-			if (instanceWebSocket) {
-				instanceWebSocket.close();
-				instanceWebSocket = null;
+			// A deliberate close: nothing is retried and no notice is shown.
+			if (liveReload) {
+				liveReload.close();
+				liveReload = null;
 			}
 			window.removeEventListener(
 				"drafter-restart-student-code",
@@ -729,6 +769,52 @@ function explainPyodideDownloadFailure(
 	};
 }
 
+/**
+ * Python that replaces the built-in `input` with one that asks its question
+ * in the browser's prompt box. Left alone, Pyodide reads `input()` from a
+ * prompt box with nothing in it and writes the question to the output
+ * instead, so the visitor is asked for an answer without seeing what is
+ * being asked. Cancelling the box gives an empty string.
+ *
+ * The snippet imports nothing from drafter, so it works with whichever
+ * drafter version the browser has installed. `js.prompt` is looked up on
+ * each call rather than once.
+ */
+const BROWSER_INPUT_SNIPPET = `
+def _drafter_install_input():
+    import builtins
+    import js
+
+    def input(prompt="", /):
+        """Ask for a line of text in the browser's prompt box.
+
+        The prompt box shows \`prompt\`. Cancelling it gives an empty string.
+        """
+        answer = js.prompt(str(prompt))
+        return answer if isinstance(answer, str) else ""
+
+    builtins.input = input
+
+_drafter_install_input()
+del _drafter_install_input
+`;
+
+/**
+ * Make Python's `input(question)` show the question (see
+ * `BROWSER_INPUT_SNIPPET`). A failure leaves Pyodide's own `input` in place
+ * and is only logged: nothing else depends on it.
+ */
+function installBrowserInput(pyodide: any): void {
+	try {
+		pyodide.runPython(BROWSER_INPUT_SNIPPET);
+	} catch (error) {
+		console.warn(
+			"[Drafter AppServer Scaffolding] Could not set up input():",
+			error,
+		);
+	}
+}
+
 export async function setupPyodide(options: PyodideSettings, verbose = false) {
 	const verboseLog = (...args: any[]) => {
 		if (verbose) {
@@ -799,6 +885,8 @@ export async function setupPyodide(options: PyodideSettings, verbose = false) {
 				batched: (line: string) =>
 					printerConsole.recordOutput("stderr", `${line}\n`),
 			});
+			// input("question") asks its question in the prompt box.
+			installBrowserInput(window.pyodide);
 			verboseLog("Pyodide setup complete.");
 		} catch (error) {
 			throw reportSystemError({
@@ -897,9 +985,92 @@ ${body}
 `;
 }
 
+const SCOPED_JS_SNIPPET = `
+_scoped_js = {}
+exec(__drafter_scoped_js_source, _scoped_js)
+__drafter_program_globals["__builtins__"] = _scoped_js["make_scoped_builtins"](
+    __drafter_program_window
+)
+`;
+
+/**
+ * Make `import js` inside one program mean the window that program is drawn
+ * in, instead of the window that hosts the shared interpreter.
+ *
+ * A program embedded through an iframe (a documentation demo) shares the
+ * hosting page's interpreter, where `js` is the hosting page. Without this,
+ * `js.document.getElementById(...)` in a demo searches the page around it
+ * and never finds the demo's own elements. Only the program's own code is
+ * affected; Drafter's `import js` is unchanged.
+ *
+ * Fails open: if the scoping cannot be set up, the program still runs, with
+ * `js` as the hosting page, and the problem is logged.
+ *
+ * @param pyodide The shared interpreter.
+ * @param programGlobals The Python dict the program's code will run in.
+ * @param targetWindow The window the program is drawn in.
+ */
+export function scopeJsToWindow(
+	pyodide: any,
+	programGlobals: any,
+	targetWindow: Window,
+): void {
+	let scratch: any;
+	try {
+		scratch = pyodide.toPy({ __drafter_scoped_js_source: SCOPED_JS_SOURCE });
+		scratch.set("__drafter_program_globals", programGlobals);
+		scratch.set("__drafter_program_window", targetWindow);
+		pyodide.runPython(SCOPED_JS_SNIPPET, { globals: scratch });
+	} catch (error) {
+		console.warn(
+			"[Drafter] Could not give this embedded program its own `js`; " +
+				"`import js` will mean the hosting page.",
+			error,
+		);
+	} finally {
+		scratch?.destroy?.();
+	}
+}
+
 const MISSING_IMPORTS_SNIPPET = importHelperSnippet(
 	`_json.dumps(_helpers["find_missing_imports"](__drafter_import_source))`,
 );
+
+const IMPORTED_MODULES_SNIPPET = importHelperSnippet(
+	`_json.dumps(_helpers["find_imported_modules"](__drafter_import_source))`,
+);
+
+/**
+ * Run one of the import-helper snippets over student code and return the
+ * module names it lists. Fails open: if the snippet cannot run, the problem
+ * is logged with `failureNote` and no names are returned.
+ */
+async function listImports(
+	pyodide: any,
+	snippet: string,
+	code: string,
+	failureNote: string,
+): Promise<string[]> {
+	if (typeof pyodide?.runPythonAsync !== "function" || !pyodide.toPy) {
+		return [];
+	}
+	const checkGlobals = pyodide.toPy({
+		__drafter_import_helpers: IMPORT_HELPERS_SOURCE,
+		__drafter_import_source: code,
+	});
+	try {
+		const result = await pyodide.runPythonAsync(snippet, {
+			globals: checkGlobals,
+		});
+		const names = JSON.parse(result);
+		return Array.isArray(names) ? names.map(String) : [];
+	} catch (error) {
+		console.warn(failureNote, error);
+		return [];
+	} finally {
+		checkGlobals.destroy?.();
+	}
+}
 
 /**
  * The imports in student code that nothing can provide yet: not the standard
@@ -909,29 +1080,13 @@ const MISSING_IMPORTS_SNIPPET = importHelperSnippet(
  * Fails open: if the check cannot run, no imports are reported and the
  * program runs as it would have before.
  */
-async function findMissingImports(pyodide: any, code: string): Promise<string[]> {
-	if (typeof pyodide?.runPythonAsync !== "function" || !pyodide.toPy) {
-		return [];
-	}
-	const checkGlobals = pyodide.toPy({
-		__drafter_import_helpers: IMPORT_HELPERS_SOURCE,
-		__drafter_import_source: code,
-	});
-	try {
-		const result = await pyodide.runPythonAsync(MISSING_IMPORTS_SNIPPET, {
-			globals: checkGlobals,
-		});
-		const names = JSON.parse(result);
-		return Array.isArray(names) ? names.map(String) : [];
-	} catch (error) {
-		console.warn(
-			"[Drafter] Could not check for libraries to install automatically:",
-			error,
-		);
-		return [];
-	} finally {
-		checkGlobals.destroy?.();
-	}
+function findMissingImports(pyodide: any, code: string): Promise<string[]> {
+	return listImports(
+		pyodide,
+		MISSING_IMPORTS_SNIPPET,
+		code,
+		"[Drafter] Could not check for libraries to install automatically:",
+	);
 }
 
 const MISSING_REQUIREMENTS_SNIPPET = importHelperSnippet(
@@ -1007,7 +1162,10 @@ function packageRuntime(pyodide: any, micropip: any): PackageRuntime {
  * Install one requirement: from PyPI, or from a wheel index that has it when
  * PyPI cannot supply it (see package_index.ts). Logs what the index provided.
  */
-async function installPackage(spec: string, indexes: string[]): Promise<void> {
+async function installPackage(
+	spec: string,
+	indexes: string[],
+): Promise<IndexInstallResult> {
 	const pyodide = (window as any).pyodide;
 	const micropip = (window as any).micropip;
 	const result = await installWithIndexes(
@@ -1024,6 +1182,42 @@ async function installPackage(spec: string, indexes: string[]): Promise<void> {
 				: "",
 		);
 	}
+	return result;
+}
+
+/**
+ * Imports that an automatic install filled from PyPI by name alone: the
+ * project did not list the library and Pyodide does not ship it, so the
+ * name on the `import` line was looked up on PyPI and whatever is published
+ * under that name was installed. That is what the student wants for
+ * `import seaborn`. It is not what they want when `helpers` was meant to be
+ * their own `helpers.py` and the file is missing from the site: PyPI has an
+ * unrelated package called `helpers`, and the program then fails inside a
+ * library the student has never heard of. The names are remembered for the
+ * life of the page (the library stays installed that long) so each run can
+ * say what happened; see `reportImportsFilledFromPyPI` and
+ * `explainImportFilledFromPyPI`.
+ */
+const automaticPyPIInstalls = new Set<string>();
+
+/** What micropip records in `pyodide.loadedPackages` for Pyodide's own packages. */
+const PYODIDE_PACKAGE_CHANNEL = "default channel";
+
+/**
+ * Whether the library came with Pyodide rather than from PyPI: micropip
+ * serves a request from Pyodide's own distribution when it can.
+ */
+function cameWithPyodide(pyodide: any, name: string): boolean {
+	const loaded: unknown = pyodide?.loadedPackages;
+	if (loaded === null || typeof loaded !== "object") {
+		return false;
+	}
+	const wanted = normalizeProjectName(name);
+	return Object.entries(loaded as Record<string, unknown>).some(
+		([project, channel]) =>
+			normalizeProjectName(project) === wanted &&
+			channel === PYODIDE_PACKAGE_CHANNEL,
+	);
 }
 
 /**
@@ -1032,25 +1226,43 @@ async function installPackage(spec: string, indexes: string[]): Promise<void> {
  * PyPI, then from the wheel indexes. A library that cannot be installed is
  * skipped quietly: its import then fails in the student's program with the
  * ordinary ModuleNotFoundError, whose error page explains what to do.
+ *
+ * An import that PyPI filled is remembered, unless the project declared the
+ * library itself (`declaredPackages`, the project's package list) or
+ * Pyodide ships it, so the student can be told where it came from.
  */
 export async function installMissingImports(
 	code: string,
 	indexes: string[] = [],
+	declaredPackages: string[] = [],
 ): Promise<string[]> {
 	const pyodide = (window as any).pyodide;
 	const micropip = (window as any).micropip;
 	if (!micropip) {
 		return [];
 	}
+	const declared = new Set(
+		declaredPackages.map((spec) => requirementName(spec) ?? spec),
+	);
 	const installed: string[] = [];
 	for (const name of await findMissingImports(pyodide, code)) {
 		if (requestedPackageSpecs.has(name) || failedAutomaticInstalls.has(name)) {
 			continue;
 		}
 		try {
-			await installPackage(name, indexes);
+			const result = await installPackage(name, indexes);
 			requestedPackageSpecs.add(name);
 			installed.push(name);
+			if (
+				result.index === null &&
+				!declared.has(normalizeProjectName(name)) &&
+				!cameWithPyodide(pyodide, name)
+			) {
+				automaticPyPIInstalls.add(name);
+				console.warn(
+					`[Drafter] Your program imports "${name}" and no ${name}.py was found with it, so the library named "${name}" was installed from PyPI.`,
+				);
+			}
 		} catch (error) {
 			failedAutomaticInstalls.add(name);
 			console.warn(
@@ -1063,6 +1275,109 @@ export async function installMissingImports(
 		console.log("Installed missing libraries:", installed);
 	}
 	return installed;
+}
+
+/**
+ * After a run that started, tell the debug panel about each import of the
+ * program that PyPI filled (see `automaticPyPIInstalls`). This waits for
+ * the run because the debug panel that shows the warning is built by the
+ * run itself. It is said again on every run for as long as the program
+ * still imports the library. Never throws.
+ */
+async function reportImportsFilledFromPyPI(
+	pyodide: any,
+	code: string,
+	options: DrafterInitOptions,
+): Promise<void> {
+	if (automaticPyPIInstalls.size === 0) {
+		return;
+	}
+	const imported = new Set(
+		await listImports(
+			pyodide,
+			IMPORTED_MODULES_SNIPPET,
+			code,
+			"[Drafter] Could not check which installed libraries the program imports:",
+		),
+	);
+	for (const name of automaticPyPIInstalls) {
+		if (!imported.has(name)) {
+			continue;
+		}
+		const technical = new Error(
+			`Nothing with the site provides "${name}" (no ${name}.py and no ${name}/__init__.py), so micropip installed the PyPI project of that name.`,
+		);
+		technical.name = "AutomaticInstall";
+		reportSystemError({
+			id: "runtime.import_installed_from_pypi",
+			category: "runtime",
+			severity: "warning",
+			recoverable: true,
+			message: `The import "${name}" was filled by installing a library from PyPI`,
+			error: technical,
+			// Shown as plain text in the debug panel, so no code marks.
+			friendlyMessage: `Your program imports ${name}, and there is no ${name}.py next to your program, so Drafter installed the library named ${name} from PyPI. If ${name} is meant to be one of your own files, that library is something else: check the file's name and that the file is deployed with your site, then reload the page. If you do want the library, start your site with --project-packages ${name} and this warning will stop.`,
+			friendlySteps: [
+				`If \`${name}\` is meant to be one of your own files, check the file's name and that the file is deployed with your site, then reload the page.`,
+				`If you do want the library from PyPI, start your site with \`--project-packages ${name}\` and this warning will stop.`,
+			],
+			context: { phase: "setup", dom_id: options.rootElementId },
+		});
+	}
+}
+
+/**
+ * The module (and the name missing from it) in a Python error that says a
+ * module does not have what the program asked it for:
+ * "cannot import name 'x' from 'helpers' (...)", "module 'helpers' has no
+ * attribute 'x'", or "No module named 'helpers.x'". Null for other errors.
+ */
+function findModuleShortfall(
+	errorText: string,
+): { module: string; missing: string } | null {
+	const importFrom = /cannot import name '([^']+)' from '([^'.]+)/.exec(
+		errorText,
+	);
+	if (importFrom) {
+		return { module: importFrom[2], missing: importFrom[1] };
+	}
+	const attribute = /module '([^'.]+)[^']*' has no attribute '([^']+)'/.exec(
+		errorText,
+	);
+	if (attribute) {
+		return { module: attribute[1], missing: attribute[2] };
+	}
+	const submodule = /No module named '([^'.]+)\.([^']+)'/.exec(errorText);
+	if (submodule) {
+		return { module: submodule[1], missing: submodule[2] };
+	}
+	return null;
+}
+
+/**
+ * Student-facing steps for a run that failed because a module lacks what
+ * the program asked it for, when that module is a library Drafter installed
+ * from PyPI on its own (see `automaticPyPIInstalls`). The usual cause is a
+ * file of the student's that is missing from the site; the generic advice
+ * for these errors never mentions that a stranger's library was installed
+ * in its place. Returns an empty object for every other failure.
+ */
+function explainImportFilledFromPyPI(error: unknown): {
+	friendlySteps?: string[];
+} {
+	const text = error instanceof Error ? error.message : String(error);
+	const shortfall = findModuleShortfall(text);
+	if (!shortfall || !automaticPyPIInstalls.has(shortfall.module)) {
+		return {};
+	}
+	const { module, missing } = shortfall;
+	return {
+		friendlySteps: [
+			`There is no \`${module}.py\` next to your program, so Drafter installed the library named \`${module}\` from PyPI. If \`${module}\` is meant to be one of your own files, that library is something else.`,
+			`Check the file's name (capital letters matter) and that the file is deployed with your site. Then reload the page: the library stays installed until you do.`,
+			`If you do want the library from PyPI, it has nothing named \`${missing}\`. Check that name against the library's documentation.`,
+		],
+	};
 }
 
 export async function setupEnvironment(options: DrafterInitOptions) {
@@ -1087,6 +1402,7 @@ export async function setupEnvironment(options: DrafterInitOptions) {
 			await installMissingImports(
 				options.code ?? "",
 				options.packageIndexes ?? [],
+				options.explicitPackageList ?? [],
 			);
 		} catch (error) {
 			throw reportSystemError({
@@ -1272,6 +1588,9 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 	};
 	if (isConfiguredInstance) {
 		runOptions.globals = pyodide.toPy({ __name__: "__main__" });
+		if (options.targetWindow && options.targetWindow !== window) {
+			scopeJsToWindow(pyodide, runOptions.globals, options.targetWindow);
+		}
 	}
 	// A stop-signal consumed by the interpreter but never delivered (see
 	// scheduleInterruptEscalation) would otherwise be raised into this run.
@@ -1279,6 +1598,7 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 	activeStudentRuns += 1;
 	try {
 		const result = await pyodide.runPythonAsync(codeToRun, runOptions);
+		await reportImportsFilledFromPyPI(pyodide, codeToRun, options);
 		return result;
 	} catch (error) {
 		if (
@@ -1294,6 +1614,7 @@ async function runStudentCodeInner(options: DrafterInitOptions): Promise<any> {
 			message: "Error running student code",
 			title: "Error",
 			error,
+			...explainImportFilledFromPyPI(error),
 			recoverable: true,
 			context: { phase: "setup" },
 			targetDocument: options.targetWindow?.document,

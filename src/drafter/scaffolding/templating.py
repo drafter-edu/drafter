@@ -4,6 +4,8 @@ Provides functions to load and render Jinja2 templates for the index page,
 supporting multiple Python engines (Skulpt, Pyodide).
 """
 
+import hashlib
+import os
 from base64 import b64encode
 from functools import lru_cache
 
@@ -30,6 +32,44 @@ def default_favicon_data_uri() -> str:
     """
     favicon_bytes = (pkg_scaffold_dir() / "favicon.svg").read_bytes()
     return "data:image/svg+xml;base64," + b64encode(favicon_bytes).decode("ascii")
+
+
+MAIN_FILE_ID_LENGTH = 16
+"""Number of hexadecimal digits kept from the hash in `main_file_id`."""
+
+
+def main_file_id(system: SystemConfiguration) -> str:
+    """Identify the student's main file without revealing where it is.
+
+    The page stores a few things in the browser (the debug panel's save
+    slots, the theme picked in the theme switcher, the open debug tab).
+    Browser storage is shared by every page at one address, and every
+    program the development server runs is at the same address, so the
+    page's script keys those values by this id as well (see
+    js/src/storage_keys.ts). The id is a hash of the file's full path, so
+    two files with the same name in different folders get different ids,
+    and the folder names (which usually include the student's user name)
+    never reach the page or the browser's storage.
+
+    Args:
+        system: System configuration, whose bootstrap section holds the
+            path to the main file.
+
+    Returns:
+        A short hexadecimal id, or an empty string when no main file path
+        is known.
+
+    Example:
+        ```python
+        main_file_id(system)  # "3f9a0c1d5e7b2a44"
+        ```
+    """
+    path = system.bootstrap.path
+    if not path:
+        return ""
+    full_path = os.path.normcase(os.path.abspath(path))
+    digest = hashlib.sha256(full_path.encode("utf-8")).hexdigest()
+    return digest[:MAIN_FILE_ID_LENGTH]
 
 
 def _load_template_text(engine: str) -> Template:
@@ -101,6 +141,7 @@ def render_index_html(
         system=system,
         system_json=system.to_json(),
         modified_system=modified_system or {},
+        main_file_id=main_file_id(system),
         # Specific variables
         title=system.app_common.site_title,
         favicon=system.app_common.favicon or default_favicon_data_uri(),

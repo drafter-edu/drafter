@@ -184,3 +184,61 @@ describe("setupPyodide other failures", () => {
 		expect(renderedSteps().join(" ")).not.toContain("hard refresh");
 	});
 });
+
+describe("setupPyodide and input()", () => {
+	// What input() then does is checked against a real interpreter in
+	// pyodide/pyodide.test.ts; these cover how the replacement is installed.
+
+	/** A loader whose Pyodide has just enough for setup to finish. */
+	function loaderGives(runPython: (code: string) => unknown): void {
+		const micropip = {
+			add_mock_package: () => {},
+			install: async () => {},
+		};
+		(globalThis as AnyWindow).__realLoadPyodide = jest.fn(async () => ({
+			loadPackage: async () => {},
+			pyimport: () => micropip,
+			FS: { writeFile: () => {} },
+			setStdout: () => {},
+			setStderr: () => {},
+			runPython,
+		}));
+	}
+
+	afterEach(() => {
+		delete (window as AnyWindow).micropip;
+	});
+
+	test("replaces input with Python that needs nothing from drafter", async () => {
+		const runPython = jest.fn((_code: string) => undefined);
+		loaderGives(runPython);
+
+		await setupPyodide({ pyodideUrl: CDN_URL, systemPackages: [] });
+
+		expect(runPython).toHaveBeenCalledTimes(1);
+		const snippet = runPython.mock.calls[0][0];
+		expect(snippet).toContain("builtins.input = input");
+		expect(snippet).toContain("js.prompt(str(prompt))");
+		// The browser's drafter may be an older published version, so the
+		// snippet must stand on its own.
+		expect(snippet).not.toMatch(/^\s*(from|import)\s+drafter/m);
+	});
+
+	test("setup still finishes when input cannot be replaced", async () => {
+		const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+		loaderGives(() => {
+			throw new Error("PythonError: builtins is read-only");
+		});
+
+		await expect(
+			setupPyodide({ pyodideUrl: CDN_URL, systemPackages: [] }),
+		).resolves.toBeDefined();
+
+		expect(warnSpy).toHaveBeenCalledWith(
+			expect.stringContaining("Could not set up input()"),
+			expect.any(Error),
+		);
+		expect(document.querySelector(".drafter-system-error")).toBeNull();
+		warnSpy.mockRestore();
+	});
+});
