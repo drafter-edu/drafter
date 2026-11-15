@@ -8,6 +8,7 @@ prints a warning.
 """
 
 import difflib
+import os
 import sys
 from dataclasses import dataclass
 from functools import wraps
@@ -64,21 +65,49 @@ def try_getting_full_code(filename: str, lineno: int) -> str | None:
         return None
 
 
-DEFAULT_STACK_DEPTH = 7
-"""Default number of frames to look back in the call stack when locating
-the source line of an assertion call, if no line matching the target
-string was found."""
+UNKNOWN_TEST_CODE = "<unknown test code>"
+"""Stands in for an assertion's source text when Python cannot read the
+file it was written in (code typed at a prompt or passed with `-c`)."""
 
 
-def get_line_code(target, depth=DEFAULT_STACK_DEPTH):
+def _testing_package_directories() -> tuple[str, ...]:
+    """Folders holding Drafter's (and Bakery's) own code.
+
+    A frame from one of these is part of the assertion machinery, never
+    the student's test.
+    """
+    import drafter
+
+    packages = [drafter] if bakery is None else [drafter, bakery]
+    files = [getattr(package, "__file__", None) for package in packages]
+    return tuple(
+        os.path.dirname(os.path.abspath(file))
+        for file in files
+        if isinstance(file, str)
+    )
+
+
+def _is_inside(filename: str, directories: tuple[str, ...]) -> bool:
+    """Whether a stack frame's file is in one of the given folders."""
+    path = os.path.normcase(os.path.abspath(filename))
+    return any(
+        path.startswith(os.path.normcase(directory) + os.sep)
+        for directory in directories
+    )
+
+
+def get_line_code(target):
     """Extract source code line and its context for a test assertion.
 
-    Searches the call stack for a line matching the target string and
-    retrieves the full multi-line code snippet.
+    Searches the call stack for a line that starts with the target string
+    and retrieves the full multi-line code snippet. An assertion does not
+    always start its line (`ok = assert_equal(...)`, or one written after
+    `if ...:`), and sometimes the source cannot be read at all, so the
+    search falls back to the innermost frame outside Drafter's own code:
+    the line that called the assertion.
 
     Args:
         target: The string to search for in the call stack (e.g., 'assert_').
-        depth: The stack depth to search; defaults to DEFAULT_STACK_DEPTH.
 
     Returns:
         A tuple of (line_number, code_string), or (None, None) if not found.
@@ -99,11 +128,16 @@ def get_line_code(target, depth=DEFAULT_STACK_DEPTH):
                     code = possible_full_line
                 return line, code
 
-        # If none found, just try jumping up there and see what we can find
-        frame = trace[len(trace) - depth]
-        line = frame[1]
-        code = frame[3]
-        return line, code
+        # No line starts with the target, so report the caller: the
+        # innermost frame that is not part of the assertion machinery.
+        own_directories = _testing_package_directories()
+        for data in reversed(trace):
+            filename, line, code = data[0], data[1], data[3]
+            if line is None or _is_inside(filename, own_directories):
+                continue
+            full_code = try_getting_full_code(filename, line)
+            return line, full_code or code or UNKNOWN_TEST_CODE
+        return None, None
     except Exception as e:
         print(e)
         # logger.error(f"Error getting line and code: {e}")

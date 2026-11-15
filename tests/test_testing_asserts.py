@@ -1,16 +1,20 @@
 """Tests for Drafter's jest-like assertion framework (drafter.testing)."""
 
+import inspect
 from dataclasses import dataclass
 
 import pytest
 
 from drafter import (
+    BulletedList,
     Button,
     Div,
     Header,
+    NumberedList,
     Page,
     Text,
 )
+from drafter.data.errors import StudentFacingError
 from drafter.payloads.kinds.fragment import Fragment
 from drafter.testing import (
     assert_attribute,
@@ -487,6 +491,15 @@ def test_assert_children_failure_names_component(capsys):
     assert "Div children" in output
 
 
+@pytest.mark.parametrize("list_class", [BulletedList, NumberedList])
+def test_assert_children_of_a_list_are_its_items(list_class):
+    # The items used to count as one child (a list), so this reported
+    # "Too few items (1 < 2)".
+    listing = list_class(["a", Text("b")])
+    assert assert_children(listing, ["a", "b"]) is True
+    assert assert_children(listing, ["a"]) is False
+
+
 def test_assert_children_requires_component(capsys):
     assert assert_children(["a"], ["a"]) is False
     output = capsys.readouterr().out
@@ -536,6 +549,45 @@ def test_report_success_default_flag(capsys):
     # Failures are still printed
     assert assert_equal(4, 5) is False
     assert "FAILURE" in capsys.readouterr().out
+
+
+def test_reported_line_is_the_assertion_even_when_it_does_not_start_the_line(capsys):
+    # The line used to be looked up by text ("starts with assert_"), and
+    # anything else fell back to a frame inside Drafter: "at line 141".
+    line = inspect.currentframe().f_lineno + 1
+    passed = assert_equal(1 + 1, 2)
+    results = [passed, assert_equal(3, 3)]
+
+    assert results == [True, True]
+    output = capsys.readouterr().out
+    assert f"SUCCESS at line {line} (assert_equal)" in output
+    assert f"SUCCESS at line {line + 1} (assert_equal)" in output
+
+
+def test_reported_line_without_readable_source(capsys):
+    # Code run with exec (or typed at a prompt, or passed with -c) has no
+    # file to read the line's text from.
+    source = "\n\nresult = assert_equal(4, 4)\n"
+    exec(compile(source, "<typed in>", "exec"), {"assert_equal": assert_equal})
+
+    assert "SUCCESS at line 3 (assert_equal)" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("precision", [True, False, "2", 2.5])
+def test_precision_default_must_be_a_whole_number(precision):
+    # set_assertion_defaults(True) used to quietly set precision=True.
+    before = get_assertion_defaults().precision
+    with pytest.raises(StudentFacingError) as raised:
+        set_assertion_defaults(precision)
+
+    assert "precision must be a whole number" in str(raised.value)
+    assert "strict_styles=True" in raised.value.friendly_steps[0]
+    assert get_assertion_defaults().precision == before
+
+
+def test_precision_default_accepts_a_whole_number():
+    assert set_assertion_defaults(2).precision == 2
+    assert set_assertion_defaults(precision=4).precision == 4
 
 
 def test_failed_assertion_logs_event_with_diff(events, capsys):

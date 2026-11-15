@@ -19,6 +19,7 @@ import difflib
 from dataclasses import dataclass
 
 from drafter.data.details.tests import TestCaseEvent
+from drafter.data.errors import StudentFacingError
 from drafter.history.formatting import format_page_content
 from drafter.monitor.audit import log_record
 from drafter.testing.assertions import ComparisonSettings
@@ -86,8 +87,30 @@ def set_assertion_defaults(
 
     Returns:
         AssertionDefaults: The updated defaults.
+
+    Raises:
+        StudentFacingError: If `precision` is not a whole number. This
+            catches `set_assertion_defaults(True)`, where the `True` was
+            meant for one of the other flags.
     """
     if precision is not None:
+        if isinstance(precision, bool) or not isinstance(precision, int):
+            raise StudentFacingError(
+                "set_assertion_defaults precision must be a whole number, "
+                f"but got {precision!r}.",
+                friendly=(
+                    "The first setting of set_assertion_defaults is "
+                    "precision, the number of decimal places used when "
+                    f"comparing numbers, so {precision!r} cannot be used "
+                    "there."
+                ),
+                steps=(
+                    "Name the setting you want to change, like "
+                    "set_assertion_defaults(strict_styles=True).",
+                    "For precision, pass a whole number, like "
+                    "set_assertion_defaults(precision=2).",
+                ),
+            )
         _assertion_defaults.precision = precision
     if exact_strings is not None:
         _assertion_defaults.exact_strings = exact_strings

@@ -873,9 +873,12 @@ def get_component_children(component: Component) -> list[Any]:
     """Collect the direct child content of a component.
 
     Follows the component's declared content arguments (the same fields
-    its renderer uses for child content), flattening var-args arguments
-    and skipping None values. Unlike `Component.get_children`, this does
-    not require a rendering context.
+    its renderer uses for child content), skipping None values. A
+    var-args argument contributes each of its values, and so does an
+    argument that holds a list (the items of a `BulletedList` or a
+    `NumberedList`), so those items are the children, not one list
+    holding them. Unlike `Component.get_children`,
+    this does not require a rendering context.
 
     Args:
         component: The component whose children should be collected.
@@ -890,7 +893,7 @@ def get_component_children(component: Component) -> list[Any]:
         value = getattr(component, argument.name, argument.default_value)
         if value is None:
             continue
-        if argument.kind == "var":
+        if argument.kind == "var" or isinstance(value, (list, tuple)):
             children.extend(value)
         else:
             children.append(value)
