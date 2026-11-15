@@ -17,6 +17,7 @@ from unittest.mock import MagicMock
 from starlette.routing import Route
 
 from drafter.app import app_server
+from drafter.app.ports import STOP_REASON_HEADER, STOP_REASON_TAKEOVER
 from drafter.config.app_builder import AppBuilderConfiguration
 from drafter.config.app_common import AppCommonConfiguration
 from drafter.config.app_server import AppServerConfiguration
@@ -49,9 +50,9 @@ def make_app(tmp_path):
     return app_server.make_app(make_system(tmp_path), MagicMock(), None)
 
 
-def post_stop(app):
+def post_stop(app, headers=None):
     """Drive the stop handler the way a POST to the endpoint would."""
-    request = types.SimpleNamespace(app=app)
+    request = types.SimpleNamespace(app=app, headers=headers or {})
     response = asyncio.run(app_server.stop_server(request))
     return response.status_code, json.loads(response.body)
 
@@ -76,7 +77,21 @@ class TestStopServerEndpoint:
         assert status == 200
         assert body == {"ok": True}
         app.state.request_stop.assert_called_once_with()
-        assert "Stopping the server" in capsys.readouterr().out
+        assert "because the browser asked it to" in capsys.readouterr().out
+
+    def test_takeover_by_a_newer_run_is_named_in_the_terminal(self, tmp_path, capsys):
+        # The earlier run used to print "because the browser asked it to"
+        # when it was really a newer run of the program stopping it.
+        app = make_app(tmp_path)
+        app.state.request_stop = MagicMock()
+
+        status, _body = post_stop(app, {STOP_REASON_HEADER: STOP_REASON_TAKEOVER})
+
+        assert status == 200
+        app.state.request_stop.assert_called_once_with()
+        output = capsys.readouterr().out
+        assert "a newer run of this program is taking over" in output
+        assert "browser" not in output
 
     def test_without_a_stop_callback_reports_unavailable(self, tmp_path):
         app = make_app(tmp_path)

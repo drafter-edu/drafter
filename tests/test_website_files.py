@@ -37,6 +37,7 @@ from drafter.files.website_files import (
     WebsiteFileLookup,
     find_in_subfolders,
     find_similar_files,
+    find_true_spelling,
     is_url,
     list_directory_entries,
     looks_like_code,
@@ -44,6 +45,7 @@ from drafter.files.website_files import (
     missing_file_error,
     normalize_website_path,
     resolve_website_file,
+    wrong_capitals_error,
 )
 from drafter.site.site import Site
 
@@ -766,6 +768,7 @@ class TestBridgeContentUpdates:
             set_site_title=MagicMock(),
             _handle_debug_events=MagicMock(return_value=True),
             _applied_content=set(),
+            replaying_startup_events=False,
         )
         bridge._seed_applied_content = lambda: ClientBridge._seed_applied_content(
             bridge
@@ -854,3 +857,122 @@ class TestBridgeContentUpdates:
         self.dispatch(bridge, "additional_css_content", "extra.css")
         assert add_link.call_args.args[1].endswith("/extra.css")
         assert add_link.call_args.args[1] != "extra.css"
+
+
+# ============================================================================
+# CAPITAL LETTERS AND FOLDERS
+# ============================================================================
+
+
+class TestTrueSpelling:
+    """Windows and macOS open `logo.png` when the file is `Logo.PNG`."""
+
+    def test_matching_name_is_returned_as_written(self, program_dir):
+        assert find_true_spelling(program_dir, "static/style.css") == "static/style.css"
+
+    def test_file_name_with_other_capitals(self, program_dir):
+        assert find_true_spelling(program_dir, "logo.png") == "Logo.PNG"
+
+    def test_folder_name_with_other_capitals(self, program_dir):
+        assert find_true_spelling(program_dir, "Static/style.css") == "static/style.css"
+
+    def test_name_that_is_not_there(self, program_dir):
+        assert find_true_spelling(program_dir, "missing.png") is None
+        assert find_true_spelling(program_dir, "nowhere/style.css") is None
+
+    def test_exact_name_wins_when_both_spellings_exist(self, tmp_path, monkeypatch):
+        # Both names in one folder is only possible where capital letters
+        # matter, so the listing is supplied by hand to cover every platform.
+        monkeypatch.setattr(
+            website_files.os, "listdir", lambda folder: ["Data.txt", "data.txt"]
+        )
+
+        assert find_true_spelling(tmp_path, "data.txt") == "data.txt"
+        assert find_true_spelling(tmp_path, "Data.txt") == "Data.txt"
+
+
+class TestWrongCapitals:
+    def test_error_shows_the_real_name(self):
+        error = wrong_capitals_error("add_website_file", "logo.png", "Logo.PNG")
+
+        assert error.friendly_title == "Website File Name Has Different Capital Letters"
+        assert "'Logo.PNG'" in error.friendly_message
+        assert "deployed" in error.friendly_message
+        assert error.friendly_steps[0].endswith("add_website_file('Logo.PNG').")
+
+    def test_wrong_capitals_never_pass(self, program_dir, server):
+        """An error on every platform, though not the same one.
+
+        Where capital letters do not matter the file is found, and the
+        new check reports the difference. Where they do matter the file
+        is simply missing, with the real name as the suggestion.
+        """
+        forgiving = (program_dir / "logo.png").exists()
+
+        with pytest.raises(StudentFacingError) as info:
+            add_website_file("logo.png", server=server)
+
+        expected_title = (
+            "Website File Name Has Different Capital Letters"
+            if forgiving
+            else "Website File Not Found"
+        )
+        assert info.value.friendly_title == expected_title
+        assert "Logo.PNG" in " ".join(info.value.friendly_steps)
+        assert server.get_config_setting("additional_files") == []
+
+    def test_lookup_records_the_real_spelling(self, program_dir, monkeypatch):
+        # Stand in for a file system that ignores capital letters.
+        monkeypatch.setattr(pathlib.Path, "is_file", lambda self: True)
+
+        lookup = lookup_website_file("logo.png")
+
+        assert lookup.exists is True
+        assert lookup.true_path == "Logo.PNG"
+
+    def test_matching_name_records_nothing(self, program_dir):
+        assert lookup_website_file("Logo.PNG").true_path is None
+
+
+class TestFolders:
+    def test_add_website_file_accepts_a_folder(self, program_dir, server):
+        add_website_file("static", server=server)
+
+        assert server.get_config_setting("additional_files") == ["static"]
+
+    def test_folder_is_copied_whole_into_the_build(self, program_dir, tmp_path):
+        output = tmp_path / "dist"
+
+        copy_adjacent_file("static", program_dir, output, label="website file")
+
+        assert (output / "static" / "style.css").read_text() == "body {}"
+        assert (output / "static" / "extra.js").exists()
+
+    def test_missing_folder_is_still_an_error(self, program_dir, server):
+        with pytest.raises(StudentFacingError) as info:
+            add_website_file("statics", server=server)
+
+        assert info.value.friendly_title == "Website File Not Found"
+        assert "Did you mean 'static/'?" in info.value.friendly_steps
+
+    def test_a_folder_is_not_a_stylesheet(self, program_dir):
+        assert lookup_website_file("static").exists is False
+        assert lookup_website_file("static", allow_folder=True).exists is True
+
+    def test_dev_server_listing_confirms_a_folder(self, fake_pyodide):
+        # The server answers 404 for the folder itself but lists it.
+        FakeXHR.responses[("GET", INTERNAL_ROUTES["LIST_FILES"])] = (
+            200,
+            json.dumps({"entries": [{"name": "images", "is_dir": True}]}),
+        )
+
+        assert lookup_website_file("images", allow_folder=True).exists is True
+        assert lookup_website_file("images").exists is False
+
+    def test_deployed_site_cannot_tell_a_folder_from_nothing(self, fake_pyodide):
+        """No listing route, and a 404 for the folder: accept it."""
+        assert lookup_website_file("images", allow_folder=True).exists is None
+        assert resolve_website_file("images", "add_website_file", "file") == "images"
+
+    def test_deployed_site_still_reports_a_missing_file(self, fake_pyodide):
+        assert lookup_website_file("words.txt", allow_folder=True).exists is False

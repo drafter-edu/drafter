@@ -7,7 +7,10 @@ path is checked right away, while the student is still looking at the line
 that named it: a missing file raises a `StudentFacingError` that explains
 where Drafter looked and suggests similarly named files from that folder
 (a `styles.css` when they asked for `style.css`, a file with different
-capitalization, or the same name inside a subfolder).
+capitalization, or the same name inside a subfolder). A name that differs
+from the real file only in its capital letters is an error too: Windows
+and macOS find the file anyway, and the server a site is deployed to does
+not. `add_website_file()` also accepts a folder, which is copied whole.
 
 The check adapts to where the code is running. Outside the browser, paths
 resolve against the configured user directory (see `get_drafter_path`). In
@@ -293,6 +296,9 @@ class WebsiteFileLookup:
         searched_in: Human-readable description of the folder searched.
         siblings: Entry names found in the folder the file should be in.
         in_subfolders: Relative paths of same-named files in subfolders.
+        true_path: The path as it is really spelled on disk, when the file
+            was found under a name that differs only in capital letters.
+            None when the spelling matches or could not be checked.
     """
 
     def __init__(self) -> None:
@@ -300,14 +306,50 @@ class WebsiteFileLookup:
         self.searched_in: str = "the folder containing your program"
         self.siblings: list[str] = []
         self.in_subfolders: list[str] = []
+        self.true_path: str | None = None
 
 
-def lookup_website_file(path: str) -> WebsiteFileLookup:
+def find_true_spelling(base: pathlib.Path, path: str) -> str | None:
+    """Spell a relative path the way its folders and file are really named.
+
+    Windows and macOS open `Style.css` when the file is `style.css`. The
+    server a site is deployed to does not, so the difference has to be
+    caught on the student's own computer.
+
+    Args:
+        base: The folder the path is relative to.
+        path: A normalized relative path that exists under `base`.
+
+    Returns:
+        The path with every part spelled as it is on disk, or None when a
+        part cannot be found or its folder cannot be listed.
+    """
+    current = base
+    true_parts: list[str] = []
+    for part in pathlib.PurePosixPath(path).parts:
+        try:
+            names = os.listdir(current)
+        except OSError:
+            return None
+        if part in names:
+            true_part = part
+        else:
+            matches = [name for name in names if name.lower() == part.lower()]
+            if not matches:
+                return None
+            true_part = matches[0]
+        true_parts.append(true_part)
+        current = current / true_part
+    return "/".join(true_parts)
+
+
+def lookup_website_file(path: str, allow_folder: bool = False) -> WebsiteFileLookup:
     """Look for a relative file path in the student's program folder.
 
     Args:
         path: A normalized relative path such as `style.css` or
             `static/style.css`.
+        allow_folder: Whether a folder at that path counts as found.
 
     Returns:
         A `WebsiteFileLookup` describing whether it exists and what
@@ -337,10 +379,17 @@ def lookup_website_file(path: str) -> WebsiteFileLookup:
             result.siblings = result.siblings + [
                 name for name in listing if name not in result.siblings
             ]
-            result.exists = relative.name in listing if served is None else served
-        elif served is False:
+            if allow_folder and relative.name + "/" in listing:
+                # The server answers 404 for a folder itself, but lists it.
+                result.exists = True
+            else:
+                result.exists = relative.name in listing if served is None else served
+        elif served is False and not (allow_folder and relative.suffix == ""):
             result.exists = False
-        # Otherwise exists stays None: nothing here can check.
+        # Otherwise exists stays None: nothing here can check. That
+        # includes a name with no ending when folders are allowed. A
+        # deployed site answers 404 for a folder and has no listing to
+        # ask, so a folder there looks exactly like a missing file.
         return result
 
     if is_web():
@@ -350,11 +399,46 @@ def lookup_website_file(path: str) -> WebsiteFileLookup:
     base = _user_directory()
     result.searched_in = str(base)
     target = base / pathlib.Path(path)
-    result.exists = target.is_file()
+    result.exists = target.is_file() or (allow_folder and target.is_dir())
     if not result.exists:
         result.siblings = list_directory_entries(target.parent)
         result.in_subfolders = find_in_subfolders(base, relative.name)
+    else:
+        true_path = find_true_spelling(base, path)
+        if true_path is not None and true_path != path:
+            result.true_path = true_path
     return result
+
+
+def wrong_capitals_error(
+    function_name: str, path: str, true_path: str
+) -> StudentFacingError:
+    """Build the error for a name that differs from the file only in capitals.
+
+    Args:
+        function_name: The helper that was called (for the message).
+        path: The path as the student wrote it.
+        true_path: The path as it is spelled on disk.
+
+    Returns:
+        The error to raise.
+    """
+    return StudentFacingError(
+        f"{function_name}: {path!r} is spelled {true_path!r} on disk"
+        " (the capital letters differ)",
+        friendly=(
+            f"Your program asks for '{path}', but the file is named"
+            f" '{true_path}'. Your computer treats those as the same name."
+            " The server that hosts a deployed site does not, so the site"
+            " would not find the file there."
+        ),
+        steps=(
+            f"Change the name in your code to match the file: "
+            f"{function_name}('{true_path}').",
+            "Or rename the file so its capital letters match your code.",
+        ),
+        title="Website File Name Has Different Capital Letters",
+    )
 
 
 def missing_file_error(
@@ -422,8 +506,10 @@ def resolve_website_file(path: str, function_name: str, kind: str = "file") -> s
     Raises:
         StudentFacingError: If the argument is not a string, is empty, looks
             like code rather than a name, is an absolute path, escapes the
-            program folder, has the wrong extension, or names a file that
-            does not exist.
+            program folder, has the wrong extension, names a file that
+            does not exist, or differs from the real file name only in its
+            capital letters. With `kind="file"` the path may also name a
+            folder.
     """
     if not isinstance(path, str):
         raise StudentFacingError(
@@ -525,7 +611,9 @@ def resolve_website_file(path: str, function_name: str, kind: str = "file") -> s
                 title=f"Not a {language} File",
             )
 
-    lookup = lookup_website_file(normalized)
+    lookup = lookup_website_file(normalized, allow_folder=kind == "file")
     if lookup.exists is False:
         raise missing_file_error(function_name, normalized, lookup)
+    if lookup.true_path is not None:
+        raise wrong_capitals_error(function_name, normalized, lookup.true_path)
     return normalized

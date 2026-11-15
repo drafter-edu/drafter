@@ -15,6 +15,7 @@ first and:
    names the occupant and how to stop it.
 """
 
+import errno
 import http.client
 import json
 import os
@@ -43,6 +44,14 @@ PORT_SEARCH_LIMIT = 20
 
 STOP_ROUTE_NAME = "--stop-server"
 """The system route students can open to stop a running server."""
+
+STOP_REASON_HEADER = "X-Drafter-Stop-Reason"
+"""Request header saying why a server is being asked to stop. The browser
+sends none; a newer run taking over the port sends `STOP_REASON_TAKEOVER`,
+so the stopping server can tell the student what actually happened."""
+
+STOP_REASON_TAKEOVER = "takeover"
+"""`STOP_REASON_HEADER` value sent by a newer run of the same program."""
 
 
 def _connect_host(host: str) -> str:
@@ -75,12 +84,58 @@ def server_url(host: str, port: int, path: str = "") -> str:
     return f"http://{_connect_host(host)}:{port}/{path}"
 
 
+def _windows_port_is_unclaimed(port: int) -> bool:
+    """Whether no program holds `port` on any address (Windows only).
+
+    Windows lets a socket bind one specific address (127.0.0.1) while
+    another program already holds the same port on every address, which is
+    how `python -m http.server` binds. Both programs then listen on the
+    port and the browser may reach either. Binding the port on every
+    address at once, exclusively, is the one test that every kind of
+    occupant fails.
+
+    Args:
+        port: The port to test.
+
+    Returns:
+        False when another program holds the port on some address. True
+        otherwise, including when the test itself cannot be made.
+    """
+    exclusive = getattr(socket, "SO_EXCLUSIVEADDRUSE", None)
+    if exclusive is None:
+        return True
+    # A dual-stack IPv6 socket covers IPv4 as well; plain IPv4 is the
+    # fallback for a computer with IPv6 turned off.
+    for family, address in ((socket.AF_INET6, "::"), (socket.AF_INET, "0.0.0.0")):
+        try:
+            sock = socket.socket(family, socket.SOCK_STREAM)
+        except OSError:
+            continue
+        try:
+            sock.setsockopt(socket.SOL_SOCKET, exclusive, 1)
+            if family == socket.AF_INET6:
+                sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+            sock.bind((address, port))
+        except OSError as error:
+            if error.errno in (errno.EADDRINUSE, errno.EACCES):
+                return False
+            # Anything else means this kind of socket is unusable here,
+            # which says nothing about the port.
+            continue
+        finally:
+            sock.close()
+        return True
+    return True
+
+
 def port_is_free(host: str, port: int) -> bool:
     """Whether a server could bind `host`:`port` right now.
 
     Resolves the host the way asyncio's server creation does and tries to
     bind every resulting address with a throwaway socket. A name that does
     not resolve counts as free so that uvicorn reports that problem itself.
+    On Windows the port must also be unclaimed on every other address (see
+    `_windows_port_is_unclaimed`).
 
     Args:
         host: The configured bind host.
@@ -117,6 +172,8 @@ def port_is_free(host: str, port: int) -> bool:
             return False
         finally:
             sock.close()
+    if os.name == "nt":
+        return _windows_port_is_unclaimed(port)
     return True
 
 
@@ -178,6 +235,10 @@ def request_remote_stop(
 ) -> bool:
     """Ask the Drafter server on `host`:`port` to shut down.
 
+    The request says it comes from a newer run taking over the port (see
+    `STOP_REASON_HEADER`), which is the only reason this module stops a
+    server.
+
     Args:
         host: The configured bind host.
         port: The configured port.
@@ -187,7 +248,9 @@ def request_remote_stop(
         True when the server acknowledged the stop request.
     """
     url = server_url(host, port, INTERNAL_ROUTES["STOP_SERVER"])
-    request = urllib.request.Request(url, method="POST")
+    request = urllib.request.Request(
+        url, method="POST", headers={STOP_REASON_HEADER: STOP_REASON_TAKEOVER}
+    )
     try:
         with _opener().open(request, timeout=timeout) as response:
             return response.status == 200

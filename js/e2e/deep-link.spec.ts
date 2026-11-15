@@ -47,6 +47,24 @@ test("opening the site with ?route=--about starts on the About page", async ({
 	expect(new URL(page.url()).searchParams.get("route")).toBe("--about");
 });
 
+test("the --reload route takes its name out of the address before reloading", async ({
+	page,
+}) => {
+	// A reloaded site opens the route named in ?route=, so leaving
+	// --reload there made every load reload again, without end.
+	await page.goto("/harness.html?route=--reload");
+	const reloaded = page.waitForEvent("load");
+	// The reload destroys the page while runExample is still in flight.
+	await page
+		.evaluate(async (code) => {
+			await window.runExample(code);
+		}, ABOUT_APP)
+		.catch(() => undefined);
+	await reloaded;
+
+	expect(new URL(page.url()).searchParams.get("route")).toBeNull();
+});
+
 test("without a route parameter the site still starts on the index", async ({
 	page,
 }) => {

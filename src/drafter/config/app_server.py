@@ -166,9 +166,8 @@ class AppServerConfiguration(BaseConfiguration):
     def extend_parser(parser):
         """Add development server arguments to the command line parser.
 
-        Adds the "App Server Configuration" group with --port and --host
-        (which have argparse defaults, unlike most other options), the
-        negative flags --no-reloader, --no-open-browser, --no-inline-py, and
+        Adds the "App Server Configuration" group with --port and --host,
+        the negative flags --no-reloader, --no-open-browser, --no-inline-py, and
         --no-serve-adjacent-files, which store False on their fields,
         --browser to name the browser the site opens in, and
         the watch-policy options (--no-watch-adjacent-files,
@@ -176,6 +175,9 @@ class AppServerConfiguration(BaseConfiguration):
         --no-watch-served-files, --watch-max-files, --watch-max-directories,
         --watch-max-depth, --watch-broad-locations, --watch-path,
         --ignore-watch-path, --watch-manifest, --watch-force-recursive).
+        No option has an argparse default, so a setting left off the
+        command line keeps whatever an environment variable or the
+        dataclass default gave it.
 
         Args:
             parser: An argparse.ArgumentParser instance to extend.
@@ -184,25 +186,33 @@ class AppServerConfiguration(BaseConfiguration):
             The "App Server Configuration" argument group that was added.
         """
         group = parser.add_argument_group("App Server Configuration")
+        # Every option defaults to None so that parse_args only reports it
+        # when it was explicitly given; an argparse default would override
+        # lower-precedence sources like environment variables.
         group.add_argument(
             "--port",
             type=int,
-            default=DEFAULT_PORT,
-            help="Port number for the server",
+            default=None,
+            help=f"Port number for the server (default: {DEFAULT_PORT})",
         )
         group.add_argument(
-            "--host", type=str, default="localhost", help="Host address for the server"
+            "--host",
+            type=str,
+            default=None,
+            help="Host address for the server (default: localhost)",
         )
         group.add_argument(
             "--no-reloader",
             action="store_false",
             dest="use_reloader",
+            default=None,
             help="Disable auto-reloader for code changes",
         )
         group.add_argument(
             "--no-open-browser",
             action="store_false",
             dest="open_browser",
+            default=None,
             help="Do not automatically open web browser on start",
         )
         group.add_argument(
@@ -219,17 +229,16 @@ class AppServerConfiguration(BaseConfiguration):
             "--no-inline-py",
             action="store_false",
             dest="inline_py",
+            default=None,
             help="Do not inline user code in HTML; load via HTTP request instead",
         )
         group.add_argument(
             "--no-serve-adjacent-files",
             action="store_false",
             dest="serve_adjacent_files",
+            default=None,
             help="Do not serve files from user directory",
         )
-        # Watch policy flags all default to None so that parse_args only
-        # reports them when explicitly given (otherwise the argparse default
-        # would override lower-precedence sources like environment variables).
         group.add_argument(
             "--no-watch-adjacent-files",
             action="store_false",

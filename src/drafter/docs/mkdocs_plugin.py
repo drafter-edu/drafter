@@ -314,7 +314,7 @@ class DrafterCodeBlockPlugin(BasePlugin):
             "--production" if self.config["production"] else "",
             "--subtle-debug-entry" if self.config["subtle_debug_entry"] else "",
             "--verbose",
-            "--console_mode",
+            "--console-mode",
             "hover",
             # Demos are documentation snippets, not sites someone deploys.
             "--no-warn-missing-info",
@@ -523,7 +523,10 @@ class DrafterCodeBlockPlugin(BasePlugin):
             # shared-runtime instance a stable id (registry key + FS folder).
             + f'name="{html.escape(demo_id)}" '
             + 'loading="lazy" '
-            + 'sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" '
+            # allow-modals: a demo's `js` is its own window, so `js.alert`
+            # and `js.prompt` in a demo need the frame's permission to show.
+            + 'sandbox="allow-scripts allow-forms allow-same-origin allow-downloads '
+            + 'allow-modals" '
             + f'style="{style_value}" '
             + "></iframe>\n"
             + "</div>"

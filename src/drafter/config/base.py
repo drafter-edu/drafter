@@ -8,6 +8,7 @@ plus helpers for merging, copying, and JSON (de)serialization.
 
 import json
 from dataclasses import dataclass, fields
+from pathlib import Path
 from typing import Any, Literal
 
 FalseType = Literal[False]
@@ -134,13 +135,27 @@ class BaseConfiguration:
         Returns:
             The parsed contents of the JSON file as a dictionary.
         """
-        # if not os.path.isfile(file_path):
-        #    raise FileNotFoundError(f"Configuration file not found: {file_path}")
-        with open(file_path) as f:
-            return json.load(f)
+        # Read through pathlib, not the `open` builtin. Drafter replaces
+        # `builtins.open` with a version that asks the system configuration
+        # where the student's files live, and that configuration is the
+        # very thing being built here, so the replacement would recurse
+        # forever. pathlib opens files without going through the builtin.
+        return json.loads(Path(file_path).read_text(encoding="utf-8"))
+
+    @classmethod
+    def setting_names(cls) -> frozenset[str]:
+        """Names of the settings this section holds.
+
+        Returns:
+            The name of every dataclass field of the section.
+        """
+        return frozenset(field.name for field in fields(cls))
 
     def merge_in_args(self, new_args: dict, raise_errors=True) -> None:
         """Merge new arguments into configuration.
+
+        Only the section's own settings (its dataclass fields) can be set.
+        A name that merely matches a method, such as `copy`, is unknown.
 
         Args:
             new_args: Dict of argument names and values. None values are ignored.
@@ -151,8 +166,9 @@ class BaseConfiguration:
             AttributeError: If an unknown configuration attribute is provided
                 and `raise_errors` is True.
         """
+        setting_names = self.setting_names()
         for key, value in new_args.items():
-            if hasattr(self, key):
+            if key in setting_names:
                 if value is not None:
                     setattr(self, key, value)
             else:

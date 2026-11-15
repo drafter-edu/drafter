@@ -158,6 +158,8 @@ from drafter.deploy import (
 
 # Alternative file handling approach
 from drafter.files.opening import get_drafter_path, open
+from drafter.helpers.uncaught_errors import install_student_error_hook
+from drafter.helpers.utils import is_web
 
 # Key starting point for Drafter applications, whether building or running
 from drafter.launch import start_server
@@ -205,6 +207,12 @@ from drafter.testing import (
     set_assertion_defaults,
 )
 from drafter.version import CURRENT_DRAFTER_VERSION
+
+if not is_web():
+    # In the terminal, a Drafter error raised near the top of a program
+    # (before start_server) prints its explanation and steps instead of a
+    # traceback. In the browser the error page does that job.
+    install_student_error_hook()
 
 __all__ = [
     "get_system_configuration",

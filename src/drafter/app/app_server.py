@@ -26,7 +26,11 @@ from starlette.types import Scope
 from drafter.app.browser_launch import open_in_browser
 from drafter.app.error_log import append_error_log_entry, build_log_entry
 from drafter.app.hacks import DRAFTER_LOG_CONFIG_FOR_UVICORN
-from drafter.app.ports import prepare_port
+from drafter.app.ports import (
+    STOP_REASON_HEADER,
+    STOP_REASON_TAKEOVER,
+    prepare_port,
+)
 from drafter.app.source_recovery import (
     UNSAVED_SOURCE_FILENAME,
     main_file_is_available,
@@ -341,11 +345,13 @@ async def server_status(req) -> Response:
 
 
 async def stop_server(req) -> Response:
-    """Stop the development server at the browser's request.
+    """Stop the development server when asked to over HTTP.
 
     Reached by the debug panel's "Stop Server" menu item and the button on
-    the ``--stop-server`` system route (see js/src/debug/dev_server.ts).
-    Accepts only POST, so a stray link or prefetch cannot stop the server.
+    the ``--stop-server`` system route (see js/src/debug/dev_server.ts),
+    and by a newer run of the same program that wants this server's port
+    (see drafter.app.ports.request_remote_stop). The terminal message names
+    whichever of the two asked. Accepts only POST, so a stray link or prefetch cannot stop the server.
     The actual shutdown is whatever callable `serve_app_once` stored on the
     application state; the in-flight response is still delivered because
     uvicorn finishes open requests before exiting.
@@ -365,7 +371,10 @@ async def stop_server(req) -> Response:
             {"error": "This server cannot be stopped from the browser"},
             status_code=503,
         )
-    print("Stopping the server because the browser asked it to.")
+    if req.headers.get(STOP_REASON_HEADER) == STOP_REASON_TAKEOVER:
+        print("Stopping the server because a newer run of this program is taking over.")
+    else:
+        print("Stopping the server because the browser asked it to.")
     request_stop()
     return JSONResponse({"ok": True})
 

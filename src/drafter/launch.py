@@ -4,17 +4,273 @@ Provides the start_server() function which routes to either in-browser ClientSer
 or local development AppServer based on execution context.
 """
 
+import ast
+import linecache
 import sys
+from difflib import get_close_matches
+from pathlib import Path
 from typing import Any
 
+from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import get_main_server
 from drafter.config.engines import EngineType
 from drafter.configuration import get_system_configuration
-from drafter.data.errors import StudentFacingError, format_student_facing_error
+from drafter.data.errors import (
+    CATEGORY_CONFIG,
+    SEVERITY_WARNING,
+    ErrorDetails,
+    StudentFacingError,
+    format_student_facing_error,
+)
+from drafter.data.telemetry import ErrorRecord, TelemetryMetadata
 from drafter.helpers.utils import is_web
 
 MaybeBoolStr = bool | str | None
 """Type alias for parameters that accept a bool, a string, or None."""
+
+LEGACY_START_SERVER_OPTIONS = frozenset(
+    {
+        "backend",
+        "cdn_drafter_setup",
+        "debug",
+        "save_uploaded_files",
+        "skulpt",
+        "src_image_folder",
+        "style",
+        "title",
+    }
+)
+"""Options that `start_server` took in Drafter 1 and no longer uses.
+
+They are ignored without a warning, so a program written for Drafter 1
+still starts quietly."""
+
+UNKNOWN_OPTION_ERROR_ID = "config.unknown_start_server_option"
+"""Stable id of the warning for a `start_server` option Drafter does not have."""
+
+START_SERVER_ONLY_OPTIONS = frozenset({"initial_state", "server", "reloader", "argv"})
+"""Parameters of `start_server` that are not settings of their own, offered
+alongside the settings when suggesting a correction for a misspelled option."""
+
+CODE_AFTER_START_ERROR_ID = "config.code_after_start_server"
+"""Stable id of the warning for statements written after `start_server(...)`."""
+
+
+def warn_at_startup(
+    server: ClientServer,
+    error_id: str,
+    message: str,
+    *,
+    title: str,
+    friendly: str,
+    steps: tuple[str, ...],
+    terminal_note: str = "",
+) -> None:
+    """Report a problem with how a program starts its site, without stopping it.
+
+    On the computer the warning is printed in the terminal. In the browser
+    it goes to the debug panel, where it stays listed from page to page.
+
+    Args:
+        server: The server being started, whose debug panel gets the
+            warning in the browser.
+        error_id: Stable, code-like id of the warning.
+        message: The warning itself, in one or two sentences.
+        title: Short title for the debug panel.
+        friendly: Plain-language explanation for the debug panel.
+        steps: What to try, for the debug panel.
+        terminal_note: Extra sentence printed after the message in the
+            terminal, where there is no room for the explanation.
+    """
+    if not is_web():
+        printed = f"{message} {terminal_note}".strip()
+        print(f"Warning: {printed}", file=sys.stderr)
+        return
+    envelope = ErrorDetails(
+        id=error_id,
+        category=CATEGORY_CONFIG,
+        message=message,
+        severity=SEVERITY_WARNING,
+        friendly_title=title,
+        friendly_message=friendly,
+        friendly_steps=steps,
+    )
+    server.event_bus.publish(
+        ErrorRecord(
+            kind=envelope.id,
+            metadata=TelemetryMetadata(source="launch.start_server", level="warning"),
+            correlation=envelope.context,
+            error=envelope,
+        )
+    )
+
+
+def find_unknown_options(
+    options: dict[str, Any], setting_names: frozenset[str]
+) -> list[str]:
+    """Pick out the `start_server` options that Drafter does not have.
+
+    Args:
+        options: The extra keyword arguments given to `start_server`.
+        setting_names: Every setting name Drafter does have.
+
+    Returns:
+        The unknown names, in the order they were written. Options from
+        Drafter 1 (`LEGACY_START_SERVER_OPTIONS`) are left out.
+    """
+    return [
+        name
+        for name in options
+        if name not in setting_names and name not in LEGACY_START_SERVER_OPTIONS
+    ]
+
+
+def suggest_option(name: str, setting_names: frozenset[str]) -> str | None:
+    """Find the real `start_server` option closest to a misspelled one.
+
+    Args:
+        name: The option as it was written.
+        setting_names: Every setting name Drafter does have.
+
+    Returns:
+        The most similar real option, or None when nothing is close.
+    """
+    candidates = sorted(setting_names | START_SERVER_ONLY_OPTIONS)
+    matches = get_close_matches(name, candidates, n=1)
+    return matches[0] if matches else None
+
+
+def describe_unknown_option(name: str, setting_names: frozenset[str]) -> str:
+    """Write the warning for one unknown `start_server` option.
+
+    Args:
+        name: The option as it was written.
+        setting_names: Every setting name Drafter does have.
+
+    Returns:
+        The warning, with a "Did you mean" suggestion when a real option
+        has a similar name.
+    """
+    message = f"Unknown start_server option {name!r}."
+    suggestion = suggest_option(name, setting_names)
+    if suggestion is not None:
+        message += f" Did you mean {suggestion!r}?"
+    return message
+
+
+def report_unknown_options(
+    unknown: list[str], setting_names: frozenset[str], server: ClientServer
+) -> None:
+    """Warn about `start_server` options that were ignored.
+
+    On the computer the warning is printed in the terminal. In the browser
+    it goes to the debug panel. Either way the site still starts.
+
+    Args:
+        unknown: The unknown option names.
+        setting_names: Every setting name Drafter does have.
+        server: The server being started, whose debug panel gets the
+            warning in the browser.
+    """
+    for name in unknown:
+        suggestion = suggest_option(name, setting_names)
+        first_step = (
+            f"Check the spelling of {name!r} in your start_server(...) call."
+            if suggestion is None
+            else f"Change {name!r} to {suggestion!r} in your start_server(...) call."
+        )
+        warn_at_startup(
+            server,
+            UNKNOWN_OPTION_ERROR_ID,
+            describe_unknown_option(name, setting_names),
+            title="Unknown start_server Option",
+            friendly=(
+                f"start_server was given an option named {name!r}, but "
+                "Drafter has no option with that name, so it was ignored. "
+                "The site still started."
+            ),
+            steps=(first_step, "Remove the option if you do not need it."),
+            terminal_note="The option was ignored.",
+        )
+
+
+def find_code_after_call(source: str, call_line: int) -> int | None:
+    """Find the first statement written after a call at the top of a file.
+
+    Args:
+        source: The text of a Python file.
+        call_line: The line of a call in that file (`start_server(...)`).
+
+    Returns:
+        The line of the first top-level statement after the one holding
+        the call, or None when the call is the last thing in the file.
+        Also None when the call is not at the top level of the file (it
+        is inside a function, say), since what runs after it then
+        depends on who called that function.
+    """
+    statements = ast.parse(source).body
+    for index, statement in enumerate(statements):
+        last_line = getattr(statement, "end_lineno", None) or statement.lineno
+        if not statement.lineno <= call_line <= last_line:
+            continue
+        if isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            return None
+        following = statements[index + 1 :]
+        return following[0].lineno if following else None
+    return None
+
+
+def report_code_after_start(
+    server: ClientServer, filename: str, call_line: int
+) -> None:
+    """Warn when a program has statements after its `start_server(...)` call.
+
+    That code does run, but not when a reader of the file would expect:
+    on the computer `start_server` does not return until the server
+    stops, while in the browser it returns as soon as the first page is
+    shown. A file that cannot be read or parsed (code typed at a prompt)
+    is skipped.
+
+    Args:
+        server: The server being started, whose debug panel gets the
+            warning in the browser.
+        filename: The file that called `start_server`.
+        call_line: The line of that call.
+    """
+    # linecache holds the text of code that is running, wherever it came
+    # from. In the browser the program is run under a file name that is not
+    # where its file sits in the virtual file system, so reading that name
+    # from disk would find nothing.
+    source = "".join(linecache.getlines(filename))
+    if not source:
+        return
+    try:
+        next_line = find_code_after_call(source, call_line)
+    except (SyntaxError, ValueError):
+        return
+    if next_line is None:
+        return
+    name = Path(filename).name
+    warn_at_startup(
+        server,
+        CODE_AFTER_START_ERROR_ID,
+        f"{name} has code after start_server(...), starting on line {next_line}.",
+        title="Code After start_server",
+        friendly=(
+            f"Line {next_line} of {name} comes after start_server(...). That "
+            "code does not run when you would expect: on your computer it "
+            "waits until the server stops, and in the browser it runs right "
+            "after the first page appears."
+        ),
+        steps=(
+            "Make start_server(...) the last line of your file.",
+            "Move routes, tests, and anything else the site needs above it.",
+        ),
+        terminal_note=(
+            "That code will not run until the server stops. Make "
+            "start_server(...) the last line of your file."
+        ),
+    )
 
 
 def start_server(
@@ -191,6 +447,15 @@ def start_server(
         return
 
     server = server or get_main_server()
+
+    setting_names = system.setting_names()
+    report_unknown_options(
+        find_unknown_options(extra_configuration, setting_names),
+        setting_names,
+        server,
+    )
+    caller = sys._getframe(1)
+    report_code_after_start(server, caller.f_code.co_filename, caller.f_lineno)
 
     # Primary dispatch based on execution context
     if is_web():

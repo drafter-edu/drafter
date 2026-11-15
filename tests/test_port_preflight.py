@@ -11,6 +11,7 @@ patched out.
 
 import asyncio
 import json
+import os
 import socket
 import threading
 import time
@@ -70,6 +71,7 @@ class _StatusHandler(BaseHTTPRequestHandler):
 
     status_payload: dict = {}
     stop_requests: list[str] = []
+    stop_reasons: list[str | None] = []
 
     def log_message(self, *args):
         pass
@@ -87,6 +89,7 @@ class _StatusHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         self.stop_requests.append(self.path)
+        self.stop_reasons.append(self.headers.get(ports.STOP_REASON_HEADER))
         if self.path == "/" + INTERNAL_ROUTES["STOP_SERVER"] and self.status_payload:
             self.send_response(200)
             self.end_headers()
@@ -105,7 +108,11 @@ def http_server():
         handler = type(
             "Handler",
             (_StatusHandler,),
-            {"status_payload": status_payload or {}, "stop_requests": []},
+            {
+                "status_payload": status_payload or {},
+                "stop_requests": [],
+                "stop_reasons": [],
+            },
         )
         server = HTTPServer((HOST, 0), handler)
         thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -128,6 +135,29 @@ class TestPortIsFree:
         sock, port = listening_socket
         sock.close()
         assert ports.port_is_free(HOST, port) is True
+
+    @pytest.mark.skipif(os.name != "nt", reason="Windows bind semantics")
+    @pytest.mark.parametrize(
+        "family, address",
+        [(socket.AF_INET6, "::"), (socket.AF_INET, "0.0.0.0")],
+    )
+    def test_port_held_on_every_address_is_busy(self, family, address):
+        # `python -m http.server` binds every address. Windows still lets
+        # another socket bind 127.0.0.1 on that port, so a plain bind test
+        # called the port free and two servers shared it.
+        occupant = socket.socket(family, socket.SOCK_STREAM)
+        try:
+            if family == socket.AF_INET6:
+                occupant.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+            occupant.bind((address, 0))
+            occupant.listen(1)
+            port = occupant.getsockname()[1]
+
+            assert ports.port_is_free("localhost", port) is False
+            assert ports.port_is_free(HOST, port) is False
+        finally:
+            occupant.close()
+        assert ports.port_is_free("localhost", port) is True
 
     def test_unresolvable_host_is_left_to_uvicorn(self):
         assert ports.port_is_free("no-such-host.invalid", 8000) is True
@@ -170,6 +200,8 @@ class TestProbe:
         port, handler = http_server({"drafter": "2.0"})
         assert ports.request_remote_stop(HOST, port) is True
         assert handler.stop_requests == ["/" + INTERNAL_ROUTES["STOP_SERVER"]]
+        # The earlier run is told why, so it can say so in its terminal.
+        assert handler.stop_reasons == [ports.STOP_REASON_TAKEOVER]
 
     def test_stop_request_failure_is_reported(self, http_server):
         port, _handler = http_server(None)

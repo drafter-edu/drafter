@@ -84,8 +84,9 @@ def default_stop_server(state, _server: ClientServer):
             BulletedList(
                 [
                     "Your program finishes, the same as pressing Ctrl+C in the terminal.",
-                    "This browser tab stays open, but clicking around the site "
-                    "will no longer work, and reloading the page will fail.",
+                    "This browser tab stays open, and the page already showing "
+                    "may keep responding. Saving your file will no longer "
+                    "update it, and reloading the page will fail.",
                     "To start again, run your Python file again.",
                 ]
             ),

@@ -37,6 +37,21 @@ class SystemConfiguration:
     app_builder: AppBuilderConfiguration
     app_common: AppCommonConfiguration
 
+    def setting_names(self) -> frozenset[str]:
+        """Names of every setting, across all sections.
+
+        Returns:
+            The names `merge_in_args` can set. Anything else it is given
+            is ignored.
+        """
+        return (
+            self.bootstrap.setting_names()
+            | self.client_server.setting_names()
+            | self.app_server.setting_names()
+            | self.app_builder.setting_names()
+            | self.app_common.setting_names()
+        )
+
     def merge_in_args(self, args: dict):
         """
         Merge in arguments from a dictionary into the appropriate configuration objects.

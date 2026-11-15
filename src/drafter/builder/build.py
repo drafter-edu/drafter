@@ -180,6 +180,31 @@ def build_zip(
     print(f"Built zip file at {output_zip}")
 
 
+def zip_output_directory(output_directory: Path) -> Path:
+    """Zip the built site into one file next to its folder.
+
+    The archive is written beside the output folder, not inside it, so
+    building again does not put the last build's zip inside the new one.
+    Paths in the archive are relative to the output folder: unpacking it
+    gives `index.html` and the rest of the site directly.
+
+    Args:
+        output_directory: Root of the built site.
+
+    Returns:
+        The path of the zip file, named after the folder (`dist.zip` for
+        `dist`).
+    """
+    site_root = output_directory.resolve()
+    zip_path = site_root.with_name((site_root.name or "site") + ".zip")
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
+        for file_path in sorted(site_root.rglob("*")):
+            if file_path.is_file() and file_path != zip_path:
+                archive.write(file_path, file_path.relative_to(site_root))
+    print(f"Site zipped to {zip_path}")
+    return zip_path
+
+
 def copy_adjacent_file(
     reference: str, base_dir: Path, output_directory: Path, label: str = "file"
 ) -> Path | None:
@@ -408,6 +433,9 @@ def compile_site(
 
     if system.bootstrap.verbose:
         print(f"Site compiled successfully to {output_directory}")
+
+    if system.app_builder.zip_output:
+        zip_output_directory(output_directory)
 
     # Last, so the notice is the final thing on screen instead of being
     # scrolled away by the copy log above.

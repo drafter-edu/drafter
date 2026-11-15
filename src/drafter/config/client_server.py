@@ -184,7 +184,7 @@ class ClientServerConfiguration(BaseConfiguration):
         )
         result.get_string_if_exists("DRAFTER_SITE_TITLE", "site_title")
         result.get_string_if_exists("DRAFTER_FAVICON", "favicon")
-        result.get_string_if_exists("DRAFTER_FRAMED", "framed")
+        result.get_bool_if_exists("DRAFTER_FRAMED", "framed")
         result.get_string_if_exists("DRAFTER_THEME", "theme")
         result.get_string_if_exists("DRAFTER_DEPLOY_IMAGE_PATH", "deploy_image_path")
         result.get_string_list_if_exists(

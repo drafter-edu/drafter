@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
+from drafter.configuration import get_parser
 from drafter.docs.mkdocs_plugin import DrafterCodeBlockPlugin
 
 MARKDOWN = """# Example
@@ -46,6 +47,49 @@ def test_marked_fence_becomes_source_and_iframe():
     assert '<div class="drafter-demo" data-drafter-demo="' in result
     assert "<iframe" in result
     assert page.file.src_uri in plugin._pages_with_demos
+
+
+def test_demo_frame_may_show_alert_and_prompt_boxes():
+    # A demo's `js` is its own frame, so `js.alert(...)` in a demo is shown
+    # by the frame, which a sandbox forbids unless it allows modals.
+    result = run_page_markdown(make_plugin(), make_page())
+
+    sandbox = result.split('sandbox="')[1].split('"')[0].split()
+    assert "allow-modals" in sandbox
+    assert {"allow-scripts", "allow-forms", "allow-same-origin"} <= set(sandbox)
+
+
+def capture_compile_command(plugin, tmp_path) -> list[str]:
+    """Run `_build_demo` with the compile subprocess replaced by a recorder."""
+    plugin._site_output_dir = tmp_path / "site"
+    plugin._temp_root = tmp_path / "temp"
+    plugin._docs_dir = tmp_path / "docs"
+    plugin._temp_root.mkdir()
+    commands = []
+
+    def fake_run(command, **kwargs):
+        commands.append(command)
+        (plugin._site_output_dir / "demo-1").mkdir(parents=True)
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    with patch("drafter.docs.mkdocs_plugin.subprocess.run", fake_run):
+        plugin._build_demo("from drafter import *\n", "demo-1")
+    return commands[0]
+
+
+@pytest.mark.parametrize("overrides", [{}, {"shared_runtime": True}])
+def test_compile_command_uses_only_flags_the_cli_knows(tmp_path, overrides):
+    # The command once passed `--console_mode`; the real flag is
+    # `--console-mode`, and the CLI ignores flags it does not know, so the
+    # demos silently ran without the console setting.
+    command = capture_compile_command(make_plugin(**overrides), tmp_path)
+
+    parser = get_parser("compile_site")
+    arguments = [argument for argument in command[3:] if argument]
+    parsed, unknown = parser.parse_known_args(arguments)
+
+    assert unknown == []
+    assert parsed.console_mode == "hover"
 
 
 def test_unmarked_fence_left_alone():

@@ -467,18 +467,26 @@ def add_website_file(*filenames: str, server: ClientServer | None = None):
     so that they are copied into the built site when it is deployed.
 
     Use this for files the site needs at runtime (data files that are
-    `open()`ed, images, fonts, and so on). Each file is checked right
-    away; a missing file raises a friendly error that suggests similarly
-    named files.
+    `open()`ed, images, fonts, and so on). A folder can be named too, and
+    everything in it is copied. Each path is checked right away; a missing
+    file raises a friendly error that suggests similarly named files, and
+    so does a name whose capital letters do not match the file's.
 
     Args:
         filenames: One or more paths, relative to your program's folder
-            (such as `"words.txt"` or `"images/logo.png"`).
+            (such as `"words.txt"`, `"images/logo.png"`, or the folder
+            `"images"`).
         server: The server to configure. If None, uses the main server.
 
     Raises:
         StudentFacingError: If no filenames are given, or if any path is
-            not a string, is a URL or absolute path, or cannot be found.
+            not a string, is a URL or absolute path, cannot be found, or
+            is spelled with different capital letters than the file.
+
+    Example:
+        ```python
+        add_website_file("words.txt", "images")
+        ```
     """
     if server is None:
         server = get_main_server()
