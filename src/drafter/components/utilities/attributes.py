@@ -110,12 +110,16 @@ BOOLEAN_ATTRS = [
     "defer",
     "hidden",
     "selected",
-    "autocomplete",
     "inert",
 ]
 """HTML boolean attributes. When one of these has a truthy value it is
 rendered bare (e.g. `disabled` rather than `disabled="True"`); when
 falsy it is omitted from the output entirely."""
+
+ON_OFF_ATTRS = ["autocomplete"]
+"""Attributes whose HTML value is the word `on` or `off` (or, for
+`autocomplete`, a more specific hint such as `email`). A Python `True`
+or `False` is written as `on` or `off`; any other value is kept."""
 
 # All strings are case insensitive
 # Doubles as checking the valid values for certain attributes
@@ -263,6 +267,8 @@ def parse_extra_settings(extra_settings, known_attrs, component_id):
                 if isinstance(value, str):
                     value = value.lower()
                 value = enum_map[value]
+            elif key in ON_OFF_ATTRS and isinstance(value, bool):
+                value = "on" if value else "off"
             # Otherwise handle regular attribute
             escaped_value = html.escape(str(value), quote=True)
             attrs.append(f'{key}="{escaped_value}"')

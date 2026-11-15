@@ -4,6 +4,7 @@ import pytest
 from PIL import Image as PILImage
 
 from drafter import Div, Download, Image, Page, Picture
+from drafter.data.images import decode_data_url
 from drafter.payloads.renderer import render
 
 
@@ -103,6 +104,33 @@ class TestDownloadComponent:
     def test_string_content_unchanged(self):
         html = render(Download("Save", "notes.txt", "hello")).flatten()
         assert 'href="data:text/plain,hello"' in html
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "before # after",
+            "100%41 sure",
+            "ends with a newline\n",
+            "  spaces on both ends  ",
+            'quotes " and <tags> & more',
+            "línea, 日本語, 🙂",
+            "a,b\n1,2\n",
+        ],
+    )
+    def test_text_content_survives_the_data_url(self, text):
+        # A `#` used to end the file, `%41` arrived as `A`, and trailing
+        # whitespace was dropped, because the text was not escaped.
+        html = render(Download("Save", "notes.txt", text)).flatten()
+        href = html.split('href="', 1)[1].split('"', 1)[0]
+
+        assert "#" not in href and "\n" not in href and " " not in href
+        data, mime = decode_data_url(href)
+        assert data.decode("utf-8") == text
+        assert mime == "text/plain"
+
+    def test_content_type_is_kept_for_text(self):
+        html = render(Download("Save", "data.csv", "a,b", "text/csv")).flatten()
+        assert 'href="data:text/csv,a%2Cb"' in html
 
 
 class TestPictureInPageContent:

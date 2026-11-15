@@ -1,4 +1,8 @@
-from drafter import RawHTML, Span, Text
+import pytest
+
+from drafter import Header, RawHTML, Span, Text
+from drafter.data.errors import StudentFacingError
+from drafter.payloads.renderer import render
 
 
 def test_text_equality():
@@ -30,3 +34,33 @@ def test_raw_html():
     )
     assert RawHTML(html_content) != RawHTML(html_content + " Extra")
     assert RawHTML(html_content) == RawHTML(html_content)
+
+
+class TestHeaderLevel:
+    @pytest.mark.parametrize("level", [1, 2, 6])
+    def test_whole_numbers_from_one_to_six_pick_the_tag(self, level):
+        html = render(Header("Title", level)).flatten()
+        assert html.startswith(f"<h{level}")
+
+    @pytest.mark.parametrize("level", [0, 7, -1, 2.5, True, "2", None])
+    def test_other_levels_get_the_header_level_error(self, level):
+        with pytest.raises(StudentFacingError) as raised:
+            Header("Title", level)
+
+        assert str(raised.value) == (
+            f"Header level must be between 1 and 6, not {level!r}"
+        )
+        assert raised.value.friendly_message
+        # Its own title, not the shared "Unusable Value" of a ValueError.
+        assert raised.value.friendly_title == "Header Level Out of Range"
+
+    def test_swapped_arguments_are_pointed_out(self):
+        # Header(2, "Title") used to stop with "'<' not supported between
+        # instances of 'str' and 'int'".
+        with pytest.raises(StudentFacingError) as raised:
+            Header(2, "Title")
+
+        assert "Header('Title', 2)" in raised.value.friendly_steps[0]
+
+    def test_a_number_can_still_be_the_header_text(self):
+        assert render(Header(2026, 2)).flatten().startswith("<h2")

@@ -164,37 +164,40 @@ class LinkContent(Component):
                 valid external URL.
         """
         if not router.has_route(self.url):
+            # Buttons and links are checked the same way, so the messages
+            # name whichever one the student wrote.
+            kind = type(self).__name__
             invalid_external_url_reason = check_invalid_external_url(self.url)
             if invalid_external_url_reason == "is a valid external url":
                 return None
             elif invalid_external_url_reason:
                 raise StudentFacingError(
-                    f"Link `{self.url}` is not a valid external url.\n{invalid_external_url_reason}.",
+                    f"{kind} `{self.url}` is not a valid external url.\n{invalid_external_url_reason}.",
+                    title=f"{kind} Points to a Missing Page",
                     friendly=(
-                        f"This link's url argument (`{self.url}`) does not match "
-                        "any of your route functions and is not a working web "
-                        "address either."
+                        f"This {kind.lower()}'s url argument (`{self.url}`) "
+                        "does not match any of your route functions and is "
+                        "not a working web address either."
                     ),
                     steps=(
                         "Check the url argument for typos.",
-                        "If you meant one of your own pages, pass the route "
-                        "function itself, like Link('Home', index).",
+                        "If you meant one of your own pages, use the name "
+                        f"of its route function, like {kind}('Home', 'index').",
                         "If you meant an external website, use a full address "
                         "that starts with https://",
                     ),
                 )
             raise StudentFacingError(
-                f"Link `{self.text}` points to non-existent page `{self.url}`.",
+                f"{kind} `{self.text}` points to non-existent page `{self.url}`.",
+                title=f"{kind} Points to a Missing Page",
                 friendly=(
-                    f"The link labeled '{self.text}' tries to go to a page "
-                    f"named `{self.url}`, but your site has no route with "
-                    "that name."
+                    f"The {kind.lower()} labeled '{self.text}' tries to go to "
+                    f"a page named `{self.url}`, but your site has no route "
+                    "with that name."
                 ),
                 steps=(
-                    "Check the spelling of the page name in the Link.",
+                    f"Check the spelling of the page name in the {kind}.",
                     "Make sure the page's function has the @route decorator.",
-                    "Pass the route function itself instead of a string, "
-                    "like Link('Next', next_page).",
                 ),
             )
         return None
@@ -261,13 +264,12 @@ class Link(LinkContent):
             context: The active Renderer, providing rendering state and configuration.
 
         Returns:
-            Dictionary including the submit button name and data-submit-button value.
+            Dictionary including the data-submit-button value.
         """
         # External URLs are handled by the bridge's click handler, which lets
         # the browser follow the href natively instead of dispatching a route.
         # TODO: Handle the configuration setting that blocks external links
         attributes = super().get_attributes(context)
-        attributes["name"] = SUBMIT_BUTTON_KEY
         attributes["data-submit-button"] = make_safe_argument(self.get_link_namespace())
         return attributes
 

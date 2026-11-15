@@ -7,6 +7,7 @@ accepting user file submissions.
 
 from dataclasses import dataclass
 from typing import Union
+from urllib.parse import quote
 
 from PIL import Image as PILImage
 
@@ -21,8 +22,8 @@ class Download(Component):
     """Creates a downloadable link for file content.
 
     Renders an anchor whose `href` is a data URL built from the content.
-    String content is embedded directly as `data:<content_type>,<content>`.
-    A `Picture` or PIL Image is encoded at render time as a base64 data
+    String content is percent-encoded into `data:<content_type>,<content>`,
+    so the saved file holds exactly the text that was given. A `Picture` or PIL Image is encoded at render time as a base64 data
     URL using the picture's own MIME type (PNG for PIL images), and
     `content_type` is ignored. Raw bytes are base64-encoded with the
     given `content_type` (or a sniffed image type).
@@ -99,7 +100,11 @@ class Download(Component):
             mime = sniff_image_mime(bytes(content)) or self.content_type
             attributes["href"] = bytes_to_data_url(bytes(content), mime)
         else:
-            attributes["href"] = f"data:{self.content_type},{self.content!s}"
+            # Percent-encode the text: left as written, a `#` would end the
+            # file, `%41` would arrive as `A`, and the browser would drop
+            # trailing whitespace.
+            encoded = quote(str(self.content), safe="")
+            attributes["href"] = f"data:{self.content_type},{encoded}"
         return attributes
 
 
@@ -137,7 +142,15 @@ class FileUpload(FormComponent):
     ]
 
     DEFAULT_ATTRS = {"type": "file"}
-    KNOWN_ATTRS = ["accept", "capture", "multiple", "required", "type", "name"]
+    KNOWN_ATTRS = [
+        "accept",
+        "capture",
+        "multiple",
+        "required",
+        "disabled",
+        "type",
+        "name",
+    ]
 
     def __init__(
         self, name: str, accept: str | list[str] | None = None, **extra_settings

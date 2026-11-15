@@ -3,7 +3,21 @@ Slider and ColorPicker inputs (drafter-edu/drafter#28)."""
 
 import pytest
 
-from drafter import Color, ColorPicker, SelectBox, Slider
+from drafter import (
+    CheckBox,
+    Color,
+    ColorPicker,
+    DateInput,
+    DateTimeInput,
+    FileUpload,
+    RadioButtonGroup,
+    RelatedCheckBox,
+    SelectBox,
+    Slider,
+    TextArea,
+    TextBox,
+    TimeInput,
+)
 from drafter.data.converter import ConversionContext
 from drafter.data.errors import StudentFacingError
 from drafter.payloads.renderer import render
@@ -14,8 +28,11 @@ class TestSelectBoxAllowMissing:
     def test_missing_default_raises_when_allow_missing_false(self):
         with pytest.raises(
             ValueError, match="default_value 'purple' is not in options"
-        ):
+        ) as raised:
             SelectBox("color", ["red", "green", "blue"], "purple")
+
+        # Its own title, not the shared "Unusable Value" of a ValueError.
+        assert raised.value.friendly_title == "SelectBox Default Is Not an Option"
 
     def test_missing_default_allowed_when_flag_true(self):
         component = SelectBox(
@@ -216,3 +233,139 @@ class TestColorPickerAlpha:
         assert repr(picker) == "ColorPicker('ink', '#ff880080', True)"
         assert eval(repr(picker)) == picker
         assert picker != ColorPicker("ink", "#ff8800")
+
+    def test_disabled_goes_on_every_input_and_not_the_wrapper(self):
+        html = self.render("ink", disabled=True)
+
+        wrapper = html.split(">", 1)[0]
+        assert "disabled" not in wrapper
+        assert 'disabled id="ink"' in html
+        # The swatch, the opacity slider, and the hidden input that is
+        # submitted: a disabled field must not send its value.
+        assert html.count(" disabled ") == 3
+        assert '<input disabled name="ink" type="hidden"' in html
+
+    def test_not_disabled_by_default(self):
+        assert "disabled" not in self.render("ink")
+
+
+def render_tag(component) -> str:
+    """The opening tag of a rendered component."""
+    return render(component).flatten().split(">", 1)[0]
+
+
+class TestFieldKeywordsBecomeAttributes:
+    """A keyword missing from KNOWN_ATTRS is rendered as a CSS style, which
+    silently drops it: `min=0` became `style="min: 0"`."""
+
+    @pytest.mark.parametrize(
+        "component, expected",
+        [
+            (
+                TextBox("age", kind="number", min=0, max=10, step=2, required=True),
+                ['min="0"', 'max="10"', 'step="2"', " required"],
+            ),
+            (
+                TextBox("age", disabled=True, readonly=True, list="ages"),
+                [" disabled", " readonly", 'list="ages"'],
+            ),
+            (TextArea("essay", maxlength=10, minlength=2), ['maxlength="10"']),
+            (TextArea("essay", maxlength=10, minlength=2), ['minlength="2"']),
+            (SelectBox("size", ["S", "M"], disabled=True), [" disabled"]),
+            (ColorPicker("ink", disabled=True), [" disabled"]),
+            (FileUpload("photo", disabled=True), [" disabled"]),
+            (
+                DateInput("day", min="2026-01-01", max="2026-12-31", required=True),
+                ['min="2026-01-01"', 'max="2026-12-31"', " required"],
+            ),
+            (
+                DateTimeInput("moment", step=60, disabled=True, readonly=True),
+                ['step="60"', " disabled", " readonly"],
+            ),
+            (TimeInput("alarm", min="08:00", max="17:00"), ['min="08:00"']),
+            (Slider("volume", 0, 10, disabled=True, list="ticks"), [" disabled"]),
+            (Slider("volume", 0, 10, disabled=True, list="ticks"), ['list="ticks"']),
+        ],
+    )
+    def test_keyword_renders_as_an_attribute(self, component, expected):
+        tag = render_tag(component)
+
+        assert "style=" not in tag
+        for attribute in expected:
+            assert attribute in tag
+
+    @pytest.mark.parametrize(
+        "component", [CheckBox("agree", required=True, disabled=True)]
+    )
+    def test_checkbox_keywords_go_on_the_checkbox(self, component):
+        html = render(component).flatten()
+        hidden, checkbox = html.split("/>", 1)
+
+        assert "required" not in hidden and "disabled" not in hidden
+        assert " disabled" in checkbox and " required" in checkbox
+        assert "style=" not in html
+
+    def test_related_checkbox_keywords(self):
+        tag = render_tag(RelatedCheckBox("toppings", "olives", disabled=True))
+
+        assert " disabled" in tag
+        assert "style=" not in tag
+
+    def test_false_leaves_the_attribute_off(self):
+        tag = render_tag(TextBox("age", required=False, disabled=False))
+
+        assert "required" not in tag and "disabled" not in tag
+
+    def test_real_styles_are_still_styles(self):
+        tag = render_tag(TextBox("age", style_color="red", required=True))
+
+        assert 'style="color: red"' in tag
+        assert " required" in tag
+
+
+class TestAutocomplete:
+    """`autocomplete` takes a word, so it must not render as a bare flag."""
+
+    def test_text_value_is_kept(self):
+        assert 'autocomplete="off"' in render_tag(TextArea("essay", autocomplete="off"))
+        assert 'autocomplete="email"' in render_tag(
+            TextBox("email", autocomplete="email")
+        )
+
+    def test_booleans_become_on_and_off(self):
+        assert 'autocomplete="on"' in render_tag(TextBox("name", autocomplete=True))
+        assert 'autocomplete="off"' in render_tag(TextBox("name", autocomplete=False))
+
+
+class TestRadioButtonGroup:
+    def render(self, **kwargs) -> str:
+        group = RadioButtonGroup(
+            "size", ["small", "medium"], default_value="medium", **kwargs
+        )
+        return render(group).flatten()
+
+    def test_id_is_the_field_name_not_the_default_value(self):
+        assert RadioButtonGroup("size", ["small"], default_value="small").get_id() == (
+            "size"
+        )
+        assert RadioButtonGroup("size", ["small"]).get_id() == "size"
+        assert RadioButtonGroup("size", ["small"], id="sizes").get_id() == "sizes"
+
+    def test_wrapper_renders_the_field_name_as_its_id(self):
+        assert self.render().startswith('<div aria-label="size" id="size">')
+
+    def test_required_and_disabled_go_on_every_radio_button(self):
+        html = self.render(required=True, disabled=True)
+        wrapper, radios = html.split(">", 1)
+
+        assert "required" not in wrapper and "disabled" not in wrapper
+        assert "style=" not in wrapper
+        assert radios.count(" disabled ") == 2
+        assert radios.count(" required ") == 2
+
+    def test_styles_stay_on_the_wrapper(self):
+        html = self.render(style_margin="4px")
+        wrapper, radios = html.split(">", 1)
+
+        assert "margin: 4px" in wrapper
+        assert "margin" not in radios

@@ -13,7 +13,7 @@ from drafter.components.utilities.persistence import (
     PERSIST_EVICT_ATTR,
     PERSIST_KEY_ATTR,
 )
-from drafter.data.errors import StudentFacingError
+from drafter.data.errors import StudentFacingError, with_article
 
 
 def resolve_persist_key(target: str | Component) -> str:
@@ -42,8 +42,8 @@ def resolve_persist_key(target: str | Component) -> str:
             f"{target.__class__.__name__} components do not support persistence, "
             "so there is no persisted version to remove.",
             friendly=(
-                f"You gave RemovePersistent a {target.__class__.__name__} "
-                "component, but that kind of component never keeps running "
+                "You gave RemovePersistent "
+                f"{with_article(target.__class__.__name__)} component, but that kind of component never keeps running "
                 "between pages, so there is nothing to remove."
             ),
             steps=(
@@ -56,8 +56,8 @@ def resolve_persist_key(target: str | Component) -> str:
         "RemovePersistent expects a key string or a Component, "
         f"but was given {target!r}.",
         friendly=(
-            "The target argument you gave RemovePersistent was a "
-            f"{type(target).__name__}, but it needs the name (a string) or "
+            "The target argument you gave RemovePersistent was "
+            f"{with_article(type(target).__name__)}, but it needs the name (a string) or "
             "the component you want to remove."
         ),
         steps=(

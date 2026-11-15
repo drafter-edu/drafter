@@ -19,6 +19,18 @@ from drafter.components.utilities.validation import validate_parameter_name
 from drafter.data.colors import Color, to_color
 from drafter.data.errors import StudentFacingError
 
+SHARED_FIELD_ATTRS = ["required", "disabled", "autocomplete"]
+"""HTML attributes that most form fields accept. A keyword that is not in
+a component's `KNOWN_ATTRS` is rendered as a CSS style, so each field
+lists the attributes its HTML element supports."""
+
+DATE_TIME_ATTRS = ["min", "max", "step", "list", "readonly", *SHARED_FIELD_ATTRS]
+"""HTML attributes accepted by the date, time, and date-and-time inputs."""
+
+GROUP_FIELD_ATTRS = ("required", "disabled")
+"""Keywords a `RadioButtonGroup` passes on to each of its radio buttons,
+since they have no effect on the `div` that wraps the group."""
+
 
 class FormComponent(Component):
     """Base class for form input components.
@@ -144,6 +156,12 @@ class TextBox(FormComponent):
         "pattern",
         "minlength",
         "placeholder",
+        "min",
+        "max",
+        "step",
+        "list",
+        "readonly",
+        *SHARED_FIELD_ATTRS,
     ]
     DEFAULT_ATTRS = {"type": "text"}
 
@@ -198,6 +216,8 @@ class TextArea(FormComponent):
         "placeholder",
         "readonly",
         "required",
+        "maxlength",
+        "minlength",
     ]
 
     def __init__(
@@ -233,7 +253,7 @@ class SelectBox(FormComponent):
     default_value: str | None
     allow_missing: bool
 
-    KNOWN_ATTRS = ["name", "multiple", "required", "size"]
+    KNOWN_ATTRS = ["name", "multiple", "size", *SHARED_FIELD_ATTRS]
     ARGUMENTS = [
         ComponentArgument("name"),
         ComponentArgument("options"),
@@ -277,6 +297,7 @@ class SelectBox(FormComponent):
         ):
             raise StudentFacingError(
                 f"default_value '{self.default_value}' is not in options {self.options}",
+                title="SelectBox Default Is Not an Option",
                 friendly=(
                     "The starting choice for this SelectBox has to be one of "
                     "the options in its list, and "
@@ -336,7 +357,7 @@ class CheckBox(FormComponent):
     default_value: bool
 
     tag = "input"
-    KNOWN_ATTRS = ["type", "name", "checked"]
+    KNOWN_ATTRS = ["type", "name", "checked", "required", "disabled"]
 
     ARGUMENTS = [
         ComponentArgument("name"),
@@ -409,7 +430,7 @@ class RelatedCheckBox(FormComponent):
     default_value: bool
 
     tag = "input"
-    KNOWN_ATTRS = ["type", "name", "checked"]
+    KNOWN_ATTRS = ["type", "name", "checked", "required", "disabled"]
     # Members of a group share one name and submit as a single list, so the
     # duplicate-name payload verification must not flag them.
     ALLOWS_SHARED_NAME = True
@@ -522,11 +543,17 @@ class RadioButtonGroup(FormComponent):
             List of RenderPlan objects, one labeled radio per option.
         """
         children: list[PageContent | RenderPlan] = []
+        group_attrs = {
+            key: self.extra_settings[key]
+            for key in GROUP_FIELD_ATTRS
+            if key in self.extra_settings
+        }
         for option in self.options:
             option_attrs: dict[str, Any] = {
                 "type": "radio",
                 "name": self.name,
                 "value": option,
+                **group_attrs,
             }
             if option == self.default_value:
                 option_attrs["checked"] = True
@@ -536,7 +563,13 @@ class RadioButtonGroup(FormComponent):
                 attributes=option_attrs,
                 children=[],
                 self_closing=True,
-                known_attributes=["type", "name", "value", "checked"],
+                known_attributes=[
+                    "type",
+                    "name",
+                    "value",
+                    "checked",
+                    *GROUP_FIELD_ATTRS,
+                ],
             )
             children.append(
                 RenderPlan(
@@ -549,13 +582,21 @@ class RadioButtonGroup(FormComponent):
 
         return children
 
-    def get_id(self) -> str:
-        """Get the identifier for this radio button group.
+    def get_attributes(self, context) -> dict:
+        """Get HTML attributes for the `div` that wraps the group.
+
+        Args:
+            context: Rendering context.
 
         Returns:
-            The element ID or, by default, the group's default value.
+            Dictionary of HTML attributes, without the keywords that
+            belong on the radio buttons themselves (`required` and
+            `disabled`, see `get_children`).
         """
-        return self.extra_settings.get("id", self.default_value)
+        attributes = super().get_attributes(context)
+        for key in GROUP_FIELD_ATTRS:
+            attributes.pop(key, None)
+        return attributes
 
 
 @dataclass(repr=False)
@@ -578,7 +619,7 @@ class DateTimeInput(FormComponent):
 
     tag = "input"
     SELF_CLOSING_TAG = True
-    KNOWN_ATTRS = ["type", "name", "value"]
+    KNOWN_ATTRS = ["type", "name", "value", *DATE_TIME_ATTRS]
 
     ARGUMENTS = [
         ComponentArgument("name"),
@@ -617,7 +658,7 @@ class DateInput(FormComponent):
 
     tag = "input"
     SELF_CLOSING_TAG = True
-    KNOWN_ATTRS = ["type", "name", "value"]
+    KNOWN_ATTRS = ["type", "name", "value", *DATE_TIME_ATTRS]
     DEFAULT_ATTRS = {"type": "date"}
     RENAME_ATTRS = {"default_value": "value"}
 
@@ -659,7 +700,7 @@ class TimeInput(FormComponent):
 
     tag = "input"
     SELF_CLOSING_TAG = True
-    KNOWN_ATTRS = ["type", "name", "value"]
+    KNOWN_ATTRS = ["type", "name", "value", *DATE_TIME_ATTRS]
     RENAME_ATTRS = {"default_value": "value"}
 
     ARGUMENTS = [
@@ -739,7 +780,7 @@ class Slider(FormComponent):
 
     tag = "input"
     SELF_CLOSING_TAG = True
-    KNOWN_ATTRS = ["type", "name", "min", "max", "value", "step"]
+    KNOWN_ATTRS = ["type", "name", "min", "max", "value", "step", "list", "disabled"]
     DEFAULT_ATTRS = {"type": "range"}
     RENAME_ATTRS = {"default_value": "value"}
 
@@ -872,7 +913,7 @@ class ColorPicker(FormComponent):
 
     tag = "input"
     SELF_CLOSING_TAG = True
-    KNOWN_ATTRS = ["type", "name", "value"]
+    KNOWN_ATTRS = ["type", "name", "value", "disabled"]
     DEFAULT_ATTRS = {"type": "color"}
     RENAME_ATTRS = {"default_value": "value", "alpha": ""}
 
@@ -937,6 +978,15 @@ class ColorPicker(FormComponent):
         if not self.alpha:
             return self._plan_tag(context)
 
+        # The wrapper carries the styles and event handlers the student
+        # asked for; input and change events from the two visible controls
+        # bubble up to it. The id stays on the swatch, so a Label written
+        # for the picker still points at something a visitor can click.
+        # `disabled` means nothing on a span, so it goes on the three inputs.
+        attributes = self._handle_extra_settings({}, context, {})
+        attributes.pop("id", None)
+        disabled = bool(attributes.pop("disabled", False))
+
         solid_part = self.default_value[:7]
         alpha_amount = int(self.default_value[7:9], 16)
         hidden_plan = RenderPlan(
@@ -946,9 +996,12 @@ class ColorPicker(FormComponent):
                 "type": "hidden",
                 "name": self.name,
                 "value": self.default_value,
+                # A disabled field is not sent to the route; without this
+                # the hidden input would keep sending the starting color.
+                "disabled": disabled,
             },
             self_closing=True,
-            known_attributes=["type", "name", "value"],
+            known_attributes=["type", "name", "value", "disabled"],
         )
         swatch_plan = RenderPlan(
             kind="tag",
@@ -959,9 +1012,17 @@ class ColorPicker(FormComponent):
                 "value": solid_part,
                 "aria-label": self.name,
                 "oninput": ALPHA_SWATCH_SCRIPT,
+                "disabled": disabled,
             },
             self_closing=True,
-            known_attributes=["type", "id", "value", "aria-label", "oninput"],
+            known_attributes=[
+                "type",
+                "id",
+                "value",
+                "aria-label",
+                "oninput",
+                "disabled",
+            ],
         )
         slider_plan = RenderPlan(
             kind="tag",
@@ -974,6 +1035,7 @@ class ColorPicker(FormComponent):
                 "aria-label": f"{self.name} opacity",
                 "title": "Opacity",
                 "oninput": ALPHA_SLIDER_SCRIPT,
+                "disabled": disabled,
             },
             self_closing=True,
             known_attributes=[
@@ -984,14 +1046,9 @@ class ColorPicker(FormComponent):
                 "aria-label",
                 "title",
                 "oninput",
+                "disabled",
             ],
         )
-        # The wrapper carries the styles and event handlers the student
-        # asked for; input and change events from the two visible controls
-        # bubble up to it. The id stays on the swatch, so a Label written
-        # for the picker still points at something a visitor can click.
-        attributes = self._handle_extra_settings({}, context, {})
-        attributes.pop("id", None)
         return RenderPlan(
             kind="tag",
             tag_name="span",

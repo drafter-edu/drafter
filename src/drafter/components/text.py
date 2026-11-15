@@ -132,20 +132,30 @@ class Header(Component):
             **extra_settings: Additional HTML attributes and styles.
 
         Raises:
-            StudentFacingError: If level is not between 1 and 6.
+            StudentFacingError: If level is not a whole number between 1
+                and 6.
         """
         self.body = body
         self.level = level
-        if level < 1 or level > 6:
+        is_whole_number = isinstance(level, int) and not isinstance(level, bool)
+        if not is_whole_number or level < 1 or level > 6:
+            steps = [
+                "Change the level argument of this Header to a number from 1 to 6.",
+            ]
+            if isinstance(level, str) and not isinstance(body, str):
+                steps.insert(
+                    0,
+                    "The text comes first and the level second, like "
+                    f"Header({level!r}, {body!r}).",
+                )
             raise StudentFacingError(
                 f"Header level must be between 1 and 6, not {level!r}",
+                title="Header Level Out of Range",
                 friendly=(
                     "Headers only come in six sizes, so the level argument "
-                    "must be a number from 1 (biggest) to 6 (smallest)."
+                    "must be a whole number from 1 (biggest) to 6 (smallest)."
                 ),
-                steps=(
-                    "Change the level argument of this Header to a number from 1 to 6.",
-                ),
+                steps=steps,
             )
         self.extra_settings = extra_settings
 
