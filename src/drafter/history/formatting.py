@@ -12,6 +12,42 @@ from drafter.data.images import Picture
 from drafter.helpers.diffing import get_indent_width
 from drafter.history.utils import repr_image
 
+NOT_FROZEN_PREFIX = "# Not frozen:"
+"""How a visit's generated test starts when no test could be written for it.
+
+The text after the prefix says why. The line is a Python comment, so the
+debug panel's Copy and Download output stays valid Python. Mirrored in
+js/src/debug/panels/testing.tsx, which keeps these lines among the tests."""
+
+
+def describe_unfrozen_circular_visit(route_call: str) -> str:
+    """Write the comment that stands in for a test with a circular state.
+
+    A value that contains itself cannot be written as a Python literal, so
+    a visit whose arguments or resulting state are circular gets this
+    one-line comment instead of an `assert_equal(...)` test that could not
+    be pasted and run.
+
+    Args:
+        route_call: The visit's route call, such as `add(State(count=1))`.
+            Only the function name in front of the parenthesis is used.
+
+    Returns:
+        A one-line Python comment naming the route.
+
+    Example:
+        ```python
+        describe_unfrozen_circular_visit("add(Pet(name='Ada', owner=...))")
+        # "# Not frozen: add(...) has a state with a circular reference,
+        #  which cannot be written as a test."
+        ```
+    """
+    function_name = route_call.split("(", 1)[0].strip() or "this route"
+    return (
+        f"{NOT_FROZEN_PREFIX} {function_name}(...) has a state with a circular "
+        "reference, which cannot be written as a test."
+    )
+
 
 class CustomPrettyPrinter(pprint.PrettyPrinter):  # type: ignore
     """PrettyPrinter subclass that renders images as HTML img tags."""

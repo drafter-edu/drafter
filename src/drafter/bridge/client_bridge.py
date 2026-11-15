@@ -86,6 +86,12 @@ class ClientBridge:
         hooks: Server-facing operations injected by the composition root
             via setup_events (None until then). The bridge reaches the
             server only through these, never through a global lookup.
+
+        replaying_startup_events: True only while the events published
+            before this bridge existed are being delivered to it. Settings
+            changed in that time are already part of the first render, so
+            their events are shown in the debug panel and not applied to
+            the page a second time.
     """
 
     site_renderer: SiteRenderer
@@ -95,6 +101,7 @@ class ClientBridge:
     runtime: RuntimeAdapter = field(default_factory=create_runtime)
     site_title: str = "Default Title"
     hooks: ServerHooks | None = None
+    replaying_startup_events: bool = False
 
     def __init__(
         self,
@@ -186,6 +193,7 @@ class ClientBridge:
         self.hooks = hooks
         self.navigator.set_navigation_func(hooks.visit)
         self.navigator.set_state_accessors(hooks.get_state, hooks.set_state)
+        self.navigator.find_missing_arguments = hooks.find_missing_arguments
         self.events.setup_events(
             {
                 "drafter-toggle-frame": lambda event: hooks.toggle_frame(),
@@ -324,6 +332,10 @@ class ClientBridge:
         detail carries `{reason, slot}`). The snapshot travels back to the
         JS SaveLoadManager as StateSnapshot telemetry, which stores it in
         localStorage or downloads it as a file.
+
+        The snapshot also carries the state from just before the captured
+        route ran (kept by the NavigationController), which is the state
+        that loading restores.
         """
         detail = getattr(event, "detail", None)
         reason = str(getattr(detail, "reason", None) or "save")
@@ -333,7 +345,13 @@ class ClientBridge:
         kwargs = dict(last.kwargs) if last else {}
         state = self._require_hooks().get_state()
         snapshot = serialize_state_snapshot(
-            state, route, kwargs, reason, slot, self.site_title
+            state,
+            route,
+            kwargs,
+            reason,
+            slot,
+            self.site_title,
+            state_before_json=self.navigator.last_request_state_json if last else None,
         )
         if snapshot is not None:
             log_record(
@@ -347,13 +365,24 @@ class ClientBridge:
         """Restore a previously saved snapshot and replay its route.
 
         Responds to the debug UI's ``drafter-load-state`` window event (its
-        detail carries `{state_json, route, kwargs_json}`). The state is
+        detail carries `{state_json, route, kwargs_json}` and, for snapshots
+        saved since format version 2, `state_before_json`). The state is
         rebuilt from plain data against the running app's state class,
         restored first, and then the route is re-invoked, because argument
         preparation reads the current state.
+
+        Which state is restored depends on what the snapshot carries. With
+        `state_before_json` (the state from before the saved route ran),
+        that earlier state is restored, so running the route again arrives
+        at the saved page and state, the way the browser's Back button
+        restores a history entry. An older snapshot has only `state_json`
+        (the state from after the route ran); it is restored as before, so
+        a route that changes the state applies its change a second time.
         """
         detail = getattr(event, "detail", None)
         state_json = getattr(detail, "state_json", None)
+        # Falsy when absent (older snapshots) or sent as an empty value.
+        state_before_json = getattr(detail, "state_before_json", None)
         route = str(getattr(detail, "route", None) or "index")
         kwargs_json = str(getattr(detail, "kwargs_json", None) or "{}")
         if not state_json:
@@ -367,7 +396,9 @@ class ClientBridge:
             return
         hooks = self._require_hooks()
         try:
-            restored = deserialize_state_snapshot(str(state_json), hooks.get_state())
+            restored = deserialize_state_snapshot(
+                str(state_before_json or state_json), hooks.get_state()
+            )
         except Exception as e:
             report_bridge_error(
                 "client.load_snapshot_failed",
@@ -437,7 +468,14 @@ class ClientBridge:
         Site.render() is a pure data computation (it never touches the DOM),
         so it is safe to call here just to learn the new cascade-ordered CSS
         list; the SiteRenderer then swaps only the stale stylesheet links.
+
+        A theme chosen before the site starts (`set_website_style` at the
+        top of a program) is replayed to the bridge as soon as it begins
+        listening, which is before `setup_events` installs the hooks. The
+        first render already used that theme, so there is nothing to do.
         """
+        if self.hooks is None:
+            return
         try:
             site_data = self._require_hooks().render_site()
             self.site_renderer.refresh_theme_css(site_data.additional_css)
@@ -527,9 +565,14 @@ class ClientBridge:
         events into a bridge whose DOM no longer exists, and an in-flight
         click (its form data is collected through a promise chain) could
         still dispatch a visit on the dead instance after the reset.
+
+        The site's own JavaScript is told first, through the
+        `drafter-cleanup` window event, so it can remove what it set up
+        before the program runs again in the same page.
         """
         self.navigator.teardown()
         try:
+            self.events.dispatch_cleanup()
             self.events.teardown()
         except Exception as e:
             report_bridge_error(
@@ -666,6 +709,9 @@ class ClientBridge:
         debug-entry button. Settings that change nothing in the page (such
         as the site information fields) are accepted as they are; only a key
         that is not a setting at all is reported as a bridge error.
+        Updates made before the site started are the exception: the first
+        render was built from the finished configuration, so while
+        `replaying_startup_events` is set they are not applied again.
         Every event (including configuration updates) is
         then forwarded to the debug panel; events the panel does not handle
         are logged to the console.
@@ -691,7 +737,10 @@ class ClientBridge:
                 phase="event_dispatch",
             )
             return False
-        if event["kind"] == UpdatedConfigurationEvent.kind:
+        if (
+            event["kind"] == UpdatedConfigurationEvent.kind
+            and not self.replaying_startup_events
+        ):
             if event.get("key") == "framed":
                 self.site_renderer.toggle_frame()
             elif event.get("key") == "in_debug_mode":

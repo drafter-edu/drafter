@@ -106,3 +106,159 @@ class TestExternalLinks:
         manager.click_handler(event)
 
         do_navigation.assert_called_once()
+
+
+class TestSubmitterForFormData:
+    """Only a submit button may be handed to FormData as the submitter.
+
+    Any element can carry data-nav (a span written with RawHTML, say), and
+    the browser's FormData constructor throws for anything that is not a
+    submit button.
+    """
+
+    def click(self, monkeypatch, tag, element_type=None):
+        manager, runtime = make_manager()
+        captured = []
+        monkeypatch.setattr(
+            events_module,
+            "get_all_event_data",
+            lambda runtime, target, event, submitter, scope: captured.append(submitter)
+            or [],
+        )
+        runtime.finish_promises.side_effect = lambda promises, callback: callback([])
+        do_navigation = MagicMock()
+        root = mount(manager, do_navigation)
+        event, nav_element = make_click_event("guess", tag=tag, root=root)
+        attributes = {"data-nav": "guess", "type": element_type}
+        nav_element.getAttribute = attributes.get
+
+        manager.click_handler(event)
+
+        do_navigation.assert_called_once()
+        return captured[0], nav_element
+
+    def test_span_is_not_passed_as_the_submitter(self, monkeypatch):
+        submitter, _ = self.click(monkeypatch, "SPAN")
+        assert submitter is None
+
+    def test_anchor_is_not_passed_as_the_submitter(self, monkeypatch):
+        submitter, _ = self.click(monkeypatch, "A")
+        assert submitter is None
+
+    def test_plain_button_is_not_passed_as_the_submitter(self, monkeypatch):
+        submitter, _ = self.click(monkeypatch, "BUTTON", "button")
+        assert submitter is None
+
+    def test_submit_button_is_the_submitter(self, monkeypatch):
+        submitter, element = self.click(monkeypatch, "BUTTON", "submit")
+        assert submitter is element
+
+    def test_button_without_a_type_is_the_submitter(self, monkeypatch):
+        submitter, element = self.click(monkeypatch, "BUTTON")
+        assert submitter is element
+
+    def test_submit_input_is_the_submitter(self, monkeypatch):
+        submitter, element = self.click(monkeypatch, "INPUT", "submit")
+        assert submitter is element
+
+    def test_text_input_is_not_passed_as_the_submitter(self, monkeypatch):
+        submitter, _ = self.click(monkeypatch, "INPUT", "text")
+        assert submitter is None
+
+
+class TestBrokenImages:
+    """An image the browser cannot load used to fail without a word."""
+
+    def mount_with_events(self, monkeypatch):
+        manager, runtime = make_manager()
+        reported = []
+        monkeypatch.setattr(
+            events_module,
+            "report_bridge_warning",
+            lambda event_type, message, source, details, **extra: reported.append(
+                (event_type, message)
+            ),
+        )
+        root = mount(manager, MagicMock())
+        return manager, root, reported
+
+    def image_error(self, source, tag="IMG"):
+        event = MagicMock()
+        event.target.tagName = tag
+        event.target.getAttribute = lambda name: source if name == "src" else None
+        return event
+
+    def test_listener_catches_the_event_on_the_way_down(self, monkeypatch):
+        manager, root, _ = self.mount_with_events(monkeypatch)
+
+        # An image's error event does not bubble, so the listener has to
+        # be a capturing one (third argument True).
+        root.addEventListener.assert_any_call(
+            "error", manager.image_error_handler, True
+        )
+
+    def test_missing_image_is_reported_by_name(self, monkeypatch):
+        manager, _, reported = self.mount_with_events(monkeypatch)
+
+        manager.image_error_handler(self.image_error("corgi.png"))
+
+        assert reported == [
+            ("client.image_load_failed", "The image 'corgi.png' could not be loaded.")
+        ]
+
+    def test_same_image_is_reported_once(self, monkeypatch):
+        manager, _, reported = self.mount_with_events(monkeypatch)
+
+        manager.image_error_handler(self.image_error("corgi.png"))
+        manager.image_error_handler(self.image_error("corgi.png"))
+        manager.image_error_handler(self.image_error("cat.png"))
+
+        assert [message for _, message in reported] == [
+            "The image 'corgi.png' could not be loaded.",
+            "The image 'cat.png' could not be loaded.",
+        ]
+
+    def test_other_failed_elements_are_ignored(self, monkeypatch):
+        manager, _, reported = self.mount_with_events(monkeypatch)
+
+        manager.image_error_handler(self.image_error("clip.mp4", tag="VIDEO"))
+
+        assert reported == []
+
+    def test_long_data_address_is_shortened(self, monkeypatch):
+        manager, _, reported = self.mount_with_events(monkeypatch)
+
+        manager.image_error_handler(
+            self.image_error("data:image/png;base64," + "A" * 5000)
+        )
+
+        (_, message) = reported[0]
+        assert len(message) < 200
+        assert "..." in message
+
+    def test_remounting_replaces_the_listener(self, monkeypatch):
+        manager, root, _ = self.mount_with_events(monkeypatch)
+        first = manager.image_error_handler
+
+        manager.mount_navigation(MagicMock())
+
+        root.removeEventListener.assert_any_call("error", first, True)
+        assert manager.image_error_handler is not first
+
+    def test_teardown_releases_the_listener(self, monkeypatch):
+        manager, _, _ = self.mount_with_events(monkeypatch)
+        handler = manager.image_error_handler
+
+        manager.teardown()
+
+        manager.runtime.cleanup_event_handler.assert_any_call(handler)
+        assert manager.image_error_handler is None
+
+    def test_warning_has_friendly_steps(self):
+        from drafter.data.error_explainer import ID_EXPLANATIONS
+
+        title, message, steps = ID_EXPLANATIONS["client.image_load_failed"]
+
+        assert title == "Image Did Not Load"
+        assert "broken picture" in message
+        assert any("capital letters" in step for step in steps)

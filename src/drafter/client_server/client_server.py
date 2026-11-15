@@ -47,7 +47,9 @@ from drafter.data.errors import (
 from drafter.data.request import Request
 from drafter.data.response import Response
 from drafter.data.telemetry import ErrorRecord, TelemetryMetadata
+from drafter.history.formatting import describe_unfrozen_circular_visit
 from drafter.history.state import SiteState
+from drafter.history.utils import has_circular_reference
 from drafter.monitor.audit import log_error, log_record
 from drafter.monitor.bus import EventBus, Subscription
 from drafter.payloads.kinds.error_page import SimpleErrorPage
@@ -144,6 +146,11 @@ class ClientServer:
         # call once argument preparation succeeds, and attached to any error
         # envelope raised during the visit (see make_visit_error).
         self._route_call_reprs: dict[int, tuple[str, bool]] = {}
+        # Ids of in-flight requests whose route arguments contain a circular
+        # reference. Such a call cannot be written as Python source, so the
+        # visit gets a comment in place of a generated regression test (see
+        # format_payload).
+        self._circular_route_calls: set[int] = set()
         self.transition("initialized")
 
     def reset(self) -> None:
@@ -449,6 +456,27 @@ class ClientServer:
         )
         return dependencies
 
+    FRAMEWORK_DEPENDENCY_NAMES = ("_server", "_configuration", "_request")
+    """Parameter names every route can ask for and get from Drafter itself
+    (the fixed part of `_get_extra_dependencies`)."""
+
+    def find_missing_arguments(self, url: str) -> list[str]:
+        """Name the parameters a route could not fill if opened by address.
+
+        A page opened from its address (a reload, a bookmark, a shared
+        link) brings no form fields or component arguments with it. A
+        route that needs some cannot be opened that way.
+
+        Args:
+            url: The route to check.
+
+        Returns:
+            The required parameters that would have no value, or an empty
+            list when the route can run with nothing but the state. Also
+            empty for a route that does not exist.
+        """
+        return self.router.find_missing_arguments(url, self.FRAMEWORK_DEPENDENCY_NAMES)
+
     @staticmethod
     def _approximate_route_call(route_func, request: Request) -> str:
         """Best-effort route call string from the raw request values.
@@ -500,6 +528,12 @@ class ClientServer:
             # The exact bound call is now known; error envelopes raised for
             # the rest of this visit will carry it (see make_visit_error).
             self._route_call_reprs[request.id] = (representation, True)
+            # Checked now, before the route runs and can change its arguments.
+            if any(
+                has_circular_reference(argument)
+                for argument in (*args, *kwargs.values())
+            ):
+                self._circular_route_calls.add(request.id)
             log_record(
                 RequestParseEvent(
                     request_id=request.id,
@@ -629,6 +663,12 @@ class ClientServer:
     ) -> str:
         """Format a payload for history panel display.
 
+        A visit whose route arguments or resulting state contain a circular
+        reference cannot be written as a test, because a value that contains
+        itself has no Python literal. Such a visit gets a one-line comment
+        in place of its `assert_equal(...)` test (see
+        `describe_unfrozen_circular_visit`).
+
         Args:
             request: Associated request for error context.
             representation: String representation of arguments.
@@ -636,14 +676,21 @@ class ClientServer:
             configuration: Current server configuration.
 
         Returns:
-            str: Formatted payload representation.
+            str: Formatted payload representation, the comment described
+            above, or an empty string for a payload that has no test form.
 
         Raises:
             ErrorDetails: If formatting fails.
         """
         # Format the payload for display in the history panel
         try:
-            return payload.format(self.state, representation, configuration)
+            formatted = payload.format(self.state, representation, configuration)
+            if formatted and (
+                request.id in self._circular_route_calls
+                or has_circular_reference(getattr(payload, "state", None))
+            ):
+                return describe_unfrozen_circular_visit(representation)
+            return formatted
         except Exception as e:
             raise self.make_visit_error(
                 "payload.formatting_failed",
@@ -836,6 +883,7 @@ class ClientServer:
                 return response
         finally:
             self._route_call_reprs.pop(request.id, None)
+            self._circular_route_calls.discard(request.id)
             get_main_event_bus().unsubscribe(warning_subscription)
 
     def make_success_response(

@@ -8,7 +8,7 @@ signatures and prepares handler arguments by running the parameter pipeline
 """
 
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from typing import Any
 
@@ -304,6 +304,46 @@ class Router:
             representation,
             bound.provenance,
         )
+
+    def find_missing_arguments(
+        self, url: str, injected_names: Iterable[str] = ()
+    ) -> list[str]:
+        """Name the parameters a route could not fill if it got no values.
+
+        A page opened from its address (a reload, a bookmark, a shared
+        link) arrives with no form fields, component arguments, or event
+        values. This runs the same binding a real request gets, with an
+        empty payload, so the answer always agrees with what the route
+        would actually report.
+
+        Args:
+            url: The route to check.
+            injected_names: Names of the framework values Drafter passes by
+                parameter name (such as `_server`), which never count as
+                missing.
+
+        Returns:
+            The required parameters left without a value, in declaration
+            order. Empty when the route can run as it is, and also when no
+            such route exists (visiting it reports that on its own).
+        """
+        registered_url = self.resolve_url(url)
+        signature = (
+            self.signatures.get(registered_url) if registered_url is not None else None
+        )
+        if signature is None:
+            return []
+        bound = RouteBinder().bind(
+            signature,
+            {},
+            converter_registry=CONVERTER_REGISTRY,
+            extra_dependencies=dict.fromkeys(injected_names),
+        )
+        return [
+            diagnostic.parameter
+            for diagnostic in bound.diagnostics
+            if diagnostic.code == "missing_required_parameter" and diagnostic.parameter
+        ]
 
     def report_diagnostics(
         self, request: Request, diagnostics: tuple[RouteDiagnostic, ...]

@@ -7,6 +7,13 @@ Loading rebuilds the state with the same converter registry the router uses
 for route parameters, targeting the running app's state class — no pickle,
 so snapshots survive code edits/restarts as long as the state's shape still
 matches.
+
+The state is stored twice: as it is at the moment of saving (after the
+route that produced the current page ran) and as it was just before that
+route ran. Loading restores the earlier one and runs the route again, the
+way the browser's Back button restores a history entry, so the student
+arrives at the page and state they saved. Restoring the later state and
+running the route again would apply the route's changes twice.
 """
 
 import dataclasses
@@ -169,6 +176,7 @@ def serialize_state_snapshot(
     reason: str,
     slot: str,
     app_title: str = "",
+    state_before_json: str | None = None,
 ) -> StateSnapshotEvent | None:
     """Capture the given state and route invocation as a snapshot event.
 
@@ -180,6 +188,11 @@ def serialize_state_snapshot(
         reason: "save" (store in a slot) or "download" (save as a file).
         slot: The storage slot the UI asked to save into.
         app_title: The site title at capture time.
+        state_before_json: The state as it was just before the captured
+            invocation ran, already encoded by `encode_state_json`, or None
+            when it is not known. Loading the snapshot restores this state
+            and runs the route again; without it, loading falls back to
+            restoring `state` and running the route on top of it.
 
     Returns:
         The StateSnapshotEvent to publish, or None when the state could not
@@ -216,6 +229,7 @@ def serialize_state_snapshot(
         state, route, kwargs_json, reason, slot, app_title
     )
     event.state_json = state_json
+    event.state_before_json = state_before_json or ""
     event.state_type = type(state).__name__
     return event
 

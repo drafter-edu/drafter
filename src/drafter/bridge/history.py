@@ -167,7 +167,7 @@ class BrowserHistory:
         """The href of the window this instance renders into (may be an iframe)."""
         return self.runtime.context.window.location.href
 
-    def add_to_history(self, request: Request):
+    def add_to_history(self, request: Request) -> str | None:
         """Push a request onto the browser history stack.
 
         Stores the request's id, route, and JSON-serialized kwargs as the
@@ -181,6 +181,11 @@ class BrowserHistory:
 
         Args:
             request: The request being navigated to.
+
+        Returns:
+            The state snapshot stored in the entry (the application state
+            from before the request's route runs, as snapshot JSON), or
+            None when the entry was recorded without one.
         """
         url = request.url
         request_id = request.id
@@ -211,6 +216,7 @@ class BrowserHistory:
         full_url.searchParams.set(ROUTE_QUERY_PARAM, url)
         self.runtime.history_push_state(state, "", full_url.toString())
         debug_log("client.add_to_history", state, request)
+        return state_json
 
     def convert_popstate_to_request(self, event: Any) -> Request:
         """Turn a browser popstate event into a Request to replay.

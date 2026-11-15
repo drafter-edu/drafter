@@ -183,6 +183,7 @@ class TestBridge:
             configuration=SimpleNamespace(state_display=True),
             navigator=SimpleNamespace(state_display=True),
             _handle_debug_events=MagicMock(return_value=True),
+            replaying_startup_events=False,
         )
         event = UpdatedConfigurationEvent(key="state_display", value=False)
 

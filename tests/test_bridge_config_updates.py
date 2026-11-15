@@ -128,3 +128,84 @@ class TestUnknownSetting:
         )
 
         assert kinds(seen).count(UNHANDLED) == 1
+
+
+class TestSettingsMadeBeforeTheSiteStarted:
+    """Updates from before the bridge existed are already in the first render.
+
+    Applying them again undid `set_website_framed(False)` (the update is a
+    toggle) and let an older `set_website_title` replace the title given to
+    `start_server`.
+    """
+
+    def test_replayed_frame_update_does_not_toggle_the_frame(self, server):
+        bridge = make_bridge(ClientServerConfiguration())
+        bridge.replaying_startup_events = True
+
+        handled = bridge.handle_server_event(
+            UpdatedConfigurationEvent(key="framed", value=False)
+        )
+
+        bridge.site_renderer.toggle_frame.assert_not_called()
+        # The debug panel still lists the change.
+        assert handled is True
+
+    def test_live_frame_update_still_toggles_the_frame(self, server):
+        bridge = make_bridge(ClientServerConfiguration())
+
+        bridge.handle_server_event(UpdatedConfigurationEvent(key="framed", value=False))
+
+        bridge.site_renderer.toggle_frame.assert_called_once()
+
+    def test_replayed_title_does_not_replace_the_rendered_one(self, server):
+        configuration = ClientServerConfiguration(site_title="From start_server")
+        bridge = make_bridge(configuration)
+        bridge.replaying_startup_events = True
+
+        bridge.handle_server_event(
+            UpdatedConfigurationEvent(key="site_title", value="From the function")
+        )
+
+        assert configuration.site_title == "From start_server"
+
+    def test_startup_replays_with_the_flag_set_and_clears_it(self, server, monkeypatch):
+        from drafter.bridge import bridger
+
+        flags_seen: list[tuple[str, bool]] = []
+
+        class RecordingBridge:
+            replaying_startup_events = False
+
+            def __init__(self, configuration, context=None):
+                pass
+
+            def setup_site(self, rendered_site):
+                pass
+
+            def handle_server_event(self, event):
+                flags_seen.append((event.kind, self.replaying_startup_events))
+
+            def setup_events(self, hooks):
+                pass
+
+            def start(self):
+                # Made after start-up, so it has to reach the page.
+                server.reconfigure(framed=True)
+                self.flag_at_start = self.replaying_startup_events
+
+        created: list[RecordingBridge] = []
+
+        def make_recording_bridge(configuration, context=None):
+            created.append(RecordingBridge(configuration, context))
+            return created[-1]
+
+        monkeypatch.setattr(bridger, "ClientBridge", make_recording_bridge)
+        monkeypatch.setattr(bridger.DomContext, "for_window", lambda window: None)
+        # Made before start-up, the way set_website_framed(False) is.
+        server.reconfigure(framed=False)
+
+        bridger.run_client_bridge(MagicMock(), server, None)
+
+        updates = [flag for kind, flag in flags_seen if kind == "UpdatedConfiguration"]
+        assert updates == [True, False]
+        assert created[0].flag_at_start is False

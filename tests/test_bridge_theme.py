@@ -110,6 +110,7 @@ class TestHandleServerEventTheme:
             site_renderer=MagicMock(),
             _refresh_site_theme=MagicMock(),
             _handle_debug_events=MagicMock(return_value=True),
+            replaying_startup_events=False,
         )
         event = UpdatedConfigurationEvent(key="theme", value="sakura")
 
@@ -118,6 +119,36 @@ class TestHandleServerEventTheme:
         assert handled is True
         assert bridge.configuration.theme == "sakura"
         bridge._refresh_site_theme.assert_called_once_with()
+
+    def test_theme_set_before_start_reports_no_error(
+        self, fresh_server, captured_events
+    ):
+        # set_website_style("water") at the top of a program is replayed to
+        # the bridge before its hooks exist. That used to leave "Could not
+        # apply the new theme to the page" in the debug panel even though
+        # the first render had already used the theme.
+        bridge = SimpleNamespace(hooks=None, site_renderer=MagicMock())
+
+        ClientBridge._refresh_site_theme(bridge)
+
+        bridge.site_renderer.refresh_theme_css.assert_not_called()
+        assert not events_of_type(captured_events, "client.theme_refresh_failed")
+
+    def test_theme_refresh_failure_is_still_reported(
+        self, fresh_server, captured_events
+    ):
+        hooks = MagicMock()
+        hooks.render_site.side_effect = RuntimeError("no site")
+        bridge = SimpleNamespace(
+            hooks=hooks,
+            _require_hooks=lambda: hooks,
+            site_renderer=MagicMock(),
+            configuration=SimpleNamespace(theme="water"),
+        )
+
+        ClientBridge._refresh_site_theme(bridge)
+
+        assert len(events_of_type(captured_events, "client.theme_refresh_failed")) == 1
 
 
 class FakeLink:

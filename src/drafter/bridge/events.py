@@ -40,9 +40,18 @@ DOUBLE_PRESS_THRESHOLD = 600  # milliseconds
 """Maximum gap, in milliseconds, between two presses of a hotkey combination
 for them to count as a double press and trigger the hotkey's callback."""
 
+IMAGE_SOURCE_PREVIEW_LENGTH = 120
+"""How much of an image's address a load-failure warning shows. An image
+given as a `data:` address can be thousands of characters long."""
+
 DRAFTER_PAGE_LOADED_EVENT = "drafter-page-loaded"
 """Name of the custom window event dispatched after each page render,
 carrying the route, request id, and response id in its detail."""
+
+DRAFTER_CLEANUP_EVENT = "drafter-cleanup"
+"""Name of the custom window event dispatched when a running site is about
+to be replaced (live reload re-running the program in the same page). A
+site's own JavaScript listens for it to remove what it set up."""
 
 # Set on an element once its per-element handlers are attached. Persisted
 # components survive page swaps with their listeners intact, so re-mounting on
@@ -76,6 +85,10 @@ class EventManager:
         submit_handler: The currently mounted (wrapped) submit handler on
             the form element, or None before mounting.
 
+        image_error_handler: The currently mounted (wrapped) listener on
+            the body element that reports images the browser could not
+            load, or None before mounting.
+
         listeners: Wrapped window-level listeners keyed by event name, kept
             so re-registration can remove and clean up the old handler.
 
@@ -96,6 +109,7 @@ class EventManager:
     runtime: RuntimeAdapter
     click_handler: Any = None
     submit_handler: Any = None
+    image_error_handler: Any = None
     listeners: dict[str, Callable] = field(default_factory=dict)
     hotkey_events: dict[str, Callable[[], None]] = field(default_factory=dict)
     last_press_time: int = 0
@@ -105,6 +119,10 @@ class EventManager:
         self.runtime = runtime
         self.click_handler = None
         self.submit_handler = None
+        # The wrapped listener that reports images the browser could not
+        # load, and the addresses already reported (one warning each).
+        self.image_error_handler = None
+        self.reported_images: set[str] = set()
         self.listeners = {}
 
         self.hotkey_events = {}
@@ -314,7 +332,7 @@ class EventManager:
                     self.runtime,
                     target,
                     event,
-                    None if is_anchor else nearest_nav_link,
+                    nearest_nav_link if is_submit_button(nearest_nav_link) else None,
                     self.scope,
                 )
                 if not is_anchor:
@@ -430,9 +448,65 @@ class EventManager:
                 phase="setup",
             )
 
+        self.watch_images(root)
+
         # Mount event handlers for components
         self.mount_event_handlers(root, do_navigation)
         debug_log("client.mount_navigation_complete")
+
+    def watch_images(self, root: Any) -> None:
+        """Report any image in the page that the browser fails to load.
+
+        A missing image is otherwise silent: the page shows a broken
+        picture, there is no error page, and nothing in the debug panel
+        says why. An image's `error` event does not bubble, so one
+        listener on the body catches it on the way down (the capture
+        phase) for every image, including ones written with RawHTML.
+        Mounting again replaces the previous listener.
+
+        Args:
+            root: The instance's body element, which every page is
+                rendered into.
+        """
+        if self.image_error_handler is not None:
+            root.removeEventListener("error", self.image_error_handler, True)
+            self.runtime.cleanup_event_handler(self.image_error_handler)
+
+        def handle_image_error(event: Any) -> None:
+            target = getattr(event, "target", None)
+            tag_name = str(getattr(target, "tagName", "") or "").lower()
+            if target is None or tag_name != "img":
+                return
+            self.report_image_failure(str(target.getAttribute("src") or ""))
+
+        self.image_error_handler = self.runtime.wrap_event_handler(handle_image_error)
+        root.addEventListener("error", self.image_error_handler, True)
+
+    def report_image_failure(self, source: str) -> None:
+        """Warn in the debug panel that an image could not be loaded.
+
+        The warning carries no request id, so it stays listed while the
+        student moves between pages. Each address is reported once, since
+        the same broken image fires again every time its page is drawn.
+
+        Args:
+            source: The image's `src` as written in the page.
+        """
+        if source in self.reported_images:
+            return
+        self.reported_images.add(source)
+        shown = (
+            source
+            if len(source) <= IMAGE_SOURCE_PREVIEW_LENGTH
+            else (source[:IMAGE_SOURCE_PREVIEW_LENGTH] + "...")
+        )
+        report_bridge_warning(
+            "client.image_load_failed",
+            f"The image {shown!r} could not be loaded.",
+            "bridge.events.watch_images",
+            f"The browser reported an error loading <img src={shown!r}>.",
+            phase="event_dispatch",
+        )
 
     def _mount_well_known_button(
         self, tag_key: str, callback: Callable[[], None], log_name: str
@@ -571,6 +645,20 @@ class EventManager:
         self.runtime.dispatch_window_event(event)
         debug_log("client.page_loaded_event_dispatched", detail)
 
+    def dispatch_cleanup(self) -> None:
+        """Dispatch the drafter-cleanup custom event on the window.
+
+        Fired once when this instance is being discarded, before its own
+        listeners are removed. Live reload runs a saved program again in
+        the same page, so JavaScript the site added with `add_website_js`
+        runs again too, and Drafter cannot remove listeners that code
+        attached. Code that listens for this event can undo its own
+        set-up, so the next run starts clean.
+        """
+        event = self.runtime.create_custom_event(DRAFTER_CLEANUP_EVENT, {})
+        self.runtime.dispatch_window_event(event)
+        debug_log("client.cleanup_event_dispatched")
+
     def _register_event(self, event_name: str, handler: Callable[[Any], Any]) -> None:
         window = self.runtime.context.window
         if self.listeners.get(event_name):
@@ -640,12 +728,41 @@ class EventManager:
         self.hotkey_listener_ready = False
         self.hotkey_events.clear()
 
-        for handler in (self.click_handler, self.submit_handler):
+        for handler in (
+            self.click_handler,
+            self.submit_handler,
+            self.image_error_handler,
+        ):
             if handler is not None:
                 self.runtime.cleanup_event_handler(handler)
         self.click_handler = None
         self.submit_handler = None
+        self.image_error_handler = None
         debug_log("client.event_manager_teardown")
+
+
+def is_submit_button(element: Any) -> bool:
+    """Check whether an element can be given to FormData as the submitter.
+
+    The browser only accepts a submit button there (a `button` that is
+    not `type="button"` or `type="reset"`, or an `input` of type `submit`
+    or `image`) and throws for anything else. Any element can carry
+    `data-nav` or `data-call`, for example a `span` written with RawHTML,
+    so the click handler asks before passing one along.
+
+    Args:
+        element: The clicked DOM element.
+
+    Returns:
+        True if the element is a submit button.
+    """
+    tag_name = str(element.tagName).lower()
+    element_type = str(element.getAttribute("type") or "").lower()
+    if tag_name == "button":
+        return element_type in ("", "submit")
+    if tag_name == "input":
+        return element_type in ("submit", "image")
+    return False
 
 
 def get_single_checkbox_names(form: Any) -> set[str]:

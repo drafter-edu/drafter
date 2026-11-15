@@ -68,6 +68,7 @@ def build_server_hooks(
         get_state=pinned(lambda: server.state.current),
         set_state=pinned(lambda state: server.state.update(state)),
         render_site=pinned(lambda: server.site.render()),
+        find_missing_arguments=pinned(lambda url: server.find_missing_arguments(url)),
     )
 
 
@@ -129,7 +130,17 @@ def run_client_bridge(
     if rendered_site.error:
         return
 
-    subscription = server.do_listen_for_events(client_bridge.handle_server_event)
+    # Subscribing also delivers everything published before the bridge
+    # existed. Settings changed in that time (set_website_title(...) above
+    # start_server, for example) are already in the site just rendered, so
+    # the bridge must not apply them again: a second "framed" update would
+    # flip the frame back, and an older title would replace the one given
+    # to start_server.
+    client_bridge.replaying_startup_events = True
+    try:
+        subscription = server.do_listen_for_events(client_bridge.handle_server_event)
+    finally:
+        client_bridge.replaying_startup_events = False
 
     # Whoever wires an instance to the browser unwires it: when this instance
     # is discarded (reset_server_for_root), remove the bridge's

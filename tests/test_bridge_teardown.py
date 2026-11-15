@@ -17,7 +17,7 @@ if not hasattr(sys.modules.get("js"), "document"):
     sys.modules["js"] = MagicMock()
 
 from drafter.bridge.client_bridge import ClientBridge
-from drafter.bridge.events import EventManager
+from drafter.bridge.events import DRAFTER_CLEANUP_EVENT, EventManager
 from drafter.client_server import commands
 from drafter.client_server.client_server import ClientServer
 from drafter.client_server.commands import (
@@ -246,3 +246,51 @@ class TestTornDownNavigation:
         bridge.navigator.teardown.assert_called_once()
         bridge.events.teardown.assert_called_once()
         assert bridge.debug_panel is None
+
+
+class TestCleanupSignal:
+    """A site's own JavaScript is told before the program runs again.
+
+    Live reload re-runs a saved program in the same page, so code added
+    with `add_website_js` runs again and its listeners pile up. Drafter
+    cannot remove those, so it announces the teardown and lets the code
+    undo its own set-up.
+    """
+
+    def test_event_manager_dispatches_the_cleanup_event(self):
+        runtime = MagicMock()
+        manager = EventManager(runtime)
+
+        manager.dispatch_cleanup()
+
+        runtime.create_custom_event.assert_called_once_with(DRAFTER_CLEANUP_EVENT, {})
+        runtime.dispatch_window_event.assert_called_once_with(
+            runtime.create_custom_event.return_value
+        )
+        assert DRAFTER_CLEANUP_EVENT == "drafter-cleanup"
+
+    def test_bridge_announces_before_removing_its_own_listeners(self):
+        bridge = ClientBridge.__new__(ClientBridge)
+        bridge.navigator = MagicMock()
+        bridge.events = MagicMock()
+        bridge.debug_panel = MagicMock()
+
+        bridge.teardown()
+
+        names = [call[0] for call in bridge.events.method_calls]
+        assert names == ["dispatch_cleanup", "teardown"]
+
+    def test_reset_before_a_rerun_sends_the_event(self):
+        server = ClientServer("test-cleanup-signal")
+        bridge = ClientBridge.__new__(ClientBridge)
+        bridge.navigator = MagicMock()
+        bridge.debug_panel = None
+        runtime = MagicMock()
+        bridge.events = EventManager(runtime)
+        register_server("cleanup-signal-test", server)
+        register_instance_cleanup("cleanup-signal-test", bridge.teardown)
+
+        reset_server_for_root("cleanup-signal-test")
+
+        runtime.create_custom_event.assert_called_once_with(DRAFTER_CLEANUP_EVENT, {})
+        runtime.dispatch_window_event.assert_called_once()

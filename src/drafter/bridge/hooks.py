@@ -50,6 +50,11 @@ class ServerHooks:
         render_site: Renders the server's site data (a pure computation;
             it never touches the DOM), e.g. to learn the current
             cascade-ordered stylesheet list after a theme change.
+
+        find_missing_arguments: Names the parameters a route could not
+            fill if it were opened from the page's address, with no form
+            or component values. An empty list means the route can be
+            opened that way.
     """
 
     activate: Callable[[], None]
@@ -60,3 +65,4 @@ class ServerHooks:
     get_state: Callable[[], Any]
     set_state: Callable[[Any], None]
     render_site: Callable[[], InitialSiteData]
+    find_missing_arguments: Callable[[str], list[str]]

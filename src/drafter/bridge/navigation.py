@@ -14,7 +14,7 @@ from typing import Any
 from drafter.bridge.error_handling import report_bridge_error, report_bridge_warning
 from drafter.bridge.history import BrowserHistory
 from drafter.bridge.log import debug_log
-from drafter.bridge.snapshot import deserialize_state_snapshot
+from drafter.bridge.snapshot import deserialize_state_snapshot, encode_state_json
 from drafter.constants import SUBMIT_BUTTON_KEY
 from drafter.data.details.state import UpdatedStateEvent
 from drafter.data.request import Request
@@ -58,6 +58,11 @@ class NavigationController:
         set_app_state: Replaces the application's current state; None until
             set_state_accessors is called.
 
+        find_missing_arguments: Names the parameters a route could not
+            fill if opened from the page's address; None until the bridge
+            installs it. Used to keep a reload from running a route
+            without the form values it needs.
+
         redirect_loop_stack: Reprs of the redirect payloads currently being
             followed, used to detect redirect loops.
 
@@ -65,6 +70,13 @@ class NavigationController:
             debug menu's "Replay Route" (and state snapshots) can re-invoke
             the current route with the same arguments; None before the
             first request.
+
+        last_request_state_json: The application state as it was just
+            before `last_request` was dispatched, as snapshot JSON, so a
+            saved snapshot can later be loaded the way the Back button
+            restores an entry (earlier state first, then the route). None
+            before the first request, and when that state could not be
+            captured.
 
         request_log: The most recent Requests keyed by their id (bounded to
             REQUEST_LOG_LIMIT entries), so the debug history's "Revisit"
@@ -81,9 +93,11 @@ class NavigationController:
     navigation_func: Callable[[Request], Response] | None = None
     redirect_loop_stack: list[str]
     last_request: Request | None
+    last_request_state_json: str | None
     request_log: dict[int, Request]
     get_app_state: Callable[[], Any] | None
     set_app_state: Callable[[Any], None] | None
+    find_missing_arguments: Callable[[str], list[str]] | None
     #: Whether restored states are described for the debug panel (the
     #: `state_display` configuration setting).
     state_display: bool = True
@@ -98,9 +112,11 @@ class NavigationController:
         self.redirect_loop_stack = []
         self.navigation_func = None
         self.last_request = None
+        self.last_request_state_json = None
         self.request_log = {}
         self.get_app_state = None
         self.set_app_state = None
+        self.find_missing_arguments = None
         self.torn_down = False
 
     def teardown(self) -> None:
@@ -258,6 +274,10 @@ class NavigationController:
         `/?route=--about`, which is also where a deployed site's `404.html`
         sends paths like `/--about`).
 
+        A route that needs form or component values cannot be opened that
+        way (reloading the tab after submitting a form asks for exactly
+        that), so the index is opened in its place with a warning.
+
         The initial request is not added to the browser history, since the
         browser already has an entry for the page itself; instead the
         startup state (and the route opened) is stamped onto that original
@@ -273,9 +293,45 @@ class NavigationController:
         route = "index"
         if self.browser_history_enabled:
             route = self.history.initial_route_from_url() or "index"
+            route = self._first_page_if_arguments_are_missing(route)
             self.history.record_initial_state(route)
         initial_request = Request("page_load", route, {}, {}, "")
         return self.navigate(initial_request, remember=False)
+
+    def _first_page_if_arguments_are_missing(self, route: str) -> str:
+        """Choose the index when the address names a route it cannot run.
+
+        The address carries a route name and nothing else. After a form
+        is submitted the address names the route the form led to, so
+        reloading the tab would run that route with none of the form's
+        values and stop on an error page. The index is opened instead,
+        the route is taken out of the address, and one warning says why.
+
+        Args:
+            route: The route named by the page's address.
+
+        Returns:
+            The route to open: the one given, or "index" when the one
+            given needs values the address does not carry.
+        """
+        if route == "index" or self.find_missing_arguments is None:
+            return route
+        missing = self.find_missing_arguments(route)
+        if not missing:
+            return route
+        self.history.clear_route_from_url()
+        names = ", ".join(f"'{name}'" for name in missing)
+        report_bridge_warning(
+            "bridge.initial_route_needs_arguments",
+            f"The page's address asked for the route '{route}', which needs "
+            f"values an address does not carry ({names}). The first page "
+            "was opened instead.",
+            "bridge.navigation.do_initial_request",
+            f"Missing parameters: {names}",
+            route=route,
+            phase="navigation",
+        )
+        return "index"
 
     def handle_popstate(self, event: Any):
         """Replay a browser back/forward navigation as time travel.
@@ -362,6 +418,10 @@ class NavigationController:
         """Takes a Request and initiates it by invoking the navigation function,
         while also notifying the BrowserHistory.
 
+        The application state from just before the route runs is kept in
+        `last_request_state_json` (the history entry's own snapshot when
+        one is pushed, otherwise a separate capture), for state snapshots.
+
         Args:
             request: The Request to initiate.
             remember: Whether to add the request to the browser history
@@ -385,9 +445,34 @@ class NavigationController:
         debug_log("client.initiate_request", request)
         self._record_request(request)
         if remember and self.browser_history_enabled:
-            self.history.add_to_history(request)
+            self.last_request_state_json = self.history.add_to_history(request)
+        else:
+            self.last_request_state_json = self._capture_state_before_route()
         next_visit = self.navigation_func(request)
         return next_visit
+
+    def _capture_state_before_route(self) -> str | None:
+        """Encode the current application state for `last_request_state_json`.
+
+        Used for requests that push no history entry (the initial page
+        load, replays, back/forward, and every request of an instance with
+        browser history disabled), whose earlier state would otherwise go
+        unrecorded.
+
+        Returns:
+            The state as snapshot JSON, or None when no state accessor is
+            installed or the state cannot be reduced to simple data.
+        """
+        if self.get_app_state is None:
+            return None
+        try:
+            return encode_state_json(self.get_app_state())
+        except Exception:
+            # Not reported here: this runs on every such request, and a
+            # state that cannot be stored is reported when the student
+            # actually saves a snapshot (bridge.snapshot_encode_failed).
+            # Without the earlier state, that snapshot loads the older way.
+            return None
 
     ### Replaying past requests (debug menu "Replay Route" / history "Revisit")
 
