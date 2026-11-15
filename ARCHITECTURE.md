@@ -460,6 +460,19 @@ are named in its docstring and implemented under `src/drafter/router/parameters/
    parameters and warns about unused or colliding values (diagnostic codes in
    `router/parameters/diagnostics.py`).
 
+Two policies live in the bind and convert stages:
+
+- **Unused values.** A button sends every field on its page and a component chooses its own event
+  values, so a leftover form field or event value is normal and is dropped quietly. It warns only on
+  a near miss, when its name is close to a parameter that received nothing. A leftover
+  `Argument(...)` always warns, because the student addressed it to that route.
+- **Blank values.** A number, date or choice field left blank, a file field with no file, and a
+  camera with no photo are a *missing value* (`MISSING_VALUE_ERROR_CODE` in `data/converter.py`).
+  The parameter then receives, in order: `None` when the annotation allows it (union conversion),
+  the parameter's default (the binder), the type's own empty value when it has one (the current
+  date for a `date`), and otherwise the request fails. Blank text is a real value for `str` and
+  `bool` and never counts as missing.
+
 Finally, `build_argument_representation` produces a string representation of the arguments for
 logging/debugging.
 
@@ -522,6 +535,16 @@ When the server starts up, it creates an initial State. If `prerender_initial_pa
 which are embedded in the generated True Page template so SEO crawlers can see initial content.
 When the `ClientBridge` connects, it immediately requests the index page (unless a specific other
 page was requested via query arguments), which runs on the `ClientServer` to generate the real page.
+
+The address carries a route name and nothing else. Before following it, the bridge asks the server
+(`ServerHooks.find_missing_arguments`, backed by `Router.find_missing_arguments`) whether that
+route could run with no form or component values. If it could not (the usual case is a tab reloaded
+on a page that a form led to), the index is requested instead, the route is removed from the
+address, and a `bridge.initial_route_needs_arguments` warning is reported.
+
+The pre-drawn page is thrown away when the live one replaces it, so in the Pyodide template the
+root element is `inert` until the loading screen is removed. Nothing typed into the pre-drawn page
+would survive the swap.
 
 ### Component Persistence ("Parking")
 
@@ -597,6 +620,14 @@ application communicate without tight coupling. Each `ClientServer` instance has
 (`get_main_event_bus()` returns the main instance's). Topic matching supports a `"*"` wildcard and
 prefix matching; events published with no subscribers are queued (bounded at 500) and replayed when
 a subscriber attaches.
+
+The bridge is the subscriber that receives that replay (`run_client_bridge` sets
+`ClientBridge.replaying_startup_events` around it). Replayed events are shown in the debug panel,
+which is how a warning raised before the site started (an unknown `start_server` option, code
+written after `start_server`) reaches it. Replayed `UpdatedConfiguration` events are **not** applied
+to the page: the first render was built from the finished configuration, and applying them again
+would undo toggles (`framed`) and let an earlier setting replace the one given to `start_server`.
+The rule for settings made before start is therefore "last one written wins".
 
 Telemetry records are subclasses of `TelemetryRecord` (`src/drafter/data/telemetry.py`). There is
 deliberately **no envelope type**: each record carries its own `TelemetryMetadata` (source, level,
@@ -712,8 +743,12 @@ Dynamic configs (override static):
    `hide_debug_information()`/`show_debug_information()` (`src/drafter/deploy.py`), all of which
    route through `ClientServer.reconfigure`.
 2. Browser-side debug overrides: the Config debug panel persists overrides to localStorage
-   (`drafter.debug.configuration-overrides.v1`, merged into the `client_server` sub-config by
-   `js/src/config_overrides.ts`), layered on top of the embedded configuration.
+   (`drafter.app.<scope>.debug.configuration-overrides.v1`, merged into the `client_server`
+   sub-config by `js/src/config_overrides.ts`), layered on top of the embedded configuration.
+   The `<scope>` is a hash of the page address and of the main file's id (the
+   `DRAFTER_MAIN_FILE_ID` the index template embeds), built by `js/src/storage_keys.ts`, so
+   overrides, the debug panel's save slots, and its remembered tab belong to one app rather than
+   to every app served at the same origin.
 
 Note that `start_server(...)` keyword arguments are merged into the **static** configuration during
 the Launch Phase (before the server starts), not applied as dynamic reconfiguration.
@@ -802,6 +837,18 @@ Multiple independent Drafter apps can run on one page (used for live examples in
 registry of servers, each with its own event bus and `DomContext` (window/document pair). The site
 can render into a shadow DOM (`SITE_HTML_SHADOW_DOM_TEMPLATE`, `drafter-shadow-host--`,
 `use_shadow_dom`) so styles don't leak between instances or into the host page.
+
+An instance drawn in its own iframe (a documentation demo) shares the hosting page's interpreter,
+where Pyodide's `js` module is the hosting page. Its program is therefore run with its own
+`__builtins__`, in which `import js` returns the iframe's window (`helpers/scoped_js.py`, carried in
+the bundle as text and applied by `scopeJsToWindow` in `js/src/pyodide.index.tsx`). Only the
+program's own file is affected: `sys.modules["js"]`, Drafter's own imports, and any other module the
+program imports still see the hosting page.
+
+When an instance is discarded (live reload re-running the program in the same page, or an embed
+being detached), `ClientBridge.teardown` first dispatches a `drafter-cleanup` event on the window so
+that JavaScript the site added itself can remove what it set up; Drafter can only remove its own
+listeners.
 
 ## File System
 
