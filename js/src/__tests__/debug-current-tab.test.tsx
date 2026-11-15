@@ -161,6 +161,53 @@ describe("CurrentPanel", () => {
 		expect(details).toContain("extra context");
 	});
 
+	test("a warning's steps are listed with its details", () => {
+		// The steps were only drawn on error pages, so advice such as
+		// "Did you mean ...?" on a warning was never seen.
+		const panel = createPanel();
+		const record = errorRecord("warning", "Unknown start_server option 'sight_title'.");
+		const error = (
+			record as unknown as {
+				error: { friendly_message?: string; friendly_steps?: string[]; details?: string };
+			}
+		).error;
+		error.friendly_message = "start_server was given an option it does not have.";
+		error.details = "";
+		error.friendly_steps = [
+			"Change 'sight_title' to 'site_title' in your start_server(...) call.",
+			"Remove the option if you do not need it.",
+		];
+		panel.handleEvent(record);
+
+		const details = query(".drafter-debug-current-problem-details");
+		const steps = Array.from(
+			details.querySelectorAll(".drafter-debug-current-problem-steps li"),
+		).map((item) => item.textContent);
+		expect(steps).toEqual([
+			"Change 'sight_title' to 'site_title' in your start_server(...) call.",
+			"Remove the option if you do not need it.",
+		]);
+	});
+
+	test("a step the details already spell out is not repeated", () => {
+		const panel = createPanel();
+		const record = errorRecord("warning", "The form field 'petnam' was sent to 'adopt'.");
+		const error = (
+			record as unknown as {
+				error: { friendly_steps?: string[]; details?: string };
+			}
+		).error;
+		error.details = "Did you mean the parameter 'pet_name'?";
+		error.friendly_steps = ["Did you mean the parameter 'pet_name'?"];
+		panel.handleEvent(record);
+
+		const problem = query(".drafter-debug-current-problem");
+		expect(
+			problem.querySelector(".drafter-debug-current-problem-steps"),
+		).toBeNull();
+		expect(problem.textContent).toContain("Did you mean the parameter");
+	});
+
 	test("structured envelope data appears pretty-printed in the details", () => {
 		const panel = createPanel();
 		const record = errorRecord("error", "Route crashed");
@@ -419,5 +466,54 @@ describe("StoragePanel", () => {
 			window.localStorage.getItem("drafter.debug.something.v1"),
 		).toBeNull();
 		expect(window.localStorage.getItem("someone-elses-key")).toBe("xyz");
+	});
+
+	test("save slots from before they were kept per app are still listed", () => {
+		// The Save/Load menu no longer offers these (it cannot tell which
+		// app saved them), so this section is where a student can still see
+		// and delete them. Slots saved now sit next to them, under a key
+		// that starts with `drafter.app.`.
+		const oldKey = "drafter.debug.snapshot.v1.slot-3";
+		window.localStorage.setItem(oldKey, '{"kind": "drafter-state-snapshot"}');
+		const panel = createPanel();
+		panel.handleEvent({
+			kind: "StateSnapshot",
+			route: "index",
+			kwargs_json: "{}",
+			state_json: '{"count": 1}',
+			state_before_json: '{"count": 1}',
+			state_type: "State",
+			representation: null,
+			reason: "save",
+			slot: "quick",
+			app_title: "",
+			version: 2,
+		} as unknown as TelemetryRecord);
+		(
+			query(".drafter-debug-storage-refresh") as HTMLButtonElement
+		).click();
+
+		const rows = Array.from(
+			query(".drafter-debug-storage-table").querySelectorAll("tbody tr"),
+		);
+		const keys = rows.map((row) => row.querySelector("code")?.textContent);
+		expect(keys).toContain(oldKey);
+		expect(
+			keys.some(
+				(key) =>
+					key?.startsWith("drafter.app.") &&
+					key.endsWith(".debug.snapshot.v2.quick"),
+			),
+		).toBe(true);
+
+		const oldRow = rows.find(
+			(row) => row.querySelector("code")?.textContent === oldKey,
+		) as HTMLElement;
+		(
+			oldRow.querySelector(
+				".drafter-debug-storage-delete",
+			) as HTMLButtonElement
+		).click();
+		expect(window.localStorage.getItem(oldKey)).toBeNull();
 	});
 });

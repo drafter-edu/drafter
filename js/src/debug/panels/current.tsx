@@ -213,6 +213,18 @@ export class CurrentPanel extends Panel {
 		const technical = technicalParts
 			.filter((part) => part && part !== primary)
 			.join("\n");
+		// The "what to try" steps an envelope carries were only ever drawn
+		// on error pages, so a warning's advice ("Did you mean ...?") was
+		// never seen. They sit with the details, one click away. A step
+		// that the details already spell out is not repeated.
+		let steps: string[] = [];
+		try {
+			steps = Array.from(envelope.friendly_steps ?? [])
+				.map((step) => String(step))
+				.filter((step) => step && !technical.includes(step));
+		} catch {
+			steps = [];
+		}
 		const element = (
 				<div
 					class={`drafter-debug-current-problem ${
@@ -225,10 +237,20 @@ export class CurrentPanel extends Panel {
 					<span class="drafter-debug-current-problem-message">
 						{primary}
 					</span>
-					{technical ? (
+					{technical || steps.length > 0 ? (
 						<details class="drafter-debug-current-problem-details">
 							<summary>{t("current.problem_details")}</summary>
-							<pre>{technical}</pre>
+							{technical ? <pre>{technical}</pre> : null}
+							{steps.length > 0 ? (
+								<div class="drafter-debug-current-problem-steps">
+									<span>{t("current.problem_steps")}</span>
+									<ul>
+										{steps.map((step) => (
+											<li>{step}</li>
+										))}
+									</ul>
+								</div>
+							) : null}
 						</details>
 					) : null}
 				</div>

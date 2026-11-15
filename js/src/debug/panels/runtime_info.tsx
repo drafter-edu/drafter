@@ -2,9 +2,10 @@ import { Panel } from "./panel";
 import { t } from "../../i18n";
 
 /**
- * Environment tab: basic facts about the runtime the site is executing in.
- * Engine/browser rows are real; deeper metrics (memory, timing) are STUB
- * placeholders until the runtime exposes them.
+ * Environment tab: basic facts about the runtime the site is executing in
+ * (engine, browser, language, Pyodide version). Deeper metrics (memory,
+ * uptime) are not shown: the runtime does not report them yet, and a row
+ * that only says "coming soon" tells a student nothing.
  */
 export class RuntimeInfoPanel extends Panel {
 	constructor(
@@ -48,12 +49,11 @@ export class RuntimeInfoPanel extends Panel {
 		if (pyodideVersion) {
 			rows.push([t("runtime.pyodide_version"), pyodideVersion]);
 		}
-		// STUB rows, present for spacing/visualization until the runtime
-		// reports real numbers.
-		rows.push(
-			[t("runtime.memory"), t("runtime.sample_value")],
-			[t("runtime.uptime"), t("runtime.sample_value")],
-		);
+		// TODO: Finish these rows (the runtime reports no real numbers yet).
+		// rows.push(
+		// 	[t("runtime.memory"), t("runtime.sample_value")],
+		// 	[t("runtime.uptime"), t("runtime.sample_value")],
+		// );
 		return rows;
 	}
 

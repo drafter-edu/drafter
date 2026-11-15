@@ -7,6 +7,13 @@ import type { ReactElement } from "jsx-dom";
 /** How long the "Copied!" status stays visible after copying tests. */
 const COPY_STATUS_MS = 2000;
 
+/**
+ * How a visit's generated test starts when the server could not write a
+ * test for it (a state with a circular reference). The rest of the line
+ * says why. Mirror of NOT_FROZEN_PREFIX in src/drafter/history/formatting.py.
+ */
+const NOT_FROZEN_PREFIX = "# Not frozen:";
+
 export class TestPanel extends Panel {
 	private tests: TestCaseEvent[] = [];
 	private regressionTests: string[] = [];
@@ -104,17 +111,30 @@ export class TestPanel extends Panel {
 	 * responses and payloads without a test form (e.g. `Redirect`) carry
 	 * rendered HTML or nothing there instead, so they are skipped. Repeated
 	 * identical visits produce one test.
+	 *
+	 * A visit the server could not write a test for arrives as a one-line
+	 * `# Not frozen: ...` comment. It is kept in place of the test, so the
+	 * copied source says which visit is missing and stays valid Python.
 	 */
 	public recordVisit(response: ResponseEvent): void {
 		const test = response.formatted_page_content;
 		if (
 			response.has_errors ||
-			!test?.startsWith("assert_equal(") ||
+			!test ||
+			!(
+				test.startsWith("assert_equal(") ||
+				TestPanel.isNotFrozenComment(test)
+			) ||
 			this.regressionTests.includes(test)
 		) {
 			return;
 		}
 		this.regressionTests.push(test);
+	}
+
+	/** Whether the text is a single `# Not frozen: ...` comment line. */
+	private static isNotFrozenComment(text: string): boolean {
+		return text.startsWith(NOT_FROZEN_PREFIX) && !text.includes("\n");
 	}
 
 	/**

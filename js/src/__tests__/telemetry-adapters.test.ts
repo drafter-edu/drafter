@@ -567,6 +567,41 @@ describe("TestCaseEvent", () => {
 		expect(source).not.toContain("error-page");
 	});
 
+	test("a visit with a circular state is copied as a comment, not a test", async () => {
+		// What ClientServer.format_payload sends for a visit whose state
+		// contains itself (see tests/test_circular_reference_tests.py).
+		const notFrozen =
+			"# Not frozen: add(...) has a state with a circular reference, " +
+			"which cannot be written as a test.";
+		const panel = createPanel();
+		panel.handleEvent(visit({ request_id: 1 }));
+		panel.handleEvent(
+			visit({ request_id: 2, formatted_page_content: notFrozen }),
+		);
+		// The same visit again adds nothing.
+		panel.handleEvent(
+			visit({ request_id: 3, formatted_page_content: notFrozen }),
+		);
+
+		const writeText = copyTests();
+		await Promise.resolve();
+
+		const source = writeText.mock.calls[0][0];
+		expect(source.split(notFrozen)).toHaveLength(2);
+		expect(source).toContain(GENERATED_TEST);
+		expect(source).not.toContain("Circular Reference");
+		// Every line outside the one real test is blank, a comment, or the
+		// import: the copied text is still Python that can be pasted.
+		const outsideTheTest = source.replace(GENERATED_TEST, "").split("\n");
+		for (const line of outsideTheTest) {
+			expect(
+				line === "" ||
+					line.startsWith("#") ||
+					line === "from drafter import *",
+			).toBe(true);
+		}
+	});
+
 	test("Copy Regression Tests explains when nothing has been visited", async () => {
 		createPanel();
 

@@ -22,7 +22,7 @@ import { RuntimeInfoPanel } from "./panels/runtime_info";
 import { StoragePanel } from "./panels/storage";
 import { InternalsPanel } from "./panels/internals";
 import { attachPrinterConsole } from "../console/printer";
-import { TabBar } from "./tabs";
+import { TabBar, type TabDefinition } from "./tabs";
 import {
 	HeaderMenuBar,
 	type MenuDefinition,
@@ -31,7 +31,8 @@ import {
 import { getCurrentSourceCode, openCodeEditor } from "./editor";
 import { openSourceViewer } from "./viewsource";
 import { openHtmlConverter } from "./htmlconvert";
-import { openStateEditor } from "./state_edit";
+// TODO: Finish the state editor (see the Edit menu below).
+// import { openStateEditor } from "./state_edit";
 import { openThemeSwitcher } from "./theme_switch";
 import { downloadBugReport, SaveLoadManager } from "./saveload";
 import { DevServerErrorReporter } from "./error_reporter";
@@ -76,7 +77,11 @@ export class DebugPanel {
 	private panels: Panel[];
 	private tabBar!: TabBar;
 	private panelMenuBar!: HeaderMenuBar;
-	private saveLoad: SaveLoadManager = new SaveLoadManager();
+	private saveLoad: SaveLoadManager;
+	// The window this instance renders into (an iframe's window for an
+	// embedded instance). Its address and main file decide which stored
+	// values (save slots, open tab) belong to this app; see storage_keys.ts.
+	private storageWindow: Window;
 	private lastRoute: string | null = null;
 	// Problems on the CURRENT page (reset on each navigation); the Log tab
 	// keeps the cumulative record.
@@ -107,6 +112,8 @@ export class DebugPanel {
 	) {
 		this.root = root ?? document;
 		this.devServer = isDevServerDocument(ownerDocumentOf(this.root));
+		this.storageWindow = ownerDocumentOf(this.root).defaultView ?? window;
+		this.saveLoad = new SaveLoadManager(this.storageWindow);
 		this.instanceId = DebugPanel.instanceCounter++;
 
 		this.headerBar = new DebugHeaderBar(
@@ -152,6 +159,9 @@ export class DebugPanel {
 			this.containerId,
 			this.instanceId,
 			this.root,
+			// Only the development server can list the project's files; a
+			// deployed site has nothing to show there.
+			this.devServer,
 		);
 		this.currentPanel = new CurrentPanel(
 			this.containerId,
@@ -233,7 +243,18 @@ export class DebugPanel {
 
 		// Receive TypeScript-side system errors (boot/runtime failures) so
 		// they appear in the event log alongside Python telemetry.
+		// A restart wipes the page, and this panel with it, before the next
+		// run builds a new one. An error reported in between (the new code
+		// failed to start) has no log to go to; the error dialog still
+		// shows it. Without this check the removed panel threw
+		// "drafter-debug-log content not found" on top of the real error.
+		const mountedContainer = this.root.querySelector(
+			`#${this.containerId}`,
+		);
 		setSystemErrorSink((event) => {
+			if (mountedContainer && !mountedContainer.isConnected) {
+				return;
+			}
 			this.handleEvent(event as unknown as TelemetryRecord);
 		});
 	}
@@ -285,7 +306,9 @@ export class DebugPanel {
 		// Five student-facing tab areas. Several tabs will gain additional
 		// panels (route graph, coverage, packages, ...) as they are built;
 		// each tab's content is just the member panels' structures in order.
-		this.tabBar = new TabBar(this.instanceId, [
+		// Panels that are still stubs (sample content, "coming soon") are
+		// constructed but left out of the tabs, so students never see them.
+		const tabs: TabDefinition[] = [
 			{
 				id: "current",
 				labelKey: "debug.tab.current",
@@ -304,7 +327,9 @@ export class DebugPanel {
 				labelKey: "debug.tab.overview",
 				content: [
 					this.routesPanel.createStructure(),
-					this.routeGraphPanel.createStructure(),
+					// TODO: Finish this panel (it draws the same sample
+					// graph for every app).
+					// this.routeGraphPanel.createStructure(),
 				],
 			},
 			{
@@ -327,10 +352,17 @@ export class DebugPanel {
 					this.runtimeInfoPanel.createStructure(),
 					this.logPanel.createStructure(),
 					this.storagePanel.createStructure(),
-					this.internalsPanel.createStructure(),
+					// TODO: Finish this panel (it shows sample numbers).
+					// this.internalsPanel.createStructure(),
 				],
 			},
-		]);
+		];
+		this.tabBar = new TabBar(
+			this.instanceId,
+			tabs,
+			undefined,
+			this.storageWindow,
+		);
 
 		// The panel's own top-right menu duplicates the view-settings
 		// toggles: with the frame (and its header menus) hidden, this is
@@ -499,16 +531,19 @@ export class DebugPanel {
 				id: "edit",
 				labelKey: "menu.edit",
 				items: [
-					{
-						labelKey: "menu.edit_state",
-						iconKey: "icon.edit_state",
-						tooltipKey: "menu.edit_state.tooltip",
-						className: "drafter-menu-item-edit-state",
-						action: () =>
-							openStateEditor(
-								() => this.statePanel?.getPlainText() ?? "",
-							),
-					},
+					// TODO: Finish the state editor. Its dialog only shows
+					// the state next to a "coming soon" note, so the menu
+					// item stays out until the state can really be edited.
+					// {
+					// 	labelKey: "menu.edit_state",
+					// 	iconKey: "icon.edit_state",
+					// 	tooltipKey: "menu.edit_state.tooltip",
+					// 	className: "drafter-menu-item-edit-state",
+					// 	action: () =>
+					// 		openStateEditor(
+					// 			() => this.statePanel?.getPlainText() ?? "",
+					// 		),
+					// },
 					{
 						labelKey: "button.edit",
 						iconKey: "icon.edit",

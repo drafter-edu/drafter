@@ -340,6 +340,64 @@ describe("hover mode", () => {
 		manager.recordOutput("stdout", "floating\n");
 		expect(panel!.hidden).toBe(false);
 	});
+
+	test("a hidden floating console comes back when new output is printed", () => {
+		// The hover console has no toggle button (that lives in the footer
+		// bar, which production pages do not show), so without this a hidden
+		// console could not be seen again until the page was reloaded.
+		mountSite();
+		setConsoleMode("hover");
+		const manager = new PrinterConsoleManager();
+		manager.attach(document);
+		manager.recordOutput("stdout", "one\n");
+		expect(
+			document.querySelector(".drafter-footer-console-button"),
+		).toBeNull();
+		const hideButton = document.querySelector(
+			".drafter-printer-console-hide",
+		) as HTMLButtonElement;
+
+		hideButton.click();
+		expect(consolePanel()!.hidden).toBe(true);
+
+		manager.recordOutput("stdout", "two\n");
+		expect(consolePanel()!.hidden).toBe(false);
+		expect(outputText()).toContain("one");
+		expect(outputText()).toContain("two");
+
+		// Hiding works again afterwards, and again only until more output.
+		hideButton.click();
+		expect(consolePanel()!.hidden).toBe(true);
+		manager.recordOutput("stderr", "three\n");
+		expect(consolePanel()!.hidden).toBe(false);
+	});
+
+	test("the Hide tooltip says what brings each kind of console back", () => {
+		mountSite();
+		setConsoleMode("hover");
+		new PrinterConsoleManager().attach(document);
+		const hoverTooltip = (
+			document.querySelector(
+				".drafter-printer-console-hide",
+			) as HTMLButtonElement
+		).title;
+
+		mountSite();
+		setConsoleMode(undefined);
+		new PrinterConsoleManager().attach(document);
+		const footerTooltip = (
+			document.querySelector(
+				".drafter-printer-console-hide",
+			) as HTMLButtonElement
+		).title;
+
+		expect(hoverTooltip).toBe(
+			"Hide the console until new output is printed",
+		);
+		expect(footerTooltip).toBe(
+			"Hide the console until it is toggled back on",
+		);
+	});
 });
 
 describe("toast mode", () => {

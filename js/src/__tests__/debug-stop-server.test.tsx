@@ -13,7 +13,11 @@
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
 
 import { DebugPanel } from "../debug/index";
-import { markDevServerDocument, STOP_SERVER_PATH } from "../debug/dev_server";
+import {
+	LIST_FILES_PATH,
+	markDevServerDocument,
+	STOP_SERVER_PATH,
+} from "../debug/dev_server";
 import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrapper";
 
 const CONTAINER_ID = "drafter-debug-container";
@@ -182,5 +186,35 @@ describe("on the development server", () => {
 		dialogButton("Cancel").click();
 		await flush();
 		expect(dialogs()).toHaveLength(0);
+	});
+
+	test("the Environment tab lists the project's files from the server", async () => {
+		// The development server is also what makes the Host File System
+		// list possible (details in debug-files-panel.test.tsx); away from
+		// it the section is left out (debug-panel.test.tsx).
+		const fetchMock = mockFetch(
+			Promise.resolve({
+				ok: true,
+				status: 200,
+				json: async () => ({
+					entries: [
+						{ name: "website.py", is_dir: false },
+						{ name: "images", is_dir: true },
+					],
+				}),
+			}),
+		);
+
+		createPanel();
+		await flush();
+
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+		expect(fetchMock.mock.calls[0][0]).toBe(LIST_FILES_PATH);
+		const items = Array.from(
+			document.querySelectorAll(
+				".drafter-debug-files-host .drafter-debug-files-list-items > *",
+			),
+		).map((item) => item.textContent);
+		expect(items).toEqual(["images/", "website.py"]);
 	});
 });

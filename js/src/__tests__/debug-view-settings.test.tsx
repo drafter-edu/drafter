@@ -14,12 +14,14 @@ import {
 	openThemeSwitcher,
 } from "../debug/theme_switch";
 import { formatHtml } from "../debug/viewsource";
+import { getConfigurationOverridesStorageKey } from "../config_overrides";
 import {
 	collectSystemStatus,
 	formatRelativeTime,
 } from "../debug/saveload";
 
-const OVERRIDES_KEY = "drafter.debug.configuration-overrides.v1";
+// Overrides (the chosen theme among them) are kept per app.
+const OVERRIDES_KEY = getConfigurationOverridesStorageKey();
 
 afterEach(async () => {
 	// Close any open dialogs so their listeners do not leak between tests.

@@ -35,6 +35,7 @@ const PARITY_PREFIXES = [
 	"footer.status",
 	"theme.",
 	"time.",
+	"live_reload.",
 ];
 
 function keysInNamespaces(bundle: Record<string, string>): string[] {

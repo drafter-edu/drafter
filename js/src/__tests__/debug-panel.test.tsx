@@ -47,6 +47,7 @@ import {
 import { DebugPanel } from "../debug/index";
 import { reportSystemError, setSystemErrorSink } from "../bridge/engine";
 import { i18n } from "../i18n";
+import { appStorageKey } from "../storage_keys";
 import type { ClientBridgeWrapperInterface } from "../types/client_bridge_wrapper";
 import type { RouteAddedEvent } from "../debug/telemetry/routes";
 import type {
@@ -74,17 +75,22 @@ import UPDATED_CONFIGURATION from "./fixtures/telemetry/updated-configuration.js
 import UPDATED_STATE from "./fixtures/telemetry/updated-state.json";
 
 const CONTAINER_ID = "drafter-debug-container";
-const OVERRIDES_STORAGE_KEY = "drafter.debug.configuration-overrides.v1";
+// Stored values are kept per app (js/src/storage_keys.ts); every panel in
+// this file belongs to the one app at the jsdom page's address.
+const OVERRIDES_STORAGE_KEY = appStorageKey("debug.configuration-overrides.v1");
+const ACTIVE_TAB_STORAGE_KEY = appStorageKey("debug.active-tab.v1");
 
 // Section DOM-id prefixes and their titles, in DOM order: tabpanels appear
 // in tab order (current, history, overview, tests, environment) and each
-// tab's sections in composition order.
+// tab's sections in composition order. The commented-out sections are
+// unfinished stubs that the panel deliberately leaves out (see the
+// "unfinished features stay hidden" suite).
 const PANEL_SECTIONS: Array<[string, string]> = [
 	["drafter-debug-current", "Current Page"],
 	["drafter-debug-current-state", "Current State"],
 	["drafter-debug-history", "Page History"],
 	["drafter-debug-routes", "Registered Routes"],
-	["drafter-debug-route-graph", "Route Graph"],
+	// ["drafter-debug-route-graph", "Route Graph"],
 	["drafter-debug-tests", "Your Tests"],
 	// ["drafter-debug-coverage", "Coverage"],
 	// ["drafter-debug-test-wizard", "Create a Test"],
@@ -94,7 +100,7 @@ const PANEL_SECTIONS: Array<[string, string]> = [
 	["drafter-debug-runtime", "Runtime Info"],
 	["drafter-debug-log", "Event Log"],
 	["drafter-debug-storage", "Browser Storage"],
-	["drafter-debug-internals", "Advanced"],
+	// ["drafter-debug-internals", "Advanced"],
 ];
 
 // The five tab areas: [tab id, English label, section id prefixes it holds].
@@ -108,7 +114,10 @@ const TABS: Array<[string, string, string[]]> = [
 	[
 		"overview",
 		"Overview",
-		["drafter-debug-routes", "drafter-debug-route-graph"],
+		[
+			"drafter-debug-routes",
+			// "drafter-debug-route-graph",
+		],
 	],
 	[
 		"tests",
@@ -129,7 +138,7 @@ const TABS: Array<[string, string, string[]]> = [
 			"drafter-debug-runtime",
 			"drafter-debug-log",
 			"drafter-debug-storage",
-			"drafter-debug-internals",
+			// "drafter-debug-internals",
 		],
 	],
 ];
@@ -313,7 +322,7 @@ describe("construction and mounting", () => {
 		expect(tabPanel("current").hidden).toBe(true);
 		expect(tabPanel("history").hidden).toBe(false);
 		// The choice persists for the next construction (page reload).
-		expect(window.localStorage.getItem("drafter.debug.active-tab.v1")).toBe(
+		expect(window.localStorage.getItem(ACTIVE_TAB_STORAGE_KEY)).toBe(
 			"history",
 		);
 	});
@@ -334,7 +343,7 @@ describe("construction and mounting", () => {
 			".drafter-menu-item-reset",
 		) as HTMLButtonElement;
 		expect(reset.textContent).toBe("🔄 Reset");
-		expect(reset.title).toBe("Clear state, history, and return to home");
+		expect(reset.title).toBe("Put the state back to its starting value and return to the first page");
 
 		const production = menubar.querySelector(
 			".drafter-menu-item-production",
@@ -408,7 +417,6 @@ describe("construction and mounting", () => {
 			"drafter-menu-item-bug-report",
 			"drafter-menu-item-view-source",
 			"drafter-menu-item-switch-theme",
-			"drafter-menu-item-edit-state",
 			"drafter-menu-item-edit-source",
 			"drafter-menu-item-convert-html",
 		]) {
@@ -1881,6 +1889,27 @@ describe("event log", () => {
 		// No dialog for warning severity (dialogs render a close button).
 		expect(document.querySelector(".drafter-dialog-close")).toBeNull();
 	});
+
+	test("a panel removed by a restart ignores later system errors", () => {
+		// A restart clears the site root before the next run builds a new
+		// panel. If the new code fails to start, the error is reported while
+		// the old panel is still the registered sink; it used to throw
+		// "drafter-debug-log content not found", logged as a second error.
+		createPanel();
+		container().remove();
+
+		reportSystemError({
+			id: "runtime.debug_panel_test_warning",
+			category: "runtime",
+			message: "Reported after the panel was removed",
+			severity: "warning",
+		});
+
+		expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+			"[Drafter System Error] Failed to deliver system error to debug panel",
+			expect.anything(),
+		);
+	});
 });
 
 describe("files panel", () => {
@@ -1942,11 +1971,105 @@ describe("files panel", () => {
 		).toContain("print('hello from drafter')");
 	});
 
-	// NOT TESTED: the pyodide branch of getAllClientFiles/getFileContents
-	// needs a real pyodide.FS; that path is exercised by the integration
-	// suite under __tests__/pyodide/. The Host File System list has no
-	// implementation at all yet (the Refresh button is rendered but
-	// FilesPanel.initialize only wires the client refresh button).
+	test("pressing Refresh again does not list the files twice", () => {
+		// Regression: each Refresh appended the whole listing again.
+		(window as any).DRAFTER_ENGINE = "pyodide";
+		const files = [".", "..", "main.py", "scores.txt"];
+		(globalThis as any).pyodide = { FS: { readdir: () => files } };
+		try {
+			createPanel();
+			const refresh = container().querySelector(
+				".drafter-debug-refresh-client-btn",
+			) as HTMLButtonElement;
+			const names = () =>
+				Array.from(
+					container().querySelectorAll(
+						".drafter-debug-files-local .drafter-debug-files-list-items code",
+					),
+				).map((code) => code.textContent);
+
+			refresh.click();
+			refresh.click();
+			expect(names()).toEqual(["main.py", "scores.txt"]);
+
+			// A file that has since been deleted leaves the list.
+			files.pop();
+			refresh.click();
+			expect(names()).toEqual(["main.py"]);
+		} finally {
+			delete (globalThis as any).pyodide;
+		}
+	});
+
+	test("no Host File System list away from the development server", () => {
+		// Nothing can list the files of a deployed site, so the section is
+		// not built at all (an always-empty list looked broken). The list
+		// itself is covered by debug-files-panel.test.tsx.
+		createPanel();
+
+		expect(
+			container().querySelector(".drafter-debug-files-local"),
+		).not.toBeNull();
+		expect(
+			container().querySelector(".drafter-debug-files-host"),
+		).toBeNull();
+		expect(container().textContent).not.toContain("Host File System");
+	});
+
+	// NOT TESTED: the real pyodide.FS behind getAllClientFiles and
+	// getFileContents; that path is exercised by the integration suite
+	// under __tests__/pyodide/.
+});
+
+describe("unfinished features stay hidden", () => {
+	// These exist in the source as stubs: sample content next to a "coming
+	// soon" note. They are constructed but never shown, the same way the
+	// Coverage and Create a Test sections are. When one of them is finished
+	// and put back, move its line from here into PANEL_SECTIONS/TABS above.
+	test("no stub section is in the panel", () => {
+		createPanel();
+		const root = container();
+
+		for (const prefix of [
+			"drafter-debug-route-graph",
+			"drafter-debug-internals",
+			"drafter-debug-coverage",
+			"drafter-debug-test-wizard",
+		]) {
+			expect(root.querySelector(`[id^='${prefix}-']`)).toBeNull();
+		}
+		expect(root.querySelector(".drafter-debug-stub-notice")).toBeNull();
+		expect(root.textContent).not.toContain("coming soon");
+	});
+
+	test("the Edit menu has no Edit State item", () => {
+		createPanel();
+		const headerBar = document.querySelector(
+			".drafter-header--",
+		) as HTMLElement;
+
+		expect(
+			headerBar.querySelector(".drafter-menu-item-edit-state"),
+		).toBeNull();
+		// The rest of the Edit menu is still there.
+		expect(
+			headerBar.querySelector(".drafter-menu-item-edit-source"),
+		).not.toBeNull();
+		expect(
+			headerBar.querySelector(".drafter-menu-item-convert-html"),
+		).not.toBeNull();
+	});
+
+	test("Runtime Info shows only rows with real values", () => {
+		createPanel();
+		const labels = Array.from(
+			container().querySelectorAll(".drafter-debug-runtime-table th"),
+		).map((cell) => cell.textContent);
+
+		expect(labels).toEqual(["Engine", "Browser", "Language"]);
+		expect(labels).not.toContain("Memory");
+		expect(labels).not.toContain("Uptime");
+	});
 });
 
 describe("multiple instances", () => {

@@ -1,5 +1,6 @@
 import type { ReactElement } from "jsx-dom";
 import { t } from "../i18n";
+import { appStorageKey } from "../storage_keys";
 
 export interface TabDefinition {
 	/** Stable identifier, e.g. "current" or "environment". */
@@ -12,7 +13,7 @@ export interface TabDefinition {
 
 export type TabBadgeVariant = "error" | "warn" | "fail";
 
-const ACTIVE_TAB_STORAGE_KEY = "drafter.debug.active-tab.v1";
+const ACTIVE_TAB_STORAGE_NAME = "debug.active-tab.v1";
 
 /**
  * Accessible tab bar for the debug panel: a `role="tablist"` row of buttons
@@ -22,25 +23,35 @@ const ACTIVE_TAB_STORAGE_KEY = "drafter.debug.active-tab.v1";
  *
  * The active tab persists to localStorage so a page reload (or a full
  * browser reload via the "--reload" route) returns the student to the tab
- * they were using.
+ * they were using. The stored value belongs to the app (see
+ * storage_keys.ts): another program served at the same address opens on
+ * its own remembered tab, not this one's.
  */
 export class TabBar {
 	private tabButtons = new Map<string, HTMLButtonElement>();
 	private tabPanels = new Map<string, HTMLElement>();
 	private badges = new Map<string, HTMLElement>();
 	private activeId: string;
+	private readonly storageKey: string;
 
+	/**
+	 * @param storageWindow The window the app renders into, which decides
+	 *   whose remembered tab this is (an embedded instance passes its
+	 *   iframe's window).
+	 */
 	constructor(
 		private readonly instanceId: number,
 		private readonly tabs: TabDefinition[],
 		private readonly onActivate?: (id: string) => void,
+		storageWindow: Window = window,
 	) {
+		this.storageKey = appStorageKey(ACTIVE_TAB_STORAGE_NAME, storageWindow);
 		this.activeId = this.loadStoredTab() ?? tabs[0]?.id ?? "";
 	}
 
 	private loadStoredTab(): string | null {
 		try {
-			const stored = window.localStorage.getItem(ACTIVE_TAB_STORAGE_KEY);
+			const stored = window.localStorage.getItem(this.storageKey);
 			if (stored && this.tabs.some((tab) => tab.id === stored)) {
 				return stored;
 			}
@@ -53,7 +64,7 @@ export class TabBar {
 
 	private storeActiveTab(id: string): void {
 		try {
-			window.localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, id);
+			window.localStorage.setItem(this.storageKey, id);
 		} catch {
 			// Persistence is best-effort only.
 		}

@@ -1297,6 +1297,17 @@ div.btlw-container img {
 	margin-top: 10px;
 }
 
+/* Host File System: folders (and "../") open when clicked; files do not. */
+.drafter-debug-files-host-folder,
+.drafter-debug-files-host-up {
+	cursor: pointer;
+	font-weight: bold;
+}
+
+.drafter-debug-files-host-note {
+	font-style: italic;
+}
+
 /* Code editor dialog */
 .drafter-code-editor-container {
 	width: 100%;
@@ -1365,6 +1376,11 @@ div.btlw-container img {
 .drafter-debug-current-problem-details {
 	flex-basis: 100%;
 	font-size: 0.85em;
+}
+
+.drafter-debug-current-problem-steps ul {
+	margin: 0.25em 0 0;
+	padding-left: 1.5em;
 }
 
 .drafter-debug-current-diff-empty {

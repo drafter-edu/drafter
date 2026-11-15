@@ -15,6 +15,11 @@ declare global {
 	var DebugPanel: typeof import("../debug").DebugPanel;
 
 	var DRAFTER_ENGINE: "skulpt" | "pyodide";
+	/**
+	 * A short hash of the main file's full path, embedded by the index
+	 * template; part of the per-app localStorage keys (storage_keys.ts).
+	 */
+	var DRAFTER_MAIN_FILE_ID: string | undefined;
 	var DRAFTER_CONFIGURATION: Record<string, unknown> | undefined;
 	var DRAFTER_MODIFIED_CONFIGURATION: Record<string, unknown> | undefined;
 	var DRAFTER_EMBEDDED_MODIFIED_CONFIGURATION:

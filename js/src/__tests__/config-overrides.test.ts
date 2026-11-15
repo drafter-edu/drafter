@@ -9,6 +9,7 @@ import {
 
 import {
 	clearStoredConfigurationOverrides,
+	getConfigurationOverridesStorageKey,
 	getEmbeddedModifiedConfiguration,
 	getStoredConfigurationOverrides,
 	initializeRuntimeConfigurationOverrides,
@@ -16,7 +17,10 @@ import {
 	syncWindowConfigurationOverrides,
 } from "../config_overrides";
 
-const STORAGE_KEY = "drafter.debug.configuration-overrides.v1";
+// Overrides are kept per app (js/src/storage_keys.ts); these tests all run
+// as the one app at the jsdom page's address.
+const STORAGE_KEY = getConfigurationOverridesStorageKey();
+const OLD_SHARED_KEY = "drafter.debug.configuration-overrides.v1";
 
 const anyWindow = window as any;
 
@@ -311,6 +315,46 @@ describe("config overrides", () => {
 			expect(
 				anyWindow.DRAFTER_MODIFIED_CONFIGURATION.client_server.debug,
 			).toBeUndefined();
+		});
+
+		test("overrides stored for another program are not applied here", () => {
+			// Regression: the key was the same for every app of an origin,
+			// so the theme picked for one program was applied to the next
+			// one run on the same address. The main file is part of the key.
+			anyWindow.DRAFTER_MAIN_FILE_ID = "first-program";
+			try {
+				setStoredConfigurationOverrides({ theme: "terminal" });
+				expect(getStoredConfigurationOverrides()).toEqual({
+					theme: "terminal",
+				});
+
+				anyWindow.DRAFTER_MAIN_FILE_ID = "second-program";
+				expect(getStoredConfigurationOverrides()).toEqual({});
+				initializeRuntimeConfigurationOverrides();
+				expect(anyWindow.DRAFTER_MODIFIED_CONFIGURATION).toEqual({
+					client_server: {},
+				});
+
+				// The first program still has its own when it runs again.
+				anyWindow.DRAFTER_MAIN_FILE_ID = "first-program";
+				expect(getStoredConfigurationOverrides()).toEqual({
+					theme: "terminal",
+				});
+			} finally {
+				delete anyWindow.DRAFTER_MAIN_FILE_ID;
+			}
+		});
+
+		test("overrides under the old shared key are ignored and kept", () => {
+			localStorage.setItem(OLD_SHARED_KEY, '{"theme": "terminal"}');
+
+			expect(getStoredConfigurationOverrides()).toEqual({});
+			clearStoredConfigurationOverrides();
+
+			// Left for the Browser Storage section to show and delete.
+			expect(localStorage.getItem(OLD_SHARED_KEY)).toBe(
+				'{"theme": "terminal"}',
+			);
 		});
 
 		test("corrupt stored overrides fall back to the embedded config", () => {

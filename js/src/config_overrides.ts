@@ -1,3 +1,5 @@
+import { appStorageKey } from "./storage_keys";
+
 export type JsonValue =
 	| string
 	| number
@@ -8,8 +10,19 @@ export type JsonValue =
 
 export type JsonObject = Record<string, JsonValue>;
 
-const OVERRIDES_STORAGE_KEY = "drafter.debug.configuration-overrides.v1";
+const OVERRIDES_STORAGE_NAME = "debug.configuration-overrides.v1";
 const MERGE_INTO_KEY = "client_server";
+
+/**
+ * The localStorage key holding this app's configuration overrides (the
+ * values edited in the debug panel's Configuration section, and the theme
+ * picked in the theme switcher). The key is specific to the app (see
+ * storage_keys.ts), so a theme chosen for one site does not follow the
+ * student to the next program they run on the same address.
+ */
+export function getConfigurationOverridesStorageKey(): string {
+	return appStorageKey(OVERRIDES_STORAGE_NAME);
+}
 
 function isObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -58,7 +71,7 @@ export function getStoredConfigurationOverrides(): JsonObject {
 		return {};
 	}
 
-	const rawValue = storage.getItem(OVERRIDES_STORAGE_KEY);
+	const rawValue = storage.getItem(getConfigurationOverridesStorageKey());
 	if (!rawValue) {
 		return {};
 	}
@@ -80,7 +93,10 @@ export function setStoredConfigurationOverrides(overrides: JsonObject): void {
 	if (!storage) {
 		return;
 	}
-	storage.setItem(OVERRIDES_STORAGE_KEY, JSON.stringify(overrides));
+	storage.setItem(
+		getConfigurationOverridesStorageKey(),
+		JSON.stringify(overrides),
+	);
 }
 
 export function clearStoredConfigurationOverrides(): void {
@@ -88,7 +104,7 @@ export function clearStoredConfigurationOverrides(): void {
 	if (!storage) {
 		return;
 	}
-	storage.removeItem(OVERRIDES_STORAGE_KEY);
+	storage.removeItem(getConfigurationOverridesStorageKey());
 }
 
 export function syncWindowConfigurationOverrides(

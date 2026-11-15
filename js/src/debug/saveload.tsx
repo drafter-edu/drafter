@@ -1,9 +1,18 @@
 import { showDialog } from "../dialogs";
 import { t } from "../i18n";
+import { getConfigurationOverridesStorageKey } from "../config_overrides";
+import { appStorageKey } from "../storage_keys";
 import type { StateSnapshotEvent } from "./telemetry/snapshot";
 
-const SNAPSHOT_KEY_PREFIX = "drafter.debug.snapshot.v1.";
-const MOST_RECENT_KEY = `${SNAPSHOT_KEY_PREFIX}most-recent`;
+/**
+ * Name of the snapshot slots within an app's stored values (see
+ * storage_keys.ts); the slot name follows. Slots saved before they were
+ * kept per app live under `drafter.debug.snapshot.v1.*`. Those are not
+ * read here, because nothing says which app saved them, but they remain in
+ * storage and the Browser Storage section still lists them.
+ */
+const SNAPSHOT_STORAGE_NAME = "debug.snapshot.v2.";
+const MOST_RECENT_SLOT_KEY = "most-recent";
 export const QUICK_SLOT = "quick";
 export const SLOT_COUNT = 10;
 
@@ -14,8 +23,20 @@ export interface StoredSnapshot {
 	created: string;
 	route: string;
 	kwargs_json: string;
-	/** JSON-encoded plain data of the saved state (opaque to JS). */
+	/**
+	 * JSON-encoded plain data of the saved state (opaque to JS): the state
+	 * as it was when saving, after `route` ran.
+	 */
 	state_json: string;
+	/**
+	 * The state as it was just before `route` ran, encoded the same way.
+	 * Loading restores this one, so that running the route again arrives at
+	 * the saved page rather than one step past it. Absent from snapshots
+	 * saved in format version 1 (and from later ones whose earlier state
+	 * could not be captured); those load from `state_json` as they always
+	 * did.
+	 */
+	state_before_json?: string;
 	/** The state's class name at save time (labels/diagnostics). */
 	state_type: string;
 	app_title: string;
@@ -135,8 +156,28 @@ function closeContainingDialog(element: HTMLElement): void {
  * Python reduces the state to plain JSON data and publishes StateSnapshot
  * telemetry, and handleSnapshot() (called from DebugPanel.handleEvent)
  * completes the store/download here.
+ *
+ * The slots belong to one app: their keys carry the app's storage scope
+ * (page address and main file, see storage_keys.ts), so two programs
+ * served at the same address do not see each other's saves.
  */
 export class SaveLoadManager {
+	private readonly keyPrefix: string;
+
+	/**
+	 * @param storageWindow The window the app renders into, which decides
+	 *   whose slots these are (an embedded instance passes its iframe's
+	 *   window).
+	 */
+	constructor(storageWindow: Window = window) {
+		this.keyPrefix = appStorageKey(SNAPSHOT_STORAGE_NAME, storageWindow);
+	}
+
+	/** The localStorage key of a slot (or of the most-recent pointer). */
+	private slotKey(slot: string): string {
+		return this.keyPrefix + slot;
+	}
+
 	/** Ask Python to capture the current state + route invocation. */
 	public requestSave(reason: "save" | "download", slot: string): void {
 		window.dispatchEvent(
@@ -158,22 +199,25 @@ export class SaveLoadManager {
 			state_type: event.state_type,
 			app_title: event.app_title,
 		};
+		if (event.state_before_json) {
+			stored.state_before_json = event.state_before_json;
+		}
 		if (event.reason === "download") {
 			const stamp = stored.created.replace(/[:.]/g, "-");
 			downloadJson(`drafter-snapshot-${event.route}-${stamp}.json`, stored);
 			return;
 		}
-		if (safeSetItem(SNAPSHOT_KEY_PREFIX + event.slot, JSON.stringify(stored))) {
-			safeSetItem(MOST_RECENT_KEY, event.slot);
+		if (safeSetItem(this.slotKey(event.slot), JSON.stringify(stored))) {
+			safeSetItem(this.slotKey(MOST_RECENT_SLOT_KEY), event.slot);
 		}
 	}
 
 	public getSlot(slot: string): StoredSnapshot | null {
-		return parseStoredSnapshot(safeGetItem(SNAPSHOT_KEY_PREFIX + slot));
+		return parseStoredSnapshot(safeGetItem(this.slotKey(slot)));
 	}
 
 	public getMostRecentSlot(): string | null {
-		const slot = safeGetItem(MOST_RECENT_KEY);
+		const slot = safeGetItem(this.slotKey(MOST_RECENT_SLOT_KEY));
 		return slot && this.getSlot(slot) ? slot : null;
 	}
 
@@ -191,17 +235,31 @@ export class SaveLoadManager {
 		return snapshot ? formatRelativeTime(snapshot.created) : null;
 	}
 
-	/** Ask Python to restore a snapshot's state and replay its route. */
+	/**
+	 * Ask Python to restore a snapshot's state and replay its route. A
+	 * snapshot that carries the state from before its route ran sends it
+	 * along; Python then restores that earlier state, the way the Back
+	 * button does. Without it (an older snapshot), Python restores
+	 * `state_json` and runs the route on top of it, as it always did.
+	 */
 	public dispatchLoad(snapshot: StoredSnapshot): void {
-		window.dispatchEvent(
-			new CustomEvent("drafter-load-state", {
-				detail: {
-					state_json: snapshot.state_json,
-					route: snapshot.route,
-					kwargs_json: snapshot.kwargs_json,
-				},
-			}),
-		);
+		const detail: {
+			state_json: string;
+			route: string;
+			kwargs_json: string;
+			state_before_json?: string;
+		} = {
+			state_json: snapshot.state_json,
+			route: snapshot.route,
+			kwargs_json: snapshot.kwargs_json,
+		};
+		if (
+			typeof snapshot.state_before_json === "string" &&
+			snapshot.state_before_json.length > 0
+		) {
+			detail.state_before_json = snapshot.state_before_json;
+		}
+		window.dispatchEvent(new CustomEvent("drafter-load-state", { detail }));
 	}
 
 	public loadSlot(slot: string): boolean {
@@ -441,9 +499,7 @@ export function downloadBugReport(
 		currentRoute: context.route ?? null,
 		pageHtml: context.pageHtml ?? null,
 		sourceCode: context.sourceCode ?? null,
-		configOverrides: safeGetItem(
-			"drafter.debug.configuration-overrides.v1",
-		),
+		configOverrides: safeGetItem(getConfigurationOverridesStorageKey()),
 		eventCount: events.length,
 		events,
 	});

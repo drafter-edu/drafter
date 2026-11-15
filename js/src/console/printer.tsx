@@ -70,8 +70,10 @@ class PrinterConsoleView {
 	private outputElement: HTMLElement;
 	private inputElement: HTMLInputElement;
 	private promptElement: HTMLElement;
-	// Set when the user explicitly hid the console; new output then no
-	// longer re-reveals it (only the footer toggle button brings it back).
+	// Set when the user explicitly hid the footer console; new output then
+	// no longer re-reveals it (only the footer toggle button brings it
+	// back). The hover console has no toggle button, so new output always
+	// brings it back (see notifyOutput).
 	private userHidden = false;
 	private historyIndex: number | null = null;
 	private pendingInput = "";
@@ -114,7 +116,11 @@ class PrinterConsoleView {
 					<button
 						type="button"
 						class="drafter-printer-console-hide"
-						title={t("console.hide.tooltip")}
+						title={t(
+							this.variant === "hover"
+								? "console.hide.tooltip.hover"
+								: "console.hide.tooltip",
+						)}
 					>
 						{t("console.hide")}
 					</button>
@@ -217,8 +223,17 @@ class PrinterConsoleView {
 		this.outputElement.scrollTop = this.outputElement.scrollHeight;
 	}
 
-	/** New output arrived: reveal unless the user explicitly hid us. */
+	/**
+	 * New output arrived: reveal the console. A footer console the user
+	 * explicitly hid stays hidden, because the footer's Console button
+	 * brings it back. The hover console has no such button, so Hide only
+	 * lasts until the next output; otherwise it could never be seen again
+	 * without reloading the page.
+	 */
 	public notifyOutput(): void {
+		if (this.variant === "hover") {
+			this.userHidden = false;
+		}
 		if (!this.userHidden) {
 			this.element.hidden = false;
 		}

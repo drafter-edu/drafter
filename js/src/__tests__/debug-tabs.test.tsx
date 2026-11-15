@@ -7,16 +7,27 @@
 import { afterEach, describe, expect, test } from "@jest/globals";
 
 import { TabBar } from "../debug/tabs";
+import { appStorageKey } from "../storage_keys";
 
-const STORAGE_KEY = "drafter.debug.active-tab.v1";
+// The remembered tab is kept per app (js/src/storage_keys.ts).
+const STORAGE_KEY = appStorageKey("debug.active-tab.v1");
+const OLD_SHARED_KEY = "drafter.debug.active-tab.v1";
+
+/** A stand-in for the window another app renders into. */
+function otherAppWindow(mainFileId: string): Window {
+	return {
+		location: { origin: "http://localhost", pathname: "/" },
+		DRAFTER_MAIN_FILE_ID: mainFileId,
+	} as unknown as Window;
+}
 
 afterEach(() => {
 	document.body.innerHTML = "";
 	window.localStorage.clear();
 });
 
-function makeTabBar(instanceId: number = 0): TabBar {
-	const tabBar = new TabBar(instanceId, [
+function makeTabBar(instanceId: number = 0, storageWindow?: Window): TabBar {
+	const tabs = [
 		{
 			id: "alpha",
 			labelKey: "debug.tab.current",
@@ -32,7 +43,10 @@ function makeTabBar(instanceId: number = 0): TabBar {
 			labelKey: "debug.tab.tests",
 			content: [(<div class="gamma-content">C</div>) as HTMLElement],
 		},
-	]);
+	];
+	const tabBar = storageWindow
+		? new TabBar(instanceId, tabs, undefined, storageWindow)
+		: new TabBar(instanceId, tabs);
 	document.body.appendChild(tabBar.createTabList());
 	tabBar.createTabPanels().forEach((panel) =>
 		document.body.appendChild(panel),
@@ -110,6 +124,38 @@ describe("persistence", () => {
 
 		expect(tabBar.getActiveTab()).toBe("alpha");
 		expect(panel("alpha").hidden).toBe(false);
+	});
+
+	test("another app at the same address keeps its own tab", () => {
+		// Regression: the key was the same for every app of an origin, so
+		// the tab opened in one program was the tab the next program
+		// started on.
+		makeTabBar(0, otherAppWindow("first-program"));
+		button("gamma").click();
+		document.body.innerHTML = "";
+
+		const other = makeTabBar(1, otherAppWindow("second-program"));
+		expect(other.getActiveTab()).toBe("alpha");
+		button("beta").click();
+		document.body.innerHTML = "";
+
+		expect(makeTabBar(2, otherAppWindow("first-program")).getActiveTab()).toBe(
+			"gamma",
+		);
+		document.body.innerHTML = "";
+		expect(makeTabBar(3, otherAppWindow("second-program")).getActiveTab()).toBe(
+			"beta",
+		);
+	});
+
+	test("a tab remembered under the old shared key is not picked up", () => {
+		window.localStorage.setItem(OLD_SHARED_KEY, "gamma");
+
+		const tabBar = makeTabBar();
+
+		expect(tabBar.getActiveTab()).toBe("alpha");
+		// It is left alone for the Browser Storage section to show.
+		expect(window.localStorage.getItem(OLD_SHARED_KEY)).toBe("gamma");
 	});
 });
 
