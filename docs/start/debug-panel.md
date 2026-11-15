@@ -129,9 +129,9 @@ goes. Thonny's shell shows only what was printed while the program was
 starting, such as your test results.
 
 ???+ note
-    In the demo on this page, the Console box is part of the debug
-    view. Click the "debug" button in the corner of the demo, then click
-    **Double it**, and the printed lines appear below the page.
+    In the demo on this page, the printed lines appear in a small
+    Console box that floats at the bottom of the demo. Click
+    **Double it** to see a new line arrive.
 
 Printing the state before and after a change is the most basic
 debugging tool you have.

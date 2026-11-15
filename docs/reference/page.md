@@ -32,8 +32,16 @@ Page(content)
 | `content` | `list` | A list of strings, numbers, booleans, and components, rendered in order. A single string, number, boolean, or component is also accepted, and Drafter wraps it in a list. |
 
 Two more parameters, `css` and `js`, accept raw CSS and JavaScript to
-inject when the page renders. They are for advanced use; see
+inject when the page renders. They must be given by name, as in
+`Page(state, content, css="h1 { color: red; }")`, and each takes text
+or a list of text. They are for advanced use; see
 [JavaScript interop](../extend/javascript.md).
+
+A `Page` takes nothing else by position. Anything written after the
+content without a name, as in `Page(state, "Hello", "there")`, is an
+error titled `Page Content Problem`, because it is almost always
+content that was meant to go inside the list. The error page shows the
+corrected call, `Page(state, ['Hello', 'there'])`.
 
 ## With state and without
 
@@ -124,8 +132,8 @@ placed inside the list.
 | `["Pets:", ["Ada", "Babbage"]]` (a list inside the list) | Error. |
 
 The error appears when the `Page` is created. In the browser, the
-error page is titled `Unusable Value`, and its message names the type
-that Drafter found:
+error page is titled `Page Content Problem`, and its message names the
+type that Drafter found:
 
 ```text
 The content you returned in this Page was a dict, but it needs to be text, a number, a boolean, a component, or a list of those.

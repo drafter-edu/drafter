@@ -161,7 +161,7 @@ assignment is all about styling.
 ## Common problems
 
 - **Your tests do not run**: they must sit before `start_server(...)`,
-  because nothing after that line runs.
+  because code after that line does not run until the server stops.
 - **A test broke after you restyled a page**: the test is checking more
   than it cares about. Narrow it, for example by replacing
   `assert_page` with `assert_has` or `assert_state`.

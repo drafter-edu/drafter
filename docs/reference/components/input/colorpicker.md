@@ -49,13 +49,14 @@ The starting color can be written any of these ways:
 | A `Color` | `Color(255, 136, 0)` |
 
 Like every component, `ColorPicker` also accepts
-[styling and attribute keywords](../../keyword-attributes.md). It
-recognizes no HTML attributes beyond the ones every component shares,
-so `disabled=True` does not work here. Drafter turns a keyword it
-does not recognize into a CSS style, which the browser ignores, and
-it reports no error.
+[styling and attribute keywords](../../keyword-attributes.md). The
+one HTML attribute it recognizes as a keyword is `disabled`.
+`disabled=True` stops the visitor from changing the color. With
+`alpha=True`, it locks both the swatch and the opacity slider.
+Drafter turns any other keyword it does not recognize into a CSS
+style;
 [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
-explains the keyword rule.
+explains that rule.
 
 ## Examples
 

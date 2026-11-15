@@ -52,7 +52,12 @@ type or choose there.
 
 The expected type in the message tells you which conversion failed:
 
-- **`float`**: the text was not a number at all.
+- **`float`**: the text was not a number at all. When the box was
+  left empty, the message says "expects float but no value was
+  provided" and its hint says how to allow that: give the parameter a
+  default value, or make it optional with `float | None`.
+  [Blank values](../../reference/route.md#blank-values) lists what
+  each type receives for an empty field.
 - **`bool`**: this conversion normally cannot fail, because
   checkboxes send values that convert cleanly. If you see it, a text
   box is usually supplying a `bool` parameter.

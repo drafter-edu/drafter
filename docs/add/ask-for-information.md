@@ -309,9 +309,8 @@ from Python's `datetime` module, so a route that uses them needs
 - **Two buttons, one form**: every button on the page sends all of the
   page's inputs to its route. A route that needs a value must have the
   matching parameter. A route that does not need it, such as the target
-  of a Cancel button, can leave the parameter out. The page still
-  works, and the debug panel lists a warning about a form field with no
-  matching parameter.
+  of a Cancel button, can leave the parameter out, and the page still
+  works.
 
 ## Understand it
 

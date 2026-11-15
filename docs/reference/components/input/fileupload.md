@@ -34,19 +34,21 @@ FileUpload(name, accept="image/*")
 | Parameter | Type | Default | Meaning |
 | --------- | ---- | ------- | ------- |
 | `name` | `str` | required | The field's name, matching a parameter of the receiving route. |
-| `accept` | `str` | any file | File-type filters for the picker: a MIME pattern (`"image/*"`), extensions (`".txt"`), or several, comma-separated. |
+| `accept` | `str` or `list[str]` | any file | File-type filters for the picker: a MIME pattern (`"image/*"`), an extension (`".txt"`), or a list of several (`[".txt", ".csv"]`). An extension written without its period (`"txt"`) gets one added. |
 
 Adding the `multiple` attribute (`FileUpload("photos",
 multiple=True)`) lets the visitor pick several files; the parameter
 then receives a list.
 
 Besides `multiple`, the HTML attributes `FileUpload` recognizes as
-keywords are `capture` and `required`. `required=True` adds the
-attribute, but a button still runs its route when no file is chosen.
-`disabled` is not on that list. Drafter turns a keyword it does not
-recognize into a CSS style, which the browser ignores, and it reports
-no error. [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
-explains the keyword rule.
+keywords are `capture`, `required`, and `disabled`. `disabled=True`
+stops the visitor from choosing a file, and a disabled upload is not
+sent to the route. `required=True` adds the attribute, but Drafter
+does not ask the browser to check the form when a button is clicked,
+so the route still runs when no file is chosen. Drafter turns any
+other keyword it does not recognize into a CSS style;
+[Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains that rule.
 
 ## Examples
 
@@ -92,9 +94,10 @@ start_server(State(0))
   parameter receives `b""`. A file type such as `DrafterTextFile`
   receives a file whose `filename` is empty and whose `size` is 0.
   A `Picture` parameter stops with an error page that says no file
-  was chosen. Annotate it `Picture | None` to receive `None`
-  instead. Adding `| None` to `str` does not change the result,
-  which is still `""`.
+  was chosen. Adding `| None` to any of these annotations, as in
+  `str | None` or `Picture | None`, gives `None` instead, and a
+  parameter with a default value receives its default.
+  [Blank values](../../route.md#blank-values) has the full rule.
 - `accept` is guidance for the picker, not enforcement; a visitor
   can still choose any file. A file of the wrong type produces a
   [friendly error](../../../help/errors/file-decode-error.md).

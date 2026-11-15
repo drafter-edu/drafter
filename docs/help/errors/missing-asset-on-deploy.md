@@ -27,6 +27,15 @@ tab) shows a line that begins:
 Failed to load resource: the server responded with a status of 404
 ```
 
+If the deployed site still shows the debug panel, the panel lists a
+warning for each image that failed. The warning begins "The browser
+could not load one of the images on this site", and its Details name
+the image:
+
+```text
+The image 'ada.png' could not be loaded.
+```
+
 A missing file that your code reads with `open(...)` produces an
 error page with this title:
 
@@ -98,9 +107,10 @@ add_website_file("images/cat.png")
 ```
 
 The build then copies each declared file into the site, in the same
-folder it has next to your program. The `--additional-paths` command
-line flag does the same job from outside the code, and it also
-accepts the name of a whole folder.
+folder it has next to your program. To declare every file in a folder
+at once, name the folder, as in `add_website_file("images")`. The
+`--additional-paths` command line flag does the same job from outside
+the code.
 
 ## Confirm
 
@@ -118,9 +128,13 @@ Declaring files with
 [`add_website_file`](../../reference/site-config.md#add_website_file)
 also helps while you develop, whichever way you deploy. Drafter
 checks that each declared file exists as soon as the program starts.
-A misspelled or missing name stops the program with a message such
-as `add_website_file: file not found: 'adda.png'`, long before
-anyone visits the deployed site. Stylesheets and scripts added with
+A misspelled or missing name stops the program with a message in the
+terminal titled "Website File Not Found", which names the file and
+suggests files with similar names. A name whose
+capital letters differ from the file's, such as `ada.png` for
+`Ada.PNG`, stops the program with a message titled "Website File Name
+Has Different Capital Letters". Both happen on your own computer, long
+before anyone visits the deployed site. Stylesheets and scripts added with
 `add_website_css_file` and `add_website_js_file` are declared
 automatically.
 

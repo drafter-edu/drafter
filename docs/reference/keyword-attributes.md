@@ -98,15 +98,25 @@ lists the other forms that `arguments` accepts.
 Each component also understands the HTML attributes that make sense
 for its element: `placeholder="Type here"` or `maxlength=20` on a
 `TextBox`, `rows=6` on a `TextArea`, `accept="image/*"` on a
-`FileUpload`, `disabled=True` on a `Button`. A shared baseline of
-attributes (`id`, `title`, `hidden`, `data_*` attributes, and
-similar) works on every component. Underscores become hyphens on the
-way out, so `data_role="hero"` renders as `data-role="hero"`.
+`FileUpload`, `disabled=True` on a `Button`. The reference page for
+each input component lists the attributes it recognizes. A shared
+baseline of attributes (`id`, `title`, `hidden`, `data_*` attributes,
+and similar) works on every component. Underscores become hyphens on
+the way out, so `data_role="hero"` renders as `data-role="hero"`.
 
 If a component does not recognize a keyword as an attribute, Drafter
 treats the keyword as a CSS style instead. This rule is what makes
 bare `color="red"` work, but it also means an unsupported attribute
 quietly becomes a meaningless style rather than an error.
+
+Some attributes act on the field itself: `maxlength` limits typing,
+and `disabled=True` and `readonly=True` block editing. A disabled
+field's value is not sent to the route. Attributes that ask the
+browser to check a form do not stop a route from running. Drafter
+does not ask the browser to check the form when a `Button` is
+clicked, so a field marked `required=True` can be left empty, and a
+value that breaks a `pattern`, a `minlength`, or a `min` and `max`
+range still reaches the route. Check the values inside the route.
 
 ## Notes
 
@@ -117,6 +127,9 @@ quietly becomes a meaningless style rather than an error.
 - **Boolean attributes render bare**: `disabled=True` renders as
   `disabled`, the way HTML expects, and `disabled=False` omits the
   attribute entirely.
+- **`autocomplete` keeps its value**: `autocomplete="off"` and
+  `autocomplete="email"` render as written, and `True` and `False`
+  render as `on` and `off`.
 - **Styles set here are testable** with
   [assert_style](testing-functions.md#assert_style); other
   assertions ignore styling by default.

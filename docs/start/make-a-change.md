@@ -132,20 +132,19 @@ Save. When the page tries to display, Drafter stops it and shows an
 error page that begins like this:
 
 ```text
-Unusable Value
+Button Points to a Missing Page
 
-The link labeled '+10' tries to go to a page named `ad_ten`, but your site has no route with that name.
+The button labeled '+10' tries to go to a page named `ad_ten`, but your site has no route with that name.
 
 payload.verification_failed: Payload verification failed for the page 'index': While verifying the Page() object returned from index, an error was encountered:
-Link `+10` points to non-existent page `ad_ten`.
+Button `+10` points to non-existent page `ad_ten`.
 ```
 
-Read it slowly. The large title at the top is a general category, and
-the sentence under it says what happened in plain words: the `+10`
+Read it slowly. The large title at the top names the kind of problem,
+and the sentence under it says what happened in plain words: the `+10`
 button points to a page called `ad_ten`, and no route with that name
-exists. The error calls the button a link because buttons and links are
-checked the same way. Below that sentence is the technical message, and
-below that is a list titled "What To Try Next".
+exists. Below that sentence is the technical message, and below that
+is a list titled "What To Try Next".
 
 Drafter checks every link and button on a page before showing it, so a
 broken app tells you what went wrong instead of showing a blank screen or
@@ -171,8 +170,10 @@ error page, or search the docs for the exact text of the message.
   Fix the line the box names and save again.
 - **The site still shows an old version**: stop the program and run it
   again, and use the browser tab that the new run opens. A fresh run
-  always reflects the current code, but a tab left open from an
-  earlier run keeps showing the old code.
+  always reflects the current code. A tab left open from an earlier
+  run reloads by itself once the new run is going, unless it has
+  waited more than two minutes and shows a box titled
+  "Disconnected". Reload a tab that shows that box.
 - **You cannot find the broken spot**: the last line of the error message
   names what is wrong (here, the button label and the missing page name).
   Search your file for that name; do not start reading from the top.

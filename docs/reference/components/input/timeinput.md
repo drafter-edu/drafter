@@ -37,14 +37,26 @@ TimeInput(name, default_value)
 | `default_value` | `str` or `datetime.time` | empty | The pre-filled time, written as `"HH:MM"` in 24-hour form (like `"14:30"`) or given as a `time` object. |
 
 Like every component, `TimeInput` also accepts
-[styling and attribute keywords](../../keyword-attributes.md). It
-recognizes no HTML attributes beyond the ones every component shares,
-so `min`, `max`, `step`, `required`, and `disabled` do not work here,
-and the picker cannot be limited to a range of times. Drafter turns a
-keyword it does not recognize into a CSS style, which the browser
-ignores, and it reports no error. Check the time inside the route
-instead. [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
-explains the keyword rule.
+[styling and attribute keywords](../../keyword-attributes.md). The
+HTML attributes it recognizes as keywords are `min`, `max`, `step`,
+`list`, `required`, `disabled`, `readonly`, and `autocomplete`.
+(`list` takes the `id` of an HTML `<datalist>`, not a Python list.)
+Drafter turns any other keyword it does not recognize into a CSS
+style;
+[Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains that rule.
+
+`min` and `max` limit the times the picker offers. Write them in the
+same `"HH:MM"` form as the default, as in
+`TimeInput("when", min="09:00", max="17:00")`. `step` is counted in
+seconds, so `step=900` moves in quarter hours. `disabled=True` and
+`readonly=True` both block changes, and a disabled field's time is
+not sent to the route.
+
+These limits apply to the picker only. Drafter does not ask the
+browser to check the form when a button is clicked, so a time typed
+outside the range, or an empty field marked `required=True`, still
+reaches the route. Check the time inside the route.
 
 ## Examples
 
@@ -88,9 +100,12 @@ start_server(State("17:00"))
 
 - Annotate the receiving parameter as `datetime.time` to get a time
   object, or as `str` to get the raw `"HH:MM"` text.
-- With a `time` annotation, leaving the field empty submits the
-  current time. With a `str` annotation, an empty field arrives as
-  `""`.
+- With a `time` annotation, leaving the field empty gives the route
+  the current time. To tell an empty field apart from a chosen time,
+  annotate the parameter as `time | None`, and an empty field gives
+  `None`. A parameter with a default value receives its default. With
+  a `str` annotation, an empty field arrives as `""`.
+  [Blank values](../../route.md#blank-values) has the full rule.
 - Values always use 24-hour form (`"14:30"`, not `"2:30 PM"`), even
   when the picker displays AM and PM to the visitor.
 

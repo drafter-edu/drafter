@@ -43,16 +43,20 @@ SelectBox(name, options, multiple=True)
 
 Like every component, `SelectBox` also accepts
 [styling and attribute keywords](../../keyword-attributes.md). The
-HTML attributes it recognizes as keywords are `multiple`, `size`, and
-`required`. `multiple=True` lets the visitor choose several options,
-as the second example below shows, and `size=4` displays four options
-at once in a list instead of a dropdown. `required=True` adds the
-attribute, but a button still runs its route when nothing is chosen.
+HTML attributes it recognizes as keywords are `multiple`, `size`,
+`required`, `disabled`, and `autocomplete`. `multiple=True` lets the
+visitor choose several options, as the second example below shows,
+and `size=4` displays four options at once in a list instead of a
+dropdown. `disabled=True` stops the visitor from changing the choice,
+and a disabled box's value is not sent to the route.
+`required=True` adds the attribute, but Drafter does not ask the
+browser to check the form when a button is clicked, so the route
+still runs when nothing is chosen.
 
-`disabled` is not on that list. Drafter turns a keyword it does not
-recognize into a CSS style, which the browser ignores, and it reports
-no error. [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
-explains the keyword rule.
+Drafter turns any other keyword it does not recognize into a CSS
+style;
+[Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains that rule.
 
 ## Examples
 

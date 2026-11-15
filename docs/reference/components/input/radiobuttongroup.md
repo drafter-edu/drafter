@@ -41,12 +41,17 @@ RadioButtonGroup(name, options, default_value)
 Like every component, `RadioButtonGroup` also accepts
 [styling and attribute keywords](../../keyword-attributes.md). Drafter
 applies them to the box that wraps the whole group, not to the
-individual radio buttons. The group recognizes no HTML attributes of
-its own, so `disabled=True` and `required=True` do not work here.
-Drafter turns a keyword it does not recognize into a CSS style, which
-the browser ignores, and it reports no error.
+individual radio buttons. That box's `id` is the group's `name`
+unless you pass an `id` keyword. Two keywords are the exception:
+Drafter passes `required=True` and `disabled=True` on to every radio
+button in the group. A disabled group cannot be changed, and its
+choice is not sent to the route. `required=True` adds the attribute,
+but Drafter does not ask the browser to check the form when a button
+is clicked, so the route still runs when nothing is chosen. Drafter
+turns any other keyword it does not recognize into a CSS style on
+the wrapping box;
 [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
-explains the keyword rule.
+explains that rule.
 
 ## Examples
 

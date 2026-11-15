@@ -92,7 +92,7 @@ route that does not exist, you get an error saying so, naming the button
 and the missing page, instead of a dead button:
 
 ```text
-Link `Play` points to non-existent page `play`.
+Button `Play` points to non-existent page `play`.
 ```
 
 ## What this means for your code

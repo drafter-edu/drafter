@@ -111,9 +111,9 @@ frozen tests for pages that no longer exist.
   your copied call does not reproduce the page you froze, often
   because the page depended on earlier clicks. Reproduce the
   situation, then freeze from that visit.
-- **"Circular Reference" appears inside the recorded page**: your
+- **A `# Not frozen:` comment appears where a test should be**: your
   state contains objects that refer to each other, which the
-  recorder cannot flatten. See
+  recorder cannot write down. See
   [Circular Reference in generated tests](../help/errors/circular-reference-tests.md).
 - **The frozen page is huge and the test is unreadable**: freeze
   smaller pages, or switch that page to a few `assert_has` checks.

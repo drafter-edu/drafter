@@ -73,7 +73,7 @@ The type named in the message points to the cause:
   its state is `None`. In an app that has state, every route returns
   `Page(state, [...])` with the state first.
 - **One field in place of the whole state**: the message names the
-  field's type, as in "is a int". `Page(state.score, [...])` passes a
+  field's type, as in "is an int". `Page(state.score, [...])` passes a
   number where the state belongs.
 - **The name `state` was reassigned**: a line such as
   `state = state.score + 1` replaces the state with a different
@@ -84,25 +84,33 @@ The type named in the message points to the cause:
   with nothing in the parentheses, and a route then returns a `Page`
   that has a state. Give the starting state to `start_server`, as in
   `start_server(State(0))`.
+- **`True` or `False` where a number belongs**: the message says the
+  state "is a bool, but the previous state was an int". Python counts
+  `True` and `False` as kinds of whole number, but Drafter compares
+  the exact type, so an app whose state is a number cannot return
+  `Page(state > 0, [...])`.
+- **A class that inherits from your state class**: the message names
+  the two classes. The exact type must match, so a state built from a
+  subclass of `State` does not count as a `State`.
 
-### A warning in place of the error page
+### A warning about the state's type
 
-In one situation Drafter accepts the page and lists a warning in the
-debug panel. This happens when the new state's type is a more
-specific kind of the old type. The most likely case is an app whose
-state is a whole number, where a route returns `True` or `False` as
-the state, because Python counts `True` and `False` as kinds of whole
-number. A state built from a class that inherits from your `State`
-class has the same effect. The Current tab of the debug panel then
-shows this line under "Errors & Warnings", and the line stays there
-as you move to other pages:
+A route that returns a state of a different type always gets the
+error page above. The debug panel can also list a warning about the
+state's type when the state was replaced some other way, for example
+by loading a saved state that holds a different type of value. The
+Current tab of the debug panel then shows a line like this one under
+"Errors & Warnings", and the line stays there as you move to other
+pages:
 
 ```text
-One of your routes changed the site state from int to bool; the state should
-keep the same type for the whole site.
+The site state changed from int to State; the state should keep the
+same type for the whole site.
 ```
 
-The causes and the fix are the same as for the error page.
+Reload the browser tab to start again from the state given to
+`start_server`, and save a new copy of the state from the current
+version of your program.
 
 ## Fix
 

@@ -79,9 +79,9 @@ checks.
 
 - Did you save the file, and is the program still running? Saving
   reloads the site only while the program runs.
-- Are you looking at the right browser tab? A tab left open from an
-  earlier run keeps showing the old version of your site until you
-  reload it.
+- Are you looking at the right browser tab? A tab that belongs to
+  another program, or one showing a box titled "Disconnected", keeps
+  showing an old version of a site until you reload it.
 - Is there an error message in the terminal you started from, or
   under "Errors & Warnings" in the debug panel's Current tab?
 - Does the app still break after you stop the program and run it

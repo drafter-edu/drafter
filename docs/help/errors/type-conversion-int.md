@@ -38,6 +38,14 @@ Parameter 'price' expects int but got '2.5' from the form field
 or enter a whole number.
 ```
 
+or, when the box was left empty:
+
+```text
+Parameter 'age' expects int but no value was provided by the form field
+'age'. Enter a number. To let this be left blank, give the parameter a
+default value or make it optional (int | None).
+```
+
 ## What it means
 
 A form field's contents are always text; your route asked for an
@@ -55,12 +63,15 @@ then consider what a visitor might type into that field.
 The hint at the end of the message distinguishes the causes:
 
 - **"Try entering a number"**: the text was not numeric at all
-  (`"twenty"`, `""`, `"3 dogs"`).
+  (`"twenty"`, `"3 dogs"`).
 - **"use float instead of int"**: the text was a number, but not a
   whole one (`"2.5"`).
+- **"Enter a number. To let this be left blank..."**: the box was
+  empty. The message says "no value was provided" where the other two
+  say "got" and quote the text.
 
-Then consider the underlying question: should this field only ever
-hold whole numbers?
+Then consider two underlying questions. Should this field only ever
+hold whole numbers, and may a visitor leave it empty?
 
 ## Fix
 
@@ -73,6 +84,11 @@ Match the annotation to what the field means:
 - Free text that sometimes holds a number: annotate `str` and convert
   yourself when it matters, checking `isdigit()` first, as the
   [Calculator example](../../examples/calculator.md) does.
+- A number that may be left empty: give the parameter a default, as
+  in `age: int = 0`, and an empty box gives the default. Or annotate
+  it `age: int | None`, and an empty box gives `None`, which the route
+  checks for. [Blank values](../../reference/route.md#blank-values)
+  has the full rule.
 
 ```python
 @route

@@ -77,9 +77,12 @@ Each annotation produces a different kind of value:
 When the visitor presses the button without choosing a file, a `str`
 parameter receives an empty string and a `bytes` parameter receives
 empty bytes, so check for an empty value before using it. A `Picture`
-parameter has no empty form and shows an error instead, unless you
-annotate it as `Picture | None`, in which case it receives `None`. A
-`FileUpload` with the `multiple` attribute delivers a list.
+parameter has no empty form and shows an error instead. Adding
+`| None` to any of these annotations, as in `str | None` or
+`Picture | None`, makes the parameter receive `None` when no file was
+chosen. [Blank values](../reference/route.md#blank-values) has the
+full rule. A `FileUpload` with the `multiple` attribute delivers a
+list.
 
 ## Recipe: offer a download
 
@@ -145,16 +148,19 @@ repository.
 
 If you build the site another way, tell the build about the file
 with `add_website_file`. That function also checks right away that
-the file really exists, and stops the program with a "file not
-found" message if it does not:
+the file really exists under exactly that name, capital letters
+included. If it does not, the program stops with a message in the
+terminal titled "Website File Not Found" or "Website File Name Has
+Different Capital Letters", which says what to change:
 
 ```python
 add_website_file("questions.txt")
 ```
 
-The `--additional-paths` command line flag does the same job from
-outside the code, repeated once per file (see
-[Command line](../reference/cli.md)).
+To include a whole folder of files, name the folder, as in
+`add_website_file("data")`. The `--additional-paths` command line
+flag does the same job from outside the code, repeated once per file
+or folder (see [Command line](../reference/cli.md)).
 The helper `get_drafter_path("questions.txt")` resolves a name to
 wherever the app's files actually live, which helps in the rare
 case where plain `open` cannot find a file you bundled.
@@ -203,7 +209,7 @@ def index(state: State) -> Page:
         Button("Record", "record"),
         "\n",
         Download("Save my journal", "journal.txt",
-                 entries_to_text(state.entries).encode("utf-8")),
+                 entries_to_text(state.entries)),
         " or ",
         Link("load a saved journal", "ask_for_file")
     ])
@@ -247,11 +253,8 @@ function turns the list in state into one string with an entry on
 each line, and `text_to_entries` turns that string back into a list.
 The first two tests check each direction.
 
-The `Download` receives the text converted to bytes with
-`.encode("utf-8")`. A download built from bytes saves every character
-exactly as written. A download built from a plain string can lose
-part of the text when it contains a `#` character, which matters when
-the file holds whatever a visitor typed.
+The `Download` receives that string, and the saved file holds every
+character of it, including the line break at the end of each entry.
 
 The `load_journal` route checks for an empty string before it
 replaces anything. When the visitor presses Load without choosing a
@@ -315,8 +318,10 @@ files manageable:
 - Give the helper file a specific name of your own. A name such as
   `helpers.py` is also the name of a public library. If your file
   is ever missing from the deployed site, the browser installs that
-  library in its place, and the import error that follows is
-  confusing to read.
+  library in its place. The Current tab of the debug panel then
+  lists a warning that begins "Your program imports helpers, and
+  there is no helpers.py next to your program", and an import error
+  that follows says the same in its steps.
 - When you deploy, upload every `.py` file to the repository, next
   to `main.py`. The template from
   [Publish on GitHub Pages](../your-project/deploy/github-pages.md)

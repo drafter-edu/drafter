@@ -79,7 +79,12 @@ the module name in the last line.
   `helpers.py` next to your program. On a deployed site, that file
   must also be part of the site, as
   [Image or file works locally but 404s when deployed](missing-asset-on-deploy.md)
-  explains.
+  explains. When the file is missing and a public library has the
+  same name, the browser installs that library in its place. The
+  debug panel's Current tab then shows a warning that begins "Your
+  program imports helpers, and there is no helpers.py next to your
+  program", and an error such as `cannot import name 'describe_mood'
+  from 'helpers'` lists the missing file as its first step.
 
 Many well-known libraries do work in the browser. `requests` loads
 there, and `matplotlib` and `pandas` have browser builds. The first

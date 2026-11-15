@@ -17,12 +17,10 @@ error_text: "is not in options"
 The error page has this title:
 
 ```text
-Unusable Value
+SelectBox Default Is Not an Option
 ```
 
-Drafter uses the title "Unusable Value" for several different
-problems, so the sentence under the title is what identifies this
-one:
+The sentence under the title names the default that is missing:
 
 ```text
 The starting choice for this SelectBox has to be one of the options in its

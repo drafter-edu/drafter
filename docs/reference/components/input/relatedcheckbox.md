@@ -38,13 +38,16 @@ RelatedCheckBox(name, value, default_value)
 | `default_value` | `bool` | `False` | Whether this box starts checked. |
 
 Like every component, `RelatedCheckBox` also accepts
-[styling and attribute keywords](../../keyword-attributes.md). It
-recognizes no HTML attributes beyond the ones every component shares,
-so `disabled=True` and `required=True` do not work here. Drafter turns
-a keyword it does not recognize into a CSS style, which the browser
-ignores, and it reports no error.
+[styling and attribute keywords](../../keyword-attributes.md). The
+HTML attributes it recognizes as keywords are `required` and
+`disabled`. `disabled=True` stops the visitor from changing that one
+box, and a disabled box adds nothing to the list, even when it is
+shown checked. `required=True` adds the attribute, but Drafter does
+not ask the browser to check the form when a button is clicked, so
+the route still runs when the box is unchecked. Drafter turns any
+other keyword it does not recognize into a CSS style;
 [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
-explains the keyword rule.
+explains that rule.
 
 ## Examples
 

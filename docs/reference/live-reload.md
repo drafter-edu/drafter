@@ -69,10 +69,9 @@ never trigger a reload in any mode.
 Each setting below can be passed as a keyword to `start_server(...)`
 or given as a command line flag, such as `--no-reloader` or
 `--watch-max-files 500`. Running `drafter --help` lists the flags.
-The `watch_...` settings can also be set through an environment
-variable with the `DRAFTER_` prefix, for example
-`DRAFTER_WATCH_MAX_FILES=500`. The `use_reloader` setting is the
-exception: its environment variable currently has no effect.
+Each one can also be set through an environment variable with the
+`DRAFTER_` prefix, for example `DRAFTER_WATCH_MAX_FILES=500` or
+`DRAFTER_USE_RELOADER=false`.
 [Where settings come from](start-server.md#where-settings-come-from)
 describes the three forms.
 

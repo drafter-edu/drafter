@@ -24,16 +24,18 @@ Drafter works, not a bug.
 [State](../concepts/state.md) covers what does and does not
 persist.
 
-### Why do I get an error when I reload the page?
+### Why did reloading take me back to the first page?
 
 The address bar remembers the last route you visited, in the part
 that looks like `?route=save_name`. Reloading starts the app over
 and then runs that route again. If the route expects a value from a
-form, no form was submitted this time, so Drafter shows the error
-page titled "Problem With the Route's Arguments". Click **Return to
-Index Page** on the error page to start from the beginning.
-[Route is missing a parameter](errors/missing-parameter.md) has the
-details.
+form, no form was submitted this time, so Drafter opens the first
+page instead and lists a warning in the debug panel that says so.
+Nothing in your code needs fixing. A
+route that needs only the state is run again after a reload, with
+the state back at its starting value.
+[Reloading the tab](troubleshooting.md#reloading-the-tab-shows-a-page-i-did-not-expect)
+has the details.
 
 ### Where is my data stored?
 
@@ -73,8 +75,9 @@ After that, everything is fast.
 ### Why does nothing after `start_server(...)` run?
 
 On your computer, `start_server` keeps running for as long as the
-site is up, so Python does not reach the lines after it. Put tests
-and settings before it and page logic in routes.
+site is up, so Python does not reach the lines after it until the
+server stops. Drafter prints a warning when it finds code there. Put
+tests and settings before it and page logic in routes.
 [Code after start_server never runs](errors/nothing-after-start-server.md).
 
 ## Writing your app
@@ -93,10 +96,11 @@ right. [Row](../reference/components/layout/row.md).
 
 ### Why does `input()` not work the way it does in my other programs?
 
-Inside a route, `input()` opens a bare pop-up box in the browser,
-without your question in it. A web page asks for information with
-form components instead: show a `TextBox` and a `Button`, and
-receive the answer as a parameter of the next route.
+Inside a route, `input()` opens a pop-up box in the browser that
+shows your question, and the page waits until the box is answered.
+Pressing Cancel gives an empty string. A web page asks for
+information with form components instead: show a `TextBox` and a
+`Button`, and receive the answer as a parameter of the next route.
 [Ask the user for information](../add/ask-for-information.md).
 
 ### Why does `time.sleep()` not make my page wait and then change?

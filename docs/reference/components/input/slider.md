@@ -45,13 +45,14 @@ Slider(name, min, max, default_value, step)
 
 Like every component, `Slider` also accepts
 [styling and attribute keywords](../../keyword-attributes.md). Its
-`min`, `max`, and `step` are parameters, and it recognizes no further
-HTML attributes beyond the ones every component shares, so
-`disabled=True` does not work here. Drafter turns a keyword it does
-not recognize into a CSS style, which the browser ignores, and it
-reports no error.
+`min`, `max`, and `step` are parameters. The HTML attributes it
+recognizes as keywords are `disabled` and `list`. `disabled=True`
+locks the handle in place, and a disabled slider's number is not sent
+to the route. `list` takes the `id` of an HTML `<datalist>`, not a
+Python list. Drafter turns any other keyword it does not recognize
+into a CSS style;
 [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
-explains the keyword rule.
+explains that rule.
 
 ## Examples
 

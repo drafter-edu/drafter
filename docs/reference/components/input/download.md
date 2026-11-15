@@ -82,12 +82,8 @@ start_server(State(["Meeting began late."]))
   the download always matches the current state.
 - The extension should match the contents: `.txt` for text, `.png`
   for a `Picture`, `.csv` for comma-separated rows.
-- Text is written into the download link exactly as given, and a
-  browser treats some characters in a link specially. A `#` in the
-  text ends the saved file at that character, and a line break at
-  the very end of the text is dropped. When the text might contain
-  a `#`, pass it as bytes with `transcript.encode("utf-8")`, and
-  the file arrives unchanged.
+- The saved file holds the text exactly as given, including
+  characters such as `#` and `%` and a line break at the very end.
 - The visitor's browser decides where downloads are saved (usually
   the downloads folder); your app is not told whether the visitor
   kept the file.

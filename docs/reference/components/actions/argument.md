@@ -110,6 +110,14 @@ start_server(State("nothing yet"))
     The component argument 'wish_fr' was sent to 'wish', but the function has no matching parameter.
     ```
 
+    Expanding the warning's Details shows a suggestion, here "Did you
+    mean the parameter 'wish_for'?". When no parameter has a similar
+    name, the Details say to add a parameter with that name or to
+    remove the argument. An unused argument is reported every time,
+    because you wrote it for that one route. An unused form field is
+    reported only when its name is close to a parameter that received
+    nothing.
+
 ## Related components
 
 - [Button](button.md) and [Link](link.md): the components that

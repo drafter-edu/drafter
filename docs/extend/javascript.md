@@ -169,14 +169,7 @@ change it directly. Give a component an `id` keyword, find its
 element with `js.document.getElementById`, and then change the
 element.
 
-The demos in this documentation all share one Python with the
-documentation page around them, so `js.document` on this page would
-be the documentation page and not the demo. Most of the remaining
-recipes are therefore shown as listings without a demo. Each
-listing is a complete program that was run in a browser. Save it as
-a file and run it to try it.
-
-```python
+```python drafter height=320
 from drafter import *
 from dataclasses import dataclass
 
@@ -243,7 +236,7 @@ coroutine instead of a `Page`.
 What does work is to give the promise a function to call when the
 result arrives. Every promise has a `then` method for that purpose.
 
-```python
+```python drafter height=280
 from drafter import *
 from dataclasses import dataclass
 
@@ -384,7 +377,7 @@ libraries for any site to load. This program loads a small library
 named canvas-confetti and uses it to throw confetti across the
 page.
 
-```python
+```python drafter height=340
 from drafter import *
 from dataclasses import dataclass
 
@@ -514,6 +507,8 @@ The JavaScript reads as follows.
   listener is added only once. While you are developing, each save
   reloads your program and runs this JavaScript again. Without the
   check, a second listener would make one key press count twice.
+  [Cleaning up before a reload](#cleaning-up-before-a-reload) shows
+  a second way to prevent that.
 
 A button does not have to be visible for this to work.
 `Button("Next", "next_card", style_display="none")` hides the
@@ -531,7 +526,7 @@ through a route. The `then` method above is one case. Many other
 JavaScript functions accept a function to call later, and for
 those the Python function has to be wrapped first.
 
-```python
+```python drafter height=280
 from drafter import *
 from dataclasses import dataclass
 
@@ -605,6 +600,61 @@ With these lines near the top of a program, the browser tab reads
 changes with each page that follows. Drafter does not send the
 event after an `Update`, because no page was shown.
 
+### Cleaning up before a reload
+
+While you are developing, each save runs your program again in the
+same browser tab, and JavaScript added with `add_website_js` runs
+again with it. Whatever the earlier run set up, such as a `keydown`
+listener, is still in place. Right before the running site is
+replaced, Drafter sends the browser window an event named
+`drafter-cleanup`. A script can listen for that event and remove
+what it set up:
+
+```python
+add_website_js("""
+function onKey(event) {
+    if (event.key === "ArrowRight") {
+        var button = document.querySelector('[data-nav="next_card"]');
+        if (button) {
+            button.click();
+        }
+    }
+}
+document.addEventListener("keydown", onKey);
+window.addEventListener(
+    "drafter-cleanup",
+    function () {
+        document.removeEventListener("keydown", onKey);
+    },
+    { once: true }
+);
+""")
+```
+
+The listener has a name, `onKey`, so that `removeEventListener` can
+be given the same function that `addEventListener` received. The
+`{ once: true }` option removes the clean-up listener itself after
+it has run, so each run of the program leaves nothing behind.
+
+This script and the `window.cardKeysReady` check in
+[Calling a route from JavaScript](#calling-a-route-from-javascript)
+both stop one key press from counting twice. They differ in which
+version of your JavaScript is running after a save.
+
+- **A guard variable keeps the first listener.** Later runs add
+  nothing, so when you edit the JavaScript and save, the old listener
+  keeps running until you reload the browser tab. A guard is the
+  shorter choice for JavaScript that you have finished writing.
+- **The clean-up event replaces the listener on every save.** The
+  old listener is removed and the new one is added, so an edit to
+  the JavaScript takes effect when you save. Choose it while you are
+  still changing the JavaScript, and for anything that should not
+  keep running after a reload, such as a `setInterval` timer.
+
+Reloading the browser tab clears every listener, so neither approach
+is needed for that. A deployed site never runs the program a second
+time in the same page.
+
 ## Custom elements exist
 
 Drafter's own interactive components, such as Timer, Map, and
@@ -642,8 +692,10 @@ can build in Python alone, and the
   button triggers.
 - **One key press acts twice while you are developing.** Each save
   ran your site-wide JavaScript again and added another listener.
-  Add a check like the `cardKeysReady` lines above, and refresh the
-  browser tab to clear the extra listeners.
+  Add a check like the `cardKeysReady` lines above, or remove the
+  listener when the `drafter-cleanup` event arrives, as in
+  [Cleaning up before a reload](#cleaning-up-before-a-reload). Then
+  refresh the browser tab to clear the extra listeners.
 - **Deciding what to keep from a `js` value.** Numbers and text
   from JavaScript are ordinary Python values and can go into your
   state. An element or any other JavaScript object is a wrapper

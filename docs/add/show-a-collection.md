@@ -249,9 +249,8 @@ for one route call only.
 
 The Cancel button returns to the list without saving. The text box's
 value is still sent with that click, and `index` has no parameter for
-it, so the debug panel lists a warning about
-[a form field with no matching parameter](../help/errors/missing-parameter.md#a-related-warning-a-form-field-with-no-matching-parameter).
-That warning is expected here and does not affect the page.
+it. That is allowed. A route can leave out the form fields it does
+not use, and the unused value is dropped without any message.
 
 ## Recipe: show only the items that match
 

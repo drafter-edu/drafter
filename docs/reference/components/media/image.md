@@ -71,6 +71,12 @@ start_server()
   [works locally, 404s deployed](../../../help/errors/missing-asset-on-deploy.md).
 - **URL images** require the visitor to be online, and the address
   must point directly at an image file.
+- **An image that cannot be loaded** shows as a broken picture, and
+  the rest of the page appears as usual. The debug panel lists a
+  warning for it, whose Details name the image, as in "The image
+  'ada.png' could not be loaded."
+  [A picture shows as a broken image](../../../help/troubleshooting.md#a-picture-shows-as-a-broken-image)
+  lists what to check.
 - A width and height that do not match the picture's proportions
   will stretch it. Give only one of the two, or keep the pair in
   proportion, unless the distortion is intentional.

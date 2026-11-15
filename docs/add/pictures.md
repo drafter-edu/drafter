@@ -170,6 +170,11 @@ pipeline together, from upload to transformation to download.
 - **A URL image shows nothing**: the address must point straight at
   an image (ending in .png, .jpg, or another image extension), not
   at a page containing one, and the visitor needs to be online.
+- **A broken-picture icon appears where the image belongs**: the
+  browser could not load the file. The debug panel lists a warning
+  that names the image.
+  [A picture shows as a broken image](../help/troubleshooting.md#a-picture-shows-as-a-broken-image)
+  lists what to check.
 - **Transformations seem to do nothing**: the result was not
   assigned back to state.
 

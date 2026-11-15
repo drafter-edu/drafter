@@ -33,17 +33,17 @@ phrase from the message, in quotes.
 | `Problem With the Route's Arguments` | `expects int but got` | [Could not convert text to an int](type-conversion-int.md) |
 | `Problem With the Route's Arguments` | `expects float but got`, or another type | [Could not convert a value to the parameter's type](type-conversion-other.md) |
 | `Problem With the Route's Arguments` | `does not look like unicode (utf-8) text` | [Uploaded file couldn't be read as text](file-decode-error.md) |
-| `Unusable Value` | `points to non-existent page` | [Link or button points to an unknown route](route-not-found.md) |
-| `Unusable Value` | `must be a list of strings, numbers, booleans, or components` | [Page content must be a list of strings, numbers, booleans, or components](page-content-invalid.md) |
-| `Unusable Value` | `is not in options` | [SelectBox default not in options](selectbox-default-missing.md) |
-| `Unusable Value` | `Header level must be between 1 and 6` | [Header level must be 1-6](header-level-invalid.md) |
-| `Unusable Value` | Anything else | [Python's own errors](#pythons-own-errors) |
-| `Page Content Problem` | `Unsupported page content type`, or `has no attribute 'extend'` | [Page content must be a list of strings, numbers, booleans, or components](page-content-invalid.md) |
+| `Problem With the Route's Arguments` | `but no value was provided by` | [Blank values](../../reference/route.md#blank-values) |
+| `Button Points to a Missing Page`, or `Link Points to a Missing Page` | Any message | [Link or button points to an unknown route](route-not-found.md) |
+| `Page Content Problem` | Any message | [Page content must be a list of strings, numbers, booleans, or components](page-content-invalid.md) |
+| `SelectBox Default Is Not an Option` | Any message | [SelectBox default not in options](selectbox-default-missing.md) |
+| `Header Level Out of Range` | Any message | [Header level must be 1-6](header-level-invalid.md) |
 | `Page Not Found` | `No route found for URL` | [Link or button points to an unknown route](route-not-found.md) |
 | `Module Not Found` | `No module named` | [A library import fails in the browser](package-import-error.md) |
 | `File Not Found` | `File not found`, on the deployed site only | [Image or file works locally but 404s when deployed](missing-asset-on-deploy.md) |
-| `Unknown Name`, `Type Mismatch`, `Missing Attribute`, `List Position Out of Range`, `Missing Dictionary Key`, `Division by Zero`, `Endless Recursion`, or `Problem Loading This Page` | A message from Python | [Python's own errors](#pythons-own-errors) |
+| `Unknown Name`, `Type Mismatch`, `Unusable Value`, `Missing Attribute`, `List Position Out of Range`, `Missing Dictionary Key`, `Division by Zero`, `Endless Recursion`, or `Problem Loading This Page` | A message from Python | [Python's own errors](#pythons-own-errors) |
 | `Error`, on a dialog that says "Error running student code" | `ModuleNotFoundError` | [A library import fails in the browser](package-import-error.md) |
+| `Website File Not Found`, or `Website File Name Has Different Capital Letters`, printed in the terminal | Any message | [add_website_file](../../reference/site-config.md#add_website_file) |
 
 ## By message text
 
@@ -55,9 +55,10 @@ phrase from the message, in quotes.
 | `was sent to ..., but the function has no matching parameter` (a warning in the debug panel) | [A form field with no matching parameter](missing-parameter.md#a-related-warning-a-form-field-with-no-matching-parameter) |
 | `expects int but got` | [Could not convert text to an int](type-conversion-int.md) |
 | `expects float but got`, or another type | [Could not convert a value to the parameter's type](type-conversion-other.md) |
+| `expects ... but no value was provided by` | [Blank values](../../reference/route.md#blank-values) |
 | `has a state that is a ..., but the previous state was a ...` | [State doesn't match the State class](state-mismatch.md) |
-| `changed the site state from ... to ...` (a warning in the debug panel) | [A warning in place of the error page](state-mismatch.md#a-warning-in-place-of-the-error-page) |
-| `must be a list of strings, numbers, booleans, or components` | [Page content must be a list of strings, numbers, booleans, or components](page-content-invalid.md) |
+| `changed the site state from ... to ...` (a warning in the debug panel) | [A warning about the state's type](state-mismatch.md#a-warning-about-the-states-type) |
+| `must be a list of strings, numbers, booleans, or components`, `must be given as one list`, or `Unsupported page content type` | [Page content must be a list of strings, numbers, booleans, or components](page-content-invalid.md) |
 | `has multiple components with the same name` | [Two components share a name](duplicate-component-name.md) |
 | `default_value ... is not in options` | [SelectBox default not in options](selectbox-default-missing.md) |
 | `Header level must be between 1 and 6` | [Header level must be 1-6](header-level-invalid.md) |
@@ -67,11 +68,18 @@ phrase from the message, in quotes.
 | A red X on your GitHub deployment | [GitHub Actions build failed](deploy-build-failed.md) |
 | `ModuleNotFoundError`, or `No module named` | [A library import fails in the browser](package-import-error.md) |
 | `Camera access denied`, `Microphone access denied`, or `Location access denied` | [Device permission denied](permission-denied-device.md) |
+| `The address of this page named a route that needs values from a form or a button` (a warning in the debug panel) | [Reloading the tab shows a page I did not expect](../troubleshooting.md#reloading-the-tab-shows-a-page-i-did-not-expect) |
+| `The browser could not load one of the images` (a warning in the debug panel) | [A picture shows as a broken image](../troubleshooting.md#a-picture-shows-as-a-broken-image) |
+| `has code after start_server(...)` in the terminal, or `comes after start_server(...)` (a warning in the debug panel) | [Code after start_server() never runs](nothing-after-start-server.md) |
+| `Unknown start_server option` in the terminal, or `start_server was given an option named` (a warning in the debug panel) | [start_server](../../reference/start-server.md#student-relevant-options) |
 
 ## Not an error, but broken anyway
 
 - If code placed after `start_server()` does not seem to run, see
   [Code after start_server() never runs](nothing-after-start-server.md).
+- If reloading the browser tab shows the first page in place of the
+  page you were on, see
+  [Reloading the tab shows a page I did not expect](../troubleshooting.md#reloading-the-tab-shows-a-page-i-did-not-expect).
 - If there is no error message but the app behaves incorrectly, see
   [Troubleshooting](../troubleshooting.md), which is organized by symptom.
 

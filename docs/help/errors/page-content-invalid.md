@@ -17,12 +17,10 @@ error_text: "must be a list of strings, numbers, booleans, or components"
 The error page has this title:
 
 ```text
-Unusable Value
+Page Content Problem
 ```
 
-Drafter uses the title "Unusable Value" for several different
-problems, so the sentence under the title is what identifies this
-one:
+The sentence under the title says which item is the problem:
 
 ```text
 Item number 0 in this Page's content list is a Pet, but every item needs
@@ -40,12 +38,12 @@ components. Found Pet at index 0 instead.
 The position counts from zero, so "index 0" is the first item of the
 content list and "index 1" is the second.
 
-Two other forms of this error exist. When the value sits where the
-whole list belongs, the messages leave out the position ("The content
-you returned in this Page was a Pet", and "Found Pet instead."). When
-the value is inside another component, such as a `Div` or a
-`BulletedList`, the error page is titled "Page Content Problem" and
-the sentence under the title says where the value is:
+Two other forms of this error have the same title. When the value
+sits where the whole list belongs, the messages leave out the position
+("The content you returned in this Page was a Pet", and "Found Pet
+instead."). When the value is inside another component, such as a
+`Div` or a `BulletedList`, the sentence under the title says where the
+value is:
 
 ```text
 Your page content includes a value that Drafter does not know how to
@@ -95,10 +93,19 @@ produces:
   in the wrong order, as in `Page(["Hello"], state)`. The state comes
   first.
 - **Missing square brackets around several items**:
-  `Page(state, "Hello", Button("Go", "index"))` gives an error page
-  titled "Page Content Problem" whose technical message ends
-  `'Button' object has no attribute 'extend'`. Put the items inside
-  one list.
+  `Page(state, "Hello", Button("Go", "index"))` produces "The content
+  of a Page must be given as one list, but more was written after the
+  content: a Button." A `Page` takes the state, then one content
+  list, and nothing else without a name. The first hint under "What To
+  Try Next" shows the call with the brackets added, as in
+  `Page(state, ['Hello', Button(...)])`.
+- **CSS or JavaScript given without its name**:
+  `Page(state, ["Hello"], "h1 { color: red; }")` produces the same
+  message, ending "a str". Name the value, as in
+  `Page(state, ["Hello"], css="h1 { color: red; }")`. The `css` and
+  `js` values must be text or a list of text. `css=5` produces "The
+  css of a Page must be a string or a list of strings, but got an
+  int."
 
 A single string, number, or component in place of the list is not an
 error. `Page(state, "Hello")` shows the same page as

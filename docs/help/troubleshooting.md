@@ -69,9 +69,11 @@ through these checks in order.
 3. Check that you are editing the file that is running, and that you
    are looking at the browser tab that belongs to this run. When a
    program starts, the terminal prints the address of its site in a
-   line such as `Drafter ready at http://localhost:8000`. A tab left
-   open from an earlier run, or from another program, does not
-   reload when you save. Reload that tab, and see
+   line such as `Drafter ready at http://localhost:8000`. A tab that
+   belongs to another program does not reload when you save, and
+   neither does a tab showing a "Disconnected" box, which means it
+   lost its program more than two minutes ago. Reload that tab, and
+   see
    [The browser shows an old or different app](#the-browser-shows-an-old-or-different-app).
 4. Look for a box titled "Syntax Error" on top of your site. When
    the saved file is not valid Python, Drafter keeps showing the
@@ -88,25 +90,30 @@ through these checks in order.
 6. As a last resort, stop the program, run it again, and open the
    address that the terminal prints.
 
-## Reloading the tab does not go back to the first page
+## Reloading the tab shows a page I did not expect
 
 After each click, the address bar ends with the name of the route
 that produced the current page, such as `?route=add_one`. When you
 reload the tab, Drafter starts the site again with the state at its
-starting value and then runs that same route, with no form values.
-Two results of this behavior can be surprising.
+starting value. What it shows next depends on what that route needs.
 
-- If the route changes the state, the change is applied once to the
+- **The route needs only the state.** Drafter runs the route again.
+  If the route changes the state, the change is applied once to the
   starting state. A counter that starts at 0 and was showing 4 shows
   1 after a reload when the address ends in `?route=add_one`.
-- If the route needs a value from a form, the reload has no value to
-  give it. Drafter shows an error page titled "Problem With the
-  Route's Arguments", which the
-  [missing parameter](errors/missing-parameter.md) entry describes.
+- **The route needs a value from a form or a button.** A reload has
+  no value to give it, so Drafter does not run the route. It opens
+  the first page and removes the `?route=...` part from the address.
+  The debug panel lists a warning that begins "The address of this
+  page named a route that needs values from a form or a button", and
+  the warning's Details name the route and the parameters it was
+  missing. Nothing in your code needs fixing. Use your site's buttons
+  and links to get back to the page you were on.
 
-To return to the first page, click **Return to Index Page** on the
-error page, or open the site's address without the `?route=...`
-part.
+To return to the first page yourself, open the site's address without
+the `?route=...` part.
+[Opening a site on a route](../reference/route.md#opening-a-site-on-a-route)
+has the full rules.
 
 ## The browser shows an old or different app
 
@@ -125,10 +132,17 @@ An earlier run of main.py is still using port 8000. Stopping it so this run can 
 Stopped the earlier run.
 ```
 
-A browser tab that the earlier run opened does not follow the new
-run. That tab keeps showing the old version of your site, and it no
-longer reloads when you save. Reload that tab, or use the tab that
-the new run opened.
+A browser tab that the earlier run opened notices that its program
+went away and keeps trying to reach it again. When the new run
+answers at the same address, the tab reloads by itself and shows the
+new version, so you may end up with two tabs showing the same site.
+Close either one.
+
+A tab that cannot reach its program for two minutes stops trying
+and shows a box titled "Disconnected". The page stays readable
+behind it, but saving your file no longer updates that tab. Run the
+program again and reload the tab, or use the tab that the new run
+opened.
 
 **A different program is using the port.** Drafter moves your
 program to the next free port and prints the new address. When the
@@ -157,6 +171,12 @@ a free port for you.
 
 - Read the message in the terminal. A syntax error names the file
   and the line. Fix that line and run the program again.
+- A problem that Drafter recognizes is shown in the terminal as a
+  titled message, not a traceback. Examples are a file named in
+  `add_website_file` that does not exist and a `Header` level outside
+  1 to 6. The message has a `Where:` line that names the file and
+  line, an explanation, and a list headed "What to try". Running the
+  program with `--verbose` shows the full traceback instead.
 - If the terminal shows a message titled "Port already in use", see
   [The browser shows an old or different app](#the-browser-shows-an-old-or-different-app).
 - If `import drafter` itself fails, the installation is the problem.
@@ -214,12 +234,25 @@ own.
 
 A small broken-picture icon in place of your image means that the
 browser asked for the file and did not get it. Drafter does not show
-an error page or a warning for a missing picture, so the icon is the
-only sign on the page.
+an error page for a missing picture, so the rest of the page appears
+as usual. The debug panel lists a warning that begins "The browser
+could not load one of the images on this site", once for each image
+that failed, and the warning's Details name the image:
+
+```text
+The image 'ada.png' could not be loaded.
+```
+
+The warning covers every image on the page, including an `<img>`
+written with `RawHTML` and an image from another website.
 
 - Compare the filename in your code, such as `Image("ada.png")`,
-  with the name of the real file, including the ending.
-- Check that the file sits next to your program.
+  with the name of the real file, including the ending and the
+  capital letters.
+- Check that the file sits next to your program, or in the folder
+  that your code names.
+- If the image comes from another website, check its address and
+  your internet connection.
 - While the program runs on your computer, the terminal prints a
   line ending in `404 Not Found` for each file that the browser
   asked for and did not get. That line shows the exact name that was
@@ -277,8 +310,11 @@ working.
 
 This behavior is
 [by design](errors/nothing-after-start-server.md). The call to
-`start_server(...)` takes over the program. Configuration and tests
-go before it, and behavior goes in routes.
+`start_server(...)` takes over the program, and on your computer the
+lines after it wait until the server stops. When the program starts,
+the terminal prints a warning that names the line where that code
+begins. Configuration and tests go before the call, and behavior goes
+in routes.
 
 ## The first load is slow
 

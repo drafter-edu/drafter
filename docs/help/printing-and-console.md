@@ -82,18 +82,18 @@ def add_one(state: State) -> Page:
 start_server(State(0))
 ```
 
-The demos on this documentation site run with the debug panel
-hidden, so the Console box is hidden too. Click the "debug" button
-in the corner of the demo, then click **Click me**, and the printed
-lines appear in the Console box below the page. When you run the
-same program on your own computer, the box is visible without that
-step.
+The demos on this documentation site show printed lines in a small
+Console box that floats at the bottom of the demo. Click
+**Click me** to see more lines arrive. When you run the same program
+on your own computer, the Console box sits below the page instead.
 
 Messages that Python writes to `stderr`, such as warnings, appear in
 the Console box in red. The **Console** button in the bar above the
 box opens and closes the box. Inside the box, **Clear** empties it
 and **Hide** closes it. After you press Hide, new output does not
-reopen the box, so press the Console button to see it again.
+reopen the box, so press the Console button to see it again. The
+floating box in the demos has no Console button. After Hide, it
+comes back the next time something is printed.
 
 Printing is the quickest way to answer two common questions, which
 are "did this route run at all?" and "what value arrived?" Print
@@ -133,7 +133,7 @@ environment variable.
 | Mode | What it does |
 | ---- | ------------ |
 | `auto` (default) | The Console box under the page, only while the debug panel is showing. |
-| `hover` | A floating Console box pinned to the bottom of the window, with or without the debug panel. |
+| `hover` | A floating Console box pinned to the bottom of the window, with or without the debug panel. Hide closes it until the next output is printed. |
 | `toast` | Each printed line appears for a few seconds as a small notice in a corner of the window. |
 | `devtools` | No Console box on the page. Output goes only to the browser's developer tools. |
 
@@ -163,7 +163,8 @@ choose the `hover` or `toast` mode, for example with
 - **The Console box is missing.** The box appears only after
   something has been printed, and only while the debug panel is
   showing. If you pressed Hide, press the Console button under your
-  page. If your program calls `hide_debug_information()`, see
+  page (in `hover` mode, the box returns with the next output). If
+  your program calls `hide_debug_information()`, see
   [Printing on a deployed site](#printing-on-a-deployed-site).
 - **Prints flood the console.** A `print` inside a route that runs
   on every keystroke (`on_input`) produces a line every time the

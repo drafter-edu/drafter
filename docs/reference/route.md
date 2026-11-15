@@ -130,34 +130,107 @@ message names the parameter and the value that was sent.
 | ---------- | ------------------ | ------- |
 | none | The value as it was sent. | Nothing is converted. A text input sends a `str`. |
 | `str` | The text exactly as typed. | Spaces at either end are kept. An empty box gives `""`. |
-| `int` | A whole number. | Spaces around the number are ignored, and `5.0` is accepted as `5`. Text such as `2.5`, `twenty`, or `1,000` is an error, and so is an empty box. |
-| `float` | A decimal number. | `3` becomes `3.0`. Text that is not a number is an error, and so is an empty box. |
+| `int` | A whole number. | Spaces around the number are ignored, and `5.0` is accepted as `5`. Text such as `2.5`, `twenty`, or `1,000` is an error. For an empty box, see [Blank values](#blank-values). |
+| `float` | A decimal number. | `3` becomes `3.0`. Text that is not a number is an error. For an empty box, see [Blank values](#blank-values). |
 | `bool` | `True` or `False`. | `true`, `on`, `1`, `yes`, and `checked` give `True`. `false`, `off`, `0`, `no`, and empty text give `False`. Capital letters make no difference. A `CheckBox` gives `True` when it is checked and `False` when it is not. Any other text is an error. |
 | `list`, `list[str]`, `list[int]` | A list. | Each item is converted to the type in the brackets. One value alone becomes a one-item list. A `SelectBox` with `multiple=True` sends one item for each selected option. |
 | `tuple[int, int]`, `tuple[int, ...]`, `set[str]` | A tuple or a set. | The items are converted as they are for a list. A tuple that names a type for each position must receive exactly that many values. |
 | `Literal["red", "blue"]` | The value, when it is one of the listed choices. | `Literal[1, 2, 3]` turns the text `2` into the number `2`. Any other value is an error that lists the choices. |
 | `int | float` and other unions | The result from the first type that accepts the value. | The types are tried from left to right. With `int | float`, the text `2` gives `2` and the text `2.5` gives `2.5`. When `str` is one of the types, text is passed through unchanged. |
-| `int | None`, `Optional[int]` | The same result as `int`. | Adding `None` does not make the parameter optional, and an empty box is still an error. The one exception is listed with `Picture` below. |
-| a default, as in `times: int = 1` | The default, when no value with that name was sent. | A value that was sent is still converted by the annotation. |
+| `int | None`, `Optional[int]` | The same result as `int`, or `None` when the box was left empty. | `None` arrives only when there is no value at all, as [Blank values](#blank-values) explains. Text that is not a number is still an error. |
+| a default, as in `times: int = 1` | The default, when no value with that name was sent or the box was left empty. | A value that was sent is still converted by the annotation. [Blank values](#blank-values) lists which empty fields use the default. |
 | `**kwargs` | A dictionary of every value that matched no named parameter. | These values are not converted. |
-| `date`, `time`, `datetime` | A value from Python's `datetime` module. | The text must be in ISO form, such as `2026-11-14`, `13:30`, or `2026-11-14T13:30`, which is the form that date and time inputs send. Empty text gives the current date or time. Other forms, such as `11/14/2026`, are an error. |
+| `date`, `time`, `datetime` | A value from Python's `datetime` module. | The text must be in ISO form, such as `2026-11-14`, `13:30`, or `2026-11-14T13:30`, which is the form that date and time inputs send. Other forms, such as `11/14/2026`, are an error. An empty field gives the current date or time, unless the parameter allows `None` or has a default. See [Blank values](#blank-values). |
 | a dataclass | An instance of the dataclass. | The value must be a dictionary, or JSON text, with a key for each field. Each field is converted by its own annotation, and fields that have defaults may be left out. |
 | `dict` | The dictionary that was sent. | JSON text is not turned into a dictionary. An uploaded file gives a dictionary with the keys `filename`, `content`, `type`, and `size`. |
 | `Color` | A [Color](data-types/color.md). | The text can be a hex code such as `#ff8800` or a color name such as `red`. A `ColorPicker` sends a hex code. With `list[int]`, a hex code becomes `[255, 136, 0]`. |
-| `Picture` | A [Picture](data-types/picture.md) made from an uploaded image. | A file that is not an image is an error. With `Picture | None`, the route receives `None` when no file was chosen. |
-| `str`, `bytes`, `DrafterTextFile`, `DrafterBinaryFile` on a `FileUpload` | The file's text, its raw bytes, or its contents together with the filename. | [File types](data-types/file-types.md) describes each one. For `str`, a file that is not UTF-8 text is an error. |
+| `Picture` | A [Picture](data-types/picture.md) made from an uploaded image. | A file that is not an image is an error, and so is no file at all. With `Picture | None`, the route receives `None` when no file was chosen. |
+| `str`, `bytes`, `DrafterTextFile`, `DrafterBinaryFile` on a `FileUpload` | The file's text, its raw bytes, or its contents together with the filename. | [File types](data-types/file-types.md) describes each one. For `str`, a file that is not UTF-8 text is an error. [Blank values](#blank-values) covers a form sent with no file chosen. |
 | `Photo`, `Location`, `Recording`, `AudioLevel` | A value built from the data that a camera, location, or sound component sends. | [Data types](data-types/index.md) describes each one. |
 
-Two rules explain most surprises:
+### Values that match no parameter
 
-- **An empty text box still sends a value.** The value is empty text,
-  so the parameter is not missing, and its default is not used. For a
-  number field that may be left empty, annotate the parameter as `str`
-  and convert the text yourself after checking for `""`.
-- **A value that matches no parameter is not an error.** The route
-  still runs, and the debug panel shows a warning that names the unused
-  value. A route with `**kwargs` receives those values without a
-  warning.
+A value that matches no parameter is not an error, and the route runs
+without it. Every button and link sends all of the form fields on its
+page, so a route that takes none of them is normal. The target of a
+Cancel button is the usual example, and it produces no message.
+
+The debug panel lists a warning for a leftover value in two cases:
+
+- **The name is a near miss.** A form field or event value is named
+  almost the same as a parameter that received nothing, as with
+  `TextBox("petname")` and a parameter named `pet_name`. The
+  warning's Details ask whether you meant that parameter.
+- **The value came from an `Argument`.** You addressed an
+  [Argument](components/actions/argument.md) to this one route, so a
+  name the route does not have is reported every time.
+
+A route with `**kwargs` receives every leftover value and never
+produces this warning.
+[A form field with no matching parameter](../help/errors/missing-parameter.md#a-related-warning-a-form-field-with-no-matching-parameter)
+shows the warning and how to fix it.
+
+### Blank values
+
+A visitor can press a button without filling in every field. For the
+fields below, Drafter treats what arrives as no value at all:
+
+- a text box left empty, when the parameter is annotated as `int`,
+  `float`, `date`, `time`, `datetime`, or a `Literal`
+- a `DateInput`, `TimeInput`, or `DateTimeInput` left empty, when the
+  parameter is annotated as `date`, `time`, or `datetime`
+- a `FileUpload` with no file chosen
+- a `Camera` that has not taken a photo, when the parameter is
+  annotated as `Picture`
+
+When there is no value, the parameter receives the first of these
+that applies:
+
+1. **`None`**, when the annotation allows it, as in `age: int | None`
+   or `day: Optional[date]`.
+2. **The parameter's default**, when it has one. With `age: int = 7`,
+   an empty box gives `7`.
+3. **The type's own empty value**, when the type has one. The table
+   below lists them.
+4. **An error page** that says no value was provided, for a type that
+   has no empty value.
+
+| Annotation | With no `None` and no default, an empty field gives |
+| ---------- | --------------------------------------------------- |
+| `date`, `time`, `datetime` | The current date, the current time, or both. |
+| `str` on a `FileUpload` | `""` |
+| `bytes` on a `FileUpload` | `b""` |
+| `DrafterTextFile`, `DrafterBinaryFile` | A file whose `filename` is empty and whose `size` is 0. |
+| `int`, `float`, a `Literal`, `Picture` | An error page. |
+
+The error page is titled `Problem With the Route's Arguments`, and its
+message ends with the way to allow an empty field:
+
+```text
+Parameter 'age' expects int but no value was provided by the form field
+'age'. Enter a number. To let this be left blank, give the parameter a
+default value or make it optional (int | None).
+```
+
+So a number field that may be left empty needs one of two things. Give
+the parameter a default, as in `age: int = 0`, or annotate it as
+`age: int | None` and check for `None` inside the route.
+
+Three cases are not blank values:
+
+- **Empty text for a `str` parameter is a value.** An empty text box
+  gives `""`, and it gives `""` for `name: str | None` and for
+  `name: str = "World"` as well. The default of a `str` parameter is
+  used only when no input with that name is on the page.
+- **An unchecked `CheckBox` is a value.** A `bool` parameter receives
+  `False`.
+- **A file that was chosen but has nothing in it is a real file.** A
+  `str` parameter receives `""` for it, even when the annotation is
+  `str | None`.
+
+An empty item inside a list, such as one empty box among several that
+fill a `list[int]`, is an error for that item. It does not turn the
+whole parameter into `None` or its default.
 
 ## Built-in routes
 
@@ -208,11 +281,30 @@ Three limits apply to an address like this:
   still names the last route.
 - **Only the route name is used.** Other values in the address are not
   passed to the route, so `?route=greet&who=Ada` runs `greet` without a
-  value for `who`. An address like this is dependable only for a route
-  that needs nothing but the state. A route with a required form
-  parameter shows the `Problem With the Route's Arguments` error page.
+  value for `who`. A route can be opened this way only when it needs
+  nothing but the state, which means every parameter after the state
+  has a default value.
 - **The name must match a route.** Any other name shows the
   `Page Not Found` error page.
+
+When the address names a route with a required parameter after the
+state, Drafter does not run that route. It opens the first page with
+a fresh state and takes `route` out of the address. This is what
+happens when a visitor reloads the tab on a page that a form led to,
+such as `?route=save`. The debug panel lists one warning, which
+begins "The address of this page named a route that needs values from
+a form or a button". Expanding the warning's Details shows the route
+and the parameters that had no value:
+
+```text
+The page's address asked for the route 'save', which needs values an
+address does not carry ('name', 'age'). The first page was opened instead.
+```
+
+Nothing in the program needs fixing when this warning appears. To
+make a page that can be reloaded or opened from its address, give
+every parameter after the state a default value, as in
+`def greet(state: State, who: str = "friend")`.
 
 On the development server, a shorter form also works. The address
 `http://localhost:8000/second` is redirected to

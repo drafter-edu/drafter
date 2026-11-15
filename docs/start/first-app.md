@@ -310,7 +310,7 @@ SUCCESS at line 33 (assert_has)
   has exactly one field.
 - **Nothing happens after `#!python start_server(...)`**: that is normal.
   `#!python start_server` hands your program over to the site;
-  [lines after it do not run](../help/errors/nothing-after-start-server.md). 
+  [lines after it do not run while the site is up](../help/errors/nothing-after-start-server.md). 
   Go check the site in your browser: the URL will be something like <http://localhost:8000>.
 
 ## Name it

@@ -38,14 +38,25 @@ DateInput(name, default_value)
 | `default_value` | `str` or `datetime.date` | empty | The pre-filled date, written as `"YYYY-MM-DD"` (like `"2026-07-27"`) or given as a `date` object. |
 
 Like every component, `DateInput` also accepts
-[styling and attribute keywords](../../keyword-attributes.md). It
-recognizes no HTML attributes beyond the ones every component shares,
-so `min`, `max`, `step`, `required`, and `disabled` do not work here,
-and the picker cannot be limited to a range of dates. Drafter turns a
-keyword it does not recognize into a CSS style, which the browser
-ignores, and it reports no error. Check the date inside the route
-instead. [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
-explains the keyword rule.
+[styling and attribute keywords](../../keyword-attributes.md). The
+HTML attributes it recognizes as keywords are `min`, `max`, `step`,
+`list`, `required`, `disabled`, `readonly`, and `autocomplete`.
+(`list` takes the `id` of an HTML `<datalist>`, not a Python list.)
+Drafter turns any other keyword it does not recognize into a CSS
+style;
+[Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains that rule.
+
+`min` and `max` limit the days the picker offers. Write them in the
+same `"YYYY-MM-DD"` form as the default, as in
+`DateInput("day", min="2026-08-01", max="2026-08-31")`. `step` is
+counted in days. `disabled=True` and `readonly=True` both block
+changes, and a disabled field's date is not sent to the route.
+
+These limits apply to the picker only. Drafter does not ask the
+browser to check the form when a button is clicked, so a date typed
+outside the range, or an empty field marked `required=True`, still
+reaches the route. Check the date inside the route.
 
 ## Examples
 
@@ -89,8 +100,12 @@ start_server(State("2026-08-15"))
 
 - Annotate the receiving parameter as `datetime.date` to get a date
   object, or as `str` to get the raw `"YYYY-MM-DD"` text.
-- With a `date` annotation, leaving the field empty submits today's
-  date. With a `str` annotation, an empty field arrives as `""`.
+- With a `date` annotation, leaving the field empty gives the route
+  today's date. To tell an empty field apart from a chosen day,
+  annotate the parameter as `date | None`, and an empty field gives
+  `None`. A parameter with a default value receives its default. With
+  a `str` annotation, an empty field arrives as `""`.
+  [Blank values](../../route.md#blank-values) has the full rule.
 - The browser controls what the picker looks like, so it differs
   between computers and phones; the submitted value is always in
   `"YYYY-MM-DD"` form regardless.

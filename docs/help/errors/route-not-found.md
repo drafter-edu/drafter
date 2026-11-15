@@ -15,15 +15,18 @@ error_id: payload.verification_failed
 
 ## The error
 
-The error page has this title:
+The error page has one of two titles. The title names the kind of
+component that has the problem:
 
 ```text
-Unusable Value
+Link Points to a Missing Page
 ```
 
-Drafter uses the title "Unusable Value" for several different
-problems, so the sentence under the title is what identifies this
-one:
+```text
+Button Points to a Missing Page
+```
+
+The sentence under the title gives the label and the target:
 
 ```text
 The link labeled 'Next' tries to go to a page named `sumary`, but your
@@ -38,10 +41,9 @@ While verifying the Page() object returned from index, an error was encountered:
 Link `Next` points to non-existent page `sumary`.
 ```
 
-Both messages say "link" even when the component is a `Button`.
-Drafter checks buttons and links the same way, so
-`Button("Next", "sumary")` and `Link("Next", "sumary")` produce the
-same text.
+Both messages also name the kind of component. For
+`Button("Next", "sumary")` they read "The button labeled 'Next'" and
+"Button `Next` points to non-existent page `sumary`."
 
 A different error page, titled "Page Not Found", appears when the
 address in the browser names a route your program does not have, for
@@ -97,11 +99,12 @@ def summary(state: State) -> Page:
 Button("Next", "summary")
 ```
 
-The third hint under "What To Try Next" on the error page suggests
-passing the route function itself, as in `Button("Next", summary)`
-with no quotation marks. Both forms work and lead to the same route,
-and when you use a string, as these docs do, the string must match
-the name of the function exactly.
+The two hints under "What To Try Next" on the error page point at the
+same two places. The first says to check the spelling of the page
+name in the button or link, and the second says to make sure the
+page's function has the `@route` decorator. The string must match the
+name of the function exactly, including capital letters and
+underscores.
 
 ## Confirm
 

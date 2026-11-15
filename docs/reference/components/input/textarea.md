@@ -39,14 +39,18 @@ Like every component, `TextArea` also accepts
 [styling and attribute keywords](../../keyword-attributes.md). The
 HTML attributes it recognizes as keywords are `rows` and `cols`,
 which control its size, `placeholder`, which shows a hint, and
-`disabled`, `readonly`, and `required`.
+`maxlength`, `minlength`, `required`, `disabled`, `readonly`,
+`autocomplete`, and `autofocus`. Drafter turns any other keyword it
+does not recognize into a CSS style;
+[Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains that rule.
 
-`maxlength` is not on that list. Drafter turns a keyword it does not
-recognize into a CSS style, which the browser ignores, and it reports
-no error. `required=True` adds the attribute, but a button still runs
-its route when the area is empty, so check for empty text inside the
-route. [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
-explains the keyword rule.
+`maxlength=200` stops typing after 200 characters. `disabled=True`
+and `readonly=True` both block typing, and a disabled area's text is
+not sent to the route. `required=True` and `minlength` add their
+attributes, but Drafter does not ask the browser to check the form
+when a button is clicked, so the route still runs when the area is
+empty or the text is too short. Check the text inside the route.
 
 ## Examples
 

@@ -41,18 +41,27 @@ TextBox(name, default_value, kind)
 Like every component, `TextBox` also accepts
 [styling and attribute keywords](../../keyword-attributes.md). The
 HTML attributes it recognizes as keywords are `placeholder`,
-`maxlength`, `minlength`, `size`, `pattern`, and `alt`.
+`maxlength`, `minlength`, `size`, `pattern`, `alt`, `min`, `max`,
+`step`, `list`, `required`, `disabled`, `readonly`, and
+`autocomplete`. (`list` takes the `id` of an HTML `<datalist>`, not a
+Python list.) Drafter turns any other keyword it does not recognize
+into a CSS style;
+[Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains that rule.
 
-Several attributes that work on a plain HTML input are not on that
-list, including `required`, `min`, `max`, `step`, `disabled`, and
-`readonly`. Drafter turns a keyword it does not recognize into a CSS
-style, which the browser ignores, and it reports no error. As a
-result, `TextBox("age", kind="number", min=0, max=10)` shows a number
-box that accepts any number. Drafter also does not ask the browser to
-check the form when a button is clicked, so `minlength` and `pattern`
-do not stop a route from running. Check the value inside the route
-instead. [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
-explains the keyword rule.
+Some of these keywords change what the box itself allows.
+`maxlength=20` stops typing after 20 characters. With
+`kind="number"`, the `min`, `max`, and `step` keywords set where the
+box's arrow buttons stop and how far each click moves.
+`disabled=True` and `readonly=True` both block typing. A read-only
+box still sends its value to the route. A disabled box does not, so
+the route's parameter needs a default value.
+
+None of these keywords stops a route from running, because Drafter
+does not ask the browser to check the form when a button is clicked.
+A box marked `required=True` can be left empty, and
+`TextBox("age", kind="number", min=0, max=10)` still lets the visitor
+type `50` and send it. Check the value inside the route.
 
 ## Examples
 
@@ -131,8 +140,16 @@ start_server(State(0))
   explains the problem. For example, `2.5` cannot become an `int`;
   if decimal values should be accepted, annotate the parameter as
   `float`.
-- A box whose `name` matches no parameter of the target route produces
-  a warning; a route parameter no box fills produces a
+- An empty box gives a `str` parameter `""`. For an `int` or `float`
+  parameter, an empty box is an error unless the parameter has a
+  default value, which is then used, or allows `None`, as in
+  `age: int | None`. [Blank values](../../route.md#blank-values) has
+  the full rule.
+- A box whose `name` matches no parameter of the target route is not
+  an error, and its value is dropped. The debug panel lists a
+  [warning](../../../help/errors/missing-parameter.md#a-related-warning-a-form-field-with-no-matching-parameter)
+  when the name is close to a parameter that received nothing. A route
+  parameter no box fills produces a
   [missing parameter](../../../help/errors/missing-parameter.md) error.
 - For multi-line input, use [TextArea](textarea.md).
 

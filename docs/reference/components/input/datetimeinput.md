@@ -38,14 +38,25 @@ DateTimeInput(name, default_value)
 | `default_value` | `str` or `datetime.datetime` | empty | The pre-filled moment, written as `"YYYY-MM-DDTHH:MM"` (like `"2026-07-27T14:30"`, with a capital T between the date and the time) or given as a `datetime` object. |
 
 Like every component, `DateTimeInput` also accepts
-[styling and attribute keywords](../../keyword-attributes.md). It
-recognizes no HTML attributes beyond the ones every component shares,
-so `min`, `max`, `step`, `required`, and `disabled` do not work here,
-and the picker cannot be limited to a range of moments. Drafter turns
-a keyword it does not recognize into a CSS style, which the browser
-ignores, and it reports no error. Check the value inside the route
-instead. [Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
-explains the keyword rule.
+[styling and attribute keywords](../../keyword-attributes.md). The
+HTML attributes it recognizes as keywords are `min`, `max`, `step`,
+`list`, `required`, `disabled`, `readonly`, and `autocomplete`.
+(`list` takes the `id` of an HTML `<datalist>`, not a Python list.)
+Drafter turns any other keyword it does not recognize into a CSS
+style;
+[Plain HTML attributes](../../keyword-attributes.md#plain-html-attributes)
+explains that rule.
+
+`min` and `max` limit the moments the picker offers. Write them in
+the same `"YYYY-MM-DDTHH:MM"` form as the default, as in
+`DateTimeInput("moment", min="2026-08-01T09:00")`. `step` is counted
+in seconds. `disabled=True` and `readonly=True` both block changes,
+and a disabled field's value is not sent to the route.
+
+These limits apply to the picker only. Drafter does not ask the
+browser to check the form when a button is clicked, so a moment typed
+outside the range, or an empty field marked `required=True`, still
+reaches the route. Check the value inside the route.
 
 ## Examples
 
@@ -90,9 +101,13 @@ start_server(State("2026-08-01T10:00"))
 - Annotate the receiving parameter as `datetime.datetime` to get a
   `datetime` object, or as `str` to get the raw
   `"YYYY-MM-DDTHH:MM"` text.
-- With a `datetime` annotation, leaving the field empty submits the
-  current date and time. With a `str` annotation, an empty field
-  arrives as `""`.
+- With a `datetime` annotation, leaving the field empty gives the
+  route the current date and time. To tell an empty field apart from
+  a chosen moment, annotate the parameter as `datetime | None`, and an
+  empty field gives `None`. A parameter with a default value receives
+  its default. With a `str` annotation, an empty field arrives as
+  `""`. [Blank values](../../route.md#blank-values) has the full
+  rule.
 - The `T` in the middle of the value is part of the standard
   format; `datetime.fromisoformat` and Drafter's conversion both
   expect it.

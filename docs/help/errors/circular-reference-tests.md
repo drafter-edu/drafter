@@ -15,20 +15,23 @@ error_text: "Circular Reference"
 ## The error
 
 This problem has no error page and no title. The words
-`Circular Reference` appear inside a recorded route call or a
-generated test, in the place where a value should be. In the text of
-a [frozen test](../../add/freeze-pages.md) the marker looks like
-this:
+`Circular Reference` appear inside a route call recorded on the
+History tab, in the place where a value should be:
 
 ```text
 Pet(name='Ada', owner=<strong>Circular Reference</strong>)
 ```
 
-Python's own marker for the same situation, three dots, can appear
-in the same test, as in `Pet(name='Ada', owner=...)`. A test that
-contains the first marker is not valid Python, and a test that
-contains the three dots compares against the wrong value, so neither
-one passes.
+For that visit, Drafter does not write a
+[frozen test](../../add/freeze-pages.md). The History tab and the
+copied or downloaded tests have a comment in its place:
+
+```text
+# Not frozen: add(...) has a state with a circular reference, which cannot be written as a test.
+```
+
+The comment is valid Python, so the tests around it still run when
+you paste them. The visit it names has no test.
 
 ## What it means
 

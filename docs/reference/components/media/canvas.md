@@ -42,12 +42,9 @@ Canvas(canvas_id, width=400, height=200)
 
 The canvas is found by id and drawn on with the browser's own
 drawing calls, through the `js` module, which only exists in the
-browser. Copy this program to your own computer to try it. It is not
-a live demo, because a demo on this page shares its `js.document`
-with the documentation page around it and cannot find its own
-canvas there:
+browser. Press the button to draw:
 
-```python
+```python drafter height=300
 from drafter import *
 from dataclasses import dataclass
 

@@ -80,11 +80,6 @@ list as a table of contents for your app. Check it when clicking a
 button reports that a route does not exist, or when you suspect a
 route function is missing its `@route` decorator.
 
-Below the list, the **Route Graph** section is not finished. It
-shows a note that the graph is coming soon and a sample drawing with
-the routes `index`, `guess`, `give_up`, and `result`. The drawing is
-the same for every app and does not describe yours.
-
 ## Tests: your assertions, live
 
 Every assertion in your file is listed here with its result and its
@@ -99,7 +94,10 @@ broken behavior does not have a test yet.
 The **Regression Tests** section has two buttons, **Copy Regression
 Tests** and **Download Tests (.py)**. Both produce one
 `assert_equal` test for each page you have visited, in the order you
-visited them. [Freeze finished pages](../add/freeze-pages.md)
+visited them. A visit whose state has a circular reference gets a
+`# Not frozen:` comment in place of its test, because such a state
+cannot be written as Python code.
+[Freeze finished pages](../add/freeze-pages.md)
 explains what to do with those tests.
 
 ## Environment: the machinery
@@ -110,7 +108,11 @@ environment your app runs in.
 - **File Systems** lists the files that Python can see in the
   browser, under "Client File System". Press Refresh to update the
   list. Use it to check that a data file is where `open(...)`
-  expects it.
+  expects it. While your app runs from your own computer, a second
+  list, "Host File System", shows the files in your project folder.
+  Click a folder there to look inside it, and `../` to go back up.
+  A deployed site has no such folder, so that list does not appear
+  there.
 - **Installed Packages** lists the Python packages that are loaded.
 - **Configuration** lists every setting, such as the title, the
   theme, and debug mode, with its current value. Look here to check
@@ -125,8 +127,6 @@ environment your app runs in.
   including the snapshots from the Save/Load menu. Press Refresh to
   update the list, and use the button at the end of a row to delete
   that entry.
-- **Advanced** is not finished. Its "Show Drafter internals" section
-  shows sample values, not information about your app.
 
 ## The menus
 
@@ -171,9 +171,6 @@ menus. The names of the items below are the names on the screen.
 
 ### Edit
 
-- **Edit State…** is not finished. It opens a window that shows the
-  current state and a note that editing is coming soon. You cannot
-  change a value there.
 - **Edit Source** opens your program in an editor inside the
   browser. Pressing **Run** restarts the site with the edited code.
   The edit exists only in that browser tab. The file on your
@@ -202,15 +199,28 @@ cart.
 - **Download Snapshot…** saves a snapshot as a `.json` file on your
   computer, and **Upload Snapshot…** restores from such a file.
 
-Loading a snapshot puts the saved state back and then runs the saved
-route again. If that route changes the state, the change is applied
-again on top of the saved state. For example, a counter saved at 4
-on a page produced by an `add_one` route loads as 5. To get back
-exactly what you saved, save while you are on a page whose route
-only displays the state, such as `index`.
+Loading a snapshot brings back the page and the state you saved. A
+snapshot also records the state from just before its route ran.
+Loading puts that earlier state back and runs the route again, the
+same way the browser's Back button returns to a page. For example, a
+counter saved at 4 on a page produced by an `add_one` route loads
+as 4. If the route does something different each time it runs, such
+as picking a random number, the loaded page can differ from the one
+you saved.
+
+A snapshot saved by an older version of Drafter does not have the
+earlier state. Loading one puts the saved state back and runs the
+route on top of it, so that counter loads as 5.
 
 Snapshots are kept by the browser, so they survive a reload of the
-tab. If you change the fields of your `State` class after you save,
+tab. Each app has its own slots. Two programs that you run at the
+same address, one after the other, do not see each other's
+snapshots, and a program that you move or rename starts with empty
+slots. Snapshots saved before slots were kept for each app are no
+longer offered in this menu. They are still listed under Browser
+Storage on the Environment tab, where you can delete them.
+
+If you change the fields of your `State` class after you save,
 for example by renaming one, loading the snapshot can fail. The
 state then stays as it was, and the Current tab lists an error.
 
@@ -234,8 +244,11 @@ state then stays as it was, and the Current tab lists an error.
 - **Tests show old results.** Tests run when the site loads. Save
   your file, or reload the tab, to run them against the current
   code.
-- **A loaded snapshot is off by one step.** Loading runs the saved
-  route again. See the note under [Save/Load](#saveload).
+- **A loaded snapshot is off by one step.** The snapshot was saved
+  by an older version of Drafter. Save it again to get one that
+  loads exactly. See the note under [Save/Load](#saveload).
+- **Your saved snapshots are gone.** Slots belong to one app at one
+  address. See the note under [Save/Load](#saveload).
 
 ## Next steps
 

@@ -13,8 +13,8 @@ outcome: Know every student-relevant start_server option.
 # start_server
 
 `start_server(...)` hands your routes over to Drafter and starts the
-site. It is the last line of every Drafter program: code written after
-it [never runs](../help/errors/nothing-after-start-server.md).
+site. It is the last line of every Drafter program. Code written after
+it [does not run when you would expect](../help/errors/nothing-after-start-server.md).
 
 ## Syntax
 
@@ -81,19 +81,28 @@ configuration function (`set_website_style`, `set_website_title`,
 [configuration functions](site-config.md) read more clearly and are
 what the rest of these docs use.
 
-Set each option in only one of the two forms. When a configuration
-function and a `start_server` keyword give different values for the
-same option, the result is not dependable. For example, the browser
-tab shows the title from `set_website_title`, while the theme follows
-the `start_server` keyword.
+Both forms write the same settings, and the one written last wins.
+`start_server(...)` runs after every configuration function above it,
+so its keywords win. With `set_website_title("A")` above
+`start_server(site_title="B")`, the browser tab shows "B". Setting
+each option in only one of the two forms keeps a program easier to
+read.
 
-!!! warning "A misspelled option is ignored without any message"
+!!! warning "A misspelled option is ignored, with a warning"
 
     `start_server` accepts any keyword. A keyword that it does not
-    recognize, such as `sight_title` in place of `site_title`, produces
-    no error and no warning, and the real option keeps its default. If
-    an option seems to have no effect, check its spelling against the
-    table above.
+    recognize, such as `sight_title` in place of `site_title`, is
+    ignored, and the real option keeps its default. The site still
+    starts, and the terminal prints a warning that names the keyword:
+
+    ```text
+    Warning: Unknown start_server option 'sight_title'. Did you mean 'site_title'? The option was ignored.
+    ```
+
+    In the browser, the debug panel lists the same problem as a
+    warning. The "Did you mean" part is left out when no real option
+    has a similar name. If an option seems to have no effect, look
+    for this warning and check the spelling against the table above.
 
 ## Where settings come from
 
@@ -129,15 +138,16 @@ When the same setting is given in more than one place, a
 `start_server` keyword wins over a flag, and a flag wins over an
 environment variable.
 
-The environment variables for `port`, `host`, `open_browser`, and
-`use_reloader` currently have no effect. Use the keyword or the flag
-for those four settings.
-
 ## Notes
 
-- **Nothing after the call runs.** `start_server` takes over the
-  program, so all configuration must come before it; code placed
-  after the call never executes.
+- **Code after the call runs at the wrong time.** `start_server`
+  takes over the program, so all configuration must come before it.
+  On your computer, code placed after the call waits until the server
+  stops. In the browser, it runs right after the first page appears.
+  When the file has statements after the call, the terminal prints a
+  warning that names the line, and the debug panel lists the same
+  warning. Comments and blank lines after the call do not count. See
+  [Code after start_server never runs](../help/errors/nothing-after-start-server.md).
 - **Tests run first.** Assertions written above `start_server` execute
   before the site starts. A failing assertion prints a FAILURE message
   and the site still starts. See
@@ -151,8 +161,10 @@ for those four settings.
   like Downloads or your home directory, Drafter prints a notice and
   watches only your program and the files your site uses, instead of
   the entire folder. [Live reload](live-reload.md) has the details.
-- **Old v1 options are ignored.** Parameters from Drafter v1 such as
-  `cdn_skulpt` print a warning and do nothing.
+- **Old v1 options are ignored.** Options that only Drafter v1 had,
+  such as `title`, `style`, and `debug`, do nothing and produce no
+  message, so a program written for v1 still starts. The
+  `cdn_skulpt` options print a warning and do nothing.
 - **Command-line flags** set many of the same options for one run of
   `drafter yourfile.py`. A keyword in `start_server` wins when both
   are given. See [Command line](cli.md) and

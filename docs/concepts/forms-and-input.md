@@ -68,7 +68,11 @@ list is the
 
 If the text cannot be converted, for example `abc` for an `int`
 parameter, Drafter stops with a friendly error naming the parameter and
-the value, and the visitor can go back and correct it.
+the value, and the visitor can go back and correct it. A number box
+that was left empty is also an error, unless the parameter has a
+default value or allows `None`.
+[Blank values](../reference/route.md#blank-values) gives the rule for
+every type.
 
 ## See it
 
@@ -161,8 +165,10 @@ number is expected.
   parameter names. `new_name` and `first` read well; `textbox1` does not.
 - The button's target route needs a parameter for each input whose
   value it uses, matching the input's name exactly. An input that the
-  route has no parameter for is not an error. The page still works, and
-  the debug panel lists a warning about the unused form field.
+  route has no parameter for is not an error, and the page still works.
+  The debug panel lists a warning only when the input's name is nearly
+  the same as a parameter that received nothing, which usually means a
+  typing mistake.
 - Annotate every input parameter. With `#!python age: int`, the route
   receives a number or a clear error; without an annotation, it
   receives text that you must convert yourself.

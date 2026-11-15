@@ -60,6 +60,13 @@ typical call. Every function also accepts a final `server` keyword,
 which chooses the app to configure in a program that runs more than
 one. Ordinary programs leave it out.
 
+Some of these settings can also be given as keywords to
+[`start_server`](start-server.md#student-relevant-options). Both
+forms write the same settings, and the one written last wins. A
+`start_server` keyword therefore wins over a configuration function
+called above it: with `set_website_title("A")` above
+`start_server(site_title="B")`, the title is "B".
+
 ## Appearance
 
 ### set_website_title
@@ -227,7 +234,9 @@ a `.css` file next to your Python program (a subfolder path such as
 program are checked immediately: a missing file raises an error that
 names the folder Drafter searched and suggests similarly named files,
 so `"style.css"` when the file is `"styles.css"` is caught at once
-rather than silently ignored. The file is registered as a website file
+rather than silently ignored. A name that differs from the file only
+in its capital letters is an error too, as described under
+[`add_website_file`](#add_website_file). The file is registered as a website file
 (see `add_website_file`), so it is copied into the built site when you
 deploy. Your stylesheet is linked after the theme's, so its rules win
 ties.
@@ -242,6 +251,11 @@ add_website_js("console.log('Site loaded');")
 
 Runs JavaScript code once, when the site first loads. Like
 `add_website_css`, it takes code, not a file name.
+
+While you are developing, each save runs your program again in the
+same browser tab, and this code runs again with it.
+[Cleaning up before a reload](../extend/javascript.md#cleaning-up-before-a-reload)
+shows how the code can remove what an earlier run set up.
 
 ### add_website_js_file
 
@@ -266,21 +280,57 @@ add_website_file("words.txt", "images/logo.png")
 ```
 
 Declares files next to your program that the site needs at runtime:
-data files you `open()`, images, fonts, and so on. Each name is
-checked immediately (with suggestions when a similarly named file
-exists), and the files are copied into the built site when you
-deploy. This is the way to prevent the
+data files you `open()`, images, fonts, and so on. A name can also be
+a folder, as in `add_website_file("images")`, which declares
+everything inside it. The files are copied into the built site when
+you deploy. This is the way to prevent the
 [works locally, 404s deployed](../help/errors/missing-asset-on-deploy.md)
 problem. Only files inside your program's folder can be added:
 absolute paths, `..` paths, and URLs are rejected with an explanation.
 
+Each name is checked as soon as the line runs, and a name that fails
+the check stops the program. The terminal shows a titled message in
+place of a traceback. It gives the line of your program, an
+explanation, and a list of things to try.
+
+- **No file or folder has that name.** The message is titled
+  "Website File Not Found". When a similarly named file exists, the
+  first thing to try is a suggestion such as "Did you mean
+  'questions.txt'?".
+- **The capital letters differ.** Windows and macOS open `Logo.PNG`
+  when a program asks for `logo.png`. The server that hosts a
+  deployed site does not, so Drafter stops the program on your own
+  computer, before the site is deployed:
+
+    ```text
+    ==============================================================================
+    Website File Name Has Different Capital Letters
+    ==============================================================================
+    Where: main.py, line 3
+
+    Your program asks for 'logo.png', but the file is named 'Logo.PNG'. Your
+    computer treats those as the same name. The server that hosts a deployed site
+    does not, so the site would not find the file there.
+
+    What to try:
+      1. Change the name in your code to match the file:
+         add_website_file('Logo.PNG').
+      2. Or rename the file so its capital letters match your code.
+
+    Details: add_website_file: 'logo.png' is spelled 'Logo.PNG' on disk (the
+             capital letters differ)
+    ```
+
+`add_website_css_file` and `add_website_js_file` make the same two
+checks. They accept a file only, not a folder.
+
 Two command line flags also copy files into the built site.
 [`--additional-files`](cli.md#building-for-deployment) is the flag form
-of this function and takes one file name at a time.
+of this function and takes one file or folder name at a time.
 [`--additional-paths`](cli.md#building-for-deployment) is a separate
-build flag that also accepts folders and patterns such as
-`data/*.csv`. Calling `add_website_file` in your program has the
-advantage that the list of files travels with the code.
+build flag that also accepts patterns such as `data/*.csv`. Calling
+`add_website_file` in your program has the advantage that the list of
+files travels with the code.
 
 ## Site information
 

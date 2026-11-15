@@ -25,8 +25,9 @@ When you run a Drafter program, it actually runs twice:
 1. **Once on your computer**, from top to bottom, like any Python file.
    This run defines your `State`, registers your routes, and runs your
    `assert_` tests. When it reaches `start_server(...)`, it hands
-   everything over to the site. That is why code written after
-   `start_server(...)` never runs.
+   everything over to the site and waits there for as long as the
+   site is up. That is why `start_server(...)` goes on the last line:
+   code written after it does not run until the server stops.
 2. **Again inside the browser**, where the real app lives. The browser
    can run Python directly, so your routes execute right there: every
    button click calls one of your functions, which returns the next
@@ -84,8 +85,11 @@ lives only in memory.
 
 ## What this means for your code
 
-- Put `start_server(...)` last. On your computer, nothing after it
-  runs.
+- Put `start_server(...)` last. On your computer, code after it waits
+  until the server stops. In the browser, it runs right after the
+  first page appears. Drafter prints a
+  [warning](../help/errors/nothing-after-start-server.md) when it
+  finds code there.
 - Put tests before `start_server(...)`; they run at startup, every time.
 - Design your `State` to hold everything the app needs to remember, and
   expect it to reset on reload.
