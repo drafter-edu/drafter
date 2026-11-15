@@ -118,6 +118,52 @@ ID_EXPLANATIONS: dict[str, tuple[str, str, tuple[str, ...]]] = {
             "along with the rest of the site.",
         ),
     ),
+    "client.image_load_failed": (
+        "Image Did Not Load",
+        "The browser could not load one of the images on this site, so it "
+        "shows as a broken picture. Your Python code still ran.",
+        (
+            "Check that the name in your code matches the file exactly, "
+            "including capital letters and the ending (like .png or .jpg).",
+            "Check that the image file is next to your program, or in the "
+            "folder your code names.",
+            "If the site is deployed, check that the image was uploaded "
+            "along with the rest of the site.",
+            "If the image comes from another website, check its address "
+            "and your internet connection.",
+        ),
+    ),
+    "client.load_snapshot_failed": (
+        "Saved State Does Not Fit",
+        "Drafter could not load that saved state. It was most likely saved "
+        "under a different version of your code, so its values no longer "
+        "match the state your program uses now. Your site is unchanged.",
+        (
+            "If you changed the fields of your state since saving, save a "
+            "new snapshot from the current version of your program.",
+            "Open Details to see which part of the saved state did not fit.",
+        ),
+    ),
+    "bridge.history_state_restore_failed": (
+        "Earlier State Not Restored",
+        "Drafter could not bring back the state this page had when you "
+        "first visited it, most likely because your code changed since "
+        "then. The page is shown with the current state instead.",
+        ("Reload the page to start again from the first page with a fresh state.",),
+    ),
+    "bridge.initial_route_needs_arguments": (
+        "Opened the First Page Instead",
+        "The address of this page named a route that needs values from a "
+        "form or a button, and an address cannot carry those. This is what "
+        "happens when a tab is reloaded on a page that a form led to. "
+        "Drafter opened the first page instead, with a fresh state.",
+        (
+            "Nothing in your code needs fixing. Use your site's own buttons "
+            "and links to get back to that page.",
+            "To make a page that can be reloaded or opened from its "
+            "address, give every parameter after the state a default value.",
+        ),
+    ),
     "system.error_page_failed": (
         "Something Went Very Wrong",
         "Drafter hit a second problem while trying to show you the error page itself.",
@@ -371,7 +417,9 @@ def diagnostics_to_friendly(
 
     Args:
         diagnostics: `RouteDiagnostic`-like values (need `message`, `hint`,
-            and optionally `route_name` attributes).
+            and optionally `parameter` and `route_name` attributes). Each
+            one becomes a step holding its hint, or its message when it
+            has no hint.
         route_name: Route to mention in the summary; when empty, taken from
             the first diagnostic that names one.
 
@@ -383,9 +431,16 @@ def diagnostics_to_friendly(
     for diagnostic in diagnostics:
         message = str(getattr(diagnostic, "message", "") or "")
         hint = str(getattr(diagnostic, "hint", "") or "")
-        combined = f"{message} {hint}".strip()
-        if combined:
-            steps.append(combined)
+        parameter = str(getattr(diagnostic, "parameter", "") or "")
+        # The error page prints the technical message (every diagnostic's
+        # message and hint) right above these steps, so a step is only the
+        # hint: what to do, not a second copy of what went wrong.
+        if hint and parameter and parameter not in hint:
+            step = f"For '{parameter}': {hint}"
+        else:
+            step = hint or message
+        if step:
+            steps.append(step)
         if not route_name:
             route_name = str(getattr(diagnostic, "route_name", "") or "")
     if not steps:

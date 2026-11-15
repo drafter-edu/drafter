@@ -13,7 +13,9 @@ from dataclasses import dataclass
 from typing import Any
 
 from drafter.data.converter import (
+    MISSING_VALUE_ERROR_CODE,
     ConversionContext,
+    ConversionResult,
     ConverterRegistry,
     preview_value,
 )
@@ -193,12 +195,19 @@ class RouteBinder:
            `missing_required_parameter` error diagnostics, with a
            did-you-mean hint against the leftover payload names.
         5. Leftover payload keys flow into **kwargs when the function
-           accepts var-keyword arguments; otherwise each produces an
-           `unused_request_parameter` warning (framework metadata is
-           silently ignored).
+           accepts var-keyword arguments; otherwise they are dropped. A
+           dropped component argument (`Argument(...)`) always produces an
+           `unused_request_parameter` warning. A dropped form field or
+           event value produces one only when its name is close to a
+           parameter that received nothing, since a button sends every
+           field on its page whether or not the route wants it. Framework
+           metadata is silently ignored.
         6. Bound payload-derived values are converted through the converter
            registry; failures produce `conversion_failed` error diagnostics.
            Injected values (state, dependencies) pass through untouched.
+           A value that was left blank follows one rule: None when the
+           annotation allows it, otherwise the parameter's default,
+           otherwise the type's own empty value, otherwise a failure.
 
         Args:
             signature: Introspected signature of the target route function.
@@ -333,7 +342,16 @@ class RouteBinder:
             )
 
         # Leftover payload keys pass into **kwargs when accepted; otherwise
-        # they are dropped with a warning (framework extras never warn).
+        # they are dropped (framework extras never warn).
+        #
+        # A button sends every field on its page and a component chooses
+        # its own event values, so a leftover form field or event value is
+        # normal: a Cancel button's route takes none of the form. Those
+        # only warn on a near miss, when the name is close to a parameter
+        # that received nothing (`petname` for `pet_name`), which is the
+        # one case where the warning is the only sign of a typo. A value
+        # sent with Argument(...) was addressed to this route by the
+        # student, so it always warns.
         unbound_param_names = [
             param.name for param in named if param.name not in bound_names
         ]
@@ -344,16 +362,18 @@ class RouteBinder:
                 kwargs[value.name] = value.value
                 consumed.add(value.name)
                 continue
-            suggestion = _suggest(
-                value.name,
-                unbound_param_names or [param.name for param in named],
+            near_miss = _suggest(value.name, unbound_param_names)
+            if value.source != "component_argument" and near_miss is None:
+                continue
+            suggestion = near_miss or _suggest(
+                value.name, [param.name for param in named]
             )
             if suggestion:
                 hint = f"Did you mean the parameter '{suggestion}'?"
             else:
                 hint = (
                     f"Add a parameter named '{value.name}' to '{route_name}', "
-                    f"or remove the field."
+                    f"or remove the argument."
                 )
             diagnostics.append(
                 RouteDiagnostic(
@@ -384,7 +404,29 @@ class RouteBinder:
                 payload_value=value,
                 route_name=route_name,
             )
-            result = converter_registry.convert(context)
+            result = converter_registry.convert(context, keep_missing=True)
+            if not result.ok and result.error_code == MISSING_VALUE_ERROR_CODE:
+                # The field was left blank and the annotation does not
+                # allow None. The parameter's own default comes next,
+                # then the type's empty value (today, for a date).
+                if param.has_default:
+                    provenance.append(
+                        {
+                            "name": param.name,
+                            "source": "default",
+                            "source_detail": (
+                                f"{describe_source(value)} was left blank"
+                            ),
+                            "value": preview_value(param.default),
+                            "expected_type": param.describe_annotation() or "",
+                            "converted": None,
+                            "changed": False,
+                            "representation": describe_argument(param.default),
+                        }
+                    )
+                    continue
+                if result.has_empty_value:
+                    result = ConversionResult(ok=True, value=result.value)
             if not result.ok:
                 diagnostics.append(
                     RouteDiagnostic(

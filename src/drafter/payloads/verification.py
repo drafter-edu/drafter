@@ -9,8 +9,10 @@ with concrete fix suggestions, so the error page never has to fall back to
 generic debugging advice for these mistakes.
 """
 
+import inspect
 from typing import Any
 
+from drafter.data.errors import with_article
 from drafter.data.request import Request
 from drafter.payloads.failure import VerificationFailure
 from drafter.payloads.payloads import ResponsePayload
@@ -81,6 +83,29 @@ def verify_response_payload_type(
                 "Wrap the list in a Page, like return Page(state, your_list).",
             ),
         )
+    elif inspect.iscoroutine(payload):
+        # The coroutine will never run; closing it keeps Python from also
+        # warning that it "was never awaited".
+        payload.close()
+        return VerificationFailure(
+            f"The route {original_function} is defined with `async def`, so calling it "
+            f"returned a coroutine instead of a Page() object.\n"
+            f"Routes cannot be async. Define the route with `def` instead of `async def`.",
+            friendly_title=title,
+            friendly_message=(
+                f"Your route function `{original_function}` is written with "
+                "`async def`. Drafter calls a route as a regular function "
+                "and needs its Page right away, but an async function "
+                "hands back a coroutine (work that has not run yet) "
+                "instead."
+            ),
+            friendly_steps=(
+                "Change `async def` to `def` on this route, and remove any "
+                "`await` inside it.",
+                "To use a JavaScript result that arrives later, give the "
+                "promise a function to call with its `then` method.",
+            ),
+        )
     elif not isinstance(payload, ResponsePayload):
         return VerificationFailure(
             f"The server did not return a Page() object from {original_function}. Instead, it returned:\n"
@@ -88,8 +113,8 @@ def verify_response_payload_type(
             f"Make sure you return a Page object with the new state and the list of strings.",
             friendly_title=title,
             friendly_message=(
-                f"Your route function `{original_function}` returned a "
-                f"{type(payload).__name__} instead of a Page."
+                f"Your route function `{original_function}` returned "
+                f"{with_article(type(payload).__name__)} instead of a Page."
             ),
             friendly_steps=(
                 "Every route function must return a Page, like "
@@ -200,6 +225,10 @@ def verify_page_state_history(
     Ensures the new state object has the same type as the most recent
     state in the history. Returns a failure if the types don't match.
 
+    The type must match exactly, the same test `SiteState.update` uses.
+    A subclass of the state's class is a different type, and so is `True`
+    where the state was an `int`.
+
     Args:
         request: Associated request providing context (URL).
         updated_state: New state value to verify.
@@ -212,7 +241,7 @@ def verify_page_state_history(
     if not state_history:
         return None  # No history to compare against
     last_type = state_history[-1].__class__
-    if not isinstance(updated_state, last_type):
+    if type(updated_state) is not last_type:
         return VerificationFailure(
             f"The server did not return a valid Page() object from {original_function}. The state object's type changed from its previous type. The new value is:\n"
             f" {updated_state!r}\n"
@@ -224,9 +253,9 @@ def verify_page_state_history(
             friendly_title="State Changed Type",
             friendly_message=(
                 f"The page returned from `{original_function}` has a state "
-                f"that is a {type(updated_state).__name__}, but the previous "
-                f"state was a {last_type.__name__}. The state must stay the "
-                "same type from page to page."
+                f"that is {with_article(type(updated_state).__name__)}, but "
+                f"the previous state was {with_article(last_type.__name__)}. "
+                "The state must stay the same type from page to page."
             ),
             friendly_steps=(
                 "Return the same kind of state object from every route.",

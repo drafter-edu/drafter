@@ -9,7 +9,7 @@ type (a bare function suggests a `Link`, `None` suggests a missing
 
 import types
 
-from drafter.data.errors import StudentFacingError
+from drafter.data.errors import StudentFacingError, with_article
 from drafter.data.paths import PathItem, render_debug_path, render_student_path
 
 SUPPORTED_CONTENT_SENTENCE = (
@@ -66,7 +66,7 @@ def describe_content_value(value) -> str:
         return f"the function '{name}' itself"
     if isinstance(value, type):
         return f"the class '{value.__name__}' itself"
-    return f"a {type(value).__name__} value ({short_repr(value)})"
+    return f"{with_article(type(value).__name__)} value ({short_repr(value)})"
 
 
 def advice_for_content_value(value) -> tuple[str, ...]:

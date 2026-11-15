@@ -27,17 +27,19 @@ from PIL import Image as PILImage
 from drafter.data.converter import (
     COLLECTION_TYPES,
     CONVERTER_REGISTRY,
+    MISSING_VALUE_ERROR_CODE,
     ConversionContext,
     ConversionResult,
     ConverterRegistry,
     conversion_failure,
     describe_type,
+    is_blank_text,
     missing_value_failure,
     preview_value,
 )
 from drafter.data.files import DrafterBinaryFile, DrafterTextFile
 from drafter.data.images import Picture, decode_data_url
-from drafter.helpers.dates import try_convert_datetime
+from drafter.helpers.dates import current_moment, try_convert_datetime
 
 __all__ = [
     "CONVERTER_REGISTRY",
@@ -63,11 +65,32 @@ def _accepts_file_upload(target: Any) -> bool:
 
 
 def convert_file_upload(ctx: ConversionContext) -> ConversionResult | None:
-    """Convert a client file-upload dict (``__file_upload__``) to the target type."""
+    """Convert a client file-upload dict (``__file_upload__``) to the target type.
+
+    A file field that was left empty is a missing value. Its empty form
+    (``""`` for ``str``, ``b""`` for ``bytes``, a file object with no
+    content) is what the parameter receives unless it is optional or has
+    a default.
+    """
     value = ctx.raw_value
     if not isinstance(value, dict) or not value.get("__file_upload__"):
         return None
+    result = _convert_uploaded_file(ctx, value)
+    no_file_chosen = not value.get("content") and not value.get("filename")
+    if result is None or not result.ok or result.value is None or not no_file_chosen:
+        return result
+    return missing_value_failure(
+        ctx,
+        ctx.resolved_type,
+        hint="No file was chosen.",
+        empty_value=result.value,
+    )
 
+
+def _convert_uploaded_file(
+    ctx: ConversionContext, value: dict
+) -> ConversionResult | None:
+    """Turn an upload dict into the target type, whatever the file holds."""
     target = ctx.resolved_type
     content = value.get("content", b"")
     filename = value.get("filename", "unknown")
@@ -319,7 +342,17 @@ def convert_datetime_like(ctx: ConversionContext) -> ConversionResult | None:
     Delegates to ``try_convert_datetime``; unparseable values fail with a
     hint to use an ISO format, and unhandled value/target combinations
     defer to the next converter.
+
+    A blank value is a missing value whose empty form is the current date
+    or time, so a bare ``date`` parameter still gets today while
+    ``date | None`` gets None and a parameter with a default keeps it.
     """
+    if is_blank_text(ctx.raw_value):
+        return missing_value_failure(
+            ctx,
+            ctx.resolved_type,
+            empty_value=current_moment(ctx.resolved_type),
+        )
     try:
         outcome, converted = try_convert_datetime(ctx.raw_value, ctx.resolved_type)
     except ValueError:
@@ -371,6 +404,18 @@ def _resolve_forward_references(annotation: Any, owner: type) -> Any:
         return annotation
 
 
+def _failure_inside(result: ConversionResult) -> ConversionResult:
+    """Report a failed field or item as a failure of the whole value.
+
+    A blank number inside a list or dataclass is a missing *part*. The
+    parameter itself was provided, so the missing-value rule (None, then
+    the parameter's default) must not apply to it.
+    """
+    if result.error_code != MISSING_VALUE_ERROR_CODE:
+        return result
+    return replace(result, error_code="conversion_failed", has_empty_value=False)
+
+
 def convert_dataclass(ctx: ConversionContext) -> ConversionResult | None:
     """Build a dataclass from a dict (or JSON string), converting each field."""
     target = ctx.resolved_type
@@ -411,7 +456,7 @@ def convert_dataclass(ctx: ConversionContext) -> ConversionResult | None:
             )
             result = ctx.registry.convert(child)
             if not result.ok:
-                return result
+                return _failure_inside(result)
             build_kwargs[field_spec.name] = result.value
         elif (
             field_spec.default is dataclasses.MISSING
@@ -467,18 +512,30 @@ def convert_bool(ctx: ConversionContext) -> ConversionResult | None:
     return None
 
 
+def _blank_number_hint(number_type: type) -> str:
+    """The fix for a number field that was left blank."""
+    name = number_type.__name__
+    return (
+        "Enter a number. To let this be left blank, give the parameter a "
+        f"default value or make it optional ({name} | None)."
+    )
+
+
 def convert_int(ctx: ConversionContext) -> ConversionResult | None:
     """Convert numeric strings to int.
 
     Strings are stripped and parsed with ``int``; if that fails, they are
     parsed as floats and accepted only when the result is a whole number.
     Decimal values fail with a hint to use float instead, and non-numeric
-    strings fail with a hint to enter a number or use str. Bools and
-    non-string values defer to the next converter.
+    strings fail with a hint to enter a number or use str. A blank string
+    is a missing value: there is no empty ``int``. Bools and non-string
+    values defer to the next converter.
     """
     value = ctx.raw_value
     if isinstance(value, bool):
         return None
+    if is_blank_text(value):
+        return missing_value_failure(ctx, int, hint=_blank_number_hint(int))
     if isinstance(value, str):
         text = value.strip()
         number_hint = "Try entering a number, or change the parameter type to str."
@@ -507,12 +564,15 @@ def convert_float(ctx: ConversionContext) -> ConversionResult | None:
     """Convert numeric strings to float.
 
     Strings are stripped and parsed with ``float``; non-numeric strings
-    fail with a hint to enter a number or use str. Bools and non-string
+    fail with a hint to enter a number or use str. A blank string is a
+    missing value: there is no empty ``float``. Bools and non-string
     values defer to the next converter.
     """
     value = ctx.raw_value
     if isinstance(value, bool):
         return None
+    if is_blank_text(value):
+        return missing_value_failure(ctx, float, hint=_blank_number_hint(float))
     if isinstance(value, str):
         try:
             return ConversionResult(ok=True, value=float(value.strip()))
@@ -585,7 +645,7 @@ def convert_collection(ctx: ConversionContext) -> ConversionResult | None:
             )
             result = ctx.registry.convert(child)
             if not result.ok:
-                return result
+                return _failure_inside(result)
             converted.append(result.value)
         items = converted
 

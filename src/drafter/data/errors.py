@@ -293,6 +293,28 @@ class StudentFacingError(ValueError):
         self.friendly_steps = tuple(steps)
 
 
+def with_article(noun: str) -> str:
+    """Put "a" or "an" in front of a noun, chosen by its first letter.
+
+    Error messages often name a type ("returned an int", "is a list"), and
+    the type's name is only known when the message is built.
+
+    Args:
+        noun: The word to introduce, such as a type name.
+
+    Returns:
+        The noun with its article, like "an int" or "a str".
+
+    Example:
+        ```python
+        with_article("int")  # "an int"
+        with_article("Button")  # "a Button"
+        ```
+    """
+    article = "an" if noun[:1].lower() in ("a", "e", "i", "o", "u") else "a"
+    return f"{article} {noun}"
+
+
 TERMINAL_WIDTH = 78
 """Column width used when printing a student-facing error to the terminal."""
 
@@ -300,7 +322,7 @@ DEFAULT_TERMINAL_ERROR_TITLE = "Drafter could not start"
 """Title used for a terminal error whose exception carries none."""
 
 
-def format_student_facing_error(error: StudentFacingError) -> str:
+def format_student_facing_error(error: StudentFacingError, location: str = "") -> str:
     """Lay out a student-facing error for the terminal.
 
     Used when a `StudentFacingError` escapes on the host (for example, the
@@ -311,6 +333,9 @@ def format_student_facing_error(error: StudentFacingError) -> str:
 
     Args:
         error: The error to present.
+        location: Where in the student's program the error came from,
+            like "main.py, line 12". Shown under the title when given,
+            since no traceback is printed to say it.
 
     Returns:
         The text to print, with a leading and trailing blank line.
@@ -329,13 +354,10 @@ def format_student_facing_error(error: StudentFacingError) -> str:
     title = error.friendly_title or DEFAULT_TERMINAL_ERROR_TITLE
     rule = "=" * TERMINAL_WIDTH
     explanation = error.friendly_message or str(error)
-    lines = [
-        "",
-        rule,
-        title,
-        rule,
-        textwrap.fill(explanation, TERMINAL_WIDTH),
-    ]
+    lines = ["", rule, title, rule]
+    if location:
+        lines.extend([f"Where: {location}", ""])
+    lines.append(textwrap.fill(explanation, TERMINAL_WIDTH))
     if error.friendly_steps:
         lines.append("")
         lines.append("What to try:")

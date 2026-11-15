@@ -16,7 +16,7 @@ from drafter.components.links import LinkContent
 from drafter.components.page_content import PLAIN_CONTENT_TYPES
 from drafter.config.client_server import ClientServerConfiguration
 from drafter.data.channel import Message
-from drafter.data.errors import StudentFacingError
+from drafter.data.errors import StudentFacingError, with_article
 from drafter.data.images import Picture
 from drafter.data.request import Request
 from drafter.history.formatting import format_page_content
@@ -39,10 +39,14 @@ class Fragment(ResponsePayload):
 
     Args:
         state: The state of the fragment. If only one argument is provided, this will default to be ``None``.
-        content: The content of the fragment. Must always be provided as a list of strings, numbers, booleans, and components.
+        content: The content of the fragment: a list of strings, numbers, booleans, and components. A single one of those is also accepted and treated as a list of one item.
         target: The target element to inject into. Can be a Target instance, a string ID/selector, or None. In most cases, using `None` will target the original element that launched the request.
         css: Optional CSS content to inject dynamically when this fragment is rendered.
         js: Optional JavaScript content to inject dynamically when this fragment is rendered.
+
+    Raises:
+        StudentFacingError: If the content holds something that cannot be
+            shown, or if `css` or `js` is not text (or a list of text).
     """
 
     state: Any
@@ -59,6 +63,8 @@ class Fragment(ResponsePayload):
         self.target = target
         self.css = css
         self.js = js
+        self._require_text_setting("css", css)
+        self._require_text_setting("js", js)
 
         if isinstance(content, Picture):
             # A Picture value displays as an Image component, the same way
@@ -73,9 +79,11 @@ class Fragment(ResponsePayload):
             raise StudentFacingError(
                 f"The content of a {self.__class__.__name__} must be a list of strings, numbers, booleans, or components."
                 f" Found {incorrect_type} instead.",
+                title="Page Content Problem",
                 friendly=(
                     "The content you returned in this "
-                    f"{self.__class__.__name__} was a {incorrect_type}, but "
+                    f"{self.__class__.__name__} was "
+                    f"{with_article(incorrect_type)}, but "
                     "it needs to be text, a number, a boolean, a component, "
                     "or a list of those."
                 ),
@@ -97,10 +105,12 @@ class Fragment(ResponsePayload):
                     raise StudentFacingError(
                         f"The content of a {self.__class__.__name__} must be a list of strings, numbers, booleans, or components."
                         f" Found {incorrect_type} at index {index} instead.",
+                        title="Page Content Problem",
                         friendly=(
                             f"Item number {index} in this "
-                            f"{self.__class__.__name__}'s content list is a "
-                            f"{incorrect_type}, but every item needs to be "
+                            f"{self.__class__.__name__}'s content list is "
+                            f"{with_article(incorrect_type)}, but every item "
+                            "needs to be "
                             "text, a number, a boolean, or a component."
                         ),
                         steps=(
@@ -111,6 +121,41 @@ class Fragment(ResponsePayload):
                             "Text(the_value) or Image(the_value).",
                         ),
                     )
+
+    def _require_text_setting(self, name: str, value: Any) -> None:
+        """Check that the `css` or `js` argument is text or a list of text.
+
+        Anything else would only fail later, while the page is being put
+        together, with an error that does not name the argument.
+
+        Args:
+            name: Which argument is being checked, "css" or "js".
+            value: The value given for it.
+
+        Raises:
+            StudentFacingError: If the value is not None, a string, or a
+                list of strings.
+        """
+        if value is None or isinstance(value, str):
+            return
+        if isinstance(value, list) and all(isinstance(item, str) for item in value):
+            return
+        kind = self.__class__.__name__
+        given = with_article(type(value).__name__)
+        raise StudentFacingError(
+            f"The {name} of a {kind} must be a string or a list of strings, "
+            f"but got {given}.",
+            title="Page Content Problem",
+            friendly=(
+                f"The {name} of this {kind} is {given}, but it has to be "
+                "text or a list of text."
+            ),
+            steps=(
+                f"Pass the {name} as text, like {name}='...'.",
+                f"If the value was meant to appear on the page, move it "
+                f"into the {kind}'s content list.",
+            ),
+        )
 
     def get_state_updates(self) -> tuple[bool, Any]:
         """Report the fragment's state as an update.
@@ -317,8 +362,9 @@ class Fragment(ResponsePayload):
                 f"Expected content to be a list, but got {type(self.content).__name__}",
                 friendly_title="Page Content Problem",
                 friendly_message=(
-                    f"This fragment's content is a "
-                    f"{type(self.content).__name__} instead of a list."
+                    "This fragment's content is "
+                    f"{with_article(type(self.content).__name__)} instead "
+                    "of a list."
                 ),
                 friendly_steps=(
                     "Make the content argument a list, like "

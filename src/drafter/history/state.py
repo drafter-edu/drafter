@@ -102,7 +102,11 @@ class SiteState:
 
         On the first call, the new state is also copied as the initial
         state. If the type of the new state differs from the most recent
-        state in history, a warning is logged via the audit system.
+        state in history, a warning is logged via the audit system. A page
+        returned by a route never gets this far with a different type
+        (`verify_page_state_history` makes that an error page, using the
+        same exact-type test), so the warning covers the other ways a
+        state is replaced, such as loading a saved one.
 
         The `current` state keeps the original object (so aliases the
         student holds stay live), while the history entry is a deep copy
@@ -128,15 +132,17 @@ class SiteState:
                         severity=SEVERITY_WARNING,
                         details=f"SiteState type changed from {old_type_name} to {new_type_name}.",
                         friendly_message=(
-                            f"One of your routes changed the site state from "
-                            f"{old_type_name} to {new_type_name}; the state "
-                            "should keep the same type for the whole site."
+                            f"The site state changed from {old_type_name} to "
+                            f"{new_type_name}; the state should keep the same "
+                            "type for the whole site."
                         ),
                         friendly_steps=(
-                            "Find the route that returned a different kind of "
-                            "state value.",
-                            "Make every route keep the state as the same type "
-                            "(for example, always your State dataclass).",
+                            "If you just loaded a saved state or went back to "
+                            "an earlier page, it may come from a different "
+                            "version of your program. Reload the page to start "
+                            "again with a fresh state.",
+                            "Keep the state as the same type everywhere (for "
+                            "example, always your State dataclass).",
                         ),
                     ),
                     "site_state.update",

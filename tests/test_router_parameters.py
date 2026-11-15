@@ -536,15 +536,94 @@ class TestRouteBinder:
         errors = [d for d in bound.diagnostics if d.severity == "error"]
         assert "'nmae'" in errors[0].hint
 
-    def test_unused_key_is_warning(self):
+    def test_unused_form_field_is_dropped_quietly(self):
+        """A button sends every field on its page, wanted or not."""
+
         def greet(name: str):
             return name
 
         bound, _ = bind(greet, [form_value("name", "x"), form_value("extra", "y")])
+        assert bound.diagnostics == ()
+        assert "extra" not in bound.kwargs
+
+    def test_cancel_button_route_does_not_warn_about_the_form(self):
+        def cancel(state):
+            return state
+
+        bound, _ = bind(
+            cancel,
+            [form_value("pet_name", "Ada"), form_value("age", "3")],
+            state={"count": 1},
+        )
+        assert bound.diagnostics == ()
+
+    def test_unused_event_value_is_dropped_quietly(self):
+        """A Timer's route need not take the values the Timer reports."""
+
+        def times_up(state):
+            return state
+
+        bound, _ = bind(
+            times_up,
+            [
+                PayloadValue("elapsed", 10, "event_detail"),
+                PayloadValue("remaining", 0, "event_detail"),
+            ],
+            state={"count": 1},
+        )
+        assert bound.diagnostics == ()
+
+    def test_near_miss_of_an_optional_parameter_warns(self):
+        """The warning is the only sign of this typo: the default hides it."""
+
+        def adopt(state, pet_name: str = ""):
+            return pet_name
+
+        bound, _ = bind(adopt, [form_value("petname", "Ada")], state={"count": 1})
+        warnings = [d for d in bound.diagnostics if d.severity == "warning"]
+        assert len(warnings) == 1
+        assert warnings[0].code == "unused_request_parameter"
+        assert warnings[0].parameter == "petname"
+        assert warnings[0].hint == "Did you mean the parameter 'pet_name'?"
+        assert "pet_name" not in bound.kwargs
+
+    def test_near_miss_of_an_event_value_warns(self):
+        def tick(state, remaining: int = 0):
+            return remaining
+
+        bound, _ = bind(
+            tick, [PayloadValue("remainng", 4, "event_detail")], state={"count": 1}
+        )
+        warnings = [d for d in bound.diagnostics if d.severity == "warning"]
+        assert [warning.parameter for warning in warnings] == ["remainng"]
+
+    def test_name_close_to_a_filled_parameter_does_not_warn(self):
+        """`name2` is near `name`, but `name` already has its value."""
+
+        def greet(name: str):
+            return name
+
+        bound, _ = bind(greet, [form_value("name", "x"), form_value("name2", "y")])
+        assert bound.diagnostics == ()
+
+    def test_unused_component_argument_always_warns(self):
+        """An Argument(...) was addressed to this route by the student."""
+
+        def greet(name: str):
+            return name
+
+        bound, _ = bind(
+            greet,
+            [
+                form_value("name", "x"),
+                PayloadValue("extra", "y", "component_argument"),
+            ],
+        )
         warnings = [d for d in bound.diagnostics if d.severity == "warning"]
         assert len(warnings) == 1
         assert warnings[0].code == "unused_request_parameter"
         assert warnings[0].parameter == "extra"
+        assert "remove the argument" in warnings[0].hint
         assert "extra" not in bound.kwargs
 
     def test_var_keyword_absorbs_unused_without_warning(self):

@@ -1,8 +1,11 @@
 """The `Page` payload: a full-page response targeting the document body."""
 
 from dataclasses import dataclass
+from typing import Any
 
+from drafter.components.page_content import PLAIN_CONTENT_TYPES
 from drafter.config.client_server import ClientServerConfiguration
+from drafter.data.errors import StudentFacingError, with_article
 from drafter.data.request import Request
 from drafter.history.formatting import format_page_content
 from drafter.history.state import SiteState
@@ -11,6 +14,61 @@ from drafter.payloads.kinds.fragment import Fragment
 from drafter.payloads.target import DEFAULT_BODY_TARGET
 from drafter.payloads.verification import verify_unique_component_names
 from drafter.router.routes import Router
+
+_LONGEST_TEXT_IN_EXAMPLE = 30
+"""Text longer than this is shortened when an error shows a corrected call."""
+
+
+def _show_content_item(item: Any) -> str:
+    """Write one piece of content the way it would appear in a `Page` call.
+
+    Args:
+        item: A piece of page content, or something mistaken for one.
+
+    Returns:
+        The `repr` of plain values (long text is shortened), and
+        `Name(...)` for anything else.
+    """
+    if isinstance(item, str) and len(item) > _LONGEST_TEXT_IN_EXAMPLE:
+        return repr(item[:_LONGEST_TEXT_IN_EXAMPLE] + "...")
+    if isinstance(item, PLAIN_CONTENT_TYPES):
+        return repr(item)
+    return f"{type(item).__name__}(...)"
+
+
+def _forgotten_brackets_error(
+    content: Any, extra_content: tuple[Any, ...]
+) -> StudentFacingError:
+    """Build the error for values written after a `Page`'s content.
+
+    `Page(state, "Hello", "there")` has two pieces of content and no list
+    around them. The error shows the same call with the brackets added.
+
+    Args:
+        content: The value in the content position.
+        extra_content: The unnamed values written after it.
+
+    Returns:
+        The error to raise.
+    """
+    items = content if isinstance(content, list) else [content]
+    corrected = ", ".join(_show_content_item(item) for item in [*items, *extra_content])
+    extras = ", ".join(with_article(type(item).__name__) for item in extra_content)
+    return StudentFacingError(
+        "The content of a Page must be given as one list, but more was "
+        f"written after the content: {extras}.",
+        title="Page Content Problem",
+        friendly=(
+            "A Page takes all of its content in one list. Something was "
+            f"written after the content, outside the list: {extras}."
+        ),
+        steps=(
+            "Put square brackets around all of the content, like "
+            f"Page(state, [{corrected}]).",
+            "If you meant to give the Page some CSS or JavaScript, name "
+            "it, like css='...' or js='...'.",
+        ),
+    )
 
 
 @dataclass
@@ -29,16 +87,34 @@ class Page(Fragment):
     The content of a page can be any combination of strings, numbers, booleans, and components. Strings will be
     rendered as paragraphs, numbers and booleans will be rendered as their text form, and components will be rendered
     as their respective HTML. Components should be classes that inherit from
-    ``drafter.components.PageContent``. If the content is not a list, a ValueError will be raised.
+    ``drafter.components.PageContent``. A single string, number, boolean, or component is also accepted
+    and treated as a list of one item; any other content raises a ``StudentFacingError`` (a ``ValueError``).
 
     Args:
         state: The state of the page. If only one argument is provided, this will default to be ``None``.
-        content: The content of the page. Must always be provided as a list of strings, numbers, booleans, and components.
+        content: The content of the page: a list of strings, numbers, booleans, and components.
+        *extra_content: Not accepted. Anything written after the content
+            is almost always content that was meant to go inside the
+            list, so it raises an error that shows the corrected call.
         css: Optional CSS content to inject dynamically when this page is rendered.
+            Must be given by name, as in ``css="..."``.
         js: Optional JavaScript content to inject dynamically when this page is rendered.
+            Must be given by name, as in ``js="..."``.
+
+    Raises:
+        StudentFacingError: If anything is written after the content
+            without a name, or if the content, ``css``, or ``js`` is not
+            something a page can hold.
+
+    Example:
+        ```python
+        Page(state, ["Hello!", Button("Next", "next")])
+        ```
     """
 
-    def __init__(self, state, content=None, css=None, js=None):
+    def __init__(self, state, content=None, *extra_content, css=None, js=None):
+        if extra_content:
+            raise _forgotten_brackets_error(content, extra_content)
         # Page always targets the body element
         super().__init__(state, content, target=DEFAULT_BODY_TARGET, css=css, js=js)
 
@@ -64,23 +140,9 @@ class Page(Fragment):
             None if the content is valid, a VerificationFailure otherwise.
         """
         original_function = request.url
-        if isinstance(self.content, str):
-            return VerificationFailure(
-                f"The server did not return a valid Page() object from {original_function}.\n"
-                f"Instead of a list of strings or content objects, the content field was a string:\n"
-                f" {self.content!r}\n"
-                f"Make sure you return a Page object with the new state and the list of strings/content objects.",
-                friendly_title="Page Content Problem",
-                friendly_message=(
-                    f"The Page returned from `{original_function}` has its "
-                    "content given as one plain string instead of a list."
-                ),
-                friendly_steps=(
-                    "Put the content inside a list, like Page(state, ['Hello!']).",
-                    "Even a single piece of content needs to be in a list.",
-                ),
-            )
-        elif not isinstance(self.content, list):
+        # The constructor always stores a list, so this only catches content
+        # that was replaced after the Page was made.
+        if not isinstance(self.content, list):
             return VerificationFailure(
                 f"The server did not return a valid Page() object from {original_function}.\n"
                 f"Instead of a list of strings or content objects, the content field was:\n"
@@ -89,7 +151,7 @@ class Page(Fragment):
                 friendly_title="Page Content Problem",
                 friendly_message=(
                     f"The Page returned from `{original_function}` has "
-                    f"content that is a {type(self.content).__name__} "
+                    f"content that is {with_article(type(self.content).__name__)} "
                     "instead of a list."
                 ),
                 friendly_steps=(
@@ -116,8 +178,8 @@ class Page(Fragment):
                         friendly_title="Page Content Problem",
                         friendly_message=(
                             f"One of the items in the content list of the "
-                            f"Page returned from `{original_function}` is a "
-                            f"{type(item).__name__}, but every item has to "
+                            f"Page returned from `{original_function}` is "
+                            f"{with_article(type(item).__name__)}, but every item has to "
                             "be text, a number, a boolean, or a component."
                         ),
                         friendly_steps=(

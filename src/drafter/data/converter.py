@@ -54,11 +54,18 @@ class ConversionResult:
 
     Attributes:
         ok: Whether the conversion succeeded.
-        value: The converted value, when `ok` is True.
+        value: The converted value, when `ok` is True. For a missing
+            value (see `has_empty_value`), the type's own empty value.
         error_code: Stable, code-like identifier for the failure
             (e.g. `conversion_failed`), when `ok` is False.
         message: Student-facing description of the failure.
         hint: Student-facing suggestion for fixing the failure.
+        has_empty_value: Only meaningful for a missing-value failure
+            (`MISSING_VALUE_ERROR_CODE`). True when the type has a value
+            that stands for "nothing was provided", held in `value`: the
+            current date for a `date`, the empty string for the text of a
+            file that was not chosen. It is used when the parameter is
+            neither optional nor given a default.
     """
 
     ok: bool
@@ -66,6 +73,7 @@ class ConversionResult:
     error_code: str = ""
     message: str = ""
     hint: str = ""
+    has_empty_value: bool = False
 
 
 ConverterFn = Callable[[ConversionContext], ConversionResult | None]
@@ -73,10 +81,26 @@ ConverterFn = Callable[[ConversionContext], ConversionResult | None]
 value, letting the next registered converter (or the fallback) try instead."""
 
 MISSING_VALUE_ERROR_CODE = "missing_value"
-"""Failure code for "the value is absent" (e.g. an empty file upload or a
-denied camera). Union conversion treats it specially: when the annotation
-also allows None (``Picture | None``), the parameter becomes None instead
-of failing."""
+"""Failure code for "the value is absent": a number or date field left
+blank, a file that was not chosen, a camera that took no photo.
+
+One rule decides what the parameter receives, in this order:
+
+1. None, when the annotation allows it (``int | None``). Union conversion
+   does this.
+2. The parameter's default, when it has one (``age: int = 7``). The binder
+   does this, since defaults belong to the route's signature.
+3. The type's own empty value, when it has one (the current date for a
+   ``date``, ``""`` for the text of a file that was not chosen).
+4. Otherwise the request fails with a message that says no value was
+   provided.
+
+Blank text is not absent for ``str`` (it is the empty string) or ``bool``
+(an unchecked box), so those never report a missing value for it."""
+
+NO_EMPTY_VALUE: Any = object()
+"""Marks a missing value whose type has nothing that stands for "empty"
+(there is no empty ``int``)."""
 
 
 #: Origins that represent a union annotation (typing.Union and PEP 604 `X | Y`).
@@ -133,30 +157,61 @@ def conversion_failure(
 
 
 def missing_value_failure(
-    ctx: ConversionContext, expected_type: Any, hint: str = ""
+    ctx: ConversionContext,
+    expected_type: Any,
+    hint: str = "",
+    empty_value: Any = NO_EMPTY_VALUE,
 ) -> ConversionResult:
-    """Build the student-facing error for an absent value.
+    """Build the result for an absent value.
 
-    Used when the client submitted "nothing" for a parameter (no file
-    chosen, no photo captured). For a plain annotation this surfaces as a
-    friendly failure; when the annotation is a union that allows None
-    (``Picture | None``), union conversion turns it into None instead.
+    Used when the client submitted "nothing" for a parameter (a blank
+    number field, no file chosen, no photo captured). What the parameter
+    then receives follows the rule described at `MISSING_VALUE_ERROR_CODE`;
+    the message and hint here are shown only when that rule ends in a
+    failure.
+
+    Args:
+        ctx: The conversion being attempted.
+        expected_type: The type the parameter expects.
+        hint: Suggestion for fixing the failure; a general one is used
+            when not given.
+        empty_value: The type's own stand-in for "nothing was provided",
+            when it has one.
+
+    Returns:
+        A failed result with the missing-value code.
     """
     expected_name = describe_type(expected_type)
     message = (
         f"Parameter '{ctx.param_name}' expects {expected_name} but no value "
         f"was provided by {describe_source(ctx.payload_value, ctx.param_name)}."
     )
+    has_empty_value = empty_value is not NO_EMPTY_VALUE
     return ConversionResult(
         ok=False,
+        value=empty_value if has_empty_value else None,
         error_code=MISSING_VALUE_ERROR_CODE,
         message=message,
         hint=hint
         or (
-            f"Make the parameter optional ({expected_name} | None) if it is "
-            f"okay for no value to be provided."
+            f"If it is okay for no value to be provided, give the parameter "
+            f"a default value or make it optional ({expected_name} | None)."
         ),
+        has_empty_value=has_empty_value,
     )
+
+
+def is_blank_text(value: Any) -> bool:
+    """Whether a value is text with nothing in it but spaces.
+
+    Args:
+        value: A raw request value.
+
+    Returns:
+        True for an empty or all-whitespace string, False for anything
+        else (including None and non-text values).
+    """
+    return isinstance(value, str) and not value.strip()
 
 
 @dataclass
@@ -228,18 +283,35 @@ class ConverterRegistry:
         )
         self._converters.sort(key=lambda entry: entry.priority)
 
-    def convert(self, ctx: ConversionContext) -> ConversionResult:
+    def convert(
+        self, ctx: ConversionContext, keep_missing: bool = False
+    ) -> ConversionResult:
         """Convert ``ctx.raw_value`` to ``ctx.expected_type``.
 
         Untyped (or ``Any``) parameters pass through unconverted; explicitly
         typed parameters convert strictly and produce a structured error on
         failure.
+
+        Args:
+            ctx: The conversion to perform.
+            keep_missing: How to report a value that is absent (see
+                `MISSING_VALUE_ERROR_CODE`) when the annotation does not
+                allow None. By default the type's own empty value is
+                returned as a success when there is one. The binder
+                passes True to get the missing-value failure itself, so
+                it can use the parameter's default first.
+
+        Returns:
+            The outcome of the conversion.
         """
         ctx.registry = self
         expected = ctx.expected_type
         if expected is inspect.Parameter.empty or expected is Any or expected is None:
             return ConversionResult(ok=True, value=ctx.raw_value)
-        return self._convert_to(ctx, expected)
+        result = self._convert_to(ctx, expected)
+        if keep_missing or result.ok or not result.has_empty_value:
+            return result
+        return ConversionResult(ok=True, value=result.value)
 
     def _convert_to(self, ctx: ConversionContext, expected: Any) -> ConversionResult:
         origin = get_origin(expected)
@@ -330,6 +402,14 @@ class ConverterRegistry:
             for option in allowed:
                 if str(option) == value:
                     return ConversionResult(ok=True, value=option)
+        if is_blank_text(value):
+            return missing_value_failure(
+                ctx,
+                expected,
+                hint="Choose one of: "
+                + ", ".join(repr(option) for option in allowed)
+                + ".",
+            )
         return conversion_failure(
             ctx,
             expected,

@@ -6,12 +6,38 @@ from typing import Any
 from drafter.data.errors import StudentFacingError
 
 
+def current_moment(target_type: Any) -> datetime | date | time:
+    """The present moment as a datetime, a date, or a time of day.
+
+    This is what a blank date or time field stands for when the route's
+    parameter is neither optional nor given a default.
+
+    Args:
+        target_type: One of `datetime`, `date`, or `time`.
+
+    Returns:
+        Now, in the form of the requested type.
+
+    Raises:
+        ValueError: If `target_type` is not one of the three types.
+    """
+    now = datetime.now()
+    if target_type is datetime:
+        return now
+    if target_type is date:
+        return now.date()
+    if target_type is time:
+        return now.time()
+    raise ValueError(f"Expected datetime, date, or time, not {target_type!r}.")
+
+
 def try_convert_datetime(value, target_type) -> tuple[bool, Any]:
     """Convert a value to datetime-like types if possible.
 
-    TODO: Allow control over "default" behavior for blank fields. Could raise an error,
-          return None, or use current date/time. Currently just uses the current date/time
-          for missing parts.
+    A blank string converts to the current date or time. Route parameters
+    get more choices for a blank field (None for an optional parameter,
+    then the parameter's default); the converter registry applies those
+    before this function is reached.
 
     Args:
         value: Arbitrary input to convert.
@@ -29,14 +55,7 @@ def try_convert_datetime(value, target_type) -> tuple[bool, Any]:
 
     if isinstance(value, str):
         if not value.strip():
-            # Empty string; return current date/time based on target type
-            if target_type is datetime:
-                return True, datetime.now()
-            elif target_type is date:
-                return True, date.today()
-            elif target_type is time:
-                now = datetime.now()
-                return True, time(now.hour, now.minute, now.second, now.microsecond)
+            return True, current_moment(target_type)
         try:
             if target_type is datetime:
                 return True, datetime.fromisoformat(value)
@@ -54,8 +73,8 @@ def try_convert_datetime(value, target_type) -> tuple[bool, Any]:
                 steps=(
                     "Write dates as YYYY-MM-DD (like '2026-07-26') and "
                     "times as HH:MM:SS (like '14:30:00').",
-                    "If the value comes from a form, use a TextBox with the "
-                    "matching date/time kind so the browser formats it "
+                    "If the value comes from a form, use a DateInput, "
+                    "TimeInput, or DateTimeInput so the browser formats it "
                     "for you.",
                 ),
             ) from e

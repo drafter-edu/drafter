@@ -3,6 +3,8 @@
 import sys
 from unittest.mock import MagicMock
 
+import pytest
+
 # drafter.bridge requires a browser 'js' module; stub it for unit tests.
 if not hasattr(sys.modules.get("js"), "document"):
     sys.modules["js"] = MagicMock()
@@ -106,6 +108,24 @@ class TestIdAndCategoryExplanations:
         assert "could not find the page route" in explanation.message
         assert not any("dictionary" in step for step in explanation.steps)
 
+    @pytest.mark.parametrize(
+        "error_id, phrase",
+        [
+            ("client.load_snapshot_failed", "different version of your code"),
+            ("bridge.history_state_restore_failed", "your code changed"),
+        ],
+    )
+    def test_state_restore_failures_do_not_get_value_error_advice(
+        self, error_id, phrase
+    ):
+        # The converter raises ValueError, whose "Unusable Value" text is
+        # written for a mistake in the student's own code.
+        explanation = explain(ValueError("does not match"), error_id, "bridge")
+
+        assert explanation.title != "Unusable Value"
+        assert phrase in explanation.message
+        assert explanation.steps
+
     def test_category_entry_with_generic_steps(self):
         class UnknownError(Exception):
             pass
@@ -188,12 +208,13 @@ class TestDiagnosticsExplanations:
         assert explanation.title == "Problem With the Route's Arguments"
         assert "'add_item'" in explanation.message
         assert len(explanation.steps) == 2
-        assert explanation.steps[0].endswith(
-            "Make sure the field contains a whole number."
+        # A step is the fix alone. The error page prints the technical
+        # message (what went wrong, plus the same hint) right above the
+        # steps, and the steps used to repeat it word for word.
+        assert explanation.steps[0] == (
+            "For 'count': Make sure the field contains a whole number."
         )
-        assert explanation.steps[1] == (
-            "Missing required parameter 'name'. Add a form field named 'name'."
-        )
+        assert explanation.steps[1] == "Add a form field named 'name'."
 
     def test_diagnostics_without_hints(self):
         message, steps = diagnostics_to_friendly([_diagnostic(hint="", route_name="")])
