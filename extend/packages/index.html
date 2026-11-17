@@ -7315,6 +7315,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#libraries-that-draw-their-own-charts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Libraries that draw their own charts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#declaring-packages-explicitly" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13860,6 +13871,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#libraries-that-draw-their-own-charts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Libraries that draw their own charts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#declaring-packages-explicitly" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14345,18 +14367,22 @@ external service; copy it into your own editor to try it. It also
 uses a dictionary, which your course may not have covered.)</p>
 <h2 id="wheels-drafter-hosts">Wheels Drafter hosts</h2>
 <p>A few libraries students ask for exist on PyPI only as source code,
-which a browser cannot build. ChemPy is one. For these, Drafter keeps
-a <strong>wheel index</strong> at
+which a browser cannot build. ChemPy is one. Others can be installed
+themselves but need a library like that: qmsolve needs <code>progressbar</code>,
+which is source-only. For these, Drafter keeps a <strong>wheel index</strong> at
 <code>https://drafter-edu.github.io/packages/wheels.json</code>: pure-Python
-wheels built for the browser, listed in a small JSON file. When a
-package has no wheel on PyPI, Drafter checks the index. Nothing to
-configure: <code>import chempy</code> works.</p>
-<p>An index is installed as a set. Its wheels are built to go together,
-so when one of them is needed all of them are installed, and then
-whatever they declare they still need (such as <code>sympy</code>, which the
-browser's Python already provides) is fetched. A declared requirement
-that nothing can supply is skipped, since not every dependency a
-package lists is needed in the browser.</p>
+wheels built for the browser, listed in a small JSON file. When PyPI
+cannot supply a package, or something the package needs, Drafter
+checks the index. Nothing to configure: <code>import chempy</code> and
+<code>import qmsolve</code> work.</p>
+<p>Only what your program needs is installed. Drafter installs the
+package, then each library the package says it needs: from the same
+index when the index has it, since an index's wheels are built to go
+together, and otherwise from the browser's own Python (<code>sympy</code>, for
+example) or PyPI. A requirement that nothing can supply is skipped,
+since not every dependency a package lists is needed in the browser.
+If the package turns out to need it after all, its <code>import</code> fails
+with a <code>ModuleNotFoundError</code> that names the missing library.</p>
 <p>Courses can host their own index the same way: a <code>wheels.json</code>
 listing wheel file names next to a <code>wheels/</code> folder, on any server
 that allows cross-origin requests (GitHub Pages does). Add it with
@@ -14371,6 +14397,85 @@ separated by <code>;</code>) and <code>DRAFTER_USE_DEFAULT_PACKAGE_INDEX</code>,
 The index format is the one produced by the
 <a href="https://github.com/drafter-edu/packages">drafter-edu/packages</a>
 repository, which you can copy to build your own.</p>
+<h2 id="libraries-that-draw-their-own-charts">Libraries that draw their own charts</h2>
+<p>Some libraries built on matplotlib draw a chart for you and then call
+<code>plt.show()</code> themselves. qmsolve's <code>plot_eigenstate</code> is one. The
+chart is still an ordinary matplotlib figure, so put <code>MatPlotLibPlot()</code>
+on the page right after the library draws it.</p>
+<p>The <code>plt.show()</code> call needs one extra step, because it means
+different things in the two places your program runs:</p>
+<ul>
+<li><strong>In the browser</strong> it does nothing. The figure stays open, and
+  <code>MatPlotLibPlot()</code> picks it up.</li>
+<li><strong>On your own computer</strong> it opens the chart in a separate window
+  and waits for you to close it. Drafter builds your first page on
+  your computer before the site opens, so the site does not start
+  until the window is closed.</li>
+</ul>
+<p>To stop the window from opening, tell matplotlib to draw off screen.
+Put these two lines at the top of your program, above the import of
+the library that draws the chart:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;Agg&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qmsolve</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hamiltonian</span><span class="p">,</span> <span class="n">SingleParticle</span><span class="p">,</span> <span class="n">init_visualization</span><span class="p">,</span> <span class="n">Å</span><span class="p">,</span> <span class="n">eV</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">State</span><span class="p">:</span>
+    <span class="n">level</span><span class="p">:</span> <span class="nb">int</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">harmonic_oscillator</span><span class="p">(</span><span class="n">particle</span><span class="p">):</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">eV</span> <span class="o">/</span> <span class="n">Å</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">k</span> <span class="o">*</span> <span class="n">particle</span><span class="o">.</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">hamiltonian</span> <span class="o">=</span> <span class="n">Hamiltonian</span><span class="p">(</span>
+        <span class="n">particles</span><span class="o">=</span><span class="n">SingleParticle</span><span class="p">(),</span>
+        <span class="n">potential</span><span class="o">=</span><span class="n">harmonic_oscillator</span><span class="p">,</span>
+        <span class="n">spatial_ndim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">N</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+        <span class="n">extent</span><span class="o">=</span><span class="mi">20</span> <span class="o">*</span> <span class="n">Å</span>
+    <span class="p">)</span>
+    <span class="n">eigenstates</span> <span class="o">=</span> <span class="n">hamiltonian</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">max_states</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="c1"># plot_eigenstate draws the chart and calls plt.show() itself.</span>
+    <span class="n">init_visualization</span><span class="p">(</span><span class="n">eigenstates</span><span class="p">)</span><span class="o">.</span><span class="n">plot_eigenstate</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">level</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">Header</span><span class="p">(</span><span class="s2">&quot;Harmonic oscillator&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;Showing energy level &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">level</span><span class="p">),</span>
+        <span class="n">MatPlotLibPlot</span><span class="p">(),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Next level&quot;</span><span class="p">,</span> <span class="n">next_level</span><span class="p">)</span>
+    <span class="p">])</span>
+
+
+<span class="nd">@route</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">next_level</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">5</span>
+    <span class="k">return</span> <span class="n">index</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+</code></pre></div>
+<p>(This one is not a live demo: its libraries take a while to download.
+Copy it into your own editor to try it, after installing qmsolve on
+your computer.)</p>
+<p>With those two lines, your terminal may print <code>UserWarning:
+FigureCanvasAgg is non-interactive, and thus cannot be shown</code> each
+time the library calls <code>plt.show()</code>. That is matplotlib saying it
+skipped the window, which is what you asked for.</p>
+<p>If the <code>plt.show()</code> is in your own code, delete it instead. A Drafter
+page shows a chart with <code>MatPlotLibPlot()</code>, so the call is never
+needed.</p>
+<p>Only charts that are a single picture carry over. A library's
+sliders, animations, and other controls that live in a matplotlib
+window do not work on a Drafter page; use Drafter's own buttons and
+inputs to choose what to draw, as the example does.</p>
 <h2 id="declaring-packages-explicitly">Declaring packages explicitly</h2>
 <p>Automatic installation works from the <code>import</code> lines in your main
 file, and it looks each library up by the name you import. Three
@@ -14404,7 +14509,12 @@ control.</p>
   <code>--project-packages</code>.</li>
 <li><strong><code>ModuleNotFoundError</code> for a library that is only on PyPI as source</strong>:
   if Drafter's wheel index does not have it, you can build a wheel and
-  host your own index; see <a href="#wheels-drafter-hosts">Wheels Drafter hosts</a>.</li>
+  host your own index; see <a href="#wheels-drafter-hosts">Wheels Drafter hosts</a>.
+  The same goes for a library you never imported yourself: one of
+  your libraries needs it, and it is only on PyPI as source.</li>
+<li><strong>A chart opens in its own window and the site does not start</strong>:
+  something called <code>plt.show()</code>; see
+  <a href="#libraries-that-draw-their-own-charts">Libraries that draw their own charts</a>.</li>
 <li><strong>Your own file has the same name as a library</strong>: your file wins.
   Drafter only goes to PyPI for names that nothing next to your
   program can provide, so a <code>utils.py</code> of your own is never replaced

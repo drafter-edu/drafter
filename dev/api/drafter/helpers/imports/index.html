@@ -14082,10 +14082,10 @@ not importable, in order of appearance.</p>
     <div class="doc doc-contents ">
 
         <p>List the declared dependencies of installed packages that are absent.</p>
-<p>Used after wheels are installed from a wheel index without dependency
-resolution: the index supplies the pure-Python packages, and this
-reports what else they declare they need, so the runtime can fetch
-those (for example <code>sympy</code> from the browser's own distribution).</p>
+<p>Used after a package is installed without dependency resolution, from
+a wheel index or alone from PyPI: this reports what else it declares
+it needs, so the runtime can fetch those one by one (for example
+<code>sympy</code> from the browser's own distribution).</p>
 <p>Requirements that apply only to an extra (<code>; extra == "docs"</code>) are
 skipped. Other environment markers are not evaluated, so a requirement
 meant for another platform may be reported; trying to install it is

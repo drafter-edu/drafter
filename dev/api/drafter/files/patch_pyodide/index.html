@@ -10997,6 +10997,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.files.patch_pyodide.MATPLOTLIB_SHOW_WARNING" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MATPLOTLIB_SHOW_WARNING
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.files.patch_pyodide.RemoteFinder" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -11049,6 +11060,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.files.patch_pyodide.draw_matplotlib_off_screen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        draw_matplotlib_off_screen
+      
+    </span>
+  </a>
   
 </li>
       
@@ -13806,6 +13828,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.files.patch_pyodide.MATPLOTLIB_SHOW_WARNING" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MATPLOTLIB_SHOW_WARNING
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.files.patch_pyodide.RemoteFinder" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13862,6 +13895,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.files.patch_pyodide.draw_matplotlib_off_screen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        draw_matplotlib_off_screen
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.files.patch_pyodide.expire_remote_imports" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13899,7 +13943,9 @@
     <div class="doc doc-contents first">
 
         <p>This file should only be imported by Pyodide.
-It patches the Python import system to allow importing modules from a remote server.</p>
+It patches the Python import system to allow importing modules from a remote
+server, and makes Matplotlib draw off screen so that <code>plt.show()</code> adds
+nothing to the page.</p>
 
 
 
@@ -13937,6 +13983,29 @@ It patches the Python import system to allow importing modules from a remote ser
         <p>Fully qualified names of modules that were loaded from the remote
 server, recorded so <code>expire_remote_imports</code> can evict them from
 <code>sys.modules</code> later.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="drafter.files.patch_pyodide.MATPLOTLIB_SHOW_WARNING" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">MATPLOTLIB_SHOW_WARNING</span> <span class="o">=</span> <span class="s1">&#39;FigureCanvasAgg is non-interactive&#39;</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The start of the warning Matplotlib gives when <code>plt.show()</code> is called and
+figures are drawn off screen. <code>draw_matplotlib_off_screen</code> silences it.</p>
 
     </div>
 
@@ -14225,6 +14294,38 @@ nor the package's <code>__init__.py</code> could be fetched.</p>
 
 </div>
 
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="drafter.files.patch_pyodide.draw_matplotlib_off_screen" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">draw_matplotlib_off_screen</span><span class="p">()</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make <code>plt.show()</code> do nothing in the browser.</p>
+<p>In the browser, Matplotlib normally answers <code>plt.show()</code> by adding a
+figure window of its own to the bottom of the web page, outside the
+Drafter site, and one more for every later call. A Drafter page
+shows a chart with <code>MatPlotLibPlot</code>, so nothing should appear for
+<code>plt.show()</code>, whether the program calls it or a library does on the
+program's behalf.</p>
+<p>Drawing off screen (Matplotlib's "Agg" backend) gives that: <code>plt.show()</code>
+leaves the page alone and the figure stays open for <code>MatPlotLibPlot</code>.
+The backend is chosen through the <code>MPLBACKEND</code> environment variable,
+which Matplotlib reads when it is first imported, so this must run
+before the program does. A value that is already set is kept.</p>
+<p>Matplotlib warns on every <code>plt.show()</code> that an off-screen figure cannot
+be shown. That warning is silenced: it would fill the console with a
+message about something the program is not expected to change.</p>
+
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 

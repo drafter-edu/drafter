@@ -14281,6 +14281,11 @@ currently has open and embeds it as an image.</p>
   create it, so run your <code>plt.</code> commands first and write
   <code>MatPlotLibPlot()</code> after them. Commands that run after the
   component is created belong to the next chart.</li>
+<li>Leave out <code>plt.show()</code>. On your own computer it opens the chart in
+  a separate window, and when your first page draws a chart the site
+  does not start until you close that window. In the browser it does
+  nothing. If a library calls it for you, see
+  <a href="../../../../extend/packages/#libraries-that-draw-their-own-charts">Libraries that draw their own charts</a>.</li>
 <li>Charts drawn in unit tests never leak into your pages: each
   <code>MatPlotLibPlot()</code> keeps its own figure, even when the page
   is only compared and never shown.</li>
