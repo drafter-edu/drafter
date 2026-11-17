@@ -7792,6 +7792,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.app.ports.STOP_REASON_HEADER" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STOP_REASON_HEADER
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.app.ports.STOP_REASON_TAKEOVER" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STOP_REASON_TAKEOVER
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.app.ports.STOP_ROUTE_NAME" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -11411,6 +11433,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -13804,6 +13882,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.app.ports.STOP_REASON_HEADER" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STOP_REASON_HEADER
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.app.ports.STOP_REASON_TAKEOVER" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STOP_REASON_TAKEOVER
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.app.ports.STOP_ROUTE_NAME" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14010,6 +14110,52 @@ request. A hung earlier run never answers, so this bounds the delay.</p>
 
 
 
+<h2 id="drafter.app.ports.STOP_REASON_HEADER" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">STOP_REASON_HEADER</span> <span class="o">=</span> <span class="s1">&#39;X-Drafter-Stop-Reason&#39;</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Request header saying why a server is being asked to stop. The browser
+sends none; a newer run taking over the port sends <code>STOP_REASON_TAKEOVER</code>,
+so the stopping server can tell the student what actually happened.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="drafter.app.ports.STOP_REASON_TAKEOVER" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">STOP_REASON_TAKEOVER</span> <span class="o">=</span> <span class="s1">&#39;takeover&#39;</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p><code>STOP_REASON_HEADER</code> value sent by a newer run of the same program.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h2 id="drafter.app.ports.STOP_ROUTE_NAME" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">STOP_ROUTE_NAME</span> <span class="o">=</span> <span class="s1">&#39;--stop-server&#39;</span></code>
 
@@ -14176,7 +14322,9 @@ stop.</p>
         <p>Whether a server could bind <code>host</code>:<code>port</code> right now.</p>
 <p>Resolves the host the way asyncio's server creation does and tries to
 bind every resulting address with a throwaway socket. A name that does
-not resolve counts as free so that uvicorn reports that problem itself.</p>
+not resolve counts as free so that uvicorn reports that problem itself.
+On Windows the port must also be unclaimed on every other address (see
+<code>_windows_port_is_unclaimed</code>).</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -14460,6 +14608,9 @@ or None.</p>
     <div class="doc doc-contents ">
 
         <p>Ask the Drafter server on <code>host</code>:<code>port</code> to shut down.</p>
+<p>The request says it comes from a newer run taking over the port (see
+<code>STOP_REASON_HEADER</code>), which is the only reason this module stops a
+server.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>

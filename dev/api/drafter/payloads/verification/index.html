@@ -11234,6 +11234,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -13885,6 +13941,9 @@ share one submit-button name.</p>
         <p>Validate state type consistency with previous state history.</p>
 <p>Ensures the new state object has the same type as the most recent
 state in the history. Returns a failure if the types don't match.</p>
+<p>The type must match exactly, the same test <code>SiteState.update</code> uses.
+A subclass of the state's class is a different type, and so is <code>True</code>
+where the state was an <code>int</code>.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>

@@ -11342,6 +11342,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14203,13 +14259,14 @@ better choice.</p>
 </table>
 <p>Like every component, <code>Slider</code> also accepts
 <a href="../../../keyword-attributes/">styling and attribute keywords</a>. Its
-<code>min</code>, <code>max</code>, and <code>step</code> are parameters, and it recognizes no further
-HTML attributes beyond the ones every component shares, so
-<code>disabled=True</code> does not work here. Drafter turns a keyword it does
-not recognize into a CSS style, which the browser ignores, and it
-reports no error.
+<code>min</code>, <code>max</code>, and <code>step</code> are parameters. The HTML attributes it
+recognizes as keywords are <code>disabled</code> and <code>list</code>. <code>disabled=True</code>
+locks the handle in place, and a disabled slider's number is not sent
+to the route. <code>list</code> takes the <code>id</code> of an HTML <code>&lt;datalist&gt;</code>, not a
+Python list. Drafter turns any other keyword it does not recognize
+into a CSS style;
 <a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
-explains the keyword rule.</p>
+explains that rule.</p>
 <h2 id="examples">Examples</h2>
 <p>The route's parameter is annotated as <code>int</code>, so Drafter converts the
 submitted text into a number:</p>
@@ -14243,7 +14300,7 @@ submitted text into a number:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="slider-1-f45e922ea89b">
-  <iframe src="../../../../drafter-demos/slider-1-f45e922ea89b/index.html" title="Drafter Demo slider-1-f45e922ea89b" name="slider-1-f45e922ea89b" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
+  <iframe src="../../../../drafter-demos/slider-1-f45e922ea89b/index.html" title="Drafter Demo slider-1-f45e922ea89b" name="slider-1-f45e922ea89b" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
 </div>
 
 <p>A fractional <code>step</code> lets the handle stop between whole numbers.
@@ -14277,7 +14334,7 @@ Annotate the parameter as <code>float</code> to match:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mf">2.5</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="slider-2-3f02b5882f8b">
-  <iframe src="../../../../drafter-demos/slider-2-3f02b5882f8b/index.html" title="Drafter Demo slider-2-3f02b5882f8b" name="slider-2-3f02b5882f8b" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
+  <iframe src="../../../../drafter-demos/slider-2-3f02b5882f8b/index.html" title="Drafter Demo slider-2-3f02b5882f8b" name="slider-2-3f02b5882f8b" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
 </div>
 
 <h2 id="notes">Notes</h2>

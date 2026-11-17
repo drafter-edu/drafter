@@ -11439,6 +11439,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -14130,6 +14186,20 @@ set_state_accessors is called.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
+            <td><code><span title="drafter.bridge.navigation.NavigationController.find_missing_arguments">find_missing_arguments</span></code></td>
+            <td>
+                  <code><span title="collections.abc.Callable">Callable</span>[[<span title="str">str</span>], <span title="list">list</span>[<span title="str">str</span>]] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Names the parameters a route could not
+fill if opened from the page's address; None until the bridge
+installs it. Used to keep a reload from running a route
+without the form values it needs.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
             <td><code><span title="drafter.bridge.navigation.NavigationController.redirect_loop_stack">redirect_loop_stack</span></code></td>
             <td>
                   <code><span title="list">list</span>[<span title="str">str</span>]</code>
@@ -14156,6 +14226,22 @@ followed, used to detect redirect loops.</p>
 debug menu's "Replay Route" (and state snapshots) can re-invoke
 the current route with the same arguments; None before the
 first request.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="drafter.bridge.navigation.NavigationController.last_request_state_json">last_request_state_json</span></code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The application state as it was just
+before <code>last_request</code> was dispatched, as snapshot JSON, so a
+saved snapshot can later be loaded the way the Back button
+restores an entry (earlier state first, then the route). None
+before the first request, and when that state could not be
+captured.</p>
               </div>
             </td>
           </tr>
@@ -14236,6 +14322,9 @@ these Python-side Request objects.</p>
 another route in its <code>route</code> query parameter (a deep link such as
 <code>/?route=--about</code>, which is also where a deployed site's <code>404.html</code>
 sends paths like <code>/--about</code>).</p>
+<p>A route that needs form or component values cannot be opened that
+way (reloading the tab after submitting a form asks for exactly
+that), so the index is opened in its place with a warning.</p>
 <p>The initial request is not added to the browser history, since the
 browser already has an entry for the page itself; instead the
 startup state (and the route opened) is stamped onto that original
@@ -14522,6 +14611,9 @@ the last successfully rendered page in place.</p>
 
         <p>Takes a Request and initiates it by invoking the navigation function,
 while also notifying the BrowserHistory.</p>
+<p>The application state from just before the route runs is kept in
+<code>last_request_state_json</code> (the history entry's own snapshot when
+one is pushed, otherwise a separate capture), for state snapshots.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>

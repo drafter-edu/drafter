@@ -11329,6 +11329,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -13810,8 +13866,8 @@ accepting user file submissions.</p>
 
         <p>Creates a downloadable link for file content.</p>
 <p>Renders an anchor whose <code>href</code> is a data URL built from the content.
-String content is embedded directly as <code>data:&lt;content_type&gt;,&lt;content&gt;</code>.
-A <code>Picture</code> or PIL Image is encoded at render time as a base64 data
+String content is percent-encoded into <code>data:&lt;content_type&gt;,&lt;content&gt;</code>,
+so the saved file holds exactly the text that was given. A <code>Picture</code> or PIL Image is encoded at render time as a base64 data
 URL using the picture's own MIME type (PNG for PIL images), and
 <code>content_type</code> is ignored. Raw bytes are base64-encoded with the
 given <code>content_type</code> (or a sniffed image type).</p>

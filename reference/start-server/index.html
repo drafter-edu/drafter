@@ -11305,6 +11305,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14074,8 +14130,8 @@
 </script>
 <h1 id="start_server">start_server</h1>
 <p><code>start_server(...)</code> hands your routes over to Drafter and starts the
-site. It is the last line of every Drafter program: code written after
-it <a href="../../help/errors/nothing-after-start-server/">never runs</a>.</p>
+site. It is the last line of every Drafter program. Code written after
+it <a href="../../help/errors/nothing-after-start-server/">does not run when you would expect</a>.</p>
 <h2 id="syntax">Syntax</h2>
 <div class="highlight"><pre><span></span><code><span class="n">start_server</span><span class="p">()</span>
 <span class="n">start_server</span><span class="p">(</span><span class="n">initial_state</span><span class="p">)</span>
@@ -14109,7 +14165,7 @@ it <a href="../../help/errors/nothing-after-start-server/">never runs</a>.</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="start-server-1-8bb8b76e7698">
-  <iframe src="../../drafter-demos/start-server-1-8bb8b76e7698/index.html" title="Drafter Demo start-server-1-8bb8b76e7698" name="start-server-1-8bb8b76e7698" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 200px;" ></iframe>
+  <iframe src="../../drafter-demos/start-server-1-8bb8b76e7698/index.html" title="Drafter Demo start-server-1-8bb8b76e7698" name="start-server-1-8bb8b76e7698" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 200px;" ></iframe>
 </div>
 
 <h2 id="student-relevant-options">Student-relevant options</h2>
@@ -14215,18 +14271,24 @@ configuration function (<code>set_website_style</code>, <code>set_website_title<
 <code>set_website_framed</code>, <code>hide_debug_information</code>). The
 <a href="../site-config/">configuration functions</a> read more clearly and are
 what the rest of these docs use.</p>
-<p>Set each option in only one of the two forms. When a configuration
-function and a <code>start_server</code> keyword give different values for the
-same option, the result is not dependable. For example, the browser
-tab shows the title from <code>set_website_title</code>, while the theme follows
-the <code>start_server</code> keyword.</p>
+<p>Both forms write the same settings, and the one written last wins.
+<code>start_server(...)</code> runs after every configuration function above it,
+so its keywords win. With <code>set_website_title("A")</code> above
+<code>start_server(site_title="B")</code>, the browser tab shows "B". Setting
+each option in only one of the two forms keeps a program easier to
+read.</p>
 <div class="admonition warning">
-<p class="admonition-title">A misspelled option is ignored without any message</p>
+<p class="admonition-title">A misspelled option is ignored, with a warning</p>
 <p><code>start_server</code> accepts any keyword. A keyword that it does not
-recognize, such as <code>sight_title</code> in place of <code>site_title</code>, produces
-no error and no warning, and the real option keeps its default. If
-an option seems to have no effect, check its spelling against the
-table above.</p>
+recognize, such as <code>sight_title</code> in place of <code>site_title</code>, is
+ignored, and the real option keeps its default. The site still
+starts, and the terminal prints a warning that names the keyword:</p>
+<div class="highlight"><pre><span></span><code>Warning: Unknown start_server option &#39;sight_title&#39;. Did you mean &#39;site_title&#39;? The option was ignored.
+</code></pre></div>
+<p>In the browser, the debug panel lists the same problem as a
+warning. The "Did you mean" part is left out when no real option
+has a similar name. If an option seems to have no effect, look
+for this warning and check the spelling against the table above.</p>
 </div>
 <h2 id="where-settings-come-from">Where settings come from</h2>
 <p>A setting can be given in three places. The examples all set the
@@ -14257,14 +14319,16 @@ PowerShell, set the variable on its own line first with
 <p>When the same setting is given in more than one place, a
 <code>start_server</code> keyword wins over a flag, and a flag wins over an
 environment variable.</p>
-<p>The environment variables for <code>port</code>, <code>host</code>, <code>open_browser</code>, and
-<code>use_reloader</code> currently have no effect. Use the keyword or the flag
-for those four settings.</p>
 <h2 id="notes">Notes</h2>
 <ul>
-<li><strong>Nothing after the call runs.</strong> <code>start_server</code> takes over the
-  program, so all configuration must come before it; code placed
-  after the call never executes.</li>
+<li><strong>Code after the call runs at the wrong time.</strong> <code>start_server</code>
+  takes over the program, so all configuration must come before it.
+  On your computer, code placed after the call waits until the server
+  stops. In the browser, it runs right after the first page appears.
+  When the file has statements after the call, the terminal prints a
+  warning that names the line, and the debug panel lists the same
+  warning. Comments and blank lines after the call do not count. See
+  <a href="../../help/errors/nothing-after-start-server/">Code after start_server never runs</a>.</li>
 <li><strong>Tests run first.</strong> Assertions written above <code>start_server</code> execute
   before the site starts. A failing assertion prints a FAILURE message
   and the site still starts. See
@@ -14278,8 +14342,10 @@ for those four settings.</p>
   like Downloads or your home directory, Drafter prints a notice and
   watches only your program and the files your site uses, instead of
   the entire folder. <a href="../live-reload/">Live reload</a> has the details.</li>
-<li><strong>Old v1 options are ignored.</strong> Parameters from Drafter v1 such as
-  <code>cdn_skulpt</code> print a warning and do nothing.</li>
+<li><strong>Old v1 options are ignored.</strong> Options that only Drafter v1 had,
+  such as <code>title</code>, <code>style</code>, and <code>debug</code>, do nothing and produce no
+  message, so a program written for v1 still starts. The
+  <code>cdn_skulpt</code> options print a warning and do nothing.</li>
 <li><strong>Command-line flags</strong> set many of the same options for one run of
   <code>drafter yourfile.py</code>. A keyword in <code>start_server</code> wins when both
   are given. See <a href="../cli/">Command line</a> and

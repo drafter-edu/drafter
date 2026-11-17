@@ -11047,6 +11047,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.files.website_files.find_true_spelling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        find_true_spelling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.files.website_files.is_url" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -11117,6 +11128,17 @@
     <span class="md-ellipsis">
       
         resolve_website_file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.files.website_files.wrong_capitals_error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wrong_capitals_error
       
     </span>
   </a>
@@ -11380,6 +11402,62 @@
     
   
     imports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
   
 
     
@@ -13804,6 +13882,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.files.website_files.find_true_spelling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        find_true_spelling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.files.website_files.is_url" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13880,6 +13969,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#drafter.files.website_files.wrong_capitals_error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wrong_capitals_error
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -13914,7 +14014,10 @@ path is checked right away, while the student is still looking at the line
 that named it: a missing file raises a <code>StudentFacingError</code> that explains
 where Drafter looked and suggests similarly named files from that folder
 (a <code>styles.css</code> when they asked for <code>style.css</code>, a file with different
-capitalization, or the same name inside a subfolder).</p>
+capitalization, or the same name inside a subfolder). A name that differs
+from the real file only in its capital letters is an error too: Windows
+and macOS find the file anyway, and the server a site is deployed to does
+not. <code>add_website_file()</code> also accepts a folder, which is copied whole.</p>
 <p>The check adapts to where the code is running. Outside the browser, paths
 resolve against the configured user directory (see <code>get_drafter_path</code>). In
 Pyodide, the file may already sit in the instance's virtual folder, or it
@@ -14011,6 +14114,19 @@ missing, None if this environment cannot tell.</p>
             <td>
               <div class="doc-md-description">
                 <p>Relative paths of same-named files in subfolders.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="drafter.files.website_files.WebsiteFileLookup.true_path">true_path</span></code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The path as it is really spelled on disk, when the file
+was found under a name that differs only in capital letters.
+None when the spelling matches or could not be checked.</p>
               </div>
             </td>
           </tr>
@@ -14221,6 +14337,98 @@ case).</p>
               <div class="doc-md-description">
                 <p>Up to <code>MAX_SUGGESTIONS</code> names, best first, without duplicates and
 never the name itself.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="drafter.files.website_files.find_true_spelling" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">find_true_spelling</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Spell a relative path the way its folders and file are really named.</p>
+<p>Windows and macOS open <code>Style.css</code> when the file is <code>style.css</code>. The
+server a site is deployed to does not, so the difference has to be
+caught on the student's own computer.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>base</code>
+            </td>
+            <td>
+                  <code><span title="pathlib.Path">Path</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The folder the path is relative to.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>path</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A normalized relative path that exists under <code>base</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The path with every part spelled as it is on disk, or None when a
+part cannot be found or its folder cannot be listed.</p>
               </div>
             </td>
           </tr>
@@ -14458,7 +14666,7 @@ or semicolons, so any of those means the argument is code.</p>
 
 
 <h2 id="drafter.files.website_files.lookup_website_file" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">lookup_website_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">lookup_website_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">allow_folder</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 </h2>
 
@@ -14494,6 +14702,22 @@ or semicolons, so any of those means the argument is code.</p>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>allow_folder</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether a folder at that path counts as found.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
             </td>
           </tr>
       </tbody>
@@ -14828,8 +15052,114 @@ no extension at all).</p>
               <div class="doc-md-description">
                 <p>If the argument is not a string, is empty, looks
 like code rather than a name, is an absolute path, escapes the
-program folder, has the wrong extension, or names a file that
-does not exist.</p>
+program folder, has the wrong extension, names a file that
+does not exist, or differs from the real file name only in its
+capital letters. With <code>kind="file"</code> the path may also name a
+folder.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="drafter.files.website_files.wrong_capitals_error" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">wrong_capitals_error</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">true_path</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Build the error for a name that differs from the file only in capitals.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>function_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The helper that was called (for the message).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>path</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The path as the student wrote it.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>true_path</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The path as it is spelled on disk.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="StudentFacingError(message, *, friendly='', steps=(), title='') (drafter.data.errors.StudentFacingError)" href="../../data/errors/#drafter.data.errors.StudentFacingError">StudentFacingError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The error to raise.</p>
               </div>
             </td>
           </tr>

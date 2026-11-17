@@ -11389,6 +11389,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -14047,7 +14103,7 @@ back to their nearest listed base.</p>
 
 
 <h2 id="drafter.data.error_explainer.ID_EXPLANATIONS" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">ID_EXPLANATIONS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;request.route_not_found&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Page Not Found&#39;</span><span class="p">,</span> <span class="s1">&#39;Drafter could not find the page route your app tried to open.&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Check route names and links so they match exactly (including dashes and slashes).&#39;</span><span class="p">,</span> <span class="s1">&#39;Confirm that the route is added before your app starts handling requests.&#39;</span><span class="p">,</span> <span class="s2">&quot;Use the &#39;Return to Index Page&#39; link below to get back to a known page.&quot;</span><span class="p">)),</span> <span class="s1">&#39;request.argument_parsing_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;Problem With the Route&#39;s Arguments&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">()),</span> <span class="s1">&#39;payload.rendering_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Page Content Problem&#39;</span><span class="p">,</span> <span class="s1">&#39;Drafter could not turn the content your route returned into a web page.&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Read the technical message to see which value caused the problem and where it is in your content.&#39;</span><span class="p">,</span> <span class="s1">&#39;Check the content you returned from your route for values that are not text, numbers, booleans, images, or Drafter components.&#39;</span><span class="p">,</span> <span class="s1">&#39;To display an unusual value as text, wrap it in `str(...)`.&#39;</span><span class="p">)),</span> <span class="s1">&#39;payload.formatting_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Page Content Problem&#39;</span><span class="p">,</span> <span class="s1">&#39;Drafter could not format the content your route returned for display in the history panel.&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Read the technical message to see which value caused the problem and where it is in your content.&#39;</span><span class="p">,</span> <span class="s1">&#39;Check the content you returned from your route for values that are not text, numbers, booleans, images, or Drafter components.&#39;</span><span class="p">)),</span> <span class="s1">&#39;client.stylesheet_load_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Styling Did Not Load&#39;</span><span class="p">,</span> <span class="s2">&quot;The browser could not load one of this site&#39;s stylesheets, so the page may look plain or out of place. Your Python code still ran.&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Reload the page; a brief network hiccup is the most common cause.&#39;</span><span class="p">,</span> <span class="s1">&#39;If you added the stylesheet yourself (for example with `add_website_css_file`), check that the file name or address is spelled correctly and that the file is next to your program.&#39;</span><span class="p">,</span> <span class="s1">&#39;If the site is deployed, check that the file was uploaded along with the rest of the site.&#39;</span><span class="p">)),</span> <span class="s1">&#39;system.error_page_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Something Went Very Wrong&#39;</span><span class="p">,</span> <span class="s1">&#39;Drafter hit a second problem while trying to show you the error page itself.&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Reload the application to get back to a working page.&#39;</span><span class="p">,</span> <span class="s1">&#39;Read the technical message for the original problem.&#39;</span><span class="p">,</span> <span class="s1">&#39;If this keeps happening, submit a bug report so it can be fixed.&#39;</span><span class="p">))}</span></code>
+            <code class="highlight language-python"><span class="n">ID_EXPLANATIONS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;request.route_not_found&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Page Not Found&#39;</span><span class="p">,</span> <span class="s1">&#39;Drafter could not find the page route your app tried to open.&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Check route names and links so they match exactly (including dashes and slashes).&#39;</span><span class="p">,</span> <span class="s1">&#39;Confirm that the route is added before your app starts handling requests.&#39;</span><span class="p">,</span> <span class="s2">&quot;Use the &#39;Return to Index Page&#39; link below to get back to a known page.&quot;</span><span class="p">)),</span> <span class="s1">&#39;request.argument_parsing_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;Problem With the Route&#39;s Arguments&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">()),</span> <span class="s1">&#39;payload.rendering_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Page Content Problem&#39;</span><span class="p">,</span> <span class="s1">&#39;Drafter could not turn the content your route returned into a web page.&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Read the technical message to see which value caused the problem and where it is in your content.&#39;</span><span class="p">,</span> <span class="s1">&#39;Check the content you returned from your route for values that are not text, numbers, booleans, images, or Drafter components.&#39;</span><span class="p">,</span> <span class="s1">&#39;To display an unusual value as text, wrap it in `str(...)`.&#39;</span><span class="p">)),</span> <span class="s1">&#39;payload.formatting_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Page Content Problem&#39;</span><span class="p">,</span> <span class="s1">&#39;Drafter could not format the content your route returned for display in the history panel.&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Read the technical message to see which value caused the problem and where it is in your content.&#39;</span><span class="p">,</span> <span class="s1">&#39;Check the content you returned from your route for values that are not text, numbers, booleans, images, or Drafter components.&#39;</span><span class="p">)),</span> <span class="s1">&#39;client.stylesheet_load_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Styling Did Not Load&#39;</span><span class="p">,</span> <span class="s2">&quot;The browser could not load one of this site&#39;s stylesheets, so the page may look plain or out of place. Your Python code still ran.&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Reload the page; a brief network hiccup is the most common cause.&#39;</span><span class="p">,</span> <span class="s1">&#39;If you added the stylesheet yourself (for example with `add_website_css_file`), check that the file name or address is spelled correctly and that the file is next to your program.&#39;</span><span class="p">,</span> <span class="s1">&#39;If the site is deployed, check that the file was uploaded along with the rest of the site.&#39;</span><span class="p">)),</span> <span class="s1">&#39;client.image_load_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Image Did Not Load&#39;</span><span class="p">,</span> <span class="s1">&#39;The browser could not load one of the images on this site, so it shows as a broken picture. Your Python code still ran.&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Check that the name in your code matches the file exactly, including capital letters and the ending (like .png or .jpg).&#39;</span><span class="p">,</span> <span class="s1">&#39;Check that the image file is next to your program, or in the folder your code names.&#39;</span><span class="p">,</span> <span class="s1">&#39;If the site is deployed, check that the image was uploaded along with the rest of the site.&#39;</span><span class="p">,</span> <span class="s1">&#39;If the image comes from another website, check its address and your internet connection.&#39;</span><span class="p">)),</span> <span class="s1">&#39;client.load_snapshot_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Saved State Does Not Fit&#39;</span><span class="p">,</span> <span class="s1">&#39;Drafter could not load that saved state. It was most likely saved under a different version of your code, so its values no longer match the state your program uses now. Your site is unchanged.&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;If you changed the fields of your state since saving, save a new snapshot from the current version of your program.&#39;</span><span class="p">,</span> <span class="s1">&#39;Open Details to see which part of the saved state did not fit.&#39;</span><span class="p">)),</span> <span class="s1">&#39;bridge.history_state_restore_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Earlier State Not Restored&#39;</span><span class="p">,</span> <span class="s1">&#39;Drafter could not bring back the state this page had when you first visited it, most likely because your code changed since then. The page is shown with the current state instead.&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Reload the page to start again from the first page with a fresh state.&#39;</span><span class="p">,)),</span> <span class="s1">&#39;bridge.initial_route_needs_arguments&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Opened the First Page Instead&#39;</span><span class="p">,</span> <span class="s1">&#39;The address of this page named a route that needs values from a form or a button, and an address cannot carry those. This is what happens when a tab is reloaded on a page that a form led to. Drafter opened the first page instead, with a fresh state.&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;Nothing in your code needs fixing. Use your site&#39;s own buttons and links to get back to that page.&quot;</span><span class="p">,</span> <span class="s1">&#39;To make a page that can be reloaded or opened from its address, give every parameter after the state a default value.&#39;</span><span class="p">)),</span> <span class="s1">&#39;system.error_page_failed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Something Went Very Wrong&#39;</span><span class="p">,</span> <span class="s1">&#39;Drafter hit a second problem while trying to show you the error page itself.&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Reload the application to get back to a working page.&#39;</span><span class="p">,</span> <span class="s1">&#39;Read the technical message for the original problem.&#39;</span><span class="p">,</span> <span class="s1">&#39;If this keeps happening, submit a bug report so it can be fixed.&#39;</span><span class="p">))}</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
@@ -14154,7 +14210,9 @@ contribution" and resolve through the remaining rules.</p>
             <td>
               <div class="doc-md-description">
                 <p><code>RouteDiagnostic</code>-like values (need <code>message</code>, <code>hint</code>,
-and optionally <code>route_name</code> attributes).</p>
+and optionally <code>parameter</code> and <code>route_name</code> attributes). Each
+one becomes a step holding its hint, or its message when it
+has no hint.</p>
               </div>
             </td>
             <td>

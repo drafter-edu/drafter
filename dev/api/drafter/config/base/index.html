@@ -9851,6 +9851,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#drafter.config.base.BaseConfiguration.setting_names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        setting_names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#drafter.config.base.BaseConfiguration.to_json" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -11419,6 +11430,62 @@
     
   
     imports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
   
 
     
@@ -13943,6 +14010,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#drafter.config.base.BaseConfiguration.setting_names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        setting_names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#drafter.config.base.BaseConfiguration.to_json" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14570,6 +14648,8 @@ as the base instead of a default-constructed one.</p>
     <div class="doc doc-contents ">
 
         <p>Merge new arguments into configuration.</p>
+<p>Only the section's own settings (its dataclass fields) can be set.
+A name that merely matches a method, such as <code>copy</code>, is unknown.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -14788,6 +14868,51 @@ and <code>raise_errors</code> is True.</p>
             <td>
               <div class="doc-md-description">
                 <p>A dictionary of configuration values extracted from environment variables.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="drafter.config.base.BaseConfiguration.setting_names" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">setting_names</span><span class="p">()</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Names of the settings this section holds.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="frozenset">frozenset</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of every dataclass field of the section.</p>
               </div>
             </td>
           </tr>

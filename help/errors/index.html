@@ -11205,6 +11205,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13695,34 +13751,29 @@ phrase from the message, in quotes.</p>
 <td><a href="file-decode-error/">Uploaded file couldn't be read as text</a></td>
 </tr>
 <tr>
-<td><code>Unusable Value</code></td>
-<td><code>points to non-existent page</code></td>
+<td><code>Problem With the Route's Arguments</code></td>
+<td><code>but no value was provided by</code></td>
+<td><a href="../../reference/route/#blank-values">Blank values</a></td>
+</tr>
+<tr>
+<td><code>Button Points to a Missing Page</code>, or <code>Link Points to a Missing Page</code></td>
+<td>Any message</td>
 <td><a href="route-not-found/">Link or button points to an unknown route</a></td>
 </tr>
 <tr>
-<td><code>Unusable Value</code></td>
-<td><code>must be a list of strings, numbers, booleans, or components</code></td>
+<td><code>Page Content Problem</code></td>
+<td>Any message</td>
 <td><a href="page-content-invalid/">Page content must be a list of strings, numbers, booleans, or components</a></td>
 </tr>
 <tr>
-<td><code>Unusable Value</code></td>
-<td><code>is not in options</code></td>
+<td><code>SelectBox Default Is Not an Option</code></td>
+<td>Any message</td>
 <td><a href="selectbox-default-missing/">SelectBox default not in options</a></td>
 </tr>
 <tr>
-<td><code>Unusable Value</code></td>
-<td><code>Header level must be between 1 and 6</code></td>
+<td><code>Header Level Out of Range</code></td>
+<td>Any message</td>
 <td><a href="header-level-invalid/">Header level must be 1-6</a></td>
-</tr>
-<tr>
-<td><code>Unusable Value</code></td>
-<td>Anything else</td>
-<td><a href="#pythons-own-errors">Python's own errors</a></td>
-</tr>
-<tr>
-<td><code>Page Content Problem</code></td>
-<td><code>Unsupported page content type</code>, or <code>has no attribute 'extend'</code></td>
-<td><a href="page-content-invalid/">Page content must be a list of strings, numbers, booleans, or components</a></td>
 </tr>
 <tr>
 <td><code>Page Not Found</code></td>
@@ -13740,7 +13791,7 @@ phrase from the message, in quotes.</p>
 <td><a href="missing-asset-on-deploy/">Image or file works locally but 404s when deployed</a></td>
 </tr>
 <tr>
-<td><code>Unknown Name</code>, <code>Type Mismatch</code>, <code>Missing Attribute</code>, <code>List Position Out of Range</code>, <code>Missing Dictionary Key</code>, <code>Division by Zero</code>, <code>Endless Recursion</code>, or <code>Problem Loading This Page</code></td>
+<td><code>Unknown Name</code>, <code>Type Mismatch</code>, <code>Unusable Value</code>, <code>Missing Attribute</code>, <code>List Position Out of Range</code>, <code>Missing Dictionary Key</code>, <code>Division by Zero</code>, <code>Endless Recursion</code>, or <code>Problem Loading This Page</code></td>
 <td>A message from Python</td>
 <td><a href="#pythons-own-errors">Python's own errors</a></td>
 </tr>
@@ -13748,6 +13799,11 @@ phrase from the message, in quotes.</p>
 <td><code>Error</code>, on a dialog that says "Error running student code"</td>
 <td><code>ModuleNotFoundError</code></td>
 <td><a href="package-import-error/">A library import fails in the browser</a></td>
+</tr>
+<tr>
+<td><code>Website File Not Found</code>, or <code>Website File Name Has Different Capital Letters</code>, printed in the terminal</td>
+<td>Any message</td>
+<td><a href="../../reference/site-config/#add_website_file">add_website_file</a></td>
 </tr>
 </tbody>
 </table>
@@ -13785,15 +13841,19 @@ phrase from the message, in quotes.</p>
 <td><a href="type-conversion-other/">Could not convert a value to the parameter's type</a></td>
 </tr>
 <tr>
+<td><code>expects ... but no value was provided by</code></td>
+<td><a href="../../reference/route/#blank-values">Blank values</a></td>
+</tr>
+<tr>
 <td><code>has a state that is a ..., but the previous state was a ...</code></td>
 <td><a href="state-mismatch/">State doesn't match the State class</a></td>
 </tr>
 <tr>
 <td><code>changed the site state from ... to ...</code> (a warning in the debug panel)</td>
-<td><a href="state-mismatch/#a-warning-in-place-of-the-error-page">A warning in place of the error page</a></td>
+<td><a href="state-mismatch/#a-warning-about-the-states-type">A warning about the state's type</a></td>
 </tr>
 <tr>
-<td><code>must be a list of strings, numbers, booleans, or components</code></td>
+<td><code>must be a list of strings, numbers, booleans, or components</code>, <code>must be given as one list</code>, or <code>Unsupported page content type</code></td>
 <td><a href="page-content-invalid/">Page content must be a list of strings, numbers, booleans, or components</a></td>
 </tr>
 <tr>
@@ -13832,12 +13892,31 @@ phrase from the message, in quotes.</p>
 <td><code>Camera access denied</code>, <code>Microphone access denied</code>, or <code>Location access denied</code></td>
 <td><a href="permission-denied-device/">Device permission denied</a></td>
 </tr>
+<tr>
+<td><code>The address of this page named a route that needs values from a form or a button</code> (a warning in the debug panel)</td>
+<td><a href="../troubleshooting/#reloading-the-tab-shows-a-page-i-did-not-expect">Reloading the tab shows a page I did not expect</a></td>
+</tr>
+<tr>
+<td><code>The browser could not load one of the images</code> (a warning in the debug panel)</td>
+<td><a href="../troubleshooting/#a-picture-shows-as-a-broken-image">A picture shows as a broken image</a></td>
+</tr>
+<tr>
+<td><code>has code after start_server(...)</code> in the terminal, or <code>comes after start_server(...)</code> (a warning in the debug panel)</td>
+<td><a href="nothing-after-start-server/">Code after start_server() never runs</a></td>
+</tr>
+<tr>
+<td><code>Unknown start_server option</code> in the terminal, or <code>start_server was given an option named</code> (a warning in the debug panel)</td>
+<td><a href="../../reference/start-server/#student-relevant-options">start_server</a></td>
+</tr>
 </tbody>
 </table>
 <h2 id="not-an-error-but-broken-anyway">Not an error, but broken anyway</h2>
 <ul>
 <li>If code placed after <code>start_server()</code> does not seem to run, see
   <a href="nothing-after-start-server/">Code after start_server() never runs</a>.</li>
+<li>If reloading the browser tab shows the first page in place of the
+  page you were on, see
+  <a href="../troubleshooting/#reloading-the-tab-shows-a-page-i-did-not-expect">Reloading the tab shows a page I did not expect</a>.</li>
 <li>If there is no error message but the app behaves incorrectly, see
   <a href="../troubleshooting/">Troubleshooting</a>, which is organized by symptom.</li>
 </ul>

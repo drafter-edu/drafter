@@ -11344,6 +11344,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14180,8 +14236,15 @@ whatever page was on screen before.</p>
 </tbody>
 </table>
 <p>Two more parameters, <code>css</code> and <code>js</code>, accept raw CSS and JavaScript to
-inject when the page renders. They are for advanced use; see
+inject when the page renders. They must be given by name, as in
+<code>Page(state, content, css="h1 { color: red; }")</code>, and each takes text
+or a list of text. They are for advanced use; see
 <a href="../../extend/javascript/">JavaScript interop</a>.</p>
+<p>A <code>Page</code> takes nothing else by position. Anything written after the
+content without a name, as in <code>Page(state, "Hello", "there")</code>, is an
+error titled <code>Page Content Problem</code>, because it is almost always
+content that was meant to go inside the list. The error page shows the
+corrected call, <code>Page(state, ['Hello', 'there'])</code>.</p>
 <h2 id="with-state-and-without">With state and without</h2>
 <p>An app with a <code>State</code> dataclass passes it as the first argument, so the
 next route receives the current values:</p>
@@ -14206,7 +14269,7 @@ next route receives the current values:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="page-1-9b63a1c26ff1">
-  <iframe src="../../drafter-demos/page-1-9b63a1c26ff1/index.html" title="Drafter Demo page-1-9b63a1c26ff1" name="page-1-9b63a1c26ff1" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 220px;" ></iframe>
+  <iframe src="../../drafter-demos/page-1-9b63a1c26ff1/index.html" title="Drafter Demo page-1-9b63a1c26ff1" name="page-1-9b63a1c26ff1" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 220px;" ></iframe>
 </div>
 
 <p>An app with nothing to remember can skip state entirely:</p>
@@ -14232,7 +14295,7 @@ next route receives the current values:</p>
 <span class="n">start_server</span><span class="p">()</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="page-2-f2b6641bb20e">
-  <iframe src="../../drafter-demos/page-2-f2b6641bb20e/index.html" title="Drafter Demo page-2-f2b6641bb20e" name="page-2-f2b6641bb20e" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 200px;" ></iframe>
+  <iframe src="../../drafter-demos/page-2-f2b6641bb20e/index.html" title="Drafter Demo page-2-f2b6641bb20e" name="page-2-f2b6641bb20e" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 200px;" ></iframe>
 </div>
 
 <h2 id="what-content-can-hold">What content can hold</h2>
@@ -14295,8 +14358,8 @@ placed inside the list.</p>
 </tbody>
 </table>
 <p>The error appears when the <code>Page</code> is created. In the browser, the
-error page is titled <code>Unusable Value</code>, and its message names the type
-that Drafter found:</p>
+error page is titled <code>Page Content Problem</code>, and its message names the
+type that Drafter found:</p>
 <div class="highlight"><pre><span></span><code>The content you returned in this Page was a dict, but it needs to be text, a number, a boolean, a component, or a list of those.
 </code></pre></div>
 <p>For an item inside the list, the message gives the item's position,

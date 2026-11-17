@@ -6688,10 +6688,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#why-do-i-get-an-error-when-i-reload-the-page" class="md-nav__link">
+  <a href="#why-did-reloading-take-me-back-to-the-first-page" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why do I get an error when I reload the page?
+        Why did reloading take me back to the first page?
       
     </span>
   </a>
@@ -11571,6 +11571,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13956,10 +14012,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#why-do-i-get-an-error-when-i-reload-the-page" class="md-nav__link">
+  <a href="#why-did-reloading-take-me-back-to-the-first-page" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why do I get an error when I reload the page?
+        Why did reloading take me back to the first page?
       
     </span>
   </a>
@@ -14281,15 +14337,17 @@ Drafter works, not a bug.
 <a href="../../start/how-drafter-works/">How Drafter works</a> explains, and
 <a href="../../concepts/state/">State</a> covers what does and does not
 persist.</p>
-<h3 id="why-do-i-get-an-error-when-i-reload-the-page">Why do I get an error when I reload the page?</h3>
+<h3 id="why-did-reloading-take-me-back-to-the-first-page">Why did reloading take me back to the first page?</h3>
 <p>The address bar remembers the last route you visited, in the part
 that looks like <code>?route=save_name</code>. Reloading starts the app over
 and then runs that route again. If the route expects a value from a
-form, no form was submitted this time, so Drafter shows the error
-page titled "Problem With the Route's Arguments". Click <strong>Return to
-Index Page</strong> on the error page to start from the beginning.
-<a href="../errors/missing-parameter/">Route is missing a parameter</a> has the
-details.</p>
+form, no form was submitted this time, so Drafter opens the first
+page instead and lists a warning in the debug panel that says so.
+Nothing in your code needs fixing. A
+route that needs only the state is run again after a reload, with
+the state back at its starting value.
+<a href="../troubleshooting/#reloading-the-tab-shows-a-page-i-did-not-expect">Reloading the tab</a>
+has the details.</p>
 <h3 id="where-is-my-data-stored">Where is my data stored?</h3>
 <p>Nowhere permanent. Each visitor's data lives in their own browser
 tab while the tab is open. There is no database and no server
@@ -14317,8 +14375,9 @@ After that, everything is fast.
 <a href="../../extend/pyodide/">Python in the browser</a>.</p>
 <h3 id="why-does-nothing-after-start_server-run">Why does nothing after <code>start_server(...)</code> run?</h3>
 <p>On your computer, <code>start_server</code> keeps running for as long as the
-site is up, so Python does not reach the lines after it. Put tests
-and settings before it and page logic in routes.
+site is up, so Python does not reach the lines after it until the
+server stops. Drafter prints a warning when it finds code there. Put
+tests and settings before it and page logic in routes.
 <a href="../errors/nothing-after-start-server/">Code after start_server never runs</a>.</p>
 <h2 id="writing-your-app">Writing your app</h2>
 <h3 id="why-is-everything-on-one-line">Why is everything on one line?</h3>
@@ -14330,10 +14389,11 @@ to begin on a new line, as in <code>"Your score: 5\n"</code>.
 <p>Wrap them in a <code>Row</code>, which lays its contents out from left to
 right. <a href="../../reference/components/layout/row/">Row</a>.</p>
 <h3 id="why-does-input-not-work-the-way-it-does-in-my-other-programs">Why does <code>input()</code> not work the way it does in my other programs?</h3>
-<p>Inside a route, <code>input()</code> opens a bare pop-up box in the browser,
-without your question in it. A web page asks for information with
-form components instead: show a <code>TextBox</code> and a <code>Button</code>, and
-receive the answer as a parameter of the next route.
+<p>Inside a route, <code>input()</code> opens a pop-up box in the browser that
+shows your question, and the page waits until the box is answered.
+Pressing Cancel gives an empty string. A web page asks for
+information with form components instead: show a <code>TextBox</code> and a
+<code>Button</code>, and receive the answer as a parameter of the next route.
 <a href="../../add/ask-for-information/">Ask the user for information</a>.</p>
 <h3 id="why-does-timesleep-not-make-my-page-wait-and-then-change">Why does <code>time.sleep()</code> not make my page wait and then change?</h3>
 <p>A page appears only after its route returns. <code>time.sleep(3)</code> makes

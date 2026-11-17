@@ -11236,6 +11236,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../helpers/urls/" class="md-nav__link">
         
   
@@ -14002,7 +14058,7 @@ setup or if setup failed).</p>
           <tr class="doc-section-item">
             <td><code><span title="drafter.bridge.ClientBridge.hooks">hooks</span></code></td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="ServerHooks(activate, visit, toggle_frame, toggle_debug_mode, set_theme, get_state, set_state, render_site)
+                  <code><a class="autorefs autorefs-internal" title="ServerHooks(activate, visit, toggle_frame, toggle_debug_mode, set_theme, get_state, set_state, render_site, find_missing_arguments)
 
   
       dataclass
@@ -14013,6 +14069,21 @@ setup or if setup failed).</p>
                 <p>Server-facing operations injected by the composition root
 via setup_events (None until then). The bridge reaches the
 server only through these, never through a global lookup.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="drafter.bridge.ClientBridge.replaying_startup_events">replaying_startup_events</span></code></td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True only while the events published
+before this bridge existed are being delivered to it. Settings
+changed in that time are already part of the first render, so
+their events are shown in the debug panel and not applied to
+the page a second time.</p>
               </div>
             </td>
           </tr>
@@ -14187,6 +14258,9 @@ update the configuration and refresh the debug CSS and subtle
 debug-entry button. Settings that change nothing in the page (such
 as the site information fields) are accepted as they are; only a key
 that is not a setting at all is reported as a bridge error.
+Updates made before the site started are the exception: the first
+render was built from the finished configuration, so while
+<code>replaying_startup_events</code> is set they are not applied again.
 Every event (including configuration updates) is
 then forwarded to the debug panel; events the panel does not handle
 are logged to the console.</p>
@@ -14269,10 +14343,18 @@ event bus.</p>
 
         <p>Restore a previously saved snapshot and replay its route.</p>
 <p>Responds to the debug UI's <code>drafter-load-state</code> window event (its
-detail carries <code>{state_json, route, kwargs_json}</code>). The state is
+detail carries <code>{state_json, route, kwargs_json}</code> and, for snapshots
+saved since format version 2, <code>state_before_json</code>). The state is
 rebuilt from plain data against the running app's state class,
 restored first, and then the route is re-invoked, because argument
 preparation reads the current state.</p>
+<p>Which state is restored depends on what the snapshot carries. With
+<code>state_before_json</code> (the state from before the saved route ran),
+that earlier state is restored, so running the route again arrives
+at the saved page and state, the way the browser's Back button
+restores a history entry. An older snapshot has only <code>state_json</code>
+(the state from after the route ran); it is restored as before, so
+a route that changes the state applies its change a second time.</p>
 
 
     </div>
@@ -14338,6 +14420,9 @@ by telemetry are used to rebuild an equivalent request instead.</p>
 detail carries <code>{reason, slot}</code>). The snapshot travels back to the
 JS SaveLoadManager as StateSnapshot telemetry, which stores it in
 localStorage or downloads it as a file.</p>
+<p>The snapshot also carries the state from just before the captured
+route ran (kept by the NavigationController), which is the state
+that loading restores.</p>
 
 
     </div>
@@ -14543,7 +14628,7 @@ routes to this instance's event bus.</p>
                 <code>hooks</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="ServerHooks(activate, visit, toggle_frame, toggle_debug_mode, set_theme, get_state, set_state, render_site)
+                  <code><a class="autorefs autorefs-internal" title="ServerHooks(activate, visit, toggle_frame, toggle_debug_mode, set_theme, get_state, set_state, render_site, find_missing_arguments)
 
   
       dataclass
@@ -14665,6 +14750,9 @@ without it, the old bridge's global listeners keep routing browser
 events into a bridge whose DOM no longer exists, and an in-flight
 click (its form data is collected through a promise chain) could
 still dispatch a visit on the dead instance after the reset.</p>
+<p>The site's own JavaScript is told first, through the
+<code>drafter-cleanup</code> window event, so it can remove what it set up
+before the program runs again in the same page.</p>
 
 
     </div>

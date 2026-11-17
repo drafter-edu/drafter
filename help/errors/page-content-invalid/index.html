@@ -11340,6 +11340,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13809,11 +13865,9 @@
 <h1 id="page-content-must-be-a-list-of-strings-numbers-booleans-or-components">Page content must be a list of strings, numbers, booleans, or components</h1>
 <h2 id="the-error">The error</h2>
 <p>The error page has this title:</p>
-<div class="highlight"><pre><span></span><code>Unusable Value
+<div class="highlight"><pre><span></span><code>Page Content Problem
 </code></pre></div>
-<p>Drafter uses the title "Unusable Value" for several different
-problems, so the sentence under the title is what identifies this
-one:</p>
+<p>The sentence under the title says which item is the problem:</p>
 <div class="highlight"><pre><span></span><code>Item number 0 in this Page&#39;s content list is a Pet, but every item needs
 to be text, a number, a boolean, or a component.
 </code></pre></div>
@@ -13824,12 +13878,12 @@ components. Found Pet at index 0 instead.
 </code></pre></div>
 <p>The position counts from zero, so "index 0" is the first item of the
 content list and "index 1" is the second.</p>
-<p>Two other forms of this error exist. When the value sits where the
-whole list belongs, the messages leave out the position ("The content
-you returned in this Page was a Pet", and "Found Pet instead."). When
-the value is inside another component, such as a <code>Div</code> or a
-<code>BulletedList</code>, the error page is titled "Page Content Problem" and
-the sentence under the title says where the value is:</p>
+<p>Two other forms of this error have the same title. When the value
+sits where the whole list belongs, the messages leave out the position
+("The content you returned in this Page was a Pet", and "Found Pet
+instead."). When the value is inside another component, such as a
+<code>Div</code> or a <code>BulletedList</code>, the sentence under the title says where the
+value is:</p>
 <div class="highlight"><pre><span></span><code>Your page content includes a value that Drafter does not know how to
 display: a Pet value (Pet(name=&#39;Ada&#39;, age=3)). It is located at: the Div
 at index 0, the item at index 0.
@@ -13871,10 +13925,19 @@ produces:</p>
   in the wrong order, as in <code>Page(["Hello"], state)</code>. The state comes
   first.</li>
 <li><strong>Missing square brackets around several items</strong>:
-  <code>Page(state, "Hello", Button("Go", "index"))</code> gives an error page
-  titled "Page Content Problem" whose technical message ends
-  <code>'Button' object has no attribute 'extend'</code>. Put the items inside
-  one list.</li>
+  <code>Page(state, "Hello", Button("Go", "index"))</code> produces "The content
+  of a Page must be given as one list, but more was written after the
+  content: a Button." A <code>Page</code> takes the state, then one content
+  list, and nothing else without a name. The first hint under "What To
+  Try Next" shows the call with the brackets added, as in
+  <code>Page(state, ['Hello', Button(...)])</code>.</li>
+<li><strong>CSS or JavaScript given without its name</strong>:
+  <code>Page(state, ["Hello"], "h1 { color: red; }")</code> produces the same
+  message, ending "a str". Name the value, as in
+  <code>Page(state, ["Hello"], css="h1 { color: red; }")</code>. The <code>css</code> and
+  <code>js</code> values must be text or a list of text. <code>css=5</code> produces "The
+  css of a Page must be a string or a list of strings, but got an
+  int."</li>
 </ul>
 <p>A single string, number, or component in place of the list is not an
 error. <code>Page(state, "Hello")</code> shows the same page as

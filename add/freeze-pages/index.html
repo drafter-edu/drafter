@@ -11371,6 +11371,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13954,9 +14010,9 @@ frozen tests for pages that no longer exist.</p>
   your copied call does not reproduce the page you froze, often
   because the page depended on earlier clicks. Reproduce the
   situation, then freeze from that visit.</li>
-<li><strong>"Circular Reference" appears inside the recorded page</strong>: your
+<li><strong>A <code># Not frozen:</code> comment appears where a test should be</strong>: your
   state contains objects that refer to each other, which the
-  recorder cannot flatten. See
+  recorder cannot write down. See
   <a href="../../help/errors/circular-reference-tests/">Circular Reference in generated tests</a>.</li>
 <li><strong>The frozen page is huge and the test is unreadable</strong>: freeze
   smaller pages, or switch that page to a few <code>assert_has</code> checks.</li>

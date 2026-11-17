@@ -11447,6 +11447,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../helpers/urls/" class="md-nav__link">
         
   
@@ -14491,7 +14547,7 @@ upload dict for a <code>dict</code> parameter).</p>
 
 
 <h3 id="drafter.components.utilities.registry.ConverterRegistry.convert" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">convert</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">convert</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">keep_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 </h3>
 
@@ -14502,6 +14558,89 @@ upload dict for a <code>dict</code> parameter).</p>
 <p>Untyped (or <code>Any</code>) parameters pass through unconverted; explicitly
 typed parameters convert strictly and produce a structured error on
 failure.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>ctx</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ConversionContext(param_name, expected_type, raw_value, payload_value=None, route_name='', resolved_type=None, type_args=(), registry=None)
+
+  
+      dataclass
+   (drafter.data.converter.ConversionContext)" href="../../../data/converter/#drafter.data.converter.ConversionContext">ConversionContext</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The conversion to perform.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>keep_missing</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>How to report a value that is absent (see
+<code>MISSING_VALUE_ERROR_CODE</code>) when the annotation does not
+allow None. By default the type's own empty value is
+returned as a success when there is one. The binder
+passes True to get the missing-value failure itself, so
+it can use the parameter's default first.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ConversionResult(ok, value=None, error_code='', message='', hint='', has_empty_value=False)
+
+  
+      dataclass
+   (drafter.data.converter.ConversionResult)" href="../../../data/converter/#drafter.data.converter.ConversionResult">ConversionResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The outcome of the conversion.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     </div>

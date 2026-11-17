@@ -11360,6 +11360,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14223,7 +14279,7 @@ makes it far less alarming when it happens by accident.</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="make-a-change-1-d3ccb9fbca99">
-  <iframe src="../../drafter-demos/make-a-change-1-d3ccb9fbca99/index.html" title="Drafter Demo make-a-change-1-d3ccb9fbca99" name="make-a-change-1-d3ccb9fbca99" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
+  <iframe src="../../drafter-demos/make-a-change-1-d3ccb9fbca99/index.html" title="Drafter Demo make-a-change-1-d3ccb9fbca99" name="make-a-change-1-d3ccb9fbca99" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
 </div>
 
 <p>Run the program once, and leave it running. On your computer, the loop
@@ -14280,7 +14336,7 @@ new route and a new <code>Button</code> pointing at it:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="make-a-change-2-e7ea8de13247">
-  <iframe src="../../drafter-demos/make-a-change-2-e7ea8de13247/index.html" title="Drafter Demo make-a-change-2-e7ea8de13247" name="make-a-change-2-e7ea8de13247" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
+  <iframe src="../../drafter-demos/make-a-change-2-e7ea8de13247/index.html" title="Drafter Demo make-a-change-2-e7ea8de13247" name="make-a-change-2-e7ea8de13247" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
 </div>
 
 <p><strong>Predict first</strong>: what happens if you add the <code>Button("+10", "add_ten")</code>
@@ -14292,19 +14348,18 @@ about to find out.</p>
 </code></pre></div>
 <p>Save. When the page tries to display, Drafter stops it and shows an
 error page that begins like this:</p>
-<div class="highlight"><pre><span></span><code>Unusable Value
+<div class="highlight"><pre><span></span><code>Button Points to a Missing Page
 
-The link labeled &#39;+10&#39; tries to go to a page named `ad_ten`, but your site has no route with that name.
+The button labeled &#39;+10&#39; tries to go to a page named `ad_ten`, but your site has no route with that name.
 
 payload.verification_failed: Payload verification failed for the page &#39;index&#39;: While verifying the Page() object returned from index, an error was encountered:
-Link `+10` points to non-existent page `ad_ten`.
+Button `+10` points to non-existent page `ad_ten`.
 </code></pre></div>
-<p>Read it slowly. The large title at the top is a general category, and
-the sentence under it says what happened in plain words: the <code>+10</code>
+<p>Read it slowly. The large title at the top names the kind of problem,
+and the sentence under it says what happened in plain words: the <code>+10</code>
 button points to a page called <code>ad_ten</code>, and no route with that name
-exists. The error calls the button a link because buttons and links are
-checked the same way. Below that sentence is the technical message, and
-below that is a list titled "What To Try Next".</p>
+exists. Below that sentence is the technical message, and below that
+is a list titled "What To Try Next".</p>
 <p>Drafter checks every link and button on a page before showing it, so a
 broken app tells you what went wrong instead of showing a blank screen or
 a dead button.</p>
@@ -14325,8 +14380,10 @@ error page, or search the docs for the exact text of the message.</p>
   Fix the line the box names and save again.</li>
 <li><strong>The site still shows an old version</strong>: stop the program and run it
   again, and use the browser tab that the new run opens. A fresh run
-  always reflects the current code, but a tab left open from an
-  earlier run keeps showing the old code.</li>
+  always reflects the current code. A tab left open from an earlier
+  run reloads by itself once the new run is going, unless it has
+  waited more than two minutes and shows a box titled
+  "Disconnected". Reload a tab that shows that box.</li>
 <li><strong>You cannot find the broken spot</strong>: the last line of the error message
   names what is wrong (here, the button label and the missing page name).
   Search your file for that name; do not start reading from the top.</li>

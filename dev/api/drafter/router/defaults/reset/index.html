@@ -11234,6 +11234,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../helpers/urls/" class="md-nav__link">
         
   
@@ -13736,7 +13792,7 @@
 
 
 <h2 id="drafter.router.defaults.reset.default_reset" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">default_reset</span><span class="p">(</span><span class="n">state</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">default_reset</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">_server</span><span class="p">)</span></code>
 
 </h2>
 
@@ -13744,6 +13800,8 @@
     <div class="doc doc-contents ">
 
         <p>Default reset route handler.</p>
+<p>Resets the state of the server that is handling this request, which
+is not always the main server: a page can hold several Drafter sites.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -13766,6 +13824,26 @@
             <td>
               <div class="doc-md-description">
                 <p>Current application state.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>_server</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ClientServer(custom_name)
+
+  
+      dataclass
+   (drafter.client_server.client_server.ClientServer)" href="../../../client_server/client_server/#drafter.client_server.client_server.ClientServer">ClientServer</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The server handling the request (injected by Drafter).</p>
               </div>
             </td>
             <td>

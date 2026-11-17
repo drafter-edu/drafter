@@ -11342,6 +11342,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14181,14 +14237,23 @@ appointment or a deadline; when you only need one half, use
 </tbody>
 </table>
 <p>Like every component, <code>DateTimeInput</code> also accepts
-<a href="../../../keyword-attributes/">styling and attribute keywords</a>. It
-recognizes no HTML attributes beyond the ones every component shares,
-so <code>min</code>, <code>max</code>, <code>step</code>, <code>required</code>, and <code>disabled</code> do not work here,
-and the picker cannot be limited to a range of moments. Drafter turns
-a keyword it does not recognize into a CSS style, which the browser
-ignores, and it reports no error. Check the value inside the route
-instead. <a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
-explains the keyword rule.</p>
+<a href="../../../keyword-attributes/">styling and attribute keywords</a>. The
+HTML attributes it recognizes as keywords are <code>min</code>, <code>max</code>, <code>step</code>,
+<code>list</code>, <code>required</code>, <code>disabled</code>, <code>readonly</code>, and <code>autocomplete</code>.
+(<code>list</code> takes the <code>id</code> of an HTML <code>&lt;datalist&gt;</code>, not a Python list.)
+Drafter turns any other keyword it does not recognize into a CSS
+style;
+<a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
+explains that rule.</p>
+<p><code>min</code> and <code>max</code> limit the moments the picker offers. Write them in
+the same <code>"YYYY-MM-DDTHH:MM"</code> form as the default, as in
+<code>DateTimeInput("moment", min="2026-08-01T09:00")</code>. <code>step</code> is counted
+in seconds. <code>disabled=True</code> and <code>readonly=True</code> both block changes,
+and a disabled field's value is not sent to the route.</p>
+<p>These limits apply to the picker only. Drafter does not ask the
+browser to check the form when a button is clicked, so a moment typed
+outside the range, or an empty field marked <code>required=True</code>, still
+reaches the route. Check the value inside the route.</p>
 <h2 id="examples">Examples</h2>
 <p>The route's parameter is annotated as <code>datetime.datetime</code>, so
 Drafter converts the submitted text into a <code>datetime</code> object with
@@ -14224,7 +14289,7 @@ fields like <code>.month</code>, <code>.day</code>, and <code>.hour</code>:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;2026-08-01T10:00&quot;</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="datetimeinput-1-29bd3e1c6ab0">
-  <iframe src="../../../../drafter-demos/datetimeinput-1-29bd3e1c6ab0/index.html" title="Drafter Demo datetimeinput-1-29bd3e1c6ab0" name="datetimeinput-1-29bd3e1c6ab0" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
+  <iframe src="../../../../drafter-demos/datetimeinput-1-29bd3e1c6ab0/index.html" title="Drafter Demo datetimeinput-1-29bd3e1c6ab0" name="datetimeinput-1-29bd3e1c6ab0" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
 </div>
 
 <h2 id="notes">Notes</h2>
@@ -14232,9 +14297,13 @@ fields like <code>.month</code>, <code>.day</code>, and <code>.hour</code>:</p>
 <li>Annotate the receiving parameter as <code>datetime.datetime</code> to get a
   <code>datetime</code> object, or as <code>str</code> to get the raw
   <code>"YYYY-MM-DDTHH:MM"</code> text.</li>
-<li>With a <code>datetime</code> annotation, leaving the field empty submits the
-  current date and time. With a <code>str</code> annotation, an empty field
-  arrives as <code>""</code>.</li>
+<li>With a <code>datetime</code> annotation, leaving the field empty gives the
+  route the current date and time. To tell an empty field apart from
+  a chosen moment, annotate the parameter as <code>datetime | None</code>, and an
+  empty field gives <code>None</code>. A parameter with a default value receives
+  its default. With a <code>str</code> annotation, an empty field arrives as
+  <code>""</code>. <a href="../../../route/#blank-values">Blank values</a> has the full
+  rule.</li>
 <li>The <code>T</code> in the middle of the value is part of the standard
   format; <code>datetime.fromisoformat</code> and Drafter's conversion both
   expect it.</li>

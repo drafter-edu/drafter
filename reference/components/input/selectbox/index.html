@@ -11342,6 +11342,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14196,15 +14252,19 @@ visitor can pick several options, and the route receives a list.</p>
 </table>
 <p>Like every component, <code>SelectBox</code> also accepts
 <a href="../../../keyword-attributes/">styling and attribute keywords</a>. The
-HTML attributes it recognizes as keywords are <code>multiple</code>, <code>size</code>, and
-<code>required</code>. <code>multiple=True</code> lets the visitor choose several options,
-as the second example below shows, and <code>size=4</code> displays four options
-at once in a list instead of a dropdown. <code>required=True</code> adds the
-attribute, but a button still runs its route when nothing is chosen.</p>
-<p><code>disabled</code> is not on that list. Drafter turns a keyword it does not
-recognize into a CSS style, which the browser ignores, and it reports
-no error. <a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
-explains the keyword rule.</p>
+HTML attributes it recognizes as keywords are <code>multiple</code>, <code>size</code>,
+<code>required</code>, <code>disabled</code>, and <code>autocomplete</code>. <code>multiple=True</code> lets the
+visitor choose several options, as the second example below shows,
+and <code>size=4</code> displays four options at once in a list instead of a
+dropdown. <code>disabled=True</code> stops the visitor from changing the choice,
+and a disabled box's value is not sent to the route.
+<code>required=True</code> adds the attribute, but Drafter does not ask the
+browser to check the form when a button is clicked, so the route
+still runs when nothing is chosen.</p>
+<p>Drafter turns any other keyword it does not recognize into a CSS
+style;
+<a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
+explains that rule.</p>
 <h2 id="examples">Examples</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
@@ -14237,7 +14297,7 @@ explains the keyword rule.</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;aquarium&quot;</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="selectbox-1-5c8661d1bbc2">
-  <iframe src="../../../../drafter-demos/selectbox-1-5c8661d1bbc2/index.html" title="Drafter Demo selectbox-1-5c8661d1bbc2" name="selectbox-1-5c8661d1bbc2" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
+  <iframe src="../../../../drafter-demos/selectbox-1-5c8661d1bbc2/index.html" title="Drafter Demo selectbox-1-5c8661d1bbc2" name="selectbox-1-5c8661d1bbc2" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
 </div>
 
 <p>With <code>multiple=True</code>, the box becomes a list in which the visitor can
@@ -14276,7 +14336,7 @@ Annotate the receiving parameter as <code>list[str]</code>:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">([]))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="selectbox-2-df20d9d970cc">
-  <iframe src="../../../../drafter-demos/selectbox-2-df20d9d970cc/index.html" title="Drafter Demo selectbox-2-df20d9d970cc" name="selectbox-2-df20d9d970cc" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 320px;" ></iframe>
+  <iframe src="../../../../drafter-demos/selectbox-2-df20d9d970cc/index.html" title="Drafter Demo selectbox-2-df20d9d970cc" name="selectbox-2-df20d9d970cc" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 320px;" ></iframe>
 </div>
 
 <h2 id="notes">Notes</h2>

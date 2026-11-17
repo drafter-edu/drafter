@@ -11340,6 +11340,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13817,6 +13873,12 @@ browser's developer console (open it with <span class="keys"><kbd class="key-f12
 tab) shows a line that begins:</p>
 <div class="highlight"><pre><span></span><code>Failed to load resource: the server responded with a status of 404
 </code></pre></div>
+<p>If the deployed site still shows the debug panel, the panel lists a
+warning for each image that failed. The warning begins "The browser
+could not load one of the images on this site", and its Details name
+the image:</p>
+<div class="highlight"><pre><span></span><code>The image &#39;ada.png&#39; could not be loaded.
+</code></pre></div>
 <p>A missing file that your code reads with <code>open(...)</code> produces an
 error page with this title:</p>
 <div class="highlight"><pre><span></span><code>File Not Found
@@ -13872,9 +13934,10 @@ each file in your program, above the routes:</p>
 <span class="n">add_website_file</span><span class="p">(</span><span class="s2">&quot;images/cat.png&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>The build then copies each declared file into the site, in the same
-folder it has next to your program. The <code>--additional-paths</code> command
-line flag does the same job from outside the code, and it also
-accepts the name of a whole folder.</p>
+folder it has next to your program. To declare every file in a folder
+at once, name the folder, as in <code>add_website_file("images")</code>. The
+<code>--additional-paths</code> command line flag does the same job from outside
+the code.</p>
 <h2 id="confirm">Confirm</h2>
 <p>Reload the deployed site with a hard refresh (<span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-r">R</kbd></span>), and
 check from a second device if you can. The image appears, or the
@@ -13887,9 +13950,13 @@ through the pages that show images or open files.</p>
 <a href="../../../reference/site-config/#add_website_file"><code>add_website_file</code></a>
 also helps while you develop, whichever way you deploy. Drafter
 checks that each declared file exists as soon as the program starts.
-A misspelled or missing name stops the program with a message such
-as <code>add_website_file: file not found: 'adda.png'</code>, long before
-anyone visits the deployed site. Stylesheets and scripts added with
+A misspelled or missing name stops the program with a message in the
+terminal titled "Website File Not Found", which names the file and
+suggests files with similar names. A name whose
+capital letters differ from the file's, such as <code>ada.png</code> for
+<code>Ada.PNG</code>, stops the program with a message titled "Website File Name
+Has Different Capital Letters". Both happen on your own computer, long
+before anyone visits the deployed site. Stylesheets and scripts added with
 <code>add_website_css_file</code> and <code>add_website_js_file</code> are declared
 automatically.</p>
 <h2 id="understand">Understand</h2>

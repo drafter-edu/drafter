@@ -11234,6 +11234,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -11540,6 +11596,17 @@
     <span class="md-ellipsis">
       
         TOO_LONG_VALUE_THRESHOLD
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.history.utils.has_circular_reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        has_circular_reference
       
     </span>
   </a>
@@ -13738,6 +13805,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.history.utils.has_circular_reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        has_circular_reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.history.utils.is_generator" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13861,6 +13939,92 @@
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="drafter.history.utils.has_circular_reference" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">has_circular_reference</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check whether a value contains itself somewhere inside it.</p>
+<p>Follows the same containers that <code>safe_repr</code> writes out (dataclass
+fields, lists, tuples, sets, frozensets, and dictionary keys and
+values). A value that is merely used twice is not circular; only a
+value reachable from itself is.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>value</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The value to inspect, typically a state or a route argument.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True if following the value's contents leads back to a container
+that is still being followed, False otherwise.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">has_circular_reference</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>  <span class="c1"># False</span>
+<span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+<span class="n">has_circular_reference</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>  <span class="c1"># True</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 

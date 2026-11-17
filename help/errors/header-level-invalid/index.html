@@ -11340,6 +11340,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13809,13 +13865,11 @@
 <h1 id="header-level-must-be-1-6">Header level must be 1-6</h1>
 <h2 id="the-error">The error</h2>
 <p>The error page has this title:</p>
-<div class="highlight"><pre><span></span><code>Unusable Value
+<div class="highlight"><pre><span></span><code>Header Level Out of Range
 </code></pre></div>
-<p>Drafter uses the title "Unusable Value" for several different
-problems, so the sentence under the title is what identifies this
-one:</p>
-<div class="highlight"><pre><span></span><code>Headers only come in six sizes, so the level argument must be a number
-from 1 (biggest) to 6 (smallest).
+<p>The sentence under the title gives the range that is allowed:</p>
+<div class="highlight"><pre><span></span><code>Headers only come in six sizes, so the level argument must be a whole
+number from 1 (biggest) to 6 (smallest).
 </code></pre></div>
 <p>The technical message below it shows the level your code gave:</p>
 <div class="highlight"><pre><span></span><code>request.route_execution_failed: Error while processing request for URL &#39;index&#39;:
@@ -13835,10 +13889,9 @@ computation is the real suspect.</p>
 <li><strong>A level of 0 or 7+</strong>: often from arithmetic, like
   <code>level + 1</code> applied one time too many in nested sections.</li>
 <li><strong>The arguments swapped</strong>: <code>Header(2, "Title")</code> puts the text
-  where the level belongs. This mistake produces a different error
-  page, titled "Type Mismatch", whose technical message ends
-  <code>'&lt;' not supported between instances of 'str' and 'int'</code>. The text
-  comes first and the level second.</li>
+  where the level belongs, and the message ends <code>not 'Title'</code>. The
+  text comes first and the level second. A level that is not a whole
+  number, such as <code>2.5</code> or <code>"2"</code>, produces the same error.</li>
 <li><strong>Expecting bigger numbers to mean bigger text</strong>: the scale
   runs the other way; 1 is the largest.</li>
 </ul>

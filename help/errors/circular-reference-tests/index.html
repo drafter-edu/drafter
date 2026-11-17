@@ -11340,6 +11340,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13809,17 +13865,17 @@
 <h1 id="circular-reference-appears-in-generated-tests">Circular Reference appears in generated tests</h1>
 <h2 id="the-error">The error</h2>
 <p>This problem has no error page and no title. The words
-<code>Circular Reference</code> appear inside a recorded route call or a
-generated test, in the place where a value should be. In the text of
-a <a href="../../../add/freeze-pages/">frozen test</a> the marker looks like
-this:</p>
+<code>Circular Reference</code> appear inside a route call recorded on the
+History tab, in the place where a value should be:</p>
 <div class="highlight"><pre><span></span><code>Pet(name=&#39;Ada&#39;, owner=&lt;strong&gt;Circular Reference&lt;/strong&gt;)
 </code></pre></div>
-<p>Python's own marker for the same situation, three dots, can appear
-in the same test, as in <code>Pet(name='Ada', owner=...)</code>. A test that
-contains the first marker is not valid Python, and a test that
-contains the three dots compares against the wrong value, so neither
-one passes.</p>
+<p>For that visit, Drafter does not write a
+<a href="../../../add/freeze-pages/">frozen test</a>. The History tab and the
+copied or downloaded tests have a comment in its place:</p>
+<div class="highlight"><pre><span></span><code># Not frozen: add(...) has a state with a circular reference, which cannot be written as a test.
+</code></pre></div>
+<p>The comment is valid Python, so the tests around it still run when
+you paste them. The visit it names has no test.</p>
 <h2 id="what-it-means">What it means</h2>
 <p>Drafter writes out your state as Python code you can paste into
 tests. That only works for values that can be written down. A

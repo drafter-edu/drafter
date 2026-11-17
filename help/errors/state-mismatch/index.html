@@ -6284,10 +6284,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#a-warning-in-place-of-the-error-page" class="md-nav__link">
+  <a href="#a-warning-about-the-states-type" class="md-nav__link">
     <span class="md-ellipsis">
       
-        A warning in place of the error page
+        A warning about the state's type
       
     </span>
   </a>
@@ -11357,6 +11357,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13764,10 +13820,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#a-warning-in-place-of-the-error-page" class="md-nav__link">
+  <a href="#a-warning-about-the-states-type" class="md-nav__link">
     <span class="md-ellipsis">
       
-        A warning in place of the error page
+        A warning about the state's type
       
     </span>
   </a>
@@ -13885,7 +13941,7 @@ the technical message shows the value Drafter found there.</p>
   its state is <code>None</code>. In an app that has state, every route returns
   <code>Page(state, [...])</code> with the state first.</li>
 <li><strong>One field in place of the whole state</strong>: the message names the
-  field's type, as in "is a int". <code>Page(state.score, [...])</code> passes a
+  field's type, as in "is an int". <code>Page(state.score, [...])</code> passes a
   number where the state belongs.</li>
 <li><strong>The name <code>state</code> was reassigned</strong>: a line such as
   <code>state = state.score + 1</code> replaces the state with a different
@@ -13896,21 +13952,29 @@ the technical message shows the value Drafter found there.</p>
   with nothing in the parentheses, and a route then returns a <code>Page</code>
   that has a state. Give the starting state to <code>start_server</code>, as in
   <code>start_server(State(0))</code>.</li>
+<li><strong><code>True</code> or <code>False</code> where a number belongs</strong>: the message says the
+  state "is a bool, but the previous state was an int". Python counts
+  <code>True</code> and <code>False</code> as kinds of whole number, but Drafter compares
+  the exact type, so an app whose state is a number cannot return
+  <code>Page(state &gt; 0, [...])</code>.</li>
+<li><strong>A class that inherits from your state class</strong>: the message names
+  the two classes. The exact type must match, so a state built from a
+  subclass of <code>State</code> does not count as a <code>State</code>.</li>
 </ul>
-<h3 id="a-warning-in-place-of-the-error-page">A warning in place of the error page</h3>
-<p>In one situation Drafter accepts the page and lists a warning in the
-debug panel. This happens when the new state's type is a more
-specific kind of the old type. The most likely case is an app whose
-state is a whole number, where a route returns <code>True</code> or <code>False</code> as
-the state, because Python counts <code>True</code> and <code>False</code> as kinds of whole
-number. A state built from a class that inherits from your <code>State</code>
-class has the same effect. The Current tab of the debug panel then
-shows this line under "Errors &amp; Warnings", and the line stays there
-as you move to other pages:</p>
-<div class="highlight"><pre><span></span><code>One of your routes changed the site state from int to bool; the state should
-keep the same type for the whole site.
+<h3 id="a-warning-about-the-states-type">A warning about the state's type</h3>
+<p>A route that returns a state of a different type always gets the
+error page above. The debug panel can also list a warning about the
+state's type when the state was replaced some other way, for example
+by loading a saved state that holds a different type of value. The
+Current tab of the debug panel then shows a line like this one under
+"Errors &amp; Warnings", and the line stays there as you move to other
+pages:</p>
+<div class="highlight"><pre><span></span><code>The site state changed from int to State; the state should keep the
+same type for the whole site.
 </code></pre></div>
-<p>The causes and the fix are the same as for the error page.</p>
+<p>Reload the browser tab to start again from the state given to
+<code>start_server</code>, and save a new copy of the state from the current
+version of your program.</p>
 <h2 id="fix">Fix</h2>
 <p>Pass the state to the returned <code>Page</code>. You can change its fields,
 but it should remain the same object and type:</p>

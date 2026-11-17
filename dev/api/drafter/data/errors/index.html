@@ -10755,6 +10755,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#drafter.data.errors.with_article" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        with_article
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -11562,6 +11573,62 @@
     
   
     imports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
   
 
     
@@ -14244,6 +14311,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#drafter.data.errors.with_article" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        with_article
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -15450,7 +15528,7 @@ than masking the original error.</p>
 
 
 <h2 id="drafter.data.errors.format_student_facing_error" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">format_student_facing_error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">format_student_facing_error</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></code>
 
 </h2>
 
@@ -15490,6 +15568,24 @@ technical message as a final "Details" line.</p>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>location</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Where in the student's program the error came from,
+like "main.py, line 12". Shown under the title when given,
+since no traceback is printed to say it.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;&#39;</code>
             </td>
           </tr>
       </tbody>
@@ -15624,6 +15720,87 @@ and dict values.</p>
       </tbody>
     </table>
 
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="drafter.data.errors.with_article" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">with_article</span><span class="p">(</span><span class="n">noun</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Put "a" or "an" in front of a noun, chosen by its first letter.</p>
+<p>Error messages often name a type ("returned an int", "is a list"), and
+the type's name is only known when the message is built.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>noun</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The word to introduce, such as a type name.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The noun with its article, like "an int" or "a str".</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="n">with_article</span><span class="p">(</span><span class="s2">&quot;int&quot;</span><span class="p">)</span>  <span class="c1"># &quot;an int&quot;</span>
+<span class="n">with_article</span><span class="p">(</span><span class="s2">&quot;Button&quot;</span><span class="p">)</span>  <span class="c1"># &quot;a Button&quot;</span>
+</code></pre></div>
+</details>
 
     </div>
 

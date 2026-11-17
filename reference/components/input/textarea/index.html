@@ -11342,6 +11342,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14182,13 +14238,17 @@ visitor room to write.</p>
 <a href="../../../keyword-attributes/">styling and attribute keywords</a>. The
 HTML attributes it recognizes as keywords are <code>rows</code> and <code>cols</code>,
 which control its size, <code>placeholder</code>, which shows a hint, and
-<code>disabled</code>, <code>readonly</code>, and <code>required</code>.</p>
-<p><code>maxlength</code> is not on that list. Drafter turns a keyword it does not
-recognize into a CSS style, which the browser ignores, and it reports
-no error. <code>required=True</code> adds the attribute, but a button still runs
-its route when the area is empty, so check for empty text inside the
-route. <a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
-explains the keyword rule.</p>
+<code>maxlength</code>, <code>minlength</code>, <code>required</code>, <code>disabled</code>, <code>readonly</code>,
+<code>autocomplete</code>, and <code>autofocus</code>. Drafter turns any other keyword it
+does not recognize into a CSS style;
+<a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
+explains that rule.</p>
+<p><code>maxlength=200</code> stops typing after 200 characters. <code>disabled=True</code>
+and <code>readonly=True</code> both block typing, and a disabled area's text is
+not sent to the route. <code>required=True</code> and <code>minlength</code> add their
+attributes, but Drafter does not ask the browser to check the form
+when a button is clicked, so the route still runs when the area is
+empty or the text is too short. Check the text inside the route.</p>
 <h2 id="examples">Examples</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
@@ -14221,7 +14281,7 @@ explains the keyword rule.</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;Day 1: Domino the cat refused to be observed.&quot;</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="textarea-1-e71ad2b58a7f">
-  <iframe src="../../../../drafter-demos/textarea-1-e71ad2b58a7f/index.html" title="Drafter Demo textarea-1-e71ad2b58a7f" name="textarea-1-e71ad2b58a7f" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
+  <iframe src="../../../../drafter-demos/textarea-1-e71ad2b58a7f/index.html" title="Drafter Demo textarea-1-e71ad2b58a7f" name="textarea-1-e71ad2b58a7f" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
 </div>
 
 <h2 id="notes">Notes</h2>

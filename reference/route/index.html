@@ -5187,6 +5187,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Parameter conversion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#values-that-match-no-parameter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Values that match no parameter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#blank-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blank values
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -11349,6 +11377,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13752,6 +13836,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Parameter conversion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#values-that-match-no-parameter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Values that match no parameter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#blank-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blank values
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -14220,7 +14332,7 @@ front page shown when your app starts, and every app must have one.</p>
 <span class="n">start_server</span><span class="p">()</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="route-1-7f86bdd416f3">
-  <iframe src="../../drafter-demos/route-1-7f86bdd416f3/index.html" title="Drafter Demo route-1-7f86bdd416f3" name="route-1-7f86bdd416f3" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 220px;" ></iframe>
+  <iframe src="../../drafter-demos/route-1-7f86bdd416f3/index.html" title="Drafter Demo route-1-7f86bdd416f3" name="route-1-7f86bdd416f3" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 220px;" ></iframe>
 </div>
 
 <h2 id="how-parameters-are-filled">How parameters are filled</h2>
@@ -14275,7 +14387,7 @@ annotation that Drafter converts.</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;none yet&quot;</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="route-2-5e24649e9ca2">
-  <iframe src="../../drafter-demos/route-2-5e24649e9ca2/index.html" title="Drafter Demo route-2-5e24649e9ca2" name="route-2-5e24649e9ca2" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 240px;" ></iframe>
+  <iframe src="../../drafter-demos/route-2-5e24649e9ca2/index.html" title="Drafter Demo route-2-5e24649e9ca2" name="route-2-5e24649e9ca2" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 240px;" ></iframe>
 </div>
 
 <h2 id="parameter-conversion">Parameter conversion</h2>
@@ -14306,12 +14418,12 @@ message names the parameter and the value that was sent.</p>
 <tr>
 <td><code>int</code></td>
 <td>A whole number.</td>
-<td>Spaces around the number are ignored, and <code>5.0</code> is accepted as <code>5</code>. Text such as <code>2.5</code>, <code>twenty</code>, or <code>1,000</code> is an error, and so is an empty box.</td>
+<td>Spaces around the number are ignored, and <code>5.0</code> is accepted as <code>5</code>. Text such as <code>2.5</code>, <code>twenty</code>, or <code>1,000</code> is an error. For an empty box, see <a href="#blank-values">Blank values</a>.</td>
 </tr>
 <tr>
 <td><code>float</code></td>
 <td>A decimal number.</td>
-<td><code>3</code> becomes <code>3.0</code>. Text that is not a number is an error, and so is an empty box.</td>
+<td><code>3</code> becomes <code>3.0</code>. Text that is not a number is an error. For an empty box, see <a href="#blank-values">Blank values</a>.</td>
 </tr>
 <tr>
 <td><code>bool</code></td>
@@ -14340,13 +14452,13 @@ message names the parameter and the value that was sent.</p>
 </tr>
 <tr>
 <td><code>int | None</code>, <code>Optional[int]</code></td>
-<td>The same result as <code>int</code>.</td>
-<td>Adding <code>None</code> does not make the parameter optional, and an empty box is still an error. The one exception is listed with <code>Picture</code> below.</td>
+<td>The same result as <code>int</code>, or <code>None</code> when the box was left empty.</td>
+<td><code>None</code> arrives only when there is no value at all, as <a href="#blank-values">Blank values</a> explains. Text that is not a number is still an error.</td>
 </tr>
 <tr>
 <td>a default, as in <code>times: int = 1</code></td>
-<td>The default, when no value with that name was sent.</td>
-<td>A value that was sent is still converted by the annotation.</td>
+<td>The default, when no value with that name was sent or the box was left empty.</td>
+<td>A value that was sent is still converted by the annotation. <a href="#blank-values">Blank values</a> lists which empty fields use the default.</td>
 </tr>
 <tr>
 <td><code>**kwargs</code></td>
@@ -14356,7 +14468,7 @@ message names the parameter and the value that was sent.</p>
 <tr>
 <td><code>date</code>, <code>time</code>, <code>datetime</code></td>
 <td>A value from Python's <code>datetime</code> module.</td>
-<td>The text must be in ISO form, such as <code>2026-11-14</code>, <code>13:30</code>, or <code>2026-11-14T13:30</code>, which is the form that date and time inputs send. Empty text gives the current date or time. Other forms, such as <code>11/14/2026</code>, are an error.</td>
+<td>The text must be in ISO form, such as <code>2026-11-14</code>, <code>13:30</code>, or <code>2026-11-14T13:30</code>, which is the form that date and time inputs send. Other forms, such as <code>11/14/2026</code>, are an error. An empty field gives the current date or time, unless the parameter allows <code>None</code> or has a default. See <a href="#blank-values">Blank values</a>.</td>
 </tr>
 <tr>
 <td>a dataclass</td>
@@ -14376,12 +14488,12 @@ message names the parameter and the value that was sent.</p>
 <tr>
 <td><code>Picture</code></td>
 <td>A <a href="../data-types/picture/">Picture</a> made from an uploaded image.</td>
-<td>A file that is not an image is an error. With <code>Picture | None</code>, the route receives <code>None</code> when no file was chosen.</td>
+<td>A file that is not an image is an error, and so is no file at all. With <code>Picture | None</code>, the route receives <code>None</code> when no file was chosen.</td>
 </tr>
 <tr>
 <td><code>str</code>, <code>bytes</code>, <code>DrafterTextFile</code>, <code>DrafterBinaryFile</code> on a <code>FileUpload</code></td>
 <td>The file's text, its raw bytes, or its contents together with the filename.</td>
-<td><a href="../data-types/file-types/">File types</a> describes each one. For <code>str</code>, a file that is not UTF-8 text is an error.</td>
+<td><a href="../data-types/file-types/">File types</a> describes each one. For <code>str</code>, a file that is not UTF-8 text is an error. <a href="#blank-values">Blank values</a> covers a form sent with no file chosen.</td>
 </tr>
 <tr>
 <td><code>Photo</code>, <code>Location</code>, <code>Recording</code>, <code>AudioLevel</code></td>
@@ -14390,17 +14502,103 @@ message names the parameter and the value that was sent.</p>
 </tr>
 </tbody>
 </table>
-<p>Two rules explain most surprises:</p>
+<h3 id="values-that-match-no-parameter">Values that match no parameter</h3>
+<p>A value that matches no parameter is not an error, and the route runs
+without it. Every button and link sends all of the form fields on its
+page, so a route that takes none of them is normal. The target of a
+Cancel button is the usual example, and it produces no message.</p>
+<p>The debug panel lists a warning for a leftover value in two cases:</p>
 <ul>
-<li><strong>An empty text box still sends a value.</strong> The value is empty text,
-  so the parameter is not missing, and its default is not used. For a
-  number field that may be left empty, annotate the parameter as <code>str</code>
-  and convert the text yourself after checking for <code>""</code>.</li>
-<li><strong>A value that matches no parameter is not an error.</strong> The route
-  still runs, and the debug panel shows a warning that names the unused
-  value. A route with <code>**kwargs</code> receives those values without a
-  warning.</li>
+<li><strong>The name is a near miss.</strong> A form field or event value is named
+  almost the same as a parameter that received nothing, as with
+  <code>TextBox("petname")</code> and a parameter named <code>pet_name</code>. The
+  warning's Details ask whether you meant that parameter.</li>
+<li><strong>The value came from an <code>Argument</code>.</strong> You addressed an
+  <a href="../components/actions/argument/">Argument</a> to this one route, so a
+  name the route does not have is reported every time.</li>
 </ul>
+<p>A route with <code>**kwargs</code> receives every leftover value and never
+produces this warning.
+<a href="../../help/errors/missing-parameter/#a-related-warning-a-form-field-with-no-matching-parameter">A form field with no matching parameter</a>
+shows the warning and how to fix it.</p>
+<h3 id="blank-values">Blank values</h3>
+<p>A visitor can press a button without filling in every field. For the
+fields below, Drafter treats what arrives as no value at all:</p>
+<ul>
+<li>a text box left empty, when the parameter is annotated as <code>int</code>,
+  <code>float</code>, <code>date</code>, <code>time</code>, <code>datetime</code>, or a <code>Literal</code></li>
+<li>a <code>DateInput</code>, <code>TimeInput</code>, or <code>DateTimeInput</code> left empty, when the
+  parameter is annotated as <code>date</code>, <code>time</code>, or <code>datetime</code></li>
+<li>a <code>FileUpload</code> with no file chosen</li>
+<li>a <code>Camera</code> that has not taken a photo, when the parameter is
+  annotated as <code>Picture</code></li>
+</ul>
+<p>When there is no value, the parameter receives the first of these
+that applies:</p>
+<ol>
+<li><strong><code>None</code></strong>, when the annotation allows it, as in <code>age: int | None</code>
+   or <code>day: Optional[date]</code>.</li>
+<li><strong>The parameter's default</strong>, when it has one. With <code>age: int = 7</code>,
+   an empty box gives <code>7</code>.</li>
+<li><strong>The type's own empty value</strong>, when the type has one. The table
+   below lists them.</li>
+<li><strong>An error page</strong> that says no value was provided, for a type that
+   has no empty value.</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>With no <code>None</code> and no default, an empty field gives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date</code>, <code>time</code>, <code>datetime</code></td>
+<td>The current date, the current time, or both.</td>
+</tr>
+<tr>
+<td><code>str</code> on a <code>FileUpload</code></td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>bytes</code> on a <code>FileUpload</code></td>
+<td><code>b""</code></td>
+</tr>
+<tr>
+<td><code>DrafterTextFile</code>, <code>DrafterBinaryFile</code></td>
+<td>A file whose <code>filename</code> is empty and whose <code>size</code> is 0.</td>
+</tr>
+<tr>
+<td><code>int</code>, <code>float</code>, a <code>Literal</code>, <code>Picture</code></td>
+<td>An error page.</td>
+</tr>
+</tbody>
+</table>
+<p>The error page is titled <code>Problem With the Route's Arguments</code>, and its
+message ends with the way to allow an empty field:</p>
+<div class="highlight"><pre><span></span><code>Parameter &#39;age&#39; expects int but no value was provided by the form field
+&#39;age&#39;. Enter a number. To let this be left blank, give the parameter a
+default value or make it optional (int | None).
+</code></pre></div>
+<p>So a number field that may be left empty needs one of two things. Give
+the parameter a default, as in <code>age: int = 0</code>, or annotate it as
+<code>age: int | None</code> and check for <code>None</code> inside the route.</p>
+<p>Three cases are not blank values:</p>
+<ul>
+<li><strong>Empty text for a <code>str</code> parameter is a value.</strong> An empty text box
+  gives <code>""</code>, and it gives <code>""</code> for <code>name: str | None</code> and for
+  <code>name: str = "World"</code> as well. The default of a <code>str</code> parameter is
+  used only when no input with that name is on the page.</li>
+<li><strong>An unchecked <code>CheckBox</code> is a value.</strong> A <code>bool</code> parameter receives
+  <code>False</code>.</li>
+<li><strong>A file that was chosen but has nothing in it is a real file.</strong> A
+  <code>str</code> parameter receives <code>""</code> for it, even when the annotation is
+  <code>str | None</code>.</li>
+</ul>
+<p>An empty item inside a list, such as one empty box among several that
+fill a <code>list[int]</code>, is an error for that item. It does not turn the
+whole parameter into <code>None</code> or its default.</p>
 <h2 id="built-in-routes">Built-in routes</h2>
 <p>Drafter adds a few routes of its own to every app. Their names start
 with <code>--</code>, so they are separate from your routes, and you can still
@@ -14460,12 +14658,27 @@ starts the site and runs that route in place of <code>index</code>.</p>
   still names the last route.</li>
 <li><strong>Only the route name is used.</strong> Other values in the address are not
   passed to the route, so <code>?route=greet&amp;who=Ada</code> runs <code>greet</code> without a
-  value for <code>who</code>. An address like this is dependable only for a route
-  that needs nothing but the state. A route with a required form
-  parameter shows the <code>Problem With the Route's Arguments</code> error page.</li>
+  value for <code>who</code>. A route can be opened this way only when it needs
+  nothing but the state, which means every parameter after the state
+  has a default value.</li>
 <li><strong>The name must match a route.</strong> Any other name shows the
   <code>Page Not Found</code> error page.</li>
 </ul>
+<p>When the address names a route with a required parameter after the
+state, Drafter does not run that route. It opens the first page with
+a fresh state and takes <code>route</code> out of the address. This is what
+happens when a visitor reloads the tab on a page that a form led to,
+such as <code>?route=save</code>. The debug panel lists one warning, which
+begins "The address of this page named a route that needs values from
+a form or a button". Expanding the warning's Details shows the route
+and the parameters that had no value:</p>
+<div class="highlight"><pre><span></span><code>The page&#39;s address asked for the route &#39;save&#39;, which needs values an
+address does not carry (&#39;name&#39;, &#39;age&#39;). The first page was opened instead.
+</code></pre></div>
+<p>Nothing in the program needs fixing when this warning appears. To
+make a page that can be reloaded or opened from its address, give
+every parameter after the state a default value, as in
+<code>def greet(state: State, who: str = "friend")</code>.</p>
 <p>On the development server, a shorter form also works. The address
 <code>http://localhost:8000/second</code> is redirected to
 <code>http://localhost:8000/?route=second</code>.</p>

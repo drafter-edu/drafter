@@ -11353,6 +11353,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14240,13 +14296,14 @@ be free to pick any color; when only a few colors are allowed, a
 </tbody>
 </table>
 <p>Like every component, <code>ColorPicker</code> also accepts
-<a href="../../../keyword-attributes/">styling and attribute keywords</a>. It
-recognizes no HTML attributes beyond the ones every component shares,
-so <code>disabled=True</code> does not work here. Drafter turns a keyword it
-does not recognize into a CSS style, which the browser ignores, and
-it reports no error.
+<a href="../../../keyword-attributes/">styling and attribute keywords</a>. The
+one HTML attribute it recognizes as a keyword is <code>disabled</code>.
+<code>disabled=True</code> stops the visitor from changing the color. With
+<code>alpha=True</code>, it locks both the swatch and the opacity slider.
+Drafter turns any other keyword it does not recognize into a CSS
+style;
 <a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
-explains the keyword rule.</p>
+explains that rule.</p>
 <h2 id="examples">Examples</h2>
 <p>The chosen color is stored in state and used to style a piece of
 text:</p>
@@ -14281,7 +14338,7 @@ text:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;royalblue&quot;</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="colorpicker-1-dad484254654">
-  <iframe src="../../../../drafter-demos/colorpicker-1-dad484254654/index.html" title="Drafter Demo colorpicker-1-dad484254654" name="colorpicker-1-dad484254654" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
+  <iframe src="../../../../drafter-demos/colorpicker-1-dad484254654/index.html" title="Drafter Demo colorpicker-1-dad484254654" name="colorpicker-1-dad484254654" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
 </div>
 
 <p>The annotation on the route's parameter decides what form the color
@@ -14319,7 +14376,7 @@ amounts as numbers you can calculate with:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">136</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="colorpicker-2-821efb73badd">
-  <iframe src="../../../../drafter-demos/colorpicker-2-821efb73badd/index.html" title="Drafter Demo colorpicker-2-821efb73badd" name="colorpicker-2-821efb73badd" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
+  <iframe src="../../../../drafter-demos/colorpicker-2-821efb73badd/index.html" title="Drafter Demo colorpicker-2-821efb73badd" name="colorpicker-2-821efb73badd" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
 </div>
 
 <p>With <code>alpha=True</code>, a slider appears beside the swatch for how
@@ -14357,7 +14414,7 @@ amount too:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">Color</span><span class="p">(</span><span class="mi">51</span><span class="p">,</span> <span class="mi">102</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">128</span><span class="p">)))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="colorpicker-3-d9b6e996bf3b">
-  <iframe src="../../../../drafter-demos/colorpicker-3-d9b6e996bf3b/index.html" title="Drafter Demo colorpicker-3-d9b6e996bf3b" name="colorpicker-3-d9b6e996bf3b" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 320px;" ></iframe>
+  <iframe src="../../../../drafter-demos/colorpicker-3-d9b6e996bf3b/index.html" title="Drafter Demo colorpicker-3-d9b6e996bf3b" name="colorpicker-3-d9b6e996bf3b" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 320px;" ></iframe>
 </div>
 
 <h2 id="what-the-route-receives">What the route receives</h2>

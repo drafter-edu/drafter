@@ -11234,6 +11234,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -16341,9 +16397,12 @@ Difference reporting the mismatch.</p>
 
         <p>Collect the direct child content of a component.</p>
 <p>Follows the component's declared content arguments (the same fields
-its renderer uses for child content), flattening var-args arguments
-and skipping None values. Unlike <code>Component.get_children</code>, this does
-not require a rendering context.</p>
+its renderer uses for child content), skipping None values. A
+var-args argument contributes each of its values, and so does an
+argument that holds a list (the items of a <code>BulletedList</code> or a
+<code>NumberedList</code>), so those items are the children, not one list
+holding them. Unlike <code>Component.get_children</code>,
+this does not require a rendering context.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>

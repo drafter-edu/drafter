@@ -11342,6 +11342,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14186,13 +14242,16 @@ plain <a href="../checkbox/">CheckBox</a>.</p>
 </tbody>
 </table>
 <p>Like every component, <code>RelatedCheckBox</code> also accepts
-<a href="../../../keyword-attributes/">styling and attribute keywords</a>. It
-recognizes no HTML attributes beyond the ones every component shares,
-so <code>disabled=True</code> and <code>required=True</code> do not work here. Drafter turns
-a keyword it does not recognize into a CSS style, which the browser
-ignores, and it reports no error.
+<a href="../../../keyword-attributes/">styling and attribute keywords</a>. The
+HTML attributes it recognizes as keywords are <code>required</code> and
+<code>disabled</code>. <code>disabled=True</code> stops the visitor from changing that one
+box, and a disabled box adds nothing to the list, even when it is
+shown checked. <code>required=True</code> adds the attribute, but Drafter does
+not ask the browser to check the form when a button is clicked, so
+the route still runs when the box is unchecked. Drafter turns any
+other keyword it does not recognize into a CSS style;
 <a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
-explains the keyword rule.</p>
+explains that rule.</p>
 <h2 id="examples">Examples</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
@@ -14228,7 +14287,7 @@ explains the keyword rule.</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">([]))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="relatedcheckbox-1-bda67dbcddbc">
-  <iframe src="../../../../drafter-demos/relatedcheckbox-1-bda67dbcddbc/index.html" title="Drafter Demo relatedcheckbox-1-bda67dbcddbc" name="relatedcheckbox-1-bda67dbcddbc" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
+  <iframe src="../../../../drafter-demos/relatedcheckbox-1-bda67dbcddbc/index.html" title="Drafter Demo relatedcheckbox-1-bda67dbcddbc" name="relatedcheckbox-1-bda67dbcddbc" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
 </div>
 
 <h2 id="notes">Notes</h2>

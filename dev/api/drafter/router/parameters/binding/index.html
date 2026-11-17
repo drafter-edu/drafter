@@ -11234,6 +11234,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../helpers/urls/" class="md-nav__link">
         
   
@@ -14275,12 +14331,19 @@ PayloadValue, tuple of warning diagnostics for collisions).</p>
    <code>missing_required_parameter</code> error diagnostics, with a
    did-you-mean hint against the leftover payload names.</li>
 <li>Leftover payload keys flow into **kwargs when the function
-   accepts var-keyword arguments; otherwise each produces an
-   <code>unused_request_parameter</code> warning (framework metadata is
-   silently ignored).</li>
+   accepts var-keyword arguments; otherwise they are dropped. A
+   dropped component argument (<code>Argument(...)</code>) always produces an
+   <code>unused_request_parameter</code> warning. A dropped form field or
+   event value produces one only when its name is close to a
+   parameter that received nothing, since a button sends every
+   field on its page whether or not the route wants it. Framework
+   metadata is silently ignored.</li>
 <li>Bound payload-derived values are converted through the converter
    registry; failures produce <code>conversion_failed</code> error diagnostics.
-   Injected values (state, dependencies) pass through untouched.</li>
+   Injected values (state, dependencies) pass through untouched.
+   A value that was left blank follows one rule: None when the
+   annotation allows it, otherwise the parameter's default,
+   otherwise the type's own empty value, otherwise a failure.</li>
 </ol>
 
 

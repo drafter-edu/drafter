@@ -11382,6 +11382,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14253,7 +14309,7 @@ next to your program:</p>
 <span class="n">start_server</span><span class="p">()</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="pictures-1-d845e93110a8">
-  <iframe src="../../drafter-demos/pictures-1-d845e93110a8/index.html" title="Drafter Demo pictures-1-d845e93110a8" name="pictures-1-d845e93110a8" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
+  <iframe src="../../drafter-demos/pictures-1-d845e93110a8/index.html" title="Drafter Demo pictures-1-d845e93110a8" name="pictures-1-d845e93110a8" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
 </div>
 
 <p>The two numbers are the width and height in pixels. Leave them off
@@ -14293,7 +14349,7 @@ chosen):</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">Picture</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">160</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="s2">&quot;lightsteelblue&quot;</span><span class="p">)))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="pictures-2-d29862e6ee96">
-  <iframe src="../../drafter-demos/pictures-2-d29862e6ee96/index.html" title="Drafter Demo pictures-2-d29862e6ee96" name="pictures-2-d29862e6ee96" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 320px;" ></iframe>
+  <iframe src="../../drafter-demos/pictures-2-d29862e6ee96/index.html" title="Drafter Demo pictures-2-d29862e6ee96" name="pictures-2-d29862e6ee96" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 320px;" ></iframe>
 </div>
 
 <p>A <code>Picture</code> placed in the content list displays itself, and
@@ -14344,7 +14400,7 @@ returns a changed copy:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="n">Picture</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;tomato&quot;</span><span class="p">)))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="pictures-3-98775b4e7ef8">
-  <iframe src="../../drafter-demos/pictures-3-98775b4e7ef8/index.html" title="Drafter Demo pictures-3-98775b4e7ef8" name="pictures-3-98775b4e7ef8" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
+  <iframe src="../../drafter-demos/pictures-3-98775b4e7ef8/index.html" title="Drafter Demo pictures-3-98775b4e7ef8" name="pictures-3-98775b4e7ef8" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
 </div>
 
 <p>Always assign the result: <code>state.art.rotate(90)</code> on its own creates
@@ -14377,6 +14433,11 @@ pipeline together, from upload to transformation to download.</p>
 <li><strong>A URL image shows nothing</strong>: the address must point straight at
   an image (ending in .png, .jpg, or another image extension), not
   at a page containing one, and the visitor needs to be online.</li>
+<li><strong>A broken-picture icon appears where the image belongs</strong>: the
+  browser could not load the file. The debug panel lists a warning
+  that names the image.
+  <a href="../../help/troubleshooting/#a-picture-shows-as-a-broken-image">A picture shows as a broken image</a>
+  lists what to check.</li>
 <li><strong>Transformations seem to do nothing</strong>: the result was not
   assigned back to state.</li>
 </ul>

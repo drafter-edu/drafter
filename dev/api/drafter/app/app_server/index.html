@@ -11456,6 +11456,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -15089,10 +15145,12 @@ being served ("main_file"), and this process id ("pid").</p>
 
     <div class="doc doc-contents ">
 
-        <p>Stop the development server at the browser's request.</p>
+        <p>Stop the development server when asked to over HTTP.</p>
 <p>Reached by the debug panel's "Stop Server" menu item and the button on
-the <code>--stop-server</code> system route (see js/src/debug/dev_server.ts).
-Accepts only POST, so a stray link or prefetch cannot stop the server.
+the <code>--stop-server</code> system route (see js/src/debug/dev_server.ts),
+and by a newer run of the same program that wants this server's port
+(see drafter.app.ports.request_remote_stop). The terminal message names
+whichever of the two asked. Accepts only POST, so a stray link or prefetch cannot stop the server.
 The actual shutdown is whatever callable <code>serve_app_once</code> stored on the
 application state; the in-flight response is still delivered because
 uvicorn finishes open requests before exiting.</p>

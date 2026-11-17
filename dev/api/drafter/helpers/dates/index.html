@@ -11191,6 +11191,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.helpers.dates.current_moment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_moment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.helpers.dates.try_convert_datetime" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -11281,6 +11292,62 @@
     
   
     imports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
   
 
     
@@ -13672,6 +13739,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.helpers.dates.current_moment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_moment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.helpers.dates.try_convert_datetime" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13733,6 +13811,103 @@
 <div class="doc doc-object doc-function">
 
 
+<h2 id="drafter.helpers.dates.current_moment" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">current_moment</span><span class="p">(</span><span class="n">target_type</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The present moment as a datetime, a date, or a time of day.</p>
+<p>This is what a blank date or time field stands for when the route's
+parameter is neither optional nor given a default.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>target_type</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One of <code>datetime</code>, <code>date</code>, or <code>time</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="datetime.datetime">datetime</span> | <span title="datetime.date">date</span> | <span title="datetime.time">time</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Now, in the form of the requested type.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>target_type</code> is not one of the three types.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h2 id="drafter.helpers.dates.try_convert_datetime" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">try_convert_datetime</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">target_type</span><span class="p">)</span></code>
 
@@ -13742,13 +13917,11 @@
     <div class="doc doc-contents ">
 
         <p>Convert a value to datetime-like types if possible.</p>
+<p>A blank string converts to the current date or time. Route parameters
+get more choices for a blank field (None for an optional parameter,
+then the parameter's default); the converter registry applies those
+before this function is reached.</p>
 
-
-<details class="todo" open>
-  <summary>Allow control over "default" behavior for blank fields. Could raise an error,</summary>
-  <p>return None, or use current date/time. Currently just uses the current date/time
-for missing parts.</p>
-</details>
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>

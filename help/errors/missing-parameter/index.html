@@ -11351,6 +11351,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13876,12 +13932,6 @@ arguments). The mismatch is somewhere between those two.</p>
   parameters require.</li>
 <li><strong>It is actually <code>state</code></strong>: if the unfilled parameter is your state,
   make it the first parameter and name it <code>state</code>.</li>
-<li><strong>You reloaded the tab, or opened a saved link, on a page that came
-  from a form</strong>: the address bar keeps the name of the last route,
-  for example <code>?route=save</code>. Reloading the tab starts the app again,
-  returns the state to its starting value, and runs that route with
-  no form values, so its parameters receive nothing. Choose "Return
-  to Index Page" on the error page to continue from the first page.</li>
 </ul>
 <h2 id="fix">Fix</h2>
 <p>Make the names agree; you can change either side:</p>
@@ -13907,33 +13957,42 @@ component and the parameter. If you write the form and its route in
 the same sitting and check each name against its parameter, the
 mismatch is unlikely to appear in the first place.</p>
 <h2 id="a-related-warning-a-form-field-with-no-matching-parameter">A related warning: a form field with no matching parameter</h2>
-<p>The opposite mismatch produces a warning, not an error page. When a
-page sends a form field and the route has no parameter with that
-name, the route still runs and its page appears as usual. The
-Current tab of the debug panel shows a count badge, and under
+<p>The opposite mismatch is not an error. When a page sends a value and
+the route has no parameter with that name, the route still runs and
+its page appears as usual.</p>
+<p>Most leftover values are normal and produce no message. Every button
+and link on a page sends all of that page's form fields to its target
+route, and many routes need none of them. A Cancel button on a form
+page is the usual example: <code>Button("Cancel", "index")</code> sends the text
+box's value to <code>index</code>, which has no use for it.</p>
+<p>Drafter lists a warning when a leftover value looks like a mistake.
+The Current tab of the debug panel shows a count badge, and under
 "Errors &amp; Warnings" it lists a line like this one:</p>
-<div class="highlight"><pre><span></span><code>The form field &#39;new_name&#39; was sent to &#39;index&#39;, but the function has no
+<div class="highlight"><pre><span></span><code>The form field &#39;petname&#39; was sent to &#39;adopt&#39;, but the function has no
 matching parameter.
 </code></pre></div>
-<p>Every button and link on a page sends all of that page's form fields
-to its target route. Whether the warning matters depends on which
-route received the field:</p>
+<p>Expanding the warning's Details shows a suggestion:</p>
+<div class="highlight"><pre><span></span><code>Did you mean the parameter &#39;pet_name&#39;?
+</code></pre></div>
+<p>The warning appears in two cases:</p>
 <ul>
-<li><strong>Harmless</strong>: a Cancel button on a form page. <code>Button("Cancel",
-  "index")</code> sends the text box's value to <code>index</code>, which does not
-  need it. You can leave this warning alone.</li>
-<li><strong>A real bug</strong>: a misspelled name. If the page has
-  <code>TextBox("petname")</code> and the route's parameter is <code>pet_name</code>, the
-  field has no parameter and the parameter has no value. The warning
-  then arrives together with the error page described at the top of
-  this entry, and the debug panel lists both.</li>
-<li><strong>A real bug with no error page</strong>: a misspelled name on a
-  parameter that has a default value. The route runs with the
-  default, and the warning is the only sign that the typed value was
-  dropped.</li>
+<li><strong>A near miss</strong>: the name of a form field is close to the name of a
+  parameter that received no value. Suppose the page has
+  <code>TextBox("petname")</code> and the route is
+  <code>def adopt(state: State, pet_name: str = "")</code>. The route runs with
+  the default, and the warning is the only sign that the typed value
+  was dropped. When the parameter has no default, the warning arrives
+  together with the error page described at the top of this entry,
+  and the debug panel lists both.</li>
+<li><strong>An unused <code>Argument</code></strong>: a value attached to a button with
+  <a href="../../../reference/components/actions/argument/">Argument</a> was
+  written for one route, so Drafter reports it whenever that route
+  has no parameter with its name. The line begins "The component
+  argument". When no parameter has a similar name, the Details say
+  to add a parameter with that name or to remove the argument.</li>
 </ul>
-<p>The fix for both bugs is the one in the Fix section: make the
-component's name and the parameter's name agree.</p>
+<p>The fix in both cases is the one in the Fix section: make the name on
+the page and the name of the parameter agree.</p>
 <h2 id="understand">Understand</h2>
 <p><a href="../../../concepts/forms-and-input/">Forms and input</a> explains the
 name-to-parameter contract this error enforces.</p>

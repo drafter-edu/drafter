@@ -11234,6 +11234,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../helpers/urls/" class="md-nav__link">
         
   
@@ -13792,7 +13848,7 @@
 
 
 <h2 id="drafter.payloads.kinds.page.Page" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">css</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">js</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">extra_content</span><span class="p">,</span> <span class="n">css</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">js</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
@@ -13823,7 +13879,8 @@ This content has two critical parts:</p>
 <p>The content of a page can be any combination of strings, numbers, booleans, and components. Strings will be
 rendered as paragraphs, numbers and booleans will be rendered as their text form, and components will be rendered
 as their respective HTML. Components should be classes that inherit from
-<code>drafter.components.PageContent</code>. If the content is not a list, a ValueError will be raised.</p>
+<code>drafter.components.PageContent</code>. A single string, number, boolean, or component is also accepted
+and treated as a list of one item; any other content raises a <code>StudentFacingError</code> (a <code>ValueError</code>).</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -13860,11 +13917,28 @@ as their respective HTML. Components should be classes that inherit from
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The content of the page. Must always be provided as a list of strings, numbers, booleans, and components.</p>
+                <p>The content of the page: a list of strings, numbers, booleans, and components.</p>
               </div>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>*extra_content</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Not accepted. Anything written after the content
+is almost always content that was meant to go inside the
+list, so it raises an error that shows the corrected call.</p>
+              </div>
+            </td>
+            <td>
+                  <code>()</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -13875,7 +13949,8 @@ as their respective HTML. Components should be classes that inherit from
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional CSS content to inject dynamically when this page is rendered.</p>
+                <p>Optional CSS content to inject dynamically when this page is rendered.
+Must be given by name, as in <code>css="..."</code>.</p>
               </div>
             </td>
             <td>
@@ -13890,7 +13965,8 @@ as their respective HTML. Components should be classes that inherit from
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional JavaScript content to inject dynamically when this page is rendered.</p>
+                <p>Optional JavaScript content to inject dynamically when this page is rendered.
+Must be given by name, as in <code>js="..."</code>.</p>
               </div>
             </td>
             <td>
@@ -13900,6 +13976,37 @@ as their respective HTML. Components should be classes that inherit from
       </tbody>
     </table>
 
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="StudentFacingError(message, *, friendly='', steps=(), title='') (drafter.data.errors.StudentFacingError)" href="../../../data/errors/#drafter.data.errors.StudentFacingError">StudentFacingError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If anything is written after the content
+without a name, or if the content, <code>css</code>, or <code>js</code> is not
+something a page can hold.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="n">Page</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;Hello!&quot;</span><span class="p">,</span> <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Next&quot;</span><span class="p">,</span> <span class="s2">&quot;next&quot;</span><span class="p">)])</span>
+</code></pre></div>
+</details>
 
 
 

@@ -11342,6 +11342,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14189,17 +14245,25 @@ for numbers, converted for you.</p>
 <p>Like every component, <code>TextBox</code> also accepts
 <a href="../../../keyword-attributes/">styling and attribute keywords</a>. The
 HTML attributes it recognizes as keywords are <code>placeholder</code>,
-<code>maxlength</code>, <code>minlength</code>, <code>size</code>, <code>pattern</code>, and <code>alt</code>.</p>
-<p>Several attributes that work on a plain HTML input are not on that
-list, including <code>required</code>, <code>min</code>, <code>max</code>, <code>step</code>, <code>disabled</code>, and
-<code>readonly</code>. Drafter turns a keyword it does not recognize into a CSS
-style, which the browser ignores, and it reports no error. As a
-result, <code>TextBox("age", kind="number", min=0, max=10)</code> shows a number
-box that accepts any number. Drafter also does not ask the browser to
-check the form when a button is clicked, so <code>minlength</code> and <code>pattern</code>
-do not stop a route from running. Check the value inside the route
-instead. <a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
-explains the keyword rule.</p>
+<code>maxlength</code>, <code>minlength</code>, <code>size</code>, <code>pattern</code>, <code>alt</code>, <code>min</code>, <code>max</code>,
+<code>step</code>, <code>list</code>, <code>required</code>, <code>disabled</code>, <code>readonly</code>, and
+<code>autocomplete</code>. (<code>list</code> takes the <code>id</code> of an HTML <code>&lt;datalist&gt;</code>, not a
+Python list.) Drafter turns any other keyword it does not recognize
+into a CSS style;
+<a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
+explains that rule.</p>
+<p>Some of these keywords change what the box itself allows.
+<code>maxlength=20</code> stops typing after 20 characters. With
+<code>kind="number"</code>, the <code>min</code>, <code>max</code>, and <code>step</code> keywords set where the
+box's arrow buttons stop and how far each click moves.
+<code>disabled=True</code> and <code>readonly=True</code> both block typing. A read-only
+box still sends its value to the route. A disabled box does not, so
+the route's parameter needs a default value.</p>
+<p>None of these keywords stops a route from running, because Drafter
+does not ask the browser to check the form when a button is clicked.
+A box marked <code>required=True</code> can be left empty, and
+<code>TextBox("age", kind="number", min=0, max=10)</code> still lets the visitor
+type <code>50</code> and send it. Check the value inside the route.</p>
 <h2 id="examples">Examples</h2>
 <p>This first example collects text and shows it back:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
@@ -14231,7 +14295,7 @@ explains the keyword rule.</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;Onward!&quot;</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="textbox-1-cd8266b3b515">
-  <iframe src="../../../../drafter-demos/textbox-1-cd8266b3b515/index.html" title="Drafter Demo textbox-1-cd8266b3b515" name="textbox-1-cd8266b3b515" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 220px;" ></iframe>
+  <iframe src="../../../../drafter-demos/textbox-1-cd8266b3b515/index.html" title="Drafter Demo textbox-1-cd8266b3b515" name="textbox-1-cd8266b3b515" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 220px;" ></iframe>
 </div>
 
 <p>Annotate the parameter as <code>int</code> and Drafter converts the typed text
@@ -14265,7 +14329,7 @@ into a number before your route sees it:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="textbox-2-cc09ba20f6b0">
-  <iframe src="../../../../drafter-demos/textbox-2-cc09ba20f6b0/index.html" title="Drafter Demo textbox-2-cc09ba20f6b0" name="textbox-2-cc09ba20f6b0" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 220px;" ></iframe>
+  <iframe src="../../../../drafter-demos/textbox-2-cc09ba20f6b0/index.html" title="Drafter Demo textbox-2-cc09ba20f6b0" name="textbox-2-cc09ba20f6b0" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 220px;" ></iframe>
 </div>
 
 <h2 id="notes">Notes</h2>
@@ -14278,8 +14342,16 @@ into a number before your route sees it:</p>
   explains the problem. For example, <code>2.5</code> cannot become an <code>int</code>;
   if decimal values should be accepted, annotate the parameter as
   <code>float</code>.</li>
-<li>A box whose <code>name</code> matches no parameter of the target route produces
-  a warning; a route parameter no box fills produces a
+<li>An empty box gives a <code>str</code> parameter <code>""</code>. For an <code>int</code> or <code>float</code>
+  parameter, an empty box is an error unless the parameter has a
+  default value, which is then used, or allows <code>None</code>, as in
+  <code>age: int | None</code>. <a href="../../../route/#blank-values">Blank values</a> has
+  the full rule.</li>
+<li>A box whose <code>name</code> matches no parameter of the target route is not
+  an error, and its value is dropped. The debug panel lists a
+  <a href="../../../../help/errors/missing-parameter/#a-related-warning-a-form-field-with-no-matching-parameter">warning</a>
+  when the name is close to a parameter that received nothing. A route
+  parameter no box fills produces a
   <a href="../../../../help/errors/missing-parameter/">missing parameter</a> error.</li>
 <li>For multi-line input, use <a href="../textarea/">TextArea</a>.</li>
 </ul>

@@ -11393,6 +11393,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14296,7 +14352,7 @@ side-by-side comparison.</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="test-a-feature-1-b0d46caed49c">
-  <iframe src="../../drafter-demos/test-a-feature-1-b0d46caed49c/index.html" title="Drafter Demo test-a-feature-1-b0d46caed49c" name="test-a-feature-1-b0d46caed49c" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
+  <iframe src="../../drafter-demos/test-a-feature-1-b0d46caed49c/index.html" title="Drafter Demo test-a-feature-1-b0d46caed49c" name="test-a-feature-1-b0d46caed49c" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 340px;" ></iframe>
 </div>
 
 <p>Read the tests aloud: adding a point to a score of 5 gives 6, the page
@@ -14391,7 +14447,7 @@ assignment is all about styling.</p>
 <h2 id="common-problems">Common problems</h2>
 <ul>
 <li><strong>Your tests do not run</strong>: they must sit before <code>start_server(...)</code>,
-  because nothing after that line runs.</li>
+  because code after that line does not run until the server stops.</li>
 <li><strong>A test broke after you restyled a page</strong>: the test is checking more
   than it cares about. Narrow it, for example by replacing
   <code>assert_page</code> with <code>assert_has</code> or <code>assert_state</code>.</li>

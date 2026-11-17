@@ -10346,6 +10346,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.data.details.snapshot.SNAPSHOT_VERSION" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SNAPSHOT_VERSION
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.data.details.snapshot.StateSnapshotEvent" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -11311,6 +11322,62 @@
     
   
     imports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
   
 
     
@@ -13702,6 +13769,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.data.details.snapshot.SNAPSHOT_VERSION" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SNAPSHOT_VERSION
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.data.details.snapshot.StateSnapshotEvent" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13768,10 +13846,11 @@
 
         <p>State snapshot events for the debug panel's Save/Load feature.</p>
 <p>A snapshot captures one route invocation (route + arguments) together with
-the current state reduced to plain JSON data, so the debug UI can persist it
-(browser localStorage or a downloaded file) and later restore it by
-dispatching a <code>drafter-load-state</code> event back to the bridge, which
-replays the route against the rebuilt state.</p>
+the state reduced to plain JSON data, both as it is now and as it was just
+before that route ran, so the debug UI can persist it (browser localStorage
+or a downloaded file) and later restore it by dispatching a
+<code>drafter-load-state</code> event back to the bridge, which puts the earlier
+state back and runs the route again.</p>
 
 
 
@@ -13790,6 +13869,34 @@ replays the route against the rebuilt state.</p>
 
 
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="drafter.data.details.snapshot.SNAPSHOT_VERSION" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">SNAPSHOT_VERSION</span> <span class="o">=</span> <span class="mi">2</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Version stamp for the stored snapshot format.</p>
+<p>Version 1 stored only the state from after the route ran. Version 2 adds
+<code>state_before_json</code>, the state from before the route ran; loading restores
+that one, so that running the route again arrives at the saved page instead
+of one step past it. A snapshot without <code>state_before_json</code> (version 1, or
+a version 2 save whose earlier state could not be captured) is loaded the
+version 1 way.</p>
+
+    </div>
+
+</div>
+
 
 
 <div class="doc doc-object doc-class">
@@ -13797,7 +13904,7 @@ replays the route against the rebuilt state.</p>
 
 
 <h2 id="drafter.data.details.snapshot.StateSnapshotEvent" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">StateSnapshotEvent</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;StateSnapshot&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">TelemetryMetadata</span><span class="p">(),</span> <span class="n">correlation</span><span class="o">=</span><span class="n">Correlation</span><span class="p">(),</span> <span class="n">route</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">kwargs_json</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">state_json</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">state_type</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">representation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s1">&#39;save&#39;</span><span class="p">,</span> <span class="n">slot</span><span class="o">=</span><span class="s1">&#39;quick&#39;</span><span class="p">,</span> <span class="n">app_title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">SNAPSHOT_VERSION</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">StateSnapshotEvent</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;StateSnapshot&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">TelemetryMetadata</span><span class="p">(),</span> <span class="n">correlation</span><span class="o">=</span><span class="n">Correlation</span><span class="p">(),</span> <span class="n">route</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">kwargs_json</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">state_json</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">state_before_json</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">state_type</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">representation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s1">&#39;save&#39;</span><span class="p">,</span> <span class="n">slot</span><span class="o">=</span><span class="s1">&#39;quick&#39;</span><span class="p">,</span> <span class="n">app_title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">SNAPSHOT_VERSION</span><span class="p">)</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
@@ -13875,7 +13982,23 @@ as a file (reason "download").</p>
               <div class="doc-md-description">
                 <p>The state as JSON-encoded plain data (dataclasses
 reduced to nested field dicts); rebuilt on load with the shared
-converter registry against the running app's state class.</p>
+converter registry against the running app's state class. This
+is the state as it is now, after the captured route ran.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="drafter.data.details.snapshot.StateSnapshotEvent.state_before_json">state_before_json</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The state as it was just before the captured
+route ran, encoded the same way, or "" when it is not known.
+Loading restores this state and runs the route again, which
+reproduces the saved page (the way the browser's Back button
+restores an entry).</p>
               </div>
             </td>
           </tr>
@@ -14116,7 +14239,7 @@ bridge).</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="StateSnapshotEvent(kind='StateSnapshot', metadata=TelemetryMetadata(), correlation=Correlation(), route='index', kwargs_json='{}', state_json='', state_type='', representation=None, reason='save', slot='quick', app_title='', version=SNAPSHOT_VERSION)
+                  <code><a class="autorefs autorefs-internal" title="StateSnapshotEvent(kind='StateSnapshot', metadata=TelemetryMetadata(), correlation=Correlation(), route='index', kwargs_json='{}', state_json='', state_before_json='', state_type='', representation=None, reason='save', slot='quick', app_title='', version=SNAPSHOT_VERSION)
 
   
       dataclass
@@ -14124,8 +14247,9 @@ bridge).</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A new StateSnapshotEvent without the state_json payload filled
-in (the bridge sets it after encoding).</p>
+                <p>A new StateSnapshotEvent without the state_json and
+state_before_json payloads filled in (the bridge sets them
+after encoding).</p>
               </div>
             </td>
           </tr>

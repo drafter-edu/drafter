@@ -10135,6 +10135,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.data.converter.NO_EMPTY_VALUE" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NO_EMPTY_VALUE
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.data.converter.ConversionContext" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -10233,6 +10244,17 @@
     <span class="md-ellipsis">
       
         describe_type
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.data.converter.is_blank_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_blank_text
       
     </span>
   </a>
@@ -11441,6 +11463,62 @@
     
   
     imports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
   
 
     
@@ -13876,6 +13954,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.data.converter.NO_EMPTY_VALUE" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NO_EMPTY_VALUE
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.data.converter.ConversionContext" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13974,6 +14063,17 @@
     <span class="md-ellipsis">
       
         describe_type
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.data.converter.is_blank_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_blank_text
       
     </span>
   </a>
@@ -14146,10 +14246,44 @@ value, letting the next registered converter (or the fallback) try instead.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Failure code for "the value is absent" (e.g. an empty file upload or a
-denied camera). Union conversion treats it specially: when the annotation
-also allows None (<code>Picture | None</code>), the parameter becomes None instead
-of failing.</p>
+        <p>Failure code for "the value is absent": a number or date field left
+blank, a file that was not chosen, a camera that took no photo.</p>
+<p>One rule decides what the parameter receives, in this order:</p>
+<ol>
+<li>None, when the annotation allows it (<code>int | None</code>). Union conversion
+   does this.</li>
+<li>The parameter's default, when it has one (<code>age: int = 7</code>). The binder
+   does this, since defaults belong to the route's signature.</li>
+<li>The type's own empty value, when it has one (the current date for a
+   <code>date</code>, <code>""</code> for the text of a file that was not chosen).</li>
+<li>Otherwise the request fails with a message that says no value was
+   provided.</li>
+</ol>
+<p>Blank text is not absent for <code>str</code> (it is the empty string) or <code>bool</code>
+(an unchecked box), so those never report a missing value for it.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="drafter.data.converter.NO_EMPTY_VALUE" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">NO_EMPTY_VALUE</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Marks a missing value whose type has nothing that stands for "empty"
+(there is no empty <code>int</code>).</p>
 
     </div>
 
@@ -14213,7 +14347,7 @@ second block is filled in by the ConverterRegistry before converters run.</p>
 
 
 <h2 id="drafter.data.converter.ConversionResult" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">ConversionResult</span><span class="p">(</span><span class="n">ok</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error_code</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">hint</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">ConversionResult</span><span class="p">(</span><span class="n">ok</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error_code</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">hint</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">has_empty_value</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
@@ -14257,7 +14391,8 @@ second block is filled in by the ConverterRegistry before converters run.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The converted value, when <code>ok</code> is True.</p>
+                <p>The converted value, when <code>ok</code> is True. For a missing
+value (see <code>has_empty_value</code>), the type's own empty value.</p>
               </div>
             </td>
           </tr>
@@ -14292,6 +14427,22 @@ second block is filled in by the ConverterRegistry before converters run.</p>
             <td>
               <div class="doc-md-description">
                 <p>Student-facing suggestion for fixing the failure.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="drafter.data.converter.ConversionResult.has_empty_value">has_empty_value</span></code></td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Only meaningful for a missing-value failure
+(<code>MISSING_VALUE_ERROR_CODE</code>). True when the type has a value
+that stands for "nothing was provided", held in <code>value</code>: the
+current date for a <code>date</code>, the empty string for the text of a
+file that was not chosen. It is used when the parameter is
+neither optional nor given a default.</p>
               </div>
             </td>
           </tr>
@@ -14372,7 +14523,7 @@ upload dict for a <code>dict</code> parameter).</p>
 
 
 <h3 id="drafter.data.converter.ConverterRegistry.convert" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">convert</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">convert</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">keep_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 </h3>
 
@@ -14383,6 +14534,89 @@ upload dict for a <code>dict</code> parameter).</p>
 <p>Untyped (or <code>Any</code>) parameters pass through unconverted; explicitly
 typed parameters convert strictly and produce a structured error on
 failure.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>ctx</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ConversionContext(param_name, expected_type, raw_value, payload_value=None, route_name='', resolved_type=None, type_args=(), registry=None)
+
+  
+      dataclass
+   (drafter.data.converter.ConversionContext)" href="#drafter.data.converter.ConversionContext">ConversionContext</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The conversion to perform.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>keep_missing</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>How to report a value that is absent (see
+<code>MISSING_VALUE_ERROR_CODE</code>) when the annotation does not
+allow None. By default the type's own empty value is
+returned as a success when there is one. The binder
+passes True to get the missing-value failure itself, so
+it can use the parameter's default first.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ConversionResult(ok, value=None, error_code='', message='', hint='', has_empty_value=False)
+
+  
+      dataclass
+   (drafter.data.converter.ConversionResult)" href="#drafter.data.converter.ConversionResult">ConversionResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The outcome of the conversion.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     </div>
@@ -14587,19 +14821,209 @@ form field 'age'.</code></p>
 <div class="doc doc-object doc-function">
 
 
-<h2 id="drafter.data.converter.missing_value_failure" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">missing_value_failure</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">expected_type</span><span class="p">,</span> <span class="n">hint</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></code>
+<h2 id="drafter.data.converter.is_blank_text" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">is_blank_text</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-        <p>Build the student-facing error for an absent value.</p>
-<p>Used when the client submitted "nothing" for a parameter (no file
-chosen, no photo captured). For a plain annotation this surfaces as a
-friendly failure; when the annotation is a union that allows None
-(<code>Picture | None</code>), union conversion turns it into None instead.</p>
+        <p>Whether a value is text with nothing in it but spaces.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>value</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A raw request value.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True for an empty or all-whitespace string, False for anything
+else (including None and non-text values).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="drafter.data.converter.missing_value_failure" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">missing_value_failure</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">expected_type</span><span class="p">,</span> <span class="n">hint</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">empty_value</span><span class="o">=</span><span class="n">NO_EMPTY_VALUE</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Build the result for an absent value.</p>
+<p>Used when the client submitted "nothing" for a parameter (a blank
+number field, no file chosen, no photo captured). What the parameter
+then receives follows the rule described at <code>MISSING_VALUE_ERROR_CODE</code>;
+the message and hint here are shown only when that rule ends in a
+failure.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>ctx</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ConversionContext(param_name, expected_type, raw_value, payload_value=None, route_name='', resolved_type=None, type_args=(), registry=None)
+
+  
+      dataclass
+   (drafter.data.converter.ConversionContext)" href="#drafter.data.converter.ConversionContext">ConversionContext</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The conversion being attempted.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>expected_type</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The type the parameter expects.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>hint</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Suggestion for fixing the failure; a general one is used
+when not given.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>empty_value</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The type's own stand-in for "nothing was provided",
+when it has one.</p>
+              </div>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="NO_EMPTY_VALUE = object()
+
+  
+      module-attribute
+   (drafter.data.converter.NO_EMPTY_VALUE)" href="#drafter.data.converter.NO_EMPTY_VALUE">NO_EMPTY_VALUE</a></code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ConversionResult(ok, value=None, error_code='', message='', hint='', has_empty_value=False)
+
+  
+      dataclass
+   (drafter.data.converter.ConversionResult)" href="#drafter.data.converter.ConversionResult">ConversionResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A failed result with the missing-value code.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     </div>

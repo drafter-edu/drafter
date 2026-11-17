@@ -11340,6 +11340,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13823,6 +13879,11 @@ To Try Next" list then give the detail that identifies this error:</p>
 &#39;price&#39;. This looks like a decimal number; use float instead of int,
 or enter a whole number.
 </code></pre></div>
+<p>or, when the box was left empty:</p>
+<div class="highlight"><pre><span></span><code>Parameter &#39;age&#39; expects int but no value was provided by the form field
+&#39;age&#39;. Enter a number. To let this be left blank, give the parameter a
+default value or make it optional (int | None).
+</code></pre></div>
 <h2 id="what-it-means">What it means</h2>
 <p>A form field's contents are always text; your route asked for an
 <code>int</code>, so Drafter tried to convert the text into a whole number and
@@ -13835,12 +13896,15 @@ then consider what a visitor might type into that field.</p>
 <p>The hint at the end of the message distinguishes the causes:</p>
 <ul>
 <li><strong>"Try entering a number"</strong>: the text was not numeric at all
-  (<code>"twenty"</code>, <code>""</code>, <code>"3 dogs"</code>).</li>
+  (<code>"twenty"</code>, <code>"3 dogs"</code>).</li>
 <li><strong>"use float instead of int"</strong>: the text was a number, but not a
   whole one (<code>"2.5"</code>).</li>
+<li><strong>"Enter a number. To let this be left blank..."</strong>: the box was
+  empty. The message says "no value was provided" where the other two
+  say "got" and quote the text.</li>
 </ul>
-<p>Then consider the underlying question: should this field only ever
-hold whole numbers?</p>
+<p>Then consider two underlying questions. Should this field only ever
+hold whole numbers, and may a visitor leave it empty?</p>
 <h2 id="fix">Fix</h2>
 <p>Match the annotation to what the field means:</p>
 <ul>
@@ -13851,6 +13915,11 @@ hold whole numbers?</p>
 <li>Free text that sometimes holds a number: annotate <code>str</code> and convert
   yourself when it matters, checking <code>isdigit()</code> first, as the
   <a href="../../../examples/calculator/">Calculator example</a> does.</li>
+<li>A number that may be left empty: give the parameter a default, as
+  in <code>age: int = 0</code>, and an empty box gives the default. Or annotate
+  it <code>age: int | None</code>, and an empty box gives <code>None</code>, which the route
+  checks for. <a href="../../../reference/route/#blank-values">Blank values</a>
+  has the full rule.</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="nd">@route</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">set_price</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">price</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>

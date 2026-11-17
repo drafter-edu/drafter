@@ -11334,6 +11334,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -13781,6 +13837,12 @@ Loading rebuilds the state with the same converter registry the router uses
 for route parameters, targeting the running app's state class — no pickle,
 so snapshots survive code edits/restarts as long as the state's shape still
 matches.</p>
+<p>The state is stored twice: as it is at the moment of saving (after the
+route that produced the current page ran) and as it was just before that
+route ran. Loading restores the earlier one and runs the route again, the
+way the browser's Back button restores a history entry, so the student
+arrives at the page and state they saved. Restoring the later state and
+running the route again would apply the route's changes twice.</p>
 
 
 
@@ -14001,7 +14063,7 @@ graphs) can be saved and restored.</p>
 
 
 <h2 id="drafter.bridge.snapshot.serialize_state_snapshot" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">serialize_state_snapshot</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">route</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">app_title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">serialize_state_snapshot</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">route</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">app_title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">state_before_json</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
@@ -14119,6 +14181,26 @@ JSON with the same empty-dict fallback the browser history uses.</p>
                   <code>&#39;&#39;</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>state_before_json</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The state as it was just before the captured
+invocation ran, already encoded by <code>encode_state_json</code>, or None
+when it is not known. Loading the snapshot restores this state
+and runs the route again; without it, loading falls back to
+restoring <code>state</code> and running the route on top of it.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -14134,7 +14216,7 @@ JSON with the same empty-dict fallback the browser history uses.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="StateSnapshotEvent(kind='StateSnapshot', metadata=TelemetryMetadata(), correlation=Correlation(), route='index', kwargs_json='{}', state_json='', state_type='', representation=None, reason='save', slot='quick', app_title='', version=SNAPSHOT_VERSION)
+                  <code><a class="autorefs autorefs-internal" title="StateSnapshotEvent(kind='StateSnapshot', metadata=TelemetryMetadata(), correlation=Correlation(), route='index', kwargs_json='{}', state_json='', state_before_json='', state_type='', representation=None, reason='save', slot='quick', app_title='', version=SNAPSHOT_VERSION)
 
   
       dataclass

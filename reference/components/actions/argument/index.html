@@ -11331,6 +11331,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14186,7 +14242,7 @@ the <a href="../../../../add/show-different-content/">one-route-many-items patte
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;nothing yet&quot;</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="argument-1-f20692c5a1b2">
-  <iframe src="../../../../drafter-demos/argument-1-f20692c5a1b2/index.html" title="Drafter Demo argument-1-f20692c5a1b2" name="argument-1-f20692c5a1b2" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 240px;" ></iframe>
+  <iframe src="../../../../drafter-demos/argument-1-f20692c5a1b2/index.html" title="Drafter Demo argument-1-f20692c5a1b2" name="argument-1-f20692c5a1b2" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 240px;" ></iframe>
 </div>
 
 <h2 id="notes">Notes</h2>
@@ -14230,6 +14286,13 @@ the <a href="../../../../add/show-different-content/">one-route-many-items patte
   shows a warning like this one:</p>
 <div class="highlight"><pre><span></span><code>The component argument &#39;wish_fr&#39; was sent to &#39;wish&#39;, but the function has no matching parameter.
 </code></pre></div>
+<p>Expanding the warning's Details shows a suggestion, here "Did you
+mean the parameter 'wish_for'?". When no parameter has a similar
+name, the Details say to add a parameter with that name or to
+remove the argument. An unused argument is reported every time,
+because you wrote it for that one route. An unused form field is
+reported only when its name is close to a parameter that received
+nothing.</p>
 </li>
 </ul>
 <h2 id="related-components">Related components</h2>

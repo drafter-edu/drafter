@@ -11340,6 +11340,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13808,9 +13864,8 @@
 
 <h1 id="code-after-start_server-never-runs">Code after start_server() never runs</h1>
 <h2 id="the-error">The error</h2>
-<p>There is no error page, no title, and no message, which is the
-confusing part. Code placed after the <code>start_server(...)</code> call, like
-the last line here, does not run where you expect it to:</p>
+<p>There is no error page. Code placed after the <code>start_server(...)</code>
+call, like the last line here, does not run when you expect it to:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 
@@ -13820,22 +13875,34 @@ the last line here, does not run where you expect it to:</p>
 
 
 <span class="n">start_server</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Welcome to my site!&quot;</span><span class="p">)</span>  <span class="c1"># never printed in the terminal</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Welcome to my site!&quot;</span><span class="p">)</span>  <span class="c1"># not printed while the site is running</span>
 </code></pre></div>
-<p>The terminal (the Thonny shell) never shows "Welcome to my site!",
-no matter how long the site runs.</p>
+<p>The terminal (the Thonny shell) does not show "Welcome to my site!"
+for as long as the site runs. When the program starts, Drafter prints
+a warning there that names the file and the line:</p>
+<div class="highlight"><pre><span></span><code>Warning: main.py has code after start_server(...), starting on line 10. That code will not run until the server stops. Make start_server(...) the last line of your file.
+</code></pre></div>
+<p>In the browser, the debug panel lists the same problem as a warning:</p>
+<div class="highlight"><pre><span></span><code>Line 10 of main.py comes after start_server(...). That code does not run
+when you would expect: on your computer it waits until the server stops,
+and in the browser it runs right after the first page appears.
+</code></pre></div>
+<p>The site still starts. The warning is about statements, so comments
+and blank lines after the call do not cause it.</p>
 <h2 id="what-it-means">What it means</h2>
 <p>Your program runs twice, once on your computer and once in the
 browser. On your computer, <code>start_server(...)</code> starts the site and
-keeps running for as long as the site is up, so Python does not reach
-the lines after it. In the browser, the call finishes once the first
-page is ready, and the lines after it run one time as the site loads.
-The <code>print</code> in this example therefore appears in the Console box in
-the footer of the browser page and never in the terminal. Code that
-runs in one place and not the other is hard to reason about, which is
-why nothing should follow the call.</p>
+does not finish until the server stops, so the lines after it wait
+until then. In the browser, the call finishes once the first page is
+ready, and the lines after it run one time, right after the first page
+appears. The <code>print</code> in this example therefore appears in the Console
+box in the footer of the browser page as the site loads, and in the
+terminal only after the server stops. Code that runs at a
+different moment in each place is hard to reason about, which is why
+nothing should follow the call.</p>
 <h2 id="where-to-look">Where to look</h2>
-<p>Look at the bottom of your file, at anything after the
+<p>The warning names the line where the extra code starts. Look at that
+line and everything below it, at the bottom of your file after the
 <code>start_server(...)</code> call.</p>
 <h2 id="check">Check</h2>
 <p>What was the code after the call trying to do?</p>
@@ -13864,8 +13931,9 @@ the call, and behavior goes inside routes.</p>
 <span class="n">start_server</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="confirm">Confirm</h2>
-<p>The moved code visibly happens: the configuration takes effect, the
-print appears (in the console; see
+<p>Run the program again. The warning is gone from the terminal and from
+the debug panel, and the moved code visibly happens: the configuration
+takes effect, the print appears (in the console; see
 <a href="../../printing-and-console/">Print and the console</a>) when the route
 runs.</p>
 <h2 id="prevent">Prevent</h2>

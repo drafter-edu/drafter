@@ -11340,6 +11340,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13866,7 +13922,12 @@ the module name in the last line.</p>
   <code>helpers.py</code> next to your program. On a deployed site, that file
   must also be part of the site, as
   <a href="../missing-asset-on-deploy/">Image or file works locally but 404s when deployed</a>
-  explains.</li>
+  explains. When the file is missing and a public library has the
+  same name, the browser installs that library in its place. The
+  debug panel's Current tab then shows a warning that begins "Your
+  program imports helpers, and there is no helpers.py next to your
+  program", and an error such as <code>cannot import name 'describe_mood'
+  from 'helpers'</code> lists the missing file as its first step.</li>
 </ul>
 <p>Many well-known libraries do work in the browser. <code>requests</code> loads
 there, and <code>matplotlib</code> and <code>pandas</code> have browser builds. The first

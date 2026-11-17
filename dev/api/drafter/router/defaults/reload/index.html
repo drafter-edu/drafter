@@ -11234,6 +11234,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../helpers/urls/" class="md-nav__link">
         
   
@@ -12471,6 +12527,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.router.defaults.reload.RELOAD_SCRIPT" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RELOAD_SCRIPT
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.router.defaults.reload.default_reload" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13674,6 +13741,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.router.defaults.reload.RELOAD_SCRIPT" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RELOAD_SCRIPT
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.router.defaults.reload.default_reload" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13728,6 +13806,31 @@
 
 
 
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="drafter.router.defaults.reload.RELOAD_SCRIPT" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">RELOAD_SCRIPT</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;(function () </span><span class="si">{</span><span class="w">    </span><span class="n">var</span><span class="w"> </span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">URL</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">location</span><span class="o">.</span><span class="n">href</span><span class="p">);</span><span class="w">    </span><span class="n">url</span><span class="o">.</span><span class="n">searchParams</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{ROUTE_QUERY_PARAM}</span><span class="s2">&quot;</span><span class="p">);</span><span class="w">    </span><span class="n">window</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">replaceState</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">url</span><span class="o">.</span><span class="n">toString</span><span class="p">());</span><span class="w">    </span><span class="n">window</span><span class="o">.</span><span class="n">location</span><span class="o">.</span><span class="n">reload</span><span class="p">();</span><span class="si">}</span><span class="s1">)();&#39;</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>JavaScript run by the reload page. Opening a route puts its name in the
+address (<code>?route=--reload</code>), and a reloaded site opens whatever route the
+address names, so the name is removed first. Left in place, every reload
+would open this route again and the site would reload without end.</p>
+
+    </div>
+
+</div>
 
 
 
@@ -13790,8 +13893,9 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A placeholder "Reloading..." page whose JavaScript immediately
-triggers a full browser reload via <code>window.location.reload()</code>.</p>
+                <p>A placeholder "Reloading..." page whose JavaScript removes
+this route's name from the address and then triggers a full browser
+reload, so the site starts again from its first page.</p>
               </div>
             </td>
           </tr>

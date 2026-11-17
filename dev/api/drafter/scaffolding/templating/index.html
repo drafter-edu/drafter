@@ -11234,6 +11234,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -12887,10 +12943,32 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.scaffolding.templating.MAIN_FILE_ID_LENGTH" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MAIN_FILE_ID_LENGTH
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.scaffolding.templating.default_favicon_data_uri" class="md-nav__link">
     <span class="md-ellipsis">
       
         default_favicon_data_uri
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.scaffolding.templating.main_file_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        main_file_id
       
     </span>
   </a>
@@ -13683,10 +13761,32 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.scaffolding.templating.MAIN_FILE_ID_LENGTH" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MAIN_FILE_ID_LENGTH
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.scaffolding.templating.default_favicon_data_uri" class="md-nav__link">
     <span class="md-ellipsis">
       
         default_favicon_data_uri
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.scaffolding.templating.main_file_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        main_file_id
       
     </span>
   </a>
@@ -13751,6 +13851,28 @@ supporting multiple Python engines (Skulpt, Pyodide).</p>
 
 
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="drafter.scaffolding.templating.MAIN_FILE_ID_LENGTH" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">MAIN_FILE_ID_LENGTH</span> <span class="o">=</span> <span class="mi">16</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Number of hexadecimal digits kept from the hash in <code>main_file_id</code>.</p>
+
+    </div>
+
+</div>
+
 
 
 
@@ -13797,6 +13919,99 @@ served asset path.</p>
       </tbody>
     </table>
 
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="drafter.scaffolding.templating.main_file_id" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">main_file_id</span><span class="p">(</span><span class="n">system</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Identify the student's main file without revealing where it is.</p>
+<p>The page stores a few things in the browser (the debug panel's save
+slots, the theme picked in the theme switcher, the open debug tab).
+Browser storage is shared by every page at one address, and every
+program the development server runs is at the same address, so the
+page's script keys those values by this id as well (see
+js/src/storage_keys.ts). The id is a hash of the file's full path, so
+two files with the same name in different folders get different ids,
+and the folder names (which usually include the student's user name)
+never reach the page or the browser's storage.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>system</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="SystemConfiguration(bootstrap, client_server, app_server, app_builder, app_common)
+
+  
+      dataclass
+   (drafter.config.system.SystemConfiguration)" href="../../config/system/#drafter.config.system.SystemConfiguration">SystemConfiguration</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>System configuration, whose bootstrap section holds the
+path to the main file.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A short hexadecimal id, or an empty string when no main file path
+is known.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="n">main_file_id</span><span class="p">(</span><span class="n">system</span><span class="p">)</span>  <span class="c1"># &quot;3f9a0c1d5e7b2a44&quot;</span>
+</code></pre></div>
+</details>
 
     </div>
 

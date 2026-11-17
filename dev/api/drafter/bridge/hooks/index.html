@@ -11301,6 +11301,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -13742,7 +13798,7 @@ several instances share one interpreter.</p>
 
 
 <h2 id="drafter.bridge.hooks.ServerHooks" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">ServerHooks</span><span class="p">(</span><span class="n">activate</span><span class="p">,</span> <span class="n">visit</span><span class="p">,</span> <span class="n">toggle_frame</span><span class="p">,</span> <span class="n">toggle_debug_mode</span><span class="p">,</span> <span class="n">set_theme</span><span class="p">,</span> <span class="n">get_state</span><span class="p">,</span> <span class="n">set_state</span><span class="p">,</span> <span class="n">render_site</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">ServerHooks</span><span class="p">(</span><span class="n">activate</span><span class="p">,</span> <span class="n">visit</span><span class="p">,</span> <span class="n">toggle_frame</span><span class="p">,</span> <span class="n">toggle_debug_mode</span><span class="p">,</span> <span class="n">set_theme</span><span class="p">,</span> <span class="n">get_state</span><span class="p">,</span> <span class="n">set_state</span><span class="p">,</span> <span class="n">render_site</span><span class="p">,</span> <span class="n">find_missing_arguments</span><span class="p">)</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
@@ -13874,6 +13930,20 @@ Response; used for all navigation.</p>
                 <p>Renders the server's site data (a pure computation;
 it never touches the DOM), e.g. to learn the current
 cascade-ordered stylesheet list after a theme change.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="drafter.bridge.hooks.ServerHooks.find_missing_arguments">find_missing_arguments</span></code></td>
+            <td>
+                  <code><span title="collections.abc.Callable">Callable</span>[[<span title="str">str</span>], <span title="list">list</span>[<span title="str">str</span>]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Names the parameters a route could not
+fill if it were opened from the page's address, with no form
+or component values. An empty list means the route can be
+opened that way.</p>
               </div>
             </td>
           </tr>

@@ -11340,6 +11340,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13834,7 +13890,12 @@ type or choose there.</p>
 <h2 id="check">Check</h2>
 <p>The expected type in the message tells you which conversion failed:</p>
 <ul>
-<li><strong><code>float</code></strong>: the text was not a number at all.</li>
+<li><strong><code>float</code></strong>: the text was not a number at all. When the box was
+  left empty, the message says "expects float but no value was
+  provided" and its hint says how to allow that: give the parameter a
+  default value, or make it optional with <code>float | None</code>.
+  <a href="../../../reference/route/#blank-values">Blank values</a> lists what
+  each type receives for an empty field.</li>
 <li><strong><code>bool</code></strong>: this conversion normally cannot fail, because
   checkboxes send values that convert cleanly. If you see it, a text
   box is usually supplying a <code>bool</code> parameter.</li>

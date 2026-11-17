@@ -11373,6 +11373,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -14254,16 +14310,18 @@ file's directory even when a safety check would refuse it.</p>
     <div class="doc doc-contents ">
 
         <p>Add development server arguments to the command line parser.</p>
-<p>Adds the "App Server Configuration" group with --port and --host
-(which have argparse defaults, unlike most other options), the
-negative flags --no-reloader, --no-open-browser, --no-inline-py, and
+<p>Adds the "App Server Configuration" group with --port and --host,
+the negative flags --no-reloader, --no-open-browser, --no-inline-py, and
 --no-serve-adjacent-files, which store False on their fields,
 --browser to name the browser the site opens in, and
 the watch-policy options (--no-watch-adjacent-files,
 --no-watch-recursively, --no-watch-safe-mode,
 --no-watch-served-files, --watch-max-files, --watch-max-directories,
 --watch-max-depth, --watch-broad-locations, --watch-path,
---ignore-watch-path, --watch-manifest, --watch-force-recursive).</p>
+--ignore-watch-path, --watch-manifest, --watch-force-recursive).
+No option has an argparse default, so a setting left off the
+command line keeps whatever an environment variable or the
+dataclass default gave it.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>

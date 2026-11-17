@@ -11421,6 +11421,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14026,10 +14082,6 @@ with its parameters, such as <code>index(state: State)</code>. Think of the
 list as a table of contents for your app. Check it when clicking a
 button reports that a route does not exist, or when you suspect a
 route function is missing its <code>@route</code> decorator.</p>
-<p>Below the list, the <strong>Route Graph</strong> section is not finished. It
-shows a note that the graph is coming soon and a sample drawing with
-the routes <code>index</code>, <code>guess</code>, <code>give_up</code>, and <code>result</code>. The drawing is
-the same for every app and does not describe yours.</p>
 <h2 id="tests-your-assertions-live">Tests: your assertions, live</h2>
 <p>Every assertion in your file is listed here with its result and its
 line number, and each failure has the full difference report. A
@@ -14041,7 +14093,10 @@ broken behavior does not have a test yet.</p>
 <p>The <strong>Regression Tests</strong> section has two buttons, <strong>Copy Regression
 Tests</strong> and <strong>Download Tests (.py)</strong>. Both produce one
 <code>assert_equal</code> test for each page you have visited, in the order you
-visited them. <a href="../../add/freeze-pages/">Freeze finished pages</a>
+visited them. A visit whose state has a circular reference gets a
+<code># Not frozen:</code> comment in place of its test, because such a state
+cannot be written as Python code.
+<a href="../../add/freeze-pages/">Freeze finished pages</a>
 explains what to do with those tests.</p>
 <h2 id="environment-the-machinery">Environment: the machinery</h2>
 <p>This tab collects several kinds of information about the
@@ -14050,7 +14105,11 @@ environment your app runs in.</p>
 <li><strong>File Systems</strong> lists the files that Python can see in the
   browser, under "Client File System". Press Refresh to update the
   list. Use it to check that a data file is where <code>open(...)</code>
-  expects it.</li>
+  expects it. While your app runs from your own computer, a second
+  list, "Host File System", shows the files in your project folder.
+  Click a folder there to look inside it, and <code>../</code> to go back up.
+  A deployed site has no such folder, so that list does not appear
+  there.</li>
 <li><strong>Installed Packages</strong> lists the Python packages that are loaded.</li>
 <li><strong>Configuration</strong> lists every setting, such as the title, the
   theme, and debug mode, with its current value. Look here to check
@@ -14065,8 +14124,6 @@ environment your app runs in.</p>
   including the snapshots from the Save/Load menu. Press Refresh to
   update the list, and use the button at the end of a row to delete
   that entry.</li>
-<li><strong>Advanced</strong> is not finished. Its "Show Drafter internals" section
-  shows sample values, not information about your app.</li>
 </ul>
 <h2 id="the-menus">The menus</h2>
 <p>The menu bar at the top of the frame around your page has five
@@ -14109,9 +14166,6 @@ menus. The names of the items below are the names on the screen.</p>
 </ul>
 <h3 id="edit">Edit</h3>
 <ul>
-<li><strong>Edit State…</strong> is not finished. It opens a window that shows the
-  current state and a note that editing is coming soon. You cannot
-  change a value there.</li>
 <li><strong>Edit Source</strong> opens your program in an editor inside the
   browser. Pressing <strong>Run</strong> restarts the site with the edited code.
   The edit exists only in that browser tab. The file on your
@@ -14139,14 +14193,25 @@ cart.</p>
 <li><strong>Download Snapshot…</strong> saves a snapshot as a <code>.json</code> file on your
   computer, and <strong>Upload Snapshot…</strong> restores from such a file.</li>
 </ul>
-<p>Loading a snapshot puts the saved state back and then runs the saved
-route again. If that route changes the state, the change is applied
-again on top of the saved state. For example, a counter saved at 4
-on a page produced by an <code>add_one</code> route loads as 5. To get back
-exactly what you saved, save while you are on a page whose route
-only displays the state, such as <code>index</code>.</p>
+<p>Loading a snapshot brings back the page and the state you saved. A
+snapshot also records the state from just before its route ran.
+Loading puts that earlier state back and runs the route again, the
+same way the browser's Back button returns to a page. For example, a
+counter saved at 4 on a page produced by an <code>add_one</code> route loads
+as 4. If the route does something different each time it runs, such
+as picking a random number, the loaded page can differ from the one
+you saved.</p>
+<p>A snapshot saved by an older version of Drafter does not have the
+earlier state. Loading one puts the saved state back and runs the
+route on top of it, so that counter loads as 5.</p>
 <p>Snapshots are kept by the browser, so they survive a reload of the
-tab. If you change the fields of your <code>State</code> class after you save,
+tab. Each app has its own slots. Two programs that you run at the
+same address, one after the other, do not see each other's
+snapshots, and a program that you move or rename starts with empty
+slots. Snapshots saved before slots were kept for each app are no
+longer offered in this menu. They are still listed under Browser
+Storage on the Environment tab, where you can delete them.</p>
+<p>If you change the fields of your <code>State</code> class after you save,
 for example by renaming one, loading the snapshot can fail. The
 state then stays as it was, and the Current tab lists an error.</p>
 <h3 id="help">Help</h3>
@@ -14169,8 +14234,11 @@ state then stays as it was, and the Current tab lists an error.</p>
 <li><strong>Tests show old results.</strong> Tests run when the site loads. Save
   your file, or reload the tab, to run them against the current
   code.</li>
-<li><strong>A loaded snapshot is off by one step.</strong> Loading runs the saved
-  route again. See the note under <a href="#saveload">Save/Load</a>.</li>
+<li><strong>A loaded snapshot is off by one step.</strong> The snapshot was saved
+  by an older version of Drafter. Save it again to get one that
+  loads exactly. See the note under <a href="#saveload">Save/Load</a>.</li>
+<li><strong>Your saved snapshots are gone.</strong> Slots belong to one app at one
+  address. See the note under <a href="#saveload">Save/Load</a>.</li>
 </ul>
 <h2 id="next-steps">Next steps</h2>
 <p><a href="../printing-and-console/">Print and the console</a> adds <code>print()</code> and

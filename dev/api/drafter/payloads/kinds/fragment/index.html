@@ -11234,6 +11234,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../helpers/urls/" class="md-nav__link">
         
   
@@ -13961,7 +14017,7 @@ a specified target element on the page.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The content of the fragment. Must always be provided as a list of strings, numbers, booleans, and components.</p>
+                <p>The content of the fragment: a list of strings, numbers, booleans, and components. A single one of those is also accepted and treated as a list of one item.</p>
               </div>
             </td>
             <td>
@@ -14011,6 +14067,30 @@ a specified target element on the page.</p>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="StudentFacingError(message, *, friendly='', steps=(), title='') (drafter.data.errors.StudentFacingError)" href="../../../data/errors/#drafter.data.errors.StudentFacingError">StudentFacingError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the content holds something that cannot be
+shown, or if <code>css</code> or <code>js</code> is not text (or a list of text).</p>
+              </div>
             </td>
           </tr>
       </tbody>

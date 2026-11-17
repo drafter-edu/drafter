@@ -11305,6 +11305,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13891,6 +13947,11 @@ missing, the build stops with <code>ModuleNotFoundError</code>.</p>
 <td>Build somewhere else.</td>
 </tr>
 <tr>
+<td><code>--zip-output</code></td>
+<td>off</td>
+<td>Also write the built site as one zip file. The file sits next to the output folder and is named after it, so <code>dist</code> gives <code>dist.zip</code> beside <code>dist/</code>. Unpacking it gives <code>index.html</code> and the rest of the site directly. The build prints <code>Site zipped to</code> followed by the file's location.</td>
+</tr>
+<tr>
 <td><code>--additional-paths PATH</code></td>
 <td>none</td>
 <td>Copy an extra file, folder, or pattern such as <code>data/*.csv</code> into the built site. Repeat the flag for each one: <code>--additional-paths pets.csv --additional-paths words.txt</code>. A pattern that matches nothing prints a warning, and the build continues. Forgetting a file your code <code>open()</code>s is the classic works-locally, <a href="../../help/errors/missing-asset-on-deploy/">404s-deployed</a> mistake.</td>
@@ -13898,7 +13959,7 @@ missing, the build stops with <code>ModuleNotFoundError</code>.</p>
 <tr>
 <td><code>--additional-files PATH</code></td>
 <td>none</td>
-<td>The flag version of <a href="../site-config/#add_website_file"><code>add_website_file(...)</code></a>. It names one file next to your program that the site needs, and the file is copied into the built site. Repeat once per file. A name that matches no file prints a warning, and the build continues.</td>
+<td>The flag version of <a href="../site-config/#add_website_file"><code>add_website_file(...)</code></a>. It names one file or folder next to your program that the site needs, and the build copies it into the site. A folder is copied with everything in it. Repeat once per name. A name that matches nothing prints a warning, and the build continues.</td>
 </tr>
 <tr>
 <td><code>--additional-css-files PATH_OR_URL</code></td>

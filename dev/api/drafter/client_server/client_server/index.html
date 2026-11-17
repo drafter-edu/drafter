@@ -8548,6 +8548,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#drafter.client_server.client_server.ClientServer.FRAMEWORK_DEPENDENCY_NAMES" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FRAMEWORK_DEPENDENCY_NAMES
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#drafter.client_server.client_server.ClientServer.add_route" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -8640,6 +8651,17 @@
     <span class="md-ellipsis">
       
         execute_route
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drafter.client_server.client_server.ClientServer.find_missing_arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        find_missing_arguments
       
     </span>
   </a>
@@ -11681,6 +11703,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -14075,6 +14153,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#drafter.client_server.client_server.ClientServer.FRAMEWORK_DEPENDENCY_NAMES" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FRAMEWORK_DEPENDENCY_NAMES
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#drafter.client_server.client_server.ClientServer.add_route" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14167,6 +14256,17 @@
     <span class="md-ellipsis">
       
         execute_route
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drafter.client_server.client_server.ClientServer.find_missing_arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        find_missing_arguments
       
     </span>
   </a>
@@ -14708,6 +14808,30 @@ or None for the interpreter-wide default.</p>
 
 
 
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="drafter.client_server.client_server.ClientServer.FRAMEWORK_DEPENDENCY_NAMES" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">FRAMEWORK_DEPENDENCY_NAMES</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_server&#39;</span><span class="p">,</span> <span class="s1">&#39;_configuration&#39;</span><span class="p">,</span> <span class="s1">&#39;_request&#39;</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Parameter names every route can ask for and get from Drafter itself
+(the fixed part of <code>_get_extra_dependencies</code>).</p>
+
+    </div>
+
+</div>
 
 
 
@@ -15295,6 +15419,83 @@ telemetry and response metadata.</p>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="drafter.client_server.client_server.ClientServer.find_missing_arguments" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">find_missing_arguments</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Name the parameters a route could not fill if opened by address.</p>
+<p>A page opened from its address (a reload, a bookmark, a shared
+link) brings no form fields or component arguments with it. A
+route that needs some cannot be opened that way.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>url</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The route to check.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The required parameters that would have no value, or an empty
+list when the route can run with nothing but the state. Also
+empty for a route that does not exist.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="drafter.client_server.client_server.ClientServer.format_payload" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">format_payload</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">representation</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">configuration</span><span class="p">)</span></code>
 
@@ -15304,6 +15505,11 @@ telemetry and response metadata.</p>
     <div class="doc doc-contents ">
 
         <p>Format a payload for history panel display.</p>
+<p>A visit whose route arguments or resulting state contain a circular
+reference cannot be written as a test, because a value that contains
+itself has no Python literal. Such a visit gets a one-line comment
+in place of its <code>assert_equal(...)</code> test (see
+<code>describe_unfrozen_circular_visit</code>).</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -15408,7 +15614,8 @@ telemetry and response metadata.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Formatted payload representation.</p>
+                <p>Formatted payload representation, the comment described
+above, or an empty string for a payload that has no test form.</p>
               </div>
             </td>
           </tr>

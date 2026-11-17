@@ -11393,6 +11393,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14294,7 +14350,7 @@ parameter; the parameter's type annotation decides what arrives.</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="files-1-4e94d8a68e4f">
-  <iframe src="../../drafter-demos/files-1-4e94d8a68e4f/index.html" title="Drafter Demo files-1-4e94d8a68e4f" name="files-1-4e94d8a68e4f" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
+  <iframe src="../../drafter-demos/files-1-4e94d8a68e4f/index.html" title="Drafter Demo files-1-4e94d8a68e4f" name="files-1-4e94d8a68e4f" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 300px;" ></iframe>
 </div>
 
 <p>Each annotation produces a different kind of value:</p>
@@ -14327,9 +14383,12 @@ parameter; the parameter's type annotation decides what arrives.</p>
 <p>When the visitor presses the button without choosing a file, a <code>str</code>
 parameter receives an empty string and a <code>bytes</code> parameter receives
 empty bytes, so check for an empty value before using it. A <code>Picture</code>
-parameter has no empty form and shows an error instead, unless you
-annotate it as <code>Picture | None</code>, in which case it receives <code>None</code>. A
-<code>FileUpload</code> with the <code>multiple</code> attribute delivers a list.</p>
+parameter has no empty form and shows an error instead. Adding
+<code>| None</code> to any of these annotations, as in <code>str | None</code> or
+<code>Picture | None</code>, makes the parameter receive <code>None</code> when no file was
+chosen. <a href="../../reference/route/#blank-values">Blank values</a> has the
+full rule. A <code>FileUpload</code> with the <code>multiple</code> attribute delivers a
+list.</p>
 <h2 id="recipe-offer-a-download">Recipe: offer a download</h2>
 <p><code>Download</code> works in the opposite direction: it offers text (or
 bytes) your app built as a file the visitor can save.</p>
@@ -14368,7 +14427,7 @@ bytes) your app built as a file the visitor can save.</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">([</span><span class="s2">&quot;Day 1: Captain ignored me.&quot;</span><span class="p">]))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="files-2-d5b6c7205274">
-  <iframe src="../../drafter-demos/files-2-d5b6c7205274/index.html" title="Drafter Demo files-2-d5b6c7205274" name="files-2-d5b6c7205274" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
+  <iframe src="../../drafter-demos/files-2-d5b6c7205274/index.html" title="Drafter Demo files-2-d5b6c7205274" name="files-2-d5b6c7205274" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
 </div>
 
 <p>The three arguments are the link text, the filename to save as, and
@@ -14388,13 +14447,16 @@ template includes it in the site along with every other file in the
 repository.</p>
 <p>If you build the site another way, tell the build about the file
 with <code>add_website_file</code>. That function also checks right away that
-the file really exists, and stops the program with a "file not
-found" message if it does not:</p>
+the file really exists under exactly that name, capital letters
+included. If it does not, the program stops with a message in the
+terminal titled "Website File Not Found" or "Website File Name Has
+Different Capital Letters", which says what to change:</p>
 <div class="highlight"><pre><span></span><code><span class="n">add_website_file</span><span class="p">(</span><span class="s2">&quot;questions.txt&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>The <code>--additional-paths</code> command line flag does the same job from
-outside the code, repeated once per file (see
-<a href="../../reference/cli/">Command line</a>).
+<p>To include a whole folder of files, name the folder, as in
+<code>add_website_file("data")</code>. The <code>--additional-paths</code> command line
+flag does the same job from outside the code, repeated once per file
+or folder (see <a href="../../reference/cli/">Command line</a>).
 The helper <code>get_drafter_path("questions.txt")</code> resolves a name to
 wherever the app's files actually live, which helps in the rare
 case where plain <code>open</code> cannot find a file you bundled.</p>
@@ -14439,7 +14501,7 @@ back in.</p>
         <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Record&quot;</span><span class="p">,</span> <span class="s2">&quot;record&quot;</span><span class="p">),</span>
         <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="n">Download</span><span class="p">(</span><span class="s2">&quot;Save my journal&quot;</span><span class="p">,</span> <span class="s2">&quot;journal.txt&quot;</span><span class="p">,</span>
-                 <span class="n">entries_to_text</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">entries</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)),</span>
+                 <span class="n">entries_to_text</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">entries</span><span class="p">)),</span>
         <span class="s2">&quot; or &quot;</span><span class="p">,</span>
         <span class="n">Link</span><span class="p">(</span><span class="s2">&quot;load a saved journal&quot;</span><span class="p">,</span> <span class="s2">&quot;ask_for_file&quot;</span><span class="p">)</span>
     <span class="p">])</span>
@@ -14477,19 +14539,16 @@ back in.</p>
 
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">([</span><span class="s2">&quot;Day 1: Captain ignored me.&quot;</span><span class="p">]))</span>
 </code></pre></div>
-<div class="drafter-demo" data-drafter-demo="files-3-6817edb11faf">
-  <iframe src="../../drafter-demos/files-3-6817edb11faf/index.html" title="Drafter Demo files-3-6817edb11faf" name="files-3-6817edb11faf" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 360px;" ></iframe>
+<div class="drafter-demo" data-drafter-demo="files-3-36f01fff8c06">
+  <iframe src="../../drafter-demos/files-3-36f01fff8c06/index.html" title="Drafter Demo files-3-36f01fff8c06" name="files-3-36f01fff8c06" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 360px;" ></iframe>
 </div>
 
 <p>Two helper functions do the converting. The <code>entries_to_text</code>
 function turns the list in state into one string with an entry on
 each line, and <code>text_to_entries</code> turns that string back into a list.
 The first two tests check each direction.</p>
-<p>The <code>Download</code> receives the text converted to bytes with
-<code>.encode("utf-8")</code>. A download built from bytes saves every character
-exactly as written. A download built from a plain string can lose
-part of the text when it contains a <code>#</code> character, which matters when
-the file holds whatever a visitor typed.</p>
+<p>The <code>Download</code> receives that string, and the saved file holds every
+character of it, including the line break at the end of each entry.</p>
 <p>The <code>load_journal</code> route checks for an empty string before it
 replaces anything. When the visitor presses Load without choosing a
 file, <code>saved_file</code> arrives as <code>""</code>, and the check keeps the journal
@@ -14543,8 +14602,10 @@ files manageable:</p>
 <li>Give the helper file a specific name of your own. A name such as
   <code>helpers.py</code> is also the name of a public library. If your file
   is ever missing from the deployed site, the browser installs that
-  library in its place, and the import error that follows is
-  confusing to read.</li>
+  library in its place. The Current tab of the debug panel then
+  lists a warning that begins "Your program imports helpers, and
+  there is no helpers.py next to your program", and an import error
+  that follows says the same in its steps.</li>
 <li>When you deploy, upload every <code>.py</code> file to the repository, next
   to <code>main.py</code>. The template from
   <a href="../../your-project/deploy/github-pages/">Publish on GitHub Pages</a>

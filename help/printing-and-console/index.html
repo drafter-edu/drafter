@@ -11349,6 +11349,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14222,20 +14278,20 @@ developer tools, which you can open with <span class="keys"><kbd class="key-f12"
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="printing-and-console-1-d12022a3cf5f">
-  <iframe src="../../drafter-demos/printing-and-console-1-d12022a3cf5f/index.html" title="Drafter Demo printing-and-console-1-d12022a3cf5f" name="printing-and-console-1-d12022a3cf5f" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
+  <iframe src="../../drafter-demos/printing-and-console-1-d12022a3cf5f/index.html" title="Drafter Demo printing-and-console-1-d12022a3cf5f" name="printing-and-console-1-d12022a3cf5f" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
 </div>
 
-<p>The demos on this documentation site run with the debug panel
-hidden, so the Console box is hidden too. Click the "debug" button
-in the corner of the demo, then click <strong>Click me</strong>, and the printed
-lines appear in the Console box below the page. When you run the
-same program on your own computer, the box is visible without that
-step.</p>
+<p>The demos on this documentation site show printed lines in a small
+Console box that floats at the bottom of the demo. Click
+<strong>Click me</strong> to see more lines arrive. When you run the same program
+on your own computer, the Console box sits below the page instead.</p>
 <p>Messages that Python writes to <code>stderr</code>, such as warnings, appear in
 the Console box in red. The <strong>Console</strong> button in the bar above the
 box opens and closes the box. Inside the box, <strong>Clear</strong> empties it
 and <strong>Hide</strong> closes it. After you press Hide, new output does not
-reopen the box, so press the Console button to see it again.</p>
+reopen the box, so press the Console button to see it again. The
+floating box in the demos has no Console button. After Hide, it
+comes back the next time something is printed.</p>
 <p>Printing is the quickest way to answer two common questions, which
 are "did this route run at all?" and "what value arrived?" Print
 the parameters at the top of the route you suspect, then click the
@@ -14277,7 +14333,7 @@ environment variable.</p>
 </tr>
 <tr>
 <td><code>hover</code></td>
-<td>A floating Console box pinned to the bottom of the window, with or without the debug panel.</td>
+<td>A floating Console box pinned to the bottom of the window, with or without the debug panel. Hide closes it until the next output is printed.</td>
 </tr>
 <tr>
 <td><code>toast</code></td>
@@ -14311,7 +14367,8 @@ choose the <code>hover</code> or <code>toast</code> mode, for example with
 <li><strong>The Console box is missing.</strong> The box appears only after
   something has been printed, and only while the debug panel is
   showing. If you pressed Hide, press the Console button under your
-  page. If your program calls <code>hide_debug_information()</code>, see
+  page (in <code>hover</code> mode, the box returns with the next output). If
+  your program calls <code>hide_debug_information()</code>, see
   <a href="#printing-on-a-deployed-site">Printing on a deployed site</a>.</li>
 <li><strong>Prints flood the console.</strong> A <code>print</code> inside a route that runs
   on every keystroke (<code>on_input</code>) produces a line every time the

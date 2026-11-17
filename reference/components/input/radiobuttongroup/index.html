@@ -11342,6 +11342,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14189,12 +14245,17 @@ few and the visitor benefits from comparing them.</p>
 <p>Like every component, <code>RadioButtonGroup</code> also accepts
 <a href="../../../keyword-attributes/">styling and attribute keywords</a>. Drafter
 applies them to the box that wraps the whole group, not to the
-individual radio buttons. The group recognizes no HTML attributes of
-its own, so <code>disabled=True</code> and <code>required=True</code> do not work here.
-Drafter turns a keyword it does not recognize into a CSS style, which
-the browser ignores, and it reports no error.
+individual radio buttons. That box's <code>id</code> is the group's <code>name</code>
+unless you pass an <code>id</code> keyword. Two keywords are the exception:
+Drafter passes <code>required=True</code> and <code>disabled=True</code> on to every radio
+button in the group. A disabled group cannot be changed, and its
+choice is not sent to the route. <code>required=True</code> adds the attribute,
+but Drafter does not ask the browser to check the form when a button
+is clicked, so the route still runs when nothing is chosen. Drafter
+turns any other keyword it does not recognize into a CSS style on
+the wrapping box;
 <a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
-explains the keyword rule.</p>
+explains that rule.</p>
 <h2 id="examples">Examples</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
@@ -14227,7 +14288,7 @@ explains the keyword rule.</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;golden&quot;</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="radiobuttongroup-1-a3a92afe51b5">
-  <iframe src="../../../../drafter-demos/radiobuttongroup-1-a3a92afe51b5/index.html" title="Drafter Demo radiobuttongroup-1-a3a92afe51b5" name="radiobuttongroup-1-a3a92afe51b5" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
+  <iframe src="../../../../drafter-demos/radiobuttongroup-1-a3a92afe51b5/index.html" title="Drafter Demo radiobuttongroup-1-a3a92afe51b5" name="radiobuttongroup-1-a3a92afe51b5" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
 </div>
 
 <h2 id="notes">Notes</h2>

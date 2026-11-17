@@ -11318,6 +11318,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14172,7 +14228,11 @@ list is the
 <a href="../../reference/route/#parameter-conversion">parameter conversion table</a>.</p>
 <p>If the text cannot be converted, for example <code>abc</code> for an <code>int</code>
 parameter, Drafter stops with a friendly error naming the parameter and
-the value, and the visitor can go back and correct it.</p>
+the value, and the visitor can go back and correct it. A number box
+that was left empty is also an error, unless the parameter has a
+default value or allows <code>None</code>.
+<a href="../../reference/route/#blank-values">Blank values</a> gives the rule for
+every type.</p>
 <h2 id="see-it">See it</h2>
 <p>Here is the contract in its smallest form. Follow the name <code>new_name</code>
 from the <code>TextBox</code>, to the button's target route, to the parameter:</p>
@@ -14209,7 +14269,7 @@ from the <code>TextBox</code>, to the button's target route, to the parameter:</
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="forms-and-input-1-8a51ea628d07">
-  <iframe src="../../drafter-demos/forms-and-input-1-8a51ea628d07/index.html" title="Drafter Demo forms-and-input-1-8a51ea628d07" name="forms-and-input-1-8a51ea628d07" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 240px;" ></iframe>
+  <iframe src="../../drafter-demos/forms-and-input-1-8a51ea628d07/index.html" title="Drafter Demo forms-and-input-1-8a51ea628d07" name="forms-and-input-1-8a51ea628d07" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 240px;" ></iframe>
 </div>
 
 <p>The test at the bottom shows something useful: because routes are
@@ -14251,7 +14311,7 @@ conversion error:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="forms-and-input-2-ef373a173ad6">
-  <iframe src="../../drafter-demos/forms-and-input-2-ef373a173ad6/index.html" title="Drafter Demo forms-and-input-2-ef373a173ad6" name="forms-and-input-2-ef373a173ad6" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
+  <iframe src="../../drafter-demos/forms-and-input-2-ef373a173ad6/index.html" title="Drafter Demo forms-and-input-2-ef373a173ad6" name="forms-and-input-2-ef373a173ad6" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
 </div>
 
 <p>The <code class="highlight"><span class="n">TextBox</span><span class="p">(</span><span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></code> form gives the box a starting value of
@@ -14263,8 +14323,10 @@ number is expected.</p>
   parameter names. <code>new_name</code> and <code>first</code> read well; <code>textbox1</code> does not.</li>
 <li>The button's target route needs a parameter for each input whose
   value it uses, matching the input's name exactly. An input that the
-  route has no parameter for is not an error. The page still works, and
-  the debug panel lists a warning about the unused form field.</li>
+  route has no parameter for is not an error, and the page still works.
+  The debug panel lists a warning only when the input's name is nearly
+  the same as a parameter that received nothing, which usually means a
+  typing mistake.</li>
 <li>Annotate every input parameter. With <code class="highlight"><span class="n">age</span><span class="p">:</span> <span class="nb">int</span></code>, the route
   receives a number or a clear error; without an annotation, it
   receives text that you must convert yourself.</li>

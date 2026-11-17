@@ -11316,6 +11316,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14106,8 +14162,9 @@ closed or reloaded.</p>
 <li><strong>Once on your computer</strong>, from top to bottom, like any Python file.
    This run defines your <code>State</code>, registers your routes, and runs your
    <code>assert_</code> tests. When it reaches <code>start_server(...)</code>, it hands
-   everything over to the site. That is why code written after
-   <code>start_server(...)</code> never runs.</li>
+   everything over to the site and waits there for as long as the
+   site is up. That is why <code>start_server(...)</code> goes on the last line:
+   code written after it does not run until the server stops.</li>
 <li><strong>Again inside the browser</strong>, where the real app lives. The browser
    can run Python directly, so your routes execute right there: every
    button click calls one of your functions, which returns the next
@@ -14156,7 +14213,7 @@ page is shown:</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="how-drafter-works-1-0e32eb714ea3">
-  <iframe src="../../drafter-demos/how-drafter-works-1-0e32eb714ea3/index.html" title="Drafter Demo how-drafter-works-1-0e32eb714ea3" name="how-drafter-works-1-0e32eb714ea3" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
+  <iframe src="../../drafter-demos/how-drafter-works-1-0e32eb714ea3/index.html" title="Drafter Demo how-drafter-works-1-0e32eb714ea3" name="how-drafter-works-1-0e32eb714ea3" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
 </div>
 
 <p>Click the button a few times, then reload your browser tab on your own
@@ -14164,8 +14221,11 @@ computer and watch the count start over. The count resets because state
 lives only in memory.</p>
 <h2 id="what-this-means-for-your-code">What this means for your code</h2>
 <ul>
-<li>Put <code>start_server(...)</code> last. On your computer, nothing after it
-  runs.</li>
+<li>Put <code>start_server(...)</code> last. On your computer, code after it waits
+  until the server stops. In the browser, it runs right after the
+  first page appears. Drafter prints a
+  <a href="../../help/errors/nothing-after-start-server/">warning</a> when it
+  finds code there.</li>
 <li>Put tests before <code>start_server(...)</code>; they run at startup, every time.</li>
 <li>Design your <code>State</code> to hold everything the app needs to remember, and
   expect it to reset on reload.</li>

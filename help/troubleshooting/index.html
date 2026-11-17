@@ -6045,10 +6045,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reloading-the-tab-does-not-go-back-to-the-first-page" class="md-nav__link">
+  <a href="#reloading-the-tab-shows-a-page-i-did-not-expect" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reloading the tab does not go back to the first page
+        Reloading the tab shows a page I did not expect
       
     </span>
   </a>
@@ -11415,6 +11415,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13810,10 +13866,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reloading-the-tab-does-not-go-back-to-the-first-page" class="md-nav__link">
+  <a href="#reloading-the-tab-shows-a-page-i-did-not-expect" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reloading the tab does not go back to the first page
+        Reloading the tab shows a page I did not expect
       
     </span>
   </a>
@@ -14015,9 +14071,11 @@ through these checks in order.</p>
 <li>Check that you are editing the file that is running, and that you
    are looking at the browser tab that belongs to this run. When a
    program starts, the terminal prints the address of its site in a
-   line such as <code>Drafter ready at http://localhost:8000</code>. A tab left
-   open from an earlier run, or from another program, does not
-   reload when you save. Reload that tab, and see
+   line such as <code>Drafter ready at http://localhost:8000</code>. A tab that
+   belongs to another program does not reload when you save, and
+   neither does a tab showing a "Disconnected" box, which means it
+   lost its program more than two minutes ago. Reload that tab, and
+   see
    <a href="#the-browser-shows-an-old-or-different-app">The browser shows an old or different app</a>.</li>
 <li>Look for a box titled "Syntax Error" on top of your site. When
    the saved file is not valid Python, Drafter keeps showing the
@@ -14034,24 +14092,29 @@ through these checks in order.</p>
 <li>As a last resort, stop the program, run it again, and open the
    address that the terminal prints.</li>
 </ol>
-<h2 id="reloading-the-tab-does-not-go-back-to-the-first-page">Reloading the tab does not go back to the first page</h2>
+<h2 id="reloading-the-tab-shows-a-page-i-did-not-expect">Reloading the tab shows a page I did not expect</h2>
 <p>After each click, the address bar ends with the name of the route
 that produced the current page, such as <code>?route=add_one</code>. When you
 reload the tab, Drafter starts the site again with the state at its
-starting value and then runs that same route, with no form values.
-Two results of this behavior can be surprising.</p>
+starting value. What it shows next depends on what that route needs.</p>
 <ul>
-<li>If the route changes the state, the change is applied once to the
+<li><strong>The route needs only the state.</strong> Drafter runs the route again.
+  If the route changes the state, the change is applied once to the
   starting state. A counter that starts at 0 and was showing 4 shows
   1 after a reload when the address ends in <code>?route=add_one</code>.</li>
-<li>If the route needs a value from a form, the reload has no value to
-  give it. Drafter shows an error page titled "Problem With the
-  Route's Arguments", which the
-  <a href="../errors/missing-parameter/">missing parameter</a> entry describes.</li>
+<li><strong>The route needs a value from a form or a button.</strong> A reload has
+  no value to give it, so Drafter does not run the route. It opens
+  the first page and removes the <code>?route=...</code> part from the address.
+  The debug panel lists a warning that begins "The address of this
+  page named a route that needs values from a form or a button", and
+  the warning's Details name the route and the parameters it was
+  missing. Nothing in your code needs fixing. Use your site's buttons
+  and links to get back to the page you were on.</li>
 </ul>
-<p>To return to the first page, click <strong>Return to Index Page</strong> on the
-error page, or open the site's address without the <code>?route=...</code>
-part.</p>
+<p>To return to the first page yourself, open the site's address without
+the <code>?route=...</code> part.
+<a href="../../reference/route/#opening-a-site-on-a-route">Opening a site on a route</a>
+has the full rules.</p>
 <h2 id="the-browser-shows-an-old-or-different-app">The browser shows an old or different app</h2>
 <p>Every running Drafter program serves its site at an address that
 ends in a port number, normally <code>http://localhost:8000</code>. Only one
@@ -14064,10 +14127,16 @@ terminal prints these two lines.</p>
 <div class="highlight"><pre><span></span><code>An earlier run of main.py is still using port 8000. Stopping it so this run can take over...
 Stopped the earlier run.
 </code></pre></div>
-<p>A browser tab that the earlier run opened does not follow the new
-run. That tab keeps showing the old version of your site, and it no
-longer reloads when you save. Reload that tab, or use the tab that
-the new run opened.</p>
+<p>A browser tab that the earlier run opened notices that its program
+went away and keeps trying to reach it again. When the new run
+answers at the same address, the tab reloads by itself and shows the
+new version, so you may end up with two tabs showing the same site.
+Close either one.</p>
+<p>A tab that cannot reach its program for two minutes stops trying
+and shows a box titled "Disconnected". The page stays readable
+behind it, but saving your file no longer updates that tab. Run the
+program again and reload the tab, or use the tab that the new run
+opened.</p>
 <p><strong>A different program is using the port.</strong> Drafter moves your
 program to the next free port and prints the new address. When the
 other program is also a Drafter site, a second line says how to stop
@@ -14090,6 +14159,12 @@ a free port for you.</p>
 <ul>
 <li>Read the message in the terminal. A syntax error names the file
   and the line. Fix that line and run the program again.</li>
+<li>A problem that Drafter recognizes is shown in the terminal as a
+  titled message, not a traceback. Examples are a file named in
+  <code>add_website_file</code> that does not exist and a <code>Header</code> level outside
+  1 to 6. The message has a <code>Where:</code> line that names the file and
+  line, an explanation, and a list headed "What to try". Running the
+  program with <code>--verbose</code> shows the full traceback instead.</li>
 <li>If the terminal shows a message titled "Port already in use", see
   <a href="#the-browser-shows-an-old-or-different-app">The browser shows an old or different app</a>.</li>
 <li>If <code>import drafter</code> itself fails, the installation is the problem.
@@ -14140,12 +14215,22 @@ own.</p>
 <h2 id="a-picture-shows-as-a-broken-image">A picture shows as a broken image</h2>
 <p>A small broken-picture icon in place of your image means that the
 browser asked for the file and did not get it. Drafter does not show
-an error page or a warning for a missing picture, so the icon is the
-only sign on the page.</p>
+an error page for a missing picture, so the rest of the page appears
+as usual. The debug panel lists a warning that begins "The browser
+could not load one of the images on this site", once for each image
+that failed, and the warning's Details name the image:</p>
+<div class="highlight"><pre><span></span><code>The image &#39;ada.png&#39; could not be loaded.
+</code></pre></div>
+<p>The warning covers every image on the page, including an <code>&lt;img&gt;</code>
+written with <code>RawHTML</code> and an image from another website.</p>
 <ul>
 <li>Compare the filename in your code, such as <code>Image("ada.png")</code>,
-  with the name of the real file, including the ending.</li>
-<li>Check that the file sits next to your program.</li>
+  with the name of the real file, including the ending and the
+  capital letters.</li>
+<li>Check that the file sits next to your program, or in the folder
+  that your code names.</li>
+<li>If the image comes from another website, check its address and
+  your internet connection.</li>
 <li>While the program runs on your computer, the terminal prints a
   line ending in <code>404 Not Found</code> for each file that the browser
   asked for and did not get. That line shows the exact name that was
@@ -14199,8 +14284,11 @@ working.</p>
 <h2 id="my-code-after-start_server-never-runs">My code after start_server never runs</h2>
 <p>This behavior is
 <a href="../errors/nothing-after-start-server/">by design</a>. The call to
-<code>start_server(...)</code> takes over the program. Configuration and tests
-go before it, and behavior goes in routes.</p>
+<code>start_server(...)</code> takes over the program, and on your computer the
+lines after it wait until the server stops. When the program starts,
+the terminal prints a warning that names the line where that code
+begins. Configuration and tests go before the call, and behavior goes
+in routes.</p>
 <h2 id="the-first-load-is-slow">The first load is slow</h2>
 <p>The browser downloads and starts a complete copy of Python before
 your site can respond, so expect a delay of several seconds on the

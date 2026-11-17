@@ -11338,6 +11338,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14168,7 +14224,7 @@ effect only on a component that calls a route.</p>
 <span class="n">start_server</span><span class="p">()</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="keyword-attributes-1-4e470c58ab85">
-  <iframe src="../../drafter-demos/keyword-attributes-1-4e470c58ab85/index.html" title="Drafter Demo keyword-attributes-1-4e470c58ab85" name="keyword-attributes-1-4e470c58ab85" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
+  <iframe src="../../drafter-demos/keyword-attributes-1-4e470c58ab85/index.html" title="Drafter Demo keyword-attributes-1-4e470c58ab85" name="keyword-attributes-1-4e470c58ab85" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
 </div>
 
 <h2 id="style_-one-css-property-each"><code>style_*</code>: one CSS property each</h2>
@@ -14212,14 +14268,23 @@ lists the other forms that <code>arguments</code> accepts.</p>
 <p>Each component also understands the HTML attributes that make sense
 for its element: <code>placeholder="Type here"</code> or <code>maxlength=20</code> on a
 <code>TextBox</code>, <code>rows=6</code> on a <code>TextArea</code>, <code>accept="image/*"</code> on a
-<code>FileUpload</code>, <code>disabled=True</code> on a <code>Button</code>. A shared baseline of
-attributes (<code>id</code>, <code>title</code>, <code>hidden</code>, <code>data_*</code> attributes, and
-similar) works on every component. Underscores become hyphens on the
-way out, so <code>data_role="hero"</code> renders as <code>data-role="hero"</code>.</p>
+<code>FileUpload</code>, <code>disabled=True</code> on a <code>Button</code>. The reference page for
+each input component lists the attributes it recognizes. A shared
+baseline of attributes (<code>id</code>, <code>title</code>, <code>hidden</code>, <code>data_*</code> attributes,
+and similar) works on every component. Underscores become hyphens on
+the way out, so <code>data_role="hero"</code> renders as <code>data-role="hero"</code>.</p>
 <p>If a component does not recognize a keyword as an attribute, Drafter
 treats the keyword as a CSS style instead. This rule is what makes
 bare <code>color="red"</code> work, but it also means an unsupported attribute
 quietly becomes a meaningless style rather than an error.</p>
+<p>Some attributes act on the field itself: <code>maxlength</code> limits typing,
+and <code>disabled=True</code> and <code>readonly=True</code> block editing. A disabled
+field's value is not sent to the route. Attributes that ask the
+browser to check a form do not stop a route from running. Drafter
+does not ask the browser to check the form when a <code>Button</code> is
+clicked, so a field marked <code>required=True</code> can be left empty, and a
+value that breaks a <code>pattern</code>, a <code>minlength</code>, or a <code>min</code> and <code>max</code>
+range still reaches the route. Check the values inside the route.</p>
 <h2 id="notes">Notes</h2>
 <ul>
 <li><strong>Misspellings fail silently.</strong> A misspelled <code>style_colour</code> or
@@ -14229,6 +14294,9 @@ quietly becomes a meaningless style rather than an error.</p>
 <li><strong>Boolean attributes render bare</strong>: <code>disabled=True</code> renders as
   <code>disabled</code>, the way HTML expects, and <code>disabled=False</code> omits the
   attribute entirely.</li>
+<li><strong><code>autocomplete</code> keeps its value</strong>: <code>autocomplete="off"</code> and
+  <code>autocomplete="email"</code> render as written, and <code>True</code> and <code>False</code>
+  render as <code>on</code> and <code>off</code>.</li>
 <li><strong>Styles set here are testable</strong> with
   <a href="../testing-functions/#assert_style">assert_style</a>; other
   assertions ignore styling by default.</li>

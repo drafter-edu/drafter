@@ -11342,6 +11342,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14173,9 +14229,9 @@ annotations is in the <a href="../../../../add/files/">files how-to</a>.</p>
 </tr>
 <tr>
 <td><code>accept</code></td>
-<td><code>str</code></td>
+<td><code>str</code> or <code>list[str]</code></td>
 <td>any file</td>
-<td>File-type filters for the picker: a MIME pattern (<code>"image/*"</code>), extensions (<code>".txt"</code>), or several, comma-separated.</td>
+<td>File-type filters for the picker: a MIME pattern (<code>"image/*"</code>), an extension (<code>".txt"</code>), or a list of several (<code>[".txt", ".csv"]</code>). An extension written without its period (<code>"txt"</code>) gets one added.</td>
 </tr>
 </tbody>
 </table>
@@ -14183,12 +14239,14 @@ annotations is in the <a href="../../../../add/files/">files how-to</a>.</p>
 multiple=True)</code>) lets the visitor pick several files; the parameter
 then receives a list.</p>
 <p>Besides <code>multiple</code>, the HTML attributes <code>FileUpload</code> recognizes as
-keywords are <code>capture</code> and <code>required</code>. <code>required=True</code> adds the
-attribute, but a button still runs its route when no file is chosen.
-<code>disabled</code> is not on that list. Drafter turns a keyword it does not
-recognize into a CSS style, which the browser ignores, and it reports
-no error. <a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
-explains the keyword rule.</p>
+keywords are <code>capture</code>, <code>required</code>, and <code>disabled</code>. <code>disabled=True</code>
+stops the visitor from choosing a file, and a disabled upload is not
+sent to the route. <code>required=True</code> adds the attribute, but Drafter
+does not ask the browser to check the form when a button is clicked,
+so the route still runs when no file is chosen. Drafter turns any
+other keyword it does not recognize into a CSS style;
+<a href="../../../keyword-attributes/#plain-html-attributes">Plain HTML attributes</a>
+explains that rule.</p>
 <h2 id="examples">Examples</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">drafter</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
@@ -14219,7 +14277,7 @@ explains the keyword rule.</p>
 <span class="n">start_server</span><span class="p">(</span><span class="n">State</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="fileupload-1-37c9b54b23ea">
-  <iframe src="../../../../drafter-demos/fileupload-1-37c9b54b23ea/index.html" title="Drafter Demo fileupload-1-37c9b54b23ea" name="fileupload-1-37c9b54b23ea" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
+  <iframe src="../../../../drafter-demos/fileupload-1-37c9b54b23ea/index.html" title="Drafter Demo fileupload-1-37c9b54b23ea" name="fileupload-1-37c9b54b23ea" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
 </div>
 
 <h2 id="notes">Notes</h2>
@@ -14234,9 +14292,10 @@ explains the keyword rule.</p>
   parameter receives <code>b""</code>. A file type such as <code>DrafterTextFile</code>
   receives a file whose <code>filename</code> is empty and whose <code>size</code> is 0.
   A <code>Picture</code> parameter stops with an error page that says no file
-  was chosen. Annotate it <code>Picture | None</code> to receive <code>None</code>
-  instead. Adding <code>| None</code> to <code>str</code> does not change the result,
-  which is still <code>""</code>.</li>
+  was chosen. Adding <code>| None</code> to any of these annotations, as in
+  <code>str | None</code> or <code>Picture | None</code>, gives <code>None</code> instead, and a
+  parameter with a default value receives its default.
+  <a href="../../../route/#blank-values">Blank values</a> has the full rule.</li>
 <li><code>accept</code> is guidance for the picker, not enforcement; a visitor
   can still choose any file. A file of the wrong type produces a
   <a href="../../../../help/errors/file-decode-error/">friendly error</a>.</li>

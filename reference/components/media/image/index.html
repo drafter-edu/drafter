@@ -11342,6 +11342,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -14205,7 +14261,7 @@ use the <code>Image</code> wrapper when you want size control or alt text.</p>
 <span class="n">start_server</span><span class="p">()</span>
 </code></pre></div>
 <div class="drafter-demo" data-drafter-demo="image-1-bfae474b8f0c">
-  <iframe src="../../../../drafter-demos/image-1-bfae474b8f0c/index.html" title="Drafter Demo image-1-bfae474b8f0c" name="image-1-bfae474b8f0c" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
+  <iframe src="../../../../drafter-demos/image-1-bfae474b8f0c/index.html" title="Drafter Demo image-1-bfae474b8f0c" name="image-1-bfae474b8f0c" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 280px;" ></iframe>
 </div>
 
 <h2 id="notes">Notes</h2>
@@ -14219,6 +14275,12 @@ use the <code>Image</code> wrapper when you want size control or alt text.</p>
   <a href="../../../../help/errors/missing-asset-on-deploy/">works locally, 404s deployed</a>.</li>
 <li><strong>URL images</strong> require the visitor to be online, and the address
   must point directly at an image file.</li>
+<li><strong>An image that cannot be loaded</strong> shows as a broken picture, and
+  the rest of the page appears as usual. The debug panel lists a
+  warning for it, whose Details name the image, as in "The image
+  'ada.png' could not be loaded."
+  <a href="../../../../help/troubleshooting/#a-picture-shows-as-a-broken-image">A picture shows as a broken image</a>
+  lists what to check.</li>
 <li>A width and height that do not match the picture's proportions
   will stretch it. Give only one of the two, or keep the pair in
   proportion, unless the distortion is intentional.</li>

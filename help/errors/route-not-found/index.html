@@ -11340,6 +11340,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../dev/api/drafter/helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../dev/api/drafter/helpers/urls/" class="md-nav__link">
         
   
@@ -13808,12 +13864,13 @@
 
 <h1 id="link-or-button-points-to-an-unknown-route">Link or button points to an unknown route</h1>
 <h2 id="the-error">The error</h2>
-<p>The error page has this title:</p>
-<div class="highlight"><pre><span></span><code>Unusable Value
+<p>The error page has one of two titles. The title names the kind of
+component that has the problem:</p>
+<div class="highlight"><pre><span></span><code>Link Points to a Missing Page
 </code></pre></div>
-<p>Drafter uses the title "Unusable Value" for several different
-problems, so the sentence under the title is what identifies this
-one:</p>
+<div class="highlight"><pre><span></span><code>Button Points to a Missing Page
+</code></pre></div>
+<p>The sentence under the title gives the label and the target:</p>
 <div class="highlight"><pre><span></span><code>The link labeled &#39;Next&#39; tries to go to a page named `sumary`, but your
 site has no route with that name.
 </code></pre></div>
@@ -13822,10 +13879,9 @@ site has no route with that name.
 While verifying the Page() object returned from index, an error was encountered:
 Link `Next` points to non-existent page `sumary`.
 </code></pre></div>
-<p>Both messages say "link" even when the component is a <code>Button</code>.
-Drafter checks buttons and links the same way, so
-<code>Button("Next", "sumary")</code> and <code>Link("Next", "sumary")</code> produce the
-same text.</p>
+<p>Both messages also name the kind of component. For
+<code>Button("Next", "sumary")</code> they read "The button labeled 'Next'" and
+"Button <code>Next</code> points to non-existent page <code>sumary</code>."</p>
 <p>A different error page, titled "Page Not Found", appears when the
 address in the browser names a route your program does not have, for
 example an address that ends in <code>?route=sumary</code>:</p>
@@ -13867,11 +13923,12 @@ three, so check your code for each one:</p>
 <span class="c1"># In the page that links there:</span>
 <span class="n">Button</span><span class="p">(</span><span class="s2">&quot;Next&quot;</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>The third hint under "What To Try Next" on the error page suggests
-passing the route function itself, as in <code>Button("Next", summary)</code>
-with no quotation marks. Both forms work and lead to the same route,
-and when you use a string, as these docs do, the string must match
-the name of the function exactly.</p>
+<p>The two hints under "What To Try Next" on the error page point at the
+same two places. The first says to check the spelling of the page
+name in the button or link, and the second says to make sure the
+page's function has the <code>@route</code> decorator. The string must match the
+name of the function exactly, including capital letters and
+underscores.</p>
 <h2 id="confirm">Confirm</h2>
 <p>Reload and click the fixed control; the target page should render.
 If you have tests, add

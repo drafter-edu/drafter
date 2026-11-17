@@ -11234,6 +11234,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../helpers/urls/" class="md-nav__link">
         
   
@@ -14240,7 +14296,7 @@ upload dict for a <code>dict</code> parameter).</p>
 
 
 <h3 id="drafter.router.parameters.conversion.ConverterRegistry.convert" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">convert</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">convert</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">keep_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 </h3>
 
@@ -14251,6 +14307,89 @@ upload dict for a <code>dict</code> parameter).</p>
 <p>Untyped (or <code>Any</code>) parameters pass through unconverted; explicitly
 typed parameters convert strictly and produce a structured error on
 failure.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>ctx</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ConversionContext(param_name, expected_type, raw_value, payload_value=None, route_name='', resolved_type=None, type_args=(), registry=None)
+
+  
+      dataclass
+   (drafter.data.converter.ConversionContext)" href="../../../data/converter/#drafter.data.converter.ConversionContext">ConversionContext</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The conversion to perform.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>keep_missing</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>How to report a value that is absent (see
+<code>MISSING_VALUE_ERROR_CODE</code>) when the annotation does not
+allow None. By default the type's own empty value is
+returned as a success when there is one. The binder
+passes True to get the missing-value failure itself, so
+it can use the parameter's default first.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ConversionResult(ok, value=None, error_code='', message='', hint='', has_empty_value=False)
+
+  
+      dataclass
+   (drafter.data.converter.ConversionResult)" href="../../../data/converter/#drafter.data.converter.ConversionResult">ConversionResult</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The outcome of the conversion.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     </div>
@@ -14436,6 +14575,9 @@ missing-value error (None for <code>bytes | None</code> annotations).</p>
 <p>Delegates to <code>try_convert_datetime</code>; unparseable values fail with a
 hint to use an ISO format, and unhandled value/target combinations
 defer to the next converter.</p>
+<p>A blank value is a missing value whose empty form is the current date
+or time, so a bare <code>date</code> parameter still gets today while
+<code>date | None</code> gets None and a parameter with a default keeps it.</p>
 
 
     </div>
@@ -14454,6 +14596,10 @@ defer to the next converter.</p>
     <div class="doc doc-contents ">
 
         <p>Convert a client file-upload dict (<code>__file_upload__</code>) to the target type.</p>
+<p>A file field that was left empty is a missing value. Its empty form
+(<code>""</code> for <code>str</code>, <code>b""</code> for <code>bytes</code>, a file object with no
+content) is what the parameter receives unless it is optional or has
+a default.</p>
 
 
     </div>
@@ -14473,7 +14619,8 @@ defer to the next converter.</p>
 
         <p>Convert numeric strings to float.</p>
 <p>Strings are stripped and parsed with <code>float</code>; non-numeric strings
-fail with a hint to enter a number or use str. Bools and non-string
+fail with a hint to enter a number or use str. A blank string is a
+missing value: there is no empty <code>float</code>. Bools and non-string
 values defer to the next converter.</p>
 
 
@@ -14496,8 +14643,9 @@ values defer to the next converter.</p>
 <p>Strings are stripped and parsed with <code>int</code>; if that fails, they are
 parsed as floats and accepted only when the result is a whole number.
 Decimal values fail with a hint to use float instead, and non-numeric
-strings fail with a hint to enter a number or use str. Bools and
-non-string values defer to the next converter.</p>
+strings fail with a hint to enter a number or use str. A blank string
+is a missing value: there is no empty <code>int</code>. Bools and non-string
+values defer to the next converter.</p>
 
 
     </div>

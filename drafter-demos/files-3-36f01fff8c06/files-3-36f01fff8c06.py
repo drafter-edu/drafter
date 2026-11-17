@@ -32,7 +32,7 @@ def index(state: State) -> Page:
         Button("Record", "record"),
         "\n",
         Download("Save my journal", "journal.txt",
-                 entries_to_text(state.entries).encode("utf-8")),
+                 entries_to_text(state.entries)),
         " or ",
         Link("load a saved journal", "ask_for_file")
     ])

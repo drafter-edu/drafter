@@ -11519,6 +11519,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../helpers/urls/" class="md-nav__link">
         
   
@@ -14374,9 +14430,10 @@ rather than a file name, is not a <code>.css</code> file, or cannot be found.</p
         <p>Registers files next to the student's program as part of the website,
 so that they are copied into the built site when it is deployed.</p>
 <p>Use this for files the site needs at runtime (data files that are
-<code>open()</code>ed, images, fonts, and so on). Each file is checked right
-away; a missing file raises a friendly error that suggests similarly
-named files.</p>
+<code>open()</code>ed, images, fonts, and so on). A folder can be named too, and
+everything in it is copied. Each path is checked right away; a missing
+file raises a friendly error that suggests similarly named files, and
+so does a name whose capital letters do not match the file's.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -14400,7 +14457,8 @@ named files.</p>
             <td>
               <div class="doc-md-description">
                 <p>One or more paths, relative to your program's folder
-(such as <code>"words.txt"</code> or <code>"images/logo.png"</code>).</p>
+(such as <code>"words.txt"</code>, <code>"images/logo.png"</code>, or the folder
+<code>"images"</code>).</p>
               </div>
             </td>
             <td>
@@ -14447,13 +14505,20 @@ named files.</p>
             <td>
               <div class="doc-md-description">
                 <p>If no filenames are given, or if any path is
-not a string, is a URL or absolute path, or cannot be found.</p>
+not a string, is a URL or absolute path, cannot be found, or
+is spelled with different capital letters than the file.</p>
               </div>
             </td>
           </tr>
       </tbody>
     </table>
 
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="n">add_website_file</span><span class="p">(</span><span class="s2">&quot;words.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;images&quot;</span><span class="p">)</span>
+</code></pre></div>
+</details>
 
     </div>
 

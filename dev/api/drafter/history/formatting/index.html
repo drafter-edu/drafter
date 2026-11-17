@@ -11234,6 +11234,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -11452,6 +11508,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.history.formatting.NOT_FROZEN_PREFIX" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NOT_FROZEN_PREFIX
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.history.formatting.CustomPrettyPrinter" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -11476,6 +11543,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.history.formatting.describe_unfrozen_circular_visit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        describe_unfrozen_circular_visit
+      
+    </span>
+  </a>
   
 </li>
       
@@ -13700,6 +13778,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#drafter.history.formatting.NOT_FROZEN_PREFIX" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NOT_FROZEN_PREFIX
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#drafter.history.formatting.CustomPrettyPrinter" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13724,6 +13813,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drafter.history.formatting.describe_unfrozen_circular_visit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        describe_unfrozen_circular_visit
+      
+    </span>
+  </a>
   
 </li>
       
@@ -13783,6 +13883,31 @@
 
 
 
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="drafter.history.formatting.NOT_FROZEN_PREFIX" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">NOT_FROZEN_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;# Not frozen:&#39;</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>How a visit's generated test starts when no test could be written for it.</p>
+<p>The text after the prefix says why. The line is a Python comment, so the
+debug panel's Copy and Download output stays valid Python. Mirrored in
+js/src/debug/panels/testing.tsx, which keeps these lines among the tests.</p>
+
+    </div>
+
+</div>
 
 
 
@@ -13954,6 +14079,91 @@ whether recursion was detected), per the pprint contract.</p>
 
 </div>
 
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="drafter.history.formatting.describe_unfrozen_circular_visit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">describe_unfrozen_circular_visit</span><span class="p">(</span><span class="n">route_call</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Write the comment that stands in for a test with a circular state.</p>
+<p>A value that contains itself cannot be written as a Python literal, so
+a visit whose arguments or resulting state are circular gets this
+one-line comment instead of an <code>assert_equal(...)</code> test that could not
+be pasted and run.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>route_call</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The visit's route call, such as <code>add(State(count=1))</code>.
+Only the function name in front of the parenthesis is used.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A one-line Python comment naming the route.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="n">describe_unfrozen_circular_visit</span><span class="p">(</span><span class="s2">&quot;add(Pet(name=&#39;Ada&#39;, owner=...))&quot;</span><span class="p">)</span>
+<span class="c1"># &quot;# Not frozen: add(...) has a state with a circular reference,</span>
+<span class="c1">#  which cannot be written as a test.&quot;</span>
+</code></pre></div>
+</details>
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 

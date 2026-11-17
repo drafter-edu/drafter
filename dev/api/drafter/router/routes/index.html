@@ -11234,6 +11234,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../helpers/scoped_js/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scoped_js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/uncaught_errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uncaught_errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../helpers/urls/" class="md-nav__link">
         
   
@@ -12822,6 +12878,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#drafter.router.routes.Router.find_missing_arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        find_missing_arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#drafter.router.routes.Router.get_route" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -13899,6 +13966,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#drafter.router.routes.Router.find_missing_arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        find_missing_arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#drafter.router.routes.Router.get_route" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14401,6 +14479,103 @@ rendered as a string, and its request "parameters".</p>
     <div class="doc doc-contents ">
 
         <p>Remove all registered routes and signatures.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="drafter.router.routes.Router.find_missing_arguments" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">find_missing_arguments</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">injected_names</span><span class="o">=</span><span class="p">())</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Name the parameters a route could not fill if it got no values.</p>
+<p>A page opened from its address (a reload, a bookmark, a shared
+link) arrives with no form fields, component arguments, or event
+values. This runs the same binding a real request gets, with an
+empty payload, so the answer always agrees with what the route
+would actually report.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>url</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The route to check.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>injected_names</code>
+            </td>
+            <td>
+                  <code><span title="collections.abc.Iterable">Iterable</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Names of the framework values Drafter passes by
+parameter name (such as <code>_server</code>), which never count as
+missing.</p>
+              </div>
+            </td>
+            <td>
+                  <code>()</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The required parameters left without a value, in declaration
+order. Empty when the route can run as it is, and also when no
+such route exists (visiting it reports that on its own).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     </div>
