@@ -103,6 +103,11 @@ start_server(State([3, 4, 2]))
   create it, so run your `plt.` commands first and write
   `MatPlotLibPlot()` after them. Commands that run after the
   component is created belong to the next chart.
+- Leave out `plt.show()`. On your own computer it opens the chart in
+  a separate window, and when your first page draws a chart the site
+  does not start until you close that window. In the browser it does
+  nothing. If a library calls it for you, see
+  [Libraries that draw their own charts](../../../extend/packages.md#libraries-that-draw-their-own-charts).
 - Charts drawn in unit tests never leak into your pages: each
   `MatPlotLibPlot()` keeps its own figure, even when the page
   is only compared and never shown.

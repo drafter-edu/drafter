@@ -125,19 +125,23 @@ uses a dictionary, which your course may not have covered.)
 ## Wheels Drafter hosts
 
 A few libraries students ask for exist on PyPI only as source code,
-which a browser cannot build. ChemPy is one. For these, Drafter keeps
-a **wheel index** at
+which a browser cannot build. ChemPy is one. Others can be installed
+themselves but need a library like that: qmsolve needs `progressbar`,
+which is source-only. For these, Drafter keeps a **wheel index** at
 `https://drafter-edu.github.io/packages/wheels.json`: pure-Python
-wheels built for the browser, listed in a small JSON file. When a
-package has no wheel on PyPI, Drafter checks the index. Nothing to
-configure: `import chempy` works.
+wheels built for the browser, listed in a small JSON file. When PyPI
+cannot supply a package, or something the package needs, Drafter
+checks the index. Nothing to configure: `import chempy` and
+`import qmsolve` work.
 
-An index is installed as a set. Its wheels are built to go together,
-so when one of them is needed all of them are installed, and then
-whatever they declare they still need (such as `sympy`, which the
-browser's Python already provides) is fetched. A declared requirement
-that nothing can supply is skipped, since not every dependency a
-package lists is needed in the browser.
+Only what your program needs is installed. Drafter installs the
+package, then each library the package says it needs: from the same
+index when the index has it, since an index's wheels are built to go
+together, and otherwise from the browser's own Python (`sympy`, for
+example) or PyPI. A requirement that nothing can supply is skipped,
+since not every dependency a package lists is needed in the browser.
+If the package turns out to need it after all, its `import` fails
+with a `ModuleNotFoundError` that names the missing library.
 
 Courses can host their own index the same way: a `wheels.json`
 listing wheel file names next to a `wheels/` folder, on any server
@@ -156,6 +160,94 @@ separated by `;`) and `DRAFTER_USE_DEFAULT_PACKAGE_INDEX`, and as
 The index format is the one produced by the
 [drafter-edu/packages](https://github.com/drafter-edu/packages)
 repository, which you can copy to build your own.
+
+## Libraries that draw their own charts
+
+Some libraries built on matplotlib draw a chart for you and then call
+`plt.show()` themselves. qmsolve's `plot_eigenstate` is one. The
+chart is still an ordinary matplotlib figure, so put `MatPlotLibPlot()`
+on the page right after the library draws it.
+
+The `plt.show()` call needs one extra step, because it means
+different things in the two places your program runs:
+
+- **In the browser** it does nothing. The figure stays open, and
+  `MatPlotLibPlot()` picks it up.
+- **On your own computer** it opens the chart in a separate window
+  and waits for you to close it. Drafter builds your first page on
+  your computer before the site opens, so the site does not start
+  until the window is closed.
+
+To stop the window from opening, tell matplotlib to draw off screen.
+Put these two lines at the top of your program, above the import of
+the library that draws the chart:
+
+```python
+import matplotlib
+matplotlib.use("Agg")
+
+from dataclasses import dataclass
+
+from drafter import *
+from qmsolve import Hamiltonian, SingleParticle, init_visualization, Å, eV
+
+
+@dataclass
+class State:
+    level: int
+
+
+def harmonic_oscillator(particle):
+    k = 100 * eV / Å**2
+    return 0.5 * k * particle.x**2
+
+
+@route
+def index(state: State) -> Page:
+    hamiltonian = Hamiltonian(
+        particles=SingleParticle(),
+        potential=harmonic_oscillator,
+        spatial_ndim=1,
+        N=512,
+        extent=20 * Å
+    )
+    eigenstates = hamiltonian.solve(max_states=5)
+    # plot_eigenstate draws the chart and calls plt.show() itself.
+    init_visualization(eigenstates).plot_eigenstate(state.level)
+    return Page(state, [
+        Header("Harmonic oscillator"),
+        "Showing energy level " + str(state.level),
+        MatPlotLibPlot(),
+        Button("Next level", next_level)
+    ])
+
+
+@route
+def next_level(state: State) -> Page:
+    state.level = (state.level + 1) % 5
+    return index(state)
+
+
+start_server(State(0))
+```
+
+(This one is not a live demo: its libraries take a while to download.
+Copy it into your own editor to try it, after installing qmsolve on
+your computer.)
+
+With those two lines, your terminal may print `UserWarning:
+FigureCanvasAgg is non-interactive, and thus cannot be shown` each
+time the library calls `plt.show()`. That is matplotlib saying it
+skipped the window, which is what you asked for.
+
+If the `plt.show()` is in your own code, delete it instead. A Drafter
+page shows a chart with `MatPlotLibPlot()`, so the call is never
+needed.
+
+Only charts that are a single picture carry over. A library's
+sliders, animations, and other controls that live in a matplotlib
+window do not work on a Drafter page; use Drafter's own buttons and
+inputs to choose what to draw, as the example does.
 
 ## Declaring packages explicitly
 
@@ -196,6 +288,11 @@ control.
 - **`ModuleNotFoundError` for a library that is only on PyPI as source**:
   if Drafter's wheel index does not have it, you can build a wheel and
   host your own index; see [Wheels Drafter hosts](#wheels-drafter-hosts).
+  The same goes for a library you never imported yourself: one of
+  your libraries needs it, and it is only on PyPI as source.
+- **A chart opens in its own window and the site does not start**:
+  something called `plt.show()`; see
+  [Libraries that draw their own charts](#libraries-that-draw-their-own-charts).
 - **Your own file has the same name as a library**: your file wins.
   Drafter only goes to PyPI for names that nothing next to your
   program can provide, so a `utils.py` of your own is never replaced
