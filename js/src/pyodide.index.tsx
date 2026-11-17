@@ -1093,16 +1093,10 @@ const MISSING_REQUIREMENTS_SNIPPET = importHelperSnippet(
 	`_json.dumps(_helpers["find_missing_requirements"](list(__drafter_distributions)))`,
 );
 
-const INSTALLED_DISTRIBUTIONS_SNIPPET = `
-import json as _json
-import importlib.metadata as _md
-_json.dumps(sorted({_d.metadata["Name"] for _d in _md.distributions() if _d.metadata["Name"]}))
-`;
-
 /**
  * The live runtime as the wheel-index code sees it: micropip for installs
- * and Python's own package metadata for what is installed and what the
- * installed packages still need.
+ * and Python's own package metadata for what the installed packages still
+ * need.
  */
 function packageRuntime(pyodide: any, micropip: any): PackageRuntime {
 	return {
@@ -1138,29 +1132,13 @@ function packageRuntime(pyodide: any, micropip: any): PackageRuntime {
 				globals.destroy?.();
 			}
 		},
-		async installedDistributions() {
-			if (typeof pyodide?.runPythonAsync !== "function") {
-				return new Set<string>();
-			}
-			try {
-				const names = JSON.parse(
-					await pyodide.runPythonAsync(INSTALLED_DISTRIBUTIONS_SNIPPET),
-				);
-				return new Set(
-					(Array.isArray(names) ? names : []).map((name: unknown) =>
-						String(name).trim().toLowerCase().replace(/[-_.]+/g, "-"),
-					),
-				);
-			} catch {
-				return new Set<string>();
-			}
-		},
 	};
 }
 
 /**
- * Install one requirement: from PyPI, or from a wheel index that has it when
- * PyPI cannot supply it (see package_index.ts). Logs what the index provided.
+ * Install one requirement and what it needs, with the wheel indexes filling
+ * in what PyPI cannot supply (see package_index.ts). Logs what the indexes
+ * provided.
  */
 async function installPackage(
 	spec: string,
@@ -1173,9 +1151,9 @@ async function installPackage(
 		spec,
 		indexes,
 	);
-	if (result.index) {
+	if (result.wheels.length > 0) {
 		console.log(
-			`Installed ${spec} from the wheel index ${result.index}:`,
+			`Installed ${spec} with wheels from a wheel index:`,
 			result.wheels.map((url) => url.split("/").pop()),
 			result.requirements.length > 0
 				? `plus ${result.requirements.join(", ")}`

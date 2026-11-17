@@ -113,10 +113,10 @@ REQUIREMENT_NAME_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 def find_missing_requirements(distributions: list[str]) -> list[str]:
     """List the declared dependencies of installed packages that are absent.
 
-    Used after wheels are installed from a wheel index without dependency
-    resolution: the index supplies the pure-Python packages, and this
-    reports what else they declare they need, so the runtime can fetch
-    those (for example `sympy` from the browser's own distribution).
+    Used after a package is installed without dependency resolution, from
+    a wheel index or alone from PyPI: this reports what else it declares
+    it needs, so the runtime can fetch those one by one (for example
+    `sympy` from the browser's own distribution).
 
     Requirements that apply only to an extra (`; extra == "docs"`) are
     skipped. Other environment markers are not evaluated, so a requirement

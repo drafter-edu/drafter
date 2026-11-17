@@ -217,7 +217,10 @@ describe("setupEnvironment package handling", () => {
 	});
 
 	test("a failed install is not marked as requested, so a retry re-installs", async () => {
-		install.mockRejectedValueOnce(new Error("network down"));
+		// An install is tried in one step and then alone; both fail here.
+		install
+			.mockRejectedValueOnce(new Error("network down"))
+			.mockRejectedValueOnce(new Error("network down"));
 		await expect(
 			setupEnvironment({
 				code: "",
@@ -375,9 +378,11 @@ describe("automatic installs for missing imports", () => {
 		install.mockRejectedValue(new Error("no such package"));
 
 		await setupEnvironment({ code: "", loadPackagesAutomatically: true });
+		// In one step, then alone (see package_index.ts).
+		expect(install).toHaveBeenCalledTimes(2);
 		await setupEnvironment({ code: "", loadPackagesAutomatically: true });
 
-		expect(install).toHaveBeenCalledTimes(1);
+		expect(install).toHaveBeenCalledTimes(2);
 	});
 
 	test("an installed library is not requested again", async () => {

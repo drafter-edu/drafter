@@ -1,7 +1,7 @@
 /**
  * Tests for the wheel-index fallback (js/src/package_index.ts): when PyPI
- * cannot supply a package, Drafter installs the wheel index that has it as
- * a set, then fetches the set's declared requirements best effort.
+ * cannot install a package and what it requires in one step, Drafter
+ * installs it piece by piece, taking from a wheel index what PyPI lacks.
  */
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
 
@@ -24,6 +24,8 @@ const INDEX_FILE = {
 		"sym-0.3.7-py2.py3-none-any.whl",
 		"pyneqsys-0.5.7-py2.py3-none-any.whl",
 		"chempy-0.10.2-py2.py3-none-any.whl",
+		"progressbar-2.5-py3-none-any.whl",
+		"qmsolve-2.0.0-py3-none-any.whl",
 	],
 };
 
@@ -49,12 +51,28 @@ function noWheelError(requirement: string): Error {
 
 /**
  * A stand-in runtime. `pypi` lists what PyPI (or the browser's own
- * distribution) can install; wheel URLs always install. `declares` maps a
- * distribution to its declared requirements.
+ * distribution) has a wheel for; wheel URLs always install. `declares` maps
+ * a distribution to its declared requirements. Like micropip, installing
+ * with `deps` installs what the package requires too, and fails as a whole
+ * when PyPI lacks any of it.
  */
 function fakeRuntime(pypi: string[], declares: Record<string, string[]> = {}) {
 	const installed = new Set<string>();
 	const calls: Array<{ specs: string | string[]; deps: boolean }> = [];
+	/** The package and everything it requires, or an error for what PyPI lacks. */
+	function resolve(spec: string, wanted: Set<string>): void {
+		const name = requirementName(spec)!;
+		if (installed.has(name) || wanted.has(name)) {
+			return;
+		}
+		if (!pypi.includes(name)) {
+			throw noWheelError(spec);
+		}
+		wanted.add(name);
+		for (const requirement of declares[name] ?? []) {
+			resolve(requirement, wanted);
+		}
+	}
 	const runtime: PackageRuntime = {
 		async install(specs, deps) {
 			calls.push({ specs, deps });
@@ -68,7 +86,13 @@ function fakeRuntime(pypi: string[], declares: Record<string, string[]> = {}) {
 				if (!pypi.includes(name)) {
 					throw noWheelError(spec);
 				}
-				installed.add(name);
+				const wanted = new Set<string>();
+				if (deps) {
+					resolve(spec, wanted);
+				} else {
+					wanted.add(name);
+				}
+				wanted.forEach((each) => installed.add(each));
 			}
 		},
 		async missingRequirements(distributions) {
@@ -81,9 +105,6 @@ function fakeRuntime(pypi: string[], declares: Record<string, string[]> = {}) {
 				}
 			}
 			return Array.from(missing).sort();
-		},
-		async installedDistributions() {
-			return new Set(installed);
 		},
 	};
 	return { runtime, installed, calls };
@@ -120,7 +141,7 @@ describe("parseWheelIndex", () => {
 		expect(index.wheels.get("chempy")).toBe(
 			"https://drafter-edu.github.io/packages/wheels/chempy-0.10.2-py2.py3-none-any.whl",
 		);
-		expect(index.wheels.size).toBe(3);
+		expect(index.wheels.size).toBe(5);
 	});
 
 	test("entries with a path or full URL are taken as written", () => {
@@ -190,7 +211,7 @@ describe("installWithIndexes", () => {
 		expect(fetchImpl).not.toHaveBeenCalled();
 	});
 
-	test("a package only an index has is installed as that index's set, without dependency resolution", async () => {
+	test("a package only an index has is installed with just the wheels it needs", async () => {
 		const { runtime, installed, calls } = fakeRuntime(["numpy", "sympy"], {
 			chempy: ["numpy", "sympy", "pyneqsys"],
 			pyneqsys: ["sym", "notebook"],
@@ -200,22 +221,122 @@ describe("installWithIndexes", () => {
 		const result = await installWithIndexes(runtime, "chempy", [INDEX_URL], fetchImpl);
 
 		expect(result.index).toBe(INDEX_URL);
+		// Each wheel goes in alone, without dependency resolution: micropip
+		// would go back to PyPI for requirements only the index has.
 		expect(result.wheels.map((url) => wheelProjectName(url))).toEqual([
-			"sym",
-			"pyneqsys",
 			"chempy",
+			"pyneqsys",
+			"sym",
 		]);
-		// The set goes in as one deps=False install...
-		expect(calls[1]).toEqual({ specs: result.wheels, deps: false });
-		// ...then what the set still declares is fetched one by one; a
+		expect(calls[1]).toEqual({ specs: [result.wheels[0]], deps: false });
+		// What the wheels declare and PyPI has is fetched one by one; a
 		// requirement nothing can supply is skipped, not fatal.
 		expect(result.requirements).toEqual(["numpy", "sympy"]);
 		expect(result.unresolved).toEqual(["notebook"]);
 		expect(installed.has("chempy")).toBe(true);
+		// The index's other wheels are someone else's packages.
+		expect(installed.has("qmsolve")).toBe(false);
+		expect(installed.has("progressbar")).toBe(false);
+	});
+
+	test("a PyPI package is installed when only something it requires is missing from PyPI", async () => {
+		// qmsolve has a wheel on PyPI; progressbar, which it requires, is
+		// source-only there, so the one-step install fails.
+		const { runtime, installed } = fakeRuntime(["qmsolve", "numpy", "scipy"], {
+			qmsolve: ["numpy", "scipy", "progressbar"],
+		});
+		const course = "https://course.example/wheels.json";
+		const fetchImpl = fakeFetch({
+			[course]: { wheels: ["progressbar-2.5-py3-none-any.whl"] },
+		});
+
+		const result = await installWithIndexes(runtime, "qmsolve", [course], fetchImpl);
+
+		// qmsolve itself came from PyPI, so no index is credited with it.
+		expect(result.index).toBeNull();
+		expect(result.wheels).toEqual([
+			"https://course.example/wheels/progressbar-2.5-py3-none-any.whl",
+		]);
+		expect(result.requirements).toEqual(["numpy", "scipy"]);
+		expect(result.unresolved).toEqual([]);
+		expect([...installed].sort()).toEqual(["numpy", "progressbar", "qmsolve", "scipy"]);
+	});
+
+	test("a PyPI package is still installed when nothing can supply one of its requirements", async () => {
+		const { runtime, installed } = fakeRuntime(["qmsolve", "numpy"], {
+			qmsolve: ["numpy", "progressbar"],
+		});
+		const fetchImpl = fakeFetch({});
+
+		const result = await installWithIndexes(runtime, "qmsolve", [], fetchImpl);
+
+		expect(result.unresolved).toEqual(["progressbar"]);
+		expect(installed.has("qmsolve")).toBe(true);
+		expect(installed.has("numpy")).toBe(true);
+	});
+
+	test("a requirement comes from the index that supplied the package needing it", async () => {
+		// PyPI has its own tabulate, but the index pins the one its chempy
+		// was built with.
+		const { runtime, calls } = fakeRuntime(["tabulate"], {
+			chempy: ["tabulate"],
+		});
+		const fetchImpl = fakeFetch({
+			[INDEX_URL]: {
+				wheels: [
+					"chempy-0.10.2-py2.py3-none-any.whl",
+					"tabulate-0.10.0-py3-none-any.whl",
+				],
+			},
+		});
+
+		const result = await installWithIndexes(runtime, "chempy", [INDEX_URL], fetchImpl);
+
+		expect(result.wheels.map((url) => wheelProjectName(url))).toEqual([
+			"chempy",
+			"tabulate",
+		]);
+		expect(result.requirements).toEqual([]);
+		expect(calls).not.toContainEqual({ specs: "tabulate", deps: true });
+	});
+
+	test("a requirement PyPI cannot fully install is not installed alone", async () => {
+		// notebook has a wheel, but what it requires does not. Installing
+		// it alone would start pulling in the rest of Jupyter piece by piece.
+		const { runtime, installed, calls } = fakeRuntime(["notebook"], {
+			chempy: ["notebook"],
+			notebook: ["tornado"],
+		});
+		const fetchImpl = fakeFetch({ [INDEX_URL]: INDEX_FILE });
+
+		const result = await installWithIndexes(runtime, "chempy", [INDEX_URL], fetchImpl);
+
+		expect(result.unresolved).toEqual(["notebook"]);
+		expect(installed.has("notebook")).toBe(false);
+		expect(calls).not.toContainEqual({ specs: "notebook", deps: false });
+	});
+
+	test("wheels that require each other are each installed once", async () => {
+		const { runtime, calls } = fakeRuntime([], {
+			sym: ["pyneqsys"],
+			pyneqsys: ["sym"],
+		});
+		const fetchImpl = fakeFetch({ [INDEX_URL]: INDEX_FILE });
+
+		const result = await installWithIndexes(runtime, "sym", [INDEX_URL], fetchImpl);
+
+		expect(result.wheels.map((url) => wheelProjectName(url))).toEqual([
+			"sym",
+			"pyneqsys",
+		]);
+		expect(calls.filter((call) => !call.deps)).toHaveLength(2);
 	});
 
 	test("wheels already installed are not downloaded again", async () => {
-		const { runtime, calls } = fakeRuntime([]);
+		const { runtime, calls } = fakeRuntime([], {
+			chempy: ["pyneqsys"],
+			pyneqsys: ["sym"],
+		});
 		await runtime.install(["https://x.example/wheels/sym-0.3.7-py3-none-any.whl"], false);
 		calls.length = 0;
 		const fetchImpl = fakeFetch({ [INDEX_URL]: INDEX_FILE });
@@ -223,8 +344,8 @@ describe("installWithIndexes", () => {
 		const result = await installWithIndexes(runtime, "chempy", [INDEX_URL], fetchImpl);
 
 		expect(result.wheels.map((url) => wheelProjectName(url))).toEqual([
-			"pyneqsys",
 			"chempy",
+			"pyneqsys",
 		]);
 	});
 
@@ -253,14 +374,30 @@ describe("installWithIndexes", () => {
 		).rejects.toThrow("Can't find a pure Python 3 wheel for 'numpy-rocket'");
 	});
 
-	test("without indexes the PyPI failure is final and nothing is fetched", async () => {
+	test("the error names what was missing when PyPI lacks the package itself", async () => {
+		// The one-step failure is the one reported, not the retry's.
+		const { runtime } = fakeRuntime([]);
+		runtime.install = jest.fn(async (_specs: string | string[], deps: boolean) => {
+			throw new Error(deps ? "one-step failure" : "alone failure");
+		});
+
+		await expect(
+			installWithIndexes(runtime, "chempy", [], fakeFetch({})),
+		).rejects.toThrow("one-step failure");
+	});
+
+	test("without indexes PyPI alone decides and nothing is fetched", async () => {
 		const { runtime, calls } = fakeRuntime([]);
 		const fetchImpl = fakeFetch({});
 
 		await expect(installWithIndexes(runtime, "chempy", [], fetchImpl)).rejects.toThrow(
 			"chempy",
 		);
-		expect(calls).toHaveLength(1);
+		// In one step, then alone.
+		expect(calls).toEqual([
+			{ specs: "chempy", deps: true },
+			{ specs: "chempy", deps: false },
+		]);
 		expect(fetchImpl).not.toHaveBeenCalled();
 	});
 });

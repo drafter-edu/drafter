@@ -8,14 +8,22 @@
  * the files in a `wheels/` folder beside it. Courses can host their own and
  * add them with `--package-index`.
  *
- * An index is a curated set of wheels that go together, and it is installed
- * as a set: when a package is found in an index, every wheel of that index
- * is installed without dependency resolution (micropip would otherwise go
- * back to PyPI for dependencies that are only in the index, and fail). The
- * packages' declared requirements that are still missing are then fetched
- * one by one, best effort, so that `sympy` or `numpy` come from the
- * browser's own distribution. A requirement nothing can supply is skipped,
- * since not every declared dependency is needed in the browser.
+ * micropip installs a package and everything it requires in one step, and
+ * the whole step fails when any one of them has no wheel on PyPI. That
+ * happens when the package itself is source-only (ChemPy), and also when a
+ * package with a wheel requires one that is source-only (qmsolve requires
+ * `progressbar`). When the one-step install fails, the package is installed
+ * piece by piece instead: the package alone, from the first index that has
+ * it or else from PyPI, and then each requirement it declares and still
+ * lacks. Only what the package needs is installed, never the rest of an
+ * index.
+ *
+ * A requirement comes from the index that supplied the package needing it,
+ * when that index has it: an index's wheels are built to go together. Any
+ * other requirement is installed in one step, so that `sympy` or `numpy`
+ * come from the browser's own distribution, and from an index when that
+ * fails. A requirement nothing can supply is skipped, since not every
+ * declared dependency is needed in the browser.
  */
 
 /** The shape of a `wheels.json` index file. */
@@ -36,20 +44,28 @@ export interface PackageRuntime {
 	install(specs: string | string[], deps: boolean): Promise<void>;
 	/** Declared requirements of installed distributions that are absent. */
 	missingRequirements(distributions: string[]): Promise<string[]>;
-	/** Normalized names of distributions already installed. */
-	installedDistributions(): Promise<Set<string>>;
 }
 
 /** The outcome of installing one requirement with index fallback. */
 export interface IndexInstallResult {
 	/** The index the package came from, or null when PyPI supplied it. */
 	index: string | null;
-	/** Wheel URLs installed from that index. */
+	/** Wheel URLs installed from indexes, for the package or what it needs. */
 	wheels: string[];
-	/** Declared requirements that were fetched afterwards. */
+	/** Declared requirements that were fetched from PyPI afterwards. */
 	requirements: string[];
 	/** Declared requirements nothing could supply. */
 	unresolved: string[];
+}
+
+/** One piece-by-piece install in progress. */
+interface PiecewiseInstall {
+	runtime: PackageRuntime;
+	indexes: string[];
+	fetchImpl: typeof fetch;
+	/** Projects already attempted, so nothing is tried twice. */
+	attempted: Set<string>;
+	result: IndexInstallResult;
 }
 
 /** Loaded (or failed) indexes by URL, so each is fetched once per page. */
@@ -148,9 +164,103 @@ export async function findIndexFor(
 }
 
 /**
- * Install a requirement from PyPI, or from the first wheel index that has
- * it when PyPI cannot supply it. Rejects with micropip's own error when no
- * index has the package either.
+ * Install one package from an index, without what it requires: from
+ * `preferred` when that index has it, else from the first configured index
+ * that does.
+ *
+ * @returns The index the wheel came from, or null when no index has it.
+ */
+async function installFromIndex(
+	project: string | null,
+	preferred: WheelIndex | null,
+	install: PiecewiseInstall,
+): Promise<WheelIndex | null> {
+	if (project === null) {
+		return null;
+	}
+	const index = preferred?.wheels.has(project)
+		? preferred
+		: await findIndexFor(project, install.indexes, install.fetchImpl);
+	const url = index?.wheels.get(project);
+	if (!index || !url) {
+		return null;
+	}
+	await install.runtime.install([url], false);
+	install.result.wheels.push(url);
+	return index;
+}
+
+/**
+ * Install one requirement of a package that was installed alone.
+ *
+ * A requirement that PyPI cannot install in one step and no index has is
+ * an error here; it is never installed alone from PyPI. That step is kept
+ * for the package the program asked for: taken any deeper, a requirement
+ * such as `notebook` would be installed without what it needs and then
+ * pull in the rest of Jupyter one piece at a time.
+ *
+ * @param source The index that supplied the package needing this one, if any.
+ */
+async function installRequirement(
+	requirement: string,
+	project: string | null,
+	source: WheelIndex | null,
+	install: PiecewiseInstall,
+): Promise<void> {
+	let failure: unknown;
+	// A wheel beside the package that needs it was built to go with it.
+	if (project === null || !source?.wheels.has(project)) {
+		try {
+			await install.runtime.install(requirement, true);
+			install.result.requirements.push(requirement);
+			return;
+		} catch (error) {
+			failure = error;
+		}
+	}
+	const index = await installFromIndex(project, source, install);
+	if (!index || project === null) {
+		throw failure;
+	}
+	await installRequirementsOf(project, index, install);
+}
+
+/**
+ * Install what an installed package declares it requires and still lacks.
+ * A requirement nothing can supply is recorded and skipped, not fatal.
+ *
+ * @param source The index that supplied the package, or null for PyPI.
+ */
+async function installRequirementsOf(
+	project: string,
+	source: WheelIndex | null,
+	install: PiecewiseInstall,
+): Promise<void> {
+	for (const requirement of await install.runtime.missingRequirements([project])) {
+		const needed = requirementName(requirement);
+		const key = needed ?? requirement;
+		if (install.attempted.has(key)) {
+			continue;
+		}
+		install.attempted.add(key);
+		try {
+			await installRequirement(requirement, needed, source, install);
+		} catch (error) {
+			install.result.unresolved.push(requirement);
+			console.warn(
+				`[Drafter] ${requirement} (needed by ${project}) could not be installed:`,
+				error,
+			);
+		}
+	}
+}
+
+/**
+ * Install a requirement and what it needs: in one step when PyPI and the
+ * browser's own distribution can supply all of it, and otherwise piece by
+ * piece, with the wheel indexes filling in what PyPI lacks (see the top of
+ * this file). Rejects with micropip's own error when neither an index nor
+ * PyPI has the requested package itself.
  */
 export async function installWithIndexes(
 	runtime: PackageRuntime,
@@ -158,55 +268,42 @@ export async function installWithIndexes(
 	indexes: string[],
 	fetchImpl: typeof fetch = fetch,
 ): Promise<IndexInstallResult> {
-	const empty: IndexInstallResult = {
+	const result: IndexInstallResult = {
 		index: null,
 		wheels: [],
 		requirements: [],
 		unresolved: [],
 	};
-	let pypiError: unknown;
+	let failure: unknown;
 	try {
 		await runtime.install(spec, true);
-		return empty;
+		return result;
 	} catch (error) {
-		pypiError = error;
+		failure = error;
 	}
-	const name = requirementName(spec);
-	const index =
-		name && indexes.length > 0 ? await findIndexFor(name, indexes, fetchImpl) : null;
-	if (!index) {
-		throw pypiError;
-	}
-
-	// The whole set, minus what is already there.
-	const installed = await runtime.installedDistributions();
-	const wheels = Array.from(index.wheels.entries())
-		.filter(([project]) => !installed.has(project))
-		.map(([, url]) => url);
-	if (wheels.length > 0) {
-		await runtime.install(wheels, false);
-	}
-
-	// Whatever the set's packages declare and still lack, from PyPI or the
-	// browser's own distribution; a requirement nothing can supply is
-	// skipped rather than failing the whole install.
-	const requirements: string[] = [];
-	const unresolved: string[] = [];
-	for (const requirement of await runtime.missingRequirements(
-		Array.from(index.wheels.keys()),
-	)) {
+	const project = requirementName(spec);
+	const install: PiecewiseInstall = {
+		runtime,
+		indexes,
+		fetchImpl,
+		attempted: new Set(project === null ? [] : [project]),
+		result,
+	};
+	const index = await installFromIndex(project, null, install);
+	if (index) {
+		result.index = index.url;
+	} else {
+		// PyPI may have the package and lack only something it requires.
 		try {
-			await runtime.install(requirement, true);
-			requirements.push(requirement);
-		} catch (error) {
-			unresolved.push(requirement);
-			console.warn(
-				`[Drafter] ${requirement} (needed by a package from ${index.url}) could not be installed:`,
-				error,
-			);
+			await runtime.install(spec, false);
+		} catch {
+			throw failure;
 		}
 	}
-	return { index: index.url, wheels, requirements, unresolved };
+	if (project !== null) {
+		await installRequirementsOf(project, index, install);
+	}
+	return result;
 }
 
 /** Test hook: forget every loaded index. */
