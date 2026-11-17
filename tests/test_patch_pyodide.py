@@ -1,4 +1,4 @@
-"""Tests for the Pyodide remote-import finder (drafter.files.patch_pyodide).
+"""Tests for the browser-only patches (drafter.files.patch_pyodide).
 
 In the browser, a student's own modules are fetched from the server over
 HTTP when imported. The finder used to try only `name.py`, so a project
@@ -6,13 +6,19 @@ laid out as a package (`my_project/__init__.py`, e.g. next to a
 `pyproject.toml`) ran fine in regular Python but crashed in the browser
 with `ModuleNotFoundError: No module named 'my_project'`.
 
-The module is imported with `js` and `pyodide.http` stubbed, and the
-finder it installs at import time is removed again so it cannot leak into
-the rest of the test process.
+The module also makes Matplotlib draw off screen. In the browser,
+`plt.show()` used to add Matplotlib's own figure window to the page, outside
+the Drafter site, each time it was called.
+
+The module is imported with `js` and `pyodide.http` stubbed, and what it
+changes at import time (the finder, the `MPLBACKEND` variable, the warning
+filter) is undone again so it cannot leak into the rest of the test process.
 """
 
 import importlib
+import os
 import sys
+import warnings
 from types import ModuleType, SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -47,11 +53,17 @@ def patch_pyodide():
     if "js" not in sys.modules:
         stubs["js"] = MagicMock()
     saved = {name: sys.modules.get(name) for name in stubs}
+    saved_backend = os.environ.get("MPLBACKEND")
     sys.modules.update(stubs)
     sys.modules.pop("drafter.files.patch_pyodide", None)
     try:
-        module = importlib.import_module("drafter.files.patch_pyodide")
+        with warnings.catch_warnings():
+            module = importlib.import_module("drafter.files.patch_pyodide")
     finally:
+        if saved_backend is None:
+            os.environ.pop("MPLBACKEND", None)
+        else:
+            os.environ["MPLBACKEND"] = saved_backend
         sys.meta_path[:] = [
             finder
             for finder in sys.meta_path
@@ -164,3 +176,56 @@ def test_package_imports_are_expired_like_modules(remote_import, patch_pyodide):
 
     assert "remote_test_reload" not in sys.modules
     assert patch_pyodide.EXTERNAL_IMPORTS == set()
+
+
+@pytest.fixture
+def no_backend_chosen(monkeypatch):
+    """Run a test with `MPLBACKEND` unset, restoring it afterwards."""
+    # Setting first makes monkeypatch remember that the variable was absent.
+    monkeypatch.setenv("MPLBACKEND", "placeholder")
+    monkeypatch.delenv("MPLBACKEND")
+
+
+def test_matplotlib_is_told_to_draw_off_screen(patch_pyodide, no_backend_chosen):
+    with warnings.catch_warnings():
+        patch_pyodide.draw_matplotlib_off_screen()
+
+    assert os.environ["MPLBACKEND"] == "Agg"
+
+
+def test_a_backend_that_is_already_chosen_is_kept(patch_pyodide, monkeypatch):
+    monkeypatch.setenv("MPLBACKEND", "svg")
+
+    with warnings.catch_warnings():
+        patch_pyodide.draw_matplotlib_off_screen()
+
+    assert os.environ["MPLBACKEND"] == "svg"
+
+
+def test_show_is_silent_and_keeps_the_figure(patch_pyodide, no_backend_chosen):
+    matplotlib = pytest.importorskip("matplotlib")
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    plt.close("all")
+    try:
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            patch_pyodide.draw_matplotlib_off_screen()
+            plt.plot([1, 2, 3])
+            plt.show()
+
+        assert [str(warning.message) for warning in caught] == []
+        # Still open, so a MatPlotLibPlot() after the call can capture it.
+        assert len(plt.get_fignums()) == 1
+    finally:
+        plt.close("all")
+
+
+def test_other_matplotlib_warnings_are_still_shown(patch_pyodide, no_backend_chosen):
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        patch_pyodide.draw_matplotlib_off_screen()
+        warnings.warn("Glyph 128021 missing from font(s) DejaVu Sans.", UserWarning)
+
+    assert len(caught) == 1

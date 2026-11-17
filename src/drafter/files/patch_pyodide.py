@@ -1,11 +1,15 @@
 """
 This file should only be imported by Pyodide.
-It patches the Python import system to allow importing modules from a remote server.
+It patches the Python import system to allow importing modules from a remote
+server, and makes Matplotlib draw off screen so that `plt.show()` adds
+nothing to the page.
 """
 
 import importlib.abc
 import importlib.util
+import os
 import sys
+import warnings
 
 from pyodide.http import pyxhr  # type: ignore
 
@@ -101,4 +105,36 @@ def expire_remote_imports():
         EXTERNAL_IMPORTS.remove(fullname)
 
 
+MATPLOTLIB_SHOW_WARNING = "FigureCanvasAgg is non-interactive"
+"""The start of the warning Matplotlib gives when `plt.show()` is called and
+figures are drawn off screen. `draw_matplotlib_off_screen` silences it."""
+
+
+def draw_matplotlib_off_screen() -> None:
+    """Make `plt.show()` do nothing in the browser.
+
+    In the browser, Matplotlib normally answers `plt.show()` by adding a
+    figure window of its own to the bottom of the web page, outside the
+    Drafter site, and one more for every later call. A Drafter page
+    shows a chart with `MatPlotLibPlot`, so nothing should appear for
+    `plt.show()`, whether the program calls it or a library does on the
+    program's behalf.
+
+    Drawing off screen (Matplotlib's "Agg" backend) gives that: `plt.show()`
+    leaves the page alone and the figure stays open for `MatPlotLibPlot`.
+    The backend is chosen through the `MPLBACKEND` environment variable,
+    which Matplotlib reads when it is first imported, so this must run
+    before the program does. A value that is already set is kept.
+
+    Matplotlib warns on every `plt.show()` that an off-screen figure cannot
+    be shown. That warning is silenced: it would fill the console with a
+    message about something the program is not expected to change.
+    """
+    os.environ.setdefault("MPLBACKEND", "Agg")
+    warnings.filterwarnings(
+        "ignore", message=MATPLOTLIB_SHOW_WARNING, category=UserWarning
+    )
+
+
 sys.meta_path.append(RemoteFinder())
+draw_matplotlib_off_screen()
