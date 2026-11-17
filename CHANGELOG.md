@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-11-17
+
+- Fixed a library failing to install in the browser when it has a wheel on PyPI but one of the libraries it needs does not. `import qmsolve` stopped with "Error installing package" because qmsolve needs `progressbar`, which PyPI only has as source. Drafter now installs such a library on its own and then fetches what it needs one by one, taking from a wheel index what PyPI cannot supply. A requirement that nothing can supply is skipped with a warning in the browser's console, as it already was for libraries from a wheel index.
+- A wheel index is no longer installed as a whole. Only the wheels a program's libraries need are downloaded, so a program that imports ChemPy does not download qmsolve, and the other way round.
+- Fixed `plt.show()` adding Matplotlib's own figure window to the bottom of the page in the browser, one more each time it was called. It now does nothing there, and the figure stays open for `MatPlotLibPlot()`. This matters most for libraries that call `plt.show()` themselves, such as qmsolve. On your own computer `plt.show()` still opens a window, and the site does not start until it is closed; "Libraries that draw their own charts" on the third-party libraries page has the two lines that turn that off.
+
 ## [2.3.0] - 2026-11-15
 
 This release works through the problems found while checking the documentation against a running site. The entries that change what existing code does come first.
