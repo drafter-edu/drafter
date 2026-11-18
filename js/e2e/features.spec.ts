@@ -247,6 +247,88 @@ test("a stylesheet that fails to load shows a dismissible notice", async ({
 	await expect(notice).toHaveCount(0);
 });
 
+// The default theme used to scope its element rules with a class
+// (`.drafter-body-- button`), which out-ranked a student's plain `button` or
+// `.loud` rule even though the student's CSS loads later. Only a real browser
+// resolves the cascade across the theme stylesheet and the injected <style>.
+const STUDENT_CSS_APP = `
+from drafter import *
+hide_debug_information()
+
+add_website_css("""
+button {
+    background-color: lavender;
+}
+.loud {
+    color: rgb(255, 0, 0);
+}
+""")
+
+@route
+def index() -> Page:
+    return Page([
+        Button("Tag styled", "index"),
+        Button("Class styled", "index", classes="loud"),
+    ])
+
+start_server()
+`;
+
+test("a student's tag and class rules override the default theme", async ({
+	page,
+}) => {
+	await page.goto("/harness.html");
+	await page.evaluate(async (code) => {
+		await window.runExample(code);
+	}, STUDENT_CSS_APP);
+
+	const tagStyled = page.getByRole("button", { name: "Tag styled" });
+	await expect(tagStyled).toHaveCSS("background-color", "rgb(230, 230, 250)");
+	// The theme still supplies everything the student's rule left alone.
+	await expect(tagStyled).toHaveCSS("border-radius", "5px");
+	await expect(tagStyled).toHaveCSS("color", "rgb(255, 255, 255)");
+
+	const classStyled = page.getByRole("button", { name: "Class styled" });
+	await expect(classStyled).toHaveCSS("color", "rgb(255, 0, 0)");
+	await expect(classStyled).toHaveCSS(
+		"background-color",
+		"rgb(230, 230, 250)",
+	);
+});
+
+// The default theme used to set the level-1 header's size with !important,
+// which beat a student's rule and even the size written on the Header itself.
+const HEADER_SIZE_APP = `
+from drafter import *
+hide_debug_information()
+
+add_website_css("h1 { font-size: 20px; }")
+
+@route
+def index() -> Page:
+    return Page([
+        Header("Rule sized"),
+        Header("Keyword sized", style_font_size="18px"),
+        change_text_size(Header("Helper sized"), "16px"),
+    ])
+
+start_server()
+`;
+
+test("a level-1 Header's size can be changed in the default theme", async ({
+	page,
+}) => {
+	await page.goto("/harness.html");
+	await page.evaluate(async (code) => {
+		await window.runExample(code);
+	}, HEADER_SIZE_APP);
+
+	const heading = (name: string) => page.getByRole("heading", { name });
+	await expect(heading("Rule sized")).toHaveCSS("font-size", "20px");
+	await expect(heading("Keyword sized")).toHaveCSS("font-size", "18px");
+	await expect(heading("Helper sized")).toHaveCSS("font-size", "16px");
+});
+
 // Slider and ColorPicker submit through real browser controls, which jsdom
 // only imitates: the range input's stepping, the color input's value
 // normalization, and (with alpha on) the inline handlers that keep the

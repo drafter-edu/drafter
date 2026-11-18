@@ -23,7 +23,13 @@ body {
     align-items: flex-start;
     justify-content: flex-start;
     align-content: flex-start; */
+}
 
+/* The looks of what goes inside the body. `:where()` scopes these rules to
+   the body without adding to their weight, so each one counts as a plain tag
+   (or class) rule. A site's own CSS loads after the theme, which lets a rule
+   as simple as `button { ... }` or `.notice { ... }` replace these values. */
+:where(.drafter-body--) {
 	button {
 		font-family:
 			Raleway, HelveticaNeue, "Helvetica Neue", Helvetica, Arial,
@@ -47,11 +53,10 @@ body {
 		background-color: #e0e0e0;
 	}
 
-	/* Need to be able to override this easily */
 	h1 {
-		font-size: 4rem !important;
-		line-height: 1.2 !important;
-		letter-spacing: -0.1rem !important;
+		font-size: 4rem;
+		line-height: 1.2;
+		letter-spacing: -0.1rem;
 	}
 
 	input,
