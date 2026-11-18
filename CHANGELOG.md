@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.2] - 2026-11-18
+
+- Fixed the default theme overriding a site's own CSS. A plain rule such as `add_website_css("button { background-color: lavender; }")` did nothing, and neither did a class rule such as `.notice { ... }` on a `Button`, a text box, or a `Table`, even though a site's CSS is loaded after the theme. The theme's rules for buttons, inputs, tables, and headers now count as plain tag rules, so a site's tag or class rule replaces whichever properties it names and the theme keeps the rest. Sites with no CSS of their own look the same. A rule that was written earlier and had no effect will start working, so a site that has one may look different after updating.
+- Fixed the size of a level-1 `Header` being fixed in the default theme. `Header("Title", style_font_size="20px")`, `change_text_size(Header("Title"), "20px")`, and a rule such as `h1 { font-size: 20px; }` all left the header at its full size, and its line height and letter spacing could not be changed either. Other header levels were not affected.
+- The `98`, `xp`, and `7` themes had the same problem for nearly everything: header sizes, link color, buttons, text boxes, select boxes, tables, and preformatted text. A site's tag and class rules now win there too. Buttons in `xp` and `7` are painted with a gradient, so write `background: lavender;` in place of `background-color` to recolor one.
+
 ## [2.3.1] - 2026-11-17
 
 - Fixed a library failing to install in the browser when it has a wheel on PyPI but one of the libraries it needs does not. `import qmsolve` stopped with "Error installing package" because qmsolve needs `progressbar`, which PyPI only has as source. Drafter now installs such a library on its own and then fetches what it needs one by one, taking from a wheel index what PyPI cannot supply. A requirement that nothing can supply is skipped with a warning in the browser's console, as it already was for libraries from a wheel index.
