@@ -14481,6 +14481,7 @@ component of that kind gets the rule:</p>
 <span class="hll"><span class="n">add_website_css</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
 </span><span class="hll"><span class="s2">button {</span>
 </span><span class="hll"><span class="s2">    background-color: lavender;</span>
+</span><span class="hll"><span class="s2">    color: darkslateblue;</span>
 </span><span class="hll"><span class="s2">    border: 2px solid slateblue;</span>
 </span><span class="hll"><span class="s2">    padding: 8px 16px;</span>
 </span><span class="hll"><span class="s2">}</span>
@@ -14498,10 +14499,13 @@ component of that kind gets the rule:</p>
 
 <span class="n">start_server</span><span class="p">()</span>
 </code></pre></div>
-<div class="drafter-demo" data-drafter-demo="custom-css-1-580c31cd5216">
-  <iframe src="../../../drafter-demos/custom-css-1-580c31cd5216/index.html" title="Drafter Demo custom-css-1-580c31cd5216" name="custom-css-1-580c31cd5216" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
+<div class="drafter-demo" data-drafter-demo="custom-css-1-2df9ac3368b3">
+  <iframe src="../../../drafter-demos/custom-css-1-2df9ac3368b3/index.html" title="Drafter Demo custom-css-1-2df9ac3368b3" name="custom-css-1-2df9ac3368b3" loading="lazy" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads allow-modals" style="width: 100%; border: 1px solid #c6c6c6; border-radius: 8px; min-height: 260px;" ></iframe>
 </div>
 
+<p>The rule replaces only the properties it names. The rounded corners
+and the shadow still come from the theme, and so would the white
+text if the rule did not set <code>color</code>.</p>
 <h2 id="a-class-selector-styles-the-components-you-choose">A class selector styles the components you choose</h2>
 <p>A class is a name you make up and hand out. The <code>classes</code> keyword
 puts the name on a component, and a selector that starts with a dot

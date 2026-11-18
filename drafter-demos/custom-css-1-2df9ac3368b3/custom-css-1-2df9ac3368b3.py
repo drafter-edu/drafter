@@ -3,6 +3,7 @@ from drafter import *
 add_website_css("""
 button {
     background-color: lavender;
+    color: darkslateblue;
     border: 2px solid slateblue;
     padding: 8px 16px;
 }

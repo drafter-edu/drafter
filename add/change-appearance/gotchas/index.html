@@ -13867,6 +13867,10 @@ ways out, in escalating order:</p>
 <li>Switch to <code>set_website_style("none")</code> and write every style
    yourself.</li>
 </ol>
+<p>A button that ignores <code>background-color</code> in the <code>xp</code> or <code>7</code> theme is
+a different case. Those themes paint their buttons with a gradient,
+which is a background image drawn on top of the color. Write
+<code>background: lavender;</code> to replace the image and the color together.</p>
 <p>Confirm which rule is actually winning with the browser's inspector
 (right-click the element, then choose Inspect): the styles panel
 shows every rule that applies, with the overridden ones struck
