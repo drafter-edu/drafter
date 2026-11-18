@@ -74,12 +74,13 @@ becomes a tag in the page: a `Button` is a `button`, a `Link` is an
 `a`, and a `Header` is an `h1`. When the selector is a tag name, every
 component of that kind gets the rule:
 
-```python drafter hl_lines="3-9" height=260
+```python drafter hl_lines="3-10" height=260
 from drafter import *
 
 add_website_css("""
 button {
     background-color: lavender;
+    color: darkslateblue;
     border: 2px solid slateblue;
     padding: 8px 16px;
 }
@@ -97,6 +98,10 @@ def index() -> Page:
 
 start_server()
 ```
+
+The rule replaces only the properties it names. The rounded corners
+and the shadow still come from the theme, and so would the white
+text if the rule did not set `color`.
 
 ## A class selector styles the components you choose
 

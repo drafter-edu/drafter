@@ -44,6 +44,11 @@ ways out, in escalating order:
 3. Switch to `set_website_style("none")` and write every style
    yourself.
 
+A button that ignores `background-color` in the `xp` or `7` theme is
+a different case. Those themes paint their buttons with a gradient,
+which is a background image drawn on top of the color. Write
+`background: lavender;` to replace the image and the color together.
+
 Confirm which rule is actually winning with the browser's inspector
 (right-click the element, then choose Inspect): the styles panel
 shows every rule that applies, with the overridden ones struck
