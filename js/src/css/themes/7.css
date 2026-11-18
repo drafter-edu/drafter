@@ -5,8 +5,10 @@
  * window chrome (.window, .title-bar, .window-body) is remapped onto the
  * Drafter frame classes (.drafter-frame--, .drafter-body--) so the page
  * renders as an Aero window (glass border around an #f0f0f0 surface).
- * All element rules are nested under .drafter-body-- (the default-theme
- * approach) so the debug panel is unaffected. Upstream custom-drawn
+ * All element rules are scoped to .drafter-body-- (the default-theme
+ * approach) so the debug panel is unaffected. The scope is written with
+ * :where(), which adds no weight, so a site's own tag or class rule
+ * replaces what the theme sets. Upstream custom-drawn
  * checkboxes/radios are dropped (they require an adjacent <label>);
  * native controls with an accent-color are used instead.
  */
@@ -55,7 +57,9 @@ body {
 	font-size: 15px;
 	line-height: 1.5;
 	color: #222;
+}
 
+:where(.drafter-body--) {
 	h1 {
 		font-size: 2.5em;
 		font-weight: 300;
@@ -158,14 +162,16 @@ body {
 	}
 
 	/* White fields with the Aero grey border, blue when focused. */
-	input:not(
-		[type="checkbox"],
-		[type="radio"],
-		[type="submit"],
-		[type="reset"],
-		[type="button"],
-		[type="range"],
-		[type="file"]
+	input:where(
+		:not(
+			[type="checkbox"],
+			[type="radio"],
+			[type="submit"],
+			[type="reset"],
+			[type="button"],
+			[type="range"],
+			[type="file"]
+		)
 	),
 	select,
 	textarea {

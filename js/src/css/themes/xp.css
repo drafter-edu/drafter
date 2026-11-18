@@ -5,10 +5,12 @@
  * window chrome (.window, .title-bar, .window-body) is remapped onto the
  * Drafter frame classes (.drafter-frame--, .drafter-body--) so the page
  * renders as a Luna window on the XP desktop. All element rules are
- * nested under .drafter-body-- (the default-theme approach) so the debug
- * panel is unaffected. The upstream hidden-input checkbox/radio hack is
- * dropped (it requires an adjacent <label>); native controls with an
- * accent-color are used instead.
+ * scoped to .drafter-body-- (the default-theme approach) so the debug
+ * panel is unaffected. The scope is written with :where(), which adds no
+ * weight, so a site's own tag or class rule replaces what the theme
+ * sets. The upstream hidden-input checkbox/radio hack is dropped (it
+ * requires an adjacent <label>); native controls with an accent-color
+ * are used instead.
  */
 
 body {
@@ -68,7 +70,9 @@ body {
 	font-size: 14px;
 	line-height: 1.5;
 	color: #222;
+}
 
+:where(.drafter-body--) {
 	h1 {
 		font-size: 2.5em;
 	}
@@ -153,14 +157,16 @@ body {
 	}
 
 	/* Flat white fields with the Luna blue-grey border. */
-	input:not(
-		[type="checkbox"],
-		[type="radio"],
-		[type="submit"],
-		[type="reset"],
-		[type="button"],
-		[type="range"],
-		[type="file"]
+	input:where(
+		:not(
+			[type="checkbox"],
+			[type="radio"],
+			[type="submit"],
+			[type="reset"],
+			[type="button"],
+			[type="range"],
+			[type="file"]
+		)
 	),
 	select,
 	textarea {

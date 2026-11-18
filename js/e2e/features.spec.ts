@@ -329,6 +329,69 @@ test("a level-1 Header's size can be changed in the default theme", async ({
 	await expect(heading("Helper sized")).toHaveCSS("font-size", "16px");
 });
 
+// The Windows themes scope their element rules to the body the same way the
+// default theme does, so they need the same guarantee.
+const themedStudentCssApp = (theme: string) => `
+from drafter import *
+hide_debug_information()
+set_website_style("${theme}")
+
+add_website_css("""
+h1 {
+    font-size: 20px;
+}
+button {
+    color: rgb(1, 2, 3);
+    padding: 7px;
+}
+input {
+    border: 3px dashed rgb(7, 8, 9);
+}
+.loud {
+    font-size: 30px;
+}
+""")
+
+@route
+def index() -> Page:
+    return Page([
+        Header("Title"),
+        TextBox("pet", "Ada"),
+        Button("Tag styled", "index"),
+        Button("Class styled", "index", classes="loud"),
+    ])
+
+start_server()
+`;
+
+for (const theme of ["98", "xp", "7"]) {
+	test(`a student's tag and class rules override the ${theme} theme`, async ({
+		page,
+	}) => {
+		await page.goto("/harness.html");
+		await page.evaluate(async (code) => {
+			await window.runExample(code);
+		}, themedStudentCssApp(theme));
+
+		// The theme is in charge of what the student's rules leave alone.
+		const tagStyled = page.getByRole("button", { name: "Tag styled" });
+		await expect(tagStyled).toHaveCSS("min-width", "90px");
+		await expect(tagStyled).toHaveCSS("color", "rgb(1, 2, 3)");
+		await expect(tagStyled).toHaveCSS("padding-top", "7px");
+
+		await expect(page.getByRole("heading", { name: "Title" })).toHaveCSS(
+			"font-size",
+			"20px",
+		);
+		const textBox = page.locator('input[name="pet"]');
+		await expect(textBox).toHaveCSS("border-top-style", "dashed");
+		await expect(textBox).toHaveCSS("border-top-color", "rgb(7, 8, 9)");
+		await expect(
+			page.getByRole("button", { name: "Class styled" }),
+		).toHaveCSS("font-size", "30px");
+	});
+}
+
 // Slider and ColorPicker submit through real browser controls, which jsdom
 // only imitates: the range input's stepping, the color input's value
 // normalization, and (with alpha on) the inline handlers that keep the
